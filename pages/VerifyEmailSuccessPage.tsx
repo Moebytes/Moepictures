@@ -5,11 +5,12 @@ import Footer from "../components/Footer"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
-import {useInteractionActions, useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
 import session from "express-session"
 
 const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -28,8 +29,11 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Verify Email Success"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.verifyEmailSuccess.pageTitle
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -47,13 +51,12 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Email Verified</span>
+                    <span className="sitepage-title">{i18n.pages.verifyEmailSuccess.title}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Thank you, your email address has been verified! You should be 
-                        able to use your account now.</span>
+                        <span className="sitepage-text">{i18n.pages.verifyEmailSuccess.heading}</span>
                     </div>
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => history.push("/posts")}>Ok</button>
+                        <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
                     </div>
                 </div>
                 <Footer/>

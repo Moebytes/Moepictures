@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector, 
 useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {showSaveTranslationDialog, saveTranslationData, saveTranslationOrder} = useTranslationDialogSelector()
     const {setShowSaveTranslationDialog, setSaveTranslationData} = useTranslationDialogActions()
@@ -46,7 +47,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                 await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } else {
-                const badReason = functions.validateReason(reason)
+                const badReason = functions.validateReason(reason, i18n)
                 if (badReason) {
                     setError(true)
                     if (!errorRef.current) await functions.timeout(20)

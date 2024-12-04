@@ -60,7 +60,7 @@ interface Props {
 }
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {translationMode} = useSearchSelector()
     const {setSearchFlag, setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
     const {posts, unverifiedPosts, tags} = useCacheSelector()
@@ -274,16 +274,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setActionBanner("copy-hash")
     }
 
-    const getDomain = () => {
-        if (props.post.link) {
-            const domain = new URL(props.post.link).hostname.replace("www.", "")
-            .split(".")?.[0] || ""
-            if (domain.toLowerCase() === "yande") return "Yandere"
-            return functions.toProperCase(domain)
-        }
-        return "Unknown"
-    }
-
     const triggerSearch = () => {
         history.push(`/posts`)
         setSearchFlag(true)
@@ -413,8 +403,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         }
         return (
             <div className="mobileinfo-row">
-                <span className="tag">Source:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                <span className="tag">{i18n.sidebar.source}:</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{functions.getSiteName(props.post.link, i18n)}</span>
                 {jsx}
             </div>
         )
@@ -470,7 +460,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (jsx.length) {
             return (
                 <div className="mobileinfo-row">
-                    <span className="tag">Mirrors:</span>
+                    <span className="tag">{i18n.sidebar.mirrors}:</span>
                     {jsx}
                 </div>
             )
@@ -540,7 +530,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}>
                             <img className="mobileinfo-icon" src={tagIcon}/>
-                            <span className="tag-red">Copy Tags</span>
+                            <span className="tag-red">{i18n.sidebar.copyTags}</span>
                         </span>
                     </div>
                 </div>
@@ -561,7 +551,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <img className="mobileinfo-icon" src={tagIcon}/>
-                            <span className="tag-red">Unlock Post</span>
+                            <span className="tag-red">{i18n.sidebar.unlockPost}</span>
                         </span>
                     </div>
                 </div>
@@ -574,7 +564,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (session.captchaNeeded) {
             return (
             <div className="mobileinfo-row">
-                <span className="tag">Artist:</span>
+                <span className="tag">{i18n.tag.artist}:</span>
                 <span className="tag-alt">{props.post.artist || "None"}</span>
             </div>
             )
@@ -592,28 +582,28 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.artists ? <>
                     <div className="mobileinfo-title-container">
-                        <span className="mobileinfo-title">{props.artists.length > 1 ? "Artists" : "Artist"}</span>
+                        <span className="mobileinfo-title">{props.artists.length > 1 ? i18n.navbar.artists : i18n.tag.artist}</span>
                     </div>
                     <div className="mobileinfo-subcontainer-column">
                         {generateArtistsJSX()}
                         {noTagsArtist()}
                         <div className="mobileinfo-row">
-                            <span className="tag">Title:</span>
+                            <span className="tag">{i18n.sidebar.title}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.title || "None"}</span>
                         </div>
                         {props.post.translatedTitle ? 
                         <div className="mobileinfo-row">
-                            <span className="tag">Translated:</span>
+                            <span className="tag">{i18n.sidebar.translated}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.translatedTitle)}</span>
                         </div>
                         : null}
                         <div className="mobileinfo-row">
-                            <span className="tag">Posted:</span>
+                            <span className="tag">{i18n.sort.posted}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.formatDate(new Date(props.post.posted)) : "Unknown"}</span>
                         </div>
                         {generateSourceJSX()}
                         <div className="mobileinfo-row">
-                            <span className="tag">Bookmarks:</span>
+                            <span className="tag">{i18n.sort.bookmarks}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
                         {generateMirrorsJSX()}
@@ -622,7 +612,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.characters ? <>
                     <div className="mobileinfo-title-container">
-                        <span className="mobileinfo-title">{props.characters.length > 1 ? "Characters" : "Character"}</span>
+                        <span className="mobileinfo-title">{props.characters.length > 1 ? i18n.navbar.characters : i18n.tag.character}</span>
                     </div>
                     <div className="mobileinfo-subcontainer-column">
                         {generateCharactersJSX()}
@@ -631,7 +621,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.series ? <>
                     <div className="mobileinfo-title-container">
-                            <span className="mobileinfo-title">Series</span>
+                            <span className="mobileinfo-title">{i18n.tag.series}</span>
                         </div>
                     <div className="mobileinfo-subcontainer-column">
                         {generateSeriesJSX()}
@@ -640,7 +630,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.tags ? <>
                     <div className="mobileinfo-title-container">
-                        <span className="mobileinfo-title">Tags</span>
+                        <span className="mobileinfo-title">{i18n.navbar.tags}</span>
                     </div>
                     <div className="mobileinfo-subcontainer">
                         {generateTagJSX()}
@@ -649,7 +639,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.post ? <>
                     <div className="mobileinfo-title-container">
-                        <span className="mobileinfo-title">Details</span>
+                        <span className="mobileinfo-title">{i18n.sidebar.details}</span>
                     </div>
                     <div className="mobileinfo-subcontainer-column">
                         <div className="mobileinfo-row">
@@ -657,57 +647,57 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag">Uploader:</span>
+                                <span className="tag">{i18n.sidebar.uploader}:</span>
                                 {generateUsernameJSX("uploader")}
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Uploaded:</span>
+                                <span className="tag">{i18n.sidebar.uploaded}:</span>
                                 <span className="tag-alt">{functions.formatDate(new Date(props.post.uploadDate))}</span>
                             </div>
                         </div>
                         {props.post.uploadDate !== props.post.updatedDate ? 
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag">Updater:</span>
+                                <span className="tag">{i18n.sidebar.updater}:</span>
                                 {generateUsernameJSX("updater")}
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Updated:</span>
+                                <span className="tag">{i18n.sidebar.updated}:</span>
                                 <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
                             </div>
                         </div> : null}
                         {props.post.uploader !== props.post.approver ?
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag">Approver:</span>
+                                <span className="tag">{i18n.sidebar.approver}:</span>
                                 {generateUsernameJSX("approver")}
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Approved:</span>
+                                <span className="tag">{i18n.sidebar.approved}:</span>
                                 <span className="tag-alt">{functions.formatDate(new Date(props.post.approveDate))}</span>
                             </div>
                         </div> : null}
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag">Type:</span>
-                                <span className="tag-alt">{functions.toProperCase(props.post.type)}</span>
+                                <span className="tag">{i18n.sidebar.type}:</span>
+                                <span className="tag-alt">{i18n.sortbar.type[props.post.type]}</span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Restrict:</span>
-                                <span className="tag-alt">{functions.toProperCase(props.post.restrict)}</span>
+                                <span className="tag">{i18n.sidebar.restrict}:</span>
+                                <span className="tag-alt">{i18n.sortbar.restrict[props.post.restrict]}</span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Style:</span>
-                                <span className="tag-alt">{functions.toProperCase(props.post.style)}</span>
+                                <span className="tag">{i18n.sidebar.style}:</span>
+                                <span className="tag-alt">{i18n.sortbar.style[props.post.style]}</span>
                             </div>
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag">Favorites:</span>
+                                <span className="tag">{i18n.sort.favorites}:</span>
                                 <span className="tag-alt">{props.post.favoriteCount || 0}</span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">Cuteness:</span>
+                                <span className="tag">{i18n.sort.cuteness}:</span>
                                 <span className="tag-alt">{props.post.cuteness || 500}</span>
                             </div>
                         </div>
@@ -715,7 +705,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>
                                     <img className="mobileinfo-icon" src={hashIcon} style={{filter: getFilter()}}/>
-                                    <span className="tag">Copy Hash</span>
+                                    <span className="tag">{i18n.sidebar.copyHash}</span>
                                 </span>
                             </div>
                         </div>
@@ -727,101 +717,101 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerTagEdit}>
                                 <img className="mobileinfo-icon" src={tagEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">Tag Edit</span>
+                                <span className="tag">{i18n.sidebar.tagEdit}</span>
                             </span>
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSourceEdit}>
                                 <img className="mobileinfo-icon" src={sourceEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">Source Edit</span>
+                                <span className="tag">{i18n.sidebar.sourceEdit}</span>
                             </span>
                         </div>
                         {!props.unverified && props.post.restrict !== "explicit" ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
-                                <span className="tag">Set Avatar</span>
+                                <span className="tag">{i18n.sidebar.setAvatar}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerParent}>
                                 <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
-                                <span className="tag">Add to Parent</span>
+                                <span className="tag">{i18n.sidebar.addParent}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerGroup}>
                                 <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
-                                <span className="tag">Add to Group</span>
+                                <span className="tag">{i18n.sidebar.addGroup}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
-                                <span className="tag">Add Translation</span>
+                                <span className="tag">{i18n.sidebar.addTranslation}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={privatePost}>
                                 <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
-                                <span className="tag">{props.post.private ? "Unprivate" : "Private"}</span>
+                                <span className="tag">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
                                 <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
-                                <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>
+                                <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
                             </span>
                         </div> : null}
                         {props.unverified ? <>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={compressingDialog}>
                                 <img className="sidebar-icon" src={compressIcon}/>
-                                <span className="tag">Compress</span>
+                                <span className="tag">{i18n.sidebar.compress}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={upscalingDialog}>
                                 <img className="sidebar-icon" src={upscaleIcon}/>
-                                <span className="tag">Upscale</span>
+                                <span className="tag">{i18n.sidebar.upscale}</span>
                             </span>
                         </div></> : null}
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={editPost}>
                                 <img className="mobileinfo-icon" src={edit}/>
-                                <span className="tag-red">Edit</span>
+                                <span className="tag-red">{i18n.buttons.edit}</span>
                             </span>
                         </div>
                         {props.unverified ? <>
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={approvePost}>
                                 <img className="mobileinfo-icon" src={approveGreen}/>
-                                <span className="tag-green">Approve</span>
+                                <span className="tag-green">{i18n.buttons.approve}</span>
                             </span>
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={rejectPost}>
                                 <img className="mobileinfo-icon" src={rejectRed}/>
-                                <span className="tag-red">Reject</span>
+                                <span className="tag-red">{i18n.buttons.reject}</span>
                             </span>
                         </div>
                         </> : null}
                         {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={lockPost}>
                                 <img className="mobileinfo-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
-                                <span className="tag-red">{props.post.locked ? "Unlock" : "Lock"}</span>
+                                <span className="tag-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="mobileinfo-icon" src={historyIcon}/>
-                                <span className="tag-red">History</span>
+                                <span className="tag-red">{i18n.sidebar.history}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ?
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={deletePost}>
                                 <img className="mobileinfo-icon" src={deleteIcon}/>
-                                <span className="tag-red">Delete</span>
+                                <span className="tag-red">{i18n.buttons.delete}</span>
                             </span>
                         </div> : null}
                     </div>

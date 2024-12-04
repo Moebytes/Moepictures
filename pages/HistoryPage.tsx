@@ -51,7 +51,7 @@ import "./styles/historypage.less"
 let replace = false
 
 const HistoryPage: React.FunctionComponent = () => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -645,7 +645,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "post") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Post History</span>
+                    <span className="history-heading">{i18n.history.post}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -656,7 +656,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
             )
@@ -664,7 +664,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Tag History</span>
+                    <span className="history-heading">{i18n.history.tag}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -675,7 +675,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
             )
@@ -683,7 +683,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "group") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Group History</span>
+                    <span className="history-heading">{i18n.history.group}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -694,7 +694,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
             )
@@ -702,7 +702,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "translation") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Translation History</span>
+                    <span className="history-heading">{i18n.history.translation}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -713,7 +713,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
             )
@@ -721,7 +721,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "alias") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Alias/Implication History</span>
+                    <span className="history-heading">{i18n.history.alias}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -732,7 +732,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
             )
@@ -740,7 +740,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "search") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">Search History</span>
+                    <span className="history-heading">{i18n.history.search}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -751,11 +751,11 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                     <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog(!showDeleteAllHistoryDialog)}>
                         <img className="history-img" src={searchHistoryDelete}/>
-                        <span className="history-opt-text">Delete All</span>
+                        <span className="history-opt-text">{i18n.buttons.deleteAll}</span>
                     </div>
                 </div></>
             )

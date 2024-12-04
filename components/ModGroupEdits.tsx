@@ -10,7 +10,7 @@ import "./styles/modposts.less"
 
 const ModGroupEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -300,16 +300,16 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         }
         if (changes.name) {
             if (showOldGroup && oldGroup) {
-                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Old Name: {oldGroup.name}</span>)
+                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>{i18n.labels.oldName}: {oldGroup.name}</span>)
             } else {
-                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>New Name: {newGroup.name}</span>)
+                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>{i18n.labels.newName}: {newGroup.name}</span>)
             }
         }
         if (changes.description) {
             if (showOldGroup && oldGroup) {
-                jsx.push(<span className="mod-post-text">Old Description: {oldGroup.description || "No description."}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldGroup.description || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New Description: {newGroup.description || "No description."}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newGroup.description || i18n.labels.none}</span>)
             }
         }
         return jsx
@@ -329,7 +329,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )
@@ -346,30 +346,30 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 forceUpdate()
             }
             jsx.push(
-                <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldGroups[i] && oldGroup ?
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {request.reason}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldGroup, request, showOldGroups[i])}
                     </div> :
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {request.reason}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldGroup, request, showOldGroups[i])}
                     </div>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldGroup()}>
                             <img className="mod-post-options-img" src={tagDiff} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">{showOldGroups[i] ? "New" : "Old"}</span>
+                            <span className="mod-post-options-text">{showOldGroups[i] ? i18n.buttons.new : i18n.buttons.old}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.group)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Reject</span>
+                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => editGroup(request.username, request.group, request.name, request.description, request.date, request.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Approve</span>
+                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div> 
                 </div>

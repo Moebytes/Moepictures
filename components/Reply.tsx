@@ -30,7 +30,7 @@ interface Props {
 }
 
 const Reply: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -128,7 +128,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const editReply = async () => {
         if (!editReplyContent) return
-        const badReply = functions.validateReply(editReplyContent)
+        const badReply = functions.validateReply(editReplyContent, i18n)
         if (badReply) return
         await functions.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
         props.onEdit?.()
@@ -158,11 +158,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
                         <img className="reply-options-img" src={editOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Edit</span>
+                        <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Delete</span>
+                        <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -172,16 +172,16 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={triggerQuote}>
                         <img className="reply-options-img" src={quoteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Quote</span>
+                        <span className="reply-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? 
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Delete</span>
+                        <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div> : 
                     <div className="reply-options-container" onClick={reportReplyDialog}>
                         <img className="reply-options-img" src={reportOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Report</span>
+                        <span className="reply-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>
             )
@@ -254,7 +254,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || "deleted"}</span>
+        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || i18n.user.deleted}</span>
     }
 
     const getBGColor = () => {
@@ -276,9 +276,9 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
-                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate)}</span>
+                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate, i18n)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
-                    <span className="reply-mini-link" onClick={viewThreads}>Posts: {props.reply?.postCount}</span>
+                    <span className="reply-mini-link" onClick={viewThreads}>{i18n.sort.posts}: {props.reply?.postCount}</span>
                 </div>
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>

@@ -7,6 +7,7 @@ import crypto from "crypto"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import jsxFunctions from "../structures/JSXFunctions"
+import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
@@ -92,9 +93,9 @@ const UserRoutes = (app: Express) => {
             username = username.trim().toLowerCase()
             email = email.trim()
             password = password.trim()
-            const badUsername = functions.validateUsername(username)
-            const badEmail = functions.validateEmail(email)
-            const badPassword = functions.validatePassword(username, password)
+            const badUsername = functions.validateUsername(username, enLocale)
+            const badEmail = functions.validateEmail(email, enLocale)
+            const badPassword = functions.validatePassword(username, password, enLocale)
             if (badUsername || badEmail || badPassword) return res.status(400).send("Bad username, password, or email.")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
@@ -541,7 +542,7 @@ const UserRoutes = (app: Express) => {
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             newUsername = newUsername.trim().toLowerCase()
-            const badUsername = functions.validateUsername(newUsername)
+            const badUsername = functions.validateUsername(newUsername, enLocale)
             if (badUsername) return res.status(400).send("Bad username")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -573,7 +574,7 @@ const UserRoutes = (app: Express) => {
             if (!oldPassword || !newPassword) return res.status(400).send("Bad oldPassword or newPassword")
             oldPassword = oldPassword.trim()
             newPassword = newPassword.trim()
-            const badPassword = functions.validatePassword(req.session.username, newPassword)
+            const badPassword = functions.validatePassword(req.session.username, newPassword, enLocale)
             if (badPassword) return res.status(400).send("Bad newPassword")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -628,7 +629,7 @@ const UserRoutes = (app: Express) => {
             let {newEmail, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            const badEmail = functions.validateEmail(newEmail)
+            const badEmail = functions.validateEmail(newEmail, enLocale)
             if (badEmail) return res.status(400).send("Bad newEmail")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -654,7 +655,7 @@ const UserRoutes = (app: Express) => {
             let {email, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            const badEmail = functions.validateEmail(email)
+            const badEmail = functions.validateEmail(email, enLocale)
             if (badEmail) return res.status(400).send("Bad email")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -766,7 +767,7 @@ const UserRoutes = (app: Express) => {
             const {username, password, token} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username || !token || !password) return res.status(400).send("Bad username, token, or password")
-            const badPassword = functions.validatePassword(username, password)
+            const badPassword = functions.validatePassword(username, password, enLocale)
             if (badPassword) return res.status(400).send("Bad password")
             const tokenData = await sql.token.passwordToken(username)
             if (!tokenData) return res.status(400).send("Bad token")
@@ -1092,7 +1093,7 @@ const UserRoutes = (app: Express) => {
             if (days) {
                 let expiration = new Date()
                 expiration.setDate(expiration.getDate() + Number(days))
-                banDuration = functions.timeUntil(expiration.toISOString())
+                banDuration = functions.timeUntil(expiration.toISOString(), enLocale)
                 await sql.user.updateUser(username, "banExpiration", expiration.toISOString())
             }
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
@@ -1187,7 +1188,7 @@ const UserRoutes = (app: Express) => {
                     await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
                 } 
                 if (premiumPromotion) {
-                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
+                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration, enLocale)}.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
                 } 
                 if (curatorPromotion) {

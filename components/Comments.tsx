@@ -12,6 +12,7 @@ interface Props {
 }
 
 const Comments: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -95,15 +96,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [quoteText])
 
     const post = async () => {
-        if (!text) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "No comment provided."
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
-        const badComment = functions.validateComment(text)
+        const badComment = functions.validateComment(text, i18n)
         if (badComment) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -114,16 +107,16 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/comment/create", {postID: props.post.postID, comment: text}, session, setSessionFlag)
-            errorRef.current!.innerText = "Comment added."
+            errorRef.current!.innerText = i18n.errors.comment.added
             setCommentFlag(true)
             setText("")
             await functions.timeout(2000)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad comment."
+            errorRef.current!.innerText = i18n.errors.comment.bad
             await functions.timeout(2000)
             setError(false)
         }
@@ -204,7 +197,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {error ? <div className="comments-validation-container"><span className="comments-validation" ref={errorRef}></span></div> : null}
                     <div className="comments-button-container-left">
-                    <button className="comments-button" onClick={post}>Post</button>
+                    <button className="comments-button" onClick={post}>{i18n.buttons.post}</button>
                     <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                         <img src={emojiSelect}/>
                     </button>
@@ -216,9 +209,9 @@ const Comments: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="comments">
-            <div className="comments-title">Comments</div>
+            <div className="comments-title">{i18n.navbar.comments}</div>
             {comments.length ? generateCommentsJSX() :
-            <div className="comments-text">There are no comments.</div>}
+            <div className="comments-text">{i18n.post.noComments}</div>}
             {getCommentBox()}
             {emojiGrid()}
         </div>

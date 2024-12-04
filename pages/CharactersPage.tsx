@@ -24,7 +24,7 @@ let replace = false
 let pageAmount = 7
 
 const CharactersPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -112,9 +112,12 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Characters"
         updateCharacters()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.characters
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -357,7 +360,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         return (
             <div className="itemsort-item" ref={sortRef}>
                 <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
-                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
     }
@@ -408,7 +411,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">Characters</span>
+                    <span className="items-heading">{i18n.navbar.characters}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
@@ -419,21 +422,21 @@ const CharactersPage: React.FunctionComponent = (props) => {
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                            <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
-                                <span className="item-dropdown-text">Random</span>
+                                <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="item-dropdown-text">Alphabetic</span>
+                                <span className="item-dropdown-text">{i18n.sort.alphabetic}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
-                                <span className="item-dropdown-text">Posts</span>
+                                <span className="item-dropdown-text">{i18n.sort.posts}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="item-dropdown-text">Cuteness</span>
+                                <span className="item-dropdown-text">{i18n.sort.cuteness}</span>
                             </div>
                         </div>
                     </div>

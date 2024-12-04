@@ -12,7 +12,7 @@ import "./styles/sitepage.less"
 import session from "express-session"
 
 const VerifyEmailPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -55,8 +55,11 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Verify Email"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.verifyEmail.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -71,7 +74,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/verify-email")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         if (session.emailVerified) {
             history.push("/verify-email-success")
@@ -80,7 +83,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
 
     const submit = async () => {
         let email = newEmail ? newEmail : session.email
-        const badEmail = functions.validateEmail(email)
+        const badEmail = functions.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -91,14 +94,14 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/verifyemail", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad email or captcha."
+            errorRef.current!.innerText = i18n.pages.verifyEmail.error
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()
@@ -114,22 +117,21 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Verify Email</span>
+                    <span className="sitepage-title">{i18n.pages.verifyEmail.title}</span>
                     {submitted ?
                     <>
-                    <span className="sitepage-link">Verification email resent. Check your email.</span>
+                    <span className="sitepage-link">{i18n.pages.verifyEmail.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>Ok</button>
+                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>{i18n.buttons.ok}</button>
                     </div>
                     </> : <>
-                    <span className="sitepage-link">You must verify your email address in order to use your account. If you need to 
-                    change your email and/or resend the verification link, you can do so below.</span>
+                    <span className="sitepage-link">{i18n.pages.verifyEmail.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Unverified Email: </span>
+                        <span className="sitepage-text">{i18n.pages.verifyEmail.unverifiedEmail}: </span>
                         <span className="sitepage-text-small2">{session.email}</span>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Optional Address Change: </span>
+                        <span className="sitepage-text">{i18n.pages.verifyEmail.optionalAddressChange}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
@@ -138,7 +140,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => submit()}>Resend Verification Link</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.pages.verifyEmail.resend}</button>
                     </div>
                     </>
                     }

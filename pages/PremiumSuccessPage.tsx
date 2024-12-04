@@ -6,12 +6,13 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import {useInteractionActions, useSessionSelector, useSessionActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/sitepage.less"
 
 const PremiumSuccessPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -73,7 +74,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                             Thank you for purchasing premium! Your account has been upgraded and you can now 
                             access all of the premium features. <br/><br/>
 
-                            Your premium membership will last until {functions.prettyDate(new Date(session.premiumExpiration))}.
+                            Your premium membership will last until {functions.prettyDate(new Date(session.premiumExpiration), i18n)}.
                         </span>
                     </div>
                     <div className="sitepage-button-container">

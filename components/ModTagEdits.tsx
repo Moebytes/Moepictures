@@ -10,7 +10,7 @@ import "./styles/modposts.less"
 
 const ModTagEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -311,81 +311,81 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         if (changes.tag) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Old Tag: {oldTag.tag}</span>)
+                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>{i18n.labels.oldTag}: {oldTag.tag}</span>)
             } else {
-                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>New Tag: {newTag.key}</span>)
+                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>{i18n.labels.newTag}: {newTag.key}</span>)
             }
         } else {
-            jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Tag: {newTag.key}</span>)
+            jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>{i18n.tag.tag}: {newTag.key}</span>)
         }
         if (changes.type) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className={`mod-post-text ${functions.getTagColor(oldTag)}`}>Old Category: {oldTag.type}</span>)
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(oldTag)}`}>{i18n.labels.oldCategory}: {oldTag.type}</span>)
             } else {
-                jsx.push(<span className={`mod-post-text ${functions.getTagColor(newTag)}`}>New Category: {newTag.type}</span>)
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(newTag)}`}>{i18n.labels.newCategory}: {newTag.type}</span>)
             }
         }
         if (changes.description) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">Old Description: {oldTag.description || "No description."}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldTag.description || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New Description: {newTag.description || "No description."}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newTag.description || i18n.labels.none}</span>)
             }
         }
         if (changes.aliases) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldAliases}: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New Aliases: {newTag.aliases?.[0] ? newTag.aliases.join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newAliases}: {newTag.aliases?.[0] ? newTag.aliases.join(", ") : i18n.labels.none}</span>)
             }
         }
         if (changes.implications) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">Old Implications: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldImplications}: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New Implications: {newTag.implications?.[0] ? newTag.implications.join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newImplications}: {newTag.implications?.[0] ? newTag.implications.join(", ") : i18n.labels.none}</span>)
             }
         }
         if (changes.pixivTags) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">Old Pixiv Tags: {oldTag.pixivTags?.[0] ? oldTag.pixivTags.join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldPixivTags}: {oldTag.pixivTags?.[0] ? oldTag.pixivTags.join(", ") : i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New Pixiv Tags: {newTag.pixivTags?.[0] ? newTag.pixivTags.join(", ") : "None"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newPixivTags}: {newTag.pixivTags?.[0] ? newTag.pixivTags.join(", ") : i18n.labels.none}</span>)
             }
         }
         if (changes.website) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>{i18n.labels.oldWebsite}: {oldTag.website || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.website, "_blank")}>New Website: {newTag.website}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.website, "_blank")}>{i18n.labels.newWebsite}: {newTag.website}</span>)
             }
         }
         if (changes.social) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social, "_blank")}>Old Social: {oldTag.social || "None."}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social, "_blank")}>{i18n.labels.oldSocial}: {oldTag.social || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.social, "_blank")}>New Social: {newTag.social}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.social, "_blank")}>{i18n.labels.newSocial}: {newTag.social}</span>)
             }
         }
         if (changes.twitter) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>{i18n.labels.oldTwitter}: {oldTag.twitter || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.twitter, "_blank")}>New Twitter: {newTag.twitter}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.twitter, "_blank")}>{i18n.labels.newTwitter}: {newTag.twitter}</span>)
             }
         }
         if (changes.fandom) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>Old Fandom: {oldTag.fandom || "None."}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>{i18n.labels.oldFandom}: {oldTag.fandom || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom, "_blank")}>New Fandom: {newTag.fandom}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom, "_blank")}>{i18n.labels.newFandom}: {newTag.fandom}</span>)
             }
         }
         if (changes.r18) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">Old R18: {oldTag.r18 ? "Yes" : "No"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldR18}: {oldTag.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">New R18: {newTag.r18 ? "Yes" : "No"}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newR18}: {newTag.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
             }
         }
         return jsx
@@ -405,7 +405,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )
@@ -426,15 +426,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
             const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image, oldTag.imageHash) : ""
             jsx.push(
-                <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldTags[i] && oldTag ? <>
                     {oldImg ?
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={oldImg}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {request.reason}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag, request, showOldTags[i])}
                     </div>
                     </> : <>
@@ -443,22 +443,22 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={img}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {request.reason}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag, request, showOldTags[i])}
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>
                             <img className="mod-post-options-img" src={tagDiff} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">{showOldTags[i] ? "New" : "Old"}</span>
+                            <span className="mod-post-options-text">{showOldTags[i] ? i18n.buttons.new : i18n.buttons.old}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.image)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Reject</span>
+                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.social, request.twitter, request.website, request.fandom)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Approve</span>
+                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div> 
                 </div>

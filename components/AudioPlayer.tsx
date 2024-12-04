@@ -20,7 +20,7 @@ import playerVolumeMute from "../assets/icons/player-volume-mute.png"
 import playerClear from "../assets/icons/player-clear.png"
 import playerStop from "../assets/icons/player-stop.png"
 import * as Tone from "tone"
-import silence from "../assets/misc/silence.mp3"
+import silence from "../assets/images/silence.mp3"
 import "./styles/audioplayer.less"
 
 let player: Tone.Player

@@ -49,7 +49,7 @@ interface Props {
 }
 
 const ThreadPage: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -468,9 +468,9 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const editThread = async () => {
-        const badTitle = functions.validateTitle(editThreadTitle)
+        const badTitle = functions.validateTitle(editThreadTitle, i18n)
         if (badTitle) return
-        const badContent = functions.validateThread(editThreadContent)
+        const badContent = functions.validateThread(editThreadContent, i18n)
         if (badContent) return
         await functions.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
         updateThread()
@@ -563,7 +563,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }, [quoteText])
 
     const reply = async () => {
-        const badReply = functions.validateReply(text)
+        const badReply = functions.validateReply(text, i18n)
         if (badReply) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -650,7 +650,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         {error ? <div className="thread-page-validation-container"><span className="thread-page-validation" ref={errorRef}></span></div> : null}
                         <div className="thread-page-button-container-left">
-                            <button className="thread-page-button" onClick={reply}>Reply</button>
+                            <button className="thread-page-button" onClick={reply}>{i18n.buttons.reply}</button>
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
@@ -695,7 +695,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                     <div className="thread-page-main-post" style={{backgroundColor: thread.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="thread-page-user-container">
                             {getCreatorJSX()}
-                            <span className="thread-page-date-text">{functions.timeAgo(thread.createDate)}</span>
+                            <span className="thread-page-date-text">{functions.timeAgo(thread.createDate, i18n)}</span>
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                             <span className="thread-page-mini-link" onClick={viewThreads}>Posts: {thread.postCount}</span>
                         </div>

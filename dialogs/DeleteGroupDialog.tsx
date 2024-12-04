@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 
 const DeleteGroupDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteGroupObj} = useGroupDialogSelector()
     const {setDeleteGroupObj} = useGroupDialogActions()
@@ -38,7 +39,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
             await functions.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
             history.push("/groups")
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

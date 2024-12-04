@@ -14,7 +14,7 @@ import "./styles/contactpage.less"
 
 const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -83,7 +83,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badEmail = functions.validateEmail(email)
+        const badEmail = functions.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

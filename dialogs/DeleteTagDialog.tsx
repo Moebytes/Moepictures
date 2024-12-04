@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 
 const DeleteTagDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteTagID} = useTagDialogSelector()
     const {setDeleteTagID, setDeleteTagFlag} = useTagDialogActions()
@@ -37,7 +38,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             setDeleteTagFlag(true)
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

@@ -25,6 +25,7 @@ interface Props {
 }
 
 const TagRow: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {tagFlag} = useFlagSelector()
@@ -253,17 +254,17 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {props.tag.aliases?.[0] ?
                     <div className="tagrow-column">
-                        <span className="tagrow-alias-header">Aliases: </span>
+                        <span className="tagrow-alias-header">{i18n.sort.aliases}: </span>
                         {generateAliasesJSX()}
                     </div> : null}
                     {props.tag.implications?.[0] ?
                     <div className="tagrow-column">
-                        <span className="tagrow-alias-header">Implies: </span>
+                        <span className="tagrow-alias-header">{i18n.labels.implies}: </span>
                         {generateImplicationsJSX()}
                     </div> : null}
                 </td>
                 <td className="tagrow-description">
-                    <span className="tagrow-desc-text" ref={scrollRef}>{props.tag.description || "No description."}</span>
+                    <span className="tagrow-desc-text" ref={scrollRef}>{props.tag.description || i18n.labels.none}</span>
                 </td>
             </div>
             {session.username ?

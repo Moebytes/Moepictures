@@ -37,7 +37,7 @@ let limit = 25
 
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -183,7 +183,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/profile")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         } else {
             setBio(session.bio)
             if (init) {
@@ -302,7 +302,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }, [interval])
 
     const changeBio = async () => {
-        const badBio = functions.validateBio(bio)
+        const badBio = functions.validateBio(bio, i18n)
         if (badBio) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -313,14 +313,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/changebio", {bio}, session, setSessionFlag)
             setSessionFlag(true)
             setError(false)
             setShowBioInput(false)
         } catch {
-            errorRef.current!.innerText = "Bad bio."
+            errorRef.current!.innerText = i18n.errors.bio.bad
             await functions.timeout(2000)
             setError(false)
         }
@@ -443,8 +443,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const getBanText = () => {
-        if (banReason) return `You are banned for reason: ${banReason}`
-        return "You are banned"
+        if (banReason) return `${i18n.user.bannedReason} ${banReason}`
+        return i18n.user.banned
     }
 
     const changeUsername = () => {
@@ -471,13 +471,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (new Date(session.premiumExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text" style={{color: "var(--premiumColor)"}}>Premium until {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                    <span className="user-text" style={{color: "var(--premiumColor)"}}>{i18n.user.premiumUntil} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}</span>
                 </div>
             )
         } else if (new Date(session.premiumExpiration) < new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text">Premium expired on {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                    <span className="user-text">{i18n.user.premiumExpired} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}</span>
                 </div>
             )
         }
@@ -488,7 +488,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (new Date(session.banExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text" style={{color: "var(--banText)"}}>Ban lasts for {functions.timeUntil(session.banExpiration)}</span>
+                    <span className="user-text" style={{color: "var(--banText)"}}>{i18n.user.banExpires} {functions.timeUntil(session.banExpiration, i18n)}</span>
                 </div>
             )
         }
@@ -558,116 +558,116 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {premiumExpirationJSX()}
                     {banExpirationJSX()}
                     <div className="user-row">
-                        <span className="user-text">Email: {session.email}</span>
+                        <span className="user-text">{i18n.user.email}: {session.email}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Join Date: {functions.prettyDate(new Date(session.joinDate))}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(session.joinDate), i18n)}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Bio: {session.bio || "This user has not written anything."}</span>
+                        <span className="user-text">{i18n.user.bio}: {session.bio || i18n.user.noBio}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>Update Bio</span>
+                        <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>{i18n.user.updateBio}</span>
                     </div>
                     {showBioInput ?
                     <div className="user-column">
                         <textarea ref={bioRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                         {error ? <div className="user-validation-container"><span className="user-validation" ref={errorRef}></span></div> : null}
-                        <button className="user-button" onClick={changeBio}>Ok</button>
+                        <button className="user-button" onClick={changeBio}>{i18n.buttons.ok}</button>
                     </div> : null}
                     <div className="user-row">
-                        <span className="user-text">Favorites Privacy: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
-                        className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
+                        <span className="user-text">{i18n.user.favoritesPrivacy}: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
+                        className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.user.public : i18n.sort.private}</span></span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Show Related: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>
+                        <span className="user-text">{i18n.user.showRelated}: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Show Tooltips: <span className="user-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
+                        <span className="user-text">{i18n.user.showTooltips}: <span className="user-text-action" onClick={showTooltips}>{session.showTooltips ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Show Tag Banner: <span className="user-text-action" onClick={showTagBanner}>{session.showTagBanner ? "Yes" : "No"}</span></span>
+                        <span className="user-text">{i18n.user.showTagBanner}: <span className="user-text-action" onClick={showTagBanner}>{session.showTagBanner ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Download Pixiv ID: <span className="user-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
-                    </div>
-                    <div className="user-row">
-                        <img className="user-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-text">Upscaled Images: <span style={{color: "var(--premiumColor)"}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
+                        <span className="user-text">{i18n.user.downloadPixivID}: <span className="user-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         <img className="user-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-text">Autosearch Interval: </span>
+                        <span style={{color: "var(--premiumColor)"}} className="user-text">{i18n.user.upscaledImages}: <span style={{color: "var(--premiumColor)"}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
+                        <img className="user-icon" src={premiumStar}/>
+                        <span style={{color: "var(--premiumColor)"}} className="user-text">{i18n.user.autosearchInterval}: </span>
                         <input style={{color: "var(--premiumColor)"}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
                     {permissions.isAdmin(session) ? <div className="user-row">
                         <img className="user-icon" src={r18}/>
-                        <span style={{color: "var(--r18Color)"}} className="user-text">Show R18: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? "Yes" : "No"}</span></span>
+                        <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}
                     {counts ? <>
                     {counts.postEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>Post Edits <span className="user-text-alt">{counts.postEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>{i18n.mod.postEdits} <span className="user-text-alt">{counts.postEdits}</span></span>
                     </div>  : null}
                     {counts.tagEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>Tag Edits <span className="user-text-alt">{counts.tagEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
                     </div> : null}
                     {counts.translationEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/translation/history`)}>Translation Edits <span className="user-text-alt">{counts.translationEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/translation/history`)}>{i18n.mod.translationEdits} <span className="user-text-alt">{counts.translationEdits}</span></span>
                     </div> : null}
                     {counts.groupEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>Group Edits <span className="user-text-alt">{counts.groupEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>
                     </div> : null}
                     </> : null}
                     <div onClick={clearPfp} className="user-row">
-                        <span className="user-link">Clear Pfp</span>
+                        <span className="user-link">{i18n.user.clearPfp}</span>
                     </div>
                     {bannerHidden ? 
                     <div onClick={showBanner} className="user-row">
-                        <span className="user-link">Show Banner</span>
+                        <span className="user-link">{i18n.user.showBanner}</span>
                     </div> : null}
                     <div onClick={changeUsername} className="user-row">
                         <img className="user-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-link">Change Username</span>
+                        <span style={{color: "var(--premiumColor)"}} className="user-link">{i18n.user.changeUsername}</span>
                     </div>
                     <Link to="/change-email" className="user-row">
-                        <span className="user-link">Change Email</span>
+                        <span className="user-link">{i18n.user.changeEmail}</span>
                     </Link>
                     <Link to="/change-password" className="user-row">
-                        <span className="user-link">Change Password</span>
+                        <span className="user-link">{i18n.user.changePassword}</span>
                     </Link>
                     <Link to="/enable-2fa" className="user-row">
-                        <span className="user-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
+                        <span className="user-link">{session.$2fa ? i18n.buttons.disable : i18n.buttons.enable} {i18n.user.$2fa}</span>
                     </Link>
                     <Link to="/login-history" className="user-row">
-                        <span className="user-link">Login History</span>
+                        <span className="user-link">{i18n.user.loginHistory}</span>
                     </Link>
                     {permissions.isAdmin(session) ? <Link to="/ip-blacklist" className="user-row">
-                        <span className="user-link">IP Blacklist</span>
+                        <span className="user-link">{i18n.user.ipBlacklist}</span>
                     </Link> : null}
                     {permissions.isAdmin(session) ? <Link to="/news-banner" className="user-row">
-                        <span className="user-link">News Banner</span>
+                        <span className="user-link">{i18n.user.newsBanner}</span>
                     </Link> : null}
                     {generateFavgroupsJSX()}
                     {favorites.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewFavorites}>Favorites <span className="user-text-alt">{favorites[0].postCount}</span></span>
+                        <span className="user-title" onClick={viewFavorites}>{i18n.sort.favorites} <span className="user-text-alt">{favorites[0].postCount}</span></span>
                         <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                     </div> : null}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewUploads}>Uploads <span className="user-text-alt">{uploads[0].postCount}</span></span>
+                        <span className="user-title" onClick={viewUploads}>{i18n.user.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewComments}>Comments <span className="user-text-alt">{comments.length}</span></span>
+                        <span className="user-title" onClick={viewComments}>{i18n.navbar.comments} <span className="user-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                     <div className="user-row">
                         <img className="user-icon" src={danger}/>
-                        <span className="user-link" onClick={deleteAccountDialog}>Delete Account</span>
+                        <span className="user-link" onClick={deleteAccountDialog}>{i18n.user.deleteAccount}</span>
                     </div>
                 </div>
                 <Footer/>

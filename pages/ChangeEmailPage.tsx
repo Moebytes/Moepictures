@@ -12,7 +12,7 @@ import "./styles/sitepage.less"
 import session from "express-session"
 
 const ChangeEmailPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -55,8 +55,11 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Change Email"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.changeEmail
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -71,12 +74,12 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/change-email")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
     const submit = async () => {
-        const badEmail = functions.validateEmail(newEmail)
+        const badEmail = functions.validateEmail(newEmail, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -87,13 +90,13 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/changeemail", {newEmail, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad email or captcha."
+            errorRef.current!.innerText = i18n.pages.changeEmail.error
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()
@@ -108,22 +111,21 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Change Email</span>
+                    <span className="sitepage-title">{i18n.user.changeEmail}</span>
                     {submitted ?
                     <>
-                    <span className="sitepage-link">A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.</span>
+                    <span className="sitepage-link">{i18n.pages.changeEmail.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
-                    <span className="sitepage-link">A confirmation email will be sent to the new address. 
-                    Your email will only be changed if you confirm the new one.</span>
+                    <span className="sitepage-link">{i18n.pages.changeEmail.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Email: </span>
+                        <span className="sitepage-text-wide">{i18n.user.email}: </span>
                         <span className="sitepage-text-small">{session.email}</span>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">New Email: </span>
+                        <span className="sitepage-text-wide">{i18n.pages.changeEmail.newEmail}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
@@ -132,8 +134,8 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="sitepage-button" onClick={() => submit()}>Change Email</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeEmail}</button>
                     </div>
                     </>
                     }

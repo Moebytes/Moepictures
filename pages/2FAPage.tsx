@@ -4,12 +4,13 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
-import {useInteractionActions, useSessionSelector, useSessionActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/sitepage.less"
 
 const $2FAPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -30,8 +31,11 @@ const $2FAPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "2-Factor Authentication"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.$2fa
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -52,21 +56,21 @@ const $2FAPage: React.FunctionComponent = (props) => {
         if (!token.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Bad token."
+            errorRef.current!.innerText = i18n.pages.$2fa.badToken
             await functions.timeout(2000)
             setError(false)
             return
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/2fa", {token}, session, setSessionFlag)
             setSessionFlag(true)
             history.push("/posts")
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad token."
+            errorRef.current!.innerText = i18n.pages.$2fa.badToken
             await functions.timeout(2000)
             setError(false)
         }
@@ -80,15 +84,15 @@ const $2FAPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">2-Factor Authentication</span>
-                    <span className="sitepage-link">Please enter your 2FA token.</span>
+                    <span className="sitepage-title">{i18n.user.$2fa}</span>
+                    <span className="sitepage-link">{i18n.pages.$2fa.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">2FA Token:</span>
+                        <span className="sitepage-text-wide">{i18n.pages.$2fa.token}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? validate() : null}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={validate}>Validate</button>
+                        <button className="sitepage-button" onClick={validate}>{i18n.buttons.validate}</button>
                     </div>
                 </div>
                 <Footer/>

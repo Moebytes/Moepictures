@@ -2,7 +2,7 @@
 
 Moepictures is an image board site for cute anime art, organized by tags.
 
-<img src="assets/misc/readme.png">
+<img src="assets/images/readme.png">
 
 ### Searching With Spaces
 
@@ -14,7 +14,7 @@ Moepictures supports multiple images per post, which is great for comics and pos
 
 ### Image Filters
 
-<img src="assets/misc/imagefilters.png">
+<img src="assets/images/imagefilters.png">
 
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
 can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
@@ -26,7 +26,7 @@ gifs, reverse playback, and modification of playback speed.
 
 Video Player:
 
-<img src="assets/misc/videoplayer.png">
+<img src="assets/images/videoplayer.png">
 
 The video player has some additional controls for volume and pitch preservement. The 3d model player has 
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse. The 
@@ -34,7 +34,7 @@ live2d player has controls for speed, parameters, and parts.
 
 ### Translations
 
-<img src="assets/misc/translations.png" height="600">
+<img src="assets/images/translations.png" height="600">
 
 As often images might contain japanese text, adding and viewing translations is also supported!
 

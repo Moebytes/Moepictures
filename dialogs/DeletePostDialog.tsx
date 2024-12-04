@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -11,6 +11,7 @@ interface Props {
 }
 
 const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -42,7 +43,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
             history.push("/posts")
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

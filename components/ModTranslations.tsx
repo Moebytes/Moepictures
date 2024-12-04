@@ -8,7 +8,7 @@ import functions from "../structures/Functions"
 import "./styles/modposts.less"
 
 const ModTranslations: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -291,7 +291,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )
@@ -313,18 +313,18 @@ const ModTranslations: React.FunctionComponent = (props) => {
                         <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation?.updater) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {translation.reason}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(translation?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {translation.reason}</span>
                         {translationDataJSX(translation)}
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID, translation.updater, translation.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Reject</span>
+                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID, translation.updater, translation.postID)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Approve</span>
+                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>
                 </div>

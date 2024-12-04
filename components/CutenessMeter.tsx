@@ -3,11 +3,11 @@ import {useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../structures/Functions"
-import cuteness1 from "../assets/misc/cuteness1.png"
-import cuteness2 from "../assets/misc/cuteness2.png"
-import cuteness3 from "../assets/misc/cuteness3.png"
-import cuteness4 from "../assets/misc/cuteness4.png"
-import cuteness5 from "../assets/misc/cuteness5.png"
+import cuteness1 from "../assets/images/cuteness1.png"
+import cuteness2 from "../assets/images/cuteness2.png"
+import cuteness3 from "../assets/images/cuteness3.png"
+import cuteness4 from "../assets/images/cuteness4.png"
+import cuteness5 from "../assets/images/cuteness5.png"
 import deleteStar from "../assets/icons/deletestar.png"
 import "./styles/cutenessmeter.less"
 
@@ -18,7 +18,7 @@ interface Props {
 let cutenessTimer = null as any
 
 const CutenessMeter: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [cuteness, setCuteness] = useState(0)
@@ -100,7 +100,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="cuteness-meter">
             <div className="cuteness-title-container">
-                <div className="cuteness-title">Cuteness</div>
+                <div className="cuteness-title">{i18n.sort.cuteness}</div>
                 <img className="cuteness-img" src={deleteStar} style={{filter: getFilter()}} onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>

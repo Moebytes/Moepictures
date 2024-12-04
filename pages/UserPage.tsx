@@ -39,7 +39,7 @@ let limit = 25
 
 const UserPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {session} = useSessionSelector()
@@ -228,14 +228,14 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             if (!favorites.length) return null
             return (
                 <div className="user-column">
-                    <span className="user-title" onClick={viewFavorites}>Favorites <span className="user-text-alt">{favorites[0].postCount}</span></span>
+                    <span className="user-title" onClick={viewFavorites}>{i18n.sort.favorites} <span className="user-text-alt">{favorites[0].postCount}</span></span>
                     <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                 </div> 
             )
         } else {
             return (
                 <div className="user-column">
-                    <span className="user-text">Favorites: <span className="user-text-alt">Private</span></span>
+                    <span className="user-text">{i18n.sort.favorites}: <span className="user-text-alt">{i18n.sort.private}</span></span>
                 </div>
             )
         }
@@ -330,11 +330,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (user.banExpiration && new Date(user.banExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-ban-text">Banned for {functions.timeUntil(user.banExpiration)}</span>
+                    <span className="user-ban-text">{i18n.user.banReason} {functions.timeUntil(user.banExpiration, i18n)}</span>
                 </div>
             )
         } else {
-            return <span className="user-ban-text">Banned</span>
+            return <span className="user-ban-text">{i18n.user.ban}</span>
         }
     }
 
@@ -399,35 +399,35 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {banJSX()}
                     <div className="user-row">
-                        <span className="user-text">Bio: {user.bio || "This user has not written anything."}</span>
+                        <span className="user-text">{i18n.user.bio}: {user.bio || i18n.user.noBio}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(user.joinDate || ""), i18n)}</span>
                     </div>
                     {counts ? <>
                     {counts.postEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>Post Edits <span className="user-text-alt">{counts.postEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>{i18n.mod.postEdits} <span className="user-text-alt">{counts.postEdits}</span></span>
                     </div>  : null}
                     {counts.tagEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>Tag Edits <span className="user-text-alt">{counts.tagEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
                     </div> : null}
                     {counts.translationEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/translation/history`)}>Translation Edits <span className="user-text-alt">{counts.translationEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/translation/history`)}>{i18n.mod.translationEdits} <span className="user-text-alt">{counts.translationEdits}</span></span>
                     </div> : null}
                     {counts.groupEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>Group Edits <span className="user-text-alt">{counts.groupEdits}</span></span>
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>
                     </div> : null}
                     </> : null}
                     {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewUploads}>Uploads <span className="user-text-alt">{uploads[0].postCount}</span></span>
+                        <span className="user-title" onClick={viewUploads}>{i18n.user.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewComments}>Comments <span className="user-text-alt">{comments.length}</span></span>
+                        <span className="user-title" onClick={viewComments}>{i18n.navbar.comments} <span className="user-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                 </div> : null}

@@ -48,7 +48,7 @@ import "./styles/modqueuepage.less"
 let replace = false 
 
 const ModQueuePage: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {modState} = useActiveSelector()
@@ -156,17 +156,17 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     }
 
     const getText = () => {
-        if (modState === "posts") return "Posts"
-        if (modState === "post-edits") return "Post Edits"
-        if (modState === "post-deletions") return "Post Deletions"
-        if (modState === "tag-edits") return "Tag Edits"
-        if (modState === "tag-aliases") return "Tag Aliases"
-        if (modState === "tag-deletions") return "Tag Deletions"
-        if (modState === "groups") return "Groups"
-        if (modState === "group-edits") return "Group Edits"
-        if (modState === "group-deletions") return "Group Deletions"
-        if (modState === "translations") return "Translations"
-        if (modState === "reports") return "Reports"
+        if (modState === "posts") return i18n.navbar.posts
+        if (modState === "post-edits") return i18n.mod.postEdits
+        if (modState === "post-deletions") return i18n.mod.postDeletions
+        if (modState === "tag-edits") return i18n.mod.tagEdits
+        if (modState === "tag-aliases") return i18n.mod.tagAliases
+        if (modState === "tag-deletions") return i18n.mod.tagDeletions
+        if (modState === "groups") return i18n.navbar.groups
+        if (modState === "group-edits") return i18n.mod.groupEdits
+        if (modState === "group-deletions") return i18n.mod.groupDeletions
+        if (modState === "translations") return i18n.navbar.translations
+        if (modState === "reports") return i18n.mod.reports
         return ""
     }
 

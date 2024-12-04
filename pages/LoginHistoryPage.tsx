@@ -10,7 +10,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../
 import "./styles/sitepage.less"
 
 const LoginHistoryPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -100,7 +100,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-table-name">{log.region}</span>
                     </div>
                     <div className="sitepage-table-column">
-                        <span className="sitepage-table-name-strong">{functions.prettyDate(new Date(log.timestamp))}</span>
+                        <span className="sitepage-table-name-strong">{functions.prettyDate(new Date(log.timestamp), i18n)}</span>
                     </div>
                 </div>
             )

@@ -27,7 +27,7 @@ interface Props {
 }
 
 const MessageReply: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -125,7 +125,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
 
     const editReply = async () => {
         if (!editMsgReplyContent) return
-        const badReply = functions.validateReply(editMsgReplyContent)
+        const badReply = functions.validateReply(editMsgReplyContent, i18n)
         if (badReply) return
         await functions.put("/api/message/reply/edit", {replyID: props.reply?.replyID, content: editMsgReplyContent, r18: editMsgReplyR18}, session, setSessionFlag)
         props.onEdit?.()
@@ -151,11 +151,11 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
                         <img className="reply-options-img" src={editOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Edit</span>
+                        <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Delete</span>
+                        <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -165,12 +165,12 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={triggerQuote}>
                         <img className="reply-options-img" src={quoteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Quote</span>
+                        <span className="reply-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? 
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Delete</span>
+                        <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>
             )
@@ -243,7 +243,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || "deleted"}</span>
+        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || i18n.user.deleted}</span>
     }
 
     return (
@@ -251,7 +251,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
-                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate)}</span>
+                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate, i18n)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                 </div>
             </div>

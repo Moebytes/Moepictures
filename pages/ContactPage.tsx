@@ -12,7 +12,7 @@ import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -68,7 +68,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     }
     
     const submit = async () => {
-        const badEmail = functions.validateEmail(email)
+        const badEmail = functions.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -77,7 +77,7 @@ const ContactPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badMessage = functions.validateMessage(message)
+        const badMessage = functions.validateMessage(message, i18n)
         if (badMessage) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

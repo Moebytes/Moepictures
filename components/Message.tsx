@@ -25,7 +25,7 @@ interface Props {
 }
 
 const Message: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
@@ -189,7 +189,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.message?.creator) || "deleted"}</span>
+                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.message?.creator) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -271,7 +271,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message?.recipients[0] || "deleted")}</span>
+                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message?.recipients[0] || i18n.user.deleted)}</span>
                 {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
             </div>
         )
@@ -306,7 +306,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
 
     const dateTextJSX = () => {
         const targetDate = props.message.updatedDate
-        return <span className="message-date-text">{functions.timeAgo(targetDate)}</span>
+        return <span className="message-date-text">{functions.timeAgo(targetDate, i18n)}</span>
     }
 
     if (props.titlePage) {
@@ -315,16 +315,16 @@ const Message: React.FunctionComponent<Props> = (props) => {
                 <div className="message-content-container">
                     <div className="message-container">
                         <div className="message-row" style={{width: "100%"}}>
-                            <span className="message-heading">Title</span>
+                            <span className="message-heading">{i18n.sidebar.title}</span>
                         </div>
                         {!mobile ? <div className="message-row">
-                            <span className="message-heading">Sender</span>
+                            <span className="message-heading">{i18n.labels.sender}</span>
                         </div> : null}
                         {!mobile ? <div className="message-row">
-                            <span className="message-heading">Recipients</span>
+                            <span className="message-heading">{i18n.labels.recipients}</span>
                         </div> : null}
                         <div className="message-row">
-                            <span className="message-heading">Updated</span>
+                            <span className="message-heading">{i18n.sidebar.updated}</span>
                         </div>
                     </div>
                 </div>

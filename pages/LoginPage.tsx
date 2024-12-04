@@ -14,7 +14,7 @@ import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {sidebarText} = useActiveSelector()
@@ -59,9 +59,12 @@ const LoginPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setEnableDrag(false)
-        if (sidebarText !== "Login required.") setSidebarText("")
-        document.title = "Login"
     }, [])
+
+    useEffect(() => {
+        if (sidebarText !== i18n.sidebar.loginRequired) setSidebarText("")
+        document.title = i18n.pages.login.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -86,13 +89,13 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
-            errorRef.current.innerText = "Solve the captcha."
+            errorRef.current.innerText = i18n.pages.login.captcha
             await functions.timeout(2000)
             return setError(false)
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             const result = await functions.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
@@ -108,8 +111,8 @@ const LoginPage: React.FunctionComponent = (props) => {
             }
             setError(false)
         } catch (err: any) {
-            let errMsg = "Invalid username, password, or captcha."
-            if (err.response?.data.includes("Too many login attempts")) errMsg = "Too many login attempts, try again later."
+            let errMsg = i18n.pages.login.error
+            if (err.response?.data.includes("Too many login attempts")) errMsg = i18n.pages.login.rateLimit
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
@@ -125,23 +128,23 @@ const LoginPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Login</span>
+                    <span className="sitepage-title">{i18n.pages.login.title}</span>
                     <Link to="/signup">
-                        <span className="sitepage-link-clickable">Don't have an account? Sign up.</span>
+                        <span className="sitepage-link-clickable">{i18n.pages.login.signupText}</span>
                     </Link>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Username:</span>
+                        <span className="sitepage-text">{i18n.pages.login.username}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Password:</span>
+                        <span className="sitepage-text">{i18n.pages.login.password}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                         </div>
                     </div>
                     <Link style={{width: "max-content"}} to ="/forgot-password">
-                        <span className="sitepage-link-clickable">Forgot Password?</span>
+                        <span className="sitepage-link-clickable">{i18n.pages.login.forgotText}</span>
                     </Link>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
@@ -149,7 +152,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => login()}>Login</button>
+                        <button className="sitepage-button" onClick={() => login()}>{i18n.pages.login.title}</button>
                     </div>
                 </div>
                 <Footer/>

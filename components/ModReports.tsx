@@ -15,7 +15,7 @@ interface Props {
 }
 
 const ReportRow: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {emojis} = useCacheSelector()
@@ -100,39 +100,39 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         img = asset.image ? functions.getTagLink("pfp", asset.image, asset.imageHash) : favicon
         username = asset.username ? asset.username : asset.creator
         if (props.request.type === "comment") {
-            textType = "Comment: "
+            textType = `${i18n.labels.comment}: `
             text = jsxFunctions.renderCommentText(asset.comment, emojis)
             id = asset.postID
         } else if (props.request.type === "thread") {
-            textType = "Thread: "
+            textType = `${i18n.labels.thread}: `
             text = jsxFunctions.renderThreadText(asset.title, emojis)
             id = asset.threadID
         } else if (props.request.type === "reply") {
-            textType = "Reply: "
+            textType = `${i18n.buttons.reply}: `
             text = jsxFunctions.renderThreadText(asset.content, emojis)
             id = asset.threadID
         }
     }
 
     return (
-        <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+        <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="mod-post-img-container">
                 <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
             </div>
             <div className="mod-post-text-column">
-                <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>Requester: {functions.toProperCase(props.request?.reporter) || "deleted"}</span>
-                <span className="mod-post-text">Reason: {props.request.reason}</span>
-                <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>User: {username}</span>
+                <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
+                <span className="mod-post-text">{i18n.labels.reason}: {props.request.reason}</span>
+                <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>{i18n.labels.user}: {username}</span>
                 <span className="mod-post-text">{textType}{text}</span>
             </div>
             <div className="mod-post-options">
                 <div className="mod-post-options-container" onClick={() => rejectRequest(username, id)}>
                     <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                    <span className="mod-post-options-text">Reject</span>
+                    <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                 </div>
                 <div className="mod-post-options-container" onClick={() => approveRequest(username, id)}>
                     <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                    <span className="mod-post-options-text">Approve</span>
+                    <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                 </div>
             </div>
         </div>
@@ -140,6 +140,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 }
 
 const ModReports: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -392,7 +393,7 @@ const ModReports: React.FunctionComponent = (props) => {
             return (
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )

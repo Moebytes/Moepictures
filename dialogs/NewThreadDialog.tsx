@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, 
 useSessionActions, useLayoutSelector, useCacheSelector} from "../store"
-import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import emojiSelect from "../assets/icons/emoji-select.png"
@@ -13,7 +12,7 @@ import "./styles/dialog.less"
 
 const NewThreadDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {showNewThreadDialog} = useThreadDialogSelector()
     const {setShowNewThreadDialog} = useThreadDialogActions()
@@ -50,7 +49,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     }, [showNewThreadDialog])
 
     const newThread = async () => {
-        const badTitle = functions.validateTitle(threadContent)
+        const badTitle = functions.validateTitle(threadContent, i18n)
         if (badTitle) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -58,7 +57,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        const badContent = functions.validateThread(threadContent)
+        const badContent = functions.validateThread(threadContent, i18n)
         if (badContent) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

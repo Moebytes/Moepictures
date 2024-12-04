@@ -13,7 +13,7 @@ useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
 
 const SignUpPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -60,8 +60,11 @@ const SignUpPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Sign Up"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.signup.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -90,12 +93,12 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (password.trim() !== confirmPassword.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Passwords don't match."
+            errorRef.current!.innerText = i18n.pages.changePassword.noMatch
             await functions.timeout(2000)
             setError(false)
             return
         }
-        const badPassword = functions.validatePassword(username.trim(), password.trim())
+        const badPassword = functions.validatePassword(username.trim(), password.trim(), i18n)
         if (badPassword) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -104,7 +107,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badEmail = functions.validateEmail(email.trim())
+        const badEmail = functions.validateEmail(email.trim(), i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -113,7 +116,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badUsername = functions.validateUsername(username.trim())
+        const badUsername = functions.validateUsername(username.trim(), i18n)
         if (badUsername) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -125,21 +128,21 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
-            errorRef.current.innerText = "Solve the captcha."
+            errorRef.current.innerText = i18n.pages.login.captcha
             await functions.timeout(2000)
             return setError(false)
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch (err: any) {
-            let errMsg = "Bad username, password, email, or captcha."
-            if (err.response?.data.includes("Too many accounts created")) errMsg = "Too many accounts created, try again later."
-            if (err.response?.data.includes("IP banned")) errMsg = "This IP is associated with a banned account."
+            let errMsg = i18n.pages.signup.error
+            if (err.response?.data.includes("Too many accounts created")) errMsg = i18n.pages.signup.rateLimit
+            if (err.response?.data.includes("IP banned")) errMsg = i18n.pages.signup.banned
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
@@ -159,34 +162,34 @@ const SignUpPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Sign Up</span>
+                    <span className="sitepage-title">{i18n.pages.signup.title}</span>
                     {submitted ? <>
-                    <span className="sitepage-validation">Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.</span>
+                    <span className="sitepage-validation">{i18n.pages.signup.submitHeading}</span>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="sitepage-button" onClick={() => goToLogin()}>Login</button>
+                        <button className="sitepage-button" onClick={() => goToLogin()}>{i18n.pages.login.title}</button>
                     </div>
                     </> :
                     <>
                     <Link style={{width: "max-content"}} to="/login">
-                        <span className="sitepage-link-clickable">Already have an account? Login.</span>
+                        <span className="sitepage-link-clickable">{i18n.pages.signup.loginText}</span>
                     </Link>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide2">Email Address:</span>
+                        <span className="sitepage-text-wide2">{i18n.pages.forgotPassword.emailAddress}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide2">Username:</span>
+                        <span className="sitepage-text-wide2">{i18n.pages.login.username}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide2">Password:</span>
+                        <span className="sitepage-text-wide2">{i18n.pages.login.password}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide2">Confirm Password:</span>
+                        <span className="sitepage-text-wide2">{i18n.pages.signup.confirmPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
@@ -197,13 +200,12 @@ const SignUpPage: React.FunctionComponent = (props) => {
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <span className="sitepage-validation">
-                        -Passwords must contain at least 10 characters<br/>
-                        -At least three of the following: lowercase letters, uppercase
-                        letters, numbers, and special symbols
+                        {i18n.pages.signup.lengthReq}<br/>
+                        {i18n.pages.signup.varietyReq}
                     </span>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => submit()}>Sign Up</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.pages.signup.title}</button>
                     </div></>}
                 </div>
                 <Footer/>

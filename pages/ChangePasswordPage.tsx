@@ -12,7 +12,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../
 import "./styles/sitepage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -43,8 +43,11 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Change Password"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.changePassword
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -59,7 +62,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/change-password")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
@@ -79,12 +82,12 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         if (newPassword.trim() !== confirmNewPassword.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Passwords don't match."
+            errorRef.current!.innerText = i18n.pages.changePassword.noMatch
             await functions.timeout(2000)
             setError(false)
             return
         }
-        const badPassword = functions.validatePassword(session.username.trim(), newPassword.trim())
+        const badPassword = functions.validatePassword(session.username.trim(), newPassword.trim(), i18n)
         if (badPassword) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -95,13 +98,13 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/changepassword", {oldPassword, newPassword}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad password."
+            errorRef.current!.innerText = i18n.pages.changePassword.error
             await functions.timeout(2000)
             setError(false)
         }
@@ -115,30 +118,30 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Change Password</span>
+                    <span className="sitepage-title">{i18n.user.changePassword}</span>
                     {submitted ?
                     <>
-                    <span className="sitepage-link">Your password has been changed.</span>
+                    <span className="sitepage-link">{i18n.pages.changePassword.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide3">Old Password:</span>
+                        <span className="sitepage-text-wide3">{i18n.pages.changePassword.oldPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={oldPassword} onChange={(event) => setOldPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide3">New Password:</span>
+                        <span className="sitepage-text-wide3">{i18n.pages.changePassword.newPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide3">Confirm New Password:</span>
+                        <span className="sitepage-text-wide3">{i18n.pages.changePassword.confirmNewPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye3()} style={{filter: getFilter()}} onClick={() => setShowPassword3((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword3 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
@@ -146,8 +149,8 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="sitepage-button" onClick={() => submit()}>Change Password</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changePassword}</button>
                     </div>
                     </>
                     }

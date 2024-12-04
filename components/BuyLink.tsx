@@ -10,7 +10,7 @@ interface Props {
 }
 
 const BuyLink: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
 
     const getFilter = () => {
@@ -20,7 +20,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentary">
             <div className="commentary-title-container">
-                <div className="commentary-title">Buy Link</div>
+                <div className="commentary-title">{i18n.post.buyLink}</div>
                 <img className="commentary-img-static" src={buyLinkIcon} style={{filter: getFilter()}}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

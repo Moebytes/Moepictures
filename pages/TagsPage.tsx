@@ -29,7 +29,7 @@ let limit = 200
 let replace = false
 
 const TagsPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -376,7 +376,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return (
             <div className="itemsort-item" ref={sortRef}>
                 <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
-                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
     }
@@ -385,7 +385,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return (
             <div className="itemsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
                 <img className="itemsort-img rotate" src={type} style={{filter: getFilter()}}/>
-                {!mobile ? <span className="itemsort-text">{functions.toProperCase(typeType)}</span> : null}
+                {!mobile ? <span className="itemsort-text">{i18n.tag[typeType]}</span> : null}
             </div>
         )
     }
@@ -440,7 +440,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">Tags</span>
+                    <span className="items-heading">{i18n.navbar.tags}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
@@ -452,67 +452,67 @@ const TagsPage: React.FunctionComponent = (props) => {
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                            <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
-                                <span className="item-dropdown-text">Random</span>
+                                <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
-                                <span className="item-dropdown-text">Date</span>
+                                <span className="item-dropdown-text">{i18n.sort.date}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="item-dropdown-text">Alphabetic</span>
+                                <span className="item-dropdown-text">{i18n.sort.alphabetic}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
-                                <span className="item-dropdown-text">Posts</span>
+                                <span className="item-dropdown-text">{i18n.sort.posts}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("image")}>
-                                <span className="item-dropdown-text">Image</span>
+                                <span className="item-dropdown-text">{i18n.sortbar.type.image}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("aliases")}>
-                                <span className="item-dropdown-text">Aliases</span>
+                                <span className="item-dropdown-text">{i18n.sort.aliases}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("length")}>
-                                <span className="item-dropdown-text">Length</span>
+                                <span className="item-dropdown-text">{i18n.sort.length}</span>
                             </div>
                         </div>
                         {getTypeJSX()}
                         <div className={`item-dropdown ${activeDropdown === "type" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getTypeMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setTypeType("all")}>
-                                <span className="item-dropdown-text">All</span>
+                                <span className="item-dropdown-text">{i18n.tag.all}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("artist")}>
-                                <span className="item-dropdown-text">Artist</span>
+                                <span className="item-dropdown-text">{i18n.tag.artist}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("character")}>
-                                <span className="item-dropdown-text">Character</span>
+                                <span className="item-dropdown-text">{i18n.tag.character}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("series")}>
-                                <span className="item-dropdown-text">Series</span>
+                                <span className="item-dropdown-text">{i18n.tag.series}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("meta")}>
-                                <span className="item-dropdown-text">Meta</span>
+                                <span className="item-dropdown-text">{i18n.tag.meta}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("appearance")}>
-                                <span className="item-dropdown-text">Appearance</span>
+                                <span className="item-dropdown-text">{i18n.tag.appearance}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("outfit")}>
-                                <span className="item-dropdown-text">Outfit</span>
+                                <span className="item-dropdown-text">{i18n.tag.outfit}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("accessory")}>
-                                <span className="item-dropdown-text">Accessory</span>
+                                <span className="item-dropdown-text">{i18n.tag.accessory}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("action")}>
-                                <span className="item-dropdown-text">Action</span>
+                                <span className="item-dropdown-text">{i18n.tag.action}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("scenery")}>
-                                <span className="item-dropdown-text">Scenery</span>
+                                <span className="item-dropdown-text">{i18n.tag.scenery}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("tag")}>
-                                <span className="item-dropdown-text">Tag</span>
+                                <span className="item-dropdown-text">{i18n.tag.tag}</span>
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import postHistoryRevert from "../assets/icons/revert.png"
 import postHistoryDelete from "../assets/icons/delete.png"
@@ -13,7 +13,6 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import permissions from "../structures/Permissions"
 import "./styles/historyrow.less"
-import crypto from "crypto"
 import path from "path"
 
 interface Props {
@@ -28,6 +27,7 @@ interface Props {
 }
 
 const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -152,11 +152,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
                         <img className="historyrow-options-img" src={postHistoryRevert}/>
-                        <span className="historyrow-options-text">Revert</span>
+                        <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     <div className="historyrow-options-container" onClick={deletePostHistoryDialog}>
                         <img className="historyrow-options-img" src={postHistoryDelete}/>
-                        <span className="historyrow-options-text">Delete</span>
+                        <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -165,7 +165,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
                         <img className="historyrow-options-img" src={postHistoryRevert}/>
-                        <span className="historyrow-options-text">Revert</span>
+                        <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>
             )
@@ -193,58 +193,58 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         let firstHistory = props.historyIndex === Number(props.postHistory.historyCount)
         if (props.exact) firstHistory = false
         const targetDate = firstHistory ? props.postHistory.uploadDate : props.postHistory.date
-        const editText = firstHistory ? "Uploaded" : "Edited"
+        const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user) || "deleted"}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user) || i18n.user.deleted}</span>
     }
 
     const loadImage = async () => {
@@ -328,7 +328,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const mapped = Object.values(props.postHistory.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
         })
     }
 
@@ -337,72 +337,72 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         let changes = props.postHistory.changes || {}
         let tagChanges = props.postHistory.addedTags?.length || props.postHistory.removedTags?.length
         if (changes.parentID !== undefined && !changes.parentID) {
-            jsx.push(<span className="historyrow-text-strong">[Parent Removed]</span>)
+            jsx.push(<span className="historyrow-text-strong">[{i18n.labels.parentRemoved}]</span>)
         }
         if ((!prevHistory && props.postHistory.images.length > 1) || changes.images) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.images}:</span> {props.postHistory.images.length}</span>)
         }
         if ((!prevHistory && props.postHistory.parentID) || changes.parentID) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Parent ID:</span> <span className="historyrow-label-link" onClick={() => history.push(`/post/${props.postHistory.parentID}`)}>{props.postHistory.parentID}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}:</span> <span className="historyrow-label-link" onClick={() => history.push(`/post/${props.postHistory.parentID}`)}>{props.postHistory.parentID}</span></span>)
         }
         if (!prevHistory || changes.type) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}:</span> {functions.toProperCase(props.postHistory.type)}</span>)
         }
         if (!prevHistory || changes.restrict) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Restrict:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.restrict}:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
         }
         if (!prevHistory || changes.style) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Style:</span> {functions.toProperCase(props.postHistory.style)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}:</span> {functions.toProperCase(props.postHistory.style)}</span>)
         }
         if (!prevHistory || tagChanges) {
             if (artistsDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Artists:</span> {artistsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.artists}:</span> {artistsDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (charactersDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Characters:</span> {charactersDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.characters}:</span> {charactersDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (seriesDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Series:</span> {seriesDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.series}:</span> {seriesDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (tagsDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Tags:</span> {tagsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.tags}:</span> {tagsDiff()}</span>)
             }
         }
         if (!prevHistory || changes.title) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Title:</span> {props.postHistory.title || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.title}:</span> {props.postHistory.title || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.translatedTitle) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Translated Title:</span> {props.postHistory.translatedTitle || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.translatedTitle}:</span> {props.postHistory.translatedTitle || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.artist) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Artist:</span> {props.postHistory.artist || "Unknown"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}:</span> {props.postHistory.artist || i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.posted) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Posted:</span> {props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : "Unknown"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}:</span> {props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.link) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link)}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.link}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link, i18n)}</span></span>)
         }
         if (!prevHistory || changes.mirrors) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Mirrors:</span> {printMirrors()}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.mirrors}:</span> {printMirrors()}</span>)
         }
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Bookmarks:</span> {props.postHistory.bookmarks || "?"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}:</span> {props.postHistory.bookmarks || "?"}</span>)
         }
         if ((!prevHistory && props.postHistory.purchaseLink) || changes.purchaseLink) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Buy Link:</span> {props.postHistory.purchaseLink || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.post.buyLink}:</span> {props.postHistory.purchaseLink || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.commentary) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Commentary:</span> {props.postHistory.commentary || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}:</span> {props.postHistory.commentary || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.translatedCommentary) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Translated Commentary:</span> {props.postHistory.translatedCommentary || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.translatedCommentary}:</span> {props.postHistory.translatedCommentary || i18n.labels.none}</span>)
         }
         return jsx
     }
@@ -419,9 +419,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {props.postHistory.imageChanged ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
+                        {props.postHistory.imageChanged ? <span className="historyrow-text-strong">[{i18n.labels.imageUpdated}]</span> : null}
                         {diffJSX()}
-                        {props.postHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.postHistory.reason}</span> : null}
+                        {props.postHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.reason}:</span> {props.postHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>

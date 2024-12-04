@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useSessionSelector, useLayoutSelector, useCacheSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import jsxFunctions from "../structures/JSXFunctions"
@@ -12,6 +12,7 @@ interface Props {
 
 
 const CommentCarousel: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
@@ -81,7 +82,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <div className="comment-carousel-commentrow-container-row">
                         <div className="comment-carousel-commentrow-container" style={{width: "100%"}}>
-                            <span className="comment-carousel-commentrow-date-text">{functions.timeAgo(props.comments[i].postDate)}:</span>
+                            <span className="comment-carousel-commentrow-date-text">{functions.timeAgo(props.comments[i].postDate, i18n)}:</span>
                             {parseText(props.comments[i].comment)}
                         </div>
                     </div>

@@ -28,7 +28,7 @@ interface Props {
 }
 
 const CommentRow: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -137,7 +137,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const editComment = async () => {
         if (!editCommentText) return
-        const badComment = functions.validateComment(editCommentText)
+        const badComment = functions.validateComment(editCommentText, i18n)
         if (badComment) return
         await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
@@ -167,11 +167,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editCommentDialog}>
                         <img className="commentrow-options-img" src={commentEdit}/>
-                        <span className="commentrow-options-text">Edit</span>
+                        <span className="commentrow-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
                         <img className="commentrow-options-img" src={commentDelete}/>
-                        <span className="commentrow-options-text">Delete</span>
+                        <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -181,16 +181,16 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
                         <img className="commentrow-options-img" src={commentQuote}/>
-                        <span className="commentrow-options-text">Quote</span>
+                        <span className="commentrow-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? 
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
                         <img className="commentrow-options-img" src={commentDelete}/>
-                        <span className="commentrow-options-text">Delete</span>
+                        <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div> : 
                     <div className="commentrow-options-container" onClick={reportCommentDialog}>
                         <img className="commentrow-options-img" src={commentReport}/>
-                        <span className="commentrow-options-text">Report</span>
+                        <span className="commentrow-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>
             )
@@ -263,7 +263,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || "deleted"}</span>
+        return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
     }
 
     useEffect(() => {
@@ -321,7 +321,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate)}:</span>
+                    <span className="commentrow-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
                     {parseText()}
                 </div>
             </div>

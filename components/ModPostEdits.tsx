@@ -9,7 +9,7 @@ import "./styles/modposts.less"
 
 const ModPostEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -346,7 +346,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         const mapped = Object.values(newPost.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="mod-post-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
+            return <span className="mod-post-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
         })
     }
 
@@ -356,54 +356,54 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         const changes = newPost.changes || {}
         let tagChanges = newPost.addedTags?.length || newPost.removedTags?.length
         if (changes.images) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.images}:</span> {newPost.images.length}</span>)
         }
         if (changes.parentID !== undefined) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Parent ID:</span> <span className="mod-post-link" onClick={() => newPost.parentID ? history.push(`/post/${newPost.parentID}`) : null}>{newPost.parentID || "removed"}</span></span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.parentID}:</span> <span className="mod-post-link" onClick={() => newPost.parentID ? history.push(`/post/${newPost.parentID}`) : null}>{newPost.parentID || i18n.labels.removed}</span></span>)
         }
         if (changes.type) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Type:</span> {functions.toProperCase(newPost.type)}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.type}:</span> {functions.toProperCase(newPost.type)}</span>)
         }
         if (changes.restrict) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Restrict:</span> {functions.toProperCase(newPost.restrict)}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.restrict}:</span> {functions.toProperCase(newPost.restrict)}</span>)
         }
         if (changes.style) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Style:</span> {functions.toProperCase(newPost.style)}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.style}:</span> {functions.toProperCase(newPost.style)}</span>)
         }
         if (tagChanges) {
             if (tagsDiff(originalPost, newPost)) {
-                jsx.push(<span className="mod-post-text"><span className="mod-post-label">Tags:</span> {tagsDiff(originalPost, newPost)}</span>)
+                jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.navbar.tags}:</span> {tagsDiff(originalPost, newPost)}</span>)
             }
         }
         if (changes.title) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Title:</span> {newPost.title || "None"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.title}:</span> {newPost.title || i18n.labels.none}</span>)
         }
         if (changes.translatedTitle) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Title:</span> {newPost.translatedTitle || "None"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.translatedTitle}:</span> {newPost.translatedTitle || i18n.labels.none}</span>)
         }
         if (changes.artist) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Artist:</span> {newPost.artist || "Unknown"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.tag.artist}:</span> {newPost.artist || i18n.labels.unknown}</span>)
         }
         if (changes.posted) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Posted:</span> {newPost.posted ? functions.formatDate(new Date(newPost.posted)) : "Unknown"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.posted}:</span> {newPost.posted ? functions.formatDate(new Date(newPost.posted)) : i18n.labels.unknown}</span>)
         }
         if (changes.link) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Link:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link)}</span></span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.link}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link, i18n)}</span></span>)
         }
         if (changes.mirrors) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Mirrors:</span> {printMirrors(newPost)}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.mirrors}:</span> {printMirrors(newPost)}</span>)
         }
         if (changes.bookmarks) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Bookmarks:</span> {newPost.bookmarks || "?"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.bookmarks}:</span> {newPost.bookmarks || "?"}</span>)
         }
         if (changes.purchaseLink) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Buy Link:</span> {newPost.purchaseLink || "None"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.post.buyLink}:</span> {newPost.purchaseLink || i18n.labels.none}</span>)
         }
         if (changes.commentary) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Commentary:</span> {newPost.commentary || "None"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.commentary}:</span> {newPost.commentary || i18n.labels.none}</span>)
         }
         if (changes.translatedCommentary) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Commentary:</span> {newPost.translatedCommentary || "None"}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.translatedCommentary}:</span> {newPost.translatedCommentary || i18n.labels.none}</span>)
         }
         return jsx
     }
@@ -422,7 +422,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )
@@ -446,18 +446,18 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post?.updater) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {post.reason || "None provided."}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>{i18n.labels.editedBy}: {functions.toProperCase(post?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {post.reason || i18n.labels.none}</span>
                         {diffJSX(originalPost, post)}
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Reject</span>
+                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approvePost(post.postID, post.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Approve</span>
+                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>
                 </div>

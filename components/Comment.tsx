@@ -1,7 +1,7 @@
 import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
-useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../store"
+useCommentDialogSelector, useCommentDialogActions, useCacheSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -30,16 +30,14 @@ interface Props {
 }
 
 const Comment: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {emojis} = useCacheSelector()
     const {setQuoteText} = useActiveActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
-    const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const history = useHistory()
 
     const getFilter = () => {
@@ -127,7 +125,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
 
     const editComment = async () => {
         if (!editCommentText) return
-        const badComment = functions.validateComment(editCommentText)
+        const badComment = functions.validateComment(editCommentText, i18n)
         if (badComment) return
         await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
@@ -156,11 +154,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={editCommentDialog}>
                         <img className="comment-options-img" src={commentEdit}/>
-                        <span className="comment-options-text">Edit</span>
+                        <span className="comment-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
                         <img className="comment-options-img" src={commentDelete}/>
-                        <span className="comment-options-text">Delete</span>
+                        <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -170,16 +168,16 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={triggerQuote}>
                         <img className="comment-options-img" src={commentQuote}/>
-                        <span className="comment-options-text">Quote</span>
+                        <span className="comment-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? 
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
                         <img className="comment-options-img" src={commentDelete}/>
-                        <span className="comment-options-text">Delete</span>
+                        <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div> : 
                     <div className="comment-options-container" onClick={reportCommentDialog}>
                         <img className="comment-options-img" src={commentReport}/>
-                        <span className="comment-options-text">Report</span>
+                        <span className="comment-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>
             )
@@ -252,7 +250,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`comment-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || "deleted"}</span>
+        return <span className={`comment-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
     }
 
     const commentJump = () => {
@@ -268,7 +266,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="comment-container" style={{width: "100%"}}>
-                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate)}:</span>
+                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
                 {parseText()}
             </div>
             {session.username ? commentOptions() : null}

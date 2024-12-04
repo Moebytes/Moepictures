@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
 import "./styles/historyrow.less"
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -52,7 +53,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
             <div className="historyrow-options">
                 <div className="historyrow-options-container" onClick={deleteSearchHistoryDialog}>
                     <img className="historyrow-options-img" src={searchHistoryDelete}/>
-                    <span className="historyrow-options-text">Delete</span>
+                    <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                 </div>
             </div>
         )
@@ -84,23 +85,12 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         loadImage()
     }, [img, session])
-    
-    const getDomain = (link: string) => {
-        try {
-            const domain = new URL(link).hostname.replace("www.", "")
-            .split(".")?.[0] || ""
-            if (domain.toLowerCase() === "yande") return "Yandere"
-            return functions.toProperCase(domain)
-        } catch {
-            return "Unknown"
-        }
-    }
 
     const printMirrors = () => {
         const mapped = Object.values(props.history.post.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
         })
     }
 
@@ -115,13 +105,13 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
-                        <span className="historyrow-user-text">Viewed on {functions.prettyDate(new Date(props.history.viewDate))}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Title:</span> {props.history.post.title || "None"}</span>
-                        {props.history.post.translatedTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Translated:</span> {props.history.post.translatedTitle}</span> : null}
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Posted:</span> {props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : "Unknown"}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Artist:</span> {props.history.post.artist ? props.history.post.artist : "Unknown"}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{getDomain(props.history.post.link)}</span></span>
-                        {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Mirrors:</span> {printMirrors()}</span> : null}
+                        <span className="historyrow-user-text">{i18n.time.viewed} {functions.prettyDate(new Date(props.history.viewDate), i18n)}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.title}:</span> {props.history.post.title || i18n.labels.none}</span>
+                        {props.history.post.translatedTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.translated}:</span> {props.history.post.translatedTitle}</span> : null}
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}:</span> {props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.tag.artist}:</span> {props.history.post.artist ? props.history.post.artist : i18n.labels.unknown}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.link}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{functions.getSiteName(props.history.post.link, i18n)}</span></span>
+                        {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.mirrors}:</span> {printMirrors()}</span> : null}
                     </div>
                 </div>
             </div>

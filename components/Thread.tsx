@@ -26,7 +26,7 @@ interface Props {
 }
 
 const Thread: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -194,7 +194,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread?.creator) || "deleted"}</span>
+                <span className={`thread-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread?.creator) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -268,7 +268,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${updaterData?.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread?.updater) || "deleted"}</span>
+                <span className={`thread-user-text ${updaterData?.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread?.updater) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -290,7 +290,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
 
     const dateTextJSX = () => {
         const targetDate = props.thread.updatedDate
-        return <span className="thread-date-text">{functions.timeAgo(targetDate)}</span>
+        return <span className="thread-date-text">{functions.timeAgo(targetDate, i18n)}</span>
     }
 
     if (props.titlePage) {
@@ -299,16 +299,16 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                 <div className="thread-content-container">
                     <div className="thread-container">
                         <div className="thread-row" style={{width: "100%"}}>
-                            <span className="thread-heading">Title</span>
+                            <span className="thread-heading">{i18n.sidebar.title}</span>
                         </div>
                         {!mobile ? <div className="thread-row">
-                            <span className="thread-heading">Created by</span>
+                            <span className="thread-heading">{i18n.labels.createdBy}</span>
                         </div> : null}
                         {!mobile ? <div className="thread-row">
-                            <span className="thread-heading">Updated by</span>
+                            <span className="thread-heading">{i18n.labels.updatedBy}</span>
                         </div> : null}
                         <div className="thread-row">
-                            <span className="thread-heading">Updated</span>
+                            <span className="thread-heading">{i18n.sidebar.updated}</span>
                         </div>
                     </div>
                 </div>

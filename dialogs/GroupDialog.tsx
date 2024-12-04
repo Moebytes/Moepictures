@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../store"
-import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -14,7 +13,7 @@ import Draggable from "react-draggable"
 
 const GroupDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -75,7 +74,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             setGroupPostID(null)
             setPostFlag(true)
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

@@ -1,7 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector, useSessionActions} from "../store"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import uploadIcon from "../assets/icons/upload.png"
@@ -13,7 +12,7 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editTagObj} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag} = useTagDialogActions()
@@ -45,27 +44,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
 
     const editTag = async () => {
         if (permissions.isContributor(session)) {
-            const badDesc = functions.validateDescription(editTagObj.description)
-            if (badDesc) {
-                setError(true)
-                if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = badDesc
-                await functions.timeout(2000)
-                setError(false)
-                return
-            }
             setEditTagFlag(true)
         } else {
-            const badDesc = functions.validateDescription(editTagObj.description)
-            if (badDesc) {
-                setError(true)
-                if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = badDesc
-                await functions.timeout(2000)
-                setError(false)
-                return
-            }
-            const badReason = functions.validateReason(editTagObj.reason)
+            const badReason = functions.validateReason(editTagObj.reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

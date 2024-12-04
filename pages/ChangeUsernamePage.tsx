@@ -11,7 +11,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../
 import "./styles/sitepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -54,8 +54,11 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Change Username"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.changeUsername
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -70,7 +73,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/change-username")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         if (!permissions.isPremium(session)) {
             functions.replaceLocation("/401")
@@ -78,7 +81,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const submit = async () => {
-        const badUsername = functions.validateUsername(newUsername)
+        const badUsername = functions.validateUsername(newUsername, i18n)
         if (badUsername) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -89,14 +92,14 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/changeusername", {newUsername, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad username or captcha."
+            errorRef.current!.innerText = i18n.pages.changeUsername.error
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()
@@ -111,21 +114,21 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Change Username</span>
+                    <span className="sitepage-title">{i18n.user.changeUsername}</span>
                     {submitted ?
                     <>
-                    <span className="sitepage-link">Your username has been changed.</span>
+                    <span className="sitepage-link">{i18n.pages.changeUsername.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
-                    <span className="sitepage-link">Your old username will become available after the change.</span>
+                    <span className="sitepage-link">{i18n.pages.changeUsername.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Username: </span>
+                        <span className="sitepage-text-wide">{i18n.pages.login.username}: </span>
                         <span className="sitepage-text-small">{session.username}</span>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">New Username: </span>
+                        <span className="sitepage-text-wide">{i18n.pages.changeUsername.newUsername}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
@@ -134,8 +137,8 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="sitepage-button" onClick={() => submit()}>Change Username</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeUsername}</button>
                     </div>
                     </>
                     }

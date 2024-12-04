@@ -1,11 +1,12 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useCommentDialogSelector, useCommentDialogActions, useSessionSelector, useSessionActions} from "../store"
+import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const ReportCommentDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {reportCommentID} = useCommentDialogSelector()
     const {setReportCommentID} = useCommentDialogActions()
@@ -32,7 +33,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
 
 
     const reportComment = async () => {
-        const badReason = functions.validateReason(reason)
+        const badReason = functions.validateReason(reason, i18n)
         if (badReason) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

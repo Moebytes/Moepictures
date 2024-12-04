@@ -5,6 +5,7 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
+import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const messageLimiter = rateLimit({
@@ -43,9 +44,9 @@ const MessageRoutes = (app: Express) => {
             if (!title || !content) return res.status(400).send("Bad title or content")
             if (recipients?.length < 1) return res.status(400).send("Bad recipients")
             if (recipients.length > 5 && !permissions.isMod(req.session)) return res.status(403).send("Recipient limit exceeded")
-            const badTitle = functions.validateTitle(title)
+            const badTitle = functions.validateTitle(title, enLocale)
             if (badTitle) return res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content)
+            const badContent = functions.validateThread(content, enLocale)
             if (badContent) return res.status(400).send("Bad content")
             for (const recipient of recipients) {
                 if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
@@ -70,9 +71,9 @@ const MessageRoutes = (app: Express) => {
             const {messageID, title, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!title || !content) return res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title)
+            const badTitle = functions.validateTitle(title, enLocale)
             if (badTitle) return res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content)
+            const badContent = functions.validateThread(content, enLocale)
             if (badContent) return res.status(400).send("Bad content")
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
@@ -134,7 +135,7 @@ const MessageRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!messageID || !content) return res.status(400).send("Bad messageID or content")
-            const badReply = functions.validateReply(content)
+            const badReply = functions.validateReply(content, enLocale)
             if (badReply) return res.status(400).send("Bad reply")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
@@ -201,7 +202,7 @@ const MessageRoutes = (app: Express) => {
             const {replyID, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!replyID || !content) return res.status(400).send("Bad replyID or content")
-            const badReply = functions.validateReply(content)
+            const badReply = functions.validateReply(content, enLocale)
             if (badReply) return res.status(400).send("Bad reply")
             const reply = await sql.message.messageReply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")

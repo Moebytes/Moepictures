@@ -5,6 +5,7 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
+import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const threadLimiter = rateLimit({
@@ -82,9 +83,9 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title)
+            const badTitle = functions.validateTitle(title, enLocale)
             if (badTitle) return res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content)
+            const badContent = functions.validateThread(content, enLocale)
             if (badContent) return res.status(400).send("Bad content")
             const threadID = await sql.thread.insertThread(req.session.username, title, content, r18)
             pushMentionNotification(content, threadID)
@@ -103,9 +104,9 @@ const ThreadRoutes = (app: Express) => {
             const {threadID, title, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!title || !content) return res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title)
+            const badTitle = functions.validateTitle(title, enLocale)
             if (badTitle) return res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content)
+            const badContent = functions.validateThread(content, enLocale)
             if (badContent) return res.status(400).send("Bad content")
             const thread = await sql.thread.thread(Number(threadID))
             if (!thread) return res.status(400).send("Invalid threadID")
@@ -192,7 +193,7 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!threadID || !content) return res.status(400).send("Bad threadID or content")
-            const badReply = functions.validateReply(content)
+            const badReply = functions.validateReply(content, enLocale)
             if (badReply) return res.status(400).send("Bad reply")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
@@ -244,7 +245,7 @@ const ThreadRoutes = (app: Express) => {
             const {replyID, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!replyID || !content) return res.status(400).send("Bad replyID or content")
-            const badReply = functions.validateReply(content)
+            const badReply = functions.validateReply(content, enLocale)
             if (badReply) return res.status(400).send("Bad reply")
             const reply = await sql.thread.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")

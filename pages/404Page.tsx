@@ -5,14 +5,14 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
-import $404 from "../assets/misc/404.png"
+import $404 from "../assets/images/404.png"
 import {useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import {useThemeSelector} from "../store"
 import "./styles/404page.less"
 
 const $404Page: React.FunctionComponent = (props) => {
-    const {theme} = useThemeSelector()
+    const {theme, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -28,8 +28,8 @@ const $404Page: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setHeaderText("")
-        setSidebarText("404 error.")
-        document.title = "404 Error"
+        setSidebarText(i18n.sidebar.$404)
+        document.title = i18n.errors.$404
     }, [])
 
     useEffect(() => {
@@ -48,7 +48,7 @@ const $404Page: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="f404-container">
-                    <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>404 Error</span>
+                    <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>{i18n.errors.$404}</span>
                     <img className="f404" src={$404}/>
                 </div>
                 <Footer noPadding={true}/>

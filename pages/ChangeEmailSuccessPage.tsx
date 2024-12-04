@@ -5,12 +5,13 @@ import Footer from "../components/Footer"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
-import {useInteractionActions, useSessionSelector, useLayoutActions, 
+import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
 import session from "express-session"
 
 const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -31,8 +32,11 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Change Email Success"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.changeEmailSuccess.pageTitle
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -47,7 +51,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/change-email-success")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
@@ -59,13 +63,13 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Email Changed Successfully</span>
+                    <span className="sitepage-title">{i18n.pages.changeEmailSuccess.title}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Your email has been changed to: </span>
+                        <span className="sitepage-text">{i18n.pages.changeEmailSuccess.label}</span>
                         <span className="sitepage-text-small2">{session.email}</span>
                     </div>
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>Ok</button>
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>{i18n.buttons.ok}</button>
                     </div>
                 </div>
                 <Footer/>

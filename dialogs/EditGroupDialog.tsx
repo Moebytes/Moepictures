@@ -8,7 +8,7 @@ import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const EditGroupDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editGroupObj} = useGroupDialogSelector()
     const {setEditGroupObj} = useGroupDialogActions()
@@ -51,15 +51,6 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            const badDesc = functions.validateDescription(description)
-            if (badDesc) {
-                setError(true)
-                if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = badDesc
-                await functions.timeout(2000)
-                setError(false)
-                return
-            }
             await functions.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
             const newSlug = functions.generateSlug(name)
             history.push(`/group/${newSlug}`)
@@ -73,16 +64,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            const badDesc = functions.validateDescription(description)
-            if (badDesc) {
-                setError(true)
-                if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = badDesc
-                await functions.timeout(2000)
-                setError(false)
-                return
-            }
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import groupHistoryRevert from "../assets/icons/revert.png"
 import groupHistoryDelete from "../assets/icons/delete.png"
@@ -27,6 +27,7 @@ interface Props {
 }
 
 const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -117,11 +118,11 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertGroupHistoryDialog}>
                         <img className="historyrow-options-img" src={groupHistoryRevert}/>
-                        <span className="historyrow-options-text">Revert</span>
+                        <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     <div className="historyrow-options-container" onClick={deleteGroupHistoryDialog}>
                         <img className="historyrow-options-img" src={groupHistoryDelete}/>
-                        <span className="historyrow-options-text">Delete</span>
+                        <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -130,7 +131,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertGroupHistoryDialog}>
                         <img className="historyrow-options-img" src={groupHistoryRevert}/>
-                        <span className="historyrow-options-text">Revert</span>
+                        <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>
             )
@@ -159,58 +160,58 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.exact) firstHistory = false
         let targetDate = firstHistory ? props.groupHistory.createDate : props.groupHistory.date
         if (!targetDate) targetDate = props.groupHistory.date
-        const editText = firstHistory ? "Uploaded" : "Edited"
+        const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.groupHistory.user) || "deleted"}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user) || i18n.user.deleted}</span>
     }
 
     const loadImage = async () => {
@@ -257,14 +258,14 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         let changes = props.groupHistory.changes || {}
         let postChanges = props.groupHistory.addedPosts?.length || props.groupHistory.removedPosts?.length
         if (!prevHistory || changes.name) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.groupHistory.name}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}:</span> {props.groupHistory.name}</span>)
         }
         if (!prevHistory || changes.description) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Description:</span> {props.groupHistory.description || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}:</span> {props.groupHistory.description || i18n.labels.none}</span>)
         }
         if (postChanges) {
             if (postDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Posts:</span> {postDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posts}:</span> {postDiff()}</span>)
             }
         }
         return jsx
@@ -286,9 +287,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {props.groupHistory.orderChanged ? <span className="historyrow-text-strong">[Order Updated]</span> : null}
+                        {props.groupHistory.orderChanged ? <span className="historyrow-text-strong">[{i18n.labels.orderUpdated}]</span> : null}
                         {diffJSX()}
-                        {props.groupHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.groupHistory.reason}</span> : null}
+                        {props.groupHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.reason}:</span> {props.groupHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>

@@ -30,7 +30,7 @@ interface Props {
 let limit = 25
 
 const FavgroupPage: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveFavgroup, setActiveDropdown} = useActiveActions()
@@ -238,7 +238,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
                         {favgroupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span><span className="group-label" onClick={searchGroup}>Posts</span> <span className="group-label-alt">{favgroup.postCount}</span></span>
+                        <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{favgroup.postCount}</span></span>
                     </div>
                     {favgroupImagesJSX()}
                 </div> : null}

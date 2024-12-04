@@ -14,7 +14,7 @@ import Draggable from "react-draggable"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {dmTarget} = useMessageDialogSelector()
     const {setDMTarget} = useMessageDialogActions()
@@ -71,7 +71,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        const badTitle = functions.validateTitle(title)
+        const badTitle = functions.validateTitle(title, i18n)
         if (badTitle) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -79,7 +79,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        const badContent = functions.validateThread(content)
+        const badContent = functions.validateThread(content, i18n)
         if (badContent) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

@@ -22,6 +22,7 @@ import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
+import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
 
 svgCaptcha.loadFont(dotline)
@@ -420,9 +421,9 @@ const MiscRoutes = (app: Express) => {
         try {
             const {email, subject, message, files} = req.body 
             if (!email || !subject || !message) return res.status(400).send("Bad email, subejct, or message.")
-            const badEmail = functions.validateEmail(email)
+            const badEmail = functions.validateEmail(email, enLocale)
             if (badEmail) return res.status(400).send("Bad email")
-            const badMessage = functions.validateMessage(message)
+            const badMessage = functions.validateMessage(message, enLocale)
             if (badMessage) return res.status(400).send("Bad message")
             const attachments = [] as any
             for (let i = 0; i < files.length; i++) {
@@ -449,7 +450,7 @@ const MiscRoutes = (app: Express) => {
             const {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, files} = req.body 
             if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return res.status(400).send("Bad fields.")
             if (!files.length && !proofLinks) return res.status(400).send("Bad proof links.")
-            const badEmail = functions.validateEmail(email)
+            const badEmail = functions.validateEmail(email, enLocale)
             if (badEmail) return res.status(400).send("Bad email")
             const attachments = [] as any
             for (let i = 0; i < files.length; i++) {
@@ -506,7 +507,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../assets/python/wdtagger.py")
+            const scriptPath = path.join(__dirname, "../assets/misc/wdtagger.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str)
@@ -533,7 +534,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../assets/python/ocr.py")
+            const scriptPath = path.join(__dirname, "../assets/misc/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str)
@@ -626,7 +627,7 @@ const MiscRoutes = (app: Express) => {
 
                 await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
 
-                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
+                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration, enLocale)}.`
                 await serverFunctions.systemMessage(metadata.username, "Notice: Your account was upgraded to premium", message)
             }
             res.status(200).send("Success")

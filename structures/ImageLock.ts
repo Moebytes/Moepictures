@@ -1,6 +1,6 @@
 import {createCanvas, loadImage} from "@napi-rs/canvas"
-import locked from "../assets/misc/locked.png"
-import noImage from "../assets/misc/noimage.png"
+import locked from "../assets/images/locked.png"
+import noImage from "../assets/images/noimage.png"
 
 const imageLock = async (image: Buffer, resize = true) => {
     const img = await loadImage(image)

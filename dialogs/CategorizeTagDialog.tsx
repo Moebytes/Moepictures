@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, 
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useTagDialogSelector, useTagDialogActions, useFlagActions} from "../store"
-import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
@@ -11,7 +10,7 @@ import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
 
 const CategorizeTagDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {categorizeTag} = useTagDialogSelector()
     const {setCategorizeTag} = useTagDialogActions()
@@ -49,7 +48,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
             setTagFlag(categorizeTag.tag)
             setCategorizeTag(null)
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import "./styles/modposts.less"
 
 const ModGroups: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -325,7 +325,7 @@ const ModGroups: React.FunctionComponent = (props) => {
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">No data</span>
+                        <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
                 </div>
             )
@@ -345,7 +345,7 @@ const ModGroups: React.FunctionComponent = (props) => {
             }
             const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
             jsx.push(
-                <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
@@ -353,18 +353,18 @@ const ModGroups: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
-                        <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={groupClick} onAuxClick={(event) => groupClick(event, true)}>Group Name: {request.name}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
+                        <span className="mod-post-link" onClick={groupClick} onAuxClick={(event) => groupClick(event, true)}>{i18n.labels.groupName}: {request.name}</span>
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.slug, request.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Reject</span>
+                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => addGroup(request.username, request.name, request.slug, request.postID)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">Approve</span>
+                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div> 
                 </div>

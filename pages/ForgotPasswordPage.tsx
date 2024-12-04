@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import "./styles/sitepage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -51,8 +51,11 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Forgot Password"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.forgotPassword.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -65,14 +68,14 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const submit = async () => {
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/forgotpassword", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
             setEmail("")
         } catch {
-            errorRef.current!.innerText = "Invalid email or captcha."
+            errorRef.current!.innerText = i18n.pages.forgotPassword.error
             await functions.timeout(2000)
             setError(false)
             setCaptchaResponse("")
@@ -88,17 +91,17 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">Forgot Password</span>
+                    <span className="sitepage-title">{i18n.pages.forgotPassword.title}</span>
                     {submitted ?
                     <>
-                    <span className="sitepage-link">A password reset link was sent if this account exists.</span>
+                    <span className="sitepage-link">{i18n.pages.forgotPassword.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>←Back</button>
+                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
-                    <span className="sitepage-link">Enter your email to receive a password reset link.</span>
+                    <span className="sitepage-link">{i18n.pages.forgotPassword.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">Email Address:</span>
+                        <span className="sitepage-text">{i18n.pages.forgotPassword.emailAddress}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
@@ -107,7 +110,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => submit()}>Send Link</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.pages.forgotPassword.sendLink}</button>
                     </div>
                     </>
                     }

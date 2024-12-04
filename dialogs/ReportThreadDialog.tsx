@@ -1,11 +1,12 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, useSessionActions} from "../store"
+import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const ReportThreadDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {reportThreadID} = useThreadDialogSelector()
     const {setReportThreadID} = useThreadDialogActions()
@@ -32,7 +33,7 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
 
 
     const reportThread = async () => {
-        const badReason = functions.validateReason(reason)
+        const badReason = functions.validateReason(reason, i18n)
         if (badReason) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

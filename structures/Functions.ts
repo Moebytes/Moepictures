@@ -20,10 +20,11 @@ import * as PIXI from "pixi.js"
 import WebPXMux from "webpxmux"
 import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
-import avifJS from "../assets/wasm/avif_enc"
-import jxlJS from "../assets/wasm/jxl_enc"
+import avifJS from "../assets/misc/avif_enc"
+import jxlJS from "../assets/misc/jxl_enc"
 import crypto from "crypto"
 import JSZip from "jszip"
+import enLocale from "../assets/locales/en.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
 let newScrollY = 0
@@ -425,12 +426,12 @@ export default class Functions {
         return true
     }
 
-    public static validateUsername = (username: string) => {
-        if (!username) return "No username."
+    public static validateUsername = (username: string, i18n: typeof enLocale) => {
+        if (!username) return i18n.errors.username.empty
         const alphaNumeric = Functions.alphaNumeric(username)
-        if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
-        if (profaneWords.map((w) => atob(w)).includes(username.toLowerCase())) return "Username is profane."
-        if (bannedUsernames.includes(username.toLowerCase())) return "This username isn't allowed to be used."
+        if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return i18n.errors.username.alphanumeric
+        if (profaneWords.map((w) => atob(w)).includes(username.toLowerCase())) return i18n.errors.username.profane
+        if (bannedUsernames.includes(username.toLowerCase())) return i18n.errors.username.disallowed
         return null
     }
 
@@ -445,21 +446,21 @@ export default class Functions {
         return "strong"
     }
 
-    public static validatePassword = (username: string, password: string) => {
-        if (!password) return "No password."
-        if (password.toLowerCase().includes(username.toLowerCase())) return "Password should not contain username."
-        if (commonPasswords.includes(password)) return "Password is too common."
-        if (/ +/.test(password)) return "Password should not contain spaces."
-        if (password.length < 10) return "Password must be at least 10 characters."
+    public static validatePassword = (username: string, password: string, i18n: typeof enLocale) => {
+        if (!password) return i18n.errors.password.empty
+        if (password.toLowerCase().includes(username.toLowerCase())) return i18n.errors.password.username
+        if (commonPasswords.includes(password)) return i18n.errors.password.common
+        if (/ +/.test(password)) return i18n.errors.password.spaces
+        if (password.length < 10) return i18n.errors.password.length
         const strength = Functions.passwordStrength(password)
-        if (strength === "weak") return "Password is too weak."
+        if (strength === "weak") return i18n.errors.password.weak
         return null
     }
 
-    public static validateEmail = (email: string) => {
-        if (!email) return "No email."
+    public static validateEmail = (email: string, i18n: typeof enLocale) => {
+        if (!email) return i18n.errors.email.empty
         const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-        if (!regex.test(email)) return "Email is not valid."
+        if (!regex.test(email)) return i18n.errors.email.invalid
         return null
     }
 
@@ -485,9 +486,9 @@ export default class Functions {
         return segments.filter(Boolean)
     }
 
-    public static validateComment = (comment: string) => {
-        if (!comment) return "No comment."
-        if (comment.length > 1000) return "Comment cannot exceed 1000 characters."
+    public static validateComment = (comment: string, i18n: typeof enLocale) => {
+        if (!comment) return i18n.errors.comment.empty
+        if (comment.length > 1000) return i18n.errors.comment.length
         const pieces = Functions.parseComment(comment)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
@@ -495,71 +496,66 @@ export default class Functions {
                 const username = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 const text = piece.replace(username, "").replaceAll(">", "")
                 if (!text && !username) continue
-                if (gibberish(Functions.stripLinks(text))) return "Comment cannot be gibberish."
+                if (gibberish(Functions.stripLinks(text))) return i18n.errors.comment.gibberish
             } else {
-                if (gibberish(Functions.stripLinks(piece))) return "Comment cannot be gibberish."
+                if (gibberish(Functions.stripLinks(piece))) return i18n.errors.comment.gibberish
             }
         }
         const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Comment is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.comment.profane
         }
         return null
     }
 
-    public static validateReply = (reply: string) => {
-        if (!reply) return "No reply."
+    public static validateReply = (reply: string, i18n: typeof enLocale) => {
+        if (!reply) return i18n.errors.reply.empty
         const words = reply.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Reply is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.reply.profane
         }
         return null
     }
 
-    public static validateMessage = (message: string) => {
-        if (!message) return "No message."
+    public static validateMessage = (message: string, i18n: typeof enLocale) => {
+        if (!message) return i18n.errors.message.empty
         const words = message.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return "Message is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return i18n.errors.message.profane
         }
         return null
     }
 
-    public static validateTitle = (title: string) => {
-        if (!title) return "No title."
+    public static validateTitle = (title: string, i18n: typeof enLocale) => {
+        if (!title) return i18n.errors.title.empty
         const words = title.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Title is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.title.profane
         }
         return null
     }
 
-    public static validateThread = (thread: string) => {
-        if (!thread) return "No thread content."
+    public static validateThread = (thread: string, i18n: typeof enLocale) => {
+        if (!thread) return i18n.errors.thread.empty
         const words = thread.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Thread content is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.thread.profane
         }
         return null
     }
 
-    public static validateReason = (reason: string) => {
-        if (!reason) return "Reason is required."
-        if (gibberish(reason)) return "Reason cannot be gibberish."
+    public static validateReason = (reason: string, i18n: typeof enLocale) => {
+        if (!reason) return i18n.errors.reason.empty
+        if (gibberish(reason)) return i18n.errors.reason.gibberish
         return null
     }
 
-    public static validateDescription = (desc: string) => {
-        if (!desc) return null
-        return null
-    }
-
-    public static validateBio = (bio: string) => {
-        if (!bio) return "No bio."
-        if (gibberish(Functions.stripLinks(bio))) return "Bio cannot be gibberish."
+    public static validateBio = (bio: string, i18n: typeof enLocale) => {
+        if (!bio) return i18n.errors.bio.empty
+        if (gibberish(Functions.stripLinks(bio))) return i18n.errors.bio.gibberish
         const words = bio.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return "Bio is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return i18n.errors.bio.profane
         }
         return null
     }
@@ -1228,20 +1224,25 @@ export default class Functions {
         return `${month}-${day}-${year}`
     }
 
-    public static prettyDate = (inputDate: Date) => {
+    public static prettyDate = (inputDate: Date, i18n: typeof enLocale) => {
         const monthNames = [
-          "January", "February", "March",
-          "April", "May", "June", "July",
-          "August", "September", "October",
-          "November", "December"
+            i18n.time.january, i18n.time.february, i18n.time.march,
+            i18n.time.april, i18n.time.may, i18n.time.june, i18n.time.july,
+            i18n.time.august, i18n.time.september, i18n.time.october,
+            i18n.time.november, i18n.time.december
         ]
         const date = new Date(inputDate)
-        const day = date.getDate()
-        const monthIndex = date.getMonth()
-        const year = date.getFullYear()
+        const day = `${date.getDate()}` + i18n.time.dayAppend
+        const month = `${monthNames[date.getMonth()]}`
+        const year = `${date.getFullYear()}` + i18n.time.yearAppend
 
-        return `${monthNames[monthIndex]} ${day}, ${year}`
-      }
+        if (i18n.time.comma) {
+            return `${month} ${day}, ${year}`
+        } else {
+            return `${year}${month}${day}`
+        }
+
+    }
 
     public static binaryToHex = (bin: string) => {
         return bin.match(/.{4}/g)?.reduce(function(acc, i) {
@@ -1885,72 +1886,61 @@ export default class Functions {
         return `data:${mime};base64,${Buffer.from(arrayBuffer).toString("base64")}`
     }
 
-    public static timeAgo = (input: string) => {
+    public static timeAgo = (input: string, i18n: typeof enLocale) => {
         if (!input) return "?"
         const date = new Date(input.replace(/ +/g, "T"))
         const seconds = Math.floor(((new Date().getTime() / 1000) - (date.getTime() / 1000)))
+    
+    
+        const parseTime = (value: number, unit: string) => {
+            return i18n.time.plural ? `${value} ${unit}${value === 1 ? "" : i18n.time.plural} ${i18n.time.ago}` : `${value}${unit}${i18n.time.ago}`
+        }
+    
         const years = seconds / 31536000
-        if (years >= 1) {
-            const rounded = Math.floor(years)
-            return `${rounded} year${rounded === 1 ? "" : "s"} ago`
-        }
+        if (years >= 1) return parseTime(Math.floor(years), i18n.time.year)
+    
         const months = seconds / 2592000
-        if (months >= 1) {
-            const rounded = Math.floor(months)
-            return `${rounded} month${rounded === 1 ? "" : "s"} ago`
-        }
+        if (months >= 1) return parseTime(Math.floor(months), i18n.time.month)
+    
         const days = seconds / 86400
-        if (days >= 1) {
-            const rounded = Math.floor(days)
-            return `${rounded} day${rounded === 1 ? "" : "s"} ago`
-        }
+        if (days >= 1) return parseTime(Math.floor(days), i18n.time.day)
+    
         const hours = seconds / 3600
-        if (hours >= 1) {
-            const rounded = Math.floor(hours)
-            return `${rounded} hour${rounded === 1 ? "" : "s"} ago`
-        }
+        if (hours >= 1) return parseTime(Math.floor(hours), i18n.time.hour)
+    
         const minutes = seconds / 60
-        if (minutes >= 1) {
-            const rounded = Math.floor(minutes)
-            return `${rounded} minute${rounded === 1 ? "" : "s"} ago`
-        }
-        return `${seconds} second${seconds === 1 ? "" : "s"} ago`
-    }
+        if (minutes >= 1) return parseTime(Math.floor(minutes), i18n.time.minute)
+    
+        return parseTime(seconds, i18n.time.second)
+    }    
 
-    public static timeUntil = (input: string) => {
+    public static timeUntil = (input: string, i18n: typeof enLocale) => {
         if (!input) return "?"
         const date = new Date(input.replace(/ +/g, "T"))
         const now = new Date().getTime()
         const seconds = Math.floor((date.getTime() - now) / 1000)
     
-        const years = seconds / 31536000
-        if (years >= 1) {
-            const rounded = Math.floor(years)
-            return `${rounded} year${rounded === 1 ? "" : "s"}`
+        const parseTime = (value: number, unit: string) => {
+            return i18n.time.plural ? `${value} ${unit}${value === 1 ? "" : i18n.time.plural}${i18n.time.ago}` : `${value}${unit}${i18n.time.ago}`
         }
-        const months = seconds / 2592000
-        if (months >= 1) {
-            const rounded = Math.floor(months)
-            return `${rounded} month${rounded === 1 ? "" : "s"}`
-        }
-        const days = seconds / 86400
-        if (days >= 1) {
-            const rounded = Math.floor(days)
-            return `${rounded} day${rounded === 1 ? "" : "s"}`
-        }
-        const hours = seconds / 3600
-        if (hours >= 1) {
-            const rounded = Math.floor(hours)
-            return `${rounded} hour${rounded === 1 ? "" : "s"}`
-        }
-        const minutes = seconds / 60
-        if (minutes >= 1) {
-            const rounded = Math.floor(minutes)
-            return `${rounded} minute${rounded === 1 ? "" : "s"}`
-        }
-        return `${seconds} second${seconds === 1 ? "" : "s"}`
-    }
     
+        const years = seconds / 31536000
+        if (years >= 1) return parseTime(Math.floor(years), i18n.time.year)
+    
+        const months = seconds / 2592000
+        if (months >= 1) return parseTime(Math.floor(months), i18n.time.month)
+    
+        const days = seconds / 86400
+        if (days >= 1) return parseTime(Math.floor(days), i18n.time.day)
+    
+        const hours = seconds / 3600
+        if (hours >= 1) return parseTime(Math.floor(hours), i18n.time.hour)
+    
+        const minutes = seconds / 60
+        if (minutes >= 1) return parseTime(Math.floor(minutes), i18n.time.minute)
+    
+        return parseTime(seconds, i18n.time.second)
+    }
 
     public static fileExtension = (uint8Array: Uint8Array) => {
         const result = fileType(uint8Array)?.[0]
@@ -1961,7 +1951,7 @@ export default class Functions {
         const sliced = query.split(/ +/g)
         
         function* iterRecur(sliced: string[]) {
-            if (sliced.length == 1) return yield sliced;
+            if (sliced.length == 1) return yield sliced
             for (const result of iterRecur(sliced.slice(1))) {
                 yield [sliced[0] + "-" + result[0], ...result.slice(1)]
                 yield [sliced[0], ...result]
@@ -2384,13 +2374,13 @@ export default class Functions {
         return arr
     }
 
-    public static getSiteName = (link: string) => {
+    public static getSiteName = (link: string, i18n: typeof enLocale) => {
         try {
             const domain = new URL(link).hostname.replace("www.", "").split(".")?.[0] || ""
             if (domain.toLowerCase() === "yande") return "Yandere"
             return Functions.toProperCase(domain)
         } catch {
-            return "Unknown"
+            return i18n.labels.unknown || "Unknown"
         }
     }
 

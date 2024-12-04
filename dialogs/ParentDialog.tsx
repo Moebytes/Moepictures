@@ -10,7 +10,7 @@ import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const ParentDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -52,7 +52,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(true)
         } else {
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

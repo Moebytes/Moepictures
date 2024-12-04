@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useLayoutSelector, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -25,6 +25,7 @@ import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const TagEditDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -182,7 +183,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(3000)
                 return setError(false)
             }
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)

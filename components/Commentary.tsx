@@ -11,7 +11,7 @@ interface Props {
 }
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -49,7 +49,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentary">
             <div className="commentary-title-container">
-                <div className="commentary-title">Artist Commentary</div>
+                <div className="commentary-title">{i18n.post.commentary}</div>
                 <img className="commentary-img" src={commentaryTranslate} style={{filter: getFilter()}} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

@@ -24,7 +24,7 @@ import "./styles/itemspage.less"
 let replace = false
 
 const ForumPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -364,7 +364,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         return (
             <div className="itemsort-item" ref={sortRef}>
                 <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
-                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
     }
@@ -410,7 +410,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         if (session.username) {
             return (
                 <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <button className="item-button" onClick={() => newThreadDialog()}>New</button>
+                    <button className="item-button" onClick={() => newThreadDialog()}>{i18n.buttons.new}</button>
                 </div> 
             )
         }
@@ -427,7 +427,7 @@ const ForumPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">Forum</span>
+                    <span className="items-heading">{i18n.navbar.forum}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateThreads() : null}/>
@@ -439,15 +439,15 @@ const ForumPage: React.FunctionComponent = (props) => {
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                            <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
-                                <span className="item-dropdown-text">Random</span>
+                                <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
-                                <span className="item-dropdown-text">Date</span>
+                                <span className="item-dropdown-text">{i18n.sort.date}</span>
                             </div>
                         </div>
                     </div>

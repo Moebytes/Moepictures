@@ -5,6 +5,7 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
+import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const commentLimiter = rateLimit({
@@ -36,7 +37,7 @@ const CommentRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!comment || !postID) return res.status(400).send("Bad comment or post ID")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const badComment = functions.validateComment(comment)
+            const badComment = functions.validateComment(comment, enLocale)
             if (badComment) return res.status(400).send("Bad comment")
             await sql.comment.insertComment(Number(postID), req.session.username, comment)
             res.status(200).send("Success")
@@ -69,7 +70,7 @@ const CommentRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!comment || !commentID) return res.status(400).send("Bad comment or comment ID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
-            const badComment = functions.validateComment(comment as string)
+            const badComment = functions.validateComment(comment as string, enLocale)
             if (badComment) return res.status(400).send("Bad comment")
             const com = await sql.comment.comment(Number(commentID))
             if (com?.username !== req.session.username) return res.status(400).send("You can only edit your own comment")

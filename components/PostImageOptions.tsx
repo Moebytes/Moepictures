@@ -37,7 +37,7 @@ interface Props {
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -83,7 +83,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         let {size} = await functions.imageDimensions(props.comicPages[i], session)
                         sizeTotal += size
                     }
-                    setDownloadText(`${props.comicPages.length} pages (${functions.readableFileSize(sizeTotal)})`)
+                    setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
                 } else {
                     let {width, height, size} = await functions.imageDimensions(props.img, session)
                     setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
@@ -256,22 +256,22 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
-                    {!session.username ? <div className="post-image-text-small">Prev</div> : null}
+                    {!session.username ? <div className="post-image-text-small">${i18n.post.prev}</div> : null}
                 </div>
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
-                    <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
+                    <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                 </div> : null}
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
-                    <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
+                    <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="post-image-text-small">Next</div>
+                    <div className="post-image-text-small">{i18n.post.next}</div>
                     {!session.username ? <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/> : null}
                 </div>
             </div>
@@ -279,7 +279,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
-                    <div className="post-image-text">Download</div>
+                    <div className="post-image-text">{i18n.sortbar.download}</div>
                 </div>
                 {props.post.type === "image" ? 
                 <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
@@ -287,7 +287,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
-                    <div className="post-image-text">Filters</div>
+                    <div className="post-image-text">{i18n.filters.filters}</div>
                 </div>
             </div> </>
              :
@@ -295,17 +295,17 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-options-left">
                     <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
-                        <div className="post-image-text-small">Prev</div>
+                        <div className="post-image-text-small">{i18n.post.prev}</div>
                     </div>
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
-                        <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
+                        <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
-                        <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
+                        <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                     </div> : null}
                 </div>
                 <div className="post-image-options-right">
@@ -314,17 +314,17 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
-                        <div className="post-image-text">Download</div>
+                        <div className="post-image-text">{i18n.sortbar.download}</div>
                     </div>
                     {props.post.type === "image" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                     {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
-                        <div className="post-image-text">Filters</div>
+                        <div className="post-image-text">{i18n.filters.filters}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="post-image-text-small">Next</div>
+                        <div className="post-image-text-small">{i18n.post.next}</div>
                         <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/>
                     </div>
                 </div>
@@ -342,46 +342,46 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             style={{marginRight: getFilterMarginRight(), marginTop: getFilterMarginTop()}}>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={brightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Brightness</span>
+                    <span className="post-dropdown-text">{i18n.filters.brightness}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={contrastIcon} style={{marginLeft: "7px", marginRight: "-7px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Contrast</span>
+                    <span className="post-dropdown-text">{i18n.filters.contrast}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={hueIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Hue</span>
+                    <span className="post-dropdown-text">{i18n.filters.hue}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={saturationIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Saturation</span>
+                    <span className="post-dropdown-text">{i18n.filters.saturation}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={lightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Lightness</span>
+                    <span className="post-dropdown-text">{i18n.filters.lightness}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={blurIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Blur</span>
+                    <span className="post-dropdown-text">{i18n.filters.blur}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={sharpenIcon} style={{marginLeft: "8px", marginRight: "-8px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Sharpen</span>
+                    <span className="post-dropdown-text">{i18n.filters.sharpen}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
                     <img className="post-dropdown-img" src={pixelateIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">Pixelate</span>
+                    <span className="post-dropdown-text">{i18n.filters.pixelate}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
                 </div>
                 <div className="post-dropdown-row filters-row">
-                    <button className="filters-button" onClick={() => resetFilters()}>Reset</button>
+                    <button className="filters-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
                 </div>
             </div>
         </div>

@@ -27,7 +27,7 @@ import "./styles/itemspage.less"
 let replace = false
 
 const MailPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -396,7 +396,7 @@ const MailPage: React.FunctionComponent = (props) => {
         return (
             <div className="itemsort-item" ref={sortRef}>
                 <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
-                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
     }
@@ -452,11 +452,11 @@ const MailPage: React.FunctionComponent = (props) => {
         const style = {marginLeft: mobile ? "0px" : "15px", marginRight: mobile ? "15px" : "0px", marginTop: mobile ? "10px" : "0px"}
         return (
             <div className="item-button-container" style={{marginLeft: "0px", justifyContent: "flex-start"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <button className="item-button" style={style} onClick={() => readAll()}>Read All</button>
-                <button className="item-button" style={style} onClick={() => unreadAll()}>Unread All</button>
+                <button className="item-button" style={style} onClick={() => readAll()}>{i18n.buttons.readAll}</button>
+                <button className="item-button" style={style} onClick={() => unreadAll()}>{i18n.buttons.unreadAll}</button>
                 {mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)} style={{marginLeft: "0px", marginTop: "7px"}}>
                     <img className="itemsort-img" src={hideSystem ? radioButtonChecked : radioButton} style={{filter: getFilter()}}/>
-                    <span className="itemsort-text">Hide System</span>
+                    <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
                 </div> : null}
             </div> 
         )
@@ -472,7 +472,7 @@ const MailPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">Mail</span>
+                    <span className="items-heading">{i18n.navbar.mail}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateMessages() : null}/>
@@ -484,19 +484,19 @@ const MailPage: React.FunctionComponent = (props) => {
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                            <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         {!mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)}>
                             <img className="itemsort-img" src={hideSystem ? radioButtonChecked : radioButton} style={{filter: getFilter()}}/>
-                            <span className="itemsort-text">Hide System</span>
+                            <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
-                                <span className="item-dropdown-text">Random</span>
+                                <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
-                                <span className="item-dropdown-text">Date</span>
+                                <span className="item-dropdown-text">{i18n.sort.date}</span>
                             </div>
                         </div>
                     </div>

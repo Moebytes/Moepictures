@@ -1,47 +1,48 @@
 import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useActiveSelector, useActiveActions} from "../store"
+import {useActiveSelector, useActiveActions, useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/actionbanner.less"
 
 let timeout = null as any
 
 const ActionBanner: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {actionBanner} = useActiveSelector()
     const {setActionBanner} = useActiveActions()
     const [stickyText, setStickyText] = useState("")
 
     useEffect(() => {
         if (actionBanner === "copy-tags") {
-            setStickyText("Copied Tags!")
+            setStickyText(i18n.banner.copiedTags)
             document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
         }
         if (actionBanner === "copy-hash") {
-            setStickyText("Copied Hash!")
+            setStickyText(i18n.banner.copiedHash)
             document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
         }
         if (actionBanner === "tag-edit") {
-            setStickyText("Edited Tags!")
+            setStickyText(i18n.banner.editedTags)
             document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
         }
         if (actionBanner === "source-edit") {
-            setStickyText("Edited Source!")
+            setStickyText(i18n.banner.editedSource)
             document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
         }
         if (actionBanner === "logout-sessions") {
-            setStickyText("Logged out other sessions!")
+            setStickyText(i18n.banner.logoutSessions)
             document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
         }
         if (actionBanner === "blacklist") {
-            setStickyText("Blacklisted IP!")
+            setStickyText(i18n.banner.blacklist)
             document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
         }
         if (actionBanner === "unblacklist") {
-            setStickyText("Unblacklisted IP!")
+            setStickyText(i18n.banner.unblacklist)
             document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
         }
         if (actionBanner === "remove-banner") {
-            setStickyText("Removed Banner!")
+            setStickyText(i18n.banner.removeBanner)
             document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
         }
     }, [actionBanner])
