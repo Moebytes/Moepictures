@@ -39,7 +39,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = i18n.pages.contact.sendMessage
+        document.title = i18n.labels.sendMessage
     }, [i18n])
 
     useEffect(() => {
@@ -178,7 +178,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" ref={dialogRef} style={{width: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.pages.contact.sendMessage}</span>
+                            <span className="dialog-title">{i18n.labels.sendMessage}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.recipients}: </span>

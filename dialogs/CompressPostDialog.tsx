@@ -104,7 +104,7 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={maxUpscaledDimension} onChange={(event) => setMaxUpscaledDimension(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
-                                <span className="dialog-text">{i18n.pages.upload.original}</span>
+                                <span className="dialog-text">{i18n.labels.original}</span>
                                 <img className="dialog-checkbox" src={original ? checkboxChecked : checkbox} onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
                                 <span className="dialog-text">{i18n.labels.upscaled}</span>
                                 <img className="dialog-checkbox" src={upscaled ? checkboxChecked : checkbox} onClick={() => setUpscaled((prev: boolean) => !prev)} style={{filter: getFilter()}}/>

@@ -133,11 +133,11 @@ const LoginPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-link-clickable">{i18n.pages.login.signupText}</span>
                     </Link>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">{i18n.pages.login.username}:</span>
+                        <span className="sitepage-text">{i18n.labels.username}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">{i18n.pages.login.password}:</span>
+                        <span className="sitepage-text">{i18n.labels.password}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>

@@ -1502,18 +1502,18 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
+                        <span className="upload-button-text">{i18n.labels.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
+                            <span className="upload-button-text">{i18n.labels.enterLinks}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.labels.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1533,16 +1533,16 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
+                        <span className="upload-button-text">{i18n.labels.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
+                            <span className="upload-button-text">{i18n.labels.enterLinks}</span>
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.labels.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>

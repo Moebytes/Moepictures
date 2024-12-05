@@ -91,11 +91,11 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.buttons.download}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.dialogs.download.offset}: </span>
+                            <span className="dialog-text">{i18n.labels.offset}: </span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={offsetField} onChange={(event) => setOffsetField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.dialogs.download.amount}: </span>
+                            <span className="dialog-text">{i18n.labels.amount}: </span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={amountField} onChange={(event) => setAmountField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">

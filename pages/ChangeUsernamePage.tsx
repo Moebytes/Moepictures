@@ -124,11 +124,11 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     </> : <>
                     <span className="sitepage-link">{i18n.pages.changeUsername.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">{i18n.pages.login.username}: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.username}: </span>
                         <span className="sitepage-text-small">{session.username}</span>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">{i18n.pages.changeUsername.newUsername}: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.newUsername}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>

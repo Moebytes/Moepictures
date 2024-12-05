@@ -356,6 +356,9 @@
         "similarPosts": "Similar Posts",
         "resolution": "Resolution",
         "size": "Size",
+        "selectFiles": "Select Files",
+        "enterLinks": "Enter Links",
+        "original": "Original",
         "upscaled": "Upscaled",
         "removed": "removed",
         "oldTag": "Old Tag",
@@ -391,7 +394,23 @@
         "transcription": "Transcription",
         "translation": "Translation",
         "wiki": "Wiki",
-        "buyLink": "Buy Link"
+        "buyLink": "Buy Link",
+        "status": "Status",
+        "newEmail": "New Email",
+        "offset": "Offset",
+        "amount": "Amount",
+        "page": "Page",
+        "oldPassword": "Old Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "newUsername": "New Username",
+        "emailAddress": "Email Address",
+        "username": "Username",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "subject": "Subject",
+        "attachFiles": "Attach Files",
+        "sendMessage": "Send Message"
     },
     "errors": {
         "$401":"401 error",
@@ -453,7 +472,6 @@
     "pages": {
         "enable2FA": {
             "heading": "2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.",
-            "status": "Status",
             "scan": "Scan the following QR Code in a 2FA authentication app (eg. Authy).",
             "finish": "To finish enabling 2FA, you must enter a valid 2fa token.",
             "enable": "Enable 2FA"
@@ -466,7 +484,6 @@
         "changeEmail": {
             "heading": "A confirmation email will be sent to the new address. Your email will only be changed if you confirm the new one.",
             "submitHeading": "A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.",
-            "newEmail": "New Email",
             "error": "Bad email or captcha."
         },
         "changeEmailSuccess": {
@@ -476,15 +493,11 @@
         },
         "changePassword": {
             "submitHeading": "Your password has been changed.",
-            "oldPassword": "Old Password",
-            "newPassword": "New Password",
-            "confirmNewPassword": "Confirm New Password",
             "noMatch": "Passwords don't match.",
             "error": "Bad password."
         },
         "changeUsername": {
             "heading": "Your old username will become available after the change.",
-            "newUsername": "New Username",
             "submitHeading": "Your username has been changed.",
             "error": "Bad username or captcha."
         },
@@ -492,7 +505,6 @@
             "title": "Forgot Password",
             "heading": "Enter your email to receive a password reset link.",
             "submitHeading": "A password reset link was sent if this account exists.",
-            "emailAddress": "Email Address",
             "sendLink": "Send Link",
             "error": "Invalid email or captcha."
         },
@@ -516,8 +528,6 @@
         "login": {
             "signupText": "Don't have an account? Sign up.",
             "forgotText": "Forgot Password?",
-            "username": "Username",
-            "password": "Password",
             "captcha": "Solve the captcha.",
             "error": "Invalid username, password, or captcha.",
             "rateLimit": "Too many login attempts, try again later."
@@ -529,7 +539,6 @@
             "error": "Bad username, password, email, or captcha.",
             "rateLimit": "Too many accounts created, try again later.",
             "banned": "This IP is associated with a banned account.",
-            "confirmPassword": "Confirm Password",
             "lengthReq": "-Passwords must contain at least 10 characters",
             "varietyReq": "-At least three of the following: lowercase letters, uppercase letters, numbers, and special symbols"
         },
@@ -565,10 +574,7 @@
         "contact": {
             "heading": "This is a contact form for general inquiries. If you would like to remove your work, please fill out our",
             "copyrightForm": "Copyright Removal Form",
-            "submitHeading": "Your message was delivered.",
-            "subject": "Subject",
-            "attachFiles": "Attach Files",
-            "sendMessage": "Send Message"
+            "submitHeading": "Your message was delivered."
         },
         "copyrightRemoval": {
             "title": "Copyright Removal",
@@ -600,9 +606,6 @@
             "error": "There was an error sending the message."
         },
         "upload": {
-            "selectFiles": "Select Files",
-            "enterLinks": "Enter Links",
-            "original": "Original",
             "submitHeading": "Post was uploaded.",
             "submitHeadingApproval": "Your post was submitted and will appear on the site if approved.",
             "submitMore": "Submit More",
@@ -668,13 +671,8 @@
         }
     },
     "dialogs": {
-        "download": {
-            "offset": "Offset",
-            "amount": "Amount"
-        },
         "page": {
-            "title": "Go To Page",
-            "page": "Page"
+            "title": "Go To Page"
         },
         "aliasTag": {
             "title": "Alias Tag",

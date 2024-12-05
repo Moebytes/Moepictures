@@ -101,7 +101,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                     </> : <>
                     <span className="sitepage-link">{i18n.pages.forgotPassword.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">{i18n.pages.forgotPassword.emailAddress}:</span>
+                        <span className="sitepage-text">{i18n.labels.emailAddress}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>

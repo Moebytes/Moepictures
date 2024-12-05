@@ -52,7 +52,7 @@ const PageDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.dialogs.page.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.dialogs.page.page}:</span>
+                            <span className="dialog-text">{i18n.labels.page}:</span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={pageField} onChange={(event) => setPageField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">

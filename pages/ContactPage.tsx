@@ -143,12 +143,12 @@ const ContactPage: React.FunctionComponent = (props) => {
                         <input className="contact-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">{i18n.pages.contact.subject}:</span>
+                        <span className="contact-text">{i18n.labels.subject}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={subject} onChange={(event) => setSubject(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">{i18n.pages.contact.attachFiles}:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.pages.upload.selectFiles}</label>
+                        <span className="contact-text">{i18n.labels.attachFiles}:</span>
+                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.labels.selectFiles}</label>
                         <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
                         {generateFilesJSX()}
                     </div>
@@ -158,7 +158,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container">
-                        <button className="contact-button" onClick={submit}>{i18n.pages.contact.sendMessage}</button>
+                        <button className="contact-button" onClick={submit}>{i18n.labels.sendMessage}</button>
                     </div>
                     </> }
                 </div>

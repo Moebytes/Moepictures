@@ -267,8 +267,8 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         </span>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">{i18n.pages.contact.attachFiles}:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.pages.upload.selectFiles}</label>
+                        <span className="contact-text">{i18n.labels.attachFiles}:</span>
+                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.labels.selectFiles}</label>
                         <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
                         {generateFilesJSX()}
                     </div>

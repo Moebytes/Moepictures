@@ -125,7 +125,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text-small">{session.email}</span>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">{i18n.pages.changeEmail.newEmail}: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.newEmail}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>

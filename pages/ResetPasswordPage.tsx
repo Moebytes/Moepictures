@@ -121,14 +121,14 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide3">{i18n.pages.changePassword.newPassword}:</span>
+                        <span className="sitepage-text-wide3">{i18n.labels.newPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide3">{i18n.pages.changePassword.confirmNewPassword}:</span>
+                        <span className="sitepage-text-wide3">{i18n.labels.confirmNewPassword}:</span>
                         <div className="sitepage-pass">
                             <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>

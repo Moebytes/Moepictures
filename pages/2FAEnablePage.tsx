@@ -131,7 +131,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     <span className="sitepage-title">{i18n.user.$2fa}</span>
                     <span className="sitepage-link">{i18n.pages.enable2FA.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">{i18n.pages.enable2FA.status}: </span>
+                        <span className="sitepage-text">{i18n.labels.status}: </span>
                         <span className="sitepage-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={changeStatus}>{session.$2fa ? i18n.buttons.enabled : i18n.buttons.disabled}</span>
                     </div>
                     {qr ? <>

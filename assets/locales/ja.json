@@ -357,6 +357,9 @@
         "similarPosts": "類似の投稿",
         "resolution": "決議",
         "size": "サイズ",
+        "selectFiles": "ファイルを選択",
+        "enterLinks": "リンクを入力",
+        "original": "オリジナル",
         "upscaled": "アップスケール",
         "removed": "削除",
         "oldTag": "旧タグ",
@@ -392,7 +395,23 @@
         "transcription": "転写",
         "translation": "翻訳",
         "wiki": "ウィキ",
-        "buyLink": "リンク購入"
+        "buyLink": "リンク購入",
+        "status": "ステータス",
+        "newEmail": "新規メール",
+        "offset": "オフセット",
+        "amount": "金額",
+        "page": "ページ",
+        "oldPassword": "旧パスワード",
+        "newPassword": "新しいパスワード",
+        "confirmNewPassword": "新しいパスワードの確認",
+        "newUsername": "新しいユーザー名",
+        "emailAddress": "メールアドレス",
+        "username": "ユーザー名",
+        "password": "パスワード",
+        "confirmPassword": "パスワードの確認",
+        "subject": "テーマ",
+        "attachFiles": "ファイルを添付する",
+        "sendMessage": "メッセージを送る"
     },
     "errors": {
         "$401":"401エラー",
@@ -454,7 +473,6 @@
     "pages": {
         "enable2FA": {
             "heading": "2FAは、ログイン時に追加の時間限定コードを要求することで、アカウントにはるかに強力なセキュリティを提供します。",
-            "status": "ステータス",
             "scan": "2FA認証アプリ（Authyなど）で以下のQRコードを読み取ってください。",
             "finish": "2FAを有効にするには、有効な2FAトークンを入力する必要があります。",
             "enable": "2FAを有効にする"
@@ -467,7 +485,6 @@
         "changeEmail": {
             "heading": "新しいアドレスに確認メールが送信されます。新しいEメールを確認した場合のみ、Eメールが変更されます。",
             "submitHeading": "新しいアドレスに確認リンクが送信されました。確認後、Eメールが変更されます。",
-            "newEmail": "新規メール",
             "error": "電子メールまたはcaptchaが正しくありません。"
         },
         "changeEmailSuccess": {
@@ -477,15 +494,11 @@
         },
         "changePassword": {
             "submitHeading": "パスワードが変更されました。",
-            "oldPassword": "旧パスワード",
-            "newPassword": "新しいパスワード",
-            "confirmNewPassword": "新しいパスワードの確認",
             "noMatch": "パスワードが一致しない。",
             "error": "パスワードが悪い。"
         },
         "changeUsername": {
             "heading": "変更後は以前のユーザー名が使用可能になります。",
-            "newUsername": "新しいユーザー名",
             "submitHeading": "ユーザー名が変更されました。",
             "error": "ユーザー名またはキャプチャが不正です。"
         },
@@ -493,7 +506,6 @@
             "title": "パスワードを忘れた",
             "heading": "パスワードリセットリンクを受け取るには、Eメールを入力してください。",
             "submitHeading": "このアカウントが存在する場合、パスワードリセットリンクが送信されました。",
-            "emailAddress": "メールアドレス",
             "sendLink": "リンクを送る",
             "error": "無効な電子メールまたはcaptcha。"
         },
@@ -517,8 +529,6 @@
         "login": {
             "signupText": "アカウントをお持ちでないですか？登録する",
             "forgotText": "パスワードをお忘れですか？",
-            "username": "ユーザー名",
-            "password": "パスワード",
             "captcha": "キャプチャを解く。",
             "error": "ユーザー名、パスワード、またはキャプチャが無効です。",
             "rateLimit": "ログインの試行回数が多すぎます。"
@@ -530,7 +540,6 @@
             "error": "ユーザー名、パスワード、電子メール、またはキャプチャに誤りがある。",
             "rateLimit": "アカウントが多すぎます。",
             "banned": "このIPは禁止されたアカウントに関連付けられています。",
-            "confirmPassword": "パスワードの確認",
             "lengthReq": "-パスワードは10文字以上であること",
             "varietyReq": "-次のうち少なくとも3つ：小文字、大文字、数字、特殊記号"
         },
@@ -566,10 +575,7 @@
         "contact": {
             "heading": "こちらは一般的なお問い合わせフォームです。作品の削除をご希望の方は、",
             "copyrightForm": "著作権削除フォームにご記入ください。",
-            "submitHeading": "メッセージが届きました。",
-            "subject": "テーマ",
-            "attachFiles": "ファイルを添付する",
-            "sendMessage": "メッセージを送る"
+            "submitHeading": "メッセージが届きました。"
         },
         "copyrightRemoval": {
             "title": "著作権の削除",
@@ -601,9 +607,6 @@
             "error": "メッセージの送信にエラーが発生しました。"
         },
         "upload": {
-            "selectFiles": "ファイルを選択",
-            "enterLinks": "リンクを入力",
-            "original": "オリジナル",
             "submitHeading": "投稿がアップロードされた。",
             "submitHeadingApproval": "あなたの投稿は投稿され、承認されればサイトに掲載されます。",
             "submitMore": "もっと見る",
@@ -669,13 +672,8 @@
         }
     },
     "dialogs": {
-        "download": {
-            "offset": "オフセット",
-            "amount": "金額"
-        },
         "page": {
-            "title": "ページへ",
-            "page": "ページ"
+            "title": "ページへ"
         },
         "aliasTag": {
             "title": "別名タグ",
