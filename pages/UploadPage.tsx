@@ -147,7 +147,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.sortbar.upload
+        document.title = i18n.buttons.upload
     }, [i18n])
 
     useEffect(() => {
@@ -514,7 +514,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <span className="upload-text margin-right">{i18n.pages.upload.artistImage}: </span>
                     <label htmlFor={`artist-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
+                            <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
                     {artists[i].image ? 
@@ -597,7 +597,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <span className="upload-text margin-right">{i18n.pages.upload.characterImage}: </span>
                     <label htmlFor={`character-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
+                            <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
                     {characters[i].image ? 
@@ -680,7 +680,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <span className="upload-text margin-right">{i18n.pages.upload.seriesImage}: </span>
                     <label htmlFor={`series-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
+                            <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
                     {series[i].image ? 
@@ -1296,7 +1296,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <span className="upload-text margin-right">{i18n.pages.upload.optionalTagImage}: </span>
                     <label htmlFor={`tag-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
+                            <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`tag-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
                     {newTags[i].image ? 
@@ -1483,7 +1483,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="upload">
-                <span className="upload-heading">{i18n.sortbar.upload}</span>
+                <span className="upload-heading">{i18n.buttons.upload}</span>
                 {submitted ?
                 <div className="upload-container">
                     <div className="upload-container-row">
@@ -1513,7 +1513,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1542,7 +1542,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1695,7 +1695,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
                 <span className="upload-link" onClick={sourceLookup}>{i18n.pages.upload.fetchFromPixiv}</span>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.sidebar.title}: </span>
+                    <span className="upload-text">{i18n.labels.title}: </span>
                     <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
@@ -1731,13 +1731,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.sidebar.mirrors}: </span>
+                    <span className="upload-text">{i18n.labels.mirrors}: </span>
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.post.buyLink}: </span>
+                    <span className="upload-text">{i18n.labels.buyLink}: </span>
                     <input className="upload-input-wide2" type="url" value={sourcePurchaseLink} onChange={(event) => setSourcePurchaseLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>

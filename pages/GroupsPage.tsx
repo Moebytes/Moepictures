@@ -162,7 +162,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.groups
+        document.title = i18n.sort.groups
     }, [i18n])
 
     useEffect(() => {
@@ -455,7 +455,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">{i18n.navbar.groups}</span>
+                    <span className="items-heading">{i18n.sort.groups}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateGroups() : null}/>

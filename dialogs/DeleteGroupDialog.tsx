@@ -20,8 +20,8 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Tag"
-    }, [])
+        document.title = i18n.dialogs.deleteGroup.title
+    }, [i18n])
 
     useEffect(() => {
         if (deleteGroupObj) {
@@ -75,11 +75,11 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Delete Group Request</span>
+                                <span className="dialog-title">{i18n.dialogs.deleteGroup.request}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.deleteGroup.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -94,14 +94,14 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Delete Group</span>
+                                <span className="dialog-title">{i18n.dialogs.deleteGroup.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Do you want to delete this group?</span>
+                                <span className="dialog-text">{i18n.dialogs.deleteGroup.header}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>
@@ -116,28 +116,28 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "500px", height: submitted ? "130px" : "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Group Request</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteGroup.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your delete request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteGroup.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Why do you want to delete this group?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteGroup.reasonHeader}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
                 </div>

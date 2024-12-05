@@ -38,24 +38,24 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
 
     const getTitle = () => {
         if (revertAliasHistoryID.type === "alias") {
-            return "Undo Aliasing"
+            return i18n.dialogs.revertAliasHistory.undoAliasTitle
         } else if (revertAliasHistoryID.type === "undo alias") {
-            return "Redo Aliasing"
+            return i18n.dialogs.revertAliasHistory.redoAliasTitle
         } else if (revertAliasHistoryID.type === "implication") {
-            return "Undo Implication"
+            return i18n.dialogs.revertAliasHistory.undoImplicationTitle
         } else if (revertAliasHistoryID.type === "undo implication") {
-            return "Redo Implication"
+            return i18n.dialogs.revertAliasHistory.redoImplicationTitle
         }
     }
     const getDescription = () => {
         if (revertAliasHistoryID.type === "alias") {
-            return "Would you like to undo this aliasing?"
+            return i18n.dialogs.revertAliasHistory.undoAliasHeading
         } else if (revertAliasHistoryID.type === "undo alias") {
-            return "Would you like to redo this aliasing?"
+            return i18n.dialogs.revertAliasHistory.redoAliasHeading
         } else if (revertAliasHistoryID.type === "implication") {
-            return "Would you like to undo this implication?"
+            return i18n.dialogs.revertAliasHistory.undoImplicationHeading
         } else if (revertAliasHistoryID.type === "undo implication") {
-            return "Would you like to redo this implication?"
+            return i18n.dialogs.revertAliasHistory.redoImplicationHeading
         }
     }
 
@@ -73,8 +73,8 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-text">{getDescription()}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

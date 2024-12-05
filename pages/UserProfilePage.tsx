@@ -558,7 +558,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {premiumExpirationJSX()}
                     {banExpirationJSX()}
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.email}: {session.email}</span>
+                        <span className="user-text">{i18n.labels.email}: {session.email}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(session.joinDate), i18n)}</span>
@@ -578,7 +578,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div> : null}
                     <div className="user-row">
                         <span className="user-text">{i18n.user.favoritesPrivacy}: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
-                        className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.user.public : i18n.sort.private}</span></span>
+                        className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.showRelated}: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? i18n.buttons.yes : i18n.buttons.no}</span></span>
@@ -657,7 +657,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div> : null}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewUploads}>{i18n.user.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
+                        <span className="user-title" onClick={viewUploads}>{i18n.labels.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
@@ -667,7 +667,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div> : null}
                     <div className="user-row">
                         <img className="user-icon" src={danger}/>
-                        <span className="user-link" onClick={deleteAccountDialog}>{i18n.user.deleteAccount}</span>
+                        <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
                 </div>
                 <Footer/>

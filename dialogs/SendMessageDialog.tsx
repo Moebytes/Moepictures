@@ -39,8 +39,8 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Send Message"
-    }, [])
+        document.title = i18n.pages.contact.sendMessage
+    }, [i18n])
 
     useEffect(() => {
         if (dmTarget) {
@@ -60,14 +60,14 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         if (cleanedRecipients.length < 1) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "At least 1 recipient is required."
+            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientRequired
             await functions.timeout(2000)
             return setError(false)
         }
         if (cleanedRecipients.length > 5 && !permissions.isMod(session)) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "You can't send to more than 5 recipients."
+            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientLimit
             await functions.timeout(2000)
             return setError(false)
         }
@@ -93,8 +93,8 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             if (message.messageID) history.push(`/message/${message.messageID}`)
         } catch (err: any) {
             setError(true)
-            let errMsg = "Bad title or content."
-            if (err.response?.data.includes("Cannot send r18 message")) errMsg = "Cannot send this message."
+            let errMsg = i18n.dialogs.sendMessage.error
+            if (err.response?.data.includes("Cannot send r18 message")) errMsg = i18n.dialogs.sendMessage.errorR18
             if (!errorRef.current) await functions.timeout(20)
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
@@ -178,18 +178,18 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" ref={dialogRef} style={{width: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Send Message</span>
+                            <span className="dialog-title">{i18n.pages.contact.sendMessage}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Recipients: </span>
+                            <span className="dialog-text">{i18n.labels.recipients}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={recipients} onChange={(event) => setRecipients(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Title: </span>
+                            <span className="dialog-text">{i18n.labels.title}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Content: </span>
+                            <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={content} onChange={(event) => setContent(event.target.value)}></textarea>
@@ -202,11 +202,11 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                         </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Send"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.send}</button>
                         </div>
                     </div>
                 </div>

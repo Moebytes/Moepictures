@@ -4,7 +4,6 @@ import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSea
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
-import permissions from "../structures/Permissions"
 
 const DeleteSearchHistoryDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -16,8 +15,8 @@ const DeleteSearchHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Search History"
-    }, [])
+        document.title = i18n.dialogs.deleteSearchHistory.title
+    }, [i18n])
 
     useEffect(() => {
         if (deleteSearchHistoryID) {
@@ -49,14 +48,14 @@ const DeleteSearchHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "255px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Search History</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteSearchHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to delete this post from your history?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteSearchHistory.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

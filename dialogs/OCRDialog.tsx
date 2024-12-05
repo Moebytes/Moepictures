@@ -18,8 +18,8 @@ const OCRDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "OCR Page"
-    }, [])
+        document.title = i18n.dialogs.ocr.title
+    }, [i18n])
 
     useEffect(() => {
         if (translationOCRDialog) {
@@ -84,14 +84,14 @@ const OCRDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">OCR Page</span>
+                            <span className="dialog-title">{i18n.dialogs.ocr.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Run OCR on this page? (This will replace the current translations).</span>
+                            <span className="dialog-text">{i18n.dialogs.ocr.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

@@ -279,7 +279,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
-                    <div className="post-image-text">{i18n.sortbar.download}</div>
+                    <div className="post-image-text">{i18n.buttons.download}</div>
                 </div>
                 {props.post.type === "image" ? 
                 <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
@@ -314,7 +314,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
-                        <div className="post-image-text">{i18n.sortbar.download}</div>
+                        <div className="post-image-text">{i18n.buttons.download}</div>
                     </div>
                     {props.post.type === "image" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>

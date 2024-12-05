@@ -47,8 +47,6 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Bulk Tag Edit"
-
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
@@ -61,6 +59,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
             window.removeEventListener("mousemove", logPosition)
         }
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.dialogs.bulkTagEdit.title
+    }, [i18n])
 
     useEffect(() => {
         if (showBulkTagEditDialog) {
@@ -217,30 +219,30 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Bulk Tag Edit</span>
+                            <span className="dialog-title">{i18n.dialogs.bulkTagEdit.title}</span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
-                            <span className="dialog-text">Artists: </span>
+                            <span className="dialog-text">{i18n.navbar.artists}: </span>
                             <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
-                            <span className="dialog-text">Characters: </span>
+                            <span className="dialog-text">{i18n.navbar.characters}: </span>
                             <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
-                            <span className="dialog-text">Series: </span>
+                            <span className="dialog-text">{i18n.tag.series}: </span>
                             <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
-                            <span className="dialog-text">Meta: </span>
+                            <span className="dialog-text">{i18n.tag.meta}: </span>
                             <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Append Tags: </span>
+                            <span className="dialog-text">{i18n.pages.bulkUpload.appendTags}: </span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(appendTags)} click={(tag) => handleTagClick(tag)} type="tag"/>
@@ -248,8 +250,8 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Bulk Edit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.bulkEdit}</button>
                         </div>
                     </div>
                 </div>

@@ -19,8 +19,8 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Report Thread"
-    }, [])
+        document.title = i18n.dialogs.reportThread.title
+    }, [i18n])
 
     useEffect(() => {
         if (reportThreadID) {
@@ -67,28 +67,28 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Report Thread</span>
+                            <span className="dialog-title">{i18n.dialogs.reportThread.title}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Thread report was sent. Thank you!</span>
+                            <span className="dialog-text">{i18n.dialogs.reportThread.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Report threads that are spam, offensive, or otherwise breaking the rules.</span>
+                            <span className="dialog-text">{i18n.dialogs.reportThread.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div> 
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Report"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.report}</button>
                         </div> </>}
                     </div>
                 </div>

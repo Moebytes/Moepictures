@@ -18,8 +18,8 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete All Search History"
-    }, [])
+        document.title = i18n.dialogs.deleteAllSearchHistory.title
+    }, [i18n])
 
     useEffect(() => {
         if (showDeleteAllHistoryDialog) {
@@ -51,14 +51,14 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "285px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete All Search History</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteAllSearchHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Are you sure you want to delete all of your history?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteAllSearchHistory.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

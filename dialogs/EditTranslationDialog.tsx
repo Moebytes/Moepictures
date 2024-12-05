@@ -13,8 +13,8 @@ const EditTranslationDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Edit Translation"
-    }, [])
+        document.title = i18n.dialogs.editTranslation.title
+    }, [i18n])
 
     useEffect(() => {
         if (editTranslationID !== null) {
@@ -43,23 +43,23 @@ const EditTranslationDialog: React.FunctionComponent = (props) => {
                 <div className="edit-translation-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="edit-translation-container">
                         <div className="edit-translation-dialog-title-container">
-                            <span className="edit-translation-dialog-title">Edit Translation</span>
+                            <span className="edit-translation-dialog-title">{i18n.dialogs.editTranslation.title}</span>
                         </div>
                         <div className="edit-translation-dialog-row">
-                            <span className="edit-translation-dialog-text">Transcription</span>
+                            <span className="edit-translation-dialog-text">{i18n.labels.transcription}</span>
                         </div>
                         <div className="edit-translation-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
                             <textarea className="edit-translation-textarea" spellCheck={false} value={editTranslationTranscript} onChange={(event) => setEditTranslationTranscript(event.target.value)}></textarea>
                         </div>
                         <div className="edit-translation-dialog-row">
-                            <span className="edit-translation-dialog-text">Translation</span>
+                            <span className="edit-translation-dialog-text">{i18n.labels.translation}</span>
                         </div>
                         <div className="edit-translation-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
                             <textarea className="edit-translation-textarea" spellCheck={false} value={editTranslationText} onChange={(event) => setEditTranslationText(event.target.value)}></textarea>
                         </div>
                         <div className="edit-translation-dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
                 </div>

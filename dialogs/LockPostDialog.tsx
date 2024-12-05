@@ -23,8 +23,8 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Lock Post"
-    }, [])
+        document.title = getTitle()
+    }, [i18n])
 
     useEffect(() => {
         if (lockPostID) {
@@ -56,17 +56,17 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
 
     const getTitle = () => {
         if (props.post.locked) {
-            return "Unlock Post"
+            return i18n.sidebar.unlockPost
         } else {
-            return "Lock Post"
+            return i18n.dialogs.lockPost.title
         }
     }
 
     const getPrompt = () => {
         if (props.post.locked) {
-            return "Do you want to unlock this post?"
+            return i18n.dialogs.lockPost.unlockHeader
         } else {
-            return "Are you sure you want to lock this post?"
+            return i18n.dialogs.lockPost.header
         }
     }
 
@@ -84,8 +84,8 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-text">{getPrompt()}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

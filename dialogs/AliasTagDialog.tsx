@@ -20,8 +20,8 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Alias Tag"
-    }, [])
+        document.title = i18n.dialogs.aliasTag.title
+    }, [i18n])
 
     useEffect(() => {
         if (aliasTagID) {
@@ -82,11 +82,11 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Alias Tag Request</span>
+                                <span className="dialog-title">{i18n.dialogs.aliasTag.request}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.deleteGroup.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -101,15 +101,15 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Alias Tag</span>
+                                <span className="dialog-title">{i18n.dialogs.aliasTag.title}</span>
                             </div>
                             <div className="dialog-center-row">
-                                <span className="dialog-text">Alias To:</span>
+                                <span className="dialog-text">{i18n.labels.aliasTo}:</span>
                                 <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
                             </div>
                             <div className="dialog-center-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Alias"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.alias}</button>
                             </div>
                         </div>
                     </div>
@@ -124,29 +124,29 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Alias Tag Request</span>
+                            <span className="dialog-title">{i18n.dialogs.aliasTag.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-center-row">
-                            <span className="dialog-text">Your alias request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.aliasTag.submitText}</span>
                         </div>
                         <div className="dialog-center-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div> 
                         </> : <>
                         <div className="dialog-center-row">
-                            <span className="dialog-text">Alias To:</span>
+                            <span className="dialog-text">{i18n.labels.aliasTo}:</span>
                             <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
                         </div>
                         <div className="dialog-center-row">
-                            <span className="dialog-text">Reason:</span>
+                            <span className="dialog-text">{i18n.labels.reason}:</span>
                             <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-center-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submit}</button>
                         </div> </>}
                     </div>
                 </div>

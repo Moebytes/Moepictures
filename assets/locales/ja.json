@@ -2,29 +2,24 @@
     "title": "Moepictures: 萌えアニメの写真 ♥",
     "navbar": {
         "login": "ログイン",
-        "posts": "ポスト",
         "comments": "コメント",
         "artists": "アーティスト",
         "characters": "キャラクター",
         "tags": "タグ",
-        "groups": "グループ",
         "forum": "フォーラム",
         "help": "ヘルプ",
         "terms": "条件",
         "contact": "コンタクト",
-        "premium": "プレミアム",
         "mail": "メール",
         "translations": "翻訳",
         "modQueue": "改造キュー"
     },
     "sidebar": {
         "source": "ソース",
-        "mirrors": "ミラーズ",
         "copyTags": "コピータグ",
         "copyHash": "コピーハッシュ",
         "unlockPost": "ロック解除ポスト",
         "saveSearch": "検索を保存",
-        "title": "タイトル",
         "translated": "翻訳",
         "details": "詳細",
         "uploader": "アップローダー",
@@ -47,17 +42,14 @@
         "restore": "リストア",
         "lock": "ロック",
         "unlock": "アンロック",
-        "compress": "圧縮",
-        "upscale": "高級",
         "history": "歴史",
         "loginRequired": "ログインが必要です。",
+        "accountDeleted": "アカウント削除。",
         "$401": "401エラー。",
         "$403": "403エラー。",
         "$404": "404エラー。"
     },
     "sortbar": {
-        "upload": "アップロード",
-        "download": "ダウンロード",
         "bulk": "バルク",
         "type": {
             "image": "画像",
@@ -126,7 +118,7 @@
         "locked": "鍵付き",
         "private": "プライベート",
         "alphabetic": "アルファベット",
-        "posts": "投稿",
+        "posts": "ポスト",
         "aliases": "別名",
         "length": "長さ"
     },
@@ -138,7 +130,6 @@
         "favgroup": "お気に入りのグループ",
         "parent": "親投稿",
         "children": "子供の投稿",
-        "buyLink": "リンク購入",
         "commentary": "アーティストのコメント",
         "artistWorks": "アーティスト作品",
         "related": "関連",
@@ -158,6 +149,8 @@
         "tag": "タグ"
     },
     "buttons": {
+        "upload": "アップロード",
+        "download": "ダウンロード",
         "new": "新しい",
         "old": "古い",
         "readAll": "すべて読む",
@@ -189,7 +182,27 @@
         "back": "戻る",
         "validate": "検証",
         "cancel": "キャンセル",
-        "go": "行く"
+        "go": "行く",
+        "alias": "別名",
+        "ban": "禁止",
+        "bulkAdd": "一括追加",
+        "bulkEdit": "一括編集",
+        "ignore": "無視",
+        "solve": "解く",
+        "categorize": "分類する",
+        "submitRequest": "リクエストを送信",
+        "compress": "圧縮",
+        "upscale": "高級",
+        "deleteAccount": "アカウント削除",
+        "add": "追加",
+        "forward": "フォワード",
+        "quit": "やめる",
+        "premiumPage": "プレミアムページ",
+        "over18": "私は18歳以上です",
+        "promote": "プロモーション",
+        "save": "保存",
+        "send": "送信",
+        "unban": "禁止解除"
     },
     "history": {
         "post": "投稿履歴",
@@ -219,6 +232,167 @@
         "blacklist": "ブラックリストに載ったIP！",
         "unblacklist": "ブラックリストに載っていないIP！",
         "removeBanner": "バナーを削除しました！"
+    },
+    "user": {
+        "bannedReason": "あなたが追放されたのには理由がある：",
+        "banned": "出入り禁止",
+        "banReason": "禁止事項",
+        "ban": "禁止",
+        "banExpires": "禁止期間",
+        "premiumUntil": "プレミアムまで",
+        "premiumExpired": "プレミアム期限切れ",
+        "joinDate": "入会日",
+        "bio": "バイオ",
+        "noBio": "このユーザーは何も書いていない。",
+        "updateBio": "最新バイオ",
+        "favoritesPrivacy": "お気に入り プライバシー",
+        "showRelated": "ショー関連",
+        "showTooltips": "ツールチップの表示",
+        "showTagBanner": "タグバナーを表示",
+        "downloadPixivID": "Pixiv IDをダウンロード",
+        "upscaledImages": "アップスケール画像",
+        "autosearchInterval": "オートサーチ間隔",
+        "showR18": "R18を表示",
+        "clearPfp": "クリアPfp",
+        "showBanner": "バナーを表示",
+        "changeUsername": "ユーザー名の変更",
+        "changeEmail": "電子メールの変更",
+        "changePassword": "パスワードの変更",
+        "$2fa": "2要素認証",
+        "loginHistory": "ログイン履歴",
+        "ipBlacklist": "IPブラックリスト",
+        "newsBanner": "ニュースバナー",
+        "deleted": "削除された"
+    },
+    "roles": {
+        "admin": "管理者",
+        "mod": "モデル",
+        "premiumCurator": "プレミアム・キュレーター",
+        "curator": "キュレーター",
+        "premiumContributor": "プレミアム・コントリビューター",
+        "contributor": "投稿者",
+        "premium": "プレミアム",
+        "user": "ユーザー"
+    },
+    "time": {
+        "january": "1月", 
+        "february": "2月", 
+        "march": "3月",
+        "april": "4月", 
+        "may": "5月", 
+        "june": "6月", 
+        "july": "7月",
+        "august": "8月", 
+        "september": "9月", 
+        "october": "10月",
+        "november": "11月", 
+        "december": "12月",
+        "comma": false,
+        "dayAppend": "日",
+        "yearAppend": "年",
+        "year": "年",
+        "month": "ヶ月",
+        "day": "日",
+        "hour": "時間",
+        "minute": "分",
+        "second": "秒",
+        "ago": "前",
+        "plural": "",
+        "by": "-",
+        "aliased": "別名：",
+        "implicated": "暗示されている：",
+        "uploaded": "アップロードした：",
+        "edited": "編集した：",
+        "updated": "更新された：",
+        "viewed": "見たよ："
+    },
+    "labels": {
+        "reason": "理由",
+        "none": "無し",
+        "unknown": "不明",
+        "noDesc": "記述がない。",
+        "affectedPosts": "影響を受けるポスト",
+        "name": "名前",
+        "email": "電子メール",
+        "description": "説明",
+        "orderUpdated": "オーダー更新",
+        "imageUpdated": "画像更新",
+        "parentRemoved": "親を削除",
+        "images": "画像",
+        "uploads": "アップロード",
+        "parentID": "親のID",
+        "title": "タイトル",
+        "translatedTitle": "翻訳タイトル",
+        "text": "テキスト",
+        "link": "リンク",
+        "mirrors": "ミラーズ",
+        "commentary": "コメンタリー",
+        "translatedCommentary": "翻訳解説",
+        "category": "カテゴリー",
+        "website": "ウェブサイト",
+        "social": "ソーシャル",
+        "twitter": "ツイッター",
+        "fandom": "ファンダム",
+        "implications": "意味合い",
+        "pixivTags": "Pixivタグ",
+        "noData": "データなし",
+        "sender": "送信者",
+        "recipients": "受賞者",
+        "newTags": "新しいタグ",
+        "implies": "インピーズ",
+        "createdBy": "作成者",
+        "updatedBy": "更新者",
+        "editedBy": "編集者",
+        "autoSearch": "オートサーチ",
+        "group": "グループ",
+        "requester": "要求者",
+        "oldName": "旧名",
+        "newName": "新名称",
+        "oldDescription": "古い説明",
+        "newDescription": "新着情報",
+        "groupName": "グループ名",
+        "thread": "スレッド",
+        "comment": "コメント",
+        "aliasTo": "エイリアス",
+        "similarPosts": "類似の投稿",
+        "resolution": "決議",
+        "size": "サイズ",
+        "upscaled": "アップスケール",
+        "removed": "削除",
+        "oldTag": "旧タグ",
+        "newTag": "新しいタグ",
+        "oldCategory": "旧カテゴリー",
+        "newCategory": "新カテゴリー",
+        "oldAliases": "古い別名",
+        "newAliases": "新しい別名",
+        "oldImplications": "古い意味合い",
+        "newImplications": "新しい意味合い",
+        "oldPixivTags": "旧Pixivタグ",
+        "newPixivTags": "新しいPixivタグ",
+        "oldWebsite": "旧ウェブサイト",
+        "newWebsite": "新しいウェブサイト",
+        "oldSocial": "旧ソーシャル",
+        "newSocial": "新しいソーシャル",
+        "oldTwitter": "旧ツイッター",
+        "newTwitter": "新しいツイッター",
+        "oldFandom": "古いファンダム",
+        "newFandom": "新しいファンダム",
+        "oldR18": "旧R18",
+        "newR18": "新型R18",
+        "days": "日数",
+        "favoriteGroup": "お気に入りのグループ",
+        "privacy": "プライバシー",
+        "public": "パブリック",
+        "quality": "品質",
+        "maxDimension": "最大寸法",
+        "maxUpscaled": "最大アップスケール",
+        "scaleFactor": "スケールファクター",
+        "compressTo": "に圧縮する：",
+        "content": "内容",
+        "transcription": "転写",
+        "translation": "翻訳",
+        "wiki": "ウィキ",
+        "buyLink": "リンク購入"
     },
     "errors": {
         "$401":"401エラー",
@@ -277,145 +451,6 @@
             "bad": "悪い経歴だ。"
         }
     },
-    "user": {
-        "bannedReason": "あなたが追放されたのには理由がある：",
-        "banned": "出入り禁止",
-        "banReason": "禁止事項",
-        "ban": "禁止",
-        "banExpires": "禁止期間",
-        "premiumUntil": "プレミアムまで",
-        "premiumExpired": "プレミアム期限切れ",
-        "email": "電子メール",
-        "joinDate": "入会日",
-        "bio": "バイオ",
-        "noBio": "このユーザーは何も書いていない。",
-        "updateBio": "最新バイオ",
-        "favoritesPrivacy": "お気に入り プライバシー",
-        "public": "パブリック",
-        "showRelated": "ショー関連",
-        "showTooltips": "ツールチップの表示",
-        "showTagBanner": "タグバナーを表示",
-        "downloadPixivID": "Pixiv IDをダウンロード",
-        "upscaledImages": "アップスケール画像",
-        "autosearchInterval": "オートサーチ間隔",
-        "showR18": "R18を表示",
-        "clearPfp": "クリアPfp",
-        "showBanner": "バナーを表示",
-        "changeUsername": "ユーザー名の変更",
-        "changeEmail": "電子メールの変更",
-        "changePassword": "パスワードの変更",
-        "$2fa": "2要素認証",
-        "loginHistory": "ログイン履歴",
-        "ipBlacklist": "IPブラックリスト",
-        "newsBanner": "ニュースバナー",
-        "uploads": "アップロード",
-        "deleteAccount": "アカウント削除",
-        "deleted": "削除された"
-    },
-    "time": {
-        "january": "1月", 
-        "february": "2月", 
-        "march": "3月",
-        "april": "4月", 
-        "may": "5月", 
-        "june": "6月", 
-        "july": "7月",
-        "august": "8月", 
-        "september": "9月", 
-        "october": "10月",
-        "november": "11月", 
-        "december": "12月",
-        "comma": false,
-        "dayAppend": "日",
-        "yearAppend": "年",
-        "year": "年",
-        "month": "ヶ月",
-        "day": "日",
-        "hour": "時間",
-        "minute": "分",
-        "second": "秒",
-        "ago": "前",
-        "plural": "",
-        "by": "-",
-        "aliased": "別名：",
-        "implicated": "暗示されている：",
-        "uploaded": "アップロードした：",
-        "edited": "編集した：",
-        "updated": "更新された：",
-        "viewed": "見たよ："
-    },
-    "labels": {
-        "reason": "理由",
-        "none": "無し",
-        "unknown": "不明",
-        "noDesc": "記述がない。",
-        "affectedPosts": "影響を受けるポスト",
-        "name": "名前",
-        "description": "説明",
-        "orderUpdated": "オーダー更新",
-        "imageUpdated": "画像更新",
-        "parentRemoved": "親を削除",
-        "images": "画像",
-        "parentID": "親のID",
-        "translatedTitle": "翻訳タイトル",
-        "text": "テキスト",
-        "link": "リンク",
-        "commentary": "コメンタリー",
-        "translatedCommentary": "翻訳解説",
-        "category": "カテゴリー",
-        "website": "ウェブサイト",
-        "social": "ソーシャル",
-        "twitter": "ツイッター",
-        "fandom": "ファンダム",
-        "implications": "意味合い",
-        "pixivTags": "Pixivタグ",
-        "noData": "データなし",
-        "sender": "送信者",
-        "recipients": "受賞者",
-        "newTags": "新しいタグ",
-        "implies": "インピーズ",
-        "createdBy": "作成者",
-        "updatedBy": "更新者",
-        "editedBy": "編集者",
-        "autoSearch": "オートサーチ",
-        "translation": "翻訳",
-        "group": "グループ",
-        "requester": "要求者",
-        "oldName": "旧名",
-        "newName": "新名称",
-        "oldDescription": "古い説明",
-        "newDescription": "新着情報",
-        "groupName": "グループ名",
-        "thread": "スレッド",
-        "comment": "コメント",
-        "user": "ユーザー",
-        "aliasTo": "エイリアス",
-        "similarPosts": "類似の投稿",
-        "resolution": "決議",
-        "size": "サイズ",
-        "upscaled": "アップスケール",
-        "removed": "削除",
-        "oldTag": "旧タグ",
-        "newTag": "新しいタグ",
-        "oldCategory": "旧カテゴリー",
-        "newCategory": "新カテゴリー",
-        "oldAliases": "古い別名",
-        "newAliases": "新しい別名",
-        "oldImplications": "古い意味合い",
-        "newImplications": "新しい意味合い",
-        "oldPixivTags": "旧Pixivタグ",
-        "newPixivTags": "新しいPixivタグ",
-        "oldWebsite": "旧ウェブサイト",
-        "newWebsite": "新しいウェブサイト",
-        "oldSocial": "旧ソーシャル",
-        "newSocial": "新しいソーシャル",
-        "oldTwitter": "旧ツイッター",
-        "newTwitter": "新しいツイッター",
-        "oldFandom": "古いファンダム",
-        "newFandom": "新しいファンダム",
-        "oldR18": "旧R18",
-        "newR18": "新型R18"
-    },
     "pages": {
         "enable2FA": {
             "heading": "2FAは、ログイン時に追加の時間限定コードを要求することで、アカウントにはるかに強力なセキュリティを提供します。",
@@ -472,8 +507,7 @@
             "submitHeading": "確認メールが再送されました。メールを確認してください。",
             "unverifiedEmail": "未確認Eメール",
             "optionalAddressChange": "住所変更オプション",
-            "resend": "検証リンクの再送",
-            "error": "電子メールまたはcaptchaが正しくありません。"
+            "resend": "検証リンクの再送"
         },
         "verifyEmailSuccess": {
             "pageTitle": "電子メールの成功を確認する",
@@ -481,7 +515,6 @@
             "heading": "メールアドレスが認証されました！これでアカウントを使用できるようになります。"
         },
         "login": {
-            "title": "ログイン",
             "signupText": "アカウントをお持ちでないですか？登録する",
             "forgotText": "パスワードをお忘れですか？",
             "username": "ユーザー名",
@@ -570,7 +603,6 @@
         "upload": {
             "selectFiles": "ファイルを選択",
             "enterLinks": "リンクを入力",
-            "upscaled": "アップスケール",
             "original": "オリジナル",
             "submitHeading": "投稿がアップロードされた。",
             "submitHeadingApproval": "あなたの投稿は投稿され、承認されればサイトに掲載されます。",
@@ -634,6 +666,312 @@
             "editReason": "編集理由",
             "noEdits": "ポスト編集は行われなかった。",
             "reasonRequired": "編集理由が必要です。"
+        }
+    },
+    "dialogs": {
+        "download": {
+            "offset": "オフセット",
+            "amount": "金額"
+        },
+        "page": {
+            "title": "ページへ",
+            "page": "ページ"
+        },
+        "aliasTag": {
+            "title": "別名タグ",
+            "request": "エイリアス・タグ・リクエスト",
+            "submitText": "エイリアス申請が送信されました。"
+        },
+        "ban": {
+            "title": "ユーザー禁止",
+            "header": "このユーザーを追放しますか？理由も記入してください。",
+            "unverifiedChanges": "検証されていない変更を削除しますか？",
+            "historyChanges": "履歴の変更を削除しますか？",
+            "comments": "コメントや返信を削除しますか？",
+            "messages": "メッセージを削除しますか？"
+        },
+        "bulkDelete": {
+            "title": "一括削除",
+            "header": "本当に選択した投稿を削除したいのですか？"
+        },
+        "bulkFavgroup": {
+            "title": "一括お気に入りグループ"
+        },
+        "bulkTagEdit": {
+            "title": "タグの一括編集"
+        },
+        "captcha": {
+            "title": "レートリミット超過",
+            "header": "あなたが人間であることを確認してください。無視してもかまいませんが、コンテンツはロックされます。"
+        },
+        "categorizeTag": {
+            "title": "タグを分類する",
+            "request": "タグリクエストを分類する",
+            "submitText": "カテゴリー分けのリクエストが送信されました。",
+            "banText": "出入り禁止。分類できない。"
+        },
+        "compress": {
+            "title": "圧縮ポスト"
+        },
+        "upscale": {
+            "title": "高級ポスト"
+        },
+        "deleteAccount": {
+            "header": "本当にアカウントを削除しますか？この操作は不可逆的です。お気に入り、コメント、かわいさ評価などすべてを永久に失うことになります。",
+            "header2": "Moepicturesはコミュニティへの投稿に重点を置いたサイトであるため、投稿された投稿を削除することはありません。これらの投稿をアップロードしたアカウントは、「deleted 」として表示されます。",
+            "header3": "このままでいいんですか？"
+        },
+        "deleteAliasHistory": {
+            "aliasTitle": "エイリアス履歴の削除",
+            "implicationTitle": "インプリケーション履歴の削除"
+        },
+        "deleteAllSaveSearch": {
+            "title": "保存したすべての検索を削除する",
+            "header": "保存した検索をすべて削除してもよろしいですか？"
+        },
+        "deleteAllSearchHistory": {
+            "title": "すべての検索履歴を削除する",
+            "header": "すべての履歴を削除してもよろしいですか？"
+        },
+        "deleteComment": {
+            "title": "コメント削除",
+            "header": "このコメントを削除しますか？"
+        },
+        "deleteFavgroup": {
+            "title": "お気に入りグループの削除",
+            "header": "このお気に入りグループを削除してもよろしいですか？"
+        },
+        "deleteGroup": {
+            "title": "グループ削除",
+            "request": "グループ削除リクエスト",
+            "submitText": "削除依頼が送信されました。",
+            "banText": "禁止されています。リクエストを送信できません。",
+            "header": "このグループを削除しますか？",
+            "reasonHeader": "なぜこのグループを削除したいのですか？"
+        },
+        "deleteGroupHistory": {
+            "title": "グループ履歴の削除",
+            "header": "本当にこの履歴状態を削除したいのですか？",
+            "noDelete": "現在の履歴状態を削除することはできない。"
+        },
+        "deleteMessage": {
+            "title": "メッセージの削除",
+            "header": "このメッセージを永久に削除してもよろしいですか？"
+        },
+        "deleteMessageReply": {
+            "title": "返信メッセージの削除",
+            "header": "この返信メッセージを削除しますか？"
+        },
+        "deletePost": {
+            "title": "投稿を削除する",
+            "request": "投稿削除リクエスト",
+            "header": "本当にこの投稿を削除したいのですか？",
+            "reasonHeader": "なぜこの投稿を削除したいのですか？ 例：低品質、AIが作成した、または他のルールに違反している）。"
+        },
+        "deleteReply": {
+            "title": "返信削除",
+            "header": "この返信を削除しますか？"
+        },
+        "deleteTag": {
+            "title": "タグの削除",
+            "request": "タグ削除リクエスト",
+            "header": "このタグを削除しますか？",
+            "reasonHeader": "タグが無意味/冗長である場合、削除を要求することができます。なぜこのタグを削除したいのですか？"
+        },
+        "deleteThread": {
+            "title": "スレッド削除",
+            "header": "このスレッドを削除しますか？"
+        },
+        "deletePostHistory": {
+            "title": "投稿履歴の削除"
+        },
+        "deleteSearchHistory": {
+            "title": "検索履歴の削除",
+            "header": "この投稿を履歴から削除しますか？"
+        },
+        "deleteTagHistory": {
+            "title": "タグ履歴の削除"
+        },
+        "deleteTranslationHistory": {
+            "title": "翻訳履歴の削除"
+        },
+        "disable2FA": {
+            "title": "2FAを無効にする",
+            "header": "本当に2FAを無効にしますか？"
+        },
+        "editComment": {
+            "title": "コメントを編集する"
+        },
+        "editMessageReply": {
+            "title": "返信メッセージを編集する"
+        },
+        "editReply": {
+            "title": "返信を編集する"
+        },
+        "editMessage": {
+            "title": "編集メッセージ"
+        },
+        "editThread": {
+            "title": "スレッドの編集"
+        },
+        "editFavgroup": {
+            "title": "お気に入りグループの編集"
+        },
+        "editGroup": {
+            "title": "編集グループ",
+            "request": "グループ・リクエストの編集",
+            "submitText": "編集リクエストが送信されました。",
+            "noName": "名前はない。"
+        },
+        "editSaveSearch": {
+            "title": "保存された検索の編集",
+            "tagsReq": "タグは必須。"
+        },
+        "editTag": {
+            "title": "編集タグ",
+            "request": "タグの編集リクエスト",
+            "submitText": "タグの編集リクエストが送信されました。",
+            "implicationEdits": "これには、承認のために提出されたインプリケーション編集も含まれる。",
+            "error": "このタグを編集できませんでした。"
+        },
+        "editTranslation": {
+            "title": "編集翻訳"
+        },
+        "favgroup": {
+            "title": "お気に入りグループに追加"
+        },
+        "forwardMessage": {
+            "title": "転送メッセージ",
+            "header": "受信者の追加や削除も可能です。",
+            "recipientRequired": "最低1人の受信者が必要。",
+            "recipientLimit": "5人以上の受信者に送信することはできません。",
+            "error": "このメッセージは転送できません。"
+        },
+        "group": {
+            "titleRemove": "グループから外す",
+            "requestAdd": "グループ・リクエストに追加",
+            "requestRemove": "グループから外す",
+            "banText": "あなたは追放されています。グループには入れません。",
+            "header": "グループ名を入力します。グループが存在しない場合は作成されます。",
+            "removeHeader": "その投稿は削除されたグループから削除されます。",
+            "submitText": "リクエストは送信されました。"
+        },
+        "lockPost": {
+            "title": "ロックポスト",
+            "header": "本当にこの投稿をロックしたいのか？",
+            "unlockHeader": "この記事のロックを解除しますか？"
+        },
+        "privatePost": {
+            "title": "私設ポスト",
+            "unprivateTitle": "非公開ポスト",
+            "header": "この投稿を非公開にしますか？",
+            "unprivateHeader": "この投稿を非公開にしますか？"
+        },
+        "newThread": {
+            "title": "新しいスレッド",
+            "error": "不正なコンテンツまたはキャプチャ。"
+        },
+        "ocr": {
+            "title": "OCRページ",
+            "header": "このページでOCRを実行しますか？(これは現在の翻訳を置き換えます）。"
+        },
+        "parent": {
+            "request": "保護者リクエストに追加",
+            "banText": "出入り禁止。親になれない。"
+        },
+        "premium": {
+            "title": "保険料が必要",
+            "header": "この機能を使用するにはプレミアムが必要です。プレミアムページをご覧になりますか？",
+            "headerTags": "3つ以上のタグを検索するにはプレミアムが必要です。プレミアムページをご覧になりますか？"
+        },
+        "r18": {
+            "pageTitle": "R18確認",
+            "title": "警告 露骨な内容",
+            "header": "R18コンテンツは18歳以上の方のみ閲覧可能です。続行することにより、あなたは18歳以上であり、そのようなコンテンツを閲覧する意思があることを確認します。"
+        },
+        "promote": {
+            "title": "ユーザー促進"
+        },
+        "reportComment": {
+            "title": "レポート・コメント",
+            "submitText": "コメントレポートを送信しました。ありがとう！",
+            "header": "スパム、攻撃的、またはその他のルール違反のコメントを報告する。"
+        },
+        "reportReply": {
+            "title": "レポート返信",
+            "submitText": "返信レポートを送信しました。ありがとうございました！",
+            "header": "スパム、攻撃的、またはその他のルール違反の返信を報告する。"
+        },
+        "reportThread": {
+            "title": "報告スレッド",
+            "submitText": "スレッドレポートを送信しました。ありがとう！",
+            "header": "スパム、攻撃的、その他ルール違反のスレッドを報告する。"
+        },
+        "revertAliasHistory": {
+            "undoAliasTitle": "エイリアシングの取り消し",
+            "redoAliasTitle": "エイリアシングのやり直し",
+            "undoImplicationTitle": "アンドゥ・インプリケーション",
+            "redoImplicationTitle": "やり直しの暗示",
+            "undoAliasHeading": "このエイリアシングを元に戻しますか？",
+            "redoAliasHeading": "このエイリアシングをやり直したいか？",
+            "undoImplicationHeading": "この意味合いを取り消したいか？",
+            "redoImplicationHeading": "この意味合いをやり直したいか？"
+        },
+        "revertGroupHistory": {
+            "title": "グループ履歴を戻す",
+            "currentState": "これはすでに現在の歴史の状態である。",
+            "banText": "あなたは追放されています。履歴を戻すことはできません。",
+            "header": "本当にこの履歴の状態に戻したいのですか？"
+        },
+        "revertPostHistory": {
+            "title": "投稿履歴を戻す",
+            "locked": "この投稿はロックされています。履歴を戻すことはできません。",
+            "imagePermission": "画像を置き換える権限がないため、この状態を適用できませんでした。"
+        },
+        "revertTagHistory": {
+            "title": "タグの履歴を戻す",
+            "implicationPermission": "このような意味合いを元に戻す許可はない。"
+        },
+        "revertTranslationHistory": {
+            "title": "翻訳履歴を戻す"
+        },
+        "saveTranslation": {
+            "title": "翻訳の保存",
+            "request": "翻訳依頼の保存",
+            "header": "この記事に加えた翻訳の変更を保存しますか？",
+            "submitText": "翻訳依頼が送信されました。",
+            "banText": "禁止されています。翻訳を保存できません。",
+            "locked": "この投稿はロックされています。翻訳を保存できない"
+        },
+        "sendMessage": {
+            "error": "タイトルや内容が悪い。",
+            "errorR18": "このメッセージを送信できません。"
+        },
+        "softDeleteMessage": {
+            "title": "ソフト削除メッセージ",
+            "header": "このメッセージをソフト削除しますか？ 他の受信者が返信した場合、再度表示されます）。"
+        },
+        "takedownPost": {
+            "title": "テイクダウン・ポスト",
+            "restoreTitle": "ポストの復元",
+            "header": "本当にこの記事を削除したいのですか？",
+            "restoreHeader": "このポストを復元しますか？"
+        },
+        "takedownTag": {
+            "title": "テイクダウン・タグ",
+            "restoreTitle": "タグの復元",
+            "header": "このタグと関連記事を削除してもよろしいですか？",
+            "restoreHeader": "このタグとすべての関連記事を復元しますか？"
+        },
+        "unban": {
+            "title": "アンバンユーザー",
+            "header": "このユーザーを追放しますか？"
+        },
+        "sourceEdit": {
+            "request": "ソース編集リクエスト"
+        },
+        "tagEdit": {
+            "request": "タグ編集リクエスト"
         }
     }
 }

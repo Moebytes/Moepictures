@@ -13,8 +13,8 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Comment"
-    }, [])
+        document.title = i18n.dialogs.deleteComment.title
+    }, [i18n])
 
     useEffect(() => {
         if (deleteCommentID) {
@@ -42,14 +42,14 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Comment</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteComment.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to delete this comment?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteComment.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

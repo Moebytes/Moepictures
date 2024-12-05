@@ -24,8 +24,8 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Post"
-    }, [])
+        document.title = i18n.dialogs.deletePost.title
+    }, [i18n])
 
     useEffect(() => {
         if (showDeletePostDialog) {
@@ -77,11 +77,11 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Delete Post Request</span>
+                                <span className="dialog-title">{i18n.dialogs.deletePost.request}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.deleteGroup.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -96,14 +96,14 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Delete Post</span>
+                                <span className="dialog-title">{i18n.dialogs.deletePost.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Are you sure that you want to delete this post?</span>
+                                <span className="dialog-text">{i18n.dialogs.deletePost.header}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>
@@ -118,28 +118,28 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                 <div className="dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Post Request</span>
+                            <span className="dialog-title">{i18n.dialogs.deletePost.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your delete request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteGroup.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text-small">Why do you want to delete this post? (eg. low quality, AI-generated, or breaks other rule).</span>
+                            <span className="dialog-text-small">{i18n.dialogs.deletePost.reasonHeader}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept", true)} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept", true)} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </> }
                     </div>
                 </div>

@@ -315,7 +315,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                 <div className="message-content-container">
                     <div className="message-container">
                         <div className="message-row" style={{width: "100%"}}>
-                            <span className="message-heading">{i18n.sidebar.title}</span>
+                            <span className="message-heading">{i18n.labels.title}</span>
                         </div>
                         {!mobile ? <div className="message-row">
                             <span className="message-heading">{i18n.labels.sender}</span>

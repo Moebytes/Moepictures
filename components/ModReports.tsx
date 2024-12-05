@@ -122,7 +122,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             <div className="mod-post-text-column">
                 <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
                 <span className="mod-post-text">{i18n.labels.reason}: {props.request.reason}</span>
-                <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>{i18n.labels.user}: {username}</span>
+                <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>{i18n.roles.user}: {username}</span>
                 <span className="mod-post-text">{textType}{text}</span>
             </div>
             <div className="mod-post-options">

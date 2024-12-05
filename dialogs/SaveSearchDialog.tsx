@@ -31,8 +31,6 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Save Search"
-
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
@@ -45,6 +43,10 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
             window.removeEventListener("mousemove", logPosition)
         }
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.sidebar.saveSearch
+    }, [i18n])
 
     const initItems = () => {
         if (saveSearchDialog) {
@@ -73,14 +75,14 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
         if (!name) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Name is required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.nameReq
             await functions.timeout(2000)
             return setError(false)
         }
         if (!tags) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Tags are required."
+            errorRef.current!.innerText = i18n.dialogs.editSaveSearch.tagsReq
             await functions.timeout(2000)
             return setError(false)
         }
@@ -126,14 +128,14 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Save Search</span>
+                            <span className="dialog-title">{i18n.sidebar.saveSearch}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Name: </span>
+                            <span className="dialog-text">{i18n.labels.name}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "max-content"}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Tags: </span>
+                            <span className="dialog-text">{i18n.navbar.tags}: </span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="all"/>
@@ -141,8 +143,8 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Save"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.save}</button>
                         </div>
                     </div>
                 </div>

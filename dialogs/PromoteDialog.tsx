@@ -41,8 +41,8 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Promote User"
-    }, [])
+        document.title = i18n.dialogs.promote.title
+    }, [i18n])
 
     useEffect(() => {
         if (promoteName) {
@@ -76,50 +76,50 @@ const PromoteDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "300px", height: "420px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Promote User</span>
+                            <span className="dialog-title">{i18n.dialogs.promote.title}</span>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={adminCrown}/>
-                            <span className="dialog-text admin-color">Admin:</span>
+                            <span className="dialog-text admin-color">{i18n.roles.admin}:</span>
                             <img className="dialog-checkbox" src={role === "admin" ? checkboxChecked : checkbox} onClick={() => setRole("admin")} style={{filter: "hue-rotate(60deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={modCrown}/>
-                            <span className="dialog-text mod-color">Mod:</span>
+                            <span className="dialog-text mod-color">{i18n.roles.mod}:</span>
                             <img className="dialog-checkbox" src={role === "mod" ? checkboxChecked : checkbox} onClick={() => setRole("mod")} style={{filter: "hue-rotate(-60deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={premiumCuratorStar}/>
-                            <span className="dialog-text curator-color">Premium Curator:</span>
+                            <span className="dialog-text curator-color">{i18n.roles.premiumCurator}:</span>
                             <img className="dialog-checkbox" src={role === "premium-curator" ? checkboxChecked : checkbox} onClick={() => setRole("premium-curator")} style={{filter: "hue-rotate(50deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={curatorStar}/>
-                            <span className="dialog-text curator-color">Curator:</span>
+                            <span className="dialog-text curator-color">{i18n.roles.curator}:</span>
                             <img className="dialog-checkbox" src={role === "curator" ? checkboxChecked : checkbox} onClick={() => setRole("curator")} style={{filter: "hue-rotate(50deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={premiumContributorPencil}/>
-                            <span className="dialog-text premium-color">Premium Contributor:</span>
+                            <span className="dialog-text premium-color">{i18n.roles.premiumContributor}:</span>
                             <img className="dialog-checkbox" src={role === "premium-contributor" ? checkboxChecked : checkbox} onClick={() => setRole("premium-contributor")} style={{filter: "hue-rotate(40deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={contributorPencil}/>
-                            <span className="dialog-text contributor-color">Contributor:</span>
+                            <span className="dialog-text contributor-color">{i18n.roles.contributor}:</span>
                             <img className="dialog-checkbox" src={role === "contributor" ? checkboxChecked : checkbox} onClick={() => setRole("contributor")} style={{filter: "hue-rotate(20deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <img className="dialog-icon" src={premiumStar}/>
-                            <span className="dialog-text premium-color">Premium:</span>
+                            <span className="dialog-text premium-color">{i18n.roles.premium}:</span>
                             <img className="dialog-checkbox" src={role === "premium" ? checkboxChecked : checkbox} onClick={() => setRole("premium")} style={{filter: "hue-rotate(40deg) saturate(100%) brightness(120%)"}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text user-color">User:</span>
+                            <span className="dialog-text user-color">{i18n.roles.user}:</span>
                             <img className="dialog-checkbox" src={role === "user" ? checkboxChecked : checkbox} onClick={() => setRole("user")}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{"Promote"}</button>
                         </div>
                     </div>

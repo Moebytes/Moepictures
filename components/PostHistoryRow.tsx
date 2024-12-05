@@ -375,7 +375,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!prevHistory || changes.title) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.title}:</span> {props.postHistory.title || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.title}:</span> {props.postHistory.title || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.translatedTitle) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.translatedTitle}:</span> {props.postHistory.translatedTitle || i18n.labels.none}</span>)
@@ -390,13 +390,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.link}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link, i18n)}</span></span>)
         }
         if (!prevHistory || changes.mirrors) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.mirrors}:</span> {printMirrors()}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}:</span> {printMirrors()}</span>)
         }
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}:</span> {props.postHistory.bookmarks || "?"}</span>)
         }
         if ((!prevHistory && props.postHistory.purchaseLink) || changes.purchaseLink) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.post.buyLink}:</span> {props.postHistory.purchaseLink || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}:</span> {props.postHistory.purchaseLink || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.commentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}:</span> {props.postHistory.commentary || i18n.labels.none}</span>)

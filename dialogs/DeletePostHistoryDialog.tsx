@@ -16,8 +16,8 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Post History"
-    }, [])
+        document.title = i18n.dialogs.deletePostHistory.title
+    }, [i18n])
 
     useEffect(() => {
         if (deletePostHistoryID) {
@@ -49,13 +49,13 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Post History</span>
+                            <span className="dialog-title">{i18n.dialogs.deletePostHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">The current history state cannot be deleted.</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteGroupHistory.noDelete}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
                 </div>
@@ -71,14 +71,14 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Post History</span>
+                            <span className="dialog-title">{i18n.dialogs.deletePostHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to delete this history state?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteGroupHistory.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

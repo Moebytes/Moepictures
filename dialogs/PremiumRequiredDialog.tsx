@@ -16,8 +16,8 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Premium Required"
-    }, [])
+        document.title = i18n.dialogs.premium.title
+    }, [i18n])
 
     useEffect(() => {
         if (premiumRequired) {
@@ -39,9 +39,9 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
 
     const getPremiumText = () => {
         if (premiumRequired === "tags") {
-            return "You need premium to search more than 3 tags. Would you like to visit the premium page?"
+            return i18n.dialogs.premium.headerTags
         }
-        return "Premium is required to use this feature. Would you like to visit the premium page?"
+        return i18n.dialogs.premium.header
     }
 
     if (premiumRequired) {
@@ -51,15 +51,15 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "355px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title" style={{color: "var(--premiumColor)"}}>Premium Required</span>
+                            <span className="dialog-title" style={{color: "var(--premiumColor)"}}>{i18n.dialogs.premium.title}</span>
                             <img className="dialog-title-img" src={premiumStar}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text" style={{color: "var(--premiumColor)"}}>{getPremiumText()}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button" style={{backgroundColor: "#ff17af"}}>{"Quit"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#ff3bd7"}}>{"Premium Page"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button" style={{backgroundColor: "#ff17af"}}>{i18n.buttons.quit}</button>
+                            <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#ff3bd7"}}>{i18n.buttons.premiumPage}</button>
                         </div>
                     </div>
                 </div>

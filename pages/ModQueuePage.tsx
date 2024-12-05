@@ -159,13 +159,13 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     }
 
     const getText = () => {
-        if (modState === "posts") return i18n.navbar.posts
+        if (modState === "posts") return i18n.sort.posts
         if (modState === "post-edits") return i18n.mod.postEdits
         if (modState === "post-deletions") return i18n.mod.postDeletions
         if (modState === "tag-edits") return i18n.mod.tagEdits
         if (modState === "tag-aliases") return i18n.mod.tagAliases
         if (modState === "tag-deletions") return i18n.mod.tagDeletions
-        if (modState === "groups") return i18n.navbar.groups
+        if (modState === "groups") return i18n.sort.groups
         if (modState === "group-edits") return i18n.mod.groupEdits
         if (modState === "group-deletions") return i18n.mod.groupDeletions
         if (modState === "translations") return i18n.navbar.translations

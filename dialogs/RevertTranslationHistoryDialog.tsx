@@ -16,8 +16,8 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Revert Translation History"
-    }, [])
+        document.title = i18n.dialogs.revertTranslationHistory.title
+    }, [i18n])
 
     useEffect(() => {
         if (revertTranslationHistoryID) {
@@ -48,11 +48,11 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Revert Translation History</span>
+                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
                         </div>
-                        <span className="dialog-ban-text">This post is locked. Cannot revert history.</span>
+                        <span className="dialog-ban-text">{i18n.dialogs.revertPostHistory.locked}</span>
                         <button className="dialog-ban-button" onClick={() => click("reject")}>
-                            <span className="dialog-ban-button-text">←Back</span>
+                            <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                         </button>
                     </div>
                 </Draggable>
@@ -67,13 +67,13 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Revert Translation History</span>
+                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">This is already the current history state.</span>
+                            <span className="dialog-text">{i18n.dialogs.revertGroupHistory.currentState}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
                 </div>
@@ -89,11 +89,11 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Revert Translation History</span>
+                                <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot revert history.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.revertGroupHistory.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -107,14 +107,14 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Revert Translation History</span>
+                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Are you sure that you want to revert back to this history state?</span>
+                            <span className="dialog-text">{i18n.dialogs.revertGroupHistory.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

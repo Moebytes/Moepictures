@@ -63,7 +63,7 @@ const LoginPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (sidebarText !== i18n.sidebar.loginRequired) setSidebarText("")
-        document.title = i18n.pages.login.title
+        document.title = i18n.navbar.login
     }, [i18n])
 
     useEffect(() => {
@@ -128,7 +128,7 @@ const LoginPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">{i18n.pages.login.title}</span>
+                    <span className="sitepage-title">{i18n.navbar.login}</span>
                     <Link to="/signup">
                         <span className="sitepage-link-clickable">{i18n.pages.login.signupText}</span>
                     </Link>
@@ -152,7 +152,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => login()}>{i18n.pages.login.title}</button>
+                        <button className="sitepage-button" onClick={() => login()}>{i18n.navbar.login}</button>
                     </div>
                 </div>
                 <Footer/>

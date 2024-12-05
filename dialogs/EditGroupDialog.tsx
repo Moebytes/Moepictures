@@ -28,14 +28,14 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Edit Group"
-    }, [])
+        document.title = i18n.dialogs.editGroup.title
+    }, [i18n])
 
     useEffect(() => {
         if (editGroupObj) {
             document.body.style.pointerEvents = "none"
             setName(editGroupObj.name)
-            setDescription(editGroupObj.description || "No description.")
+            setDescription(editGroupObj.description || i18n.labels.noDesc)
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
@@ -47,7 +47,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             if (!name) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = "No name."
+                errorRef.current!.innerText = i18n.dialogs.editGroup.noName
                 await functions.timeout(2000)
                 return setError(false)
             }
@@ -60,7 +60,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             if (!name) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = "No name."
+                errorRef.current!.innerText = i18n.dialogs.editGroup.noName
                 await functions.timeout(2000)
                 return setError(false)
             }
@@ -97,11 +97,11 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="dialog-row">
-                <span className="dialog-text">Name: </span>
+                <span className="dialog-text">{i18n.labels.name}: </span>
                 <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Description: </span>
+                <span className="dialog-text">{i18n.labels.description}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea" style={{resize: "vertical"}} spellCheck={false} value={description} onChange={(event) => setDescription(event.target.value)}></textarea>
@@ -117,11 +117,11 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Edit Group</span>
+                                <span className="dialog-title">{i18n.dialogs.editGroup.title}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -136,13 +136,13 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Edit Group</span>
+                                <span className="dialog-title">{i18n.dialogs.editGroup.title}</span>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
                     </div>
@@ -157,26 +157,26 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Group Request</span>
+                            <span className="dialog-title">{i18n.dialogs.editGroup.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your edit request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.editGroup.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         {mainJSX()}
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
                 </div>

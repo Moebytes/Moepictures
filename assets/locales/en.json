@@ -2,29 +2,24 @@
     "title": "Moepictures: Moe Anime Pictures ♥",
     "navbar": {
         "login": "Login",
-        "posts": "Posts",
         "comments": "Comments",
         "artists": "Artists",
         "characters": "Characters",
         "tags": "Tags",
-        "groups": "Groups",
         "forum": "Forum",
         "help": "Help",
         "terms": "Terms",
         "contact": "Contact",
-        "premium": "Premium",
         "mail": "Mail",
         "translations": "Translations",
         "modQueue": "Mod Queue"
     },
     "sidebar": {
         "source": "Source",
-        "mirrors": "Mirrors",
         "copyTags": "Copy Tags",
         "copyHash": "Copy Hash",
         "unlockPost": "Unlock Post",
         "saveSearch": "Save Search",
-        "title": "Title",
         "translated": "Translated",
         "details": "Details",
         "uploader": "Uploader",
@@ -47,17 +42,14 @@
         "restore": "Restore",
         "lock": "Lock",
         "unlock": "Unlock",
-        "compress": "Compress",
-        "upscale": "Upscale",
         "history": "History",
         "loginRequired": "Login required.",
+        "accountDeleted": "Account Deleted.",
         "$401": "401 error.",
         "$403": "403 error.",
         "$404": "404 error."
     },
     "sortbar": {
-        "upload": "Upload",
-        "download": "Download",
         "bulk": "Bulk",
         "type": {
             "image": "Image",
@@ -138,7 +130,6 @@
         "favgroup": "Favgroup",
         "parent": "Parent Post",
         "children": "Child Posts",
-        "buyLink": "Buy Link",
         "commentary": "Artist Commentary",
         "artistWorks": "Artist Works",
         "related": "Related",
@@ -158,6 +149,8 @@
         "tag": "Tag"
     },
     "buttons": {
+        "upload": "Upload",
+        "download": "Download",
         "new": "New",
         "old": "Old",
         "readAll": "Read All",
@@ -188,7 +181,27 @@
         "back": "Back",
         "validate": "Validate",
         "cancel": "Cancel",
-        "go": "Go"
+        "go": "Go",
+        "alias": "Alias",
+        "ban": "Ban",
+        "bulkAdd": "Bulk Add",
+        "bulkEdit": "Bulk Edit",
+        "ignore": "Ignore",
+        "solve": "Solve",
+        "categorize": "Categorize",
+        "submitRequest": "Submit Request",
+        "compress": "Compress",
+        "upscale": "Upscale",
+        "deleteAccount": "Delete Account",
+        "add": "Add",
+        "forward": "Forward",
+        "quit": "Quit",
+        "premiumPage": "Premium Page",
+        "over18": "I'm over 18",
+        "promote": "Promote",
+        "save": "Save",
+        "send": "Send",
+        "unban": "Unban"
     },
     "history": {
         "post": "Post History",
@@ -218,6 +231,167 @@
         "blacklist": "Blacklisted IP!",
         "unblacklist": "Unblacklisted IP!",
         "removeBanner": "Removed Banner!"
+    },
+    "user": {
+        "bannedReason": "You are banned for reason:",
+        "banned": "You are banned",
+        "banReason": "Banned for",
+        "ban": "Banned",
+        "banExpires": "Ban lasts for",
+        "premiumUntil": "Premium until",
+        "premiumExpired": "Premium expired on",
+        "joinDate": "Join Date",
+        "bio": "Bio",
+        "noBio": "This user has not written anything.",
+        "updateBio": "Update Bio",
+        "favoritesPrivacy": "Favorites Privacy",
+        "showRelated": "Show Related",
+        "showTooltips": "Show Tooltips",
+        "showTagBanner": "Show Tag Banner",
+        "downloadPixivID": "Download Pixiv ID",
+        "upscaledImages": "Upscaled Images",
+        "autosearchInterval": "Autosearch Interval",
+        "showR18": "Show R18",
+        "clearPfp": "Clear Pfp",
+        "showBanner": "Show Banner",
+        "changeUsername": "Change Username",
+        "changeEmail": "Change Email",
+        "changePassword": "Change Password",
+        "$2fa": "2-Factor Authentication",
+        "loginHistory": "Login History",
+        "ipBlacklist": "IP Blacklist",
+        "newsBanner": "News Banner",
+        "deleted": "deleted"
+    },
+    "roles": {
+        "admin": "Admin",
+        "mod": "Mod",
+        "premiumCurator": "Premium Curator",
+        "curator": "Curator",
+        "premiumContributor": "Premium Contributor",
+        "contributor": "Contributor",
+        "premium": "Premium",
+        "user": "User"
+    },
+    "time": {
+        "january": "January", 
+        "february": "February", 
+        "march": "March",
+        "april": "April", 
+        "may": "May", 
+        "june": "June", 
+        "july": "July",
+        "august": "August", 
+        "september": "September", 
+        "october": "October",
+        "november": "November", 
+        "december": "December",
+        "comma": true,
+        "dayAppend": "",
+        "yearAppend": "",
+        "year": "year",
+        "month": "month",
+        "day": "day",
+        "hour": "hour",
+        "minute": "minute",
+        "second": "second",
+        "ago": "ago",
+        "plural": "s",
+        "by": "by",
+        "aliased": "Aliased",
+        "implicated": "Implicated",
+        "uploaded": "Uploaded",
+        "edited": "Edited",
+        "updated": "Updated",
+        "viewed": "Viewed on"
+    },
+    "labels": {
+        "reason": "Reason",
+        "none": "None",
+        "unknown": "Unknown",
+        "noDesc": "No description.",
+        "affectedPosts": "Affected Posts",
+        "name": "Name",
+        "email": "Email",
+        "description": "Description",
+        "orderUpdated": "Order Updated",
+        "imageUpdated": "Image Updated",
+        "parentRemoved": "Parent Removed",
+        "images": "Images",
+        "uploads": "Uploads",
+        "parentID": "Parent ID",
+        "title": "Title",
+        "translatedTitle": "Translated Title",
+        "text": "Text",
+        "link": "Link",
+        "mirrors": "Mirrors",
+        "commentary": "Commentary",
+        "translatedCommentary": "Translated Commentary",
+        "category": "Category",
+        "website": "Website",
+        "social": "Social",
+        "twitter": "Twitter",
+        "fandom": "Fandom",
+        "implications": "Implications",
+        "pixivTags": "Pixiv Tags",
+        "noData": "No Data",
+        "sender": "Sender",
+        "recipients": "Recipients",
+        "newTags": "New Tags",
+        "implies": "Implies",
+        "createdBy": "Created by",
+        "updatedBy": "Updated by",
+        "editedBy": "Edited by",
+        "autoSearch": "Auto Search",
+        "group": "Group",
+        "requester": "Requester",
+        "oldName": "Old Name",
+        "newName": "New Name",
+        "oldDescription": "Old Description",
+        "newDescription": "New Description",
+        "groupName": "Group Name",
+        "thread": "Thread",
+        "comment": "Comment",
+        "aliasTo": "Alias To",
+        "similarPosts": "Similar Posts",
+        "resolution": "Resolution",
+        "size": "Size",
+        "upscaled": "Upscaled",
+        "removed": "removed",
+        "oldTag": "Old Tag",
+        "newTag": "New Tag",
+        "oldCategory": "Old Category",
+        "newCategory": "New Category",
+        "oldAliases": "Old Aliases",
+        "newAliases": "New Aliases",
+        "oldImplications": "Old Implications",
+        "newImplications": "New Implications",
+        "oldPixivTags": "Old Pixiv Tags",
+        "newPixivTags": "New Pixiv Tags",
+        "oldWebsite": "Old Website",
+        "newWebsite": "New Website",
+        "oldSocial": "Old Social",
+        "newSocial": "New Social",
+        "oldTwitter": "Old Twitter",
+        "newTwitter": "New Twitter",
+        "oldFandom": "Old Fandom",
+        "newFandom": "New Fandom",
+        "oldR18": "Old R18",
+        "newR18": "New R18",
+        "days": "Days",
+        "favoriteGroup": "Favorite Group",
+        "privacy": "Privacy",
+        "public": "Public",
+        "quality": "Quality",
+        "maxDimension": "Max Dimension",
+        "maxUpscaled": "Max Upscaled",
+        "scaleFactor": "Scale Factor",
+        "compressTo": "Compress to",
+        "content": "Content",
+        "transcription": "Transcription",
+        "translation": "Translation",
+        "wiki": "Wiki",
+        "buyLink": "Buy Link"
     },
     "errors": {
         "$401":"401 error",
@@ -276,145 +450,6 @@
             "bad": "Bad bio."
         }
     },
-    "user": {
-        "bannedReason": "You are banned for reason:",
-        "banned": "You are banned",
-        "banReason": "Banned for",
-        "ban": "Banned",
-        "banExpires": "Ban lasts for",
-        "premiumUntil": "Premium until",
-        "premiumExpired": "Premium expired on",
-        "email": "Email",
-        "joinDate": "Join Date",
-        "bio": "Bio",
-        "noBio": "This user has not written anything.",
-        "updateBio": "Update Bio",
-        "favoritesPrivacy": "Favorites Privacy",
-        "public": "Public",
-        "showRelated": "Show Related",
-        "showTooltips": "Show Tooltips",
-        "showTagBanner": "Show Tag Banner",
-        "downloadPixivID": "Download Pixiv ID",
-        "upscaledImages": "Upscaled Images",
-        "autosearchInterval": "Autosearch Interval",
-        "showR18": "Show R18",
-        "clearPfp": "Clear Pfp",
-        "showBanner": "Show Banner",
-        "changeUsername": "Change Username",
-        "changeEmail": "Change Email",
-        "changePassword": "Change Password",
-        "$2fa": "2-Factor Authentication",
-        "loginHistory": "Login History",
-        "ipBlacklist": "IP Blacklist",
-        "newsBanner": "News Banner",
-        "uploads": "Uploads",
-        "deleteAccount": "Delete Account",
-        "deleted": "deleted"
-    },
-    "time": {
-        "january": "January", 
-        "february": "February", 
-        "march": "March",
-        "april": "April", 
-        "may": "May", 
-        "june": "June", 
-        "july": "July",
-        "august": "August", 
-        "september": "September", 
-        "october": "October",
-        "november": "November", 
-        "december": "December",
-        "comma": true,
-        "dayAppend": "",
-        "yearAppend": "",
-        "year": "year",
-        "month": "month",
-        "day": "day",
-        "hour": "hour",
-        "minute": "minute",
-        "second": "second",
-        "ago": "ago",
-        "plural": "s",
-        "by": "by",
-        "aliased": "Aliased",
-        "implicated": "Implicated",
-        "uploaded": "Uploaded",
-        "edited": "Edited",
-        "updated": "Updated",
-        "viewed": "Viewed on"
-    },
-    "labels": {
-        "reason": "Reason",
-        "none": "None",
-        "unknown": "Unknown",
-        "noDesc": "No description.",
-        "affectedPosts": "Affected Posts",
-        "name": "Name",
-        "description": "Description",
-        "orderUpdated": "Order Updated",
-        "imageUpdated": "Image Updated",
-        "parentRemoved": "Parent Removed",
-        "images": "Images",
-        "parentID": "Parent ID",
-        "translatedTitle": "Translated Title",
-        "text": "Text",
-        "link": "Link",
-        "commentary": "Commentary",
-        "translatedCommentary": "Translated Commentary",
-        "category": "Category",
-        "website": "Website",
-        "social": "Social",
-        "twitter": "Twitter",
-        "fandom": "Fandom",
-        "implications": "Implications",
-        "pixivTags": "Pixiv Tags",
-        "noData": "No Data",
-        "sender": "Sender",
-        "recipients": "Recipients",
-        "newTags": "New Tags",
-        "implies": "Implies",
-        "createdBy": "Created by",
-        "updatedBy": "Updated by",
-        "editedBy": "Edited by",
-        "autoSearch": "Auto Search",
-        "translation": "Translation",
-        "group": "Group",
-        "requester": "Requester",
-        "oldName": "Old Name",
-        "newName": "New Name",
-        "oldDescription": "Old Description",
-        "newDescription": "New Description",
-        "groupName": "Group Name",
-        "thread": "Thread",
-        "comment": "Comment",
-        "user": "User",
-        "aliasTo": "Alias To",
-        "similarPosts": "Similar Posts",
-        "resolution": "Resolution",
-        "size": "Size",
-        "upscaled": "Upscaled",
-        "removed": "removed",
-        "oldTag": "Old Tag",
-        "newTag": "New Tag",
-        "oldCategory": "Old Category",
-        "newCategory": "New Category",
-        "oldAliases": "Old Aliases",
-        "newAliases": "New Aliases",
-        "oldImplications": "Old Implications",
-        "newImplications": "New Implications",
-        "oldPixivTags": "Old Pixiv Tags",
-        "newPixivTags": "New Pixiv Tags",
-        "oldWebsite": "Old Website",
-        "newWebsite": "New Website",
-        "oldSocial": "Old Social",
-        "newSocial": "New Social",
-        "oldTwitter": "Old Twitter",
-        "newTwitter": "New Twitter",
-        "oldFandom": "Old Fandom",
-        "newFandom": "New Fandom",
-        "oldR18": "Old R18",
-        "newR18": "New R18"
-    },
     "pages": {
         "enable2FA": {
             "heading": "2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.",
@@ -471,8 +506,7 @@
             "submitHeading": "Verification email resent. Check your email.",
             "unverifiedEmail": "Unverified Email",
             "optionalAddressChange": "Optional Address Change",
-            "resend": "Resend Verification Link",
-            "error": "Bad email or captcha."
+            "resend": "Resend Verification Link"
         },
         "verifyEmailSuccess": {
             "pageTitle": "Verify Email Success",
@@ -480,7 +514,6 @@
             "heading": "Thank you, your email address has been verified! You should be able to use your account now."
         },
         "login": {
-            "title": "Login",
             "signupText": "Don't have an account? Sign up.",
             "forgotText": "Forgot Password?",
             "username": "Username",
@@ -569,7 +602,6 @@
         "upload": {
             "selectFiles": "Select Files",
             "enterLinks": "Enter Links",
-            "upscaled": "Upscaled",
             "original": "Original",
             "submitHeading": "Post was uploaded.",
             "submitHeadingApproval": "Your post was submitted and will appear on the site if approved.",
@@ -643,6 +675,302 @@
         "page": {
             "title": "Go To Page",
             "page": "Page"
+        },
+        "aliasTag": {
+            "title": "Alias Tag",
+            "request": "Alias Tag Request",
+            "submitText": "Your alias request was submitted."
+        },
+        "ban": {
+            "title": "Ban User",
+            "header": "Ban this user? You can also provide a reason.",
+            "unverifiedChanges": "Delete unverified changes?",
+            "historyChanges": "Delete history changes?",
+            "comments": "Delete comments/replies?",
+            "messages": "Delete messages?"
+        },
+        "bulkDelete": {
+            "title": "Bulk Delete",
+            "header": "Are you sure that you want to delete the selected posts?"
+        },
+        "bulkFavgroup": {
+            "title": "Bulk Favorite Group"
+        },
+        "bulkTagEdit": {
+            "title": "Bulk Tag Edit"
+        },
+        "captcha": {
+            "title": "Rate Limit Exceeded",
+            "header": "Please verify that you are a human. You may ignore this, but content will be locked."
+        },
+        "categorizeTag": {
+            "title": "Categorize Tag",
+            "request": "Categorize Tag Request",
+            "submitText": "Your categorization request was submitted.",
+            "banText": "You are banned. Cannot categorize."
+        },
+        "compress": {
+            "title": "Compress Post"
+        },
+        "upscale": {
+            "title": "Upscale Post"
+        },
+        "deleteAccount": {
+            "header": "Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.",
+            "header2": "Because Moepictures is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as \"deleted\".",
+            "header3": "Are you sure that you want to continue?"
+        },
+        "deleteAliasHistory": {
+            "aliasTitle": "Delete Alias History",
+            "implicationTitle": "Delete Implication History"
+        },
+        "deleteAllSaveSearch": {
+            "title": "Delete All Saved Searches",
+            "header": "Are you sure you want to delete all saved searches?"
+        },
+        "deleteAllSearchHistory": {
+            "title": "Delete All Search History",
+            "header": "Are you sure you want to delete all of your history?"
+        },
+        "deleteComment": {
+            "title": "Delete Comment",
+            "header": "Do you want to delete this comment?"
+        },
+        "deleteFavgroup": {
+            "title": "Delete Favorite Group",
+            "header": "Are you sure you want to delete this favorite group?"
+        },
+        "deleteGroup": {
+            "title": "Delete Group",
+            "request": "Delete Group Request",
+            "submitText": "Your delete request was submitted.",
+            "banText": "You are banned. Cannot submit a request.",
+            "header": "Do you want to delete this group?",
+            "reasonHeader": "Why do you want to delete this group?"
+        },
+        "deleteGroupHistory": {
+            "title": "Delete Group History",
+            "header": "Are you sure that you want to delete this history state?",
+            "noDelete": "The current history state cannot be deleted."
+        },
+        "deleteMessage": {
+            "title": "Delete Message",
+            "header": "Are you sure you want to permanently delete this message?"
+        },
+        "deleteMessageReply": {
+            "title": "Delete Message Reply",
+            "header": "Do you want to delete this message reply?"
+        },
+        "deletePost": {
+            "title": "Delete Post",
+            "request": "Delete Post Request",
+            "header": "Are you sure that you want to delete this post?",
+            "reasonHeader": "Why do you want to delete this post? (eg. low quality, AI-generated, or breaks other rule)."
+        },
+        "deleteReply": {
+            "title": "Delete Reply",
+            "header": "Do you want to delete this reply?"
+        },
+        "deleteTag": {
+            "title": "Delete Tag",
+            "request": "Delete Tag Request",
+            "header": "Do you want to delete this tag?",
+            "reasonHeader": "If the tag is pointless/redundant, you may request it's deletion. Why do you want to delete this tag?"
+        },
+        "deleteThread": {
+            "title": "Delete Thread",
+            "header": "Do you want to delete this thread?"
+        },
+        "deletePostHistory": {
+            "title": "Delete Post History"
+        },
+        "deleteSearchHistory": {
+            "title": "Delete Search History",
+            "header": "Do you want to delete this post from your history?"
+        },
+        "deleteTagHistory": {
+            "title": "Delete Tag History"
+        },
+        "deleteTranslationHistory": {
+            "title": "Delete Translation History"
+        },
+        "disable2FA": {
+            "title": "Disable 2FA",
+            "header": "Are you sure you want to disable 2FA?"
+        },
+        "editComment": {
+            "title": "Edit Comment"
+        },
+        "editMessageReply": {
+            "title": "Edit Message Reply"
+        },
+        "editReply": {
+            "title": "Edit Reply"
+        },
+        "editMessage": {
+            "title": "Edit Message"
+        },
+        "editThread": {
+            "title": "Edit Thread"
+        },
+        "editFavgroup": {
+            "title": "Edit Favorite Group"
+        },
+        "editGroup": {
+            "title": "Edit Group",
+            "request": "Edit Group Request",
+            "submitText": "Your edit request was submitted.",
+            "noName": "No name."
+        },
+        "editSaveSearch": {
+            "title": "Edit Saved Search",
+            "tagsReq": "Tags are required."
+        },
+        "editTag": {
+            "title": "Edit Tag",
+            "request": "Edit Tag Request",
+            "submitText": "Your tag edit request was submitted.",
+            "implicationEdits": "This includes implication edits that were submitted for approval.",
+            "error": "Could not edit this tag."
+        },
+        "editTranslation": {
+            "title": "Edit Translation"
+        },
+        "favgroup": {
+            "title": "Add to Favorite Group"
+        },
+        "forwardMessage": {
+            "title": "Forward Message",
+            "header": "You may add or remove recipients.",
+            "recipientRequired": "At least 1 recipient is required.",
+            "recipientLimit": "You can't send to more than 5 recipients.",
+            "error": "Cannot forward this message."
+        },
+        "group": {
+            "titleRemove": "Remove from Group",
+            "requestAdd": "Add to Group Request",
+            "requestRemove": "Remove from Group Request",
+            "banText": "You are banned. Cannot group.",
+            "header": "Enter the group name. A group will be created if it doesn't exist.",
+            "removeHeader": "The post will be submitted for removal from the deleted groups.",
+            "submitText": "Your request was submitted."
+        },
+        "lockPost": {
+            "title": "Lock Post",
+            "header": "Are you sure you want to lock this post?",
+            "unlockHeader": "Do you want to unlock this post?"
+        },
+        "privatePost": {
+            "title": "Private Post",
+            "unprivateTitle": "Unprivate Post",
+            "header": "Do you want to set this post to private?",
+            "unprivateHeader": "Do you want to unprivate this post?"
+        },
+        "newThread": {
+            "title": "New Thread",
+            "error": "Bad content or captcha."
+        },
+        "ocr": {
+            "title": "OCR Page",
+            "header": "Run OCR on this page? (This will replace the current translations)."
+        },
+        "parent": {
+            "request": "Add to Parent Request",
+            "banText": "You are banned. Cannot parent."
+        },
+        "premium": {
+            "title": "Premium Required",
+            "header": "Premium is required to use this feature. Would you like to visit the premium page?",
+            "headerTags": "You need premium to search more than 3 tags. Would you like to visit the premium page?"
+        },
+        "r18": {
+            "pageTitle": "R18 Confirmation",
+            "title": "Warning: Explicit Content",
+            "header": "R18 Content is only suitable to be viewed by people over the age of 18. By continuing, you confirm that you are 18 years old or older and willing to view such content."
+        },
+        "promote": {
+            "title": "Promote User"
+        },
+        "reportComment": {
+            "title": "Report Comment",
+            "submitText": "Comment report was sent. Thank you!",
+            "header": "Report comments that are spam, offensive, or otherwise breaking the rules."
+        },
+        "reportReply": {
+            "title": "Report Reply",
+            "submitText": "Reply report was sent. Thank you!",
+            "header": "Report replies that are spam, offensive, or otherwise breaking the rules."
+        },
+        "reportThread": {
+            "title": "Report Thread",
+            "submitText": "Thread report was sent. Thank you!",
+            "header": "Report threads that are spam, offensive, or otherwise breaking the rules."
+        },
+        "revertAliasHistory": {
+            "undoAliasTitle": "Undo Aliasing",
+            "redoAliasTitle": "Redo Aliasing",
+            "undoImplicationTitle": "Undo Implication",
+            "redoImplicationTitle": "Redo Implication",
+            "undoAliasHeading": "Would you like to undo this aliasing?",
+            "redoAliasHeading": "Would you like to redo this aliasing?",
+            "undoImplicationHeading": "Would you like to undo this implication?",
+            "redoImplicationHeading": "Would you like to redo this implication?"
+        },
+        "revertGroupHistory": {
+            "title": "Revert Group History",
+            "currentState": "This is already the current history state.",
+            "banText": "You are banned. Cannot revert history.",
+            "header": "Are you sure that you want to revert back to this history state?"
+        },
+        "revertPostHistory": {
+            "title": "Revert Post History",
+            "locked": "This post is locked. Cannot revert history.",
+            "imagePermission": "Could not apply this state because you don't have permission to replace the image."
+        },
+        "revertTagHistory": {
+            "title": "Revert Tag History",
+            "implicationPermission": "You don't have permission to revert these implications."
+        },
+        "revertTranslationHistory": {
+            "title": "Revert Translation History"
+        },
+        "saveTranslation": {
+            "title": "Save Translation",
+            "request": "Save Translation Request",
+            "header": "Do you want to save the translation changes made to this post?",
+            "submitText": "Your translation request was submitted.",
+            "banText": "You are banned. Cannot save translations.",
+            "locked": "This post is locked. Cannot save translations"
+        },
+        "sendMessage": {
+            "error": "Bad title or content.",
+            "errorR18": "Cannot send this message."
+        },
+        "softDeleteMessage": {
+            "title": "Soft Delete Message",
+            "header": "Do you want to soft delete this message? (It will appear again if any other recipient replies)."
+        },
+        "takedownPost": {
+            "title": "Takedown Post",
+            "restoreTitle": "Restore Post",
+            "header": "Are you sure that you want to takedown this post?",
+            "restoreHeader": "Do you want to restore this post?"
+        },
+        "takedownTag": {
+            "title": "Takedown Tag",
+            "restoreTitle": "Restore Tag",
+            "header": "Are you sure that you want to takedown this tag and all related posts?",
+            "restoreHeader": "Do you want to restore this tag and all related posts?"
+        },
+        "unban": {
+            "title": "Unban User",
+            "header": "Do you want to unban this user?"
+        },
+        "sourceEdit": {
+            "request": "Source Edit Request"
+        },
+        "tagEdit": {
+            "request": "Tag Edit Request"
         }
     }
 }

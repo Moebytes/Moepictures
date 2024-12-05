@@ -224,7 +224,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <input className="contact-input-small" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text" style={{width: "70px"}}>{i18n.user.email}:</span>
+                        <span className="contact-text" style={{width: "70px"}}>{i18n.labels.email}:</span>
                         <input className="contact-input-small" style={{width: "50%"}} type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">

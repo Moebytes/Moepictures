@@ -58,8 +58,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Source Edit"
-    }, [])
+        document.title = i18n.sidebar.sourceEdit
+    }, [i18n])
 
     useEffect(() => {
         if (sourceEditID) {
@@ -144,53 +144,53 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="dialog-row">
-                <span className="dialog-text">Title: </span>
+                <span className="dialog-text">{i18n.labels.title}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Translated Title: </span>
+                <span className="dialog-text">{i18n.labels.translatedTitle}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={translatedTitle} onChange={(event) => setTranslatedTitle(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Artist: </span>
+                <span className="dialog-text">{i18n.tag.artist}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Posted: </span>
+                <span className="dialog-text">{i18n.sort.posted}: </span>
                 <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Link: </span>
+                <span className="dialog-text">{i18n.labels.link}: </span>
                 <input className="dialog-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Bookmarks: </span>
+                <span className="dialog-text">{i18n.sort.bookmarks}: </span>
                 <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={bookmarks} onChange={(event) => setBookmarks(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Commentary: </span>
+                <span className="dialog-text">{i18n.labels.commentary}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Translated Commentary: </span>
+                <span className="dialog-text">{i18n.labels.translatedCommentary}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={translatedCommentary} onChange={(event) => setTranslatedCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Mirrors: </span>
+                <span className="dialog-text">{i18n.labels.mirrors}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Buy Link: </span>
+                <span className="dialog-text">{i18n.labels.buyLink}: </span>
                 <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Reason: </span>
+                <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
             </div>
             </>
@@ -204,11 +204,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Source Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.sourceEdit}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -222,11 +222,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Source Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.sourceEdit}</span>
                             </div>
-                            <span className="dialog-ban-text">This post is locked. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.locked}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -241,13 +241,13 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Source Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.sourceEdit}</span>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
                     </div>
@@ -262,22 +262,22 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Source Edit Request</span>
+                            <span className="dialog-title">{i18n.dialogs.sourceEdit.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your edit request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.editGroup.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div> 
                         </> : <>
                         {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submit}</button>
                         </div>
                         </>}
                     </div>

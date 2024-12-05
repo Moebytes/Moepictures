@@ -17,8 +17,8 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Account"
-    }, [])
+        document.title = i18n.buttons.deleteAccount
+    }, [i18n])
 
     useEffect(() => {
         if (showDeleteAccountDialog) {
@@ -33,7 +33,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
         await functions.delete("/api/user/delete", null, session, setSessionFlag)
         setSessionFlag(true)
         history.push("/posts")
-        setSidebarText("Account Deleted.")
+        setSidebarText(i18n.sidebar.accountDeleted)
     }
 
     const click = (button: "accept" | "reject") => {
@@ -50,18 +50,18 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Account</span>
+                            <span className="dialog-title">{i18n.buttons.deleteAccount}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text-small">
-                                Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.<br/><br/>
-                                Because Moepictures is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as "deleted".<br/><br/>
-                                Are you sure that you want to continue?
+                                {i18n.dialogs.deleteAccount.header}<br/><br/>
+                                {i18n.dialogs.deleteAccount.header2}<br/><br/>
+                                {i18n.dialogs.deleteAccount.header3}
                             </span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Delete Account"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.deleteAccount}</button>
                         </div>
                     </div>
                 </div>

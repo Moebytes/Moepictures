@@ -29,6 +29,10 @@ const ParentDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
+        document.title = i18n.sidebar.addParent
+    }, [i18n])
+
+    useEffect(() => {
         if (childPostObj) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
@@ -93,11 +97,11 @@ const ParentDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Add to Parent</span>
+                                <span className="dialog-title">{i18n.sidebar.addParent}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot parent.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.parent.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -112,16 +116,16 @@ const ParentDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Add to Parent</span>
+                                <span className="dialog-title">{i18n.sidebar.addParent}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Parent ID: </span>
+                                <span className="dialog-text">{i18n.labels.parentID}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={parentID} onChange={(event) => setParentID(event.target.value)} style={{width: "50%"}}/>
                             </div>
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Parent"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.sort.parent}</button>
                             </div>
                         </div>
                     </div>
@@ -136,29 +140,29 @@ const ParentDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Add to Parent Request</span>
+                            <span className="dialog-title">{i18n.dialogs.parent.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.group.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Parent ID: </span>
+                            <span className="dialog-text">{i18n.labels.parentID}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={parentID} onChange={(event) => setParentID(event.target.value)} style={{width: "50%"}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
                 </div>

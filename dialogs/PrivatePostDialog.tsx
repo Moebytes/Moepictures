@@ -23,8 +23,8 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Private Post"
-    }, [])
+        document.title = getTitle()
+    }, [i18n])
 
     useEffect(() => {
         if (privatePostObj) {
@@ -57,17 +57,17 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
 
     const getTitle = () => {
         if (props.post.private) {
-            return "Unprivate Post"
+            return i18n.dialogs.privatePost.unprivateTitle
         } else {
-            return "Private Post"
+            return i18n.dialogs.privatePost.title
         }
     }
 
     const getPrompt = () => {
         if (props.post.private) {
-            return "Do you want to unprivate this post?"
+            return i18n.dialogs.privatePost.unprivateHeader
         } else {
-            return "Do you want to set this post to private?"
+            return i18n.dialogs.privatePost.header
         }
     }
 
@@ -85,8 +85,8 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-text">{getPrompt()}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

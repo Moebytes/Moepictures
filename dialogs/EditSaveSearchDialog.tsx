@@ -28,8 +28,6 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Edit Saved Search"
-
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
@@ -42,6 +40,10 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
             window.removeEventListener("mousemove", logPosition)
         }
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.dialogs.editSaveSearch.title
+    }, [i18n])
 
     useEffect(() => {
         if (editSaveSearchName) {
@@ -58,14 +60,14 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
         if (!editSaveSearchKey) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Name is required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.nameReq
             await functions.timeout(2000)
             return setError(false)
         }
         if (!editSaveSearchTags) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Tags are required."
+            errorRef.current!.innerText = i18n.dialogs.editSaveSearch.tagsReq
             await functions.timeout(2000)
             return setError(false)
         }
@@ -118,14 +120,14 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Saved Search</span>
+                            <span className="dialog-title">{i18n.dialogs.editSaveSearch.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Name: </span>
+                            <span className="dialog-text">{i18n.labels.name}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={editSaveSearchKey} onChange={(event) => setEditSaveSearchKey(event.target.value)} style={{width: "max-content"}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Tags: </span>
+                            <span className="dialog-text">{i18n.navbar.tags}: </span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={tagActive} text={functions.cleanHTML(editSaveSearchTags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="all"/>
@@ -133,9 +135,9 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button style={{backgroundColor: "#ff0eac"}} onClick={() => click("delete")} className="dialog-button">{"Delete"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button style={{backgroundColor: "#ff0eac"}} onClick={() => click("delete")} className="dialog-button">{i18n.buttons.delete}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
                 </div>

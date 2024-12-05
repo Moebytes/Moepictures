@@ -121,7 +121,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                     </> : <>
                     <span className="sitepage-link">{i18n.pages.changeEmail.heading}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">{i18n.user.email}: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.email}: </span>
                         <span className="sitepage-text-small">{session.email}</span>
                     </div>
                     <div className="sitepage-row">

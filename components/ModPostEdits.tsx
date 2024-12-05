@@ -376,7 +376,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             }
         }
         if (changes.title) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.title}:</span> {newPost.title || i18n.labels.none}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.title}:</span> {newPost.title || i18n.labels.none}</span>)
         }
         if (changes.translatedTitle) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.translatedTitle}:</span> {newPost.translatedTitle || i18n.labels.none}</span>)
@@ -391,13 +391,13 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.link}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link, i18n)}</span></span>)
         }
         if (changes.mirrors) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.mirrors}:</span> {printMirrors(newPost)}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.mirrors}:</span> {printMirrors(newPost)}</span>)
         }
         if (changes.bookmarks) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.bookmarks}:</span> {newPost.bookmarks || "?"}</span>)
         }
         if (changes.purchaseLink) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.post.buyLink}:</span> {newPost.purchaseLink || i18n.labels.none}</span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.buyLink}:</span> {newPost.purchaseLink || i18n.labels.none}</span>)
         }
         if (changes.commentary) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.commentary}:</span> {newPost.commentary || i18n.labels.none}</span>)

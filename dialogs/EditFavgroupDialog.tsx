@@ -27,8 +27,8 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Edit Favgroup"
-    }, [])
+        document.title = i18n.dialogs.editFavgroup.title
+    }, [i18n])
 
     useEffect(() => {
         if (editFavGroupObj) {
@@ -72,23 +72,23 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box"style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Favorite Group</span>
+                            <span className="dialog-title">{i18n.dialogs.editFavgroup.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Name: </span>
+                            <span className="dialog-text">{i18n.labels.name}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
-                            <span className="dialog-text" style={{marginTop: "-4px"}}>Privacy: </span>
+                            <span className="dialog-text" style={{marginTop: "-4px"}}>{i18n.labels.privacy}: </span>
                             <img className="dialog-checkbox" src={isPrivate ? radioButton : radioButtonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter: getFilter()}}/>
-                            <span className="dialog-text">Public</span>
+                            <span className="dialog-text">{i18n.labels.public}</span>
                             <img className="dialog-checkbox" src={isPrivate ? radioButtonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter: getFilter()}}/>
-                            <span className="dialog-text">Private</span>
+                            <span className="dialog-text">{i18n.sort.private}</span>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
                 </div>

@@ -299,7 +299,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                 <div className="thread-content-container">
                     <div className="thread-container">
                         <div className="thread-row" style={{width: "100%"}}>
-                            <span className="thread-heading">{i18n.sidebar.title}</span>
+                            <span className="thread-heading">{i18n.labels.title}</span>
                         </div>
                         {!mobile ? <div className="thread-row">
                             <span className="thread-heading">{i18n.labels.createdBy}</span>

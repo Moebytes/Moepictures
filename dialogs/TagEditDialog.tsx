@@ -84,8 +84,6 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Tag Edit"
-
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
@@ -98,6 +96,10 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             window.removeEventListener("mousemove", logPosition)
         }
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.sidebar.tagEdit
+    }, [i18n])
 
     useEffect(() => {
         if (tagEditID) {
@@ -116,7 +118,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Invalid characters in tags: _ / \\"
+                errorRef.current.innerText = i18n.pages.upload.invalidCharacters
                 setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
@@ -124,7 +126,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (joined.includes(",")) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Tags should be separated with a space."
+                errorRef.current.innerText = i18n.pages.upload.spaceSeparation
                 const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setTags(splitTags.join(" "))
                 await functions.timeout(3000)
@@ -135,7 +137,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 if (tagArr.length < 5) {
                     setError(true)
                     await functions.timeout(20)
-                    errorRef.current.innerText = "Minimum of 5 tags is required."
+                    errorRef.current.innerText = i18n.pages.upload.tagMinimum
                     await functions.timeout(3000)
                     return setError(false)
                 }
@@ -161,7 +163,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Invalid characters in tags: _ / \\"
+                errorRef.current.innerText = i18n.pages.upload.invalidCharacters
                 setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
@@ -169,7 +171,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (joined.includes(",")) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Tags should be separated with a space."
+                errorRef.current.innerText = i18n.pages.upload.spaceSeparation
                 await functions.timeout(3000)
                 const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setTags(splitTags.join(" "))
@@ -179,7 +181,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (tagArr.length < 5) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Minimum of 5 tags is required."
+                errorRef.current.innerText = i18n.pages.upload.tagMinimum
                 await functions.timeout(3000)
                 return setError(false)
             }
@@ -283,15 +285,15 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="quickedit-button-img" src={$3d}/>
-                        <span className="quickedit-button-text">3D</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button>
                     <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="quickedit-button-img" src={chibi}/>
-                        <span className="quickedit-button-text">Chibi</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="quickedit-button-img" src={pixel}/>
-                        <span className="quickedit-button-text">Pixel</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -300,11 +302,11 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="quickedit-button-img" src={$2d}/>
-                        <span className="quickedit-button-text">2D</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="quickedit-button-img" src={pixel}/>
-                        <span className="quickedit-button-text">Pixel</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -313,24 +315,24 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="quickedit-button-img" src={$2d}/>
-                        <span className="quickedit-button-text">2D</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     {type !== "live2d" ? <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="quickedit-button-img" src={$3d}/>
-                        <span className="quickedit-button-text">3D</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button> : null}
                     <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="quickedit-button-img" src={chibi}/>
-                        <span className="quickedit-button-text">Chibi</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="quickedit-button-img" src={pixel}/>
-                        <span className="quickedit-button-text">Pixel</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                     {type !== "comic" ? 
                     <button className={`quickedit-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
                         <img className="quickedit-button-img" src={daki}/>
-                        <span className="quickedit-button-text">Daki</span>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.daki}</span>
                     </button> : null}
                 </div>
             )
@@ -353,143 +355,143 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="dialog-row">
-                <span className="dialog-text">Classification: </span>
+                <span className="dialog-text">{i18n.pages.upload.classification}: </span>
             </div>
             {mobile ? <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                     <img className="quickedit-button-img" src={image}/>
-                    <span className="quickedit-button-text">Image</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                     <img className="quickedit-button-img" src={animation}/>
-                    <span className="quickedit-button-text">Animation</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                     <img className="quickedit-button-img" src={video}/>
-                    <span className="quickedit-button-text">Video</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                     <img className="quickedit-button-img" src={comic}/>
-                    <span className="quickedit-button-text">Comic</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                     <img className="quickedit-button-img" src={audio}/>
-                    <span className="quickedit-button-text">Audio</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
                     <img className="quickedit-button-img" src={live2d}/>
-                    <span className="quickedit-button-text">Live2D</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="quickedit-button-img" src={model}/>
-                    <span className="quickedit-button-text">Model</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div>
             </> : <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                     <img className="quickedit-button-img" src={image}/>
-                    <span className="quickedit-button-text">Image</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                     <img className="quickedit-button-img" src={animation}/>
-                    <span className="quickedit-button-text">Animation</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
                 <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                     <img className="quickedit-button-img" src={video}/>
-                    <span className="quickedit-button-text">Video</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                     <img className="quickedit-button-img" src={comic}/>
-                    <span className="quickedit-button-text">Comic</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                     <img className="quickedit-button-img" src={audio}/>
-                    <span className="quickedit-button-text">Audio</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
                     <img className="quickedit-button-img" src={live2d}/>
-                    <span className="quickedit-button-text">Live2D</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
                 <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="quickedit-button-img" src={model}/>
-                    <span className="quickedit-button-text">Model</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div> </>}
             {mobile ? <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                     <img className="quickedit-button-img" src={safe}/>
-                    <span className="quickedit-button-text">Safe</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.safe}</span>
                 </button>
                 <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                     <img className="quickedit-button-img" src={questionable}/>
-                    <span className="quickedit-button-text">Questionable</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.questionable}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 {session.showR18 ?
                 <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                     <img className="quickedit-button-img" src={explicit}/>
-                    <span className="quickedit-button-text">Explicit</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.explicit}</span>
                 </button> : null}
             </div>
             </> : <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                     <img className="quickedit-button-img" src={safe}/>
-                    <span className="quickedit-button-text">Safe</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.safe}</span>
                 </button>
                 <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                     <img className="quickedit-button-img" src={questionable}/>
-                    <span className="quickedit-button-text">Questionable</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.questionable}</span>
                 </button>
                 {session.showR18 ?
                 <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                     <img className="quickedit-button-img" src={explicit}/>
-                    <span className="quickedit-button-text">Explicit</span>
+                    <span className="quickedit-button-text">{i18n.sortbar.restrict.explicit}</span>
                 </button> : null}
             </div>
             </>}
             {getStyleJSX()}
             <div className="dialog-row">
                 <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
-                <span className="dialog-text">Artists: </span>
+                <span className="dialog-text">{i18n.navbar.artists}: </span>
                 <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
             </div>
             <div className="dialog-row">
                 <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
-                <span className="dialog-text">Characters: </span>
+                <span className="dialog-text">{i18n.navbar.characters}: </span>
                 <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
             </div>
             <div className="dialog-row">
                 <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
-                <span className="dialog-text">Series: </span>
+                <span className="dialog-text">{i18n.tag.series}: </span>
                 <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
             </div>
             <div className="dialog-row">
                 <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
-                <span className="dialog-text">Meta: </span>
+                <span className="dialog-text">{i18n.tag.meta}: </span>
                 <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text tag-color">Tags: </span>
+                <span className="dialog-text tag-color">{i18n.navbar.tags}: </span>
             </div>
             <div className="dialog-row">
                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
                 <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Reason: </span>
+                <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
             </div>
             </>
@@ -503,11 +505,11 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Tag Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.tagEdit}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -521,11 +523,11 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Tag Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.tagEdit}</span>
                             </div>
-                            <span className="dialog-ban-text">This post is locked. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.locked}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -540,13 +542,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Tag Edit</span>
+                                <span className="dialog-title">{i18n.sidebar.tagEdit}</span>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
                     </div>
@@ -561,22 +563,22 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Tag Edit Request</span>
+                            <span className="dialog-title">{i18n.dialogs.tagEdit.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your edit request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.editGroup.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div> 
                         </> : <>
                         {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div>
                         </>}
                     </div>

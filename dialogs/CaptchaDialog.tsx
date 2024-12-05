@@ -43,8 +43,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     }, [session, theme])
 
     useEffect(() => {
-        document.title = "Captcha"
-    }, [])
+        document.title = i18n.dialogs.captcha.title
+    }, [i18n])
 
     useEffect(() => {
         if (!session.cookie) return
@@ -117,10 +117,10 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Rate Limit Exceeded</span>
+                                <span className="dialog-title">{i18n.dialogs.captcha.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Please verify that you are a human. You may ignore this, but content will be locked.</span>
+                                <span className="dialog-text">{i18n.dialogs.captcha.header}</span>
                             </div>
                             <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
@@ -128,8 +128,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                             </div>
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Ignore"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Solve"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ignore}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.solve}</button>
                             </div>
                         </div>
                     </div>

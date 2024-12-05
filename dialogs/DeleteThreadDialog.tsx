@@ -4,7 +4,6 @@ import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThr
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import permissions from "../structures/Permissions"
 
 const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -16,8 +15,8 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Thread"
-    }, [])
+        document.title = i18n.dialogs.deleteThread.title
+    }, [i18n])
 
     useEffect(() => {
         if (deleteThreadID) {
@@ -47,14 +46,14 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Thread</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteThread.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to delete this thread?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteThread.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

@@ -16,8 +16,8 @@ const SoftDeleteMessageDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Soft Delete Message"
-    }, [])
+        document.title = i18n.dialogs.softDeleteMessage.title
+    }, [i18n])
 
     useEffect(() => {
         if (softDeleteMessageID) {
@@ -47,14 +47,14 @@ const SoftDeleteMessageDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "320px", height: "240px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Soft Delete Message</span>
+                            <span className="dialog-title">{i18n.dialogs.softDeleteMessage.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to soft delete this message? (It will appear again if any other recipient replies).</span>
+                            <span className="dialog-text">{i18n.dialogs.softDeleteMessage.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

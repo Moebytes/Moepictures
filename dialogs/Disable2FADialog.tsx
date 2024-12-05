@@ -15,8 +15,8 @@ const Disable2FADialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Disable 2FA"
-    }, [])
+        document.title = i18n.dialogs.disable2FA.title
+    }, [i18n])
 
     useEffect(() => {
         if (disable2FADialog) {
@@ -42,14 +42,14 @@ const Disable2FADialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "285px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Disable 2FA</span>
+                            <span className="dialog-title">{i18n.dialogs.disable2FA.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Are you sure you want to disable 2FA?</span>
+                            <span className="dialog-text">{i18n.dialogs.disable2FA.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

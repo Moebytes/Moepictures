@@ -101,7 +101,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
             setSessionFlag(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = i18n.pages.verifyEmail.error
+            errorRef.current!.innerText = i18n.pages.changeEmail.error
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()

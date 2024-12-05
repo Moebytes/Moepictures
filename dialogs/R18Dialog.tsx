@@ -20,8 +20,8 @@ const R18Dialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "R18 Confirmation"
-    }, [])
+        document.title = i18n.dialogs.r18.pageTitle
+    }, [i18n])
 
     useEffect(() => {
         if (r18Confirmation) {
@@ -50,17 +50,16 @@ const R18Dialog: React.FunctionComponent = (props) => {
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <img className="dialog-title-img" src={r18} style={{marginLeft: "0px", marginRight: "10px"}}/>
-                            <span className="dialog-title" style={{color: "var(--r18Color)"}}>Warning: Explicit Content</span>
+                            <span className="dialog-title" style={{color: "var(--r18Color)"}}>{i18n.dialogs.r18.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text" style={{color: "var(--r18Color)"}}>
-                                R18 Content is only suitable to be viewed by people over the age of 18. By continuing, you confirm that you 
-                                are 18 years old or older and willing to view such content.
+                                {i18n.dialogs.r18.header}
                             </span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button" style={{backgroundColor: "#c02d6b"}}>{"Quit"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#fa337d"}}>{"I'm over 18"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button" style={{backgroundColor: "#c02d6b"}}>{i18n.buttons.quit}</button>
+                            <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#fa337d"}}>{i18n.buttons.over18}</button>
                         </div>
                     </div>
                 </div>

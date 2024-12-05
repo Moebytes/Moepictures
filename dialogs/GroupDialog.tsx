@@ -39,10 +39,13 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = removalItems.length ? "Remove from Group" : "Add to Group"
         const savedGroupName = localStorage.getItem("groupName")
         if (savedGroupName) setName(savedGroupName)
-    }, [removalItems])
+    }, [])
+
+    useEffect(() => {
+        document.title = removalItems.length ? i18n.dialogs.group.titleRemove : i18n.sidebar.addGroup
+    }, [removalItems, i18n])
 
     useEffect(() => {
         localStorage.setItem("groupName", name)
@@ -66,7 +69,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             if (!name) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = "No name."
+                errorRef.current!.innerText = i18n.dialogs.editGroup.noName
                 await functions.timeout(2000)
                 return setError(false)
             }
@@ -90,7 +93,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 if (!name) {
                     setError(true)
                     if (!errorRef.current) await functions.timeout(20)
-                    errorRef.current!.innerText = "No name."
+                    errorRef.current!.innerText = i18n.dialogs.editGroup.noName
                     await functions.timeout(2000)
                     return setError(false)
                 }
@@ -147,11 +150,11 @@ const GroupDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Add to Group</span>
+                                <span className="dialog-title">{i18n.sidebar.addGroup}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot group.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.group.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -166,20 +169,20 @@ const GroupDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Add to Group</span>
+                                <span className="dialog-title">{i18n.sidebar.addGroup}</span>
                             </div>
                             {<div className="dialog-row">
-                                <span className="dialog-text">Enter the group name. A group will be created if it doesn't exist.</span>
+                                <span className="dialog-text">{i18n.dialogs.group.header}</span>
                             </div>}
                             <div className="dialog-row">
-                                <span className="dialog-text">Group Name: </span>
+                                <span className="dialog-text">{i18n.labels.groupName}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
                             </div>
                             {groupJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Add"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.add}</button>
                             </div>
                         </div>
                     </div>
@@ -194,37 +197,37 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{removalItems.length ? "Remove from Group Request" : "Add to Group Request"}</span>
+                            <span className="dialog-title">{removalItems.length ? i18n.dialogs.group.requestRemove : i18n.dialogs.group.requestAdd}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.group.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                         </> : <>
                         {removalItems.length ? 
                         <div className="dialog-row">
-                            <span className="dialog-text">The post will be submitted for removal from the deleted groups.</span>
+                            <span className="dialog-text">{i18n.dialogs.group.removeHeader}</span>
                         </div> :
                         <div className="dialog-row">
-                            <span className="dialog-text">Enter the group name. A group will be created if it doesn't exist.</span>
+                            <span className="dialog-text">{i18n.dialogs.group.header}</span>
                         </div>}
                         {!removalItems.length ? <div className="dialog-row">
-                            <span className="dialog-text">Group Name: </span>
+                            <span className="dialog-text">{i18n.labels.groupName}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
                         </div> : null}
                         {groupJSX()}
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
                 </div>

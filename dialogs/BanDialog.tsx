@@ -32,8 +32,8 @@ const BanDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Ban User"
-    }, [])
+        document.title = i18n.dialogs.ban.title
+    }, [i18n])
 
     useEffect(() => {
         if (banName) {
@@ -134,39 +134,39 @@ const BanDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Ban User</span>
+                            <span className="dialog-title">{i18n.dialogs.ban.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Ban this user? You can also provide a reason.</span>
+                            <span className="dialog-text">{i18n.dialogs.ban.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Delete unverified changes?</span>
+                            <span className="dialog-text">{i18n.dialogs.ban.unverifiedChanges}</span>
                             <img className="dialog-checkbox" src={deleteUnverifiedChanges ? checkboxChecked : checkbox} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Delete history changes?</span>
+                            <span className="dialog-text">{i18n.dialogs.ban.historyChanges}</span>
                             <img className="dialog-checkbox" src={deleteHistoryChanges ? checkboxChecked : checkbox} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Delete comments/replies?</span>
+                            <span className="dialog-text">{i18n.dialogs.ban.comments}</span>
                             <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Delete messages?</span>
+                            <span className="dialog-text">{i18n.dialogs.ban.messages}</span>
                             <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Days: </span>
+                            <span className="dialog-text">{i18n.labels.days}: </span>
                             <input style={{width: "20%"}} className="dialog-input-taller" type="text" spellCheck={false} value={days} onChange={(event) => setDays(event.target.value)}/>
                         </div> 
                         <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
+                            <span className="dialog-text">{i18n.labels.reason}: </span>
                             <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div> 
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Ban"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.ban}</button>
                         </div>
                     </div>
                 </div>

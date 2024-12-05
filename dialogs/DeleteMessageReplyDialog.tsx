@@ -16,8 +16,8 @@ const DeleteMessageReplyDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Delete Message Reply"
-    }, [])
+        document.title = i18n.dialogs.deleteMessageReply.title
+    }, [i18n])
 
     useEffect(() => {
         if (deleteMsgReplyID) {
@@ -47,14 +47,14 @@ const DeleteMessageReplyDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Delete Message Reply</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteMessageReply.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to delete this message reply?</span>
+                            <span className="dialog-text">{i18n.dialogs.deleteMessageReply.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
                 </div>

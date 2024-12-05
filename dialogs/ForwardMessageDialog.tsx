@@ -21,8 +21,8 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Forward Message"
-    }, [])
+        document.title = i18n.dialogs.forwardMessage.title
+    }, [i18n])
 
     useEffect(() => {
         if (forwardMessageObj) {
@@ -42,14 +42,14 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
         if (cleanedRecipients.length < 1) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "At least 1 recipient is required."
+            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientRequired
             await functions.timeout(2000)
             return setError(false)
         }
         if (cleanedRecipients.length > 5 && !permissions.isMod(session)) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "You can't send to more than 5 recipients."
+            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientLimit
             await functions.timeout(2000)
             return setError(false)
         }
@@ -60,7 +60,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
         } catch (err) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Cannot forward this message."
+            errorRef.current!.innerText = i18n.dialogs.forwardMessage.error
             await functions.timeout(2000)
             setError(false)
         }
@@ -81,21 +81,21 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Forward Message</span>
+                            <span className="dialog-title">{i18n.dialogs.forwardMessage.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">You may add or remove recipients.</span>
+                            <span className="dialog-text">{i18n.dialogs.forwardMessage.header}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Recipients: </span>
+                            <span className="dialog-text">{i18n.labels.recipients}: </span>
                         </div>
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" style={{resize: "vertical", height: "100px"}} spellCheck={false} value={recipients} onChange={(event) => setRecipients(event.target.value)}></textarea>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Forward"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.forward}</button>
                         </div>
                     </div>
                 </div>

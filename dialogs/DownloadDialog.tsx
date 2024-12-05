@@ -18,7 +18,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const [amountField, setAmountField] = useState("")
 
     useEffect(() => {
-        document.title = i18n.sortbar.download
+        document.title = i18n.buttons.download
     }, [i18n])
 
     useEffect(() => {
@@ -88,7 +88,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.sortbar.download}</span>
+                            <span className="dialog-title">{i18n.buttons.download}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.download.offset}: </span>
@@ -100,7 +100,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{i18n.sortbar.download}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.download}</button>
                         </div>
                     </div>
                 </div>

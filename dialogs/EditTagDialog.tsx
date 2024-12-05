@@ -28,8 +28,8 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Edit Tag"
-    }, [])
+        document.title = i18n.dialogs.editTag.title
+    }, [i18n])
 
     useEffect(() => {
         if (editTagObj) {
@@ -144,15 +144,15 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <>
                 <div className="dialog-row">
-                    <span className="dialog-text">Website: </span>
+                    <span className="dialog-text">{i18n.labels.website}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
-                    <span className="dialog-text">Social: </span>
+                    <span className="dialog-text">{i18n.labels.social}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.social} onChange={(event) => setEditTagObj({...editTagObj, social: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
-                    <span className="dialog-text">Twitter: </span>
+                    <span className="dialog-text">{i18n.labels.twitter}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
                 </div>
                 </>
@@ -162,7 +162,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <>
                 <div className="dialog-row">
-                    <span className="dialog-text">Wiki: </span>
+                    <span className="dialog-text">{i18n.labels.wiki}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.fandom} onChange={(event) => setEditTagObj({...editTagObj, fandom: event.target.value})}/>
                 </div>
                 </>
@@ -172,11 +172,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <>
                 <div className="dialog-row">
-                    <span className="dialog-text">Website: </span>
+                    <span className="dialog-text">{i18n.labels.website}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
-                    <span className="dialog-text">Twitter: </span>
+                    <span className="dialog-text">{i18n.labels.twitter}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
                 </div>
                 </>
@@ -192,13 +192,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Tag Request</span>
+                            <span className="dialog-title">{i18n.dialogs.editTag.request}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">This includes implication edits that were submitted for approval.</span>
+                            <span className="dialog-text">{i18n.dialogs.editTag.implicationEdits}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
                 </div>
@@ -214,13 +214,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Tag</span>
+                            <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Could not edit this tag.</span>
+                            <span className="dialog-text">{i18n.dialogs.editTag.error}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
                 </div>
@@ -233,15 +233,15 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="dialog-row">
-                <span className="dialog-text">Tag: </span>
+                <span className="dialog-text">{i18n.tag.tag}: </span>
                 <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: "max-content"}}/>
             </div>
             {tagSocialJSX()}
             <div className="dialog-row">
-                <span className="dialog-text">Image: </span>
+                <span className="dialog-text">{i18n.sortbar.type.image}: </span>
                 <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
                     <img className="dialog-button-img-small" src={uploadIcon}/>
-                    <span className="dialog-button-text-small">Upload</span>
+                    <span className="dialog-button-text-small">{i18n.buttons.upload}</span>
                 </label>
                 <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                 {editTagObj.image && editTagObj.image !== "delete" ? 
@@ -254,32 +254,32 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             </div>
             : null}
             <div className="dialog-row">
-                <span className="dialog-text">Description: </span>
+                <span className="dialog-text">{i18n.labels.description}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={editTagObj.description} onChange={(event) => setEditTagObj({...editTagObj, description: event.target.value})}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Aliases: </span>
+                <span className="dialog-text">{i18n.sort.aliases}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">Implications: </span>
+                <span className="dialog-text">{i18n.labels.implications}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
             </div>
             {editTagObj.type !== "artist" ? <>
             <div className="dialog-row">
-                <span className="dialog-text">Pixiv Tags: </span>
+                <span className="dialog-text">{i18n.labels.pixivTags}: </span>
             </div>
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
             </div></> : null}
             <div className="dialog-row">
-                <span className="dialog-text">Reason: </span>
+                <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
             </div>
             {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
@@ -299,11 +299,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Edit Tag</span>
+                                <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                             </div>
-                            <span className="dialog-ban-text">You are banned. Cannot edit.</span>
+                            <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
-                                <span className="dialog-ban-button-text">←Back</span>
+                                <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
                     </Draggable>
@@ -318,13 +318,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Edit Tag</span>
+                                <span className="dialog-title">i18n.dialogs.editTag.title</span>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
                     </div>
@@ -339,22 +339,22 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-30px", height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Tag Request</span>
+                            <span className="dialog-title">{i18n.dialogs.editTag.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">Your tag edit request was submitted.</span>
+                            <span className="dialog-text">{i18n.dialogs.editTag.submitText}</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div> 
                         </> : <>
                         {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
                 </div>

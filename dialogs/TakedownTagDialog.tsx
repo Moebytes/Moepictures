@@ -20,8 +20,8 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Takedown Tag"
-    }, [])
+        document.title = i18n.dialogs.takedownTag.title
+    }, [i18n])
 
     useEffect(() => {
         if (takedownTag) {
@@ -58,17 +58,17 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
 
     const getTitle = () => {
         if (takedownTag.banned) {
-            return "Restore Tag"
+            return i18n.dialogs.takedownTag.restoreTitle
         } else {
-            return "Takedown Tag"
+            return i18n.dialogs.takedownTag.title
         }
     }
 
     const getPrompt = () => {
         if (takedownTag.banned) {
-            return "Do you want to restore this tag and all related posts?"
+            return i18n.dialogs.takedownTag.restoreHeader
         } else {
-            return "Are you sure that you want to takedown this tag and all related posts?"
+            return i18n.dialogs.takedownTag.header
         }
     }
 
@@ -86,8 +86,8 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-text">{getPrompt()}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

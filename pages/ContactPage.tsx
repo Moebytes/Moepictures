@@ -139,7 +139,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                         {i18n.pages.contact.heading} <Link className="contact-text-alt-link" to="/copyright-removal">{i18n.pages.contact.copyrightForm}</Link>
                     </span>
                     <div className="contact-row">
-                        <span className="contact-text">{i18n.user.email}:</span>
+                        <span className="contact-text">{i18n.labels.email}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">

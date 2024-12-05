@@ -422,7 +422,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title" onClick={viewUploads}>{i18n.user.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
+                        <span className="user-title" onClick={viewUploads}>{i18n.labels.uploads} <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?

@@ -26,8 +26,8 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Takedown Post"
-    }, [])
+        document.title = getTitle()
+    }, [i18n])
 
     useEffect(() => {
         if (showTakedownPostDialog) {
@@ -65,17 +65,17 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
 
     const getTitle = () => {
         if (props.post.hidden) {
-            return "Restore Post"
+            return i18n.dialogs.takedownPost.restoreTitle
         } else {
-            return "Takedown Post"
+            return i18n.dialogs.takedownPost.title
         }
     }
 
     const getPrompt = () => {
         if (props.post.hidden) {
-            return "Do you want to restore this post?"
+            return i18n.dialogs.takedownPost.restoreHeader
         } else {
-            return "Are you sure that you want to takedown this post?"
+            return i18n.dialogs.takedownPost.header
         }
     }
 
@@ -93,8 +93,8 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-text">{getPrompt()}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

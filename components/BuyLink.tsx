@@ -20,7 +20,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentary">
             <div className="commentary-title-container">
-                <div className="commentary-title">{i18n.post.buyLink}</div>
+                <div className="commentary-title">{i18n.labels.buyLink}</div>
                 <img className="commentary-img-static" src={buyLinkIcon} style={{filter: getFilter()}}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

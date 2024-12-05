@@ -35,8 +35,8 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Upscale Post"
-    }, [])
+        document.title = i18n.dialogs.upscale.title
+    }, [i18n])
 
     useEffect(() => {
         if (showUpscalingDialog) {
@@ -72,7 +72,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" style={{width: "320px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Upscale Post</span>
+                                <span className="dialog-title">{i18n.dialogs.upscale.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                                 <img className="dialog-checkbox" src={upscaler === "waifu2x" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter: getFilter()}}/>
@@ -83,16 +83,16 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-text">cugan</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Scale Factor: </span>
+                                <span className="dialog-text">{i18n.labels.scaleFactor}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={scaleFactor} onChange={(event) => setScaleFactor(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
-                                <span className="dialog-text">Compress to {props.post.type === "animation" ? "WebP" : "JPG"}</span>
+                                <span className="dialog-text">{i18n.labels.compressTo} {props.post.type === "animation" ? "WebP" : "JPG"}</span>
                                 <img className="dialog-checkbox" src={compressJPG ? checkboxChecked : checkbox} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Upscale"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.upscale}</button>
                             </div>
                         </div>
                     </div>

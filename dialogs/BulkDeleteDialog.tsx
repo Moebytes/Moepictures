@@ -22,8 +22,8 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Bulk Delete"
-    }, [])
+        document.title = i18n.dialogs.bulkDelete.title
+    }, [i18n])
 
     useEffect(() => {
         if (showBulkDeleteDialog) {
@@ -63,15 +63,15 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "310px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Bulk Delete</span>
+                            <span className="dialog-title">{i18n.dialogs.bulkDelete.title}</span>
                         </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Are you sure that you want to delete the selected posts?</span>
+                                <span className="dialog-text">{i18n.dialogs.bulkDelete.header}</span>
                             </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Bulk Delete"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.dialogs.bulkDelete.title}</button>
                         </div>
                     </div>
                 </div>

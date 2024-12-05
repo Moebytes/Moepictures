@@ -39,9 +39,9 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
 
     const getTitle = () => {
         if (deleteAliasHistoryID.type === "alias" || deleteAliasHistoryID.type === "undo alias") {
-            return "Delete Alias History"
+            return i18n.dialogs.deleteAliasHistory.aliasTitle
         } else if (deleteAliasHistoryID.type === "implication" || deleteAliasHistoryID.type === "undo implication") {
-            return "Delete Implication History"
+            return i18n.dialogs.deleteAliasHistory.implicationTitle
         }
     }
 
@@ -56,11 +56,11 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Are you sure that you want to delete this history state?</span>
+                                <span className="dialog-text">{i18n.dialogs.deleteGroupHistory.header}</span>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
                     </div>

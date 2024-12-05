@@ -608,7 +608,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (jsx.length) {
             return (
                 <div className="sidebar-row">
-                    <span className="tag">{i18n.sidebar.mirrors}:</span>
+                    <span className="tag">{i18n.labels.mirrors}:</span>
                     {jsx}
                 </div>
             )
@@ -932,7 +932,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {generateArtistsJSX()}
                         {noTagsArtist()}
                         <div className="sidebar-row">
-                            <span className="tag">{i18n.sidebar.title}:</span>
+                            <span className="tag">{i18n.labels.title}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.title || "None"}</span>
                         </div>
                         {props.post.translatedTitle ? 
@@ -1098,13 +1098,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={compressingDialog}>
                                 <img className="sidebar-icon" src={compressIcon}/>
-                                <span className="tag">{i18n.sidebar.compress}</span>
+                                <span className="tag">{i18n.buttons.compress}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={upscalingDialog}>
                                 <img className="sidebar-icon" src={upscaleIcon}/>
-                                <span className="tag">{i18n.sidebar.upscale}</span>
+                                <span className="tag">{i18n.buttons.upscale}</span>
                             </span>
                         </div></> : null}
                         <div className="sidebar-row">

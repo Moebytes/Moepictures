@@ -166,7 +166,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
                     {submitted ? <>
                     <span className="sitepage-validation">{i18n.pages.signup.submitHeading}</span>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="sitepage-button" onClick={() => goToLogin()}>{i18n.pages.login.title}</button>
+                        <button className="sitepage-button" onClick={() => goToLogin()}>{i18n.navbar.login}</button>
                     </div>
                     </> :
                     <>

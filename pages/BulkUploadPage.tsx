@@ -1327,7 +1327,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1356,7 +1356,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>

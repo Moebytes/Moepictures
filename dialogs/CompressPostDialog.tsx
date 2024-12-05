@@ -39,8 +39,8 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Compress Post"
-    }, [])
+        document.title = i18n.dialogs.compress.title
+    }, [i18n])
 
     useEffect(() => {
         if (showCompressingDialog) {
@@ -75,10 +75,10 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" style={{width: "300px", height: "290px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Compress Post</span>
+                                <span className="dialog-title">{i18n.dialogs.compress.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Quality: </span>
+                                <span className="dialog-text">{i18n.labels.quality}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={quality} onChange={(event) => setQuality(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
@@ -96,22 +96,22 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-text">avif</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Max Dimension: </span>
+                                <span className="dialog-text">{i18n.labels.maxDimension}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={maxDimension} onChange={(event) => setMaxDimension(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Max Upscaled: </span>
+                                <span className="dialog-text">{i18n.labels.maxUpscaled}: </span>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={maxUpscaledDimension} onChange={(event) => setMaxUpscaledDimension(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
-                                <span className="dialog-text">Original</span>
+                                <span className="dialog-text">{i18n.pages.upload.original}</span>
                                 <img className="dialog-checkbox" src={original ? checkboxChecked : checkbox} onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
-                                <span className="dialog-text">Upscaled</span>
+                                <span className="dialog-text">{i18n.labels.upscaled}</span>
                                 <img className="dialog-checkbox" src={upscaled ? checkboxChecked : checkbox} onClick={() => setUpscaled((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                             </div>
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="dialog-button">{"Compress"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.compress}</button>
                             </div>
                         </div>
                     </div>

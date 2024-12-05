@@ -33,8 +33,8 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Edit Reply"
-    }, [])
+        document.title = i18n.dialogs.editReply.title
+    }, [i18n])
 
     useEffect(() => {
         if (editReplyID) {
@@ -125,10 +125,10 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" ref={dialogRef} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Edit Reply</span>
+                            <span className="dialog-title">{i18n.dialogs.editReply.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Content: </span>
+                            <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={editReplyContent} onChange={(event) => setEditReplyContent(event.target.value)}></textarea>
@@ -141,11 +141,11 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                         </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
                 </div>

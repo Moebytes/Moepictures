@@ -802,11 +802,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     </div>
                     <Link to="/upload" className="sortbar-item">
                         <img className="sortbar-img" src={upload} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">{i18n.sortbar.upload}</span>
+                        <span className="sortbar-text">{i18n.buttons.upload}</span>
                     </Link>
                     <div className="sortbar-item" onClick={bulkDownload}>
                         <img className="sortbar-img" src={download} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">{i18n.sortbar.download}</span>
+                        <span className="sortbar-text">{i18n.buttons.download}</span>
                     </div>
                     {!tablet && permissions.isAdmin(session) ?
                     <Link to="/bulk-upload" className="sortbar-item">

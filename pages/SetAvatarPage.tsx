@@ -315,7 +315,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                                     <button className="set-avatar-button" onClick={() => setAvatar()}>{i18n.sidebar.setAvatar}</button>
                                 </div>
                                 <div className="set-avatar-button-container">
-                                    <button className="set-avatar-button" onClick={() => download()}>{i18n.sortbar.download}</button>
+                                    <button className="set-avatar-button" onClick={() => download()}>{i18n.buttons.download}</button>
                                 </div>
                             </div>
                         </div>

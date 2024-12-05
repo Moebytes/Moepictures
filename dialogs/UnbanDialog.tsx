@@ -21,8 +21,8 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Unban User"
-    }, [])
+        document.title = i18n.dialogs.unban.title
+    }, [i18n])
 
     useEffect(() => {
         if (unbanName) {
@@ -56,15 +56,15 @@ const UnbanDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Unban User</span>
+                            <span className="dialog-title">{i18n.dialogs.unban.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to unban this user?</span>
+                            <span className="dialog-text">{i18n.dialogs.unban.header}</span>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Unban"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.unban}</button>
                         </div>
                     </div>
                 </div>

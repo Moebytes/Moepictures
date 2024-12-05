@@ -116,7 +116,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
                     <span className="sitepage-link">{i18n.pages.resetPassword.submitHeading}</span>
                     <div className="sitepage-button-container-left">
                         <Link to="/login">
-                            <button className="sitepage-button" onClick={() => history.push("/login")}>{i18n.pages.login.title}</button>
+                            <button className="sitepage-button" onClick={() => history.push("/login")}>{i18n.navbar.login}</button>
                         </Link>
                     </div>
                     </> : <>
