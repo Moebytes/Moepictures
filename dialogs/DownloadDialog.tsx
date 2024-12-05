@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
+import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector, useSearchSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {showDownloadDialog} = useMiscDialogSelector()
     const {setShowDownloadDialog} = useMiscDialogActions()
@@ -17,8 +18,8 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const [amountField, setAmountField] = useState("")
 
     useEffect(() => {
-        document.title = "Download"
-    }, [])
+        document.title = i18n.sortbar.download
+    }, [i18n])
 
     useEffect(() => {
         setTimeout(() => {
@@ -87,19 +88,19 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Download</span>
+                            <span className="dialog-title">{i18n.sortbar.download}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Offset: </span>
+                            <span className="dialog-text">{i18n.dialogs.download.offset}: </span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={offsetField} onChange={(event) => setOffsetField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Amount: </span>
+                            <span className="dialog-text">{i18n.dialogs.download.amount}: </span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={amountField} onChange={(event) => setAmountField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Download"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.sortbar.download}</button>
                         </div>
                     </div>
                 </div>

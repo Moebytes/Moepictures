@@ -118,9 +118,12 @@ const ForumPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Forum"
         updateThreads()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.forum
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

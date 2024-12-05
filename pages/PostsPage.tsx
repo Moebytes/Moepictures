@@ -16,13 +16,14 @@ import CaptchaDialog from "../dialogs/CaptchaDialog"
 import SaveSearchDialog from "../dialogs/SaveSearchDialog"
 import EditSaveSearchDialog from "../dialogs/EditSaveSearchDialog"
 import DeleteAllSaveSearchDialog from "../dialogs/DeleteAllSaveSearchDialog"
-import {useInteractionActions, useSessionSelector, useLayoutActions, 
+import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useLayoutSelector, useSearchActions} from "../store"
 
 let scrollTimer = null as any
 let lastPos = 0
 
 const PostsPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {setMobileScrolling} = useInteractionActions()
@@ -35,7 +36,6 @@ const PostsPage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Moe Anime Pictures ♥"
         const savedTitlebar = localStorage.getItem("titlebar")
         if (savedTitlebar === "false") {
             setHideTitlebar(true)
@@ -50,6 +50,10 @@ const PostsPage: React.FunctionComponent = (props) => {
             setMobileScrolling(false)
         }
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.title
+    }, [i18n])
 
     useEffect(() => {
         const scrollHandler = () => {

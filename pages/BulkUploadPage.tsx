@@ -51,7 +51,7 @@ let tagsTimer = null as any
 
 const BulkUploadPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -109,7 +109,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Bulk Upload"
         window.scrollTo(0, 0)
         setBrightness(100)
         setContrast(100)
@@ -120,6 +119,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setSharpen(0)
         setPixelate(1)
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.bulkUpload.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -956,37 +959,37 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                         <img className="upload-button-img" src={image}/>
-                        <span className="upload-button-text">Image</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                     </button>
                     <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                         <img className="upload-button-img" src={animation}/>
-                        <span className="upload-button-text">Animation</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                         <img className="upload-button-img" src={video}/>
-                        <span className="upload-button-text">Video</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                     </button>
                     <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                         <img className="upload-button-img" src={comic}/>
-                        <span className="upload-button-text">Comic</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                         <img className="upload-button-img" src={audio}/>
-                        <span className="upload-button-text">Audio</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                     </button>
                     <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
                         <img className="upload-button-img" src={live2d}/>
-                        <span className="upload-button-text">Live2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                         <img className="upload-button-img" src={model}/>
-                        <span className="upload-button-text">Model</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                     </button>
                 </div>
                 </>
@@ -997,31 +1000,31 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                         <img className="upload-button-img" src={image}/>
-                        <span className="upload-button-text">Image</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                     </button>
                     <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                         <img className="upload-button-img" src={animation}/>
-                        <span className="upload-button-text">Animation</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                     </button>
                     <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                         <img className="upload-button-img" src={video}/>
-                        <span className="upload-button-text">Video</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                     </button>
                     <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                         <img className="upload-button-img" src={comic}/>
-                        <span className="upload-button-text">Comic</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                     </button>
                     <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                         <img className="upload-button-img" src={audio}/>
-                        <span className="upload-button-text">Audio</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                     </button>
                     <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
                         <img className="upload-button-img" src={live2d}/>
-                        <span className="upload-button-text">Live2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
                     </button>
                     <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                         <img className="upload-button-img" src={model}/>
-                        <span className="upload-button-text">Model</span>
+                        <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                     </button>
                 </div>
                 </>
@@ -1036,18 +1039,18 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                         <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">Safe</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
                     </button>
                     <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                         <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">Questionable</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     {session.showR18 ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">Explicit</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
                     </button> : null}
                 </div> 
                 </>
@@ -1057,16 +1060,16 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                         <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">Safe</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
                     </button>
                     <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                         <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">Questionable</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
                     </button>
                     {session.showR18 ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">Explicit</span>
+                        <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
                     </button> : null}
                 </div>
             )
@@ -1079,15 +1082,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">3D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">Chibi</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -1096,11 +1099,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -1109,24 +1112,24 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">3D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button> : null}
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">Chibi</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                     {type !== "comic" ?
                     <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
                         <img className="upload-button-img" src={daki}/>
-                        <span className="upload-button-text">Daki</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                     </button> : null}
                 </div>
             )
@@ -1285,10 +1288,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         if (session.banned) {
             return (
                 <>
-                <span className="upload-ban-text">You are banned. Cannot upload.</span>
+                <span className="upload-ban-text">{i18n.pages.upload.banText}</span>
                 <button className="upload-button" onClick={() => history.goBack()}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
-                        <span className="upload-button-submit-text">←Back</span>
+                        <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
                 </>
             )
@@ -1296,15 +1299,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="upload">
-                <span className="upload-heading">Bulk Upload</span>
+                <span className="upload-heading">{i18n.pages.bulkUpload.title}</span>
                 {submitted ?
                 <div className="upload-container">
                     <div className="upload-container-row">
-                        <span className="upload-text-alt">Posts were uploaded.</span> 
+                        <span className="upload-text-alt">{i18n.pages.bulkUpload.submitHeading}</span> 
                     </div> 
                     <div className="upload-container-row" style={{marginTop: "10px"}}>
                         <button className="upload-button" onClick={resetAll}>
-                                <span className="upload-button-text">←Submit More</span>
+                                <span className="upload-button-text">←{i18n.pages.upload.submitMore}</span>
                         </button>
                     </div>
                 </div> : <>
@@ -1313,18 +1316,18 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">Select Files</span>
+                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">Enter Links</span>
+                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1344,16 +1347,16 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">Select Files</span>
+                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">Enter Links</span>
+                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1384,35 +1387,35 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 : getPostJSX()}
             </div>
             : null}
-            <span className="upload-heading">Classification</span>
+            <span className="upload-heading">{i18n.pages.upload.classification}</span>
             {getTypeJSX()}
             {getRestrictJSX()}
             {getStyleJSX()}
             <div className="upload-container">
                 <SearchSuggestions active={artistActive} x={getX("artist")} y={getY("artist")} width={mobile ? 150 : 200} text={rawArtist} click={handleArtistClick} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Common Artist: </span>
+                    <span className="upload-text">{i18n.pages.bulkUpload.commonArtist}: </span>
                     <input ref={artistInputRef} className="upload-input-wide2 artist-tag-color" type="text" value={rawArtist} onChange={(event) => setRawArtist(event.target.value)} spellCheck={false} onFocus={() => setArtistActive(true)} onBlur={() => setArtistActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
                 <SearchSuggestions active={characterActive} x={getX("character")} y={getY("character")} width={mobile ? 150 : 200} text={rawCharacter} click={handleCharacterClick} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Common Character: </span>
+                    <span className="upload-text">{i18n.pages.bulkUpload.commonCharacter}: </span>
                     <input ref={characterInputRef} className="upload-input-wide2 character-tag-color" type="text" value={rawCharacter} onChange={(event) => setRawCharacter(event.target.value)} spellCheck={false} onFocus={() => setCharacterActive(true)} onBlur={() => setCharacterActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
                 <SearchSuggestions active={seriesActive} x={getX("series")} y={getY("series")} width={mobile ? 150 : 200} text={rawSeries} click={handleSeriesClick} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Common Series: </span>
+                    <span className="upload-text">{i18n.pages.bulkUpload.commonSeries}: </span>
                     <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => setRawSeries(event.target.value)} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
                 <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={rawAppendTags} click={handleTagsClick} type="tag"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text" style={{marginRight: "10px"}}>Append Tags: </span>
+                    <span className="upload-text" style={{marginRight: "10px"}}>{i18n.pages.bulkUpload.appendTags}: </span>
                     <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => setRawAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
@@ -1424,7 +1427,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             <div className="upload-center-row">
                 {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
                 <button className="upload-button" onClick={() => submit()}>
-                        <span className="upload-button-submit-text">Bulk Upload</span>
+                        <span className="upload-button-submit-text">{i18n.pages.bulkUpload.title}</span>
                 </button>
             </div>
             </>}

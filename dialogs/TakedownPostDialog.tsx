@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {showTakedownPostDialog} = usePostDialogSelector()
     const {setShowTakedownPostDialog} = usePostDialogActions()

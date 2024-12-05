@@ -11,7 +11,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../
 import "./styles/sitepage.less"
 
 const NewsBannerPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setNewsBanner, setActionBanner} = useActiveActions()
@@ -38,8 +38,11 @@ const NewsBannerPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "News Banner"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.newsBanner
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -76,19 +79,19 @@ const NewsBannerPage: React.FunctionComponent = (props) => {
             <div className="content">
                 {permissions.isAdmin(session) ?
                 <div className="sitepage">
-                    <span className="sitepage-title">News Banner</span>
+                    <span className="sitepage-title">{i18n.user.newsBanner}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Text: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.text}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Link: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.link}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="sitepage-button" onClick={() => setBanner()}>Set Banner</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => setBanner()}>{i18n.pages.newsBanner.setBanner}</button>
                     </div> 
                 </div> : null}
                 <Footer/>

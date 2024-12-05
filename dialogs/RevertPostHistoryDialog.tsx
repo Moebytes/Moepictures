@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, usePostDialogSelector, usePostDialogActions, useSessionSelector} from "../store"
+import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useSessionSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const RevertPostHistoryDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {revertPostHistoryID} = usePostDialogSelector()
     const {setRevertPostHistoryID, setRevertPostHistoryFlag} = usePostDialogActions()

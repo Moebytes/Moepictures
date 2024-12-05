@@ -11,7 +11,7 @@ import checkboxChecked from "../assets/icons/checkbox-checked.png"
 import path from "path"
 
 const BanDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {banName} = useMiscDialogSelector()
     const {setBanName} = useMiscDialogActions()

@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -10,6 +10,7 @@ import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()

@@ -122,8 +122,11 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Mod Queue"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.modQueue
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

@@ -9,7 +9,7 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/dialog.less"
 
 const EditFavgroupDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editFavGroupObj} = useGroupDialogSelector()
     const {setEditFavGroupObj} = useGroupDialogActions()

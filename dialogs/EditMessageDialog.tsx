@@ -13,7 +13,7 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editMessageID, editMessageTitle, editMessageContent, editMessageR18} = useMessageDialogSelector()
     const {setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18} = useMessageDialogActions()

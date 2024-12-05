@@ -640,6 +640,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Do not behave badly participating in comments, forum threads, or sending messages. 
                     These are some general guidelines for all the comment sections: <br/>
                     <span className="help-alt">
+                    ⇾ Please communicate in English (you may use a machine translator). <br/>
                     ⇾ No spam, gibberish, or extremely off-topic comments. <br/>
                     ⇾ No foul language (if you somehow bypassed the filter). <br/>
                     ⇾ No unnecessary rudeness or impoliteness, please be kind. <br/>

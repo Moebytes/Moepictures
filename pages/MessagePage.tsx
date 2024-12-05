@@ -629,12 +629,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>Cannot respond to system messages.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.system}</span>
             </div>
         )
         if (session.banned) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.banned}</span>
             </div>
         )
         if (session.username) {

@@ -1,11 +1,12 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const Disable2FADialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {disable2FADialog} = useMiscDialogSelector()
     const {setDisable2FADialog, setDisable2FAFlag} = useMiscDialogActions()

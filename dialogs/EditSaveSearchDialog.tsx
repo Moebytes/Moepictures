@@ -1,6 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, useSessionActions} from "../store"
+import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
@@ -10,6 +10,7 @@ import ContentEditable from "react-contenteditable"
 import xButton from "../assets/icons/x-button.png"
 
 const EditSaveSearchDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editSaveSearchName, editSaveSearchKey, editSaveSearchTags} = useSearchDialogSelector()
     const {setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()

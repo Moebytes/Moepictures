@@ -1,11 +1,12 @@
 import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DeleteCommentDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteCommentID} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag} = useCommentDialogActions()

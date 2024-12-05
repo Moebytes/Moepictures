@@ -13,7 +13,7 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditThreadDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editThreadID, editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
     const {setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, setEditThreadR18} = useThreadDialogActions()

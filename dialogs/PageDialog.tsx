@@ -1,11 +1,12 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useFlagActions} from "../store"
+import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const PageDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag, setMobileScrolling} = useInteractionActions()
     const {showPageDialog} = useMiscDialogSelector()
     const {setShowPageDialog} = useMiscDialogActions()
@@ -14,8 +15,8 @@ const PageDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Go To Page"
-    }, [])
+        document.title = i18n.dialogs.page.title
+    }, [i18n])
 
     useEffect(() => {
         if (showPageDialog) {
@@ -48,15 +49,15 @@ const PageDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Go To Page</span>
+                            <span className="dialog-title">{i18n.dialogs.page.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Page:</span>
+                            <span className="dialog-text">{i18n.dialogs.page.page}:</span>
                             <input className="dialog-input-taller" type="number" spellCheck={false} value={pageField} onChange={(event) => setPageField(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Go"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.go}</button>
                         </div>
                     </div>
                 </div>

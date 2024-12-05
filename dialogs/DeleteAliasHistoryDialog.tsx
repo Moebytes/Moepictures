@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useSessionSelector, 
 useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -8,6 +8,7 @@ import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteAliasHistoryID} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag} = useTagDialogActions()

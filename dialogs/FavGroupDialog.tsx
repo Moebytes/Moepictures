@@ -12,7 +12,7 @@ import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const FavgroupDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()

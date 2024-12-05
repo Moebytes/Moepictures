@@ -147,9 +147,12 @@ const MailPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Mail"
         updateMessages()
     }, [hideSystem])
+
+    useEffect(() => {
+        document.title = i18n.navbar.mail
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

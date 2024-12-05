@@ -41,8 +41,11 @@ const ContactPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Contact"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.contact
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -125,38 +128,37 @@ const ContactPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="contact">
-                    <span className="contact-title">Contact</span>
+                    <span className="contact-title">{i18n.navbar.contact}</span>
                     {submitted ? <>
-                    <span className="contact-link">Your message was delivered.</span>
+                    <span className="contact-link">{i18n.pages.contact.submitHeading}</span>
                     <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => history.push("/posts")}>←Back</button>
+                        <button className="contact-button" onClick={() => history.push("/posts")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        This is a contact form for general inquiries. If you would like to remove your work, 
-                        please fill out our <Link className="contact-text-alt-link" to="/copyright-removal">Copyright Removal Form</Link>.
+                        {i18n.pages.contact.heading} <Link className="contact-text-alt-link" to="/copyright-removal">{i18n.pages.contact.copyrightForm}</Link>
                     </span>
                     <div className="contact-row">
-                        <span className="contact-text">Email:</span>
+                        <span className="contact-text">{i18n.user.email}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">Subject:</span>
+                        <span className="contact-text">{i18n.pages.contact.subject}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={subject} onChange={(event) => setSubject(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">Attach Files:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">Select Files</label>
+                        <span className="contact-text">{i18n.pages.contact.attachFiles}:</span>
+                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.pages.upload.selectFiles}</label>
                         <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
                         {generateFilesJSX()}
                     </div>
                     <div className="contact-row-start">
-                        <span className="contact-text">Message:</span>
+                        <span className="contact-text">{i18n.buttons.message}:</span>
                         <textarea className="contact-textarea" spellCheck={false} value={message} onChange={(event) => setMessage(event.target.value)}></textarea>
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container">
-                        <button className="contact-button" onClick={submit}>Send Message</button>
+                        <button className="contact-button" onClick={submit}>{i18n.pages.contact.sendMessage}</button>
                     </div>
                     </> }
                 </div>

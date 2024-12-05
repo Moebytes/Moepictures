@@ -8,7 +8,7 @@ import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector} from "../store"
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
@@ -71,8 +72,11 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Post History"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.history.post
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -165,7 +169,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Post History` : "Post History"}</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.post}` : i18n.history.post}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

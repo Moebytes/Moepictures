@@ -34,7 +34,7 @@ interface Props {
 let limit = 25
 
 const GroupPage: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown} = useActiveActions()
@@ -290,10 +290,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                         {groupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="group-text">{group.description ? jsxFunctions.renderCommentaryText(group.description) : "No description."}</span>
+                        <span className="group-text">{group.description ? jsxFunctions.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span><span className="group-label" onClick={searchGroup}>Posts</span> <span className="group-label-alt">{group.postCount}</span></span>
+                        <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>
                     </div>
                     {groupImagesJSX()}
                 </div> : null}

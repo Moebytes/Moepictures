@@ -115,9 +115,12 @@ const TagsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Tags"
         updateTags()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.tags
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

@@ -13,7 +13,7 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditReplyDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editReplyID, editReplyContent, editReplyR18} = useThreadDialogSelector()
     const {setEditReplyID, setEditReplyFlag, setEditReplyContent, setEditReplyR18} = useThreadDialogActions()

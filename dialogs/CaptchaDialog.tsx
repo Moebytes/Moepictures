@@ -10,7 +10,7 @@ interface Props {
 }
 
 const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setSessionFlag} = useSessionActions()
     const {session} = useSessionSelector()

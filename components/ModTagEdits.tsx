@@ -327,9 +327,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         if (changes.description) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldTag.description || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldTag.description || i18n.labels.noDesc}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newTag.description || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newTag.description || i18n.labels.noDesc}</span>)
             }
         }
         if (changes.aliases) {

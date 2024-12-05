@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -8,6 +8,7 @@ import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const ForwardMessageDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {forwardMessageObj} = useMessageDialogSelector()
     const {setForwardMessageObj} = useMessageDialogActions()

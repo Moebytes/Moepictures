@@ -48,8 +48,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Copyright Removal"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.copyrightRemoval.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -78,7 +81,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!name) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Name is required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.nameReq
             await functions.timeout(2000)
             setError(false)
             return
@@ -95,7 +98,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!artistTag) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Artist tag is required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.artistTagReq
             await functions.timeout(2000)
             setError(false)
             return
@@ -103,7 +106,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!socialMediaLinks) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Social media links are required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.socialMediaReq
             await functions.timeout(2000)
             setError(false)
             return
@@ -111,7 +114,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!postLinks) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Post links are required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.postLinkReq
             await functions.timeout(2000)
             setError(false)
             return
@@ -119,7 +122,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!files.length && !proofLinks) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Providing a proof attachment or links is required."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.proofReq
             await functions.timeout(2000)
             setError(false)
             return
@@ -127,20 +130,20 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!attestOwnership) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "You must confirm that you are the copyright owner."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.confirmReq
             await functions.timeout(2000)
             setError(false)
             return
         }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
+        errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, files}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "There was an error sending the message."
+            errorRef.current!.innerText = i18n.pages.copyrightRemoval.error
             await functions.timeout(2000)
             setError(false)
         }
@@ -168,11 +171,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             return (
                 <><div className="contact-row">
                     <span className="contact-text-alt">
-                    Please provide the link to your artist tag page.<br/>
+                    {i18n.pages.copyrightRemoval.artistTagPageHeading}<br/>
                     </span>
                 </div>
                 <div className="contact-row-start">
-                    <span className="contact-text" style={{width: "200px"}}>Artist Tag Page:</span>
+                    <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.artistTagPage}:</span>
                 </div>
                 <div className="contact-row-start">
                     <input className="contact-input-small" style={{marginLeft: "0px", width: "50%"}} type="text" spellCheck={false} value={postLinks} onChange={(event) => setPostLinks(event.target.value)}/>
@@ -182,11 +185,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             return (
                 <><div className="contact-row">
                     <span className="contact-text-alt">
-                    Please provide all the post links that you want removed.<br/>
+                    {i18n.pages.copyrightRemoval.postLinkHeading}<br/>
                     </span>
                 </div>
                 <div className="contact-row-start">
-                    <span className="contact-text" style={{width: "200px"}}>Post Links:</span>
+                    <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.postLinks}:</span>
                 </div>
                 <div className="contact-row-start">
                     <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={postLinks} onChange={(event) => setPostLinks(event.target.value)}></textarea>
@@ -203,76 +206,74 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="contact" style={{height: "max-content"}}>
-                    <span className="contact-title">Copyright Removal</span>
+                    <span className="contact-title">{i18n.pages.copyrightRemoval.title}</span>
                     {submitted ? <>
-                    <span className="contact-link">Your removal request was delivered.</span>
+                    <span className="contact-link">{i18n.pages.copyrightRemoval.submitHeading}</span>
                     <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => history.push("/posts")}>←Back</button>
+                        <button className="contact-button" onClick={() => history.push("/posts")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        If your work is on Moepictures then it means that we love your work, but we 
-                        are sorry if you are unhappy with your works appearing on our site. You 
-                        may fill out this form to request the removal of your content. <br/><br/>
+                        {i18n.pages.copyrightRemoval.heading}<br/><br/>
 
-                        If you prefer, you may also write an email containing all of this info to 
+                        {i18n.pages.copyrightRemoval.emailPref}
                         <span className="contact-text-alt" style={{marginLeft: "5px"}}>moepictures.moe@gmail.com.</span>
                     </span>
                     <div className="contact-row">
-                        <span className="contact-text" style={{width: "70px"}}>Name:</span>
+                        <span className="contact-text" style={{width: "70px"}}>{i18n.labels.name}:</span>
                         <input className="contact-input-small" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text" style={{width: "70px"}}>Email:</span>
+                        <span className="contact-text" style={{width: "70px"}}>{i18n.user.email}:</span>
                         <input className="contact-input-small" style={{width: "50%"}} type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">
                         <span className="contact-text-alt">
-                        Please provide the exact name of your artist tag on Moepictures.<br/>
+                        {i18n.pages.copyrightRemoval.artistTagHeading}<br/>
                         </span>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text" style={{width: "100px"}}>Artist Tag:</span>
+                        <span className="contact-text" style={{width: "100px"}}>{i18n.pages.upload.artistTag}:</span>
                         <input className="contact-input-small" type="text" spellCheck={false} value={artistTag} onChange={(event) => setArtistTag(event.target.value)}/>
                     </div>
                     <div className="contact-row">
                         <span className="contact-text-alt">
-                        Please provide your social media links (eg. Twitter, Pixiv). It should be possible to find the works on your profile. <br/>
+                        {i18n.pages.copyrightRemoval.socialMediaHeading}<br/>
                         </span>
                     </div>
                     <div className="contact-row-start">
-                        <span className="contact-text" style={{width: "200px"}}>Social Media Links:</span>
+                        <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.socialMedia}:</span>
                     </div>
                     <div className="contact-row-start">
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={socialMediaLinks} onChange={(event) => setSocialMediaLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
                         <img className="contact-checkbox" src={removeAllRequest ? checkbox : checkboxChecked} onClick={() => setRemoveAllRequest(false)} style={{filter: getFilter()}}/>
-                        <span className="contact-link">Remove all of the specified links</span>
+                        <span className="contact-link">{i18n.pages.copyrightRemoval.removeSpecified}</span>
                     </div>
                     <div className="contact-row-start">
                         <img className="contact-checkbox" src={removeAllRequest ? checkboxChecked : checkbox} onClick={() => setRemoveAllRequest(true)} style={{filter: getFilter()}}/>
-                        <span className="contact-link">Remove all of my associated content</span>
+                        <span className="contact-link">{i18n.pages.copyrightRemoval.removeAll}</span>
                     </div>
                     {getRemovalTypeJSX()}
                     <div className="contact-row">
                         <span className="contact-link">
-                            Please provide proof that you are the artist in question. These are a couple acceptable forms of proof: <br/>
+                            {i18n.pages.copyrightRemoval.proofHeading}<br/>
                             <span className="contact-text-alt">
-                            ⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed. <br/>
-                            ⇾ Post somewhere on your profile or in one of your posts "Remove me from Moepictures" and post the link to it. <br/>
-                            ⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly. <br/>
+                            {i18n.pages.copyrightRemoval.emailProof}<br/>
+                            {i18n.pages.copyrightRemoval.postProof}<br/>
+                            {i18n.pages.copyrightRemoval.sourceProof}<br/>
                             </span>
                         </span>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">Attach Files:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">Select Files</label>
+                        <span className="contact-text">{i18n.pages.contact.attachFiles}:</span>
+                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.pages.upload.selectFiles}</label>
                         <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
                         {generateFilesJSX()}
                     </div>
                     <div className="contact-row-start">
-                        <span className="contact-text" style={{width: "200px"}}>Links to Proof:</span>
+                        <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.proof}:</span>
                     </div>
                     <div className="contact-row-start">
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={proofLinks} onChange={(event) => setProofLinks(event.target.value)}></textarea>
@@ -280,14 +281,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     <div className="contact-row-start">
                         <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         <span className="contact-link">
-                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>I am the copyright owner of the 
-                        content linked above or am authorized to act on the behalf of the copyright owner. I verify that all of 
-                        provided information is accurate.
-                        </span>
+                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>{i18n.pages.copyrightRemoval.verifyCopyright}</span>
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container" style={{marginTop: "10px", marginBottom: "10px"}}>
-                        <button className="contact-button" onClick={submit}>Submit Removal Request</button>
+                        <button className="contact-button" onClick={submit}>{i18n.pages.copyrightRemoval.submit}</button>
                     </div>
                     </> }
                 </div>

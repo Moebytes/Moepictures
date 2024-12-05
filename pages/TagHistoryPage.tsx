@@ -9,7 +9,7 @@ import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector} from "../store"
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
@@ -41,7 +42,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             setRedirect(tag ? `/tag/history/${tag}` : "/tag/history")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
@@ -84,8 +85,11 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Tag History"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.history.tag
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -178,7 +182,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Tag History` : "Tag History"}</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.tag}` : i18n.history.tag}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

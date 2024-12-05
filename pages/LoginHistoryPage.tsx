@@ -41,8 +41,11 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Login History"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.loginHistory
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -121,12 +124,12 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="sitepage" style={{width: mobile || tablet ? "100%" : "70%", height: "max-content"}}>
                     <div className="sitepage-title-container">
-                        <span className="sitepage-title">Login History</span>
+                        <span className="sitepage-title">{i18n.user.loginHistory}</span>
                     </div>
-                    <span className="sitepage-link">If you don't recognize the activity, logout of all other sessions and change your password!</span>
+                    <span className="sitepage-link">{i18n.pages.loginHistory.heading}</span>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="sitepage-button" onClick={logoutOtherSessions}>Logout Other Sessions</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={logoutOtherSessions}>{i18n.pages.loginHistory.logoutSessions}</button>
                     </div>
                     {loginHistoryJSX()}
                 </div>

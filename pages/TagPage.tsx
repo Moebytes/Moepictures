@@ -39,7 +39,7 @@ interface Props {
 let limit = 25
 
 const TagPage: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setSidebarText, setHeaderText, setActiveDropdown} = useActiveActions()
@@ -477,7 +477,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                     {pixivTagsJSX()}
                     {tagAliasJSX()}
                     {tag.banned ? <div className="tag-row">
-                        <span className="tag-text strikethrough-color">You may not upload artwork from this artist.</span>
+                        <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
                     </div> : null}
                     <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span className="tag-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>

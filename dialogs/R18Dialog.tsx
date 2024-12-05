@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../store"
+import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import r18 from "../assets/icons/r18.png"
 import "./styles/dialog.less"
 
 const R18Dialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {r18Confirmation} = useMiscDialogSelector()
     const {setR18Confirmation} = useMiscDialogActions()

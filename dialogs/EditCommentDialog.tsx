@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useCommentDialogSelector, useCommentDialogActions, 
+import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions, 
 useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
@@ -9,6 +9,7 @@ import Draggable from "react-draggable"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editCommentID, editCommentText} = useCommentDialogSelector()
     const {setEditCommentID, setEditCommentFlag, setEditCommentText} = useCommentDialogActions()

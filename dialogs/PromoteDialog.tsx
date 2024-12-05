@@ -17,7 +17,7 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 
 const PromoteDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {promoteName} = useMiscDialogSelector()
     const {setPromoteName} = useMiscDialogActions()

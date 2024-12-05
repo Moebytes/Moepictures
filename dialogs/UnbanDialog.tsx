@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -8,6 +8,7 @@ import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const UnbanDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {unbanName} = useMiscDialogSelector()
     const {setUnbanName} = useMiscDialogActions()

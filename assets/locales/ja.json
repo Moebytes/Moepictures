@@ -1,4 +1,5 @@
 {
+    "title": "Moepictures: 萌えアニメの写真 ♥",
     "navbar": {
         "login": "ログイン",
         "posts": "ポスト",
@@ -13,7 +14,8 @@
         "contact": "コンタクト",
         "premium": "プレミアム",
         "mail": "メール",
-        "translations": "翻訳"
+        "translations": "翻訳",
+        "modQueue": "改造キュー"
     },
     "sidebar": {
         "source": "ソース",
@@ -166,6 +168,7 @@
         "reply": "返信",
         "message": "メッセージ",
         "submitting": "提出...",
+        "submit": "投稿する",
         "ok": "OK",
         "yes": "はい",
         "no": "いいえ",
@@ -184,7 +187,9 @@
         "report": "レポート",
         "revert": "復帰",
         "back": "戻る",
-        "validate": "検証"
+        "validate": "検証",
+        "cancel": "キャンセル",
+        "go": "行く"
     },
     "history": {
         "post": "投稿履歴",
@@ -343,6 +348,7 @@
         "reason": "理由",
         "none": "無し",
         "unknown": "不明",
+        "noDesc": "記述がない。",
         "affectedPosts": "影響を受けるポスト",
         "name": "名前",
         "description": "説明",
@@ -352,6 +358,7 @@
         "images": "画像",
         "parentID": "親のID",
         "translatedTitle": "翻訳タイトル",
+        "text": "テキスト",
         "link": "リンク",
         "commentary": "コメンタリー",
         "translatedCommentary": "翻訳解説",
@@ -415,9 +422,218 @@
             "status": "ステータス",
             "scan": "2FA認証アプリ（Authyなど）で以下のQRコードを読み取ってください。",
             "finish": "2FAを有効にするには、有効な2FAトークンを入力する必要があります。",
+            "enable": "2FAを有効にする"
+        },
+        "$2fa": {
+            "heading": "2FAトークンを入力してください。",
             "token": "2FAトークン",
-            "enable": "2FAを有効にする",
             "badToken": "悪いトークンだ。"
+        },
+        "changeEmail": {
+            "heading": "新しいアドレスに確認メールが送信されます。新しいEメールを確認した場合のみ、Eメールが変更されます。",
+            "submitHeading": "新しいアドレスに確認リンクが送信されました。確認後、Eメールが変更されます。",
+            "newEmail": "新規メール",
+            "error": "電子メールまたはcaptchaが正しくありません。"
+        },
+        "changeEmailSuccess": {
+            "pageTitle": "成功メールの変更",
+            "title": "電子メールの変更に成功",
+            "label": "Eメールが変更されました： "
+        },
+        "changePassword": {
+            "submitHeading": "パスワードが変更されました。",
+            "oldPassword": "旧パスワード",
+            "newPassword": "新しいパスワード",
+            "confirmNewPassword": "新しいパスワードの確認",
+            "noMatch": "パスワードが一致しない。",
+            "error": "パスワードが悪い。"
+        },
+        "changeUsername": {
+            "heading": "変更後は以前のユーザー名が使用可能になります。",
+            "newUsername": "新しいユーザー名",
+            "submitHeading": "ユーザー名が変更されました。",
+            "error": "ユーザー名またはキャプチャが不正です。"
+        },
+        "forgotPassword": {
+            "title": "パスワードを忘れた",
+            "heading": "パスワードリセットリンクを受け取るには、Eメールを入力してください。",
+            "submitHeading": "このアカウントが存在する場合、パスワードリセットリンクが送信されました。",
+            "emailAddress": "メールアドレス",
+            "sendLink": "リンクを送る",
+            "error": "無効な電子メールまたはcaptcha。"
+        },
+        "resetPassword": {
+            "title": "パスワードのリセット",
+            "submitHeading": "パスワードがリセットされました。"
+        },
+        "verifyEmail": {
+            "title": "電子メールの確認",
+            "heading": "アカウントを使用するには、Eメールアドレスの確認が必要です。Eメールアドレスの変更や認証リンクの再送信が必要な場合は、以下から行うことができます。",
+            "submitHeading": "確認メールが再送されました。メールを確認してください。",
+            "unverifiedEmail": "未確認Eメール",
+            "optionalAddressChange": "住所変更オプション",
+            "resend": "検証リンクの再送",
+            "error": "電子メールまたはcaptchaが正しくありません。"
+        },
+        "verifyEmailSuccess": {
+            "pageTitle": "電子メールの成功を確認する",
+            "title": "認証済みEメール",
+            "heading": "メールアドレスが認証されました！これでアカウントを使用できるようになります。"
+        },
+        "login": {
+            "title": "ログイン",
+            "signupText": "アカウントをお持ちでないですか？登録する",
+            "forgotText": "パスワードをお忘れですか？",
+            "username": "ユーザー名",
+            "password": "パスワード",
+            "captcha": "キャプチャを解く。",
+            "error": "ユーザー名、パスワード、またはキャプチャが無効です。",
+            "rateLimit": "ログインの試行回数が多すぎます。"
+        },
+        "signup": {
+            "title": "会員登録",
+            "loginText": "アカウントをお持ちですか？ログイン",
+            "submitHeading": "アカウントが作成されました。Eメールに確認リンクが届いているはずです。Eメールを確認し、再度ログインしてください。",
+            "error": "ユーザー名、パスワード、電子メール、またはキャプチャに誤りがある。",
+            "rateLimit": "アカウントが多すぎます。",
+            "banned": "このIPは禁止されたアカウントに関連付けられています。",
+            "confirmPassword": "パスワードの確認",
+            "lengthReq": "-パスワードは10文字以上であること",
+            "varietyReq": "-次のうち少なくとも3つ：小文字、大文字、数字、特殊記号"
+        },
+        "ipBlacklist": {
+            "title": "ブラックリストIP",
+            "ipAddress": "IPアドレス",
+            "blacklist": "ブラックリスト",
+            "unblacklist": "ブラックリスト解除"
+        },
+        "loginHistory": {
+            "heading": "アクティビティに見覚えがない場合は、他のすべてのセッションからログアウトし、パスワードを変更してください！",
+            "logoutSessions": "他のセッションをログアウトする"
+        },
+        "newsBanner": {
+            "setBanner": "セットバナー"
+        },
+        "premiumSuccess": {
+            "pageTitle": "プレミアムサクセス",
+            "title": "アカウントがアップグレードされました！",
+            "thankYou": "プレミアムをご購入いただきありがとうございます！アカウントがアップグレードされ、すべてのプレミアム機能にアクセスできるようになりました。",
+            "lastUntil": "プレミアム会員の有効期限"
+        },
+        "tag": {
+            "bannedArtist": "このアーティストの作品をアップロードすることはできません。"
+        },
+        "message": {
+            "system": "システムメッセージに応答できない。",
+            "banned": "あなたは出入り禁止です。返信できません。"
+        },
+        "thread": {
+            "locked": "このスレッドはロックされている。"
+        },
+        "contact": {
+            "heading": "こちらは一般的なお問い合わせフォームです。作品の削除をご希望の方は、",
+            "copyrightForm": "著作権削除フォームにご記入ください。",
+            "submitHeading": "メッセージが届きました。",
+            "subject": "テーマ",
+            "attachFiles": "ファイルを添付する",
+            "sendMessage": "メッセージを送る"
+        },
+        "copyrightRemoval": {
+            "title": "著作権の削除",
+            "heading": "あなたの作品がMoepicturesに掲載されているということは、私たちがあなたの作品を愛しているということです。このフォームに必要事項を記入し、あなたのコンテンツの削除を要求することができます。",
+            "emailPref": "ご希望であれば、これらの情報をすべて記載したEメールをお送りいただいても結構です： ",
+            "submitHeading": "削除依頼が届きました。",
+            "artistTagHeading": "Moepicturesのアーティストタグの名前を正確にご記入ください。",
+            "socialMediaHeading": "あなたのソーシャルメディアへのリンク（例：Twitter、Pixiv）をご記入ください。あなたのプロフィールで作品を見つけることができるはずです。",
+            "socialMedia": "ソーシャルメディアリンク",
+            "removeSpecified": "指定したリンクをすべて削除する",
+            "removeAll": "関連コンテンツをすべて削除する",
+            "artistTagPageHeading": "アーティスト・タグ・ページへのリンクをご記入ください。",
+            "artistTagPage": "アーティストタグページ",
+            "postLinkHeading": "削除してほしい投稿リンクをすべてご記入ください。",
+            "postLinks": "リンクを貼る",
+            "proofHeading": "あなたが当該アーティストであることを証明する書類を提出してください。これらの証明は、2、3の許容可能な形式です：",
+            "emailProof": "⇾ あなたのEメールがあなたのアカウントに公開されている場合、そのEメールを使ってご連絡ください。あなたのEメールが掲載されているリンクを貼ってください。",
+            "postProof": "⇾ プロフィールか投稿のどこかに 「Remove me from Moepictures 」と書いて、そのリンクを貼ってください。",
+            "sourceProof": "⇾ 公開されていない作品にソースファイル（.psd、.clip）を添付する。",
+            "proof": "証明へのリンク",
+            "verifyCopyright": "私は、上記リンク先のコンテンツの著作権者であるか、または著作権者に代わって行動する権限を与えられています。私は、提供されたすべての情報が正確であることを確認します。",
+            "submit": "削除依頼の提出",
+            "nameReq": "名前は必須。",
+            "artistTagReq": "アーティストタグが必要です。",
+            "socialMediaReq": "ソーシャルメディアへのリンクは必須。",
+            "postLinkReq": "投稿リンクは必須。",
+            "proofReq": "証明となる添付ファイルまたはリンクの提出が必要。",
+            "confirmReq": "あなたが著作権者であることを確認する必要があります。",
+            "error": "メッセージの送信にエラーが発生しました。"
+        },
+        "upload": {
+            "selectFiles": "ファイルを選択",
+            "enterLinks": "リンクを入力",
+            "upscaled": "アップスケール",
+            "original": "オリジナル",
+            "submitHeading": "投稿がアップロードされた。",
+            "submitHeadingApproval": "あなたの投稿は投稿され、承認されればサイトに掲載されます。",
+            "submitMore": "もっと見る",
+            "classification": "分類",
+            "multipleHeading": "画像が複数ある場合は、一番右のタグを選択します。",
+            "possibleDuplicates": "重複の可能性",
+            "childHeading": "子投稿の場合は、親投稿のIDを入力してください： ",
+            "fetchFromPixiv": "Pixivからフェッチ",
+            "fetchFromDanbooru": "Danbooruからフェッチ",
+            "banText": "禁止されています。アップロードできません。",
+            "artistExists": "アーティスト・タグがまだ存在しない場合は、アーティスト画像をアップロードしてください。",
+            "characterExists": "キャラクタータグがまだ存在しない場合は、キャラクター画像をアップロードしてください。",
+            "seriesExists": "シリーズタグがまだ存在しない場合は、シリーズ画像をアップロードしてください。",
+            "hideImage": "画像を隠す",
+            "displayImage": "表示イメージ",
+            "enterTags": "破線のタグをスペースで区切って入力します。タグはどの画像でも記述できます。タグが存在しない場合は、タグを作成するよう促されます。タグについてのヘルプが必要な場合は、こちらをお読みください：",
+            "taggingGuide": "タグ付けガイド",
+            "artistTag": "アーティスト・タグ",
+            "artistImage": "アーティスト・イメージ",
+            "addArtist": "アーティストを追加",
+            "removeArtist": "アーティストを削除する",
+            "characterTag": "キャラクター・タグ",
+            "characterImage": "キャラクター・イメージ",
+            "addCharacter": "キャラクターの追加",
+            "removeCharacter": "文字の削除",
+            "seriesTag": "シリーズ・タグ",
+            "seriesImage": "シリーズ・イメージ",
+            "addSeries": "シリーズ追加",
+            "removeSeries": "シリーズ削除",
+            "optionalTagImage": "オプションのタグ画像",
+            "invalidCharacters": "タグに無効な文字があります： _ / \\",
+            "spaceSeparation": "タグはスペースで区切る。",
+            "tagMinimum": "最低5枚のタグが必要。",
+            "sizeLimit": "ファイルサイズの合計は300MBを超えないこと。",
+            "error": "送信に失敗しました。必須項目が不足している可能性があります。",
+            "errorOriginal": "オリジナル画像が必要です。",
+            "fetching": "フェッチ...",
+            "wait": "数秒待つ。",
+            "noResults": "結果は見つからなかった。",
+            "nothingFound": "何も見つからない。",
+            "supportedFiletypes": "対応ファイル形式： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.",
+            "supportedFiletypesZip": "zipでサポートされているタイプ： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.",
+            "maxFileSize": "最大ファイルサイズ"
+        },
+        "bulkUpload": {
+            "title": "一括アップロード",
+            "submitHeading": "投稿がアップロードされた。",
+            "commonArtist": "コモンアーティスト",
+            "commonCharacter": "共通キャラクター",
+            "commonSeries": "共通シリーズ",
+            "appendTags": "タグの追加"
+        },
+        "edit": {
+            "title": "投稿を編集する",
+            "unverifiedTitle": "未確認投稿の編集",
+            "submitHeading": "投稿が編集されました。",
+            "submitHeadingApproval": "投稿編集が送信され、承認されればサイトに表示されます。",
+            "banText": "あなたは出入り禁止です。編集できません。",
+            "locked": "この投稿はロックされています。編集できません。",
+            "editReason": "編集理由",
+            "noEdits": "ポスト編集は行われなかった。",
+            "reasonRequired": "編集理由が必要です。"
         }
     }
 }

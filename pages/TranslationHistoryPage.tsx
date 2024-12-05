@@ -9,7 +9,7 @@ import TranslationHistoryRow from "../components/TranslationHistoryRow"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector} from "../store"
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
@@ -42,7 +43,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             setRedirect(postID ? `/translation/history/${postID}/${order}` : "/translation/history")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
@@ -75,8 +76,11 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Translation History"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.history.translation
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -160,7 +164,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Translation History` : "Translation History"}</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.translation}` : i18n.history.translation}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

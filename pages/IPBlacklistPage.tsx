@@ -11,7 +11,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../
 import "./styles/sitepage.less"
 
 const IPBlacklistPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -39,8 +39,11 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "IP Blacklist"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.user.ipBlacklist
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -78,20 +81,20 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
             <div className="content">
                 {permissions.isAdmin(session) ?
                 <div className="sitepage">
-                    <span className="sitepage-title">Blacklist IP</span>
+                    <span className="sitepage-title">{i18n.pages.ipBlacklist.title}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">IP Address: </span>
+                        <span className="sitepage-text-wide">{i18n.pages.ipBlacklist.ipAddress}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={ip} onChange={(event) => setIP(event.target.value)}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Reason: </span>
+                        <span className="sitepage-text-wide">{i18n.labels.reason}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => unblacklist()}>Unblacklist</button>
-                        <button className="sitepage-button" onClick={() => blacklist()}>Blacklist</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => unblacklist()}>{i18n.pages.ipBlacklist.unblacklist}</button>
+                        <button className="sitepage-button" onClick={() => blacklist()}>{i18n.pages.ipBlacklist.blacklist}</button>
                     </div> 
                 </div> : null}
                 <Footer/>

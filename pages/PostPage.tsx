@@ -43,7 +43,7 @@ import currentIcon from "../assets/icons/current.png"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useTranslationDialogSelector, useTranslationDialogActions, useActiveSelector, usePostDialogSelector,
-useCacheSelector, useInteractionActions,
+useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
@@ -55,6 +55,7 @@ interface Props {
 }
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
+    const {language} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {activeFavgroup} = useActiveSelector()
@@ -218,20 +219,27 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const updatePost = async () => {
-            if (post) {
-                const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
-                              post.title ? post.title : "Post"
-                document.title = `${title}`
-                if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
-            }
-        }
-        updatePost()
         updateParent()
         updateChildren()
         updateGroups()
         saveHistory()
     }, [post, session])
+
+    useEffect(() => {
+        const updateTitle = async () => {
+            if (!post) return
+            let title = ""
+            if (language === "ja") {
+                title = post.title ? post.title : "Post"
+            } else {
+                title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
+                post.title ? post.title : "Post"
+            }
+            document.title = `${title}`
+            if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
+        }
+        updateTitle()
+    }, [post, language])
 
     useEffect(() => {
         if (!session.cookie) return

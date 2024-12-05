@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/dialog.less"
 
 const PremiumRequiredDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {premiumRequired} = useMiscDialogSelector()
     const {setPremiumRequired} = useMiscDialogActions()

@@ -9,7 +9,7 @@ import GroupHistoryRow from "../components/GroupHistoryRow"
 import RevertGroupHistoryDialog from "../dialogs/RevertGroupHistoryDialog"
 import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector} from "../store"
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
@@ -41,7 +42,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             setRedirect(slug ? `/group/history/${slug}` : "/group/history")
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 
@@ -76,8 +77,11 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Group History"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.history.group
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -170,7 +174,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Group History` : "Group History"}</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.group}` : i18n.history.group}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

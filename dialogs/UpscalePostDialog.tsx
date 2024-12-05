@@ -17,7 +17,7 @@ interface Props {
 }
 
 const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {showUpscalingDialog} = usePostDialogSelector()
     const {setShowUpscalingDialog} = usePostDialogActions()

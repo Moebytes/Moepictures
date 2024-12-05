@@ -307,9 +307,9 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         }
         if (changes.description) {
             if (showOldGroup && oldGroup) {
-                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldGroup.description || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldDescription}: {oldGroup.description || i18n.labels.noDesc}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newGroup.description || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newDescription}: {newGroup.description || i18n.labels.noDesc}</span>)
             }
         }
         return jsx

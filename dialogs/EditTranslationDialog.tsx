@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/edittranslationdialog.less"
 import Draggable from "react-draggable"
 
 const EditTranslationDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editTranslationID, editTranslationText, editTranslationTranscript} = useTranslationDialogSelector()
     const {setEditTranslationFlag, setEditTranslationID, setEditTranslationText, setEditTranslationTranscript} = useTranslationDialogActions()

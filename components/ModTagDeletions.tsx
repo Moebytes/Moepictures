@@ -309,7 +309,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         <span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>{i18n.tag.tag}: {request.tag}</span>
-                        <span className="mod-post-text">{i18n.labels.description}: {request.description || i18n.labels.none}</span>
+                        <span className="mod-post-text">{i18n.labels.description}: {request.description || i18n.labels.noDesc}</span>
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag)}>

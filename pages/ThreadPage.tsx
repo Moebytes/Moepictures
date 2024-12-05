@@ -633,12 +633,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const getReplyBoxJSX = () => {
         if (thread.locked) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>This thread is locked.</span>
+                <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
             </div>
         )
         if (session.banned) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.banned}</span>
             </div>
         )
         if (session.username) {
@@ -697,7 +697,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.timeAgo(thread.createDate, i18n)}</span>
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
-                            <span className="thread-page-mini-link" onClick={viewThreads}>Posts: {thread.postCount}</span>
+                            <span className="thread-page-mini-link" onClick={viewThreads}>{i18n.sort.posts}: {thread.postCount}</span>
                         </div>
                         <div className="thread-page-text-container">
                             <p className="thread-page-text">{jsxFunctions.renderThreadText(thread.content, emojis)}</p>

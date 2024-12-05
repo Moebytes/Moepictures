@@ -270,8 +270,11 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         resetState()
         updateHistory()
-        document.title = `${functions.toProperCase(historyTab)} History`
     }, [session, historyTab])
+
+    useEffect(() => {
+        document.title = i18n.history[historyTab]
+    }, [historyTab, i18n])
 
     useEffect(() => {
         setHideNavbar(true)

@@ -57,7 +57,7 @@ interface Props {
 
 const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -243,7 +243,6 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Edit Post"
         window.scrollTo(0, 0)
 
         setBrightness(100)
@@ -256,6 +255,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setPixelate(1)
         updateFields()
     }, [session])
+
+    useEffect(() => {
+        document.title = i18n.pages.edit.title
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -347,7 +350,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
                                             acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
                                         } else {
-                                            error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
+                                            error = i18n.pages.upload.supportedFiletypesZip
                                         }
                                     }
                                     resolve()
@@ -357,11 +360,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                                 resolve()
                             }
                         } else {
-                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} max file size: ${maxSize}MB`
+                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} ${i18n.pages.upload.maxFileSize}: ${maxSize}MB`
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
+                        error = i18n.pages.upload.supportedFiletypes
                         resolve()
                     }
                     isLive2DArr.push(live2d)
@@ -596,14 +599,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Artist Tag: </span>
+                    <span className="upload-text">{i18n.pages.upload.artistTag}: </span>
                     <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text margin-right">Artist Image: </span>
+                    <span className="upload-text margin-right">{i18n.pages.upload.artistImage}: </span>
                     <label htmlFor={`artist-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">Upload</span>
+                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
                     </label>
                     <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
                     {artists[i].image ? 
@@ -633,9 +636,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
         jsx.push(
             <div className="upload-container-row">
-                <span className="upload-link" onClick={add}>+ Add artist</span>
+                <span className="upload-link" onClick={add}>+ {i18n.pages.upload.addArtist}</span>
                 {artists.length > 1 ?
-                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove artist</span>
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- {i18n.pages.upload.removeArtist}</span>
                 : null}
             </div>
         )
@@ -679,14 +682,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={characters[i].tag} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Character Tag: </span>
+                    <span className="upload-text">{i18n.pages.upload.characterTag}: </span>
                     <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text margin-right">Character Image: </span>
+                    <span className="upload-text margin-right">{i18n.pages.upload.characterImage}: </span>
                     <label htmlFor={`character-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">Upload</span>
+                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
                     </label>
                     <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
                     {characters[i].image ? 
@@ -716,9 +719,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
         jsx.push(
             <div className="upload-container-row">
-                <span className="upload-link" onClick={add}>+ Add character</span>
+                <span className="upload-link" onClick={add}>+ {i18n.pages.upload.addCharacter}</span>
                 {characters.length > 1 ?
-                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove character</span>
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- {i18n.pages.upload.removeCharacter}</span>
                 : null}
             </div>
         )
@@ -762,14 +765,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={series[i].tag} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Series Tag: </span>
+                    <span className="upload-text">{i18n.pages.upload.seriesTag}: </span>
                     <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text margin-right">Series Image: </span>
+                    <span className="upload-text margin-right">{i18n.pages.upload.seriesImage}: </span>
                     <label htmlFor={`series-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">Upload</span>
+                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
                     </label>
                     <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
                     {series[i].image ? 
@@ -799,9 +802,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
         jsx.push(
             <div className="upload-container-row">
-                <span className="upload-link" onClick={add}>+ Add series</span>
+                <span className="upload-link" onClick={add}>+ {i18n.pages.upload.addSeries}</span>
                 {series.length > 1 ?
-                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove series</span>
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- {i18n.pages.upload.removeSeries}</span>
                 : null}
             </div>
         )
@@ -874,7 +877,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Invalid characters in tags: _ / \\"
+            submitErrorRef.current.innerText = i18n.pages.upload.invalidCharacters
             setRawTags(rawTags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
             await functions.timeout(3000)
             return setSubmitError(false)
@@ -882,7 +885,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (rawTags.includes(",")) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Tags should be separated with a space."
+            submitErrorRef.current.innerText = i18n.pages.upload.spaceSeparation
             const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
             setRawTags(splitTags.join(" "))
             await functions.timeout(3000)
@@ -892,14 +895,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (tags.length < 5 && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Minimum of 5 tags is required."
+            submitErrorRef.current.innerText = i18n.pages.upload.tagMinimum
             await functions.timeout(3000)
             return setSubmitError(false)
         }
         if (!edited && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "No post edits were made."
+            submitErrorRef.current.innerText = i18n.pages.edit.noEdits
             await functions.timeout(3000)
             return setSubmitError(false)
         }
@@ -909,14 +912,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (MB > 300 && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 300MB."
+            submitErrorRef.current.innerText = i18n.pages.upload.sizeLimit
             await functions.timeout(3000)
             return setSubmitError(false)
         }
         if (!reason && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Edit reason is required."
+            submitErrorRef.current.innerText = i18n.pages.edit.reasonRequired
             await functions.timeout(3000)
             return setSubmitError(false)
         }
@@ -957,7 +960,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
         setSubmitError(true)
         await functions.timeout(20)
-        submitErrorRef.current.innerText = "Submitting..."
+        submitErrorRef.current.innerText = i18n.buttons.submitting
         try {
             if (permissions.isContributor(session)) {
                 await functions.put("/api/post/edit", data, session, setSessionFlag)
@@ -975,15 +978,15 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     setSubmitted(true)
                     return setSubmitError(false)
                 } catch (err: any) {
-                    let errMsg = "Failed to submit. You might be missing required fields."
-                    if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
+                    let errMsg = i18n.pages.upload.error
+                    if (String(err.response?.data).includes("Invalid images")) errMsg = i18n.pages.upload.errorOriginal
                     submitErrorRef.current.innerText = errMsg
                     await functions.timeout(3000)
                     return setSubmitError(false)
                 }
             } else {
-                let errMsg = "Failed to submit. You might be missing required fields."
-                if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
+                let errMsg = i18n.pages.upload.error
+                if (String(err.response?.data).includes("Invalid images")) errMsg = i18n.pages.upload.errorOriginal
                 submitErrorRef.current.innerText = errMsg
                 await functions.timeout(3000)
                 return setSubmitError(false)
@@ -994,9 +997,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const sourceLookup = async () => {
         setSaucenaoError(true)
         await functions.timeout(20)
-        saucenaoErrorRef.current.innerText = "Fetching..."
+        saucenaoErrorRef.current.innerText = i18n.pages.upload.fetching
         if (saucenaoTimeout) {
-            saucenaoErrorRef.current.innerText = "Wait a few seconds."
+            saucenaoErrorRef.current.innerText = i18n.pages.upload.wait
             await functions.timeout(3000)
             return setSaucenaoError(false)
         }
@@ -1184,13 +1187,13 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             mirrors = functions.removeItem(mirrors, link)
             setSourceMirrors(mirrors.join("\n"))
             if (!title && !artist && !link) {
-                saucenaoErrorRef.current.innerText = "No results found."
+                saucenaoErrorRef.current.innerText = i18n.pages.upload.noResults
                 await functions.timeout(3000)
             }
             setSaucenaoError(false)
         } catch (e) {
             console.log(e)
-            saucenaoErrorRef.current.innerText = "No results found."
+            saucenaoErrorRef.current.innerText = i18n.pages.upload.noResults
             await functions.timeout(3000)
             setSaucenaoError(false)
         }
@@ -1202,7 +1205,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const tagLookup = async () => {
         setDanbooruError(true)
         await functions.timeout(20)
-        danbooruErrorRef.current.innerText = "Fetching..."
+        danbooruErrorRef.current.innerText = i18n.pages.upload.fetching
         let tagArr = [] as any
 
         let blockedTags = tagConvert.blockedTags
@@ -1337,7 +1340,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             setDanbooruError(false)
         } catch (e) {
             console.log(e)
-            danbooruErrorRef.current.innerText = "Nothing found."
+            danbooruErrorRef.current.innerText = i18n.pages.upload.nothingFound
             await functions.timeout(3000)
             setDanbooruError(false)
         }
@@ -1393,20 +1396,20 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Tag: </span>
+                    <span className="upload-text">{i18n.tag.tag}: </span>
                     <span className="upload-text" style={{marginLeft: "10px"}}>{newTags[i].tag}</span>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Description: </span>
+                    <span className="upload-text">{i18n.labels.description}: </span>
                 </div>
                 <div className="upload-container-row">
                 <textarea className="upload-textarea-small" style={{height: "80px"}} value={newTags[i].desc} onChange={(event) => changeTagDesc(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text margin-right">Optional Tag Image: </span>
+                    <span className="upload-text margin-right">{i18n.pages.upload.optionalTagImage}: </span>
                     <label htmlFor={`tag-upload-${i}`} className="upload-button">
                             <img className="upload-button-img-small" src={uploadIcon}/>
-                            <span className="upload-button-text-small">Upload</span>
+                            <span className="upload-button-text-small">{i18n.sortbar.upload}</span>
                     </label>
                     <input id={`tag-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
                     {newTags[i].image ? 
@@ -1487,15 +1490,15 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">3D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">Chibi</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -1504,11 +1507,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
             )
@@ -1517,24 +1520,24 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">2D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">3D</span>
+                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button> : null}
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">Chibi</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
                         <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                     {type !== "comic" ?
                     <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
                         <img className="upload-button-img" src={daki}/>
-                        <span className="upload-button-text">Daki</span>
+                        <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                     </button> : null}
                 </div>
             )
@@ -1587,10 +1590,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (session.banned) {
             return (
                 <>
-                <span className="upload-ban-text">You are banned. Cannot edit.</span>
+                <span className="upload-ban-text">{i18n.pages.edit.banText}</span>
                 <button className="upload-button" onClick={() => history.goBack()}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
-                        <span className="upload-button-submit-text">←Back</span>
+                        <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
                 </>
             )
@@ -1599,10 +1602,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (postLocked) {
             return (
                 <>
-                <span className="upload-ban-text">This post is locked. Cannot edit.</span>
+                <span className="upload-ban-text">{i18n.pages.edit.locked}</span>
                 <button className="upload-button" onClick={() => history.goBack()}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
-                        <span className="upload-button-submit-text">←Back</span>
+                        <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
                 </>
             )
@@ -1611,17 +1614,17 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         return (
             <>
             <div className="upload">
-                <span className="upload-heading">Edit Post</span>
+                <span className="upload-heading">{i18n.pages.edit.title}</span>
                 {submitted ?
                 <div className="upload-container">
                     <div className="upload-container-row">
                         {needsPermission ?
-                        <span className="upload-text-alt">The post edit was submitted and will appear on the site if approved.</span> :
-                        <span className="upload-text-alt">Post was edited.</span>}
+                        <span className="upload-text-alt">{i18n.pages.edit.submitHeadingApproval}</span> :
+                        <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span>}
                     </div> 
                     <div className="upload-container-row" style={{marginTop: "10px"}}>
                         <button className="upload-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>
-                                <span className="upload-button-text">←Back</span>
+                                <span className="upload-button-text">←{i18n.buttons.back}</span>
                         </button>
                     </div>
                 </div> : <>
@@ -1630,18 +1633,18 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-editpost" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">Select Files</span>
+                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
                     </label>
                     <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">Enter Links</span>
+                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1661,16 +1664,16 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     <label htmlFor="file-editpost" className="upload-button">
                         <img className="upload-button-img" src={uploadIcon}/>
-                        <span className="upload-button-text">Select Files</span>
+                        <span className="upload-button-text">{i18n.pages.upload.selectFiles}</span>
                     </label>
                     <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                             <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">Enter Links</span>
+                            <span className="upload-button-text">{i18n.pages.upload.enterLinks}</span>
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                            <span className="upload-button-text">{showUpscaled ? i18n.pages.upload.upscaled : i18n.pages.upload.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
@@ -1701,176 +1704,176 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 : getPostJSX()}
             </div>
             : null}
-            <span className="upload-heading">Classification</span>
-            <span className="upload-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
+            <span className="upload-heading">{i18n.pages.upload.classification}</span>
+            <span className="upload-text-alt">{i18n.pages.upload.multipleHeading}</span>
             {mobile ? <>
             <div className="upload-row">
                 <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                     <img className="upload-button-img" src={image}/>
-                    <span className="upload-button-text">Image</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                     <img className="upload-button-img" src={animation}/>
-                    <span className="upload-button-text">Animation</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
             </div>
             <div className="upload-row">
                 <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                     <img className="upload-button-img" src={video}/>
-                    <span className="upload-button-text">Video</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                     <img className="upload-button-img" src={comic}/>
-                    <span className="upload-button-text">Comic</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
             </div>
             <div className="upload-row">
                 <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                     <img className="upload-button-img" src={audio}/>
-                    <span className="upload-button-text">Audio</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
                     <img className="upload-button-img" src={live2d}/>
-                    <span className="upload-button-text">Live2D</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
             </div> 
             <div className="upload-row">
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="upload-button-img" src={model}/>
-                    <span className="upload-button-text">Model</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div> </>
             :
             <div className="upload-row">
                 <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                     <img className="upload-button-img" src={image}/>
-                    <span className="upload-button-text">Image</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
                     <img className="upload-button-img" src={animation}/>
-                    <span className="upload-button-text">Animation</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
                 <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                     <img className="upload-button-img" src={video}/>
-                    <span className="upload-button-text">Video</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                     <img className="upload-button-img" src={comic}/>
-                    <span className="upload-button-text">Comic</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
                 <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
                     <img className="upload-button-img" src={audio}/>
-                    <span className="upload-button-text">Audio</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="upload-button-img" src={model}/>
-                    <span className="upload-button-text">Model</span>
+                    <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div>}
             {mobile ? <>
             <div className="upload-row">
                 <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                     <img className="upload-button-img" src={safe}/>
-                    <span className="upload-button-text">Safe</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
                 </button>
                 <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                     <img className="upload-button-img" src={questionable}/>
-                    <span className="upload-button-text">Questionable</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
                 </button>
             </div>
             <div className="upload-row">
                 {session.showR18 ?
                 <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                     <img className="upload-button-img" src={explicit}/>
-                    <span className="upload-button-text">Explicit</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
                 </button> : null}
             </div> </>
             :
             <div className="upload-row">
                 <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                     <img className="upload-button-img" src={safe}/>
-                    <span className="upload-button-text">Safe</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
                 </button>
                 <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
                     <img className="upload-button-img" src={questionable}/>
-                    <span className="upload-button-text">Questionable</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
                 </button>
                 {session.showR18 ?
                 <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                     <img className="upload-button-img" src={explicit}/>
-                    <span className="upload-button-text">Explicit</span>
+                    <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
                 </button> : null}
             </div>}
             {getStyleJSX()}
             <div className="upload-container">
                     <div className="upload-container-row">
-                        <span className="upload-text-alt">If this is a child post, enter the parent post ID: </span>
+                        <span className="upload-text-alt">{i18n.pages.upload.childHeading}</span>
                         <input className="upload-input" type="number" value={parentID} onChange={(event) => setParentID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
             </div>
-            <span className="upload-heading">Source</span>
+            <span className="upload-heading">{i18n.sidebar.source}</span>
             <div className="upload-container">
                 {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
-                <span className="upload-link" onClick={sourceLookup}>Fetch from Pixiv</span>
+                <span className="upload-link" onClick={sourceLookup}>{i18n.pages.upload.fetchFromPixiv}</span>
                 <div className="upload-container-row">
-                    <span className="upload-text">Title: </span>
+                    <span className="upload-text">{i18n.sidebar.title}: </span>
                     <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Translated Title: </span>
+                    <span className="upload-text">{i18n.labels.translatedTitle}: </span>
                     <input className="upload-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Artist: </span>
+                    <span className="upload-text">{i18n.tag.artist}: </span>
                     <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Posted: </span>
+                    <span className="upload-text">{i18n.sort.posted}: </span>
                     <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Link: </span>
+                    <span className="upload-text">{i18n.labels.link}: </span>
                     <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Bookmarks: </span>
+                    <span className="upload-text">{i18n.sort.bookmarks}: </span>
                     <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Buy Link: </span>
+                    <span className="upload-text">{i18n.post.buyLink}: </span>
                     <input className="upload-input-wide2" type="url" value={sourcePurchaseLink} onChange={(event) => setSourcePurchaseLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Commentary: </span>
+                    <span className="upload-text">{i18n.labels.commentary}: </span>
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Translated Commentary: </span>
+                    <span className="upload-text">{i18n.labels.translatedCommentary}: </span>
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Mirrors: </span>
+                    <span className="upload-text">{i18n.sidebar.mirrors}: </span>
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
             </div>
-            <span className="upload-heading">Artist</span>
-            <span className="upload-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
+            <span className="upload-heading">{i18n.tag.artist}</span>
+            <span className="upload-text-alt">{i18n.pages.upload.artistExists}</span>
             <div className="upload-container">
                 {generateArtistsJSX()}
             </div>
-            <span className="upload-heading">Characters</span>
-            <span className="upload-text-alt">If the character tag does not yet exist, please upload a character image.</span>
+            <span className="upload-heading">{i18n.navbar.characters}</span>
+            <span className="upload-text-alt">{i18n.pages.upload.characterExists}</span>
             <div className="upload-container">
                 {generateCharactersJSX()}
             </div>
-            <span className="upload-heading">Series</span>
-            <span className="upload-text-alt">If the series tag does not yet exist, please upload a series image.</span>
+            <span className="upload-heading">{i18n.tag.series}</span>
+            <span className="upload-text-alt">{i18n.pages.upload.seriesExists}</span>
             <div className="upload-container">
                 {generateSeriesJSX()}
             </div>
@@ -1882,20 +1885,20 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             </div>
             : null}
             <div className="upload-row" style={{marginBottom: "5px"}}>
-                <span className="upload-heading">Tags</span>
+                <span className="upload-heading">{i18n.navbar.tags}</span>
                 <div className="upload-button-container">
                     <button className="upload-button" onClick={() => setDisplayImage((prev) => !prev)}>
                         {displayImage ?
-                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>- Hide Image</span> :
-                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>+ Display Image</span>
+                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>- {i18n.pages.upload.hideImage}</span> :
+                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>+ {i18n.pages.upload.displayImage}</span>
                         }
                     </button>
                 </div>
             </div>
             {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
-            <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
-            <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
-            If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
+            <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>{i18n.pages.upload.fetchFromDanbooru}</span>
+            <span className="upload-text-alt">{i18n.pages.upload.enterTags}
+            <Link className="upload-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link></span>
             <div className="upload-container">
                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
                 <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
@@ -1903,11 +1906,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="upload-row">
-                <span className="upload-text">Edit Reason: </span>
+                <span className="upload-text">{i18n.pages.edit.editReason}: </span>
                 <input style={{width: "100%"}} className="upload-input-wide2" type="text" value={reason} onChange={(event) => setReason(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
             </div>
             {newTags.length ? <>
-            <span className="upload-heading">New Tags</span>
+            <span className="upload-heading">{i18n.labels.newTags}</span>
             <div className="upload-container">
                 {generateTagsJSX()}
             </div>
@@ -1916,10 +1919,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
                 <div className="upload-submit-button-container">
                     <button className="upload-button" onClick={() => history.push(`/post/${postID}`)}>
-                            <span className="upload-button-submit-text">Cancel</span>
+                            <span className="upload-button-submit-text">{i18n.buttons.cancel}</span>
                     </button>
                     <button className="upload-button" onClick={() => submit()}>
-                            <span className="upload-button-submit-text">Edit</span>
+                            <span className="upload-button-submit-text">{i18n.buttons.edit}</span>
                     </button>
                 </div>
             </div>

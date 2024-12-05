@@ -20,6 +20,7 @@ let replace = false
 let limit = 100
 
 const ImageGrid: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {search, searchFlag, scroll, imageType, restrictType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch, showChildren} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
@@ -99,7 +100,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
-            document.title = "Moepictures: Moe Anime Pictures ♥"
+            document.title = i18n.title
         }
     }
 

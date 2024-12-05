@@ -46,8 +46,11 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Premium Success"
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.pages.premiumSuccess.pageTitle
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -66,19 +69,18 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="sitepage">
                     {permissions.isPremium(session) ? <><div className="premium-row">
-                        <span className="premium-heading">Account Upgraded!</span>
+                        <span className="premium-heading">{i18n.pages.premiumSuccess.title}</span>
                         <img className="premium-star" src={premiumStar}/>
                     </div>
                     <div className="sitepage-row">
                         <span className="sitepage-text" style={{color: "var(--premiumColor)"}}>
-                            Thank you for purchasing premium! Your account has been upgraded and you can now 
-                            access all of the premium features. <br/><br/>
+                            {i18n.pages.premiumSuccess.thankYou}<br/><br/>
 
-                            Your premium membership will last until {functions.prettyDate(new Date(session.premiumExpiration), i18n)}.
+                            {i18n.pages.premiumSuccess.lastUntil} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}.
                         </span>
                     </div>
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => history.push("/posts")}>Ok</button>
+                        <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
                     </div></> : null}
                 </div>
                 <Footer/>

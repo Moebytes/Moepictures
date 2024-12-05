@@ -112,9 +112,12 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Series"
         updateSeries()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.tag.series
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

@@ -158,9 +158,12 @@ const GroupsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Groups"
         updateGroups()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.groups
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {

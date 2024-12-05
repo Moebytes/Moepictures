@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {revertAliasHistoryID} = useTagDialogSelector()
     const {setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()

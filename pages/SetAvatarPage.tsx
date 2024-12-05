@@ -5,7 +5,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions,  useThemeSelector,
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
@@ -16,6 +16,7 @@ interface Props {
 }
 
 const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setSidebarText} = useActiveActions()
@@ -67,7 +68,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!session.username && post.restrict !== "safe") {
             setRedirect(`/set-avatar/${postID}`)
             history.push("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         if (post.restrict === "explicit") {
             functions.replaceLocation("/403")
@@ -301,7 +302,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     <div className="set-avatar">
-                        <span className="set-avatar-title">Set Avatar</span>
+                        <span className="set-avatar-title">{i18n.sidebar.setAvatar}</span>
                         <div className="set-avatar-container">
                             <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
                                 {isAnimated ? <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/> : 
@@ -310,11 +311,11 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                             <div className="set-avatar-preview-container">
                                 <canvas className="set-avatar-preview" ref={previewRef}></canvas>
                                 <div className="set-avatar-button-container">
-                                    <button className="set-avatar-button" onClick={() => history.push(`/post/${postID}`)}>Cancel</button>
-                                    <button className="set-avatar-button" onClick={() => setAvatar()}>Set Avatar</button>
+                                    <button className="set-avatar-button" onClick={() => history.push(`/post/${postID}`)}>{i18n.buttons.cancel}</button>
+                                    <button className="set-avatar-button" onClick={() => setAvatar()}>{i18n.sidebar.setAvatar}</button>
                                 </div>
                                 <div className="set-avatar-button-container">
-                                    <button className="set-avatar-button" onClick={() => download()}>Download</button>
+                                    <button className="set-avatar-button" onClick={() => download()}>{i18n.sortbar.download}</button>
                                 </div>
                             </div>
                         </div>

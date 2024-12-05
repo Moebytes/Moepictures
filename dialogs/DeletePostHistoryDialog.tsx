@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, usePostDialogSelector, usePostDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deletePostHistoryID} = usePostDialogSelector()
     const {setDeletePostHistoryID, setDeletePostHistoryFlag} = usePostDialogActions()

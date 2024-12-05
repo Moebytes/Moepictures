@@ -370,7 +370,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {request.post ? <span className="mod-post-link">{i18n.buttons.post}: {request.post.postID}</span> : null}
                         <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>{i18n.labels.group}: {request.name}</span>
-                        <span className="mod-post-text">{i18n.labels.description}: {request.description || i18n.labels.none}</span>
+                        <span className="mod-post-text">{i18n.labels.description}: {request.description || i18n.labels.noDesc}</span>
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.group, request.post)}>

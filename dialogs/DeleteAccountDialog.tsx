@@ -1,12 +1,13 @@
 import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useSessionSelector, useSessionActions, 
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useMiscDialogSelector, useMiscDialogActions, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const DeleteAccountDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setSidebarText} = useActiveActions()
     const {showDeleteAccountDialog} = useMiscDialogSelector()

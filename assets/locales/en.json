@@ -1,4 +1,5 @@
 {
+    "title": "Moepictures: Moe Anime Pictures ♥",
     "navbar": {
         "login": "Login",
         "posts": "Posts",
@@ -13,7 +14,8 @@
         "contact": "Contact",
         "premium": "Premium",
         "mail": "Mail",
-        "translations": "Translations"
+        "translations": "Translations",
+        "modQueue": "Mod Queue"
     },
     "sidebar": {
         "source": "Source",
@@ -166,6 +168,7 @@
         "reply": "Reply",
         "message": "Message",
         "submitting": "Submitting...",
+        "submit": "Submit",
         "ok": "Ok",
         "yes": "Yes",
         "no": "No",
@@ -183,7 +186,9 @@
         "report": "Report",
         "revert": "Revert",
         "back": "Back",
-        "validate": "Validate"
+        "validate": "Validate",
+        "cancel": "Cancel",
+        "go": "Go"
     },
     "history": {
         "post": "Post History",
@@ -342,6 +347,7 @@
         "reason": "Reason",
         "none": "None",
         "unknown": "Unknown",
+        "noDesc": "No description.",
         "affectedPosts": "Affected Posts",
         "name": "Name",
         "description": "Description",
@@ -351,6 +357,7 @@
         "images": "Images",
         "parentID": "Parent ID",
         "translatedTitle": "Translated Title",
+        "text": "Text",
         "link": "Link",
         "commentary": "Commentary",
         "translatedCommentary": "Translated Commentary",
@@ -492,6 +499,150 @@
             "confirmPassword": "Confirm Password",
             "lengthReq": "-Passwords must contain at least 10 characters",
             "varietyReq": "-At least three of the following: lowercase letters, uppercase letters, numbers, and special symbols"
+        },
+        "ipBlacklist": {
+            "title": "Blacklist IP",
+            "ipAddress": "IP Address",
+            "blacklist": "Blacklist",
+            "unblacklist": "Unblacklist"
+        },
+        "loginHistory": {
+            "heading": "If you don't recognize the activity, logout of all other sessions and change your password!",
+            "logoutSessions": "Logout Other Sessions"
+        },
+        "newsBanner": {
+            "setBanner": "Set Banner"
+        },
+        "premiumSuccess": {
+            "pageTitle": "Premium Success",
+            "title": "Account Upgraded!",
+            "thankYou": "Thank you for purchasing premium! Your account has been upgraded and you can now access all of the premium features.",
+            "lastUntil": "Your premium membership will last until"
+        },
+        "tag": {
+            "bannedArtist": "You may not upload artwork from this artist."
+        },
+        "message": {
+            "system": "Cannot respond to system messages.",
+            "banned": "You are banned. Cannot reply."
+        },
+        "thread": {
+            "locked": "This thread is locked."
+        },
+        "contact": {
+            "heading": "This is a contact form for general inquiries. If you would like to remove your work, please fill out our",
+            "copyrightForm": "Copyright Removal Form",
+            "submitHeading": "Your message was delivered.",
+            "subject": "Subject",
+            "attachFiles": "Attach Files",
+            "sendMessage": "Send Message"
+        },
+        "copyrightRemoval": {
+            "title": "Copyright Removal",
+            "heading": "If your work is on Moepictures then it means that we love your work, but we are sorry if you are unhappy with your works appearing on our site. You may fill out this form to request the removal of your content.",
+            "emailPref": "If you prefer, you may also write an email containing all of this info to ",
+            "submitHeading": "Your removal request was delivered.",
+            "artistTagHeading": "Please provide the exact name of your artist tag on Moepictures.",
+            "socialMediaHeading": "Please provide your social media links (eg. Twitter, Pixiv). It should be possible to find the works on your profile.",
+            "socialMedia": "Social Media Links",
+            "removeSpecified": "Remove all of the specified links",
+            "removeAll": "Remove all of my associated content",
+            "artistTagPageHeading": "Please provide the link to your artist tag page.",
+            "artistTagPage": "Artist Tag Page",
+            "postLinkHeading": "Please provide all the post links that you want removed.",
+            "postLinks": "Post Links",
+            "proofHeading": "Please provide proof that you are the artist in question. These are a couple acceptable forms of proof:",
+            "emailProof": "⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed.",
+            "postProof": "⇾ Post somewhere on your profile or in one of your posts \"Remove me from Moepictures\" and post the link to it.",
+            "sourceProof": "⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly.",
+            "proof": "Links to Proof",
+            "verifyCopyright": "I am the copyright owner of the content linked above or am authorized to act on the behalf of the copyright owner. I verify that all of provided information is accurate.",
+            "submit": "Submit Removal Request",
+            "nameReq": "Name is required.",
+            "artistTagReq": "Artist tag is required.",
+            "socialMediaReq": "Social media links are required.",
+            "postLinkReq": "Post links are required.",
+            "proofReq": "Providing a proof attachment or links is required.",
+            "confirmReq": "You must confirm that you are the copyright owner.",
+            "error": "There was an error sending the message."
+        },
+        "upload": {
+            "selectFiles": "Select Files",
+            "enterLinks": "Enter Links",
+            "upscaled": "Upscaled",
+            "original": "Original",
+            "submitHeading": "Post was uploaded.",
+            "submitHeadingApproval": "Your post was submitted and will appear on the site if approved.",
+            "submitMore": "Submit More",
+            "classification": "Classification",
+            "multipleHeading": "If there are multiple images, select the rightmost tag that fits.",
+            "possibleDuplicates": "Possible Duplicates",
+            "childHeading": "If this is a child post, enter the parent post ID: ",
+            "fetchFromPixiv": "Fetch from Pixiv",
+            "fetchFromDanbooru": "Fetch from Danbooru",
+            "banText": "You are banned. Cannot upload.",
+            "artistExists": "If the artist tag does not yet exist, please upload an artist image.",
+            "characterExists": "If the character tag does not yet exist, please upload a character image.",
+            "seriesExists": "If the series tag does not yet exist, please upload a series image.",
+            "hideImage": "Hide Image",
+            "displayImage": "Display Image",
+            "enterTags": "Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it. If you need help with tags, read the ",
+            "taggingGuide": "tagging guide.",
+            "artistTag": "Artist Tag",
+            "artistImage": "Artist Image",
+            "addArtist": "Add artist",
+            "removeArtist": "Remove artist",
+            "characterTag": "Character Tag",
+            "characterImage": "Character Image",
+            "addCharacter": "Add character",
+            "removeCharacter": "Remove character",
+            "seriesTag": "Series Tag",
+            "seriesImage": "Series Image",
+            "addSeries": "Add series",
+            "removeSeries": "Remove series",
+            "optionalTagImage": "Optional Tag Image",
+            "invalidCharacters": "Invalid characters in tags: _ / \\",
+            "spaceSeparation": "Tags should be separated with a space.",
+            "tagMinimum": "Minimum of 5 tags is required.",
+            "sizeLimit": "Combined file size shouldn't exceed 300MB.",
+            "error": "Failed to submit. You might be missing required fields.",
+            "errorOriginal": "Original image is required.",
+            "fetching": "Fetching...",
+            "wait": "Wait a few seconds.",
+            "noResults": "No results found.",
+            "nothingFound": "Nothing found.",
+            "supportedFiletypes": "Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.",
+            "supportedFiletypesZip": "Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.",
+            "maxFileSize": "max file size"
+        },
+        "bulkUpload": {
+            "title": "Bulk Upload",
+            "submitHeading": "Posts were uploaded.",
+            "commonArtist": "Common Artist",
+            "commonCharacter": "Common Character",
+            "commonSeries": "Common Series",
+            "appendTags": "Append Tags"
+        },
+        "edit": {
+            "title": "Edit Post",
+            "unverifiedTitle": "Edit Unverified Post",
+            "submitHeading": "Post was edited.",
+            "submitHeadingApproval": "The post edit was submitted and will appear on the site if approved.",
+            "banText": "You are banned. Cannot edit.",
+            "locked": "This post is locked. Cannot edit.",
+            "editReason": "Edit Reason",
+            "noEdits": "No post edits were made.",
+            "reasonRequired": "Edit reason is required."
+        }
+    },
+    "dialogs": {
+        "download": {
+            "offset": "Offset",
+            "amount": "Amount"
+        },
+        "page": {
+            "title": "Go To Page",
+            "page": "Page"
         }
     }
 }

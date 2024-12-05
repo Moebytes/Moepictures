@@ -1,12 +1,13 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useInteractionActions, useThreadDialogSelector, useThreadDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 
 const DeleteThreadDialog: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteThreadID} = useThreadDialogSelector()
     const {setDeleteThreadID, setDeleteThreadFlag} = useThreadDialogActions()
