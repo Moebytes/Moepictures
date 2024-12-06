@@ -4,7 +4,7 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {useInteractionActions, useSessionSelector, useSessionActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import premiumStar from "../assets/icons/premium-star.png"
@@ -30,6 +30,7 @@ import "./styles/premiumpage.less"
 import axios from "axios"
 
 const PaymentButton: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [paymentLink, setPaymentLink] = useState("")
@@ -52,12 +53,13 @@ const PaymentButton: React.FunctionComponent = (props) => {
     return (
         <button className="premium-button" onClick={openPaymentLink}>
             <img src={bitcoin}/>
-            <span>Pay with Crypto</span>
+            <span>{i18n.premium.purchase.payWithCrypto}</span>
         </button>
     )
 }
 
 const PremiumPage: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -84,10 +86,13 @@ const PremiumPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Premium"
         window.scrollTo(0, 0)
         urlState()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.roles.premium
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -121,16 +126,15 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "premium") {
             return (
                 <><div className="premium-row">
-                    <span className="premium-heading">Premium Upgrade</span>
+                    <span className="premium-heading">{i18n.premium.premium.title}</span>
                     <img className="premium-star" src={premiumStar}/>
                 </div>
                 <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    You can purchase an account upgrade to unlock more features. Thank you for supporting us! <br/><br/>
+                    {i18n.premium.premium.line1}<br/><br/>
 
-                    Your contribution allows us to keep the site ad-free for the foreseeable future. We will use it to pay 
-                    our hosting and storage costs. <br/><br/>
+                    {i18n.premium.premium.line2}<br/><br/>
 
-                    All of the premium features are listed on the left.
+                    {i18n.premium.premium.line3}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={premiumImg}/></div></>
             )
@@ -139,8 +143,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={upscaledImages}/>
                 <span className="premium-text" style={{color: "#2f91ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    View images upscaled to a much higher resolution. Upscaled images have much sharper details 
-                    and often fixes any blurriness. We currently use the Real-CUGAN 4x upscaler.
+                    {i18n.premium.upscaledImages.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={upscaledImg} style={{maxWidth: "100%"}}/></div></>
             )
@@ -149,8 +152,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={autosearch}/>
                 <span className="premium-text" style={{color: "#5b2fff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Use the autosearch, which automatically searches your current tags in a loop. You can 
-                    configure the time interval between searches.
+                    {i18n.premium.autoSearch.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={autosearchImg}/></div></>
             )
@@ -159,8 +161,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={searchHistory}/>
                 <span className="premium-text" style={{color: "#ff2792"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    View the history of all posts you have viewed in the past. This is great if you saw a post 
-                    you really liked but forgot to favorite it.
+                    {i18n.premium.searchHistory.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={historyImg}/></div></>
             )
@@ -169,8 +170,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={unlimitedTags}/>
                 <span className="premium-text" style={{color: "#ff3afd"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Regular accounts can only search for 3 tags. Premium accounts have this restriction removed
-                    and you may search an unlimited number of tags.
+                    {i18n.premium.unlimitedTages.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={unlimitedTagsImg}/></div></>
             )
@@ -179,8 +179,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={bookmarkSort}/>
                 <span className="premium-text" style={{color: "#3a51ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find the posts that 
-                    attracted the most popularity.
+                    {i18n.premium.bookmarkSort.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={bookmarksImg}/></div></>
             )
@@ -189,8 +188,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={animatedAvatar}/>
                 <span className="premium-text" style={{color: "#fb1d90"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Premium users can render animated avatars out of animation posts. Regular users are only able 
-                    to use a static frame.
+                    {i18n.premium.animatedAvatar.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={animatedImg}/></div></>
             )
@@ -199,8 +197,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={changeUsername}/>
                 <span className="premium-text" style={{color: "#5e2cff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Premium users unlock the ability to change their username. You may change your name as 
-                    many times as you wish.
+                    {i18n.premium.changeUsername.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={changeUsernameImg}/></div></>
             )
@@ -209,32 +206,29 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={noAds} style={{width: "300px"}}/>
                 <span className="premium-text" style={{color: "#297aff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Allow us to continue running the website without intrusive advertisements. They're annoying and 
-                    not aesthetically pleasing. Thank you!
+                    {i18n.premium.noAds.header}
                 </span></>
             )
         }
         if (premiumFeature === "purchase") {
             return (
-                <><span className="premium-heading">Purchase</span>
+                <><span className="premium-heading">{i18n.premium.purchase.title}</span>
                 <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    If you would like to purchase a premium upgrade you can do so here via Coinbase. <br/><br/>
+                    {i18n.premium.purchase.line1}<br/><br/>
 
-                    Currently the price is $15 USD/yr. Your upgrade will last for one year from the date of purchase. 
-                    To extend your term, you may purchase it multiple times. <br/><br/>
+                    {i18n.premium.purchase.line2}<br/><br/>
                     
-                    Create a <a className="premium-link" onClick={() => openLink("https://www.coinbase.com")}>Coinbase</a> account if you don't already have one. 
-                    You can buy crypto (eg. bitcoin) with paypal or card through them and then use it to purchase.
+                    {i18n.premium.purchase.createA}<a className="premium-link" onClick={() => openLink("https://www.coinbase.com")}>Coinbase</a>
+                    {i18n.premium.purchase.line3}
                 </span>
                 <PaymentButton/></>
             )
         }
         if (premiumFeature === "refund-policy") {
             return (
-                <><span className="premium-heading">Refund Policy</span>
+                <><span className="premium-heading">{i18n.premium.refundPolicy.title}</span>
                 <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    You can contact us within 48 hours of making your purchase if you weren’t satisfied. You will receive a refund 
-                    minus any processing fees. Contact us at moepictures.moe@gmail.com.
+                    {i18n.premium.refundPolicy.header}
                 </span></>
             )
         }
@@ -250,17 +244,17 @@ const PremiumPage: React.FunctionComponent = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 {session.username ? <div className="premium">
                     <div className="premium-nav">
-                        <span className="premium-nav-text" onClick={() => setPremiumFeature("premium")}>Premium</span>
-                        <span className="premium-nav-text" style={{color: "#2f91ff"}} onClick={() => setPremiumFeature("upscaled-images")}>Upscaled Images</span>
-                        <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>Autosearch</span>
-                        <span className="premium-nav-text" style={{color: "#ff2792"}} onClick={() => setPremiumFeature("search-history")}>Search History</span>
-                        <span className="premium-nav-text" style={{color: "#ff3afd"}} onClick={() => setPremiumFeature("unlimited-tags")}>Unlimited Tags</span>
-                        <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>Bookmark Sort</span>
-                        <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>Animated Avatar</span>
-                        <span className="premium-nav-text" style={{color: "#5e2cff"}} onClick={() => setPremiumFeature("change-username")}>Change Username</span>
-                        <span className="premium-nav-text" style={{color: "#297aff"}} onClick={() => setPremiumFeature("no-ads")}>No Ads</span>
-                        <span className="premium-nav-text" onClick={() => setPremiumFeature("purchase")}>Purchase</span>
-                        <span className="premium-nav-text" onClick={() => setPremiumFeature("refund-policy")}>Refund Policy</span>
+                        <span className="premium-nav-text" onClick={() => setPremiumFeature("premium")}>{i18n.roles.premium}</span>
+                        <span className="premium-nav-text" style={{color: "#2f91ff"}} onClick={() => setPremiumFeature("upscaled-images")}>{i18n.user.upscaledImages}</span>
+                        <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
+                        <span className="premium-nav-text" style={{color: "#ff2792"}} onClick={() => setPremiumFeature("search-history")}>{i18n.history.search}</span>
+                        <span className="premium-nav-text" style={{color: "#ff3afd"}} onClick={() => setPremiumFeature("unlimited-tags")}>{i18n.premium.unlimitedTages.title}</span>
+                        <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
+                        <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
+                        <span className="premium-nav-text" style={{color: "#5e2cff"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
+                        <span className="premium-nav-text" style={{color: "#297aff"}} onClick={() => setPremiumFeature("no-ads")}>{i18n.premium.noAds.title}</span>
+                        <span className="premium-nav-text" onClick={() => setPremiumFeature("purchase")}>{i18n.premium.purchase.title}</span>
+                        <span className="premium-nav-text" onClick={() => setPremiumFeature("refund-policy")}>{i18n.premium.refundPolicy.title}</span>
                     </div>
                     <div className="premium-container">
                         {getContainerJSX()}

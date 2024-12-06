@@ -260,9 +260,9 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <span className="contact-link">
                             {i18n.pages.copyrightRemoval.proofHeading}<br/>
                             <span className="contact-text-alt">
-                            {i18n.pages.copyrightRemoval.emailProof}<br/>
-                            {i18n.pages.copyrightRemoval.postProof}<br/>
-                            {i18n.pages.copyrightRemoval.sourceProof}<br/>
+                            {i18n.terms.tos.copyrightTakedown.proof1}<br/>
+                            {i18n.terms.tos.copyrightTakedown.proof2}<br/>
+                            {i18n.terms.tos.copyrightTakedown.proof3}<br/>
                             </span>
                         </span>
                     </div>

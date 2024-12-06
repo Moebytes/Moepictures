@@ -318,7 +318,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">i18n.dialogs.editTag.title</span>
+                                <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}

@@ -884,7 +884,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const sourceLookup = async () => {
         setSaucenaoError(true)
         await functions.timeout(20)
-        saucenaoErrorRef.current.innerText = i18n.pages.upload.fetching
+        saucenaoErrorRef.current.innerText = i18n.buttons.fetching
         if (saucenaoTimeout) {
             saucenaoErrorRef.current.innerText = i18n.pages.upload.wait
             await functions.timeout(3000)
@@ -1092,7 +1092,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const tagLookup = async () => {
         setDanbooruError(true)
         await functions.timeout(20)
-        danbooruErrorRef.current.innerText = i18n.pages.upload.fetching
+        danbooruErrorRef.current.innerText = i18n.buttons.fetching
         let tagArr = [] as any
 
         let blockedTags = tagConvert.blockedTags

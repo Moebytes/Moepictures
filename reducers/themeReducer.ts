@@ -4,7 +4,7 @@ import type {StoreState, StoreDispatch} from "../store"
 import en from "../assets/locales/en.json"
 import ja from "../assets/locales/ja.json"
 
-const translations: Record<string, typeof en> = {en, ja}
+const translations: Record<string, typeof en> = {en, ja: ja as any}
 
 const themeSlice = createSlice({
     name: "theme",

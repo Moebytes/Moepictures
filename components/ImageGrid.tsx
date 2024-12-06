@@ -272,14 +272,17 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            let resultCount = Number(posts[0]?.postCount)
-            if (Number.isNaN(resultCount)) resultCount = posts.length
-            setSidebarText(`${resultCount === 1 ? `1 result.` : `${resultCount || 0} results.`}`)
-            localStorage.setItem("savedPosts", JSON.stringify(posts))
             setUpdatePostFlag(false)
         }
         if (updatePostFlag) updatePosts()
     }, [updatePostFlag, pageMultiplier])
+
+    useEffect(() => {
+        let resultCount = Number(posts[0]?.postCount)
+        if (Number.isNaN(resultCount)) resultCount = posts.length
+        setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
+        localStorage.setItem("savedPosts", JSON.stringify(posts))
+    }, [posts, i18n])
 
     const updateOffset = async () => {
         if (noResults) return

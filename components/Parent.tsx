@@ -20,7 +20,7 @@ const Parent: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="parent">
-            <div className="parent-title">{i18n.post.parent}</div>
+            <div className="parent-title">{i18n.post.parentPost}</div>
             <div className="parent-container">
                 <Carousel images={[image]} set={click} noKey={true}/>
             </div>

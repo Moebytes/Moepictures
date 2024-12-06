@@ -21,7 +21,7 @@ const Children: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="children">
-            <div className="children-title">{i18n.post.children}</div>
+            <div className="children-title">{i18n.post.childPosts}</div>
             <div className="children-container">
                 <Carousel images={images} set={click} noKey={true}/>
             </div>

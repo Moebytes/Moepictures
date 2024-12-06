@@ -381,7 +381,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (tagPosts.length) {
             return (
                 <div className="tag-column">
-                    <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>
+                    <span><span className="tag-label" onClick={searchTag}>{i18n.sort.posts}</span> <span className="tag-label-alt">{count}</span></span>
                     <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={250}/>
                 </div>
             )

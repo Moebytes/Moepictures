@@ -30,6 +30,7 @@ import childrenImg from "../assets/images/children.png"
 import aliasesImg from "../assets/images/aliases.png"
 import implicationsImg from "../assets/images/implications.png"
 import captchaImg from "../assets/images/captcha.png"
+import languageImg from "../assets/images/language.png"
 import pixivDownloaderImg from "../assets/images/pixiv-downloader.png"
 import setAvatarImg from "../assets/images/set-avatar.png"
 import musicImg from "../assets/images/music.png"
@@ -40,7 +41,7 @@ import functions from "../structures/Functions"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -63,10 +64,13 @@ const HelpPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Help"
         window.scrollTo(0, 0)
         urlState()
     }, [])
+
+    useEffect(() => {
+        document.title = i18n.navbar.help
+    }, [i18n])
 
     useEffect(() => {
         if (mobile) {
@@ -95,387 +99,349 @@ const HelpPage: React.FunctionComponent = (props) => {
     const getContainerJSX = () => {
         if (helpTab === "help") {
             return (
-                <><span className="help-heading">Help</span>
-                <span className="help-text">Welcome to Moepictures!</span>
+                <><span className="help-heading">{i18n.navbar.help}</span>
+                <span className="help-text">{i18n.help.help.welcome}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Moepictures is an image board organized by tags, dedicated exclusively to showcasing the most cute and moe artworks. While the majority of content is (and will likely be)
-                    2d art, we also accept many other artforms including animations, music, and 3d models. <br/><br/>
+                    {i18n.help.help.line1}<br/><br/>
 
-                    Click on a category on the left to view the help for that specific topic.
+                    {i18n.help.help.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={mainImg}/></div></>
             )
         }
         if (helpTab === "searching") {
             return (
-                <><span className="help-heading">Searching</span>
+                <><span className="help-heading">{i18n.help.searching.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    The tags on Moepictures use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
-                    If you encounter a problem with this, use dashed versions of the tags. These are examples
-                    of valid searches: <br/>
+                    {i18n.help.searching.header}<br/>
                     <span className="help-alt">
-                    Tag 1 Tag 2 Tag 3 <br/>
-                    Tag-1 Tag-2 Tag-3 <br/><br/>
+                    {i18n.help.searching.example1}<br/>
+                    {i18n.help.searching.example2}<br/><br/>
                     </span>
 
-                    Special tag modifiers: <br/>
-                    <span className="help-alt">-Tag 1 -Tag 2</span> - Exclude posts containing Tag 1 and Tag 2. <br/>
-                    <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/>
-                    <span className="help-alt">+-Tag 1 +-Tag 2</span> - Exclude posts containing either Tag 1 or Tag 2. <br/>
-                    <span className="help-alt">*Tag 1</span> - Match all tags containing Tag 1. <br/><br/>
+                    {i18n.help.searching.specialModifiers.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialModifiers.items)[0]}</span>{Object.values(i18n.help.searching.specialModifiers.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialModifiers.items)[1]}</span>{Object.values(i18n.help.searching.specialModifiers.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialModifiers.items)[2]}</span>{Object.values(i18n.help.searching.specialModifiers.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialModifiers.items)[3]}</span>{Object.values(i18n.help.searching.specialModifiers.items)[3]}<br/><br/>
 
-                    Special searches: <br/>
-                    <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
-                    <span className="help-alt">twitter:id</span> - Search for post matching the twitter id (if it exists). <br/>
-                    <span className="help-alt">source:link</span> - Search all post links and mirrors for the specified link. <br/>
-                    <span className="help-alt">hash:hash</span> - Search for post matching the perceptual hash. <br/>
-                    <span className="help-alt">favorites:user</span> - Search for favorites of the user (if public). <br/>
-                    <span className="help-alt">favgroup:user:name</span> - Search for favgroup of a user (if public). <br/>
-                    <span className="help-alt">group:name</span> - Search for a group by its name. <br/>
-                    <span className="help-alt">uploads:user</span> - Search for uploads of a user. <br/>
-                    <span className="help-alt">history:user</span> - Get your search history (only works on yourself!) <br/>
-                    <span className="help-alt">comments:user</span> - (Comments page) get all comments by the user. <br/>
-                    <span className="help-alt">posts:user</span> - (Forum page) get all threads the user posted in. <br/>
-                    <span className="help-alt">social:link</span> - (Tags page) find an artist by their social link. <br/><br/>
+                    {i18n.help.searching.specialSearches.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[0]}</span>{Object.values(i18n.help.searching.specialSearches.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[1]}</span>{Object.values(i18n.help.searching.specialSearches.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[2]}</span>{Object.values(i18n.help.searching.specialSearches.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[3]}</span>{Object.values(i18n.help.searching.specialSearches.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[4]}</span>{Object.values(i18n.help.searching.specialSearches.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[5]}</span>{Object.values(i18n.help.searching.specialSearches.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[6]}</span>{Object.values(i18n.help.searching.specialSearches.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[7]}</span>{Object.values(i18n.help.searching.specialSearches.items)[7]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[8]}</span>{Object.values(i18n.help.searching.specialSearches.items)[8]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[9]}</span>{Object.values(i18n.help.searching.specialSearches.items)[9]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[10]}</span>{Object.values(i18n.help.searching.specialSearches.items)[10]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[11]}</span>{Object.values(i18n.help.searching.specialSearches.items)[11]}<br/><br/>
 
-                    These are some tags with special uses: <br/>
-                    <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
-                    <span className="help-alt">self upload</span> - the post was uploaded by its original creator. <br/>
-                    <span className="help-alt">official art</span> - this is official art without a publicized artist. <br/>
-                    <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
-                    <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
-                    <span className="help-alt">unknown series</span> - the series is unknown. <br/>
-                    <span className="help-alt">no character</span> - no character or not applicable. <br/>
-                    <span className="help-alt">no series</span> - not part of any series or not applicable. <br/>
-                    <span className="help-alt">needs tags</span> - current post tags are insufficient. <br/>
-                    <span className="help-alt">text</span> - the post contains text. <br/>
-                    <span className="help-alt">transparent</span> - the post has transparency. <br/>
-                    <span className="help-alt">translated</span> - the post has complete translations. <br/>
-                    <span className="help-alt">untranslated</span> - the post is untranslated. <br/>
-                    <span className="help-alt">partially translated</span> - the post is only partially translated. <br/>
-                    <span className="help-alt">check translation</span> - needs re-checking of the translations. <br/>
-                    <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
-                    <span className="help-alt">with audio</span> - the post is a video that has audio. <br/>
-                    <span className="help-alt">multiple artists</span> - the post has multiple artists. <br/>
-                    <span className="help-alt">bad pixiv id</span> - the pixiv post was deleted. <br/>
-                    <span className="help-alt">paid reward available</span> - the post has a paid reward available. <br/>
-                    <span className="help-alt">third party edit</span> - the post is a third party edit. <br/>
-                    <span className="help-alt">third party source</span> - the source of the post was not posted by the original artist. <br/><br/>
+                    {i18n.help.searching.specialUses.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[0]}</span>{Object.values(i18n.help.searching.specialUses.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[1]}</span>{Object.values(i18n.help.searching.specialUses.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[2]}</span>{Object.values(i18n.help.searching.specialUses.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[3]}</span>{Object.values(i18n.help.searching.specialUses.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[4]}</span>{Object.values(i18n.help.searching.specialUses.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[5]}</span>{Object.values(i18n.help.searching.specialUses.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[6]}</span>{Object.values(i18n.help.searching.specialUses.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[7]}</span>{Object.values(i18n.help.searching.specialUses.items)[7]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[8]}</span>{Object.values(i18n.help.searching.specialUses.items)[8]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[9]}</span>{Object.values(i18n.help.searching.specialUses.items)[9]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[10]}</span>{Object.values(i18n.help.searching.specialUses.items)[10]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[11]}</span>{Object.values(i18n.help.searching.specialUses.items)[11]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[12]}</span>{Object.values(i18n.help.searching.specialUses.items)[12]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[13]}</span>{Object.values(i18n.help.searching.specialUses.items)[13]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[14]}</span>{Object.values(i18n.help.searching.specialUses.items)[14]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[15]}</span>{Object.values(i18n.help.searching.specialUses.items)[15]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[16]}</span>{Object.values(i18n.help.searching.specialUses.items)[16]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[17]}</span>{Object.values(i18n.help.searching.specialUses.items)[17]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[18]}</span>{Object.values(i18n.help.searching.specialUses.items)[18]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[19]}</span>{Object.values(i18n.help.searching.specialUses.items)[19]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[20]}</span>{Object.values(i18n.help.searching.specialUses.items)[20]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[21]}</span>{Object.values(i18n.help.searching.specialUses.items)[21]}<br/><br/>
 
-                    In results, posts may have different border colors which mean the following: <br/>
-                    <span className="help-alt">pink</span> - the post is favorited. <br/>
-                    <span className="help-alt">purple</span> - the post is favgrouped. <br/>
-                    <span className="help-alt">red</span> - the post is edit locked. <br/>
-                    <span className="help-alt">green</span> - the post is a parent post. <br/>
-                    <span className="help-alt">yellow</span> - the post is a child post. <br/>
-                    <span className="help-alt">orange</span> - the post is in a group. <br/>
-                    <span className="help-alt">blue</span> - the post has multiple variations. <br/>
+                    {i18n.help.searching.borderColors.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[0]}</span>{Object.values(i18n.help.searching.borderColors.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[1]}</span>{Object.values(i18n.help.searching.borderColors.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[2]}</span>{Object.values(i18n.help.searching.borderColors.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[3]}</span>{Object.values(i18n.help.searching.borderColors.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[4]}</span>{Object.values(i18n.help.searching.borderColors.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[5]}</span>{Object.values(i18n.help.searching.borderColors.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[6]}</span>{Object.values(i18n.help.searching.borderColors.items)[6]}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )
         }
         if (helpTab === "image-searching") {
             return (
-                <><span className="help-heading">Image Searching</span>
+                <><span className="help-heading">{i18n.help.imageSearching.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Every image uploaded to Moepictures is hashed with a perceptual hash algorithm, and images that look the same should 
-                    yield similar hashes irrespective of their resolution. <br/><br/>
+                    {i18n.help.imageSearching.line1}<br/><br/>
 
-                    When you do an image search your upload is perceptually hashed and we try to find a close match. Usually 
-                    this is pretty accurate at finding matching images. If you upload a video, song, or 3d model, the hash is only 
-                    computed on the first frame, song cover, or model screenshot. <br/><br/>
+                    {i18n.help.imageSearching.line2}<br/><br/>
 
-                    You can also search for images by dragging and dropping an image into the left portion of the webpage or by pasting an 
-                    image from your clipboard. Dropping  an image into the right portion of the webpage or pasting in the upload page will 
-                    upload the image instead.
+                    {i18n.help.imageSearching.line3}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={imageSearchingImg}/></div></>
             )
         }
         if (helpTab === "filters") {
             return (
-                <><span className="help-heading">Filters</span>
+                <><span className="help-heading">{i18n.filters.filters}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    You can apply custom filters such as brightness, contrast, hue, and sharpen. Some filters like pixelate and 
-                    blur will ruin most images, and are purely for fun. <br/><br/>
+                    {i18n.help.filters.line1}<br/><br/>
 
-                    For audio, the pixelate filter will behave as a bitcrusher and will reduce the sample rate of the audio.
+                    {i18n.help.filters.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={imagefiltersImg}/></div></>
             )
         }
         if (helpTab === "custom-players") {
             return (
-                <><span className="help-heading">Custom Players</span>
+                <><span className="help-heading">{i18n.help.customPlayers.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Moepictures has custom players for animations, videos, music, and 3d models, which allows additionally functionality 
-                    not available natively such as reverse playback and modification of the playback speed. <br/><br/>
+                    {i18n.help.customPlayers.line1}<br/><br/>
 
-                    The music player also has controls for changing the pitch of the audio. The 3d model player has options to enable 
-                    wireframe, matcap, and edit shapekeys and lighting.
+                    {i18n.help.customPlayers.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={videoPlayerImg}/></div></>
             )
         }
         if (helpTab === "music") {
             return (
-                <><span className="help-heading">Music</span>
+                <><span className="help-heading">{i18n.help.music.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    The music player is available globally (apart from having the per-post player which is also synced). This means 
-                    that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback,
-                    click the stop button on the left of the player or reload the page on a non-music post.
+                    {i18n.help.music.line1}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={musicImg}/></div></>
             )
         }
+        if (helpTab === "translations") {
+            return (
+                <><span className="help-heading">{i18n.navbar.translations}</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {i18n.help.translations.line1}<br/><br/>
+
+                    {i18n.help.translations.line2}
+                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>KanjiTomo{i18n.period}</a><br/><br/>
+
+                    {i18n.help.translations.line3}
+                    <a className="help-link" onClick={() => openLink("https://github.com/dmMaze/comic-text-detector")} style={{marginLeft: "10px", marginRight: "10px"}}>Comic Text Detector</a> 
+                    {i18n.help.translations.line4}
+                    <a className="help-link" onClick={() => openLink("https://github.com/kha-white/manga-ocr")} style={{marginLeft: "10px", marginRight: "10px"}}>Manga OCR</a> 
+                    {i18n.help.translations.line5}
+                    <a className="help-link" onClick={() => openLink("https://translate.google.com/")} style={{marginLeft: "10px", marginRight: "10px"}}>Google Translate</a> 
+                    {i18n.help.translations.line6}
+                </span>
+                <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
+            )
+        }
         if (helpTab === "favorites") {
             return (
-                <><span className="help-heading">Favorites</span>
+                <><span className="help-heading">{i18n.sort.favorites}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    If you like an image, you can add it to your favorites for easier access later on.
-                    By default, your favorites are public but they can be made private in your account
-                    settings. <br/><br/>
+                    {i18n.help.favorites.line1}<br/><br/>
 
-                    By setting the post sort to "favorites" or "reverse favorites", you can quickly view all the 
-                    posts that you have favorited.
+                    {i18n.help.favorites.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={favoritesImg}/></div></>
             )
         }
         if (helpTab === "favgroups") {
             return (
-                <><span className="help-heading">Favorite Groups</span>
+                <><span className="help-heading">{i18n.help.favoriteGroups.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Favorite groups are like your own custom category of "favorites" - you can specify a name and 
-                    a privacy for each favorite group. And like groups, these also store the ordering of the posts and 
-                    may be reordered on their page. There isn't a sorting for favorite groups, but you may search them 
-                    with <span className="help-alt">favgroup:user:name</span>.
+                    {i18n.help.favoriteGroups.line1}
+                    <span className="help-alt">{i18n.help.favoriteGroups.search1}</span>.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={favgroupsImg}/></div></>
             )
         }
         if (helpTab === "cuteness") {
             return (
-                <><span className="help-heading">Cuteness</span>
+                <><span className="help-heading">{i18n.sort.cuteness}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    The rating system on Moepictures is called cuteness. When you rate an
-                    image you should rate the amount of cuteness the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
-                    cute) to 1000 (Insanely cute).
+                    {i18n.help.cuteness.line1}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={cutenessMeterImg}/></div></>
             )
         }
-        if (helpTab === "translations") {
-            return (
-                <><span className="help-heading">Translations</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Translations can be added to any post containing non-english text. This is useful so that non-speakers 
-                    can understand the post's context and any jokes. <br/><br/>
-
-                    If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese text, you can use 
-                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>KanjiTomo.</a><br/><br/>
-
-                    We have an automatic translation generator for japanese text that uses 
-                    <a className="help-link" onClick={() => openLink("https://github.com/dmMaze/comic-text-detector")} style={{marginLeft: "10px", marginRight: "10px"}}>Comic Text Detector</a> 
-                    to detect the text bubbles, 
-                    <a className="help-link" onClick={() => openLink("https://github.com/kha-white/manga-ocr")} style={{marginLeft: "10px", marginRight: "10px"}}>Manga OCR</a> 
-                    to apply OCR, and 
-                    <a className="help-link" onClick={() => openLink("https://translate.google.com/")} style={{marginLeft: "10px", marginRight: "10px"}}>Google Translate</a> 
-                    for machine translation. This is not meant to be used as is, and you should always clean up the output by fixing text bubble positions 
-                    and verifying the accuracy of the transcripted and translated texts.
-                </span>
-                <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
-            )
-        }
         if (helpTab === "uploading") {
             return (
-                <><span className="help-heading">Uploading</span>
+                <><span className="help-heading">{i18n.help.uploading.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Moepictures allows uploading images, comics, animations, videos, music, and 3d models.<br/><br/>
-                    Please read carefully through all of the uploading guidelines. <br/>
+                    {i18n.help.uploading.line1}<br/><br/>
+                    {i18n.help.uploading.uploadGuidelines.header}<br/>
                     <span className="help-alt">
-                    ⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles. <br/>
-                    ⇾ The main subject should be a girl. Boys are only allowed in minor roles. 
-                    Art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
-                    ⇾ It should be moe/cute! This is the primary focus of the site. <br/>
-                    ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
-                    ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
-                    ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
-                    ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
-                    ⇾ Animations shouldn't look too stuttery. <br/>
-                    ⇾ All posts require the source link from where it was obtained from. <br/>
-                    ⇾ All tags should be romanized. Titles and commentary don't have to be romanized but may be translated. <br/>
-                    ⇾ For images, adding an upscaled version is required. <br/>
-                    ⇾ Resolution: Keep original images under 2000x2000px and upscaled images under 8000x8000px. <br/>
-                    ⇾ (Music only) The audio file must have a song cover in its metadata. <br/>
-                    ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
-                    ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
-                    ⇾ No AI-generated works. We only want art created by passionate humans. <br/>
-                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!<br/><br/>
+                    {i18n.help.uploading.uploadGuidelines.guide1}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide2}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide3}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide4}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide5}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide6}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide7}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide8}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide9}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide10}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide11}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide12}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide13}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide14}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide15}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide16}<br/>
+                    {i18n.help.uploading.uploadGuidelines.guide17}<br/><br/>
                     </span>
 
-                    Please classify uploads into the appropriate category. We have three levels of categorization: <br/>
-                    <span className="help-alt">Type</span> - The type of post. This can be <span className="help-alt">image, animation, comic, video, audio, or 3d model.</span><br/>
-                    Most of these are self-explanatory, but the distinction between an image and a comic is that comics contain various panels, 
-                    text, and speech balloons.<br/><br/>
+                    {i18n.help.uploading.categorization.header}<br/>
+                    <span className="help-alt">{i18n.sidebar.type}</span>
+                    {i18n.help.uploading.categorization.type.line1}
+                    <span className="help-alt">{i18n.help.uploading.categorization.type.line2}</span><br/>
+                    {i18n.help.uploading.categorization.type.line3}<br/><br/>
 
-                    <span className="help-alt">Restrict</span> - An image content rating that may be used to broadly restrict content you don't want to see.<br/>
-                    <span className="help-alt">safe</span> - Pretty safe with no content that is too suggestive.<br/>
-                    <span className="help-alt">questionable</span> - Revealing or tight clothing (eg. swimsuits, tights), suggestive poses and ecchi.<br/><br/>
+                    <span className="help-alt">{i18n.sidebar.restrict}</span>{i18n.help.uploading.categorization.restrict.line1}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.restrict.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.restrict.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.restrict.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.restrict.items)[1]}<br/><br/>
 
-                    <span className="help-alt">Style</span> - These are some very common art styles.<br/>
-                    <span className="help-alt">2d</span> - The vast majority of 2d art, or music that doesn't fit into any other categories.<br/>
-                    <span className="help-alt">3d</span> - 3d models or incorporates 3d models in some way.<br/>
-                    <span className="help-alt">chibi</span> - Art made in chibi or super deformed style.<br/>
-                    <span className="help-alt">pixel</span> - Art made in pixel art style or chiptune music.<br/><br/>
+                    <span className="help-alt">{i18n.sidebar.style}</span>{i18n.help.uploading.categorization.style.line1}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[2]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[3]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[4]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[4]}<br/><br/>
 
-                    Parent ID - Specify a post ID and this post will be added as a child to that post. 
-                    For post variations, simply add multiple images to the post.<br/><br/>
+                    {i18n.help.uploading.categorization.parentID}<br/><br/>
 
-                    Please provide source information for all posts. You can fill in these fields: <br/>
-                    <span className="help-alt">title</span> - The original title of the work as posted on social media.<br/>
-                    <span className="help-alt">translated title</span> - A title english translation, as titles are very commonly in japanese.<br/>
-                    <span className="help-alt">artist</span> - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.<br/>
-                    <span className="help-alt">posted</span> - The original date the work was posted.<br/>
-                    <span className="help-alt">link</span> - The primary link to the work, preferably where the artist posted it themselves.<br/>
-                    <span className="help-alt">bookmarks</span> - The amount of pixiv bookmarks or "likes" if it's a different site.<br/>
-                    <span className="help-alt">commentary</span> - The original description of the work as posted on social media.<br/>
-                    <span className="help-alt">translated commentary</span> - A commentary english translation, as they are very commonly written in japanese.<br/>
-                    <span className="help-alt">mirrors</span> - Reposts of the work posted on different sites. Include the artists own reposts.<br/>
-                    <span className="help-alt">buy link</span> - If a paid reward is available, you may post the link to buy here.<br/><br/>
+                    {i18n.help.uploading.sourceInformation.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[0]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[1]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[2]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[3]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[4]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[5]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[6]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[7]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[7]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[8]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[8]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[9]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[9]}<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )
         }
         if (helpTab === "tagging") {
             return (
-                <><span className="help-heading">Tagging</span>
+                <><span className="help-heading">{i18n.help.tagging.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Every post should be tagged with the features it contains, and although you don’t have to be exceedingly thorough some 
-                    level of effort placed on tags is required. Aim for at least 10-20 tags. Anything below that is insufficient, and above that 
-                    starts getting into excessive territory.<br/><br/>
+                    {i18n.help.tagging.line1}<br/><br/>
 
-                    These are some guidelines on what features to tag: <br/>
+                    {i18n.help.tagging.tagGuidelines.header}<br/>
                     <span className="help-alt">
-                    ⇾ Clothing (school-uniform, sailor-uniform, coat, skirt, leggings, etc). <br/>
-                    ⇾ Hair Color (blonde-hair, red-hair, blue-hair, etc). <br/>
-                    ⇾ Hair Length (short-hair, medium-hair, long-hair, etc). <br/>
-                    ⇾ Hair Styles (twintails, ponytail, braid, etc). <br/>
-                    ⇾ Special Accessories (hat, ribbon, bracelet, etc). <br/>
-                    ⇾ Expressions (smiling, crying, surprised, etc). <br/>
-                    ⇾ Actions (sleeping, running, eating, etc). <br/>
-                    ⇾ Body Parts (small-breasts, long-legs, etc). <br/>
-                    ⇾ Objects (coffee, umbrella, flower, etc). <br/>
-                    ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
-                    ⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc). <br/><br/>
+                    {i18n.help.tagging.tagGuidelines.guide1}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide2}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide3}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide4}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide5}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide6}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide7}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide8}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide9}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide10}<br/>
+                    {i18n.help.tagging.tagGuidelines.guide11}<br/><br/>
                     </span>
 
-                    If the post was already tagged on a different site you may copy over the tags and fix them up. There's no 
-                    need to fully re-invent the wheel. <br/><br/>
+                    {i18n.help.tagging.line2}<br/><br/>
 
-                    We organize tags into several categories, which also determine their color. <br/>
-                    <span className="help-alt artist-tag-color">artist</span> - Preferably the twitter username of the artist, otherwise their romanized name.<br/>
-                    <span className="help-alt character-tag-color">character</span> - The character name with their series in parentheses: character-(series-name). Use "no-character" if not applicable.<br/>
-                    <span className="help-alt series-tag-color">series</span> - The series (anime, manga, video game, etc.) the character belongs to. Use "no-series" if not applicable.<br/>
-                    <span className="help-alt meta-tag-color">meta</span> - Tags with special uses like unknown-artist and transparent.<br/>
-                    <span className="help-alt appearance-tag-color">appearance</span> - Tags related to the appearance of the character, like their hair and eyes.<br/>
-                    <span className="help-alt outfit-tag-color">outfit</span> - Tags related to the outfit of the character, like skirts and shoes.<br/>
-                    <span className="help-alt accessory-tag-color">accessory</span> - Tags related to accessories and objects, like bracelets and books.<br/>
-                    <span className="help-alt action-tag-color">action</span> - Tags related to actions like sitting and running.<br/>
-                    <span className="help-alt scenery-tag-color">scenery</span> - Tags related to the background scenery such as the sky and trees.<br/>
-                    <span className="help-alt tag-color">tag</span> - Every other tag that doesn't fit in another category.<br/><br/>
+                    {i18n.help.tagging.categories.header}<br/>
+                    <span className="help-alt artist-tag-color">{Object.keys(i18n.help.tagging.categories.items)[0]}</span>{Object.values(i18n.help.tagging.categories.items)[0]}<br/>
+                    <span className="help-alt character-tag-color">{Object.keys(i18n.help.tagging.categories.items)[1]}</span>{Object.values(i18n.help.tagging.categories.items)[1]}<br/>
+                    <span className="help-alt series-tag-color">{Object.keys(i18n.help.tagging.categories.items)[2]}</span>{Object.values(i18n.help.tagging.categories.items)[2]}<br/>
+                    <span className="help-alt meta-tag-color">{Object.keys(i18n.help.tagging.categories.items)[3]}</span>{Object.values(i18n.help.tagging.categories.items)[3]}<br/>
+                    <span className="help-alt appearance-tag-color">{Object.keys(i18n.help.tagging.categories.items)[4]}</span>{Object.values(i18n.help.tagging.categories.items)[4]}<br/>
+                    <span className="help-alt outfit-tag-color">{Object.keys(i18n.help.tagging.categories.items)[5]}</span>{Object.values(i18n.help.tagging.categories.items)[5]}<br/>
+                    <span className="help-alt accessory-tag-color">{Object.keys(i18n.help.tagging.categories.items)[6]}</span>{Object.values(i18n.help.tagging.categories.items)[6]}<br/>
+                    <span className="help-alt action-tag-color">{Object.keys(i18n.help.tagging.categories.items)[7]}</span>{Object.values(i18n.help.tagging.categories.items)[7]}<br/>
+                    <span className="help-alt scenery-tag-color">{Object.keys(i18n.help.tagging.categories.items)[8]}</span>{Object.values(i18n.help.tagging.categories.items)[8]}<br/>
+                    <span className="help-alt tag-color">{Object.keys(i18n.help.tagging.categories.items)[9]}</span>{Object.values(i18n.help.tagging.categories.items)[9]}<br/><br/>
 
-                    New tags that don't exist yet are created on post upload, and actually added once the post is approved. Once the 
-                    tag is up, you may edit its more detailed image/description/links in the tags page. Not all of these fields will be available to 
-                    edit, and will depend on the type of tag. <br/><br/>
+                    {i18n.help.tagging.fields.header}<br/><br/>
 
-                    <span className="help-alt">Tag</span> - The name of the tag. Artist tags may be changed whenever they update their twitter name, but 
-                    modify other tags only if necessary.<br/>
-                    <span className="help-alt">Website</span> - A website link, usually of the anime/video game or personal website of an artist.<br/>
-                    <span className="help-alt">Social</span> - The primary social media account of the artist where they upload their works, depending on 
-                    the type of artist this is usually pixiv/soundcloud/sketchfab. <br/>
-                    <span className="help-alt">Twitter</span> - Their twitter/x account, as the majority of people also have one. We also prefer to use their 
-                    twitter username as their tag name.<br/>
-                    <span className="help-alt">Fandom</span> - For character tags, this can be a link to the fandom wiki of the character (or any other wiki).<br/>
-                    <span className="help-alt">Image</span> - A tag image, usually profile picture of the artist or logo of the series. Please provide one for 
-                    artist, characters, and series.<br/>
-                    <span className="help-alt">Description</span> - A longer description of the tag, going into more detail about what its about. Very useful for tags 
-                    that are not very self-explanatory.<br/>
-                    <span className="help-alt">Aliases</span> - Aliases are alternate names that will resolve to this tag. They do not have to be romanized, unlike tags.<br/>
-                    <span className="help-alt">Implications</span> - Implications are "parent" tags automatically added when this tag is added to a post.<br/>
-                    <span className="help-alt">Pixiv Tags</span> - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in japanese.<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[0]}</span>{Object.values(i18n.help.tagging.fields.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[1]}</span>{Object.values(i18n.help.tagging.fields.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[2]}</span>{Object.values(i18n.help.tagging.fields.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[3]}</span>{Object.values(i18n.help.tagging.fields.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[4]}</span>{Object.values(i18n.help.tagging.fields.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[5]}</span>{Object.values(i18n.help.tagging.fields.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[6]}</span>{Object.values(i18n.help.tagging.fields.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[7]}</span>{Object.values(i18n.help.tagging.fields.items)[7]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[8]}</span>{Object.values(i18n.help.tagging.fields.items)[8]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.tagging.fields.items)[9]}</span>{Object.values(i18n.help.tagging.fields.items)[9]}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
         }
         if (helpTab === "self-uploads") {
             return (
-                <><span className="help-heading">Self Uploads</span>
+                <><span className="help-heading">{i18n.help.selfUploads.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Although the vast majority of posts are reposts, you are also welcomed to post your own art. <br/><br/>
+                    {i18n.help.selfUploads.line1}<br/><br/>
 
-                    You should tag uploads of your own artwork with <span className="help-alt">self upload</span>. We also require that your 
-                    artist tag is the same as your username on moepictures. This will let you have access to the additional option 
-                    to private a post. <br/><br/> 
+                    {i18n.help.selfUploads.shouldTag}<span className="help-alt">self-upload{i18n.period}</span>
+                    {i18n.help.selfUploads.line2}<br/><br/> 
 
-                    You may make your own posts private at any time so that they are only visible to yourself and moderators. However 
-                    do note that we don't allow post deletions even if you uploaded your own post without approval. <br/><br/>
+                    {i18n.help.selfUploads.line3}<br/><br/>
 
-                    If another user has already taken your artist name please contact us at <span style={{marginRight: "10px"}} className="help-alt">moepictures.moe@gmail.com</span> 
-                    so that we can attempt to change their name.
+                    {i18n.help.selfUploads.contactUs}<span style={{marginRight: "10px"}} className="help-alt">moepictures.moe@gmail.com</span> 
+                    {i18n.help.selfUploads.changeName}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={selfPostImg}/></div></>
             )
         }
         if (helpTab === "upscaling") {
             return (
-                <><span className="help-heading">Upscaling</span>
+                <><span className="help-heading">{i18n.help.upscaling.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Images, animations, and videos may have an upscaled version. For images, providing one is required. <br/><br/>
+                    {i18n.help.upscaling.line1}<br/><br/>
 
-                    You can download the app that we use for upscaling here: <br/>
+                    {i18n.help.upscaling.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Waifu2x-GUI/releases")}>{mobile ? "Waifu2x GUI" : "https://github.com/Moebits/Waifu2x-GUI/releases"}</a><br/><br/>
 
-                    Although the original upscaler is Waifu2x, better upscalers have come out since. Currently the best upscaler and the 
-                    one that we use is REAL-CUGAN with a scale factor of 4x. If the image doesn't have transparency, also turn on "compress to jpg" 
-                    in settings and set the JPG quality to at least 95.<br/>
+                    {i18n.help.upscaling.line3}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={upscalingImg}/></div></>
             )
         }
         if (helpTab === "compressing") {
             return (
-                <><span className="help-heading">Compressing</span>
+                <><span className="help-heading">{i18n.help.compressing.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Compressing/re-encoding posts is advised for faster loading and better space efficiency. All compressions should be 
-                    high quality and should not leave behind any artifacts. <br/><br/>
+                    {i18n.help.compressing.line1}<br/><br/>
 
-                    You can download the app that we use for compressing here: <br/>
+                    {i18n.help.compressing.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Image-Compressor/releases")}>{mobile ? "Image Compressor" : "https://github.com/Moebits/Image-Compressor/releases"}</a><br/><br/>
 
-                    These are the recommended formats for each type of post: <br/>
+                    {i18n.help.compressing.recommendedFormats.header}<br/>
                     <span className="help-alt">
-                    Images ⇾ Progressive JPG or WEBP for transparent images. Avoid AVIF for high decoding time and PNG for massive filesizes. <br/>
-                    Animations ⇾ Animated WEBP is preferred over GIF. <br/>
-                    Videos ⇾ MP4 with H.264 codec, WEBM with VP9 codec, or MP4 with AV1 codec. Avoid H.265 codec for poor browser support. <br/>
-                    Music ⇾ MP3 with cover art. Avoid WAV as it doesn't support cover art.<br/>
-                    3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support. <br/><br/>
+                    {i18n.help.compressing.recommendedFormats.format1}<br/>
+                    {i18n.help.compressing.recommendedFormats.format2}<br/>
+                    {i18n.help.compressing.recommendedFormats.format3}<br/>
+                    {i18n.help.compressing.recommendedFormats.format4}<br/>
+                    {i18n.help.compressing.recommendedFormats.format5}<br/>
+                    {i18n.help.compressing.recommendedFormats.format6}<br/><br/>
                     </span>
 
-                    The compressing settings that we commonly use are quality at 95% with progressive turned on. Please downscale original posts to 
-                    be under 2000x2000px, as anything bigger will result in an upscaled post that is way too large.<br/>
+                    {i18n.help.compressing.line3}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={compressingImg}/></div></>
             )
         }
         if (helpTab === "pixiv-downloads") {
             return (
-                <><span className="help-heading">Pixiv Downloads</span>
+                <><span className="help-heading">{i18n.help.pixivDownloads.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    The vast majority of posts come from the Japanese art website <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv.</a><br/><br/>
+                    {i18n.help.pixivDownloads.line1}<a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv{i18n.period}</a><br/><br/>
 
-                    However, it can take awhile to manually the download the art that you like, so we also have an app that makes it easy to download lots of posts at once. It 
-                    can download illustrations, manga, ugoira (animations), and novels. (However at this time, we don't support uploading textual content like novels).<br/>
+                    {i18n.help.pixivDownloads.line2}<br/>
 
                     <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Pixiv-Downloader/releases")}>{mobile ? "Pixiv Downloader" : "https://github.com/Moebits/Pixiv-Downloader/releases"}</a><br/><br/>
                 </span>
@@ -484,17 +450,16 @@ const HelpPage: React.FunctionComponent = (props) => {
         }
         if (helpTab === "bookmarklet") {
             return (
-                <><span className="help-heading">Bookmarklet</span>
+                <><span className="help-heading">{i18n.help.bookmarklet.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from 
-                    another site. <br/><br/>
+                    {i18n.help.bookmarklet.line1}<br/><br/>
 
                     <a style={{width: "auto", height: "60px"}} className="help-link" href={getBookmarklet()}
                     onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img src={bookmarkletImg} alt="Upload to Moepictures"/>
                     </a><br/><br/>
 
-                    It supports the same sites as using "Enter Links" does, which are the following:<br/>
+                    {i18n.help.bookmarklet.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.deviantart.com/")}>Deviantart</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.artstation.com/")}>Artstation</a><br/>
@@ -518,216 +483,192 @@ const HelpPage: React.FunctionComponent = (props) => {
         }
         if (helpTab === "variations") {
             return (
-                <><span className="help-heading">Variations</span>
+                <><span className="help-heading">{i18n.sort.variations}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged 
-                    edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit and 
-                    should be added as a child post instead. <br/><br/>
+                    {i18n.help.variations.line1}<br/><br/>
 
-                    Variations all share the same tags as the main post, and only the main post will appear directly in search. <br/><br/>
+                    {i18n.help.variations.line2}<br/><br/>
 
-                    If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by 
-                    creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these for a better reading experience.
+                    {i18n.help.variations.line3}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={variationsImg}/></div></>
             )
         }
         if (helpTab === "child-posts") {
             return (
-                <><span className="help-heading">Child Posts</span>
+                <><span className="help-heading">{i18n.post.childPosts}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should 
-                    be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent 
-                    background. Child posts are also used for all third party edits (modifications to a work not done by the original artist). <br/><br/>
+                    {i18n.help.childPosts.line1}<br/><br/>
                     
-                    Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to 
-                    the parent post in a separate section. <br/><br/>
+                    {i18n.help.childPosts.line2}<br/><br/>
 
-                    Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be 
-                    related with child posts and not variations. If a parent image containing all the characters doesn't exist, then they should be related 
-                    using groups instead.
+                    {i18n.help.childPosts.line3}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={childrenImg}/></div></>
             )
         }
         if (helpTab === "groups") {
             return (
-                <><span className="help-heading">Groups</span>
+                <><span className="help-heading">{i18n.sort.groups}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Groups are a way to associate several loosely related posts with very different tags, so variations and child posts are not a great way to 
-                    relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
-                    a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to 
-                    use variations. <br/><br/>
+                    {i18n.help.groups.line1}<br/><br/>
 
-                    All grouped posts otherwise act like their own posts and always appear directly in search. <br/><br/>
+                    {i18n.help.groups.line2}<br/><br/>
 
-                    If all the posts in the group have the same source then name the group like <span className="help-alt">Sitename PostID</span>, eg. 
-                    Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original 
-                    untranslated name in the group description.
+                    {i18n.help.groups.sameSource}<span className="help-alt">{i18n.help.groups.sitename}</span>
+                    {i18n.help.groups.line3}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={groupsImg}/></div></>
             )
         }
         if (helpTab === "aliases") {
             return (
-                <><span className="help-heading">Aliases</span>
+                <><span className="help-heading">{i18n.sort.aliases}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    A tag can have multiple aliases that point to the same result. This is to
-                    facilitate better searching for synonyms like "with audio" and "has audio". Unlike tags, aliases can include non-ASCII characters 
-                    so it's possible to add an alias in Japanese in order to enable Japanese searching. But on that note, you can also search for tags 
-                    with their japanese pixiv tags if they were filled in. <br/><br/>
+                    {i18n.help.aliases.line1}<br/><br/>
 
-                    <span className="help-alt">Aliasing To</span><br/>
-                    Aliases do not have to be an existing tag, but if you want to alias an already existing tag to another tag we call this 
-                    "aliasing to". Since aliasing to is a more powerful action, they will have to get reviewed and approved by mods. <br/><br/>
+                    <span className="help-alt">{i18n.help.aliases.aliasingTo.title}</span><br/>
+                    {i18n.help.aliases.aliasingTo.line1}<br/><br/>
 
-                    To make this clear, the tag that you start the "alias to" on will be the one added as an alias to the other tag. The tag 
-                    that you type in the box is the tag that will receive this new alias. Every post that was under the old tag will be moved to the new tag.<br/>
+                    {i18n.help.aliases.aliasingTo.line2}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={aliasesImg}/></div></>
             )
         }
         if (helpTab === "implications") {
             return (
-                <><span className="help-heading">Implications</span>
+                <><span className="help-heading">{i18n.labels.implications}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    A tag can have implications which are tags that are automatically added to posts if they don't already exist. For instance, 
-                    you can add an implication that the tag "red hat" implies "hat" and any post uploaded containing the "red hat" tag will also be 
-                    given the "hat" tag. These are mainly useful to aid in tagging so you don't have to type out all the broader tags. <br/><br/>
+                    {i18n.help.implications.line1}<br/><br/>
 
-                    Only mods can add implications to tags with over 1000 posts as this will start a lot of post updates. Implications are mainly 
-                    meant to be used for more specific tags that naturally contain a smaller number of posts.
+                    {i18n.help.implications.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={implicationsImg}/></div></>
             )
         }
         if (helpTab === "users") {
             return (
-                <><span className="help-heading">Users</span>
+                <><span className="help-heading">{i18n.help.users.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Moepictures has various user account levels that progressively give you more 
-                    permissions and removes restrictions. <br/><br/>
+                    {i18n.help.users.userLevels.header}<br/><br/>
 
-                    <span className="help-alt">No account</span> - Can only view the site and the posts rated "safe".<br/>
-                    <span className="help-alt">User</span> - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/translations for approval. Can also view the "questionable" posts.<br/>
-                    <span className="help-alt">Premium</span> - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.<br/>
-                    <span className="help-alt">Contributor</span> - Can edit posts and tags without passing through the mod queue. Given to members with a great 
-                    track record of contributions that we don't want to inhibit with the queue.<br/>
-                    <span className="help-alt">Curator</span> - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts 
-                    that we don't want to inhibit with the queue.<br/>
-                    <span className="help-alt">Mod</span> - Access to the mod queue and can approve uploads/edits/aliasing, can replace images on posts, can change the category of tags, and can ban users.<br/>
-                    <span className="help-alt">Admin</span> - Access to our most powerful tools such as bulk uploading and bulk tagging. Can permanently delete posts and promote users to 
-                    a higher level.<br/>
-                    <span className="help-alt">System</span> - This is only for our bot account that sends out message notifications.<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[0]}</span>{Object.values(i18n.help.users.userLevels.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[1]}</span>{Object.values(i18n.help.users.userLevels.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[2]}</span>{Object.values(i18n.help.users.userLevels.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[3]}</span>{Object.values(i18n.help.users.userLevels.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[4]}</span>{Object.values(i18n.help.users.userLevels.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[5]}</span>{Object.values(i18n.help.users.userLevels.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[6]}</span>{Object.values(i18n.help.users.userLevels.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[7]}</span>{Object.values(i18n.help.users.userLevels.items)[7]}<br/><br/>
 
 
-                    Since mods and admins can potentially make very destructive changes to the site, we require them to enable 2FA on their accounts.<br/><br/>
+                    {i18n.help.users.line1}<br/><br/>
 
-                    <span className="help-alt">Avatars</span><br/>
-                    You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an "anime avatars only" policy! 
-                    If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it. <br/><br/>
+                    <span className="help-alt">{i18n.help.users.avatars.title}</span><br/>
+                    {i18n.help.users.avatars.line1}<br/><br/>
 
-                    You can change your avatar by clicking on "set avatar" on the sidebar of any post, and you can remove it in your account settings. 
-                    Please do this on PC, as the mobile touch controls are known to be a bit finicky.
+                    {i18n.help.users.avatars.line2}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={setAvatarImg}/></div></>
             )
         }
         if (helpTab === "commenting") {
             return (
-                <><span className="help-heading">Commenting</span>
+                <><span className="help-heading">{i18n.help.commenting.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Do not behave badly participating in comments, forum threads, or sending messages. 
-                    These are some general guidelines for all the comment sections: <br/>
+                    {i18n.help.commenting.rules.header}<br/>
                     <span className="help-alt">
-                    ⇾ Please communicate in English (you may use a machine translator). <br/>
-                    ⇾ No spam, gibberish, or extremely off-topic comments. <br/>
-                    ⇾ No foul language (if you somehow bypassed the filter). <br/>
-                    ⇾ No unnecessary rudeness or impoliteness, please be kind. <br/>
-                    ⇾ No otherwise distasteful/inappropriate comments. <br/><br/>
+                    {i18n.help.commenting.rules.rule1}<br/>
+                    {i18n.help.commenting.rules.rule2}<br/>
+                    {i18n.help.commenting.rules.rule3}<br/>
+                    {i18n.help.commenting.rules.rule4}<br/>
+                    {i18n.help.commenting.rules.rule5}<br/><br/>
                     </span>
 
-                    Quotes are supported and we have a syntax that makes it easy to do quotes. Nested quotes are not supported. <br/>
+                    {i18n.help.commenting.quotes.header}<br/>
                     <span className="help-alt">
-                    &gt;&gt;&gt;[id] User said:<br/>
-                    &gt; Comment <br/><br/>
+                    {i18n.help.commenting.quotes.line1}<br/>
+                    {i18n.help.commenting.quotes.line2}<br/><br/>
                     </span>
 
-                    Emojis can also be added to messages using their special identifier. <br/>
+                    {i18n.help.commenting.emojis.header}<br/>
                     <span className="help-alt">
-                    emoji:emojiName<br/><br/>
+                    {i18n.help.commenting.emojis.line1}<br/><br/>
                     </span>
 
-                    To highlight text wrap it in double asterisks. <br/>
+                    {i18n.help.commenting.highlight.header}<br/>
                     <span className="help-alt">
-                    **Highlighted text**<br/><br/>
+                    {i18n.help.commenting.highlight.line1}<br/><br/>
                     </span>
 
-                    You can mention users and they will receive a notification. <br/>
+                    {i18n.help.commenting.mention.header}<br/>
                     <span className="help-alt">
-                    @username<br/><br/>
+                    {i18n.help.commenting.mention.line1}<br/><br/>
                     </span>
 
-                    Any image or video links posted in the comment are automatically displayed.
+                    {i18n.help.commenting.images}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
         }
         if (helpTab === "bans") {
             return (
-                <><span className="help-heading">Bans</span>
+                <><span className="help-heading">{i18n.help.bans.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    If you break the rules severely or consistently, you might get banned. If you get banned, you 
-                    will still be able to browse the site but most interactions will get disabled. <br/><br/>
+                    {i18n.help.bans.line1}<br/><br/>
 
-                    These are some actions that may get you banned: <br/>
+                    {i18n.help.bans.banActions.header}<br/>
                     <span className="help-alt">
-                    ⇾ Misconduct in the comments, forum threads, or private messages. <br/>
-                    ⇾ Spam uploading meme or very low quality posts. <br/>
-                    ⇾ Vandalizing posts, tags, or translations. <br/><br/>
+                    {i18n.help.bans.banActions.action1}<br/>
+                    {i18n.help.bans.banActions.action2}<br/>
+                    {i18n.help.bans.banActions.action3}<br/><br/>
                     </span>
 
-                    We also don't allow profane or inappropriate usernames. We will inquire you to change your 
-                    username to something more appropriate, otherwise you might also get banned if there is no response.
+                    {i18n.help.bans.line2}
                 </span></>
             )
         }
         if (helpTab === "captcha") {
             return (
-                <><span className="help-heading">Captcha</span>
+                <><span className="help-heading">{i18n.help.captcha.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    We don't condone the scraping of our website, and we have various measures in place 
-                    like captchas and end-to-end encryption. Hopefully this shouldn't be triggered by regular browsing. <br/><br/>
+                    {i18n.help.captcha.line1}<br/><br/>
                     
-                    If you happen to trigger this, simply solve the captcha to unlock the posts again. And if you are getting this 
-                    frequently (as a human visitor), you may let us know since that's obviously not intended.<br/><br/>
+                    {i18n.help.captcha.line2}<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={captchaImg}/></div></>
             )
         }
+        if (helpTab === "language") {
+            return (
+                <><span className="help-heading">{i18n.help.language.title}</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {i18n.help.language.line1}<br/><br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={languageImg}/></div></>
+            )
+        }
         if (helpTab === "account-deletion") {
             return (
-                <><span className="help-heading">Account Deletion</span>
+                <><span className="help-heading">{i18n.help.accountDeletion.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Since Moepictures is heavily focused on user contributions, when you delete your account we won't  
-                    remove your public contributions like submitted posts and edits. The account that uploaded them will be 
-                    anonymized and show up as "deleted". The rest of your account data will be deleted. <br/><br/>
+                    {i18n.help.accountDeletion.line1}<br/><br/>
                 </span></>
             )
         }
         if (helpTab === "copyright-removal") {
             return (
-                <><span className="help-heading">Copyright Removal</span>
+                <><span className="help-heading">{i18n.pages.copyrightRemoval.title}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    If your work is up on Moepictures then it means that we love your work and we always make sure to source 
-                    posts back to you.<br/><br/>
+                    {i18n.help.copyrightRemoval.line1}<br/><br/>
 
-                    With that said, we respect your rights and if you don't want your work to be here anymore, 
-                    you may submit a copyright removal form at <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright-removal`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
+                    {i18n.help.copyrightRemoval.submitForm}
+                    <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.getDomain()}/copyright-removal`}</a>
+                    {i18n.help.copyrightRemoval.emailUs}<br/><br/>
 
-                    After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded.<br/><br/>
+                    {i18n.help.copyrightRemoval.line2}<br/><br/>
 
-                    We are sad to see you go.<br/>
+                    {i18n.terms.tos.copyrightTakedown.goText}<br/>
                 </span></>
             )
         }
@@ -743,34 +684,35 @@ const HelpPage: React.FunctionComponent = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="help">
                     <div className="help-nav">
-                        <span className="help-nav-text" onClick={() => setHelpTab("help")}>Help</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("searching")}>Searching</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("image-searching")}>Image Searching</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("filters")}>Filters</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>Custom Players</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("music")}>Music</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("translations")}>Translations</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>Favorites</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>Favorite Groups</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>Uploading</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>Tagging</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>Self Uploads</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>Upscaling</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>Compressing</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>Pixiv Downloads</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>Bookmarklet</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("variations")}>Variations</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>Child Posts</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("groups")}>Groups</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>Aliases</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("implications")}>Implications</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("users")}>Users</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>Commenting</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("bans")}>Bans</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>Captcha</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("account-deletion")}>Account Deletion</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("copyright-removal")}>Copyright Removal</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("help")}>{i18n.navbar.help}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("searching")}>{i18n.help.searching.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("image-searching")}>{i18n.help.imageSearching.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("filters")}>{i18n.filters.filters}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>{i18n.help.customPlayers.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("music")}>{i18n.help.music.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("translations")}>{i18n.navbar.translations}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>{i18n.sort.favorites}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>{i18n.help.favoriteGroups.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>{i18n.sort.cuteness}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>{i18n.help.uploading.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>{i18n.help.tagging.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>{i18n.help.selfUploads.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>{i18n.help.upscaling.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>{i18n.help.compressing.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>{i18n.help.bookmarklet.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("variations")}>{i18n.sort.variations}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>{i18n.post.childPosts}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("groups")}>{i18n.sort.groups}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>{i18n.sort.aliases}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("implications")}>{i18n.labels.implications}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("users")}>{i18n.help.users.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>{i18n.help.commenting.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("bans")}>{i18n.help.bans.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>{i18n.help.captcha.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("language")}>{i18n.help.language.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("account-deletion")}>{i18n.help.accountDeletion.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("copyright-removal")}>{i18n.pages.copyrightRemoval.title}</span>
                     </div>
                     <div className="help-container">
                         {getContainerJSX()}

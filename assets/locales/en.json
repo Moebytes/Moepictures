@@ -1,5 +1,6 @@
 {
     "title": "Moepictures: Moe Anime Pictures ♥",
+    "period": ".",
     "navbar": {
         "login": "Login",
         "comments": "Comments",
@@ -43,6 +44,8 @@
         "lock": "Lock",
         "unlock": "Unlock",
         "history": "History",
+        "result": "result.",
+        "results": "results.",
         "loginRequired": "Login required.",
         "accountDeleted": "Account Deleted.",
         "$401": "401 error.",
@@ -128,8 +131,8 @@
         "favorite": "Favorite",
         "favorited": "Favorited",
         "favgroup": "Favgroup",
-        "parent": "Parent Post",
-        "children": "Child Posts",
+        "parentPost": "Parent Post",
+        "childPosts": "Child Posts",
         "commentary": "Artist Commentary",
         "artistWorks": "Artist Works",
         "related": "Related",
@@ -161,6 +164,7 @@
         "reply": "Reply",
         "message": "Message",
         "submitting": "Submitting...",
+        "fetching": "Fetching...",
         "submit": "Submit",
         "ok": "Ok",
         "yes": "Yes",
@@ -201,7 +205,8 @@
         "promote": "Promote",
         "save": "Save",
         "send": "Send",
-        "unban": "Unban"
+        "unban": "Unban",
+        "sendLink": "Send Link"
     },
     "history": {
         "post": "Post History",
@@ -505,7 +510,6 @@
             "title": "Forgot Password",
             "heading": "Enter your email to receive a password reset link.",
             "submitHeading": "A password reset link was sent if this account exists.",
-            "sendLink": "Send Link",
             "error": "Invalid email or captcha."
         },
         "resetPassword": {
@@ -591,9 +595,6 @@
             "postLinkHeading": "Please provide all the post links that you want removed.",
             "postLinks": "Post Links",
             "proofHeading": "Please provide proof that you are the artist in question. These are a couple acceptable forms of proof:",
-            "emailProof": "⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed.",
-            "postProof": "⇾ Post somewhere on your profile or in one of your posts \"Remove me from Moepictures\" and post the link to it.",
-            "sourceProof": "⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly.",
             "proof": "Links to Proof",
             "verifyCopyright": "I am the copyright owner of the content linked above or am authorized to act on the behalf of the copyright owner. I verify that all of provided information is accurate.",
             "submit": "Submit Removal Request",
@@ -642,7 +643,6 @@
             "sizeLimit": "Combined file size shouldn't exceed 300MB.",
             "error": "Failed to submit. You might be missing required fields.",
             "errorOriginal": "Original image is required.",
-            "fetching": "Fetching...",
             "wait": "Wait a few seconds.",
             "noResults": "No results found.",
             "nothingFound": "Nothing found.",
@@ -938,7 +938,7 @@
             "header": "Do you want to save the translation changes made to this post?",
             "submitText": "Your translation request was submitted.",
             "banText": "You are banned. Cannot save translations.",
-            "locked": "This post is locked. Cannot save translations"
+            "locked": "This post is locked. Cannot save translations."
         },
         "sendMessage": {
             "error": "Bad title or content.",
@@ -969,6 +969,539 @@
         },
         "tagEdit": {
             "request": "Tag Edit Request"
+        }
+    },
+    "help": {
+        "help": {
+            "welcome": "Welcome to Moepictures!",
+            "line1": "Moepictures is an image board organized by tags, dedicated exclusively to showcasing the most cute and moe artworks. While the majority of content is (and will likely be) 2d art, we also accept many other artforms including animations, music, and 3d models.",
+            "line2": "Click on a category on the left to view the help for that specific topic."
+        },
+        "searching": {
+            "title": "Searching",
+            "header": "The tags on Moepictures use a dash (\"-\") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for. If you encounter a problem with this, use dashed versions of the tags. These are examples of valid searches:",
+            "example1": "Tag 1 Tag 2 Tag 3",
+            "example2": "Tag-1 Tag-2 Tag-3",
+            "specialModifiers": {
+                "header": "Special tag modifiers:",
+                "items": {
+                    "-Tag 1 -Tag 2": " - Exclude posts containing Tag 1 and Tag 2.",
+                    "+Tag 1 +Tag 2": " - Include posts containing either Tag 1 or Tag 2.",
+                    "+-Tag 1 +-Tag 2": " - Exclude posts containing either Tag 1 or Tag 2.",
+                    "*Tag 1": " - Match all tags containing Tag 1."
+                }
+            },
+            "specialSearches": {
+                "header": "Special searches:",
+                "items": {
+                    "pixiv:id": " - Search for post matching the pixiv id (if it exists).",
+                    "twitter:id": " - Search for post matching the twitter id (if it exists).",
+                    "source:link": " - Search all post links and mirrors for the specified link.",
+                    "hash:hash": " - Search for post matching the perceptual hash.",
+                    "favorites:user": " - Search for favorites of the user (if public).",
+                    "favgroup:user:name": " - Search for favgroup of a user (if public).",
+                    "group:name": " - Search for a group by its name.",
+                    "uploads:user": " - Search for uploads of a user.",
+                    "history:user": "- Get your search history (only works on yourself!)",
+                    "comments:user": " - (Comments page) get all comments by the user.",
+                    "posts:user": " - (Forum page) get all threads the user posted in.",
+                    "social:link": " - (Tags page) find an artist by their social link."
+                }
+            },
+            "specialUses": {
+                "header": "These are some tags with special uses:",
+                "items": {
+                    "original": " - the drawing is original, ie. not fanart.",
+                    "self upload": " - the post was uploaded by its original creator.",
+                    "official art": " - this is official art without a publicized artist.",
+                    "unknown artist": " - the artist is not known.",
+                    "unknown character": " - the character is unknown and might not be original.",
+                    "unknown series": " - the series is unknown.",
+                    "no character": " - no character or not applicable.",
+                    "no series": " - not part of any series or not applicable.",
+                    "needs tags": " - current post tags are insufficient.",
+                    "text": " - the post contains text.",
+                    "transparent": " - the post has transparency.",
+                    "translated": " - the post has complete translations.",
+                    "untranslated": " - the post is untranslated.",
+                    "partially translated": " - the post is only partially translated.",
+                    "check translation": " - needs re-checking of the translations.",
+                    "no audio": " - the post is a video with no audio.",
+                    "with audio": " - the post is a video that has audio.",
+                    "multiple artists": " - the post has multiple artists.",
+                    "bad pixiv id": " - the pixiv post was deleted.",
+                    "paid reward available": " - the post has a paid reward available.",
+                    "third party edit": " - the post is a third party edit.",
+                    "third party source": " - the source of the post was not posted by the original artist."
+                }
+            },
+            "borderColors": {
+                "header": "In results, posts may have different border colors which mean the following:",
+                "items": {
+                    "pink": " - the post is favorited.",
+                    "purple": " - the post is favgrouped.",
+                    "red": " - the post is edit locked.",
+                    "green": " - the post is a parent post.",
+                    "yellow": " - the post is a child post.",
+                    "orange": " - the post is in a group.",
+                    "blue": " - the post has multiple variations."
+                }
+            }
+        },
+        "imageSearching": {
+            "title": "Image Searching",
+            "line1": "Every image uploaded to Moepictures is hashed with a perceptual hash algorithm, and images that look the same should yield similar hashes irrespective of their resolution.",
+            "line2": "When you do an image search your upload is perceptually hashed and we try to find a close match. Usually this is pretty accurate at finding matching images. If you upload a video, song, or 3d model, the hash is only computed on the first frame, song cover, or model screenshot.",
+            "line3": "You can also search for images by dragging and dropping an image into the left portion of the webpage or by pasting an image from your clipboard. Dropping  an image into the right portion of the webpage or pasting in the upload page will upload the image instead."
+        },
+        "filters": {
+            "line1": "You can apply custom filters such as brightness, contrast, hue, and sharpen. Some filters like pixelate and blur will ruin most images, and are purely for fun.",
+            "line2": "For audio, the pixelate filter will behave as a bitcrusher and will reduce the sample rate of the audio."
+        },
+        "customPlayers": {
+            "title": "Custom Players",
+            "line1": "Moepictures has custom players for animations, videos, music, and 3d models, which allows additionally functionality not available natively such as reverse playback and modification of the playback speed.",
+            "line2": "The music player also has controls for changing the pitch of the audio. The 3d model player has options to enable wireframe, matcap, and edit shapekeys and lighting."
+        },
+        "music": {
+            "title": "Music",
+            "line1": "The music player is available globally (apart from having the per-post player which is also synced). This means that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback, click the stop button on the left of the player or reload the page on a non-music post."
+        },
+        "translations": {
+            "line1": "Translations can be added to any post containing non-english text. This is useful so that non-speakers can understand the post's context and any jokes.",
+            "line2": "If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese text, you can use ",
+            "line3": "We have an automatic translation generator for japanese text that uses ",
+            "line4": "to detect the text bubbles, ",
+            "line5": "to apply OCR, and ",
+            "line6": "for machine translation. This is not meant to be used as is, and you should always clean up the output by fixing text bubble positions and verifying the accuracy of the transcripted and translated texts."
+        },
+        "favorites": {
+            "line1": "If you like an image, you can add it to your favorites for easier access later on. By default, your favorites are public but they can be made private in your account settings.",
+            "line2": "By setting the post sort to \"favorites\" or \"reverse favorites\", you can quickly view all the posts that you have favorited."
+        },
+        "favoriteGroups": {
+            "title": "Favorite Groups",
+            "line1": "Favorite groups are like your own custom category of \"favorites\" - you can specify a name and a privacy for each favorite group. And like groups, these also store the ordering of the posts and may be reordered on their page. There isn't a sorting for favorite groups, but you may search them with ",
+            "search1": "favgroup:user:name"
+        },
+        "cuteness": {
+            "line1": "The rating system on Moepictures is called cuteness. When you rate an image you should rate the amount of cuteness the image evokes. The scale is from 0 (Not cute) to 500 (Pretty cute) to 1000 (Insanely cute)."
+        },
+        "uploading": {
+            "title": "Uploading",
+            "line1": "Moepictures allows uploading images, comics, animations, videos, music, and 3d models.",
+            "uploadGuidelines": {
+                "header": "Please read carefully through all of the uploading guidelines.",
+                "guide1": "⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles.",
+                "guide2": "⇾ The main subject should be a girl. Boys are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
+                "guide3": "⇾ It should be moe/cute! This is the primary focus of the site.",
+                "guide4": "⇾ No duplicates are allowed. Variations of the same image should be added to the original post.",
+                "guide5": "⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much.",
+                "guide6": "⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes.",
+                "guide7": "⇾ The perspective, proportions, and anatomy shouldn't look weird.",
+                "guide8": "⇾ Animations shouldn't look too stuttery.",
+                "guide9": "⇾ All posts require the source link from where it was obtained from.",
+                "guide10": "⇾ All tags should be romanized. Titles and commentary don't have to be romanized but may be translated.",
+                "guide11": "⇾ For images, adding an upscaled version is required.",
+                "guide12": "⇾ Resolution: Keep original images under 2000x2000px and upscaled images under 8000x8000px.",
+                "guide13": "⇾ (Music only) The audio file must have a song cover in its metadata.",
+                "guide14": "⇾ Compress / re-encode files (maintaining high quality) to be storage efficient.",
+                "guide15": "⇾ No hentai. We only allow light nudity and suggestiveness.",
+                "guide16": "⇾ No AI-generated works. We only want art created by passionate humans.",
+                "guide17": "⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!"
+            },
+            "categorization": {
+                "header": "Please classify uploads into the appropriate category. We have three levels of categorization:",
+                "type": {
+                    "line1": " - The type of post. This can be ",
+                    "line2": "image, animation, comic, video, audio, live2d, or 3d model.",
+                    "line3": "Most of these are self-explanatory, but the distinction between an image and a comic is that comics contain various panels, text, and speech balloons."
+                },
+                "restrict": {
+                    "line1": " - An image content rating that may be used to broadly restrict content you don't want to see.",
+                    "items": {
+                        "safe": " - Pretty safe with no content that is too suggestive.",
+                        "questionable": " - Revealing or tight clothing (eg. swimsuits, tights), suggestive poses and ecchi."
+                    }
+                },
+                "style": {
+                    "line1": " - These are some very common art styles.",
+                    "items": {
+                        "2d": " - The vast majority of 2d art, or music that doesn't fit into any other categories.",
+                        "3d": " - 3d models or incorporates 3d models in some way.",
+                        "chibi": " - Art made in chibi or super deformed style.",
+                        "pixel": " - Art made in pixel art style or chiptune music.",
+                        "daki": " - Art made to be printed on a dakimakura pillow."
+                    }
+                },
+                "parentID": "Parent ID - Specify a post ID and this post will be added as a child to that post. For post variations, simply add multiple images to the post."
+            },
+            "sourceInformation": {
+                "header": "Please provide source information for all posts. You can fill in these fields:",
+                "items": {
+                    "title": " - The original title of the work as posted on social media.",
+                    "translated title": " - A title english translation, as titles are very commonly in japanese.",
+                    "artist": " - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.",
+                    "posted": " - The original date the work was posted.",
+                    "link": " - The primary link to the work, preferably where the artist posted it themselves.",
+                    "bookmarks": " - The amount of pixiv bookmarks or \"likes\" if it's a different site.",
+                    "commentary": " - The original description of the work as posted on social media.",
+                    "translated commentary": " - A commentary english translation, as they are very commonly written in japanese.",
+                    "mirrors": " - Reposts of the work posted on different sites. Include the artists own reposts.",
+                    "buy link": " - If a paid reward is available, you may post the link to buy here."
+                }
+            }
+        },
+        "tagging": {
+            "title": "Tagging",
+            "line1": "Every post should be tagged with the features it contains, and although you don’t have to be exceedingly thorough some level of effort placed on tags is required. Aim for at least 10-20 tags. Anything below that is insufficient, and above that starts getting into excessive territory.",
+            "tagGuidelines": {
+                "header": "These are some guidelines on what features to tag:",
+                "guide1": "⇾ Clothing (school-uniform, sailor-uniform, coat, skirt, leggings, etc).",
+                "guide2": "⇾ Hair Color (blonde-hair, red-hair, blue-hair, etc).",
+                "guide3": "⇾ Hair Length (short-hair, medium-hair, long-hair, etc).",
+                "guide4": "⇾ Hair Styles (twintails, ponytail, braid, etc).",
+                "guide5": "⇾ Special Accessories (hat, ribbon, bracelet, etc).",
+                "guide6": "⇾ Expressions (smiling, crying, surprised, etc).",
+                "guide7": "⇾ Actions (sleeping, running, eating, etc).",
+                "guide8": "⇾ Body Parts (small-breasts, long-legs, etc).",
+                "guide9": "⇾ Objects (coffee, umbrella, flower, etc).",
+                "guide10": "⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc).",
+                "guide11": "⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc)."
+            },
+            "line2": "If the post was already tagged on a different site you may copy over the tags and fix them up. There's no need to fully re-invent the wheel.",
+            "categories": {
+                "header": "We organize tags into several categories, which also determine their color.",
+                "items": {
+                    "artist": " - Preferably the twitter username of the artist, otherwise their romanized name.",
+                    "character": " - The character name with their series in parentheses: character-(series-name). Use \"no-character\" if not applicable.",
+                    "series": " - The series (anime, manga, video game, etc.) the character belongs to. Use \"no-series\" if not applicable.",
+                    "meta": " - Tags with special uses like unknown-artist and transparent.",
+                    "appearance": " - Tags related to the appearance of the character, like their hair and eyes.",
+                    "outfit": " - Tags related to the outfit of the character, like skirts and shoes.",
+                    "accessory": " - Tags related to accessories and objects, like bracelets and books.",
+                    "action": " - Tags related to actions like sitting and running.",
+                    "scenery": " - Tags related to the background scenery such as the sky and trees.",
+                    "tag": " - Every other tag that doesn't fit in another category."
+                }
+            },
+            "fields": {
+                "header": "New tags that don't exist yet are created on post upload, and actually added once the post is approved. Once the tag is up, you may edit its more detailed image/description/links in the tags page. Not all of these fields will be available to edit, and will depend on the type of tag.",
+                "items": {
+                    "Tag": " - The name of the tag. Artist tags may be changed whenever they update their twitter name, but modify other tags only if necessary.",
+                    "Website": " - A website link, usually of the anime/video game or personal website of an artist.",
+                    "Social": " - The primary social media account of the artist where they upload their works, depending on the type of artist this is usually pixiv/soundcloud/sketchfab.",
+                    "Twitter": " - Their twitter/x account, as the majority of people also have one. We also prefer to use their twitter username as their tag name.",
+                    "Fandom": " - For character tags, this can be a link to the fandom wiki of the character (or any other wiki).",
+                    "Image": " - A tag image, usually profile picture of the artist or logo of the series. Please provide one for artist, characters, and series.",
+                    "Description": " - A longer description of the tag, going into more detail about what its about. Very useful for tags that are not very self-explanatory.",
+                    "Aliases": " - Aliases are alternate names that will resolve to this tag. They do not have to be romanized, unlike tags.",
+                    "Implications": " - Implications are \"parent\" tags automatically added when this tag is added to a post.",
+                    "Pixiv Tags": " - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in japanese."
+                }
+            }
+            
+        },
+        "selfUploads": {
+            "title": "Self Uploads",
+            "line1": "Although the vast majority of posts are reposts, you are also welcomed to post your own art.",
+            "shouldTag": "You should tag uploads of your own artwork with ",
+            "line2": "We also require that your artist tag is the same as your username on moepictures. This will let you have access to the additional option to private a post.",
+            "line3": "You may make your own posts private at any time so that they are only visible to yourself and moderators. However do note that we don't allow post deletions even if you uploaded your own post without approval.",
+            "contactUs": "If another user has already taken your artist name please contact us at ",
+            "changeName": "so that we can attempt to change their name."
+        },
+        "upscaling": {
+            "title": "Upscaling",
+            "line1": "Images, animations, and videos may have an upscaled version. For images, providing one is required.",
+            "line2": "You can download the app that we use for upscaling here:",
+            "line3": "Although the original upscaler is Waifu2x, better upscalers have come out since. Currently the best upscaler and the one that we use is REAL-CUGAN with a scale factor of 4x. If the image doesn't have transparency, also turn on \"compress to jpg\" in settings and set the JPG quality to at least 95."
+        },
+        "compressing": {
+            "title": "Compressing",
+            "line1": "Compressing/re-encoding posts is advised for faster loading and better space efficiency. All compressions should be high quality and should not leave behind any artifacts.",
+            "line2": "You can download the app that we use for compressing here:",
+            "recommendedFormats": {
+                "header": "These are the recommended formats for each type of post:",
+                "format1": "Images ⇾ Progressive JPG or WEBP for transparent images. Avoid AVIF for high decoding time and PNG for massive filesizes.",
+                "format2": "Animations ⇾ Animated WEBP is preferred over GIF.",
+                "format3": "Videos ⇾ MP4 with H.264 codec, WEBM with VP9 codec, or MP4 with AV1 codec. Avoid H.265 codec for poor browser support.",
+                "format4": "Music ⇾ MP3 with cover art. Avoid WAV as it doesn't support cover art.",
+                "format5": "3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support.",
+                "format6": "Live2D ⇾ ZIP containing MOC3, JSON files, and textures."
+            },
+            "line3": "The compressing settings that we commonly use are quality at 95% with progressive turned on. Please downscale original posts to be under 2000x2000px, as anything bigger will result in an upscaled post that is way too large."
+        },
+        "pixivDownloads": {
+            "title": "Pixiv Downloads",
+            "line1": "The vast majority of posts come from the Japanese art website ",
+            "line2": "However, it can take awhile to manually the download the art that you like, so we also have an app that makes it easy to download lots of posts at once. It can download illustrations, manga, ugoira (animations), and novels. (However at this time, we don't support uploading textual content like novels)."
+        },
+        "bookmarklet": {
+            "title": "Bookmarklet",
+            "line1": "Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from another site.",
+            "line2": "It supports the same sites as using \"Enter Links\" does, which are the following:"
+        },
+        "variations": {
+            "line1": "Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit and should be added as a child post instead.",
+            "line2": "Variations all share the same tags as the main post, and only the main post will appear directly in search.",
+            "line3": "If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these for a better reading experience."
+        },
+        "childPosts": {
+            "line1": "Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent background. Child posts are also used for all third party edits (modifications to a work not done by the original artist).",
+            "line2": "Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to the parent post in a separate section.",
+            "line3": "Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be related with child posts and not variations. If a parent image containing all the characters doesn't exist, then they should be related using groups instead."
+        },
+        "groups": {
+            "line1": "Groups are a way to associate several loosely related posts with very different tags, so variations and child posts are not a great way to relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to use variations.",
+            "line2": "All grouped posts otherwise act like their own posts and always appear directly in search.",
+            "sameSource": "If all the posts in the group have the same source then name the group like ",
+            "sitename": "Sitename PostID",
+            "line3": ", eg. Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original untranslated name in the group description."
+        },
+        "aliases": {
+            "line1": "A tag can have multiple aliases that point to the same result. This is to facilitate better searching for synonyms like \"with audio\" and \"has audio\". Unlike tags, aliases can include non-ASCII characters so it's possible to add an alias in Japanese in order to enable Japanese searching. But on that note, you can also search for tags with their japanese pixiv tags if they were filled in.",
+            "aliasingTo": {
+                "title": "Aliasing To",
+                "line1": "Aliases do not have to be an existing tag, but if you want to alias an already existing tag to another tag we call this \"aliasing to\". Since aliasing to is a more powerful action, they will have to get reviewed and approved by mods.",
+                "line2": "To make this clear, the tag that you start the \"alias to\" on will be the one added as an alias to the other tag. The tag that you type in the box is the tag that will receive this new alias. Every post that was under the old tag will be moved to the new tag."
+            }
+            
+        },
+        "implications": {
+            "line1": "A tag can have implications which are tags that are automatically added to posts if they don't already exist. For instance, you can add an implication that the tag \"red hat\" implies \"hat\" and any post uploaded containing the \"red hat\" tag will also be given the \"hat\" tag. These are mainly useful to aid in tagging so you don't have to type out all the broader tags.",
+            "line2": "Only mods can add implications to tags with over 1000 posts as this will start a lot of post updates. Implications are mainly meant to be used for more specific tags that naturally contain a smaller number of posts."
+        },
+        "users": {
+            "title": "Users",
+            "userLevels": {
+                "header": "Moepictures has various user account levels that progressively give you more permissions and removes restrictions.",
+                "items": {
+                    "No account": " - Can only view the site and the posts rated \"safe\".",
+                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/translations for approval. Can also view the \"questionable\" posts.",
+                    "Premium": " - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.",
+                    "Contributor": " - Can edit posts and tags without passing through the mod queue. Given to members with a great track record of contributions that we don't want to inhibit with the queue.",
+                    "Curator": " - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts that we don't want to inhibit with the queue.",
+                    "Mod": " - Access to the mod queue and can approve uploads/edits/aliasing, can replace images on posts, can change the category of tags, and can ban users.",
+                    "Admin": " - Access to our most powerful tools such as bulk uploading and bulk tagging. Can permanently delete posts and promote users to a higher level.",
+                    "System": " - This is only for our bot account that sends out message notifications."
+                }
+            },
+            "line1": "Since mods and admins can potentially make very destructive changes to the site, we require them to enable 2FA on their accounts.",
+            "avatars": {
+                "title": "Avatars",
+                "line1": "You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an \"anime avatars only\" policy! If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it.",
+                "line2": "You can change your avatar by clicking on \"set avatar\" on the sidebar of any post, and you can remove it in your account settings. Please do this on PC, as the mobile touch controls are known to be a bit finicky."
+            }
+        },
+        "commenting": {
+            "title": "Commenting",
+            "rules": {
+                "header": "Do not behave badly participating in comments, forum threads, or sending messages. These are some general guidelines for all the comment sections:",
+                "rule1": "⇾ Please communicate in English (you may use a machine translator).",
+                "rule2": "⇾ No spam, gibberish, or extremely off-topic comments.",
+                "rule3": "⇾ No foul language (if you somehow bypassed the filter).",
+                "rule4": "⇾ No unnecessary rudeness or impoliteness, please be kind.",
+                "rule5": "⇾ No otherwise distasteful/inappropriate comments."
+            },
+            "quotes": {
+                "header": "Quotes are supported and we have a syntax that makes it easy to do quotes. Nested quotes are not supported.",
+                "line1": ">>>[id] User said:",
+                "line2": "> Comment"
+            },
+            "emojis": {
+                "header": "Emojis can also be added to messages using their special identifier.",
+                "line1": "emoji:emojiName"
+            },
+            "highlight": {
+                "header": "To highlight text wrap it in double asterisks.",
+                "line1": "**Highlighted text**"
+            },
+            "mention": {
+                "header": "You can mention users and they will receive a notification.",
+                "line1": "@username"
+            },
+            "images": "Any image or video links posted in the comment are automatically displayed."
+        },
+        "bans": {
+            "title": "Bans",
+            "line1": "If you break the rules severely or consistently, you might get banned. If you get banned, you will still be able to browse the site but most interactions will get disabled.",
+            "banActions": {
+                "header": "These are some actions that may get you banned:",
+                "action1": "⇾ Misconduct in the comments, forum threads, or private messages.",
+                "action2": "⇾ Spam uploading meme or very low quality posts.",
+                "action3": "⇾ Vandalizing posts, tags, or translations."
+            },
+            "line2": "We also don't allow profane or inappropriate usernames. We will inquire you to change your username to something more appropriate, otherwise you might also get banned if there is no response."
+        },
+        "captcha": {
+            "title": "Captcha",
+            "line1": "We don't condone the scraping of our website, and we have various measures in place like captchas and end-to-end encryption. Hopefully this shouldn't be triggered by regular browsing.",
+            "line2": "If you happen to trigger this, simply solve the captcha to unlock the posts again. And if you are getting this frequently (as a human visitor), you may let us know since that's obviously not intended."
+        },
+        "language": {
+            "title": "Language",
+            "line1": "You can change the site language in the footer. Currently we support translations for English and Japanese. We still ask that you post all communications (comments, threads, etc.) in English and all the tags must be in English as well."
+        },
+        "accountDeletion": {
+            "title": "Account Deletion",
+            "line1": "Since Moepictures is heavily focused on user contributions, when you delete your account we won't remove your public contributions like submitted posts and edits. The account that uploaded them will be anonymized and show up as \"deleted\". The rest of your account data will be deleted."
+        },
+        "copyrightRemoval": {
+            "line1": "If your work is up on Moepictures then it means that we love your work and we always make sure to source posts back to you.",
+            "submitForm": "With that said, we respect your rights and if you don't want your work to be here anymore, you may submit a copyright removal form at ",
+            "copyrightForm": "Copyright Form",
+            "emailUs": " or email us at moepictures.moe@gmail.com.",
+            "line2": "After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded."
+        }
+    },
+    "premium": {
+        "premium": {
+            "title": "Premium Upgrade",
+            "line1": "You can purchase an account upgrade to unlock more features. Thank you for supporting us!",
+            "line2": "Your contribution allows us to keep the site ad-free for the foreseeable future. We will use it to pay our hosting and storage costs.",
+            "line3": "All of the premium features are listed on the left."
+        },
+        "upscaledImages": {
+            "header": "View images upscaled to a much higher resolution. Upscaled images have much sharper details and often fixes any blurriness. We currently use the Real-CUGAN 4x upscaler."
+        },
+        "autoSearch": {
+            "title": "Autosearch",
+            "header": "Use the autosearch, which automatically searches your current tags in a loop. You can configure the time interval between searches."
+        },
+        "searchHistory": {
+            "header": "View the history of all posts you have viewed in the past. This is great if you saw a post you really liked but forgot to favorite it."
+        },
+        "unlimitedTages": {
+            "title": "Unlimited Tags",
+            "header": "Regular accounts can only search for 3 tags. Premium accounts have this restriction removed and you may search an unlimited number of tags."
+        },
+        "bookmarkSort": {
+            "title": "Bookmark Sort",
+            "header": "Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find the posts that attracted the most popularity."
+        },
+        "animatedAvatar": {
+            "title": "Animated Avatar",
+            "header": "Premium users can render animated avatars out of animation posts. Regular users are only able to use a static frame."
+        },
+        "changeUsername": {
+            "header": "Premium users unlock the ability to change their username. You may change your name as many times as you wish."
+        },
+        "noAds": {
+            "title": "No Ads",
+            "header": "Allow us to continue running the website without intrusive advertisements. They're annoying and not aesthetically pleasing. Thank you!"
+        },
+        "purchase": {
+            "title": "Purchase",
+            "line1": "If you would like to purchase a premium upgrade you can do so here via Coinbase.",
+            "line2": "Currently the price is $15 USD/yr. Your upgrade will last for one year from the date of purchase. To extend your term, you may purchase it multiple times. ",
+            "createA": "Create a ",
+            "line3": " account if you don't already have one. You can buy crypto (eg. bitcoin) with paypal or card through them and then use it to purchase.",
+            "payWithCrypto": "Pay with Crypto"
+        },
+        "refundPolicy": {
+            "title": "Refund Policy",
+            "header": "You can contact us within 48 hours of making your purchase if you weren’t satisfied. You will receive a refund minus any processing fees. Contact us at moepictures.moe@gmail.com."
+        }
+    },
+    "terms": {
+        "tos": {
+            "title": "Terms of Service",
+            "lastUpdated": "Last Updated: October 25, 2024",
+            "header": "This terms of service applies to the website (\"site\") provided by Moepictures (\"we\", \"us\", \"our\"). By using our site, you attest that you agree to all of these terms. If you don't agree to these terms, you should not use our site.",
+            "accessToSite": {
+                "title": "Access to the site",
+                "line1": "⇾ You must be 18 years or older (or otherwise above the age of majority in your country of residence) to make an account on our site.",
+                "line2": "⇾ We reserve the right to terminate accounts at any time for any or no reason, but most commonly for a violation of our terms of service."
+            },
+            "prohibitedActions": {
+                "title": "Prohibited actions",
+                "header": "When you are using our site, you are prohibited from doing the following:",
+                "line1": "⇾ Vandalize posts, tags, translations, or other content on the site.",
+                "line2": "⇾ Send spam in comments or through unsolicited private messages.",
+                "line3": "⇾ Harass or discriminate against other users.",
+                "line4": "⇾ Robotically scrape artworks, tags, or other site content.",
+                "line5": "⇾ Attempt to gain unauthorized access to another user’s account.",
+                "line6": "⇾ Sell access to your account to someone else.",
+                "line7": "⇾ Create multiple accounts to circumvent bans.",
+                "line8": "⇾ Attempt to upload viruses, malware or other malicious content.",
+                "line9": "⇾ Attempt to DDoS and disrupt the operation of our servers."
+            },
+            "userContent": {
+                "title": "User generated content",
+                "line1": "⇾ The content on our site is user-generated and we take no responsibility for content submitted by users, whether it be images, animations, videos, or text. That responsibility falls on the user who submitted the content.",
+                "line2": "⇾ We reserve the right to remove any content at any time for any or no reason."
+            },
+            "copyrightTakedown": {
+                "title": "Copyright and DMCA takedowns",
+                "header": "We respect the intellectual property of others. If you are an artist and want your work removed from the site, you can contact us through the copyright removal form and provide the following pieces of information:",
+                "line1": "⇾ Your name, artist tag, and links to specific works or your artist tag page.",
+                "line2": "⇾ A way to prove that you are the artist in question.",
+                "proofHeader": "These are some acceptable forms of proof:",
+                "proof1": "⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed.",
+                "proof2": "⇾ Post somewhere on your profile or in one of your posts \"Remove me from Moepictures\" and post the link to it.",
+                "proof3": "⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly.",
+                "goText": "We are sad to see you go."
+            },
+            "aiPolicy": {
+                "title": "AI policy",
+                "line1": "⇾ Scraping our website for purposes of training AI or machine learning models is prohibited.",
+                "line2": "⇾ We reserve the right to fully ban IP addresses and IP ranges caught doing this (preventing them from accessing the site at all).",
+                "line3": "⇾ We also take measures such as rate limits, captchas, and encryption to make this difficult."
+            },
+            "accountUpgrades": {
+                "title": "Account Upgrades",
+                "line1": "⇾ You may submit payment information to purchase an account upgrade on our site. All of your payment information is handled solely by the third-party payment processor. We do not and will not handle your payment information.",
+                "line2": "⇾ We reserve the right to change the price or benefits of the upgrade at any point, with an advanced notice."
+            },
+            "liability": {
+                "title": "Liability",
+                "header": "The site is provided \"as is\", without warranty of any kind, express or implied. In no event shall we be liable for any claim, damages or other liability, arising from or in connection with usage of our site."
+            },
+            "changesToTerms": {
+                "title": "Changes to these terms",
+                "header": "We can make changes to these terms at any time, indicated by the \"last updated\" date. Changes to the terms are effective immediately and by using our site after the terms are revised you agree to the newly revised terms."
+            }
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "header": "This Privacy Policy outlines the information that Moepictures (\"we\", \"us\", \"our\") collects when you use our website (\"site\"). It also describes how we use your information and how your information is shared.",
+            "collectedInformation": {
+                "title": "Collected information",
+                "header": "We collect information provided directly to us, which includes:",
+                "accountInfo": "Account information",
+                "accountInfoLine": " - We need to store your username, email, password, bio, ip address, and any account preferences you set.",
+                "contentSubmitted": "Content you submit",
+                "contentSubmittedLine": " - We need to store any content that you submit which may include submitted text, images, gifs, videos, posts and comments. ",
+                "actionsTaken": "Actions you take",
+                "actionsTakenLine": " - We collect information on the interactions that you make with content, such as favoriting posts, rating them, and adding them to groups.",
+                "cookies": "Cookies",
+                "cookiesLine": " - We use cookies to maintain your login session, so that you are not logged out whenever you close your browser."
+            },
+            "howInfoIsUsed": {
+                "title": "How we use your information",
+                "header": "We use your information in order to:",
+                "line1": "⇾ Provide our site's functionality.",
+                "line2": "⇾ Protect our site from abuse and spam.",
+                "line3": "⇾ Collect anonymized analytics related to the usage of our site."
+            },
+            "doNotShare": {
+                "title": "We do not share personal information with third parties unless one of the following is true:",
+                "line1": "⇾ We have your consent.",
+                "line2": "⇾ It is aggregated and anomalyzed in a way that can’t be traced back to you.",
+                "line3": "⇾ It is required to comply with the law."
+            },
+            "controllingInformation": {
+                "title": "Controlling your information",
+                "changingInfo": "Changing your information",
+                "changingInfoLine": " - You can update your information such as your email and password anytime in your account settings. You can choose to make your favorites and favorite groups private in order to control access to them.",
+                "deletingAccount": "Deleting your account",
+                "deletingAccountLine": " - You can delete your account in your account settings. When you delete your account all of your personal information is deleted. Your public contributions, such as posts, will not be deleted. Your contributions will however get disconnected from your username and be anomalyzed as being from the account \"deleted\"."
+            },
+            "changesToPolicy": {
+                "title": "Changes to this policy",
+                "header": "We can make changes to this policy at any time, indicated by its \"last updated\" date. Changes to this policy are effective immediately and by continuing to use our site after the policy is revised, you are agreeing to the revised policy."
+            }
         }
     }
 }

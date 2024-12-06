@@ -110,7 +110,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => submit()}>{i18n.pages.forgotPassword.sendLink}</button>
+                        <button className="sitepage-button" onClick={() => submit()}>{i18n.buttons.sendLink}</button>
                     </div>
                     </>
                     }

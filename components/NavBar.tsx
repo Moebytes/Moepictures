@@ -346,10 +346,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getFontSize = () => {
         if (tablet) {
-            if (language === "ja") return "14px"
+            //if (language === "ja") return "14px"
             return "18px"
         } else {
-            if (language === "ja") return "16px"
+            //if (language === "ja") return "16px"
             return "20px"
         }
     }
