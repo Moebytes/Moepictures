@@ -11,7 +11,7 @@ interface Props {
 }
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, language, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -24,8 +24,12 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        setText(props.text)
-    }, [props.text])
+        if (language === "ja") {
+            setShowTranslated(false)
+        } else {
+            setShowTranslated(true)
+        }
+    }, [language])
 
     useEffect(() => {
         if (showTranslated) {
