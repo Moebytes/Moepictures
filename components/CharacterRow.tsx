@@ -15,7 +15,7 @@ interface Props {
 const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
     const history = useHistory()
 
@@ -30,7 +30,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
 
     const set = (image: string, index: number, newTab: boolean) => {
         if (!session.username) {
-            let filtered = props.character.posts.filter((p: any) => p.restrict === "safe")
+            let filtered = props.character.posts.filter((p: any) => p.rating === functions.r13())
             const post = filtered[index] 
             if (newTab) {
                 return window.open(`/post/${post.postID}/${post.slug}`, "_blank")
@@ -38,7 +38,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}/${post.slug}`)
             }
         }
-        let filtered = props.character.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.character.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
@@ -51,10 +51,10 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
 
     const getImages = () => {
         if (!session.username) {
-            let filtered = props.character.posts.filter((p: any) => p.restrict === "safe")
+            let filtered = props.character.posts.filter((p: any) => p.rating === "safe")
             return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
-        let filtered = props.character.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.character.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
     }
 

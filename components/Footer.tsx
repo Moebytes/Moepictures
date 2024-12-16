@@ -13,7 +13,7 @@ const Footer: React.FunctionComponent<Props> = (props) => {
     const {language, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setLanguage} = useThemeActions()
     const {mobile} = useLayoutSelector()
-    const {setSearch, setSearchFlag, setImageType, setRestrictType, setStyleType, setSortType} = useSearchActions()
+    const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
 
     useEffect(() => {
         const savedLanguage = localStorage.getItem("language")
@@ -41,7 +41,7 @@ const Footer: React.FunctionComponent<Props> = (props) => {
     const logoClick = () => {
         setSearch("")
         setImageType("all")
-        setRestrictType("all")
+        setRatingType("all")
         setStyleType("all")
         setSortType("date")
         setSearchFlag(true)

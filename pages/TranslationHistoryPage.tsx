@@ -27,7 +27,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any

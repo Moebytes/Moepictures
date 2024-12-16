@@ -819,23 +819,23 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
-            const restrict = req.query.restrict as string
+            const rating = req.query.rating as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
             let favorites = [] as any
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                favorites = await sql.favorite.favorites(username, limit, offset, "all", restrict)
+                favorites = await sql.favorite.favorites(username, limit, offset, "all", rating)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                favorites = await sql.favorite.favorites(req.session.username, limit, offset, "all", restrict)
+                favorites = await sql.favorite.favorites(req.session.username, limit, offset, "all", rating)
             }
             if (!permissions.isMod(req.session)) {
                 favorites = favorites.filter((p: any) => !p.hidden)
             }
             if (!req.session.showR18) {
-                favorites = favorites.filter((p: any) => p.restrict !== "explicit")
+                favorites = favorites.filter((p: any) => !functions.isR18(p.rating))
             }
             for (let i = favorites.length - 1; i >= 0; i--) {
                 const post = favorites[i]
@@ -855,21 +855,21 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
-            const restrict = req.query.restrict as string
+            const rating = req.query.rating as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
             let uploads = [] as any
             if (username) {
-                uploads = await sql.user.uploads(username, limit, offset, "all", restrict)
+                uploads = await sql.user.uploads(username, limit, offset, "all", rating)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                uploads = await sql.user.uploads(req.session.username, limit, offset, "all", restrict)
+                uploads = await sql.user.uploads(req.session.username, limit, offset, "all", rating)
             }
             if (!permissions.isMod(req.session)) {
                 uploads = uploads.filter((p: any) => !p.hidden)
             }
             if (!req.session.showR18) {
-                uploads = uploads.filter((p: any) => p.restrict !== "explicit")
+                uploads = uploads.filter((p: any) => !functions.isR18(p.rating))
             }
             for (let i = uploads.length - 1; i >= 0; i--) {
                 const post = uploads[i]
@@ -925,7 +925,7 @@ const UserRoutes = (app: Express) => {
                     if (comment.post.hidden) comments.splice(i, 1)
                 }
                 if (!req.session.showR18) {
-                    if (comment.post.restrict === "explicit") comments.splice(i, 1)
+                    if (functions.isR18(comment.post.rating)) comments.splice(i, 1)
                 }
                 if (comment.post.private) {
                     const categories = await serverFunctions.tagCategories(comment.post.tags)
@@ -1059,7 +1059,7 @@ const UserRoutes = (app: Express) => {
                 const postHistory = await sql.history.userPostHistory(username)
                 for (const history of postHistory) {
                     if (history.image?.startsWith("history/")) {
-                        let r18 = history.restrict === "explicit"
+                        let r18 = functions.isR18(history.rating)
                         await serverFunctions.deleteFile(history.image, r18)
                     }
                     await sql.history.deletePostHistory(history.historyID)

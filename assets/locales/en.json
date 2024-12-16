@@ -30,7 +30,7 @@
         "approver": "Approver",
         "approved": "Approved",
         "type": "Type",
-        "restrict": "Restrict",
+        "rating": "Rating",
         "style": "Style",
         "tagEdit": "Tag Edit",
         "sourceEdit": "Source Edit",
@@ -63,17 +63,20 @@
             "live2d": "Live2D",
             "model": "Model"
         },
-        "restrict": {
-            "safe": "Safe",
-            "questionable": "Questionable",
-            "explicit": "Explicit"
+        "rating": {
+            "cute": "Cute",
+            "sexy": "Sexy",
+            "ecchi": "Ecchi",
+            "hentai": "Hentai"
         },
         "style": {
             "2d": "2D",
             "3d": "3D",
             "chibi": "Chibi",
             "pixel": "Pixel",
-            "daki": "Daki"
+            "daki": "Daki",
+            "sketch": "Sketch",
+            "promo": "Promo"
         },
         "pages": "Pages",
         "scrolling": "Scrolling",
@@ -1113,15 +1116,23 @@
             "categorization": {
                 "header": "Please classify uploads into the appropriate category. We have three levels of categorization:",
                 "type": {
-                    "line1": " - The type of post. This can be ",
-                    "line2": "image, animation, comic, video, audio, live2d, or 3d model.",
-                    "line3": "Most of these are self-explanatory, but the distinction between an image and a comic is that comics contain various panels, text, and speech balloons."
-                },
-                "restrict": {
-                    "line1": " - An image content rating that may be used to broadly restrict content you don't want to see.",
+                    "line1": " - The type of post.",
                     "items": {
-                        "safe": " - Pretty safe with no content that is too suggestive.",
-                        "questionable": " - Revealing or tight clothing (eg. swimsuits, tights), suggestive poses and ecchi."
+                        "image": " - Any static piece of art or image not falling into other categories.",
+                        "animation": " - Short frame animations in simple formats like gif.",
+                        "comic": " - Manga and comic strips containing various panels, text, and speech balloons.",
+                        "video": " - Long animations that are in video format and may also contain audio.",
+                        "audio": " - Music and game soundtracks or other standalone audio.",
+                        "live2d": " - A Live2D model, containing its meshes and parameters.",
+                        "model": " - A 3D model, containing polygons and uv mapped textures."
+                    }
+                },
+                "rating": {
+                    "line1": " - A content rating that may be used to restrict content you don't want to see.",
+                    "items": {
+                        "cute": " - Cute and adorable, with little to no suggestiveness.",
+                        "sexy": " - More sexy than cute, with provocative poses or tight clothing (eg. leggings).",
+                        "ecchi": " - Showing lots of skin (eg. bikinis), panty shots, and other borderline content."
                     }
                 },
                 "style": {
@@ -1131,7 +1142,9 @@
                         "3d": " - 3d models or incorporates 3d models in some way.",
                         "chibi": " - Art made in chibi or super deformed style.",
                         "pixel": " - Art made in pixel art style or chiptune music.",
-                        "daki": " - Art made to be printed on a dakimakura pillow."
+                        "daki": " - Art made to be printed on a dakimakura pillow.",
+                        "sketch": " - Sketches, lineart, or other unfinished pieces.",
+                        "promo": " - Promotion of paid content, merch, or other goods."
                     }
                 },
                 "parentID": "Parent ID - Specify a post ID and this post will be added as a child to that post. For post variations, simply add multiple images to the post."
@@ -1277,8 +1290,8 @@
             "userLevels": {
                 "header": "Moepictures has various user account levels that progressively give you more permissions and removes restrictions.",
                 "items": {
-                    "No account": " - Can only view the site and the posts rated \"safe\".",
-                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/translations for approval. Can also view the \"questionable\" posts.",
+                    "No account": " - Can only view the site and the posts rated \"cute\".",
+                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/translations for approval. Can also view the \"sexy\" and \"ecchi\" posts.",
                     "Premium": " - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.",
                     "Contributor": " - Can edit posts and tags without passing through the mod queue. Given to members with a great track record of contributions that we don't want to inhibit with the queue.",
                     "Curator": " - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts that we don't want to inhibit with the queue.",

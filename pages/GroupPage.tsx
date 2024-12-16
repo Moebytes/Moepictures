@@ -44,7 +44,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setEditGroupObj, setDeleteGroupObj, setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setPosts} = useCacheActions()
@@ -85,7 +85,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             group = await functions.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null)
         }
         if (!group) return functions.replaceLocation("/404")
-        if (group.restrict === "explicit") {
+        if (functions.isR18(group.rating)) {
             if (!session.cookie) return
             if (!session.showR18) return functions.replaceLocation("/404")
         }
@@ -107,7 +107,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         let items = [] as any[]
         for (let i = 0; i < group.posts.length; i++) {
             const post = group.posts[i]
-            if (post.restrict === "explicit") if (restrictType !== "explicit") continue
+            if (functions.isR18(post.rating)) if (!functions.isR18(ratingType)) continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
             let img = await functions.decryptThumb(imageLink, session)
             items.push({id: post.order, image: img, post})
@@ -121,7 +121,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             setHeaderText(group.name)
             updateItems()
         }
-    }, [group, restrictType, session])
+    }, [group, ratingType, session])
 
     useEffect(() => {
         if (mobile) {

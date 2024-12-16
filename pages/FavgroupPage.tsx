@@ -40,7 +40,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setEditFavGroupObj, setDeleteFavGroupObj} = useGroupDialogActions()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
     const {setPosts} = useCacheActions()
@@ -78,7 +78,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const favgroupInfo = async () => {
         let favgroup = await functions.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
         if (!favgroup) return functions.replaceLocation("/404")
-        if (favgroup.restrict === "explicit") {
+        if (functions.isR18(favgroup.rating)) {
             if (!session.cookie) return
             if (!session.showR18) return functions.replaceLocation("/404")
         }
@@ -102,7 +102,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         let items = [] as any[]
         for (let i = 0; i < favgroup.posts.length; i++) {
             const post = favgroup.posts[i]
-            if (post.restrict === "explicit") if (restrictType !== "explicit") continue
+            if (functions.isR18(post.rating)) if (!functions.isR18(ratingType)) continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
             let img = await functions.decryptThumb(imageLink, session)
             items.push({id: post.order, image: img, post})
@@ -119,7 +119,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             }
             updateItems()
         }
-    }, [favgroup, restrictType, session])
+    }, [favgroup, ratingType, session])
 
     useEffect(() => {
         if (mobile) {

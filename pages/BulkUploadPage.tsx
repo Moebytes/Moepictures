@@ -19,14 +19,17 @@ import comic from "../assets/icons/comic.png"
 import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
-import explicit from "../assets/icons/explicit.png"
-import questionable from "../assets/icons/questionable.png"
-import safe from "../assets/icons/safe.png"
+import cute from "../assets/icons/cute.png"
+import sexy from "../assets/icons/sexy.png"
+import ecchi from "../assets/icons/ecchi.png"
+import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
+import sketch from "../assets/icons/sketch.png"
+import promo from "../assets/icons/promo.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
@@ -79,7 +82,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [currentIndex, setCurrentIndex] = useState(0) as any
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [type, setType] = useState("image")
-    const [restrict, setRestrict] = useState("safe")
+    const [rating, setRating] = useState("cute")
     const [style, setStyle] = useState("2d")
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [submitted, setSubmitted] = useState(false)
@@ -283,7 +286,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const reset = () => {
         setType("image")
-        setRestrict("safe")
+        setRating("cute")
         setStyle("2d")
     }
 
@@ -443,8 +446,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < submitData.length; i++) {
             const currentArr = submitData[i]
             const upscaledCurrentArr = upscaledSubmitData[i]
-            const sourceData = await sourceLookup(currentArr[0], restrict)
-            const tagData = await tagLookup(currentArr[0], type, style, sourceData.danbooruLink, sourceData.restrict)
+            const sourceData = await sourceLookup(currentArr[0], rating)
+            const tagData = await tagLookup(currentArr[0], type, style, sourceData.danbooruLink, sourceData.rating)
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
@@ -461,7 +464,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 images: newOriginalFiles,
                 upscaledImages: newUpscaledFiles,
                 type: tagData.type,
-                restrict: tagData.restrict,
+                rating: tagData.rating,
                 style: tagData.style,
                 parentID: "",
                 source: {
@@ -552,7 +555,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setProgressText("")
     }
 
-    const sourceLookup = async (current: any, restrict: string) => {
+    const sourceLookup = async (current: any, rating: string) => {
         let bytes = "" as any 
         if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -578,8 +581,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
             if (result.length) {
                 danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                if (result[0].rating === "q") restrict = "questionable"
-                if (result[0].rating === "e") restrict = "explicit"
+                if (result[0].rating === "q") rating = "ecchi"
+                if (result[0].rating === "e") rating = "hentai"
             }
             try {
                 const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
@@ -592,8 +595,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                 translatedTitle = translated[0]
                 translatedCommentary = translated[1]
-                if (illust.x_restrict !== 0) {
-                    if (restrict === "safe") restrict = "questionable"
+                if (illust.x_rating !== 0) {
+                    if (rating === "cute") rating = "ecchi"
                 }
                 artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                 const imageData = await readImage(illust.user.profile_image_urls.medium)
@@ -607,7 +610,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             mirrors = await functions.post("/api/misc/boorulinks", {pixivID}, session, setSessionFlag)
             mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
-                restrict,
+                rating,
                 artists,
                 danbooruLink,
                 source: {
@@ -657,8 +660,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                         if (result.length) {
                             danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                            if (result[0].rating === "q") restrict = "questionable"
-                            if (result[0].rating === "e") restrict = "explicit"
+                            if (result[0].rating === "q") rating = "ecchi"
+                            if (result[0].rating === "e") rating = "hentai"
                         }
                     }
                     artist = pixiv[0].data.author_name
@@ -674,8 +677,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
-                        if (illust.x_restrict !== 0) {
-                            if (restrict === "safe") restrict = "questionable"
+                        if (illust.x_rating !== 0) {
+                            if (rating === "cute") rating = "ecchi"
                         }
                         artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                         const imageData = await readImage(illust.user.profile_image_urls.medium)
@@ -704,7 +707,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         commentary = deviation.description
                         posted = functions.formatDate(new Date(deviation.date), true)
                         if (deviation.rating === "adult") {
-                            if (restrict === "safe") restrict = "questionable"
+                            if (rating === "cute") rating = "ecchi"
                         }
                         artists[artists.length - 1].tag = artist
                         const imageData = await readImage(deviation.author.user.usericon)
@@ -742,7 +745,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             mirrors = functions.removeItem(mirrors, link)
             mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
-                restrict,
+                rating,
                 artists,
                 danbooruLink,
                 source: {
@@ -760,7 +763,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
     }
 
-    const tagLookup = async (current: any, type: string, style: string, danbooruLink: string, restrict: string) => {
+    const tagLookup = async (current: any, type: string, style: string, danbooruLink: string, rating: string) => {
         let tagArr = [] as any
         let blockedTags = tagConvert.blockedTags
         let tagReplaceMap = tagConvert.tagReplaceMap
@@ -782,8 +785,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
         if (danbooruLink) {
             const json = await functions.fetch(danbooruLink)
-            if (json.rating === "q") restrict = "questionable"
-            if (json.rating === "e") restrict = "explicit"
+            if (json.rating === "q") rating = "ecchi"
+            if (json.rating === "e") rating = "hentai"
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             tagArr.push("upscaled")
@@ -798,6 +801,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
+            if (tagArr.includes("sketch")) style = "sketch"
+            if (tagArr.includes("lineart")) style = "sketch"
+            if (tagArr.includes("ad")) style = "promo"
             if (tagArr.includes("comic")) {
                 if (type === "image") type = "comic"
             }
@@ -858,6 +864,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
+            if (tagArr.includes("sketch")) style = "sketch"
+            if (tagArr.includes("lineart")) style = "sketch"
+            if (tagArr.includes("ad")) style = "promo"
             if (tagArr.includes("comic")) {
                 if (type === "image") type = "comic"
             }
@@ -920,7 +929,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
         return {
             type,
-            restrict,
+            rating,
             style,
             artists,
             characters,
@@ -1032,25 +1041,29 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
     }
 
-    const getRestrictJSX = () => {
+    const getRatingJSX = () => {
         if (mobile) {
             return (
                 <>
                 <div className="upload-row">
-                    <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
+                    <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                        <img className="upload-button-img" src={cute}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                     </button>
-                    <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
+                    <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                        <img className="upload-button-img" src={sexy}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                    </button>
+                    <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                        <img className="upload-button-img" src={ecchi}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.ecchi}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     {session.showR18 ?
-                    <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
+                    <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                        <img className="upload-button-img" src={hentai}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
                     </button> : null}
                 </div> 
                 </>
@@ -1058,18 +1071,22 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         } else {
             return (
                 <div className="upload-row">
-                    <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
+                    <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                        <img className="upload-button-img" src={cute}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                     </button>
-                    <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
+                    <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                        <img className="upload-button-img" src={sexy}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                    </button>
+                    <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                        <img className="upload-button-img" src={ecchi}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.ecchi}</span>
                     </button>
                     {session.showR18 ?
-                    <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
+                    <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                        <img className="upload-button-img" src={hentai}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
                     </button> : null}
                 </div>
             )
@@ -1105,34 +1122,90 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={pixel}/>
                         <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
+                    <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="upload-button-img" src={sketch}/>
+                        <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button>
                 </div>
             )
         } else {
-            return (
-                <div className="upload-row">
-                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
-                    </button>
-                    {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
-                    </button> : null}
-                    <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
-                    </button>
-                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
-                    </button>
-                    {type !== "comic" ?
-                    <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
-                        <img className="upload-button-img" src={daki}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
-                    </button> : null}
-                </div>
-            )
+            if (mobile) {
+                return (
+                    <>
+                    <div className="upload-row">
+                        <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                            <img className="upload-button-img" src={$2d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
+                        </button>
+                        {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                            <img className="upload-button-img" src={$3d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
+                        </button> : null}
+                        <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                            <img className="upload-button-img" src={chibi}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
+                        </button>
+                        <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                            <img className="upload-button-img" src={pixel}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
+                        </button>
+                    </div>
+                    <div className="upload-row">
+                        {type !== "comic" ?
+                        <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                            <img className="upload-button-img" src={daki}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                            <img className="upload-button-img" src={sketch}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                    </div>
+                    </>
+                )
+            } else {
+                return (
+                    <div className="upload-row">
+                        <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                            <img className="upload-button-img" src={$2d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
+                        </button>
+                        {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                            <img className="upload-button-img" src={$3d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
+                        </button> : null}
+                        <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                            <img className="upload-button-img" src={chibi}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
+                        </button>
+                        <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                            <img className="upload-button-img" src={pixel}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
+                        </button>
+                        {type !== "comic" ?
+                        <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                            <img className="upload-button-img" src={daki}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                            <img className="upload-button-img" src={sketch}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                    </div>
+                )
+            }
         }
     }
 
@@ -1140,11 +1213,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         if (type === "comic") {
             if (style === "daki") setStyle("2d")
         } else if (type === "model") {
-            if (style === "2d" || style === "daki") setStyle("3d")
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
         } else if (type === "live2d") {
-            if (style === "3d") setStyle("2d")
+            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi" || style === "daki") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
         }
     }, [type, style])
 
@@ -1389,7 +1462,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             : null}
             <span className="upload-heading">{i18n.pages.upload.classification}</span>
             {getTypeJSX()}
-            {getRestrictJSX()}
+            {getRatingJSX()}
             {getStyleJSX()}
             <div className="upload-container">
                 <SearchSuggestions active={artistActive} x={getX("artist")} y={getY("artist")} width={mobile ? 150 : 200} text={rawArtist} click={handleArtistClick} type="artist"/>

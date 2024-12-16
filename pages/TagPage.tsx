@@ -49,7 +49,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {setPosts} = useCacheActions()
     const {tagFlag} = useFlagSelector()
     const {setTagFlag} = useFlagActions()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, revertTagHistoryID, revertTagHistoryFlag} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag, setTakedownTag, setDeleteTagID, setDeleteTagFlag, setRevertTagHistoryID, setRevertTagHistoryFlag, setCategorizeTag} = useTagDialogActions()
@@ -113,8 +113,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updatePosts = async () => {
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict, style: "all", sort: "date", limit}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
         const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(uploads)
         setPostImages(images)
@@ -123,8 +123,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         let uploads = tagPosts
         let offset = tagPosts.length
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(uploads)
@@ -135,7 +135,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         tagInfo()
         updateRelatedTags()
         updatePosts()
-    }, [tagName, restrictType, historyID, session])
+    }, [tagName, ratingType, historyID, session])
 
     useEffect(() => {
         if (tagFlag) {

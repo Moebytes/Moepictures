@@ -37,9 +37,9 @@ export default class SQLFavorite {
     }
 
     /** Get favorites. */
-    public static favorites = async (username: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static favorites = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, restrict, style, sort, offset, limit, username: sessionUsername})
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, username: sessionUsername})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -70,15 +70,15 @@ export default class SQLFavorite {
     }
 
     /** Insert favgroup. */
-    public static insertFavgroup = async (username: string, slug: string, name: string, isPrivate: boolean, restrict: string) => {
+    public static insertFavgroup = async (username: string, slug: string, name: string, isPrivate: boolean, rating: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                INSERT INTO favgroups ("username", "slug", "name", "restrict", "private", "createDate")
+                INSERT INTO favgroups ("username", "slug", "name", "rating", "private", "createDate")
                 VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT ("username", "slug") DO UPDATE
                 SET "private" = EXCLUDED."private"
             `),
-            values: [username, slug, name, restrict, isPrivate, new Date().toISOString()]
+            values: [username, slug, name, rating, isPrivate, new Date().toISOString()]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -169,9 +169,9 @@ export default class SQLFavorite {
     }
 
     /** Get favgroup. */
-    public static favgroup = async (username: string, slug: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
         const {postJSON, values} = 
-        SQLQuery.search.boilerplate({i: 3, type, restrict, style, sort, username: sessionUsername, favgroupOrder: true})
+        SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, username: sessionUsername, favgroupOrder: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

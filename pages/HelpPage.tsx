@@ -296,21 +296,28 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
 
                     {i18n.help.uploading.categorization.header}<br/>
-                    <span className="help-alt">{i18n.sidebar.type}</span>
-                    {i18n.help.uploading.categorization.type.line1}
-                    <span className="help-alt">{i18n.help.uploading.categorization.type.line2}</span><br/>
-                    {i18n.help.uploading.categorization.type.line3}<br/><br/>
+                    <span className="help-alt">{i18n.sidebar.type}</span>{i18n.help.uploading.categorization.type.line1}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[2]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[3]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[4]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[5]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.type.items)[6]}</span>{Object.values(i18n.help.uploading.categorization.type.items)[6]}<br/><br/>
 
-                    <span className="help-alt">{i18n.sidebar.restrict}</span>{i18n.help.uploading.categorization.restrict.line1}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.restrict.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.restrict.items)[0]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.restrict.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.restrict.items)[1]}<br/><br/>
+                    <span className="help-alt">{i18n.sidebar.rating}</span>{i18n.help.uploading.categorization.rating.line1}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.rating.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.rating.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.rating.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.rating.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.rating.items)[2]}</span>{Object.values(i18n.help.uploading.categorization.rating.items)[2]}<br/><br/>
 
                     <span className="help-alt">{i18n.sidebar.style}</span>{i18n.help.uploading.categorization.style.line1}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[0]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[0]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[1]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[1]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[2]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[2]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[3]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[3]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[4]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[4]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[4]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[5]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[6]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[6]}<br/><br/>
 
                     {i18n.help.uploading.categorization.parentID}<br/><br/>
 

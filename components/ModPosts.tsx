@@ -363,7 +363,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-text">{i18n.labels.upscaled}: {post.hasUpscaled ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.sidebar.type}: {post.type}</span>
-                        <span className="mod-post-text">{i18n.sidebar.restrict}: {post.restrict}</span>
+                        <span className="mod-post-text">{i18n.sidebar.rating}: {post.rating}</span>
                         <span className="mod-post-text">{i18n.sidebar.style}: {post.style}</span>
                     </div>
                     <div className="mod-post-options">

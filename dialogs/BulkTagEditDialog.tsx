@@ -124,7 +124,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     postID: postID,
                     unverified: false,
                     type: post.type,
-                    restrict: post.restrict,
+                    rating: post.rating,
                     style: post.style,
                     artists: artistData,
                     characters: characterData,

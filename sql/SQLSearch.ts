@@ -3,9 +3,9 @@ import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
 
 export default class SQLSearch {
-    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, restrict?: string, style?: string, sort?: string, 
+    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, 
         offset?: string, limit?: string, username?: string, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean}) => {
-        let {i, tags, search, type, restrict, style, sort, offset, limit, username, withTags, favgroupOrder, outerSort} = options
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, favgroupOrder, outerSort} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -15,17 +15,20 @@ export default class SQLSearch {
         if (type === "audio") typeQuery = `posts.type = 'audio'`
         if (type === "model") typeQuery = `posts.type = 'model'`
         if (type === "live2d") typeQuery = `posts.type = 'live2d'`
-        let restrictQuery = ""
-        if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
-        if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
-        if (restrict === "explicit") restrictQuery = `posts.restrict = 'explicit'`
-        if (restrict === "all") restrictQuery = `(posts.restrict = 'safe' OR posts.restrict = 'questionable')`
+        let ratingQuery = ""
+        if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
+        if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`
+        if (rating === "ecchi") ratingQuery = `posts.rating = 'ecchi'`
+        if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
+        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'ecchi')`
         let styleQuery = ""
         if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
         if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
         if (style === "pixel") styleQuery = `posts.style = 'pixel'`
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
         if (style === "daki") styleQuery = `posts.style = 'daki'`
+        if (style === "sketch") styleQuery = `posts.style = 'sketch'`
+        if (style === "promo") styleQuery = `posts.style = 'promo'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
@@ -132,7 +135,7 @@ export default class SQLSearch {
         let offsetValue = i
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        const whereQueries = [favoriteQuery, typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
 
         let postJSON = functions.multiTrim(/*sql*/`
@@ -180,9 +183,9 @@ export default class SQLSearch {
     }
 
     /** Search posts. */
-    public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
+    public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
         const {postJSON, values, tagQuery, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({tags, type, restrict, style, sort, offset, limit, username, withTags})
+        SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, limit, username, withTags})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -562,12 +565,13 @@ export default class SQLSearch {
     }
 
     /** Group search. */
-    public static groupSearch = async (search: string, sort: string, restrict: string, limit?: string, offset?: string) => {
-        let restrictQuery = ""
-        if (restrict === "safe") restrictQuery = `groups.restrict = 'safe'`
-        if (restrict === "questionable") restrictQuery = `groups.restrict = 'questionable'`
-        if (restrict === "explicit") restrictQuery = `groups.restrict = 'explicit'`
-        if (restrict === "all") restrictQuery = `(groups.restrict = 'safe' OR groups.restrict = 'questionable')`
+    public static groupSearch = async (search: string, sort: string, rating: string, limit?: string, offset?: string) => {
+        let ratingQuery = ""
+        if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
+        if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
+        if (rating === "ecchi") ratingQuery = `groups.rating = 'ecchi'`
+        if (rating === "hentai") ratingQuery = `groups.rating = 'hentai'`
+        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'ecchi')`
         let searchQuery = ""
         let values = [] as any
         let i = 1
@@ -590,7 +594,7 @@ export default class SQLSearch {
         if (sort === "reverse date") sortQuery = `ORDER BY groups."createDate" ASC`
         if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
         if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
-        const whereQueries = [restrictQuery, searchQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [ratingQuery, searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (

@@ -27,7 +27,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -97,7 +97,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (revisions[currentIndex].restrict === "explicit") if (restrictType !== "explicit") {
+            if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
                 currentIndex++
                 continue
             }
@@ -129,7 +129,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (revisions[currentIndex].restrict === "explicit") if (restrictType !== "explicit") {
+                    if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
                         currentIndex++
                         continue
                     }

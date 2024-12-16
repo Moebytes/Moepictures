@@ -311,7 +311,7 @@ const HistoryPage: React.FunctionComponent = () => {
                             continue
                         }
                     } else {
-                        if (historyStates[currentIndex].restrict === "explicit") {
+                        if (functions.isR18(historyStates[currentIndex].rating)) {
                             continue
                         }
                     }
@@ -400,7 +400,7 @@ const HistoryPage: React.FunctionComponent = () => {
                                 continue
                             }
                         } else {
-                            if (historyStates[currentIndex].restrict === "explicit") {
+                            if (functions.isR18(historyStates[currentIndex].rating)) {
                                 continue
                             }
                         }
@@ -559,7 +559,7 @@ const HistoryPage: React.FunctionComponent = () => {
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
             if (!session.showR18) {
                 visible = visible.filter((item: any) => historyTab === "tag" ||  historyTab === "alias" ? 
-                !item.r18 : item.restrict !== "explicit")
+                !item.r18 : !functions.isR18(item.rating))
             }
         }
         let current = visible[0]

@@ -72,15 +72,15 @@ export default class SQLGroup {
     }
 
     /** Insert group. */
-    public static insertGroup = async (creator: string, name: string, slug: string, restrict: string) => {
+    public static insertGroup = async (creator: string, name: string, slug: string, rating: string) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
-                INSERT INTO groups ("name", "slug", "restrict", "creator", "createDate", "updater", "updatedDate")
+                INSERT INTO groups ("name", "slug", "rating", "creator", "createDate", "updater", "updatedDate")
                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "groupID"
             `),
             rowMode: "array",
-            values: [name, slug, restrict, creator, now, creator, now]
+            values: [name, slug, rating, creator, now, creator, now]
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number
@@ -219,9 +219,9 @@ export default class SQLGroup {
     }
 
     /** Search group. */
-    public static searchGroup = async (groupID: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static searchGroup = async (groupID: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, restrict, style, sort, offset, limit, username: sessionUsername})
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, username: sessionUsername})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

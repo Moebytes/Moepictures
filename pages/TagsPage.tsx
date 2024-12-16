@@ -39,7 +39,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
-    const {scroll, restrictType} = useSearchSelector()
+    const {scroll, ratingType} = useSearchSelector()
     const {setScroll} = useSearchActions()
     const {tagsPage} = usePageSelector()
     const {setTagsPage} = usePageActions()
@@ -405,7 +405,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
-            if (restrictType !== "explicit") if (visible[i].r18) continue
+            if (!functions.isR18(ratingType)) if (visible[i].r18) continue
             jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         if (!scroll) {

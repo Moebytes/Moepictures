@@ -125,7 +125,7 @@ const TranslationRoutes = (app: Express) => {
             let series = categories.series.map((s: any) => s.tag)
             let tags = categories.tags.map((t: any) => t.tag)
             let type = post.type
-            let restrict = post.restrict
+            let rating = post.rating
             let style = post.style
             let source = {
                 title: post.title,
@@ -149,7 +149,7 @@ const TranslationRoutes = (app: Express) => {
             let hasUpscaled = false
             let originalCheck = [] as string[]
             let upscaledCheck = [] as string[]
-            let r18 = post.restrict === "explicit"
+            let r18 = functions.isR18(post.rating)
 
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
@@ -240,7 +240,7 @@ const TranslationRoutes = (app: Express) => {
                 originalID: originalPostID ? originalPostID : null,
                 reason: reason ? reason : null,
                 type,
-                restrict, 
+                rating, 
                 style, 
                 parentID: post.parentID,
                 title: source.title ? source.title : null,

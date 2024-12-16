@@ -20,14 +20,17 @@ import comic from "../assets/icons/comic.png"
 import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
-import explicit from "../assets/icons/explicit.png"
-import questionable from "../assets/icons/questionable.png"
-import safe from "../assets/icons/safe.png"
+import cute from "../assets/icons/cute.png"
+import sexy from "../assets/icons/sexy.png"
+import ecchi from "../assets/icons/ecchi.png"
+import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
+import sketch from "../assets/icons/sketch.png"
+import promo from "../assets/icons/promo.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
@@ -82,7 +85,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [currentDupIndex, setCurrentDupIndex] = useState(0) as any
     const [type, setType] = useState("image")
-    const [restrict, setRestrict] = useState("safe")
+    const [rating, setRating] = useState("cute")
     const [style, setStyle] = useState("2d")
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [parentID, setParentID] = useState("")
@@ -345,7 +348,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setCharacters([{}])
         setSeries([{}])
         setType("image")
-        setRestrict("safe")
+        setRating("cute")
         setStyle("2d")
     }
 
@@ -839,7 +842,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             images: newOriginalFiles,
             upscaledImages: newUpscaledFiles,
             type,
-            restrict,
+            rating,
             style,
             parentID,
             source: {
@@ -926,8 +929,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                     translatedTitle = translated[0]
                     translatedCommentary = translated[1]
-                    if (illust.x_restrict !== 0) {
-                        if (restrict === "safe") setRestrict("questionable")
+                    if (illust.x_rating !== 0) {
+                        if (rating === "cute") setRating("ecchi")
                     }
                     const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
                     artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
@@ -988,10 +991,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                             const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                             translatedTitle = translated[0]
                             translatedCommentary = translated[1]
-                            if (illust.x_restrict !== 0) {
-                                setRestrict("questionable")
+                            if (illust.x_rating !== 0) {
+                                setRating("ecchi")
                             } else {
-                                setRestrict("safe")
+                                setRating("cute")
                             }
                             const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
                             artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
@@ -1023,9 +1026,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                             commentary = deviation.description
                             date = functions.formatDate(new Date(deviation.date), true)
                             if (deviation.rating === "adult") {
-                                setRestrict("questionable")
+                                setRating("ecchi")
                             } else {
-                                setRestrict("safe")
+                                setRating("cute")
                             }
                             const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag).then((r) => r[0])
                             artists[artists.length - 1].tag = artist
@@ -1121,6 +1124,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (tagArr.includes("chibi")) setStyle("chibi")
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
                 if (tagArr.includes("dakimakura")) setStyle("daki")
+                if (tagArr.includes("sketch")) setStyle("sketch")
+                if (tagArr.includes("lineart")) setStyle("sketch")
+                if (tagArr.includes("ad")) setStyle("promo")
                 if (tagArr.includes("comic")) setType("comic")
 
                 tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
@@ -1169,6 +1175,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (tagArr.includes("chibi")) setStyle("chibi")
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
                 if (tagArr.includes("dakimakura")) setStyle("daki")
+                if (tagArr.includes("sketch")) setStyle("sketch")
+                if (tagArr.includes("lineart")) setStyle("sketch")
+                if (tagArr.includes("ad")) setStyle("promo")
                 if (tagArr.includes("comic")) setType("comic")
 
                 tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
@@ -1400,34 +1409,90 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={pixel}/>
                         <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
+                    <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="upload-button-img" src={sketch}/>
+                        <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button>
                 </div>
             )
         } else {
-            return (
-                <div className="upload-row">
-                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
-                    </button>
-                    {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
-                    </button> : null}
-                    <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
-                    </button>
-                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
-                    </button>
-                    {type !== "comic" ?
-                    <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
-                        <img className="upload-button-img" src={daki}/>
-                        <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
-                    </button> : null}
-                </div>
-            )
+            if (mobile) {
+                return (
+                    <>
+                    <div className="upload-row">
+                        <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                            <img className="upload-button-img" src={$2d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
+                        </button>
+                        {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                            <img className="upload-button-img" src={$3d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
+                        </button> : null}
+                        <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                            <img className="upload-button-img" src={chibi}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
+                        </button>
+                        <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                            <img className="upload-button-img" src={pixel}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
+                        </button>
+                    </div>
+                    <div className="upload-row">
+                        {type !== "comic" ?
+                        <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                            <img className="upload-button-img" src={daki}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                            <img className="upload-button-img" src={sketch}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                    </div>
+                    </>
+                )
+            } else {
+                return (
+                    <div className="upload-row">
+                        <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                            <img className="upload-button-img" src={$2d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
+                        </button>
+                        {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                            <img className="upload-button-img" src={$3d}/>
+                            <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
+                        </button> : null}
+                        <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                            <img className="upload-button-img" src={chibi}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
+                        </button>
+                        <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                            <img className="upload-button-img" src={pixel}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
+                        </button>
+                        {type !== "comic" ?
+                        <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                            <img className="upload-button-img" src={daki}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                            <img className="upload-button-img" src={sketch}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                    </div>
+                )
+            }
         }
     }
 
@@ -1435,11 +1500,11 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (type === "comic") {
             if (style === "daki") setStyle("2d")
         } else if (type === "model") {
-            if (style === "2d" || style === "daki") setStyle("3d")
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
         } else if (type === "live2d") {
-            if (style === "3d") setStyle("2d")
+            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi" || style === "daki") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
         }
     }, [type, style])
 
@@ -1645,36 +1710,44 @@ const UploadPage: React.FunctionComponent = (props) => {
             </div>}
             {mobile ? <>
             <div className="upload-row">
-                <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                    <img className="upload-button-img" src={safe}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
+                <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="upload-button-img" src={cute}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                    <img className="upload-button-img" src={questionable}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
+                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="upload-button-img" src={sexy}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                </button>
+                <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="upload-button-img" src={ecchi}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.ecchi}</span>
                 </button>
             </div>
             <div className="upload-row">
                 {session.showR18 ?
-                <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                    <img className="upload-button-img" src={explicit}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
+                <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="upload-button-img" src={hentai}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
                 </button> : null}
             </div> </>
             :
             <div className="upload-row">
-                <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                    <img className="upload-button-img" src={safe}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.safe}</span>
+                <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="upload-button-img" src={cute}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                    <img className="upload-button-img" src={questionable}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.questionable}</span>
+                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="upload-button-img" src={sexy}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                </button>
+                <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="upload-button-img" src={ecchi}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.ecchi}</span>
                 </button>
                 {session.showR18 ?
-                <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                    <img className="upload-button-img" src={explicit}/>
-                    <span className="upload-button-text">{i18n.sortbar.restrict.explicit}</span>
+                <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="upload-button-img" src={hentai}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
                 </button> : null}
             </div>}
             {getStyleJSX()}

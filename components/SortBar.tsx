@@ -22,14 +22,17 @@ import comic from "../assets/icons/comic.png"
 import live2d from "../assets/icons/live2d.png"
 import model from "../assets/icons/model.png"
 import audio from "../assets/icons/audio.png"
-import explicit from "../assets/icons/explicit.png"
-import questionable from "../assets/icons/questionable.png"
-import safe from "../assets/icons/safe.png"
+import cute from "../assets/icons/cute.png"
+import sexy from "../assets/icons/sexy.png"
+import ecchi from "../assets/icons/ecchi.png"
+import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
+import sketch from "../assets/icons/sketch.png"
+import promo from "../assets/icons/promo.png"
 import filters from "../assets/icons/filters.png"
 import size from "../assets/icons/size.png"
 import sort from "../assets/icons/sort.png"
@@ -80,8 +83,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
-    const {scroll, square, imageType, restrictType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
-    const {setScroll, setImageType, setRestrictType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren} = useSearchActions()
+    const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
+    const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
     const {showDownloadDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setShowDownloadDialog} = useMiscDialogActions()
@@ -97,10 +100,10 @@ const SortBar: React.FunctionComponent = (props) => {
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
     const [lastImageType, setLastImageType] = useState(null) as any
-    const [lastRestrictType, setLastRestrictType] = useState(null) as any
+    const [lastRatingType, setLastRatingType] = useState(null) as any
     const [lastStyleType, setLastStyleType] = useState(null) as any
     const imageRef = useRef(null) as any
-    const restrictRef = useRef(null) as any
+    const ratingRef = useRef(null) as any
     const styleRef = useRef(null) as any
     const sizeRef = useRef(null) as any 
     const sortRef = useRef(null) as any
@@ -196,13 +199,13 @@ const SortBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         localStorage.setItem("type", imageType)
-        localStorage.setItem("restrict", restrictType)
+        localStorage.setItem("rating", ratingType)
         localStorage.setItem("style", styleType)
         localStorage.setItem("size", sizeType)
         localStorage.setItem("sort", sortType)
         localStorage.setItem("sortReverse", String(sortReverse))
         localStorage.setItem("pageMultiplier", String(pageMultiplier))
-    }, [imageType, restrictType, styleType, sizeType, sortType, sortReverse, pageMultiplier])
+    }, [imageType, ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier])
 
     const hideTheSidebar = () => {
         const newValue = !hideSidebar
@@ -314,31 +317,38 @@ const SortBar: React.FunctionComponent = (props) => {
         return `${raw + offset}px`
     }
 
-    const getRestrictJSX = () => {
-        if (restrictType === "safe") {
+    const getRatingJSX = () => {
+        if (ratingType === "cute") {
             return (
-                <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={safe} style={{filter: getFilter()}}/>
-                    <span className="sortbar-text">{i18n.sortbar.restrict.safe}</span>
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={cute} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">{i18n.sortbar.rating.cute}</span>
                 </div>
             )
-        } else if (restrictType === "questionable") {
+        } else if (ratingType === "sexy") {
             return (
-                <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={questionable} style={{filter: getFilter()}}/>
-                    <span className="sortbar-text">{i18n.sortbar.restrict.questionable}</span>
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={sexy} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">{i18n.sortbar.rating.sexy}</span>
                 </div>
             )
-        } else if (restrictType === "explicit") {
+        } else if (ratingType === "ecchi") {
             return (
-                <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={explicit}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.restrict.explicit}</span>
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={ecchi} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">{i18n.sortbar.rating.ecchi}</span>
+                </div>
+            )
+        } else if (ratingType === "hentai") {
+            return (
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={hentai}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.hentai}</span>
                 </div>
             )
         } else {
             return (
-                <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
                     <img className="sortbar-img rotate" src={all} style={{filter: getFilter()}}/>
                     <span className="sortbar-text">{i18n.tag.all}</span>
                 </div>
@@ -346,31 +356,34 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
-    const getMobileRestrictJSX = () => {
-        if (restrictType === "safe") {
-            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={safe} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
-        } else if (restrictType === "questionable") {
-            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={questionable} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
-        } else if (restrictType === "explicit") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={explicit} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
+    const getMobileRatingJSX = () => {
+        if (ratingType === "cute") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={cute} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "sexy") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={sexy} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "ecchi") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={ecchi} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "hentai") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={hentai} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         } else {
-            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         }
     }
 
-    const getRestrictMargin = () => {
+    const getRatingMargin = () => {
         if (mobile) {
             return "130px"
         }
-        const rect = restrictRef.current?.getBoundingClientRect()
+        const rect = ratingRef.current?.getBoundingClientRect()
         if (!rect) return "325px"
         const raw = rect.x
         let offset = 0
-        if (restrictType === "all") offset = -35
-        if (restrictType === "safe") offset = -30
-        if (restrictType === "questionable") offset = 0
-        if (restrictType === "explicit") offset = -20
-        if (!session.username) offset += 23
+        if (ratingType === "all") offset = -15
+        if (ratingType === "cute") offset = -10
+        if (ratingType === "sexy") offset = -10
+        if (ratingType === "ecchi") offset = -5
+        if (ratingType === "hentai") offset = -5
+        if (!session.username) offset += 0
         return `${raw + offset}px`
     }
 
@@ -410,6 +423,20 @@ const SortBar: React.FunctionComponent = (props) => {
                         <span className="sortbar-text">{i18n.sortbar.style.daki}</span>
                     </div>
                 )
+        } else if (styleType === "sketch") {
+            return (
+                <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={sketch} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">{i18n.sortbar.style.sketch}</span>
+                </div>
+            )
+        } else if (styleType === "promo") {
+            return (
+                <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={promo} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">{i18n.sortbar.style.promo}</span>
+                </div>
+            )
         } else {
             return (
                 <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
@@ -431,6 +458,10 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={chibi} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else if (styleType === "daki") {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={daki} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
+        } else if (styleType === "sketch") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={sketch} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
+        } else if (styleType === "promo") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={promo} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         }
@@ -448,12 +479,14 @@ const SortBar: React.FunctionComponent = (props) => {
         if (styleType === "pixel") offset = -5
         if (styleType === "chibi") offset = -5
         if (styleType === "daki") offset = -5
+        if (styleType === "sketch") offset = -5
+        if (styleType === "promo") offset = -5
         return `${raw + offset}px`
     }
 
     const resetAll = () => {
         setImageType("all")
-        setRestrictType("all")
+        setRatingType("all")
         setStyleType("all")
         setActiveDropdown("none")
     }
@@ -642,6 +675,10 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-dropdown-img" src={pixel} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">{i18n.sortbar.style.pixel}</span>
                     </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("sketch")}>
+                        <img className="sortbar-dropdown-img" src={sketch} style={{filter: getFilter()}}/>
+                        <span className="sortbar-dropdown-text">{i18n.sortbar.style.sketch}</span>
+                    </div>
                 </>
             )
         } else {
@@ -672,6 +709,16 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-dropdown-img" src={daki} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">{i18n.sortbar.style.daki}</span>
                     </div> : null}
+                    {imageType !== "live2d" ? 
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("sketch")}>
+                        <img className="sortbar-dropdown-img" src={sketch} style={{filter: getFilter()}}/>
+                        <span className="sortbar-dropdown-text">{i18n.sortbar.style.sketch}</span>
+                    </div> : null}
+                    {imageType !== "live2d" ? 
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("promo")}>
+                        <img className="sortbar-dropdown-img" src={promo} style={{filter: getFilter()}}/>
+                        <span className="sortbar-dropdown-text">{i18n.sortbar.style.promo}</span>
+                    </div> : null}
                 </>
             )
         }
@@ -683,15 +730,15 @@ const SortBar: React.FunctionComponent = (props) => {
                 setStyleType("2d")
             }
         } else if (imageType === "model") {
-            if (styleType === "2d" || styleType === "daki") {
+            if (styleType === "2d" || styleType === "daki" || styleType === "sketch" || styleType === "promo") {
                 setStyleType("3d")
             }
         } else if (imageType === "live2d") {
-            if (styleType === "3d") {
+            if (styleType === "3d" || styleType === "sketch" || styleType === "promo") {
                 setStyleType("2d")
             }
         } else if (imageType === "audio") {
-            if (styleType === "3d" || styleType === "chibi" || styleType === "daki") {
+            if (styleType === "3d" || styleType === "chibi" || styleType === "daki" || styleType === "promo") {
                 setStyleType("2d")
             }
         }
@@ -778,7 +825,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={upload} onClick={() => history.push("/upload")}/>
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={download} onClick={bulkDownload}/>
                 {getMobileImageJSX()}
-                {getMobileRestrictJSX()}
+                {getMobileRatingJSX()}
                 {getMobileStyleJSX()}
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={squareIcon} onClick={() => toggleSquare()}/>
                 {/* {reverse ? <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/> :
@@ -813,12 +860,12 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={bulk} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">{i18n.sortbar.bulk}</span>
                     </Link> : null}
-                    {imageType !== "all" || styleType !== "all" || restrictType !== "all" ?
+                    {imageType !== "all" || styleType !== "all" || ratingType !== "all" ?
                     <div className="sortbar-item" onClick={() => resetAll()}>
                         <img className="sortbar-img-small" src={reset} style={{filter: getFilter()}}/>
                     </div> : null}
                     {getImageJSX()}
-                    {getRestrictJSX()}
+                    {getRatingJSX()}
                     {getStyleJSX()}
                     <div className="sortbar-item" onClick={() => toggleShowChildren()}>
                         <img className="sortbar-img" src={showChildren ? checkboxChecked : checkbox} style={{filter: getFilter()}}/>
@@ -925,24 +972,28 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.model}</span>
                 </div>
             </div>
-            <div className={`dropdown ${activeDropdown === "restrict" ? "" : "hide-dropdown"}`} 
-            style={{marginLeft: getRestrictMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
-                <div className="sortbar-dropdown-row" onClick={() => setRestrictType("all")}>
+            <div className={`dropdown ${activeDropdown === "rating" ? "" : "hide-dropdown"}`} 
+            style={{marginLeft: getRatingMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("all")}>
                     <img className="sortbar-dropdown-img rotate" src={all} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">{i18n.tag.all}</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setRestrictType("safe")}>
-                    <img className="sortbar-dropdown-img" src={safe} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.sortbar.restrict.safe}</span>
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("cute")}>
+                    <img className="sortbar-dropdown-img" src={cute} style={{filter: getFilter()}}/>
+                    <span className="sortbar-dropdown-text">{i18n.sortbar.rating.cute}</span>
                 </div>
-                {session.username ? <div className="sortbar-dropdown-row" onClick={() => setRestrictType("questionable")}>
-                    <img className="sortbar-dropdown-img" src={questionable} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.sortbar.restrict.questionable}</span>
+                {session.username ? <div className="sortbar-dropdown-row" onClick={() => setRatingType("sexy")}>
+                    <img className="sortbar-dropdown-img" src={sexy} style={{filter: getFilter()}}/>
+                    <span className="sortbar-dropdown-text">{i18n.sortbar.rating.sexy}</span>
+                </div> : null}
+                {session.username ? <div className="sortbar-dropdown-row" onClick={() => setRatingType("ecchi")}>
+                    <img className="sortbar-dropdown-img" src={ecchi} style={{filter: getFilter()}}/>
+                    <span className="sortbar-dropdown-text">{i18n.sortbar.rating.ecchi}</span>
                 </div> : null}
                 {session.showR18 ?
-                <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
-                    <img className="sortbar-dropdown-img" src={explicit}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.restrict.explicit}</span>
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("hentai")}>
+                    <img className="sortbar-dropdown-img" src={hentai}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.hentai}</span>
                 </div> : null}
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 

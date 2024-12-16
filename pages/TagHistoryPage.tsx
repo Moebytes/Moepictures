@@ -27,7 +27,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -55,7 +55,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (!result.length) {
                 const tagObject = await functions.get("/api/tag", {tag}, session, setSessionFlag)
                 if (!tagObject.createDate && !tagObject.creator) {
-                    const oldestPost = await functions.get("/api/search/posts", {query: tag, type: "all", restrict: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
+                    const oldestPost = await functions.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
                     tagObject.createDate = oldestPost[0].uploadDate
                     tagObject.creator = oldestPost[0].uploader
                 }
@@ -105,7 +105,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (revisions[currentIndex].r18) if (restrictType !== "explicit") {
+            if (revisions[currentIndex].r18) if (!functions.isR18(ratingType)) {
                 currentIndex++
                 continue
             }
@@ -137,7 +137,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (revisions[currentIndex].r18) if (restrictType !== "explicit") {
+                    if (revisions[currentIndex].r18) if (!functions.isR18(ratingType)) {
                         currentIndex++
                         continue
                     }

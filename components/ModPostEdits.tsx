@@ -364,8 +364,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.type) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.type}:</span> {functions.toProperCase(newPost.type)}</span>)
         }
-        if (changes.restrict) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.restrict}:</span> {functions.toProperCase(newPost.restrict)}</span>)
+        if (changes.rating) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.rating}:</span> {functions.toProperCase(newPost.rating)}</span>)
         }
         if (changes.style) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.style}:</span> {functions.toProperCase(newPost.style)}</span>)

@@ -9,14 +9,17 @@ import image from "../assets/icons/image.png"
 import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
 import comic from "../assets/icons/comic.png"
-import explicit from "../assets/icons/explicit.png"
-import questionable from "../assets/icons/questionable.png"
-import safe from "../assets/icons/safe.png"
+import cute from "../assets/icons/cute.png"
+import sexy from "../assets/icons/sexy.png"
+import ecchi from "../assets/icons/ecchi.png"
+import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
+import sketch from "../assets/icons/sketch.png"
+import promo from "../assets/icons/promo.png"
 import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
@@ -35,7 +38,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const {setActionBanner} = useActiveActions()
     const {mobile} = useLayoutSelector()
     const [type, setType] = useState("image")
-    const [restrict, setRestrict] = useState("safe")
+    const [rating, setRating] = useState("cute")
     const [style, setStyle] = useState("2d")
     const [artists, setArtists] = useState("") as any
     const [characters, setCharacters] = useState("") as any
@@ -60,7 +63,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const updateFields = async () => {
         setType(tagEditID.post.type)
-        setRestrict(tagEditID.post.restrict)
+        setRating(tagEditID.post.rating)
         setStyle(tagEditID.post.style)
         setArtists(tagEditID.artists.map((t: any) => t.tag).join(" "))
         setCharacters(tagEditID.characters.map((t: any) => t.tag).join(" "))
@@ -75,7 +78,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const reset = () => {
         setType("image")
-        setRestrict("safe")
+        setRating("cute")
         setStyle("2d")
         setArtists("")
         setCharacters("") as any
@@ -146,7 +149,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 postID: tagEditID.post.postID,
                 unverified: tagEditID.unverified,
                 type,
-                restrict,
+                rating,
                 style,
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
@@ -196,7 +199,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             const data = {
                 postID: tagEditID.post.postID,
                 type,
-                restrict,
+                rating,
                 style,
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
@@ -308,10 +311,15 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         <img className="quickedit-button-img" src={pixel}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
+                    <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="quickedit-button-img" src={sketch}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button>
                 </div>
             )
         } else {
             return (
+                <>
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="quickedit-button-img" src={$2d}/>
@@ -335,6 +343,19 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         <span className="quickedit-button-text">{i18n.sortbar.style.daki}</span>
                     </button> : null}
                 </div>
+                <div className="dialog-row">
+                    {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="quickedit-button-img" src={sketch}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button> : null}
+                    {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                        <img className="quickedit-button-img" src={promo}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
+                    </button> : null}
+                </div>
+                </>
             )
         }
     }
@@ -343,11 +364,11 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         if (type === "comic") {
             if (style === "daki") setStyle("2d")
         } else if (type === "model") {
-            if (style === "2d" || style === "daki") setStyle("3d")
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
         } else if (type === "live2d") {
-            if (style === "3d") setStyle("2d")
+            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi" || style === "daki") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
         }
     }, [type, style])
 
@@ -429,36 +450,44 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             </div> </>}
             {mobile ? <>
             <div className="dialog-row">
-                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                    <img className="quickedit-button-img" src={safe}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.safe}</span>
+                <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="quickedit-button-img" src={cute}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                    <img className="quickedit-button-img" src={questionable}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.questionable}</span>
+                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="quickedit-button-img" src={sexy}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="quickedit-button-img" src={ecchi}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 {session.showR18 ?
-                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                    <img className="quickedit-button-img" src={explicit}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.explicit}</span>
+                <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="quickedit-button-img" src={hentai}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
                 </button> : null}
             </div>
             </> : <>
             <div className="dialog-row">
-                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                    <img className="quickedit-button-img" src={safe}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.safe}</span>
+                <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="quickedit-button-img" src={cute}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                    <img className="quickedit-button-img" src={questionable}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.questionable}</span>
+                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="quickedit-button-img" src={sexy}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="quickedit-button-img" src={ecchi}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
                 </button>
                 {session.showR18 ?
-                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                    <img className="quickedit-button-img" src={explicit}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.restrict.explicit}</span>
+                <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="quickedit-button-img" src={hentai}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
                 </button> : null}
             </div>
             </>}

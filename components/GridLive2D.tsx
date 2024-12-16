@@ -505,7 +505,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         //if (activeDropdown !== "none") return
         setScrollY(window.scrollY)
         if (selectionMode) {
-            if (event.metaKey || event.ctrlKey || event.button == 1) {
+            if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                 return
             } else {
                 const isSelected = !selected
@@ -522,7 +522,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             }
         } else {
             if (!drag) {
-                if (event.metaKey || event.ctrlKey || event.button == 1) {
+                if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
                     history.push(`/post/${props.id}/${props.post.slug}`)

@@ -418,7 +418,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
         setScrollY(window.scrollY)
         if (selectionMode) {
-            if (event.metaKey || event.ctrlKey || event.button == 1) {
+            if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                 return
             } else {
                 const isSelected = !selected
@@ -435,7 +435,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             }
         } else {
             if (!drag) {
-                if (event.metaKey || event.ctrlKey || event.button == 1) {
+                if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
                     history.push(`/post/${props.id}/${props.post.slug}`)

@@ -83,7 +83,7 @@ const App: React.FunctionComponent = (props) => {
     const {posts} = useCacheSelector()
     const {setEmojis} = useCacheActions()
     const {selectionMode} = useSearchSelector()
-    const {setRestrictType} = useSearchActions()
+    const {setRatingType} = useSearchActions()
     const history = useHistory()
     const location = useLocation()
 
@@ -103,8 +103,8 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
-        const savedRestrict = localStorage.getItem("restrict")
-        if (savedRestrict) setRestrictType(savedRestrict)
+        const savedRating = localStorage.getItem("rating")
+        if (savedRating) setRatingType(savedRating)
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()

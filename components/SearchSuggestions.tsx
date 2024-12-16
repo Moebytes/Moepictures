@@ -22,7 +22,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile, hideMobileNavbar} = useLayoutSelector()
-    const {search, restrictType} = useSearchSelector()
+    const {search, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const [suggestions, setSuggestions] = useState([]) as any
     const [activeIndex, setActiveIndex] = useState(-1)
@@ -99,7 +99,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
             if (!session.username) if (suggestions[i].r18) continue
-            if (restrictType !== "explicit") if (suggestions[i].r18) continue
+            if (!functions.isR18(ratingType)) if (suggestions[i].r18) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)

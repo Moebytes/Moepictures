@@ -54,7 +54,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const {commentID, commentJumpFlag, commentSearchFlag} = useFlagSelector()
     const {setCommentID, setCommentJumpFlag, setCommentSearchFlag} = useFlagActions()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const sortRef = useRef(null) as any
     const history = useHistory()
 
@@ -423,8 +423,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const comment = visible[i]
             if (comment.fake) continue
-            if (!session.username) if (comment.post.restrict !== "safe") continue
-            if (restrictType !== "explicit") if (comment.post.restrict === "explicit") continue
+            if (!session.username) if (comment.post.rating !== "safe") continue
+            if (!functions.isR18(ratingType)) if (functions.isR18(comment.post.rating)) continue
             jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {

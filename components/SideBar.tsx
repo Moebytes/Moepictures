@@ -623,7 +623,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const randomSearch = async () => {
         if (history.location.pathname.includes("/post/")) {
-            const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random"}, session, setSessionFlag)
+            const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random"}, session, setSessionFlag)
             history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
         } else {
             history.push(`/posts`)
@@ -830,7 +830,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (autoSearch && history.location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!autoSearch) return
-                const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
+                const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
                 history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
             }
             if (autoSearch) {
@@ -1020,8 +1020,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-alt">{i18n.sortbar.type[props.post.type]}</span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag">{i18n.sidebar.restrict}:</span>
-                            <span className="tag-alt">{i18n.sortbar.restrict[props.post.restrict]}</span>
+                            <span className="tag">{i18n.sidebar.rating}:</span>
+                            <span className="tag-alt">{i18n.sortbar.rating[props.post.rating]}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.style}:</span>
@@ -1058,7 +1058,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">{i18n.sidebar.sourceEdit}</span>
                             </span>
                         </div>
-                        {!props.unverified && props.post.restrict !== "explicit" ? <div className="sidebar-row">
+                        {!props.unverified && !functions.isR18(props.post.rating) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.setAvatar}</span>

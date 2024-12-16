@@ -45,7 +45,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {setSessionFlag, setUserImg} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setActiveFavgroup} = useActiveActions()
-    const {restrictType} = useSearchSelector()
+    const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {updateUserFlag} = useFlagSelector()
     const {setRedirect, setCommentSearchFlag} = useFlagActions()
@@ -97,8 +97,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateUploads = async () => {
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        const uploads = await functions.get("/api/user/uploads", {limit, restrict}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        const uploads = await functions.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
         const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(uploads)
         setUploadImages(images)
@@ -107,8 +107,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploadOffset = async () => {
         const newUploads = uploads
         let offset = newUploads.length
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        const result = await functions.get("/api/user/uploads", {limit, restrict, offset}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
         const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(newUploads)
@@ -116,8 +116,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateFavorites = async () => {
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        const favorites = await functions.get("/api/user/favorites", {limit, restrict}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        const favorites = await functions.get("/api/user/favorites", {limit, rating}, session, setSessionFlag)
         const images = favorites.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(favorites)
         setFavoriteImages(images)
@@ -126,8 +126,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavoriteOffset = async () => {
         const newFavorites = favorites
         let offset = newFavorites.length
-        let restrict = restrictType === "explicit" ? "explicit" : "all"
-        const result = await functions.get("/api/user/favorites", {limit, restrict, offset}, session, setSessionFlag)
+        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(newFavorites)
@@ -141,7 +141,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
-        let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
+        let filtered = comments.filter((c: any) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
         setComments(filtered)
     }
 
@@ -168,7 +168,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         updateCounts()
         checkHiddenBanner()
         if (session.banned) updateBanReason()
-    }, [session, restrictType])
+    }, [session, ratingType])
 
     useEffect(() => {
         if (mobile) {
@@ -498,10 +498,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let jsx = [] as any
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
-            if (restrictType === "explicit") {
-                if (favgroup.restrict !== "explicit") continue
+            if (functions.isR18(ratingType)) {
+                if (!functions.isR18(favgroup.rating)) continue
             } else {
-                if (favgroup.restrict === "explicit") continue
+                if (functions.isR18(favgroup.rating)) continue
             }
             const images = favgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {

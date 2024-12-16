@@ -98,8 +98,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const {mobile, relative, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setRelative, setHideTitlebar} = useLayoutActions()
-    const {search, restrictType, autoSearch} = useSearchSelector()
-    const {setSearch, setSearchFlag, setImageType, setRestrictType, setStyleType, setSortType} = useSearchActions()
+    const {search, ratingType, autoSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
     const {scrollY, mobileScrolling} = useInteractionSelector()
     const {setEnableDrag, setScrollY, setMobileScrolling} = useInteractionActions()
     const {headerFlag} = useFlagSelector()
@@ -170,7 +170,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         if (props.reset) {
             setSearch("")
             setImageType("all")
-            setRestrictType("all")
+            setRatingType("all")
             setStyleType("all")
             setSortType("date")
             setSearchFlag(true)
@@ -247,7 +247,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[${i18n.sidebar.history}: ${props.historyID}]`}</span> : null}
                     {props.translationID ? <span style={{color: "var(--translationColor)", marginRight: "10px"}}>{`[${i18n.labels.translation}: ${props.translationID}]`}</span> : null}
-                    {restrictType === "explicit" ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                    {functions.isR18(ratingType) ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup}]</span> : null}
                     {activeFavgroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeFavgroup.name}]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[{i18n.labels.autoSearch}]</span> : null}

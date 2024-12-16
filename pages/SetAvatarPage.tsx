@@ -65,12 +65,12 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie || !post) return
-        if (!session.username && post.restrict !== "safe") {
+        if (!session.username && post.rating !== functions.r13()) {
             setRedirect(`/set-avatar/${postID}`)
             history.push("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
-        if (post.restrict === "explicit") {
+        if (functions.isR18(post.rating)) {
             functions.replaceLocation("/403")
         }
     }, [session, post])

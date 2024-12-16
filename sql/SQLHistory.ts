@@ -114,21 +114,21 @@ export default class SQLHistory {
 
     /** Insert post history */
     public static insertPostHistory = async (options: {username: string, postID: number, images: string[], uploader: string, 
-        updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, parentID: string, 
+        updater?: string, uploadDate: string, updatedDate: string, type: string, rating: string, style: string, parentID: string, 
         title: string, translatedTitle: string, posted: string, artist: string, link: string, hasUpscaled: boolean, hasOriginal: boolean,
         commentary: string, translatedCommentary: string, bookmarks: string, purchaseLink: string, mirrors: string, slug: string, artists: string[], characters: string[], 
         series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, changes: any, reason: string}) => {
-        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, parentID, title, 
+        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
         translatedTitle, posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, 
         slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
-        "type", "restrict", "style", "parentID", "title", "translatedTitle", "posted", "artist", "link", "commentary", "translatedCommentary", 
+        "type", "rating", "style", "parentID", "title", "translatedTitle", "posted", "artist", "link", "commentary", "translatedCommentary", 
         "bookmarks", "purchaseLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", "removedTags",
         "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 
             $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)`,
-            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, parentID, title, translatedTitle, 
+            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, translatedTitle, 
             posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, slug, hasOriginal, hasUpscaled, artists, characters, series, 
             tags, addedTags, removedTags, imageChanged, changes, reason]
         }
@@ -354,13 +354,13 @@ export default class SQLHistory {
     }
 
     /** Insert group history */
-    public static insertGroupHistory = async (options: {username: string, groupID: string, slug: string, name: string, date: string, restrict: string, 
+    public static insertGroupHistory = async (options: {username: string, groupID: string, slug: string, name: string, date: string, rating: string, 
         description: string, posts: any, addedPosts: string[], removedPosts: string[], orderChanged: boolean, changes: any, reason?: string}) => {
-        const {username, groupID, slug, name, date, restrict, description, posts, addedPosts, removedPosts, orderChanged, changes, reason} = options
+        const {username, groupID, slug, name, date, rating, description, posts, addedPosts, removedPosts, orderChanged, changes, reason} = options
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "restrict", "description", "posts", "addedPosts",
+            text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "rating", "description", "posts", "addedPosts",
             "removedPosts", "orderChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-            values: [groupID, username, date, slug, name, restrict, description, posts, addedPosts, removedPosts, orderChanged, changes, reason]
+            values: [groupID, username, date, slug, name, rating, description, posts, addedPosts, removedPosts, orderChanged, changes, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
@@ -486,11 +486,11 @@ export default class SQLHistory {
     }
 
     /** Get user search history */
-    public static userSearchHistory = async (username: string, limit?: string, offset?: string, search?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static userSearchHistory = async (username: string, limit?: string, offset?: string, search?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
         if (!sort || sort === "date") sort = "viewDate"
         if (sort === "reverse date") sort = "reverse viewDate"
         const {postJSON, values, searchValue, sortQuery, includeTags, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, search, type, restrict, style, sort, offset, limit, username: sessionUsername, outerSort: true})
+        SQLQuery.search.boilerplate({i: 2, search, type, rating, style, sort, offset, limit, username: sessionUsername, outerSort: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

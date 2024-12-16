@@ -94,11 +94,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(props.postHistory, session)
             const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
-            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
+            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, rating: props.postHistory.rating, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: Boolean(props.postHistory.parentID),
             series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
+            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, rating: props.postHistory.rating, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: Boolean(props.postHistory.parentID),
             series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, session, setSessionFlag)
         }
@@ -348,8 +348,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.type) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}:</span> {functions.toProperCase(props.postHistory.type)}</span>)
         }
-        if (!prevHistory || changes.restrict) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.restrict}:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
+        if (!prevHistory || changes.rating) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}:</span> {functions.toProperCase(props.postHistory.rating)}</span>)
         }
         if (!prevHistory || changes.style) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}:</span> {functions.toProperCase(props.postHistory.style)}</span>)

@@ -233,7 +233,7 @@ export default class Functions {
     
     public static arrayIncludes = (str: string, arr: string[]) => {
         for (let i = 0; i < arr.length; i++) {
-            if (str.includes(arr[i])) return true
+            if (str?.includes(arr[i])) return true
         }
         return false
     }
@@ -1296,12 +1296,33 @@ export default class Functions {
         return false
     }
       
-    public static validRestrict = (restrict: string, all?: boolean) => {
-        if (all) if (restrict === "all") return true
-        if (restrict === "safe" ||
-            restrict === "questionable" ||
-            restrict === "explicit") return true 
+    public static validRating = (rating: string, all?: boolean) => {
+        if (all) if (rating === "all") return true
+        if (rating === "cute" ||
+            rating === "sexy" ||
+            rating === "ecchi" ||
+            rating === "hentai") return true 
         return false
+    }
+
+    public static isR18 = (ratingType: string) => {
+        return ratingType === "hentai"
+    }
+
+    public static r18 = () => {
+        return "hentai"
+    }
+
+    public static r17 = () => {
+        return "ecchi"
+    }
+
+    public static r15 = () => {
+        return "sexy"
+    }
+
+    public static r13 = () => {
+        return "cute"
     }
       
     public static validStyle = (style: string, all?: boolean) => {
@@ -1310,7 +1331,9 @@ export default class Functions {
             style === "3d" ||
             style === "pixel" ||
             style === "chibi" ||
-            style === "daki") return true 
+            style === "daki" ||
+            style === "sketch" ||
+            style === "promo") return true 
         return false
     }
 
@@ -2439,7 +2462,7 @@ export default class Functions {
         if (post.hasChildren) return "var(--parentBorder)"
         if (post.parentID) return "var(--childBorder)"
         if (post.isGrouped) return "var(--groupBorder)"
-        if (Number(post.imageCount) > 1) return "var(--variationBorder)"
+        if (Number(post.variationCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"
     }
 
@@ -2595,8 +2618,8 @@ export default class Functions {
         if (oldPost.type !== newPost.type) {
             json.type = newPost.type
         }
-        if (oldPost.restrict !== newPost.restrict) {
-            json.restrict = oldPost.restrict
+        if (oldPost.rating !== newPost.rating) {
+            json.rating = oldPost.rating
         }
         if (oldPost.style !== newPost.style) {
             json.style = newPost.style

@@ -22,7 +22,7 @@ let limit = 100
 const ImageGrid: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
-    const {search, searchFlag, scroll, imageType, restrictType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch, showChildren} = useSearchSelector()
+    const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch, showChildren} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {posts, visiblePosts} = useCacheSelector()
     const {setPosts, setVisiblePosts} = useCacheActions()
@@ -93,7 +93,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setIndex(0)
         setVisiblePosts([])
         setSearch(query)
-        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit}, session, setSessionFlag)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -106,7 +106,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: "random", limit}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, sort: "random", limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -122,7 +122,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (!scroll) updateOffset()
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = () => {
+        const onDOMLoaded = async () => {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
             if (!scrollY) {
@@ -182,7 +182,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         window.scrollTo(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            functions.jumpToTop()
+            //functions.jumpToTop()
         }, 100)
         if (scroll) {
             setEnded(false)
@@ -211,22 +211,25 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         if (!scroll) updatePageOffset()
     }, [session, scroll, page, pageMultiplier, ended, noResults, sizeType, 
-        imageType, restrictType, styleType, sortType, sortReverse])
+        imageType, ratingType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         if (reloadedPost) {
-            reloadedPost = false
-            const savedPage = localStorage.getItem("page")
-            if (savedPage) setPage(Number(savedPage))
+            setTimeout(() => {
+                reloadedPost = false
+                const savedPage = localStorage.getItem("page")
+                if (savedPage) setPage(Number(savedPage))
+            }, 500)
             return
         }
         if (loaded) {
             setPage(1)
             searchPosts()
         }
-    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, sortReverse, scroll, loaded])
+    }, [searchFlag, imageType, sizeType, ratingType, styleType, sortType, sortReverse, scroll, loaded])
 
     useEffect(() => {
+        if (reloadedPost) return
         if (loaded) {
             searchPosts()
         }
@@ -245,6 +248,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (imageSearchFlag) {
+            reloadedPost = true
             setEnded(false)
             setIndex(0)
             setVisiblePosts([])
@@ -301,10 +305,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         let result = null as any
         if (isRandomSearch) {
-            result = await functions.get("/api/search/posts", {type: imageType, restrict: restrictType, style: styleType, sort: "random", limit, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, sort: "random", limit, offset: newOffset}, session, setSessionFlag)
         } else {
             const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
-            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit, offset: newOffset}, session, setSessionFlag)
         }
         let hasMore = result?.length >= limit
         const cleanPosts = posts.filter((p: any) => !p.fake)
@@ -351,7 +355,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [session, sizeType, scroll, pageMultiplier, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
+    }, [session, sizeType, scroll, pageMultiplier, sizeType, imageType, ratingType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -375,7 +379,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             window.removeEventListener("scroll", scrollHandler)
         }
     }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType,
-        imageType, restrictType, styleType, sortType, sortReverse, pageMultiplier])
+        imageType, ratingType, styleType, sortType, sortReverse, pageMultiplier])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
@@ -558,7 +562,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const post = visible[i] as any
             if (post.fake) continue
             if (!showChildren) if (post.parentID) continue
-            if (restrictType !== "explicit") if (post.restrict === "explicit") continue
+            if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
             const image = post.images[0]
             if (!image) continue
             const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)

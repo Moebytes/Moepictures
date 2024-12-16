@@ -24,7 +24,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let query = req.query.query as string
             const type = req.query.type as string
-            const restrict = req.query.restrict as string
+            const rating = req.query.rating as string
             const style = req.query.style as string
             const sort = req.query.sort as string
             const offset = req.query.offset as string
@@ -32,8 +32,8 @@ const SearchRoutes = (app: Express) => {
             let withTags = req.query.withTags === "true"
             if (!query) query = ""
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
-            if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (!req.session.showR18) return res.status(403).end()
+            if (!functions.validRating(rating, true)) return res.status(400).send("Invalid rating")
+            if (functions.isR18(rating)) if (!req.session.showR18) return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
@@ -81,20 +81,20 @@ const SearchRoutes = (app: Express) => {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user?.publicFavorites) return res.status(403).send("Unauthorized")
-                result = await sql.favorite.favorites(username, limit, offset, type, restrict, style, sort, req.session.username)
+                result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, req.session.username)
             } else if (query.startsWith("uploads:")) {
                 const username = query.replace("uploads:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(400).send("Bad username")
-                result = await sql.user.uploads(username, limit, offset, type, restrict, style, sort, req.session.username)
+                result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, req.session.username)
             } else if (query.startsWith("group:")) {
                 const [g, name] = query.split(":")
                 let group = await sql.group.group(functions.generateSlug(name))
                 if (!group) return res.status(400).send("Bad group")
-                result = await sql.group.searchGroup(group.groupID, limit, offset, type, restrict, style, sort, req.session.username)
+                result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, req.session.username)
             } else if (query.startsWith("favgroup:")) {
                 const [f, username, name] = query.split(":")
-                let favgroup = await sql.favorite.favgroup(username, name, type, restrict, style, sort, req.session.username)
+                let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, sort, req.session.username)
                 if (!favgroup) return res.status(400).send("Bad favgroup")
                 if (favgroup.private) {
                     if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
@@ -104,10 +104,10 @@ const SearchRoutes = (app: Express) => {
                 const [h, username] = query.split(":")
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
                 if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
-                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, restrict, style, sort, req.session.username)
+                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, req.session.username)
                 result = history.map((h: any) => ({postCount: h.historyCount, ...h.post}))
             } else {
-                result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
+                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, req.session.username)
             }
             result = result.map((p: any) => {
                 if (p.images?.length > 1) {
@@ -120,7 +120,7 @@ const SearchRoutes = (app: Express) => {
                 result = functions.stripTags(result)
             }
             if (!req.session.showR18) {
-                result = result.filter((p: any) => p.restrict !== "explicit")
+                result = result.filter((p: any) => !functions.isR18(p.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
@@ -187,7 +187,7 @@ const SearchRoutes = (app: Express) => {
                     artist.posts = artist.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    artist.posts = artist.posts.filter((p: any) => p?.restrict !== "explicit")
+                    artist.posts = artist.posts.filter((p: any) => !functions.isR18(p?.rating))
                 }
                 for (let i = artist.posts.length - 1; i >= 0; i--) {
                     const post = artist.posts[i]
@@ -220,7 +220,7 @@ const SearchRoutes = (app: Express) => {
                     character.posts = character.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    character.posts = character.posts.filter((p: any) => p?.restrict !== "explicit")
+                    character.posts = character.posts.filter((p: any) => !functions.isR18(p?.rating))
                 }
                 for (let i = character.posts.length - 1; i >= 0; i--) {
                     const post = character.posts[i]
@@ -253,7 +253,7 @@ const SearchRoutes = (app: Express) => {
                     series.posts = series.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    series.posts = series.posts.filter((p: any) => p?.restrict !== "explicit")
+                    series.posts = series.posts.filter((p: any) => !functions.isR18(p?.rating))
                 }
                 for (let i = series.posts.length - 1; i >= 0; i--) {
                     const post = series.posts[i]
@@ -330,7 +330,7 @@ const SearchRoutes = (app: Express) => {
                     if (comment.post.hidden) result.splice(i, 1)
                 }
                 if (!req.session.showR18) {
-                    if (comment.post.restrict === "explicit") result.splice(i, 1)
+                    if (functions.isR18(comment.post.rating)) result.splice(i, 1)
                 }
                 if (comment.post.private) {
                     const categories = await serverFunctions.tagCategories(comment.post.tags)
@@ -348,14 +348,14 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
-            let restrict = req.query.restrict as string
+            let rating = req.query.rating as string
             const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validGroupSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let  result = await sql.search.groupSearch(search, sort, restrict, limit, offset)
+            let  result = await sql.search.groupSearch(search, sort, rating, limit, offset)
             if (!req.session.showR18) {
-                result = result.filter((g: any) => g.restrict !== "explicit")
+                result = result.filter((g: any) => !functions.isR18(g.rating))
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {

@@ -42,7 +42,7 @@ const PostsPage: React.FunctionComponent = (props) => {
             setHideNavbar(true)
         }
         const savedSidebar = localStorage.getItem("sidebar")
-        if (savedSidebar === "false") setHideSidebar(true)
+        if (savedSidebar === "true") setHideSidebar(true)
         const savedSquare = localStorage.getItem("square")
         if (savedSquare === "true") setSquare(true)
 

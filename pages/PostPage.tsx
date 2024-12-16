@@ -63,8 +63,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {restrictType} = useSearchSelector()
-    const {setRestrictType} = useSearchActions()
+    const {ratingType} = useSearchSelector()
+    const {setRatingType} = useSearchActions()
     const {posts} = useCacheSelector()
     const {setPosts, setTags} = useCacheActions()
     const {postFlag} = useFlagSelector()
@@ -164,11 +164,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             setRedirect(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
         }
-        if (!session.username && post.restrict !== "safe") {
+        if (!session.username && post.rating !== functions.r13()) {
             history.push("/login")
             setSidebarText("Login required.")
         }
-        if (post.restrict === "explicit") {
+        if (functions.isR18(post.rating)) {
             if (!session.showR18) {
                 functions.replaceLocation("/404")
             } else {
@@ -247,7 +247,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.artists?.[0]?.tag || !post) return
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
-                let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
                 artistPosts = artistPosts.filter((p: any) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
@@ -258,7 +258,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.characters?.[0]?.tag || !post) return
             if (tagCategories?.characters?.[0]?.tag !== characterTag) {
                 try {
-                    let relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
+                    let relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, rating: functions.isR18(post.rating) ? functions.r18() : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
                     relatedPosts = relatedPosts.filter((p: any) => p.postID !== postID)
                     if (relatedPosts?.length) setRelatedPosts(relatedPosts)
                     characterTag = tagCategories.characters[0].tag
@@ -363,13 +363,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setImage(images[0])
                 setOrder(1)
             }
-            if (restrictType === "explicit") {
-                if (post.restrict !== "explicit") setRestrictType("all")
+            if (functions.isR18(ratingType)) {
+                if (!functions.isR18(post.rating)) setRatingType("all")
             } else {
-                if (post.restrict === "explicit") setRestrictType("explicit")
+                if (functions.isR18(post.rating)) setRatingType(functions.r18())
             }
         }
-    }, [post, restrictType, order, session.upscaledImages])
+    }, [post, ratingType, order, session.upscaledImages])
 
     useEffect(() => {
         const historyParam = new URLSearchParams(window.location.search).get("history")
@@ -424,13 +424,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (currentIndex !== -1) {
             currentIndex++
             if (!session.username) {
-                while (posts[currentIndex]?.restrict !== "safe") {
+                while (posts[currentIndex]?.rating !== functions.r13()) {
                     currentIndex++
                     if (currentIndex >= posts.length) break
                 }
             }
-            if (restrictType !== "explicit") {
-                while (posts[currentIndex]?.restrict === "explicit") {
+            if (!functions.isR18(ratingType)) {
+                while (functions.isR18(posts[currentIndex]?.rating)) {
                     currentIndex++
                     if (currentIndex >= posts.length) break
                 }
@@ -449,13 +449,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (currentIndex !== -1) {
             currentIndex--
             if (!session.username) {
-                while (posts[currentIndex]?.restrict !== "safe") {
+                while (posts[currentIndex]?.rating !== functions.r13()) {
                     currentIndex--
                     if (currentIndex <= -1) break
                 }
             }
-            if (restrictType !== "explicit") {
-                while (posts[currentIndex]?.restrict === "explicit") {
+            if (!functions.isR18(ratingType)) {
+                while (functions.isR18(posts[currentIndex]?.rating)) {
                     currentIndex--
                     if (currentIndex <= -1) break
                 }
@@ -477,7 +477,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const nsfwChecker = () => {
         if (!post) return false
         if (post.postID !== postID) return false
-        if (post.restrict !== "safe") {
+        if (post.rating !== functions.r13()) {
             if (loaded) return true
             return false
         } else {
@@ -539,11 +539,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
-            await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
+            await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source,
             style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
             series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict, source,
+            await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
             style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
             series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
         }
@@ -611,7 +611,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const generateActiveFavgroupJSX = () => {
         if (activeFavgroup) {
-            if (activeFavgroup.restrict === "explicit") if (restrictType !== "explicit") return null
+            if (functions.isR18(activeFavgroup.rating)) if (!functions.isR18(ratingType)) return null
             const images = activeFavgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
@@ -635,7 +635,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
-            if (group.restrict === "explicit") if (restrictType !== "explicit") continue
+            if (functions.isR18(group.rating)) if (!functions.isR18(ratingType)) continue
             const images = group.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID

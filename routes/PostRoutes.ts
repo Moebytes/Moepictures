@@ -41,7 +41,7 @@ const PostRoutes = (app: Express) => {
                 if (result.hidden) return res.status(404).end()
             }
             if (!req.session.showR18) {
-                if (result.restrict === "explicit") return res.status(404).end()
+                if (functions.isR18(result.rating)) return res.status(404).end()
             }
             if (result.private) {
                 const categories = await serverFunctions.tagCategories(result.tags)
@@ -69,7 +69,7 @@ const PostRoutes = (app: Express) => {
                 result = result.filter((p: any) => !p.hidden)
             }
             if (!req.session.showR18) {
-                result = result.filter((p: any) => p.restrict !== "explicit")
+                result = result.filter((p: any) => !functions.isR18(p.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
@@ -96,7 +96,7 @@ const PostRoutes = (app: Express) => {
                 if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
-                if (post.restrict === "explicit") return res.status(403).end()
+                if (functions.isR18(post.rating)) return res.status(403).end()
             }
             if (post.private) {
                 const categories = await serverFunctions.tagCategories(post.tags)
@@ -121,7 +121,7 @@ const PostRoutes = (app: Express) => {
                 if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
-                if (post.restrict === "explicit") return res.status(403).end()
+                if (functions.isR18(post.rating)) return res.status(403).end()
             }
             if (post.private) {
                 const categories = await serverFunctions.tagCategories(post.tags)
@@ -143,7 +143,7 @@ const PostRoutes = (app: Express) => {
             if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
-            let r18 = post.restrict === "explicit"
+            let r18 = functions.isR18(post.rating)
             await sql.post.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
@@ -232,7 +232,7 @@ const PostRoutes = (app: Express) => {
                 result = result.filter((r: any) => !r.post?.hidden)
             }
             if (!req.session.showR18) {
-                result = result.filter((r: any) => r.post?.restrict !== "explicit")
+                result = result.filter((r: any) => !functions.isR18(r.post?.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i].post
@@ -258,7 +258,7 @@ const PostRoutes = (app: Express) => {
                 if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
-                if (post.restrict === "explicit") return res.status(403).end()
+                if (functions.isR18(post.rating)) return res.status(403).end()
             }
             if (post.private) {
                 const categories = await serverFunctions.tagCategories(post.tags)
@@ -397,7 +397,7 @@ const PostRoutes = (app: Express) => {
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
             let type = req.body.type 
-            const restrict = req.body.restrict 
+            const rating = req.body.rating 
             const style = req.body.style
             const source = req.body.source
             const parentID = req.body.parentID
@@ -499,18 +499,20 @@ const PostRoutes = (app: Express) => {
                 tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
         
                 if (!functions.validType(type)) return res.status(400).send("Invalid type")
-                if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+                if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
                 if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
         
-                let oldR18 = post.restrict === "explicit"
-                let newR18 = restrict === "explicit"
+                let oldR18 = functions.isR18(post.rating)
+                let newR18 = functions.isR18(rating)
+                let oldType = post.type 
+                let newType = type
         
                 const updatedDate = new Date().toISOString()
 
                 if (unverified) {
                     await sql.post.bulkUpdateUnverifiedPost(postID, {
                         type,
-                        restrict, 
+                        rating, 
                         style,
                         updatedDate,
                         updater: req.session.username
@@ -518,7 +520,7 @@ const PostRoutes = (app: Express) => {
                 } else {
                     await sql.post.bulkUpdatePost(postID, {
                         type,
-                        restrict, 
+                        rating, 
                         style,
                         updatedDate,
                         updater: req.session.username
@@ -580,7 +582,7 @@ const PostRoutes = (app: Express) => {
                     await sql.tag.deleteTagMap(postID, removedTags)
                     await sql.tag.insertTagMap(postID, addedTags)
                     
-                    await serverFunctions.migratePost(post, oldR18, newR18)
+                    await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
                 }
             }
 
@@ -615,7 +617,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.history.insertPostHistory({
                     postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
-                    uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+                    uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
                     style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                     posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                     bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
@@ -627,7 +629,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
-                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
@@ -640,7 +642,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
-                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
@@ -658,7 +660,7 @@ const PostRoutes = (app: Express) => {
         try {
             let postID = Number(req.body.postID)
             let type = req.body.type 
-            let restrict = req.body.restrict 
+            let rating = req.body.rating 
             let style = req.body.style
             let source = req.body.source
             let parentID = req.body.parentID
@@ -689,7 +691,7 @@ const PostRoutes = (app: Express) => {
                 series = categories.series.map((s: any) => s.tag)
                 tags = categories.tags.map((t: any) => t.tag)
                 type = post.type
-                restrict = post.restrict
+                rating = post.rating
                 style = post.style
             } 
             if (!sourceEdit) {
@@ -727,7 +729,7 @@ const PostRoutes = (app: Express) => {
             tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
     
             if (!functions.validType(type)) return res.status(400).send("Invalid type")
-            if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+            if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
     
             if (parentID) {
@@ -739,7 +741,7 @@ const PostRoutes = (app: Express) => {
             let hasUpscaled = false
             let originalCheck = [] as string[]
             let upscaledCheck = [] as string[]
-            let r18 = post.restrict === "explicit"
+            let r18 = functions.isR18(post.rating)
 
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
@@ -830,7 +832,7 @@ const PostRoutes = (app: Express) => {
                 originalID: originalPostID ? originalPostID : null,
                 reason: reason ? reason : null,
                 type,
-                restrict, 
+                rating, 
                 style, 
                 parentID: post.parentID,
                 title: source.title ? source.title : null,
@@ -988,7 +990,7 @@ const PostRoutes = (app: Express) => {
                 return res.status(400).send("Bad historyID")
             } else {
                 const currentHistory = postHistory.find((history: any) => history.historyID === historyID)
-                let r18 = currentHistory.restrict === "explicit"
+                let r18 = functions.isR18(currentHistory.rating)
                 for (let i = 0; i < currentHistory.images?.length; i++) {
                     const image = currentHistory.images[i]
                     if (image?.includes("history/")) {

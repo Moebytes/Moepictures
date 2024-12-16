@@ -75,7 +75,7 @@ const FavoriteRoutes = (app: Express) => {
             const post = await sql.post.post(postID)
             if (!post) return res.status(400).send("Invalid post")
             const slug = functions.generateSlug(name)
-            await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.restrict)
+            await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
             try {
                 const favgroup = await sql.favorite.favgroup(req.session.username, slug)
                 if (!favgroup) {
@@ -83,11 +83,13 @@ const FavoriteRoutes = (app: Express) => {
                 } else {
                     if (!favgroup.posts?.length) favgroup.posts = [{order: 0}]
                     const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
-                    if (favgroup.restrict !== post.restrict) {
-                        if (post.restrict === "explicit") {
-                            await sql.favorite.updateFavGroup(req.session.username, slug, "restrict", "explicit")
-                        } else if (post.restrict === "questionable" && favgroup.restrict !== "explicit") {
-                            await sql.favorite.updateFavGroup(req.session.username, slug, "restrict", "questionable")
+                    if (favgroup.rating !== post.rating) {
+                        if (post.rating === functions.r18()) {
+                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r18())
+                        } else if (post.rating === functions.r17() && favgroup.rating !== functions.r18()) {
+                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r17())
+                        } else if (post.rating === functions.r15() && favgroup.rating !== functions.r17() && favgroup.rating !== functions.r18()) {
+                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r15())
                         }
                     }
                     await sql.favorite.insertFavgroupPost(req.session.username, slug, Number(postID), maxOrder + 1)
@@ -113,7 +115,7 @@ const FavoriteRoutes = (app: Express) => {
                     group.posts = group.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    if (group.restrict === "explicit") continue
+                    if (functions.isR18(group.rating)) continue
                 }
                 for (let i = group.posts.length - 1; i >= 0; i--) {
                     const post = group.posts[i]
@@ -141,12 +143,13 @@ const FavoriteRoutes = (app: Express) => {
             const favgroup = await sql.favorite.favgroup(req.session.username, slug)
             if (!favgroup) return res.status(400).send("Invalid favgroup")
             let filteredPosts = favgroup.posts.filter((p: any) => String(p.postID) !== String(postID))
-            let restrict = "safe"
+            let rating = functions.r13()
             for (const filteredPost of filteredPosts) {
-                if (filteredPost.restrict === "explicit") restrict = "explicit"
-                if (filteredPost.restrict === "questionable" && restrict !== "explicit") restrict = "questionable"
+                if (filteredPost.rating === functions.r18()) rating = functions.r18()
+                if (filteredPost.rating === functions.r17() && rating !== functions.r18()) rating = functions.r17()
+                if (filteredPost.rating === functions.r15() && rating !== functions.r17() && rating !== functions.r18()) rating = functions.r15()
             }
-            await sql.favorite.updateFavGroup(req.session.username, slug, "restrict", restrict)
+            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", rating)
             await sql.favorite.deleteFavgroupPost(Number(postID), req.session.username, favgroup.slug)
             if (favgroup.posts.length === 1) {
                 await sql.favorite.deleteFavgroup(req.session.username, favgroup.slug)
@@ -173,7 +176,7 @@ const FavoriteRoutes = (app: Express) => {
                 favgroup.posts = favgroup.posts.filter((p: any) => !p?.hidden)
             }
             if (!req.session.showR18) {
-                if (favgroup.restrict === "explicit") return res.status(403).end()
+                if (functions.isR18(favgroup.rating)) return res.status(403).end()
             }
             for (let i = favgroup.posts.length - 1; i >= 0; i--) {
                 const post = favgroup.posts[i]

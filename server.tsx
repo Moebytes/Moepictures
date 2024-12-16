@@ -235,7 +235,7 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.post(Number(postID))
-        if (post.restrict === "explicit") {
+        if (functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
@@ -286,7 +286,7 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.post(Number(postID))
-        if (post.restrict === "explicit") {
+        if (functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }

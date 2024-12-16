@@ -82,7 +82,7 @@ const CreateRoutes = (app: Express) => {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages
         let type = req.body.type 
-        const restrict = req.body.restrict 
+        const rating = req.body.rating 
         const style = req.body.style
         const parentID = req.body.parentID 
         const source = req.body.source 
@@ -139,7 +139,7 @@ const CreateRoutes = (app: Express) => {
         const totalMB = originalMB + upscaledMB
         if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const postID = await sql.post.insertPost()
@@ -159,7 +159,7 @@ const CreateRoutes = (app: Express) => {
 
         let hasOriginal = false
         let hasUpscaled = false
-        let r18 = restrict === "explicit"
+        let r18 = functions.isR18(rating)
 
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
@@ -253,7 +253,7 @@ const CreateRoutes = (app: Express) => {
 
         const uploadDate = new Date().toISOString()
         await sql.post.bulkUpdatePost(postID, {
-          restrict, 
+          rating, 
           style, 
           parentID: parentID || null,
           title: source.title ? source.title : null,
@@ -382,7 +382,7 @@ const CreateRoutes = (app: Express) => {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages
         let type = req.body.type 
-        const restrict = req.body.restrict 
+        const rating = req.body.rating 
         const style = req.body.style
         const parentID = req.body.parentID 
         const source = req.body.source 
@@ -445,14 +445,16 @@ const CreateRoutes = (app: Express) => {
         const totalMB = originalMB + upscaledMB
         if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const post = await sql.post.post(postID)
         if (!post) return res.status(400).send("Bad request")
         if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
-        let oldR18 = post.restrict === "explicit"
-        let newR18 = restrict === "explicit"
+        let oldR18 = functions.isR18(post.rating)
+        let newR18 = functions.isR18(rating)
+        let oldType = post.type
+        let newType = type
 
         let imgChanged = await serverFunctions.imagesChanged(post.images, images, false, oldR18)
         if (!imgChanged) imgChanged = await serverFunctions.imagesChanged(post.images, upscaledImages, true, oldR18)
@@ -577,7 +579,7 @@ const CreateRoutes = (app: Express) => {
         if (!updatedDate) updatedDate = new Date().toISOString()
         await sql.post.bulkUpdatePost(postID, {
           type,
-          restrict, 
+          rating, 
           style, 
           parentID: parentID || null,
           title: source.title ? source.title : null,
@@ -691,7 +693,7 @@ const CreateRoutes = (app: Express) => {
           await sql.post.deleteUnverifiedPost(Number(unverifiedID))
         }
 
-        await serverFunctions.migratePost(post, oldR18, newR18)
+        await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
 
         if (permissions.isMod(req.session)) {
           if (silent) return res.status(200).send("Success")
@@ -703,7 +705,7 @@ const CreateRoutes = (app: Express) => {
 
 
         const updated = await sql.post.post(postID)
-        let r18 = updated.restrict === "explicit"
+        let r18 = functions.isR18(updated.rating)
 
         const changes = functions.parsePostChanges(post, updated)
 
@@ -737,7 +739,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.history.insertPostHistory({
               postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
-              uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+              uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
               style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
               posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
               bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
@@ -765,7 +767,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
               style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
@@ -804,7 +806,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
               style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
@@ -823,7 +825,7 @@ const CreateRoutes = (app: Express) => {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages 
         let type = req.body.type 
-        const restrict = req.body.restrict 
+        const rating = req.body.rating 
         const style = req.body.style
         const parentID = req.body.parentID 
         const source = req.body.source 
@@ -878,7 +880,7 @@ const CreateRoutes = (app: Express) => {
         const totalMB = originalMB + upscaledMB
         if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const postID = await sql.post.insertUnverifiedPost()
@@ -978,7 +980,7 @@ const CreateRoutes = (app: Express) => {
 
         const uploadDate = new Date().toISOString()
         await sql.post.bulkUpdateUnverifiedPost(postID, {
-          restrict, 
+          rating, 
           style, 
           parentID: parentID || null,
           title: source.title ? source.title : null,
@@ -1101,7 +1103,7 @@ const CreateRoutes = (app: Express) => {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages 
         let type = req.body.type 
-        const restrict = req.body.restrict 
+        const rating = req.body.rating 
         const style = req.body.style
         const parentID = req.body.parentID 
         const source = req.body.source 
@@ -1158,15 +1160,15 @@ const CreateRoutes = (app: Express) => {
         const totalMB = originalMB + upscaledMB
         if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const originalPostID = postID as any
         postID = unverifiedID ? unverifiedID : await sql.post.insertUnverifiedPost()
         const unverifiedPost = await sql.post.unverifiedPost(postID)
         if (!unverifiedPost) return res.status(400).send("Bad unverifiedID")
-        let oldR18 = unverifiedPost.restrict === "explicit"
-        let newR18 = restrict === "explicit"
+        let oldR18 = functions.isR18(unverifiedPost.rating)
+        let newR18 = functions.isR18(rating)
 
         let post = null as any
         if (originalPostID) {
@@ -1280,7 +1282,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdateUnverifiedPost(postID, {
           originalID: originalPostID ? originalPostID : null,
           reason: reason ? reason : null,
-          restrict, 
+          rating, 
           style, 
           parentID: parentID || null,
           title: source.title ? source.title : null,
@@ -1428,8 +1430,10 @@ const CreateRoutes = (app: Express) => {
         const newPostID = unverified.originalID ? Number(unverified.originalID) : await sql.post.insertPost()
 
         let post = unverified.originalID ? await sql.post.post(unverified.originalID) : null
-        let oldR18 = post ? post.restrict === "explicit" : unverified.restrict === "explicit"
-        let newR18 = unverified.restrict === "explicit"
+        let oldR18 = post ? functions.isR18(post.rating) : functions.isR18(unverified.rating)
+        let newR18 = functions.isR18(unverified.rating)
+        let oldType = post ? post.type : unverified.type
+        let newType = unverified.type
 
         let imgChanged = true
         if (unverified.originalID) {
@@ -1571,7 +1575,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         await sql.post.bulkUpdatePost(newPostID, {
-          restrict: unverified.restrict,
+          rating: unverified.rating,
           style: unverified.style,
           parentID: unverified.parentID,
           title: unverified.title ? unverified.title : null,
@@ -1684,12 +1688,12 @@ const CreateRoutes = (app: Express) => {
         }
 
         if (post) {
-          await serverFunctions.migratePost(post, oldR18, newR18)
+          await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
         }
 
         if (unverified.originalID) {
           const updated = await sql.post.post(unverified.originalID)
-          let r18 = updated.restrict === "explicit"
+          let r18 = functions.isR18(updated.rating)
 
           const changes = functions.parsePostChanges(post, updated)
           const postHistory = await sql.history.postHistory(newPostID)
@@ -1722,7 +1726,7 @@ const CreateRoutes = (app: Express) => {
               }
               await sql.history.insertPostHistory({
                 postID: newPostID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
-                uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+                uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
                 style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
                 posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                 bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
@@ -1752,7 +1756,7 @@ const CreateRoutes = (app: Express) => {
               }
               await sql.history.insertPostHistory({
                 postID: newPostID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                 style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
@@ -1793,7 +1797,7 @@ const CreateRoutes = (app: Express) => {
               }
               await sql.history.insertPostHistory({
                 postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                 style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 

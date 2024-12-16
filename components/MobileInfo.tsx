@@ -683,8 +683,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-alt">{i18n.sortbar.type[props.post.type]}</span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag">{i18n.sidebar.restrict}:</span>
-                                <span className="tag-alt">{i18n.sortbar.restrict[props.post.restrict]}</span>
+                                <span className="tag">{i18n.sidebar.rating}:</span>
+                                <span className="tag-alt">{i18n.sortbar.rating[props.post.rating]}</span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sidebar.style}:</span>
@@ -726,7 +726,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">{i18n.sidebar.sourceEdit}</span>
                             </span>
                         </div>
-                        {!props.unverified && props.post.restrict !== "explicit" ? <div className="mobileinfo-row">
+                        {!props.unverified && !functions.isR18(props.post.rating) ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.setAvatar}</span>

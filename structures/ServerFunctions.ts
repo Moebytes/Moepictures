@@ -473,15 +473,28 @@ export default class ServerFunctions {
         return false
     }
 
-    public static migratePost = async (post: any, oldR18: boolean, newR18: boolean) => {
-        if (oldR18 === newR18) return
+    public static migratePost = async (post: any, oldType: string, newType: string, oldR18: boolean, newR18: boolean) => {
+        if (oldType === newType && oldR18 === newR18) return
+        for (let i = 0; i < post.images.length; i++) {
+            if ((post.images[i].type === "image" || post.images[i].type === "comic") && 
+            (newType === "image" || newType === "comic")) {
+                await sql.post.updateImage(post.images[i].imageID, "type", newType)
+            }
+        }
+        const updated = await sql.post.post(post.postID)
         for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename) 
-            ServerFunctions.renameFile(imagePath, imagePath, oldR18, newR18)
-            ServerFunctions.renameFile(upscaledImagePath, upscaledImagePath, oldR18, newR18)
+            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            const updatedImagePath = functions.getImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].filename)
+            const updatedUpscaledImagePath = functions.getUpscaledImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename)
+            if (oldR18 !== newR18 || imagePath !== updatedImagePath || upscaledImagePath !== updatedUpscaledImagePath) {
+                ServerFunctions.renameFile(imagePath, updatedImagePath, oldR18, newR18)
+                ServerFunctions.renameFile(upscaledImagePath, updatedUpscaledImagePath, oldR18, newR18)
+            } 
         }
-        ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
+        if (oldR18 !== newR18) {
+            ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
+        }
     }
 
     public static updateImplications = async (posts: any[], implications: string[]) => {
