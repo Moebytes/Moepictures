@@ -595,7 +595,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                 translatedTitle = translated[0]
                 translatedCommentary = translated[1]
-                if (illust.x_rating !== 0) {
+                if (illust.x_restrict !== 0) {
                     if (rating === "cute") rating = "ecchi"
                 }
                 artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
@@ -677,7 +677,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
-                        if (illust.x_rating !== 0) {
+                        if (illust.x_restrict !== 0) {
                             if (rating === "cute") rating = "ecchi"
                         }
                         artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])

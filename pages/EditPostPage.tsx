@@ -1042,7 +1042,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                     translatedTitle = translated[0]
                     translatedCommentary = translated[1]
-                    if (illust.x_rating !== 0) {
+                    if (illust.x_restrict !== 0) {
                         if (rating === "cute") setRating("ecchi")
                     }
                     const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
@@ -1104,7 +1104,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                             translatedTitle = translated[0]
                             translatedCommentary = translated[1]
-                            if (illust.x_rating !== 0) {
+                            if (illust.x_restrict !== 0) {
                                 setRating("ecchi")
                             } else {
                                 setRating("cute")
