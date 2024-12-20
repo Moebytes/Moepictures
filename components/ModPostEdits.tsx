@@ -378,8 +378,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.title) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.title}:</span> {newPost.title || i18n.labels.none}</span>)
         }
-        if (changes.translatedTitle) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.translatedTitle}:</span> {newPost.translatedTitle || i18n.labels.none}</span>)
+        if (changes.englishTitle) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.englishTitle}:</span> {newPost.englishTitle || i18n.labels.none}</span>)
         }
         if (changes.artist) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.tag.artist}:</span> {newPost.artist || i18n.labels.unknown}</span>)
@@ -402,8 +402,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.commentary) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.commentary}:</span> {newPost.commentary || i18n.labels.none}</span>)
         }
-        if (changes.translatedCommentary) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.translatedCommentary}:</span> {newPost.translatedCommentary || i18n.labels.none}</span>)
+        if (changes.englishCommentary) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.englishCommentary}:</span> {newPost.englishCommentary || i18n.labels.none}</span>)
         }
         return jsx
     }

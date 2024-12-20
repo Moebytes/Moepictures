@@ -149,13 +149,18 @@
 }
 
 .comments-preview {
+    display: flex;
+    flex-direction: column;
     margin-left: 10px;
     background-color: var(--inputBG);
     border: 1px solid var(--inputBorder);
-    font-family: Tahoma, sans-serif;
-    color: var(--text);
-    font-size: 22px;
     min-height: 200px;
+    & > div > span {
+        font-size: 21px;
+    }
+    & > span {
+        font-size: 25px;
+    }
 }
 
 .comments-preview-button {
@@ -176,5 +181,12 @@
 
     .comments-text {
         margin-left: 2px;
+    }
+
+    .comments-textarea-button {
+        & > img {
+            width: auto;
+            height: 15px;
+        }
     }
 }

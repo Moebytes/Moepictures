@@ -90,12 +90,12 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [parentID, setParentID] = useState("")
     const [sourceTitle, setSourceTitle] = useState("")
-    const [sourceTranslatedTitle, setSourceTranslatedTitle] = useState("")
+    const [sourceEnglishTitle, setSourceEnglishTitle] = useState("")
     const [sourceArtist, setSourceArtist] = useState("")
     const [sourceDate, setSourceDate] = useState("")
     const [sourceLink, setSourceLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
-    const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
+    const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourcePurchaseLink, setSourcePurchaseLink] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
@@ -334,10 +334,10 @@ const UploadPage: React.FunctionComponent = (props) => {
     const reset = () => {
         setParentID("")
         setSourceTitle("")
-        setSourceTranslatedTitle("")
+        setSourceEnglishTitle("")
         setSourceArtist("")
         setSourceCommentary("")
-        setSourceTranslatedCommentary("")
+        setSourceEnglishCommentary("")
         setSourceMirrors("")
         setSourceDate("")
         setSourceLink("")
@@ -847,12 +847,12 @@ const UploadPage: React.FunctionComponent = (props) => {
             parentID,
             source: {
                 title: sourceTitle,
-                translatedTitle: sourceTranslatedTitle,
+                englishTitle: sourceEnglishTitle,
                 artist: sourceArtist,
                 posted: sourceDate,
                 link: sourceLink,
                 commentary: sourceCommentary,
-                translatedCommentary: sourceTranslatedCommentary,
+                englishCommentary: sourceEnglishCommentary,
                 bookmarks: sourceBookmarks,
                 purchaseLink: sourcePurchaseLink,
                 mirrors: sourceMirrors
@@ -904,9 +904,9 @@ const UploadPage: React.FunctionComponent = (props) => {
         let link = ""
         let artist = ""
         let title = ""
-        let translatedTitle = ""
+        let englishTitle = ""
         let commentary = ""
-        let translatedCommentary = ""
+        let englishCommentary = ""
         let date = ""
         let bookmarks = ""
         let mirrors = [] as any
@@ -927,8 +927,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                     artist = illust.user.name
                     bookmarks = illust.total_bookmarks
                     const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                    translatedTitle = translated[0]
-                    translatedCommentary = translated[1]
+                    englishTitle = translated[0]
+                    englishCommentary = translated[1]
                     if (illust.x_restrict !== 0) {
                         if (rating === "cute") setRating("ecchi")
                     }
@@ -989,8 +989,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                             artist = illust.user.name
                             bookmarks = illust.total_bookmarks
                             const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                            translatedTitle = translated[0]
-                            translatedCommentary = translated[1]
+                            englishTitle = translated[0]
+                            englishCommentary = translated[1]
                             if (illust.x_restrict !== 0) {
                                 setRating("ecchi")
                             } else {
@@ -1003,8 +1003,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                             artistInputRefs.push(React.createRef())
                             setArtists(artists)
                             forceUpdate()
-                            // const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
-                            // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
+                            // const englishTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
+                            // setRawTags(englishTags.map((t: string) => t.toLowerCase()).join(" "))
                         } catch (e) {
                             console.log(e)
                         }
@@ -1067,11 +1067,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 }
             }
             setSourceTitle(title)
-            setSourceTranslatedTitle(translatedTitle)
+            setSourceEnglishTitle(englishTitle)
             setSourceArtist(artist)
             setSourceLink(link)
             setSourceCommentary(commentary)
-            setSourceTranslatedCommentary(translatedCommentary)
+            setSourceEnglishCommentary(englishCommentary)
             setSourceBookmarks(bookmarks)
             setSourceDate(date)
             mirrors = functions.removeItem(mirrors, link)
@@ -1812,8 +1812,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.labels.translatedTitle}: </span>
-                    <input className="upload-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <span className="upload-text">{i18n.labels.englishTitle}: </span>
+                    <input className="upload-input-wide2" type="text" value={sourceEnglishTitle} onChange={(event) => setSourceEnglishTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.tag.artist}: </span>
@@ -1838,10 +1838,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.labels.translatedCommentary}: </span>
+                    <span className="upload-text">{i18n.labels.englishCommentary}: </span>
                 </div>
                 <div className="upload-container-row">
-                    <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceEnglishCommentary} onChange={(event) => setSourceEnglishCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.mirrors}: </span>

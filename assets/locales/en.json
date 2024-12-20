@@ -21,7 +21,7 @@
         "copyHash": "Copy Hash",
         "unlockPost": "Unlock Post",
         "saveSearch": "Save Search",
-        "translated": "Translated",
+        "english": "English",
         "details": "Details",
         "uploader": "Uploader",
         "uploaded": "Uploaded",
@@ -330,12 +330,12 @@
         "uploads": "Uploads",
         "parentID": "Parent ID",
         "title": "Title",
-        "translatedTitle": "Translated Title",
+        "englishTitle": "English Title",
         "text": "Text",
         "link": "Link",
         "mirrors": "Mirrors",
         "commentary": "Commentary",
-        "translatedCommentary": "Translated Commentary",
+        "englishCommentary": "English Commentary",
         "category": "Category",
         "website": "Website",
         "social": "Social",
@@ -1155,13 +1155,13 @@
                 "header": "Please provide source information for all posts. You can fill in these fields:",
                 "items": {
                     "title": " - The original title of the work as posted on social media.",
-                    "translated title": " - A title english translation, as titles are very commonly in japanese.",
+                    "english title": " - A title english translation, as titles are very commonly in japanese.",
                     "artist": " - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.",
                     "posted": " - The original date the work was posted.",
                     "link": " - The primary link to the work, preferably where the artist posted it themselves.",
                     "bookmarks": " - The amount of pixiv bookmarks or \"likes\" if it's a different site.",
                     "commentary": " - The original description of the work as posted on social media.",
-                    "translated commentary": " - A commentary english translation, as they are very commonly written in japanese.",
+                    "english commentary": " - A commentary english translation, as they are very commonly written in japanese.",
                     "mirrors": " - Reposts of the work posted on different sites. Include the artists own reposts.",
                     "buy link": " - If a paid reward is available, you may post the link to buy here."
                 }
@@ -1319,24 +1319,62 @@
                 "rule4": "⇾ No unnecessary rudeness or impoliteness, please be kind.",
                 "rule5": "⇾ No otherwise distasteful/inappropriate comments."
             },
-            "quotes": {
-                "header": "Quotes are supported and we have a syntax that makes it easy to do quotes. Nested quotes are not supported.",
-                "line1": ">>>[id] User said:",
-                "line2": "> Comment"
-            },
-            "emojis": {
-                "header": "Emojis can also be added to messages using their special identifier.",
-                "line1": "emoji:emojiName"
-            },
-            "highlight": {
-                "header": "To highlight text wrap it in double asterisks.",
-                "line1": "**Highlighted text**"
-            },
-            "mention": {
-                "header": "You can mention users and they will receive a notification.",
-                "line1": "@username"
-            },
-            "images": "Any image or video links posted in the comment are automatically displayed."
+            "moemarkdown": {
+                "title": "MoeMarkdown",
+                "header": "MoeMarkdown is our markup language to format comments/replies, inspired somewhat by markdown.",
+                "quotes": {
+                    "title": "Quoting:",
+                    "line1": ">>>[id] User said:",
+                    "line2": "> Comment"
+                },
+                "emojis": {
+                    "title": "Emojis:",
+                    "line1": ":emojiName:"
+                },
+                "highlight": {
+                    "title": "Highlight:",
+                    "line1": "==Highlighted text=="
+                },
+                "bold": {
+                    "title": "Bold:",
+                    "line1": "**Bolded text**"
+                },
+                "italic": {
+                    "title": "Italic:",
+                    "line1": "//Italicized text//"
+                },
+                "underline": {
+                    "title": "Underline:",
+                    "line1": "__Underlined text__"
+                },
+                "strikethrough": {
+                    "title": "Strikethrough:",
+                    "line1": "~~Strikethrough text~~"
+                },
+                "spoiler": {
+                    "title": "Spoiler:",
+                    "line1": "||Spoiler text||"
+                },
+                "dropdown": {
+                    "title": "Dropdown:",
+                    "line1": "<<Header text|Dropdown text>>"
+                },
+                "color": {
+                    "title": "Hex Color:",
+                    "line1": "#hexcolor{Colored text}"
+                },
+                "code": {
+                    "title": "Code:",
+                    "line1": "```Code block```"
+                },
+                "mention": {
+                    "title": "User Mention:",
+                    "line1": "@username"
+                },
+                "images": {
+                    "header": "Posted image and video links are automatically displayed."
+                }
+            }
         },
         "bans": {
             "title": "Bans",

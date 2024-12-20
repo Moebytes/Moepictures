@@ -100,7 +100,7 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditReplyContent(editReplyContent + ` emoji:${key}`)
+                    setEditReplyContent(editReplyContent + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

@@ -153,7 +153,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setContent((prev: string) => prev + ` emoji:${key}`)
+                    setContent((prev: string) => prev + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

@@ -48,6 +48,10 @@ import italic from "../assets/icons/italic.png"
 import underline from "../assets/icons/underline.png"
 import strikethrough from "../assets/icons/strikethrough.png"
 import spoiler from "../assets/icons/spoiler.png"
+import link from "../assets/icons/link-purple.png"
+import details from "../assets/icons/details.png"
+import hexcolor from "../assets/icons/hexcolor.png"
+import codeblock from "../assets/icons/codeblock.png"
 import "./styles/threadpage.less"
 
 interface Props {
@@ -616,7 +620,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setText((prev: string) => prev + ` emoji:${key}`)
+                    setText((prev: string) => prev + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(
@@ -634,14 +638,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const parseText = () => {
-        const textarea = textRef.current
-        if (!textarea) return
-        const pieces = functions.parseComment(textarea.value)
+        const pieces = functions.parseComment(text)
         let jsx = [] as any
         if (r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
-            if (piece.includes(">")) {
+            if (piece.startsWith(">")) {
                 const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
                 const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
                 const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
@@ -692,6 +694,10 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
                             <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
                             <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
                         </div>
                         {previewMode ? <div className="thread-page-preview">{parseText()}</div> : 
                         <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>

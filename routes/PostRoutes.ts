@@ -451,32 +451,32 @@ const PostRoutes = (app: Express) => {
                 if (unverified) {
                     await sql.post.bulkUpdateUnverifiedPost(postID, {
                         title: source.title ? source.title : null,
-                        translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                        englishTitle: source.englishTitle ? source.englishTitle : null,
                         artist: source.artist ? source.artist : null,
                         posted: source.posted ? source.posted : null,
                         link: source.link ? source.link : null,
                         commentary: source.commentary ? source.commentary : null,
-                        translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                        englishCommentary: source.englishCommentary ? source.englishCommentary : null,
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-                        slug: functions.postSlug(source.title, source.translatedTitle),
+                        slug: functions.postSlug(source.title, source.englishTitle),
                         updatedDate,
                         updater: req.session.username
                     })
                 } else {
                     await sql.post.bulkUpdatePost(postID, {
                         title: source.title ? source.title : null,
-                        translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                        englishTitle: source.englishTitle ? source.englishTitle : null,
                         artist: source.artist ? source.artist : null,
                         posted: source.posted ? source.posted : null,
                         link: source.link ? source.link : null,
                         commentary: source.commentary ? source.commentary : null,
-                        translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                        englishCommentary: source.englishCommentary ? source.englishCommentary : null,
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-                        slug: functions.postSlug(source.title, source.translatedTitle),
+                        slug: functions.postSlug(source.title, source.englishTitle),
                         updatedDate,
                         updater: req.session.username
                     })
@@ -618,8 +618,8 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
                     uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
-                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
-                    posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
+                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, 
+                    posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
                     bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
                     changes: null, reason})
@@ -630,9 +630,9 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-                    style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
-                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
             } else {
@@ -643,9 +643,9 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-                    style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
-                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
             }
@@ -697,12 +697,12 @@ const PostRoutes = (app: Express) => {
             if (!sourceEdit) {
                 source = {
                     title: post.title,
-                    translatedTitle: post.translatedTitle,
+                    englishTitle: post.englishTitle,
                     artist: post.artist,
                     posted: post.posted ? functions.formatDate(new Date(post.posted), true) : null,
                     link: post.link,
                     commentary: post.commentary,
-                    translatedCommentary: post.translatedCommentary,
+                    englishCommentary: post.englishCommentary,
                     bookmarks: post.bookmarks,
                     purchaseLink: post.purchaseLink,
                     mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
@@ -836,16 +836,16 @@ const PostRoutes = (app: Express) => {
                 style, 
                 parentID: post.parentID,
                 title: source.title ? source.title : null,
-                translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                englishTitle: source.englishTitle ? source.englishTitle : null,
                 artist: source.artist ? source.artist : null,
                 posted: source.posted ? source.posted : null,
                 link: source.link ? source.link : null,
                 commentary: source.commentary ? source.commentary : null,
-                translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                englishCommentary: source.englishCommentary ? source.englishCommentary : null,
                 bookmarks: source.bookmarks ? source.bookmarks : null,
                 purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                 mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-                slug: functions.postSlug(source.title, source.translatedTitle),
+                slug: functions.postSlug(source.title, source.englishTitle),
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,

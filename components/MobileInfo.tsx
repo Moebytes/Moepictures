@@ -591,12 +591,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag">{i18n.labels.title}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.title || "None"}</span>
                         </div>
-                        {props.post.translatedTitle ? 
+                        {props.post.englishTitle ? 
                         <div className="mobileinfo-row">
-                            <span className="tag">{i18n.sidebar.translated}:</span>
-                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.translatedTitle)}</span>
+                            <span className="tag">{i18n.sidebar.english}:</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.englishTitle)}</span>
                         </div>
                         : null}
+                        <div className="mobileinfo-row">
+                            <span className="tag">{i18n.tag.artist}:</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.artist || "?"}</span>
+                        </div>
                         <div className="mobileinfo-row">
                             <span className="tag">{i18n.sort.posted}:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.formatDate(new Date(props.post.posted)) : "Unknown"}</span>

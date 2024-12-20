@@ -63,12 +63,12 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const newTags = await functions.parseNewTags(currentHistory, session, setSessionFlag)
                 const source = {
                     title: currentHistory.title,
-                    translatedTitle: currentHistory.translatedTitle,
+                    englishTitle: currentHistory.englishTitle,
                     artist: currentHistory.artist,
                     posted: currentHistory.posted,
                     link: currentHistory.link,
                     commentary: currentHistory.commentary,
-                    translatedCommentary: currentHistory.translatedCommentary,
+                    englishCommentary: currentHistory.englishCommentary,
                     bookmarks: currentHistory.bookmarks,
                     purchaseLink: currentHistory.purchaseLink,
                     mirrors: currentHistory.mirrors

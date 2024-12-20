@@ -129,7 +129,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setThreadContent((prev: string) => prev + ` emoji:${key}`)
+                    setThreadContent((prev: string) => prev + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

@@ -468,9 +468,18 @@ export default class Functions {
         let segments = [] as any
         const pieces = comment.split(/\n+/gm)
         let intermediate = [] as any
+        let codeBlock = false
         for (let i = 0; i < pieces.length; i++) {
-            let piece = pieces[i].trim()
-            if (piece.startsWith(">>>") || piece.startsWith(">")) {
+            let piece = pieces[i]
+            if (piece.includes("```")) {
+                codeBlock = !codeBlock
+                if (!codeBlock) {
+                    intermediate.push(piece)
+                    piece = ""
+                }
+            }
+            if (codeBlock || piece.startsWith(">>>") || piece.startsWith(">")) {
+                if (codeBlock && !piece.includes("```")) piece += "\n"
                 intermediate.push(piece)
             } else {
                 if (intermediate.length) {
@@ -2098,7 +2107,11 @@ export default class Functions {
             italic: "////",
             underline: "____",
             strikethrough: "~~~~",
-            spoiler: "||||"
+            spoiler: "||||",
+            link: "[]()",
+            details: "<<|>>",
+            color: "#ff17c1{}",
+            code: "``````"
         }[type]
         if (!insert) return
 
@@ -2109,12 +2122,28 @@ export default class Functions {
         let updated = ""
 
         if (isSelected) {
-            const before = current.slice(0, start)
-            const selected = current.slice(start, end)
-            const after = current.slice(end)
-            const half = Math.floor(insert.length / 2)
-            const first = insert.slice(0, half)
-            const second = insert.slice(half)
+            let before = current.slice(0, start)
+            let selected = current.slice(start, end)
+            let after = current.slice(end)
+            let half = Math.floor(insert.length / 2)
+            let first = insert.slice(0, half)
+            let second = insert.slice(half)
+
+            if (type === "link") {
+                if (selected.startsWith("http")) {
+                    first = "[]"
+                    second = `(${selected})`
+                } else {
+                    first = `[${selected}]`
+                    second = "()"
+                }
+                selected = ""
+            }
+
+            if (type === "color") {
+                first = "#ff17c1{"
+                second = "}"
+            }
     
             updated = before + first + selected + second + after
             const cursor = start + first.length + selected.length + second.length
@@ -2125,6 +2154,10 @@ export default class Functions {
             const after = current.slice(start)
             updated = before + insert + after
             let shift = -2
+            if (type === "link") shift = -3
+            if (type === "details") shift = -3
+            if (type === "color") shift = -1
+            if (type === "code") shift = -3
             const cursor = start + insert.length + shift
     
             setTimeout(() => textarea.setSelectionRange(cursor, cursor), 0)
@@ -2141,7 +2174,7 @@ export default class Functions {
     }
 
     public static stripLinks = (text: string) => {
-        return text.replace(/(https?:\/\/[^\s]+)/g, "").replace(/(emoji:[^\s]+)/g, "")
+        return text.replace(/(https?:\/\/[^\s]+)/g, "").replace(/(:[^\s]+:)/g, "")
     }
 
     public static cleanTag = (tag: string) => {
@@ -2588,12 +2621,12 @@ export default class Functions {
 
     public static sourceChanged = (revertPost: any, currentPost: any) => {
         if (revertPost.title !== currentPost.title) return true
-        if (revertPost.translatedTitle !== currentPost.translatedTitle) return true
+        if (revertPost.englishTitle !== currentPost.englishTitle) return true
         if (revertPost.posted !== currentPost.posted) return true
         if (revertPost.link !== currentPost.link) return true
         if (revertPost.artist !== currentPost.artist) return true
         if (revertPost.commentary !== currentPost.commentary) return true
-        if (revertPost.translatedCommentary !== currentPost.translatedCommentary) return true
+        if (revertPost.englishCommentary !== currentPost.englishCommentary) return true
         return false
     }
 
@@ -2675,8 +2708,8 @@ export default class Functions {
         if (oldPost.title !== newPost.title) {
             json.title = newPost.title
         }
-        if (oldPost.translatedTitle !== newPost.translatedTitle) {
-            json.translatedTitle = newPost.translatedTitle
+        if (oldPost.englishTitle !== newPost.englishTitle) {
+            json.englishTitle = newPost.englishTitle
         }
         if (oldPost.artist !== newPost.artist) {
             json.artist = newPost.artist
@@ -2699,8 +2732,8 @@ export default class Functions {
         if (oldPost.commentary !== newPost.commentary) {
             json.commentary = newPost.commentary
         }
-        if (oldPost.translatedCommentary !== newPost.translatedCommentary) {
-            json.translatedCommentary = newPost.translatedCommentary
+        if (oldPost.englishCommentary !== newPost.englishCommentary) {
+            json.englishCommentary = newPost.englishCommentary
         }
         return json
     }
@@ -2894,9 +2927,9 @@ export default class Functions {
         return slug
     }
 
-    public static postSlug = (title: string, translatedTitle: string) => {
+    public static postSlug = (title: string, englishTitle: string) => {
         if (!title) return "untitled"
-        if (translatedTitle) return Functions.generateSlug(translatedTitle)
+        if (englishTitle) return Functions.generateSlug(englishTitle)
         return Functions.generateSlug(title)
     }
 

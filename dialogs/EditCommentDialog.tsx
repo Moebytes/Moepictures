@@ -87,7 +87,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditCommentText(editCommentText + ` emoji:${key}`)
+                    setEditCommentText(editCommentText + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

@@ -111,7 +111,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (language === "ja") {
                 title = post.title ? post.title : "Post"
             } else {
-                title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
+                title = post.englishTitle ? functions.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
             document.title = `${title}`
@@ -303,7 +303,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {childPosts.length ? <Children posts={childPosts}/>: null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
-                    {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
+                    {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     <Footer/>
                 </div>
             </div>

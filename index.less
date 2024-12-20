@@ -431,10 +431,12 @@ img {
 }
 
 .spoiler {
-    color: black;
-    background-color: black !important;
-    &:hover {
-        color: var(--text);
+    color: var(--text);
+    background-color: var(--text);
+    transition: color 0.1s, background-color 0.1s;
+    &:hover, &:focus {
+        color: inherit;
+        background-color: inherit;
     }
 }
 

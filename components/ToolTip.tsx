@@ -194,7 +194,7 @@ const ToolTip: React.FunctionComponent = (props) => {
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
-                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
+                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle}</span>
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
                 </div>
                 <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

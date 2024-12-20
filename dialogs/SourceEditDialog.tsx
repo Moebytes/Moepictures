@@ -17,9 +17,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const {setSourceEditID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const [title, setTitle] = useState("")
-    const [translatedTitle, setTranslatedTitle] = useState("")
+    const [englishTitle, setEnglishTitle] = useState("")
     const [commentary, setCommentary] = useState("")
-    const [translatedCommentary, setTranslatedCommentary] = useState("")
+    const [englishCommentary, setEnglishCommentary] = useState("")
     const [artist, setArtist] = useState("")
     const [posted, setPosted] = useState("")
     const [link, setLink] = useState("")
@@ -34,12 +34,12 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
 
     const updateFields = async () => {
         setTitle(sourceEditID.post.title || "")
-        setTranslatedTitle(sourceEditID.post.translatedTitle || "")
+        setEnglishTitle(sourceEditID.post.englishTitle || "")
         setArtist(sourceEditID.post.artist || "")
         setCommentary(sourceEditID.post.commentary || "")
-        setTranslatedCommentary(sourceEditID.post.translatedCommentary || "")
+        setEnglishCommentary(sourceEditID.post.englishCommentary || "")
         setMirrors(sourceEditID.post.mirrors ? Object.values(sourceEditID.post.mirrors).join("\n") : "")
-        setTranslatedTitle(sourceEditID.post.translatedTitle || "")
+        setEnglishTitle(sourceEditID.post.englishTitle || "")
         if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
         setLink(sourceEditID.post.link || "")
         setBookmarks(sourceEditID.post.bookmarks || "")
@@ -48,9 +48,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
 
     const reset = () => {
         setTitle("")
-        setTranslatedTitle("")
+        setEnglishTitle("")
         setCommentary("")
-        setTranslatedCommentary("")
+        setEnglishCommentary("")
         setArtist("")
         setLink("")
         setPosted("")
@@ -79,12 +79,12 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 unverified: sourceEditID.unverified,
                 source: {
                     title,
-                    translatedTitle,
+                    englishTitle,
                     artist,
                     posted,
                     link,
                     commentary,
-                    translatedCommentary,
+                    englishCommentary,
                     bookmarks,
                     purchaseLink,
                     mirrors
@@ -109,12 +109,12 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 unverified: sourceEditID.unverified,
                 source: {
                     title,
-                    translatedTitle,
+                    englishTitle,
                     artist,
                     posted,
                     link,
                     commentary,
-                    translatedCommentary,
+                    englishCommentary,
                     bookmarks,
                     purchaseLink,
                     mirrors
@@ -148,8 +148,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">{i18n.labels.translatedTitle}: </span>
-                <input className="dialog-input-small" type="text" spellCheck={false} value={translatedTitle} onChange={(event) => setTranslatedTitle(event.target.value)}/>
+                <span className="dialog-text">{i18n.labels.englishTitle}: </span>
+                <input className="dialog-input-small" type="text" spellCheck={false} value={englishTitle} onChange={(event) => setEnglishTitle(event.target.value)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.tag.artist}: </span>
@@ -174,10 +174,10 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">{i18n.labels.translatedCommentary}: </span>
+                <span className="dialog-text">{i18n.labels.englishCommentary}: </span>
             </div>
             <div className="dialog-row">
-                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={translatedCommentary} onChange={(event) => setTranslatedCommentary(event.target.value)}></textarea>
+                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={englishCommentary} onChange={(event) => setEnglishCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.mirrors}: </span>

@@ -141,6 +141,69 @@ export default class JSXFunctions {
         return items
     }
 
+    public static parseColor = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        let index = 0
+    
+        while (index < text.length) {
+            const hashIndex = text.indexOf("#", index)
+    
+            if (hashIndex === -1) {
+                items.push({text: text.slice(index), jsx: null})
+                break
+            }
+    
+            if (hashIndex > index) {
+                items.push({text: text.slice(index, hashIndex), jsx: null})
+            }
+    
+            const hexColor = text.slice(hashIndex + 1, hashIndex + 7)
+            if (/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hexColor)) {
+                const openingBraceIndex = text.indexOf("{", hashIndex + 7)
+                const closingBraceIndex = text.indexOf("}", openingBraceIndex)
+    
+                if (openingBraceIndex !== -1 && closingBraceIndex !== -1) {
+                    const colorText = text.slice(openingBraceIndex + 1, closingBraceIndex)
+                    items.push({text: null, jsx: <span key={items.length} style={{ color: `#${hexColor}` }}>{colorText}</span>})
+                    index = closingBraceIndex + 1
+                    continue
+                }
+            }
+            items.push({text: text.slice(hashIndex, hashIndex + 7), jsx: null})
+            index = hashIndex + 7
+        }
+        return items
+    }
+
+    public static parseDetails = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\<\<[^><]+\>\>)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("<<") && part.endsWith(">>")) {
+                const innerText = part.slice(2, -2)
+                const [summary, details] = innerText.split("|")
+                items.push({text: null, jsx: <details key={index}><summary>{summary}</summary>{details}</details>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseCode = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\`\`\`[\s\S]*?\`\`\`)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("```") && part.endsWith("```")) {
+                const codeText = part.slice(3, -3)
+                items.push({text: null, jsx: <code style={{color: "inherit"}} key={index}>{codeText}</code>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
     public static parseMention = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
         const history = useHistory()
@@ -161,9 +224,9 @@ export default class JSXFunctions {
 
     public static parseEmojis = (text: string, emojis: any) => {
         let items = [] as {text: any, jsx: any}[]
-        const parts = text.split(/(emoji:[^\s]+)/g)
+        const parts = text.split(/(:[^\s]+:)/g)
         parts.forEach((part, index) => {
-            if (part.match(/(emoji:[^\s]+)/g)) {
+            if (part.match(/(:[^\s]+:)/g)) {
                 let key = part.split(":")[1]
                 items.push({text: null, jsx:<img key={index} src={emojis[key]} className="emoji"/>})
             } else {
@@ -175,18 +238,29 @@ export default class JSXFunctions {
 
     public static parseLinks = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
-        const parts = text.split(/(https?:\/\/[^\s]+)/g)
+        const parts = text.split(/(\[.*?\]\(.*?\)|https?:\/\/[^\s]+)/g)
         parts.forEach((part, index) => {
-            if (part.match(/(https?:\/\/[^\s]+)/g)) {
+            if (part.match(/^\[.*?\]\(.*?\)$/)) {
+                const match = part.match(/^\[(.*?)\]\((.*?)\)$/)
+                if (match) {
+                    const [_, name, link] = match
+                    items.push({text: null, jsx: <a style={{fontWeight: "bold"}} key={index} href={link} target="_blank" rel="noopener">{name}</a>})
+                }
+            } else if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
                 if (name.includes(`${functions.getDomain()}/post`)) name = `Post #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/thread`)) name = `Thread #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
-                if (functions.isImage(part) || functions.isGIF(part)) items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
-                if (functions.isVideo(part)) items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
-                items.push({text: null, jsx: <a key={index} href={part} target="_blank" rel="noopener">{name}</a>})
+    
+                if (functions.isImage(part) || functions.isGIF(part)) {
+                    items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
+                } else if (functions.isVideo(part)) {
+                    items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
+                } else {
+                    items.push({text: null, jsx: <a key={index} href={part} target="_blank" rel="noopener">{name}</a>})
+                }
             } else {
                 items.push({text: part, jsx: null})
             }
@@ -199,33 +273,34 @@ export default class JSXFunctions {
         return JSXFunctions.generateMarkup(items)
     }
 
-    public static renderCommentText = (text: string, emojis: any) => {
+    public static commonChain = (text: string, emojis: any) => {
         let items = JSXFunctions.parseBullets(text)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
         items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseDetails)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseHighlight)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseItalic)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseUnderline)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseStrikethrough)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseSpoiler)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseColor)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseCode)
+        return items
+    }
+
+    public static renderCommentText = (text: string, emojis: any) => {
+        let items = JSXFunctions.commonChain(text, emojis)
         return JSXFunctions.generateMarkup(items)
     }
 
     public static renderMessageText = (text: string, emojis: any) => {
-        return JSXFunctions.renderCommentText(text, emojis)
+        let items = JSXFunctions.commonChain(text, emojis)
+        return JSXFunctions.generateMarkup(items)
     }
 
     public static renderThreadText = (text: string, emojis: any) => {
-        let items = JSXFunctions.parseBullets(text)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
-        items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseHighlight)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseItalic)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseUnderline)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseStrikethrough)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseSpoiler)
+        let items = JSXFunctions.commonChain(text, emojis)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseMention)
         return JSXFunctions.generateMarkup(items)
     }

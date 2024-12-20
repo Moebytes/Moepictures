@@ -469,12 +469,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 parentID: "",
                 source: {
                     title: sourceData.source.title,
-                    translatedTitle: sourceData.source.translatedTitle,
+                    englishTitle: sourceData.source.englishTitle,
                     artist: sourceData.source.artist,
                     posted: sourceData.source.posted,
                     link: sourceData.source.link,
                     commentary: sourceData.source.commentary,
-                    translatedCommentary: sourceData.source.translatedCommentary,
+                    englishCommentary: sourceData.source.englishCommentary,
                     bookmarks: sourceData.source.bookmarks,
                     mirrors: sourceData.source.mirrors
                 },
@@ -565,9 +565,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let link = ""
         let artist = ""
         let title = ""
-        let translatedTitle = ""
+        let englishTitle = ""
         let commentary = ""
-        let translatedCommentary = ""
+        let englishCommentary = ""
         let posted = ""
         let bookmarks = ""
         let danbooruLink = ""
@@ -593,8 +593,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 artist = illust.user.name
                 bookmarks = illust.total_bookmarks
                 const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                translatedTitle = translated[0]
-                translatedCommentary = translated[1]
+                englishTitle = translated[0]
+                englishCommentary = translated[1]
                 if (illust.x_restrict !== 0) {
                     if (rating === "cute") rating = "ecchi"
                 }
@@ -615,11 +615,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 danbooruLink,
                 source: {
                     title,
-                    translatedTitle,
+                    englishTitle,
                     artist,
                     link,
                     commentary,
-                    translatedCommentary,
+                    englishCommentary,
                     bookmarks,
                     posted,
                     mirrors
@@ -675,8 +675,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         artist = illust.user.name
                         bookmarks = illust.total_bookmarks
                         const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                        translatedTitle = translated[0]
-                        translatedCommentary = translated[1]
+                        englishTitle = translated[0]
+                        englishCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
                             if (rating === "cute") rating = "ecchi"
                         }
@@ -750,11 +750,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 danbooruLink,
                 source: {
                     title,
-                    translatedTitle,
+                    englishTitle,
                     artist,
                     link,
                     commentary,
-                    translatedCommentary,
+                    englishCommentary,
                     bookmarks,
                     posted,
                     mirrors

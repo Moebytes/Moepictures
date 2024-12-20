@@ -96,7 +96,7 @@ const EditMessageReplyDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditMsgReplyContent(editMsgReplyContent + ` emoji:${key}`)
+                    setEditMsgReplyContent(editMsgReplyContent + ` :${key}:`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

@@ -232,7 +232,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (language === "ja") {
                 title = post.title ? post.title : "Post"
             } else {
-                title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
+                title = post.englishTitle ? functions.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
             document.title = `${title}`
@@ -526,12 +526,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (imgChanged || srcChanged) {
             source = {
                 title: post.title,
-                translatedTitle: post.translatedTitle,
+                englishTitle: post.englishTitle,
                 artist: post.artist,
                 posted: post.posted ? functions.formatDate(new Date(post.posted), true) : "",
                 link: post.link,
                 commentary: post.commentary,
-                translatedCommentary: post.translatedCommentary,
+                englishCommentary: post.englishCommentary,
                 bookmarks: post.bookmarks,
                 purchaseLink: post.purchaseLink,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
@@ -740,7 +740,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
-                    {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
+                    {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}
                     {post ? <Comments post={post}/> : null}

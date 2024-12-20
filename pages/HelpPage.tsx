@@ -560,13 +560,13 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.users.userLevels.header}<br/><br/>
 
                     <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[0]}</span>{Object.values(i18n.help.users.userLevels.items)[0]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[1]}</span>{Object.values(i18n.help.users.userLevels.items)[1]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[2]}</span>{Object.values(i18n.help.users.userLevels.items)[2]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[3]}</span>{Object.values(i18n.help.users.userLevels.items)[3]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[4]}</span>{Object.values(i18n.help.users.userLevels.items)[4]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[5]}</span>{Object.values(i18n.help.users.userLevels.items)[5]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[6]}</span>{Object.values(i18n.help.users.userLevels.items)[6]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[7]}</span>{Object.values(i18n.help.users.userLevels.items)[7]}<br/><br/>
+                    <span className="help-alt user-color">{Object.keys(i18n.help.users.userLevels.items)[1]}</span>{Object.values(i18n.help.users.userLevels.items)[1]}<br/>
+                    <span className="help-alt premium-color">{Object.keys(i18n.help.users.userLevels.items)[2]}</span>{Object.values(i18n.help.users.userLevels.items)[2]}<br/>
+                    <span className="help-alt contributor-color">{Object.keys(i18n.help.users.userLevels.items)[3]}</span>{Object.values(i18n.help.users.userLevels.items)[3]}<br/>
+                    <span className="help-alt curator-color">{Object.keys(i18n.help.users.userLevels.items)[4]}</span>{Object.values(i18n.help.users.userLevels.items)[4]}<br/>
+                    <span className="help-alt mod-color">{Object.keys(i18n.help.users.userLevels.items)[5]}</span>{Object.values(i18n.help.users.userLevels.items)[5]}<br/>
+                    <span className="help-alt admin-color">{Object.keys(i18n.help.users.userLevels.items)[6]}</span>{Object.values(i18n.help.users.userLevels.items)[6]}<br/>
+                    <span className="help-alt system-color">{Object.keys(i18n.help.users.userLevels.items)[7]}</span>{Object.values(i18n.help.users.userLevels.items)[7]}<br/><br/>
 
 
                     {i18n.help.users.line1}<br/><br/>
@@ -592,28 +592,71 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.commenting.rules.rule5}<br/><br/>
                     </span>
 
-                    {i18n.help.commenting.quotes.header}<br/>
+                    <span className="help-alt">{i18n.help.commenting.moemarkdown.title}</span><br/>
+                    {i18n.help.commenting.moemarkdown.header}<br/><br/>
+
+                    {i18n.help.commenting.moemarkdown.quotes.title}<br/>
                     <span className="help-alt">
-                    {i18n.help.commenting.quotes.line1}<br/>
-                    {i18n.help.commenting.quotes.line2}<br/><br/>
+                    {i18n.help.commenting.moemarkdown.quotes.line1}<br/>
+                    {i18n.help.commenting.moemarkdown.quotes.line2}<br/>
                     </span>
 
-                    {i18n.help.commenting.emojis.header}<br/>
-                    <span className="help-alt">
-                    {i18n.help.commenting.emojis.line1}<br/><br/>
+                    {i18n.help.commenting.moemarkdown.highlight.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.highlight.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.highlight.header}<br/>
-                    <span className="help-alt">
-                    {i18n.help.commenting.highlight.line1}<br/><br/>
+                    {i18n.help.commenting.moemarkdown.bold.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.bold.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.mention.header}<br/>
-                    <span className="help-alt">
-                    {i18n.help.commenting.mention.line1}<br/><br/>
+                    {i18n.help.commenting.moemarkdown.italic.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.italic.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.images}
+                    {i18n.help.commenting.moemarkdown.underline.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.underline.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.strikethrough.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.strikethrough.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.spoiler.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.spoiler.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.dropdown.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.dropdown.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.color.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.color.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.code.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.code.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.mention.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.mention.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.emojis.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moemarkdown.emojis.line1}<br/><br/>
+                    </span>
+
+                    {i18n.help.commenting.moemarkdown.images.header}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
@@ -706,7 +749,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>{i18n.help.selfUploads.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>{i18n.help.upscaling.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>{i18n.help.compressing.title}</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span>
+                        {/* <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span> */}
                         <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>{i18n.help.bookmarklet.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("variations")}>{i18n.sort.variations}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>{i18n.post.childPosts}</span>

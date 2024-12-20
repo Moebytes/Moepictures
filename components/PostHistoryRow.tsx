@@ -79,12 +79,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (imgChanged || srcChanged) {
             source = {
                 title: props.postHistory.title,
-                translatedTitle: props.postHistory.translatedTitle,
+                englishTitle: props.postHistory.englishTitle,
                 artist: props.postHistory.artist,
                 posted: props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted), true) : "",
                 link: props.postHistory.link,
                 commentary: props.postHistory.commentary,
-                translatedCommentary: props.postHistory.translatedCommentary,
+                englishCommentary: props.postHistory.englishCommentary,
                 bookmarks: props.postHistory.bookmarks,
                 purchaseLink: props.postHistory.purchaseLink,
                 mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
@@ -377,8 +377,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.title) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.title}:</span> {props.postHistory.title || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.translatedTitle) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.translatedTitle}:</span> {props.postHistory.translatedTitle || i18n.labels.none}</span>)
+        if (!prevHistory || changes.englishTitle) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishTitle}:</span> {props.postHistory.englishTitle || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.artist) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}:</span> {props.postHistory.artist || i18n.labels.unknown}</span>)
@@ -401,8 +401,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.commentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}:</span> {props.postHistory.commentary || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.translatedCommentary) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.translatedCommentary}:</span> {props.postHistory.translatedCommentary || i18n.labels.none}</span>)
+        if (!prevHistory || changes.englishCommentary) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishCommentary}:</span> {props.postHistory.englishCommentary || i18n.labels.none}</span>)
         }
         return jsx
     }
