@@ -19,9 +19,9 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
 
-let limit = 25
+let limit = 10
 let replace = false
-let pageAmount = 7
+let pageAmount = 5
 
 const ArtistsPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -214,7 +214,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleArtists, index, sortType, sortReverse])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -289,31 +289,31 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setArtistsPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = artistsPage - 1 
         if (newPage < 1) newPage = 1 
         setArtistsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = artistsPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setArtistsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setArtistsPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number) => {
         setArtistsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

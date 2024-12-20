@@ -17,7 +17,7 @@ import favoritesImg from "../assets/images/favorites.png"
 import favgroupsImg from "../assets/images/favgroups.png"
 import groupsImg from "../assets/images/groups.png"
 import cutenessMeterImg from "../assets/images/cutenessmeter.png"
-import translationsImg from "../assets/images/translations.png"
+import notesImg from "../assets/images/notes.png"
 import uploadImg from "../assets/images/upload.png"
 import taggingImg from "../assets/images/tagging.png"
 import searchingImg from "../assets/images/searching.png"
@@ -219,24 +219,24 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={musicImg}/></div></>
             )
         }
-        if (helpTab === "translations") {
+        if (helpTab === "notes") {
             return (
-                <><span className="help-heading">{i18n.navbar.translations}</span>
+                <><span className="help-heading">{i18n.navbar.notes}</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    {i18n.help.translations.line1}<br/><br/>
+                    {i18n.help.notes.line1}<br/><br/>
 
-                    {i18n.help.translations.line2}
+                    {i18n.help.notes.line2}
                     <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>KanjiTomo{i18n.period}</a><br/><br/>
 
-                    {i18n.help.translations.line3}
+                    {i18n.help.notes.line3}
                     <a className="help-link" onClick={() => openLink("https://github.com/dmMaze/comic-text-detector")} style={{marginLeft: "10px", marginRight: "10px"}}>Comic Text Detector</a> 
-                    {i18n.help.translations.line4}
+                    {i18n.help.notes.line4}
                     <a className="help-link" onClick={() => openLink("https://github.com/kha-white/manga-ocr")} style={{marginLeft: "10px", marginRight: "10px"}}>Manga OCR</a> 
-                    {i18n.help.translations.line5}
+                    {i18n.help.notes.line5}
                     <a className="help-link" onClick={() => openLink("https://translate.google.com/")} style={{marginLeft: "10px", marginRight: "10px"}}>Google Translate</a> 
-                    {i18n.help.translations.line6}
+                    {i18n.help.notes.line6}
                 </span>
-                <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
+                <div className="help-img-container"><img className="help-img" src={notesImg}/></div></>
             )
         }
         if (helpTab === "favorites") {
@@ -697,7 +697,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("filters")}>{i18n.filters.filters}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>{i18n.help.customPlayers.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("music")}>{i18n.help.music.title}</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("translations")}>{i18n.navbar.translations}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("notes")}>{i18n.navbar.notes}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>{i18n.sort.favorites}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>{i18n.help.favoriteGroups.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>{i18n.sort.cuteness}</span>

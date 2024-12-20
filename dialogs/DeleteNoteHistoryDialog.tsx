@@ -1,26 +1,26 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions} from "../store"
+import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
-const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
+const DeleteNoteHistoryDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {deleteTranslationHistoryID} = useTranslationDialogSelector()
-    const {setDeleteTranslationHistoryID, setDeleteTranslationHistoryFlag} = useTranslationDialogActions()
+    const {deleteNoteHistoryID} = useNoteDialogSelector()
+    const {setDeleteNoteHistoryID, setDeleteNoteHistoryFlag} = useNoteDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {
-        document.title = i18n.dialogs.deleteTranslationHistory.title
+        document.title = i18n.dialogs.deleteNoteHistory.title
     }, [i18n])
 
     useEffect(() => {
-        if (deleteTranslationHistoryID) {
+        if (deleteNoteHistoryID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -28,28 +28,28 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [deleteTranslationHistoryID])
+    }, [deleteNoteHistoryID])
 
     const click = (button: "accept" | "reject", keep?: boolean) => {
         if (button === "accept") {
-            setDeleteTranslationHistoryFlag(true)
+            setDeleteNoteHistoryFlag(true)
         } else {
-            if (!keep) setDeleteTranslationHistoryID(null)
+            if (!keep) setDeleteNoteHistoryID(null)
         }
     }
 
     const close = () => {
-        setDeleteTranslationHistoryID(null)
+        setDeleteNoteHistoryID(null)
     }
 
-    if (deleteTranslationHistoryID?.failed) {
+    if (deleteNoteHistoryID?.failed) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.deleteTranslationHistory.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteNoteHistory.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.deleteGroupHistory.noDelete}</span>
@@ -64,14 +64,14 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
         )
     }
 
-    if (deleteTranslationHistoryID) {
+    if (deleteNoteHistoryID) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.deleteTranslationHistory.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.deleteNoteHistory.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.deleteGroupHistory.header}</span>
@@ -89,4 +89,4 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default DeleteTranslationHistoryDialog
+export default DeleteNoteHistoryDialog

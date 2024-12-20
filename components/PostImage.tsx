@@ -33,11 +33,17 @@ import imageZoomOutIcon from "../assets/icons/image-zoom-out.png"
 import imageZoomOffIcon from "../assets/icons/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/icons/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/icons/image-fullscreen.png"
-import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import noteToggleOn from "../assets/icons/note-toggle-on.png"
 import waifu2xIcon from "../assets/icons/waifu2x.png"
+import reverseSearchIcon from "../assets/icons/reverse-search.png"
+import google from "../assets/icons/google-purple.png"
+import bing from "../assets/icons/bing-purple.png"
+import yandex from "../assets/icons/yandex-purple.png"
+import saucenao from "../assets/icons/saucenao-purple.png"
+import ascii2d from "../assets/icons/ascii2d-purple.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
-import TranslationEditor from "./TranslationEditor"
+import NoteEditor from "./NoteEditor"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import JSZip from "jszip"
@@ -57,11 +63,11 @@ interface Props {
     comicPages?: any
     order?: number
     noEncryption?: boolean
-    noTranslations?: boolean
+    noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    translationID?: string
+    noteID?: string
 }
 
 let timeout = null as any
@@ -80,8 +86,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     paused, duration, dragging, seekTo} = usePlaybackSelector()
     const {setDisableZoom, setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPreservePitch, setVolume, 
     setPreviousVolume, setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
-    const {translationMode, imageExpand, format} = useSearchSelector()
-    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {noteMode, imageExpand, format} = useSearchSelector()
+    const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
@@ -129,6 +135,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [buttonHover, setButtonHover] = useState(false)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
+    const [showReverseIcons, setShowReverseIcons] = useState(false)
+    const [tempLink, setTempLink] = useState("")
     const [img, setImg] = useState("")
 
     useEffect(() => {
@@ -176,6 +184,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
         setSeekTo(null)
         cancelAnimation()
+        if (props.img) setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
@@ -256,8 +265,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (value === "t") {
-                setTranslationMode(!translationMode)
-                setTranslationDrawingEnabled(true)
+                setNoteMode(!noteMode)
+                setNoteDrawingEnabled(true)
             }
         }
     }
@@ -1257,14 +1266,41 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (mobile) setImageExpand(false)
     }, [mobile])
 
+    const reverseSearch = async (service: string) => {
+        const baseMap = {
+            "google": "https://lens.google.com/uploadbyurl?url=",
+            "bing": "https://www.bing.com/images/searchbyimage?cbir=sbi&imgurl=",
+            "yandex": "https://yandex.com/images/search?rpt=imageview&url=",
+            "saucenao": "https://saucenao.com/search.php?url=",
+            "ascii2d": "https://ascii2d.net/search/url/"
+        }
+        let url = tempLink
+        if (!tempLink) {
+            const image = props.post.images[(props.order || 1) - 1]
+            const thumbnail = functions.getThumbnailLink(image.type, props.post.postID, image.order, image.filename, "massive")
+            const decryptedImage = await functions.decryptThumb(thumbnail, session, `reverse-${thumbnail}`, true)
+            const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
+            url = await functions.post("/api/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+            localStorage.setItem("reverseSearchLink", url)
+            setTempLink(url)
+        }
+        window.open(baseMap[service] + encodeURIComponent(url), "_blank", "noreferrer")
+    }
+
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
-            <div className="post-image-box" ref={containerRef} style={{display: translationMode && !props.noTranslations ? "none" : "flex"}}>
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            <div className="post-image-box" ref={containerRef} style={{display: noteMode && !props.noNotes ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
+                        {!props.noNotes && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/> : null}
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>

@@ -13,7 +13,7 @@ import flagReducer, {useFlagSelector, useFlagActions} from "./reducers/flagReduc
 import postDialogReducer, {usePostDialogSelector, usePostDialogActions} from "./reducers/postDialogReducer"
 import tagDialogReducer, {useTagDialogSelector, useTagDialogActions} from "./reducers/tagDialogReducer"
 import commentDialogReducer, {useCommentDialogSelector, useCommentDialogActions} from "./reducers/commentDialogReducer"
-import translationDialogReducer, {useTranslationDialogSelector, useTranslationDialogActions} from "./reducers/translationDialogReducer"
+import noteDialogReducer, {useNoteDialogSelector, useNoteDialogActions} from "./reducers/noteDialogReducer"
 import threadDialogReducer, {useThreadDialogSelector, useThreadDialogActions} from "./reducers/threadDialogReducer"
 import messageDialogReducer, {useMessageDialogSelector, useMessageDialogActions} from "./reducers/messageDialogReducer"
 import searchDialogReducer, {useSearchDialogSelector, useSearchDialogActions} from "./reducers/searchDialogReducer"
@@ -36,7 +36,7 @@ const store = configureStore({
         postDialog: postDialogReducer,
         tagDialog: tagDialogReducer,
         commentDialog: commentDialogReducer,
-        translationDialog: translationDialogReducer,
+        noteDialog: noteDialogReducer,
         threadDialog: threadDialogReducer,
         messageDialog: messageDialogReducer,
         searchDialog: searchDialogReducer,
@@ -77,7 +77,7 @@ export {
     usePostDialogSelector, usePostDialogActions,
     useTagDialogSelector, useTagDialogActions,
     useCommentDialogSelector, useCommentDialogActions,
-    useTranslationDialogSelector, useTranslationDialogActions,
+    useNoteDialogSelector, useNoteDialogActions,
     useThreadDialogSelector, useThreadDialogActions,
     useMessageDialogSelector, useMessageDialogActions,
     useSearchDialogSelector, useSearchDialogActions,

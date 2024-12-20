@@ -21,8 +21,8 @@ import PrivatePostDialog from "../dialogs/PrivatePostDialog"
 import LockPostDialog from "../dialogs/LockPostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
-import EditTranslationDialog from "../dialogs/EditTranslationDialog"
-import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
+import EditNoteDialog from "../dialogs/EditNoteDialog"
+import SaveNoteDialog from "../dialogs/SaveNoteDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
@@ -31,7 +31,7 @@ import GroupDialog from "../dialogs/GroupDialog"
 import ParentDialog from "../dialogs/ParentDialog"
 import OCRDialog from "../dialogs/OCRDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
-import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
+import RevertNoteHistoryDialog from "../dialogs/RevertNoteHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import Parent from "../components/Parent"
 import Children from "../components/Children"
@@ -42,7 +42,7 @@ import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
-useTranslationDialogSelector, useTranslationDialogActions, useActiveSelector, usePostDialogSelector,
+useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
 useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
@@ -55,7 +55,7 @@ interface Props {
 }
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
-    const {language} = useThemeSelector()
+    const {language, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {activeFavgroup} = useActiveSelector()
@@ -71,8 +71,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {setReloadPostFlag, setRedirect, setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const {revertPostHistoryID, revertPostHistoryFlag} = usePostDialogSelector()
     const {setRevertPostHistoryID, setRevertPostHistoryFlag} = usePostDialogActions()
-    const {revertTranslationHistoryID, revertTranslationHistoryFlag} = useTranslationDialogSelector()
-    const {setRevertTranslationHistoryID, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
+    const {revertNoteHistoryID, revertNoteHistoryFlag} = useNoteDialogSelector()
+    const {setRevertNoteHistoryID, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const [images, setImages] = useState([]) as any
     const [childPosts, setChildPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
@@ -84,7 +84,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState(null) as any
     const [order, setOrder] = useState(1)
     const [historyID, setHistoryID] = useState(null as any)
-    const [translationID, setTranslationID] = useState(null as any)
+    const [noteID, setNoteID] = useState(null as any)
     const [groups, setGroups] = useState([]) as any
     const history = useHistory()
     const location = useLocation()
@@ -101,8 +101,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         document.title = "Post"
         const historyParam = new URLSearchParams(window.location.search).get("history")
         setHistoryID(historyParam)
-        const translationParam = new URLSearchParams(window.location.search).get("translation")
-        setTranslationID(translationParam)
+        const noteParam = new URLSearchParams(window.location.search).get("note")
+        setNoteID(noteParam)
         const orderParam = new URLSearchParams(window.location.search).get("order")
         if (orderParam) setOrder(Number(orderParam))
         const onDOMLoaded = () => {
@@ -268,8 +268,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (session.showRelated) {
-            updateArtistPosts()
-            updateRelatedPosts()
+            setTimeout(() => {
+                updateArtistPosts()
+                updateRelatedPosts()
+            }, 1500)
         }
     }, [session, post, tagCategories])
 
@@ -485,27 +487,27 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const revertTranslationHistory = async () => {
-        const translation = await functions.get("/api/translation/history", {postID: post.postID, historyID: translationID}, session, setSessionFlag).then((r) => r[0])
-        await functions.put("/api/translation/save", {postID: translation.postID, order: translation.order, data: translation.data}, session, setSessionFlag)
+    const revertNoteHistory = async () => {
+        const note = await functions.get("/api/note/history", {postID: post.postID, historyID: noteID}, session, setSessionFlag).then((r) => r[0])
+        await functions.put("/api/note/save", {postID: note.postID, order: note.order, data: note.data}, session, setSessionFlag)
         currentHistory()
     }
 
     useEffect(() => {
-        if (revertTranslationHistoryFlag && translationID === revertTranslationHistoryID?.historyID) {
-            revertTranslationHistory().then(() => {
-                setRevertTranslationHistoryFlag(false)
-                setRevertTranslationHistoryID(null)
+        if (revertNoteHistoryFlag && noteID === revertNoteHistoryID?.historyID) {
+            revertNoteHistory().then(() => {
+                setRevertNoteHistoryFlag(false)
+                setRevertNoteHistoryID(null)
             }).catch(() => {
-                setRevertTranslationHistoryFlag(false)
-                setRevertTranslationHistoryID({failed: true, historyID: translationID})
+                setRevertNoteHistoryFlag(false)
+                setRevertNoteHistoryID({failed: true, historyID: noteID})
             })
         }
-    }, [revertTranslationHistoryFlag, revertTranslationHistoryID, translationID, post, session])
+    }, [revertNoteHistoryFlag, revertNoteHistoryID, noteID, post, session])
 
-    const revertTranslationHistoryDialog = async () => {
-        if (post.locked && !permissions.isMod(session)) return setRevertTranslationHistoryID({failed: "locked", historyID: translationID})
-        setRevertTranslationHistoryID({failed: false, historyID: translationID})
+    const revertNoteHistoryDialog = async () => {
+        if (post.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: noteID})
+        setRevertNoteHistoryID({failed: false, historyID: noteID})
     }
 
     const revertPostHistory = async () => {
@@ -569,23 +571,23 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const currentHistory = () => {
         setHistoryID(null)
-        setTranslationID(null)
+        setNoteID(null)
         setPostFlag(true)
         history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
     }
 
     const getHistoryButtons = () => {
-        if (translationID) {
+        if (noteID) {
             return (
-                <div className="translation-button-container">
-                    <button className="translation-button" onClick={() => history.push(`/translation/history/${postID}/${order}`)}>
+                <div className="note-button-container">
+                    <button className="note-button" onClick={() => history.push(`/note/history/${postID}/${order}`)}>
                         <img src={historyIcon}/>
                         <span>History</span>
                     </button>
-                    {session.username ? <button className="translation-button" onClick={revertTranslationHistoryDialog}>
+                    {session.username ? <button className="note-button" onClick={revertNoteHistoryDialog}>
                         <span>⌫Revert</span>
                     </button> : null}
-                    <button className="translation-button" onClick={currentHistory}>
+                    <button className="note-button" onClick={currentHistory}>
                         <img src={currentIcon}/>
                         <span>Current</span>
                     </button>
@@ -620,7 +622,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <div className="post-item">
-                    <div className="post-item-title-clickable" onClick={() => history.push(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{activeFavgroup.name}</div>
+                    <div className="post-item-title-clickable" onClick={() => history.push(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{i18n.post.favgroup}: {activeFavgroup.name}</div>
                     <div className="post-item-container">
                         <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
                     </div>
@@ -650,7 +652,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 // style={{margin: "0px", paddingLeft: "60px", paddingRight: "60px", paddingTop: "0px", paddingBottom: "0px"}}
                 // style={{marginTop: "0px", marginBottom: "10px"}} 
                 <div className="post-item">
-                    <div className="post-item-title-clickable" onClick={() => history.push(`/group/${group.slug}`)}>{group.name}</div>
+                    <div className="post-item-title-clickable" onClick={() => history.push(`/group/${group.slug}`)}>{i18n.labels.group}: {group.name}</div>
                     <div className="post-item-container">
                         <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
                     </div>
@@ -665,21 +667,21 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel post={post} model={image} order={order} next={next} previous={previous} translationID={translationID}/>
+                <PostModel post={post} model={image} order={order} next={next} previous={previous} noteID={noteID}/>
                 <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "live2d") {
             return (
                 <>
-                <PostLive2D post={post} live2d={image} order={order} next={next} previous={previous} translationID={translationID}/>
+                <PostLive2D post={post} live2d={image} order={order} next={next} previous={previous} noteID={noteID}/>
                 <PostImageOptions post={post} live2d={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong post={post} audio={image} order={order} next={next} previous={previous} translationID={translationID}/>
+                <PostSong post={post} audio={image} order={order} next={next} previous={previous} noteID={noteID}/>
                 <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -690,7 +692,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <>
-                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} translationID={translationID}/>
+                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} noteID={noteID}/>
                 <PostImageOptions post={post} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -710,14 +712,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
         <RevertPostHistoryDialog/>
-        <RevertTranslationHistoryDialog/>
+        <RevertNoteHistoryDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         {post ? <PrivatePostDialog post={post}/> : null}
         {post ? <LockPostDialog post={post}/> : null}
         {post ? <TakedownPostDialog post={post}/> : null}
-        {post ? <SaveTranslationDialog post={post}/> : null}
-        <EditTranslationDialog/>
-        <TitleBar post={post} goBack={true} historyID={historyID} translationID={translationID}/>
+        {post ? <SaveNoteDialog post={post}/> : null}
+        <EditNoteDialog/>
+        <TitleBar post={post} goBack={true} historyID={historyID} noteID={noteID}/>
         <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 
@@ -725,16 +727,16 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>}
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
-                    {historyID || translationID ? getHistoryButtons() : null}
+                    {historyID || noteID ? getHistoryButtons() : null}
                     {/*nsfwChecker() &&*/ images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
                     {generateActiveFavgroupJSX()}
-                    {generateGroupsJSX()}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {childPosts.length ? <Children posts={childPosts}/> : null}
+                    {generateGroupsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}

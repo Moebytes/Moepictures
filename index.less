@@ -2,7 +2,7 @@
 @import "~bootstrap/dist/css/bootstrap.min.css";
 @import "~react-image-crop/dist/ReactCrop.css";
 
-@title-bar-height: 74px;
+@title-bar-height: 64px;
 @nav-bar-height: 40px;
 @sort-bar-height: 38px;
 @tag-banner-height: 38px;
@@ -58,6 +58,8 @@
     --text-strong: #ff26ba;
     --inputBG: #050020;
     --buttonBG: #ff11af;
+    --previewBG: #4a44ff;
+    --editBG: #347bff;
     --footerBG: #0b0322;
     --drop-color1: rgba(59, 13, 165, 0.7);
     --drop-color2: rgba(86, 26, 226, 0.9);
@@ -71,7 +73,7 @@
     --r18Color: #e20644;
     --r18BGColor: #5603033d;
     --historyColor: #ed1287;
-    --translationColor: #5612ed;
+    --noteColor: #5612ed;
     --audioPlayerColor: #130737;
     --actionBannerColor: #ce1a4d;
 }
@@ -104,6 +106,8 @@
     --text-strong: #b264df;
     --inputBG: #f4f2ff;
     --buttonBG: #ff92ff;
+    --previewBG: #b2d0ff;
+    --editBG: #afe6ff;
     --footerBG: #dfdfff;
     --drop-color1: rgba(153, 112, 250, 0.7);
     --drop-color2: rgba(158, 124, 252, 0.9);
@@ -424,6 +428,14 @@ img {
 .banned {
     font-weight: normal;
     text-decoration: line-through;
+}
+
+.spoiler {
+    color: black;
+    background-color: black !important;
+    &:hover {
+        color: var(--text);
+    }
 }
 
 .pace {

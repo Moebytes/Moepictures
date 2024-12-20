@@ -256,7 +256,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleMessages, index, session, sortType, sortReverse])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -331,31 +331,31 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setMailPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = mailPage - 1 
         if (newPage < 1) newPage = 1 
         setMailPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = mailPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setMailPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setMailPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number) => {
         setMailPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

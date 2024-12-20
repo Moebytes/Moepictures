@@ -10,7 +10,7 @@ import sharp from "sharp"
 import phash from "sharp-phash"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
-const translationLimiter = rateLimit({
+const noteLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 300,
 	message: "Too many requests, try again later.",
@@ -20,8 +20,8 @@ const translationLimiter = rateLimit({
     handler
 })
 
-const TranslationRoutes = (app: Express) => {
-    app.post("/api/translation/save", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
+const NoteRoutes = (app: Express) => {
+    app.post("/api/note/save", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -35,19 +35,19 @@ const TranslationRoutes = (app: Express) => {
             if (!post) return res.status(400).send("Invalid post ID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
-            const translation = await sql.translation.translation(postID, order)
-            if (!translation) {
+            const note = await sql.note.note(postID, order)
+            if (!note) {
                 if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.translation.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
+                await sql.note.insertNote(postID, req.session.username, order, JSON.stringify(data))
             } else {
                 if (JSON.stringify(data) === "[]") {
-                    await sql.translation.deleteTranslation(translation.translationID)
+                    await sql.note.deleteNote(note.noteID)
                 } else {
-                    await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                    await sql.note.updateNote(note.noteID, req.session.username, JSON.stringify(data))
                 }
             }
-            const {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
-            await sql.history.insertTranslationHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason})
+            const {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -55,7 +55,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/translation/save", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
+    app.put("/api/note/save", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, silent} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -68,15 +68,15 @@ const TranslationRoutes = (app: Express) => {
             if (!post) return res.status(400).send("Invalid post ID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
-            const translation = await sql.translation.translation(postID, order)
-            if (!translation) {
+            const note = await sql.note.note(postID, order)
+            if (!note) {
                 if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.translation.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
+                await sql.note.insertNote(postID, req.session.username, order, JSON.stringify(data))
             } else {
                 if (JSON.stringify(data) === "[]") {
-                    await sql.translation.deleteTranslation(translation.translationID)
+                    await sql.note.deleteNote(note.noteID)
                 } else {
-                    await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                    await sql.note.updateNote(note.noteID, req.session.username, JSON.stringify(data))
                 }
             }
 
@@ -84,8 +84,8 @@ const TranslationRoutes = (app: Express) => {
                 if (silent) return res.status(200).send("Success")
             }
         
-            const {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
-            await sql.history.insertTranslationHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
+            const {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -93,19 +93,19 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/translations", translationLimiter, async (req: Request, res: Response) => {
+    app.get("/api/notes", noteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const translations = await sql.translation.translations(Number(postID))
-            serverFunctions.sendEncrypted(translations, req, res)
+            const notes = await sql.note.notes(Number(postID))
+            serverFunctions.sendEncrypted(notes, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
-    app.post("/api/translation/save/request", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
+    app.post("/api/note/save/request", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, order, data, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -259,7 +259,7 @@ const TranslationRoutes = (app: Express) => {
                 updatedDate,
                 hasOriginal,
                 hasUpscaled,
-                isTranslation: true,
+                isNote: true,
                 updater: req.session.username
             })
 
@@ -354,9 +354,9 @@ const TranslationRoutes = (app: Express) => {
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
-            const translation = await sql.translation.translation(postID, order)
-            let {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
-            await sql.translation.insertUnverifiedTranslation(postID, originalPostID, req.session.username, order, JSON.stringify(data), addedEntries, removedEntries, reason)
+            const note = await sql.note.note(postID, order)
+            let {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
+            await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, JSON.stringify(data), addedEntries, removedEntries, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -364,21 +364,21 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/translations/unverified", translationLimiter, async (req: Request, res: Response) => {
+    app.get("/api/notes/unverified", noteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const translations = await sql.translation.unverifiedPostTranslations(Number(postID))
-            serverFunctions.sendEncrypted(translations, req, res)
+            const notes = await sql.note.unverifiedPostNotes(Number(postID))
+            serverFunctions.sendEncrypted(notes, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
-    app.put("/api/translation/save/unverified", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
+    app.put("/api/note/save/unverified", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -387,9 +387,9 @@ const TranslationRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return res.status(403).end()
             if (!data) return res.status(400).send("Bad data")
 
-            const translation = await sql.translation.unverifiedTranslation(postID, order)
-            if (!translation) return res.status(400).send("Bad translation")
-            await sql.translation.updateUnverifiedTranslation(translation.translationID, JSON.stringify(data), reason)
+            const note = await sql.note.unverifiedNote(postID, order)
+            if (!note) return res.status(400).send("Bad note")
+            await sql.note.updateUnverifiedNote(note.noteID, JSON.stringify(data), reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -397,12 +397,12 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/translation/list/unverified", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/note/list/unverified", noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const result = await sql.translation.unverifiedTranslations(offset)
+            const result = await sql.note.unverifiedNotes(offset)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -410,12 +410,12 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/approve", csrfProtection, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/note/approve", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {translationID, username, postID} = req.body
+            let {noteID, username, postID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            translationID = Number(req.body.translationID)
-            if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
+            noteID = Number(req.body.noteID)
+            if (Number.isNaN(noteID)) return res.status(400).send("Bad noteID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const unverified = await sql.post.unverifiedPost(Number(postID))
             if (!unverified) return res.status(400).send("Bad postID")
@@ -426,13 +426,13 @@ const TranslationRoutes = (app: Express) => {
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
-            const unverifiedTranslation = await sql.translation.unverifiedTranslationID(Number(translationID))
-            if (!unverifiedTranslation) return res.status(400).send("Bad translationID")
-            await sql.translation.insertTranslation(unverifiedTranslation.originalID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
-            await sql.translation.deleteUnverifiedTranslation(Number(translationID))
+            const unverifiedNote = await sql.note.unverifiedNoteID(Number(noteID))
+            if (!unverifiedNote) return res.status(400).send("Bad noteID")
+            await sql.note.insertNote(unverifiedNote.originalID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
+            await sql.note.deleteUnverifiedNote(Number(noteID))
 
-            let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
-            await serverFunctions.systemMessage(username, "Notice: Translations have been approved", message)
+            let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
+            await serverFunctions.systemMessage(username, "Notice: Notes have been approved", message)
 
             res.status(200).send("Success")
         } catch (e) {
@@ -441,12 +441,12 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/reject", csrfProtection, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/note/reject", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {translationID, username, postID} = req.body
+            let {noteID, username, postID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            translationID = Number(req.body.translationID)
-            if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
+            noteID = Number(req.body.noteID)
+            if (Number.isNaN(noteID)) return res.status(400).send("Bad noteID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const unverified = await sql.post.unverifiedPost(Number(postID))
             if (!unverified) return res.status(400).send("Bad postID")
@@ -457,12 +457,12 @@ const TranslationRoutes = (app: Express) => {
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
-            const unverifiedTranslation = await sql.translation.unverifiedTranslationID(Number(translationID))
-            if (!unverifiedTranslation) return res.status(400).send("Bad translationID")
-            await sql.translation.deleteUnverifiedTranslation(Number(translationID))
+            const unverifiedNote = await sql.note.unverifiedNoteID(Number(noteID))
+            if (!unverifiedNote) return res.status(400).send("Bad noteID")
+            await sql.note.deleteUnverifiedNote(Number(noteID))
 
-            let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
-            // await serverFunctions.systemMessage(username, "Notice: Translations have been rejected", message)
+            let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
+            // await serverFunctions.systemMessage(username, "Notice: Notes have been rejected", message)
             
             res.status(200).send("Success")
         } catch (e) {
@@ -471,7 +471,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/translation/history", translationLimiter, async (req: Request, res: Response) => {
+    app.get("/api/note/history", noteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
             const order = req.query.order as string
@@ -482,11 +482,11 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = null as any
             if (historyID) {
-                result = await sql.history.translationHistoryID(postID, historyID)
+                result = await sql.history.noteHistoryID(postID, historyID)
             } else if (username) {
-                result = await sql.history.userTranslationHistory(username)
+                result = await sql.history.userNoteHistory(username)
             } else {
-                result = await sql.history.translationHistory(postID, order, offset, query)
+                result = await sql.history.noteHistory(postID, order, offset, query)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -495,7 +495,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/translation/history/delete", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/note/history/delete", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
             const order = req.query.order as string
@@ -503,11 +503,11 @@ const TranslationRoutes = (app: Express) => {
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const translationHistory = await sql.history.translationHistory(postID, order)
-            if (translationHistory[0]?.historyID === historyID) {
+            const noteHistory = await sql.history.noteHistory(postID, order)
+            if (noteHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")
             } else {
-                await sql.history.deleteTranslationHistory(Number(historyID))
+                await sql.history.deleteNoteHistory(Number(historyID))
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -517,4 +517,4 @@ const TranslationRoutes = (app: Express) => {
     })
 }
 
-export default TranslationRoutes
+export default NoteRoutes

@@ -177,10 +177,10 @@ export default class SQLPost {
     public static bulkUpdateUnverifiedPost = async (postID: number, params: {rating?: string, style?: string, parentID?: string, 
         title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
-        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isTranslation?: boolean, 
+        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, 
         addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
-        mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isTranslation, 
+        mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isNote, 
         addedTags, removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
@@ -310,9 +310,9 @@ export default class SQLPost {
             values.push(hasUpscaled)
             i++
         }
-        if (isTranslation !== undefined) {
-            setArray.push(`"isTranslation" = $${i}`)
-            values.push(isTranslation)
+        if (isNote !== undefined) {
+            setArray.push(`"isNote" = $${i}`)
+            values.push(isNote)
             i++
         }
         if (addedTags !== undefined) {

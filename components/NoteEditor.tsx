@@ -2,35 +2,35 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
-useSessionActions, useActiveActions, useFlagActions, useTranslationDialogSelector, 
-useTranslationDialogActions, useInteractionSelector} from "../store"
+useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
+useNoteDialogActions, useInteractionSelector} from "../store"
 import functions from "../structures/Functions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
-import translationDelete from "../assets/icons/translation-delete.png"
-import translationEdit from "../assets/icons/translation-edit.png"
-import translationView from "../assets/icons/translation-view.png"
-import translationHistory from "../assets/icons/translation-history.png"
-import translationSave from "../assets/icons/translation-save.png"
-import translationText from "../assets/icons/translation-text.png"
-import translationToggleOn from "../assets/icons/translation-toggle-on.png"
-import translationToggleOff from "../assets/icons/translation-toggle-off.png"
+import noteDelete from "../assets/icons/note-delete.png"
+import noteEdit from "../assets/icons/note-edit.png"
+import noteView from "../assets/icons/note-view.png"
+import noteHistory from "../assets/icons/note-history.png"
+import noteSave from "../assets/icons/note-save.png"
+import noteText from "../assets/icons/note-text.png"
+import noteToggleOn from "../assets/icons/note-toggle-on.png"
+import noteToggleOff from "../assets/icons/note-toggle-off.png"
 import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
-import translationOCR from "../assets/icons/translation-ocr.png"
-import "./styles/translationeditor.less"
+import noteOCR from "../assets/icons/note-ocr.png"
+import "./styles/noteeditor.less"
 
 interface Props {
     post?: any
     img: string
     order?: number
     unverified?: boolean
-    translationID?: string
+    noteID?: string
 }
 
 let isAnimatedWebP = false
 
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
-    const {translationDrawingEnabled} = useSearchSelector()
+    const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -46,7 +46,7 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
         stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity: active && translationDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
+        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
     )
 }
 
@@ -68,7 +68,7 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     onContextMenu={extraShapeProps.onContextMenu} onDoubleClick={extraShapeProps.onDoubleClick} onMouseDown={extraShapeProps.onMouseDown}/>)
 })
 
-const TranslationEditor: React.FunctionComponent<Props> = (props) => {
+const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag} = useInteractionSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -77,12 +77,12 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setSidebarText} = useActiveActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {translationMode, translationDrawingEnabled, imageExpand} = useSearchSelector()
-    const {setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
+    const {noteMode, noteDrawingEnabled, imageExpand} = useSearchSelector()
+    const {setNoteMode, setNoteDrawingEnabled} = useSearchActions()
     const {setRedirect} = useFlagActions()
-    const {editTranslationFlag, editTranslationID, editTranslationText, editTranslationTranscript, showSaveTranslationDialog, translationOCRDialog, translationOCRFlag} = useTranslationDialogSelector()
-    const {setEditTranslationFlag, setEditTranslationID, setEditTranslationText, setEditTranslationTranscript, setShowSaveTranslationDialog,
-    setSaveTranslationData, setSaveTranslationOrder, setTranslationOCRDialog, setTranslationOCRFlag} = useTranslationDialogActions()
+    const {editNoteFlag, editNoteID, editNoteText, editNoteTranscript, showSaveNoteDialog, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
+    const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript, setShowSaveNoteDialog,
+    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [img, setImg] = useState("")
@@ -104,23 +104,23 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateTranslations = async () => {
+    const updateNotes = async () => {
         if (!props.post) return
-        let translations = [] as any
+        let notes = [] as any
         if (props.unverified) {
-            translations = await functions.get("/api/translations/unverified", {postID: props.post.postID}, session, setSessionFlag)
-        } else if (props.translationID) {
-            translations = await functions.get("/api/translation/history", {postID: props.post.postID, historyID: props.translationID}, session, setSessionFlag)
+            notes = await functions.get("/api/notes/unverified", {postID: props.post.postID}, session, setSessionFlag)
+        } else if (props.noteID) {
+            notes = await functions.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
         } else {
-            translations = await functions.get("/api/translations", {postID: props.post.postID}, session, setSessionFlag)
+            notes = await functions.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
         }
-        if (translations?.length) {
-            const translation = translations.find((t: any) => t.order === (props.order || 1))
-            if (translation?.data?.length) {
-                let largestID = translation.data.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
-                setItems(translation.data)
+        if (notes?.length) {
+            const note = notes.find((t: any) => t.order === (props.order || 1))
+            if (note?.data?.length) {
+                let largestID = note.data.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
+                setItems(note.data)
                 setID(largestID)
-                setTranslationMode(true)
+                setNoteMode(true)
                 return
             } else {
                 setItems([])
@@ -133,8 +133,8 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        updateTranslations()
-    }, [props.img, props.order, props.translationID, session])
+        updateNotes()
+    }, [props.img, props.order, props.noteID, session])
 
     useEffect(() => {
         const keyDownListener = (event: KeyboardEvent) => {
@@ -262,20 +262,20 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }, [img, pixelate])
 
     const deleteFocused = () => {
-        if (!translationDrawingEnabled) return
+        if (!noteDrawingEnabled) return
         setItems((prev: any) => functions.insertAtIndex(prev, activeIndex, null).filter(Boolean))
     }
 
     const editTextDialog = () => {
-        if (!translationDrawingEnabled) return
-        if (editTranslationID === null) {
-            setEditTranslationTranscript(items[activeIndex].transcript)
-            setEditTranslationText(items[activeIndex].translation)
-            setEditTranslationID(activeIndex)
+        if (!noteDrawingEnabled) return
+        if (editNoteID === null) {
+            setEditNoteTranscript(items[activeIndex].transcript)
+            setEditNoteText(items[activeIndex].translation)
+            setEditNoteID(activeIndex)
         } else {
-            setEditTranslationTranscript("")
-            setEditTranslationText("")
-            setEditTranslationID(null)
+            setEditNoteTranscript("")
+            setEditNoteText("")
+            setEditNoteID(null)
         }
     }
 
@@ -291,14 +291,14 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (editTranslationFlag) {
-            editText(editTranslationID, editTranslationTranscript, editTranslationText)
-            setEditTranslationText("")
-            setEditTranslationTranscript("")
-            setEditTranslationFlag(false)
-            setEditTranslationID(null)
+        if (editNoteFlag) {
+            editText(editNoteID, editNoteTranscript, editNoteText)
+            setEditNoteText("")
+            setEditNoteTranscript("")
+            setEditNoteFlag(false)
+            setEditNoteID(null)
         }
-    }, [editTranslationFlag])
+    }, [editNoteFlag])
 
     const saveTextDialog = () => {
         if (!session.username) {
@@ -306,9 +306,9 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             history.push("/login")
             return setSidebarText("Login required.")
         }
-        setSaveTranslationOrder(props.order || 1)
-        setSaveTranslationData(items)
-        setShowSaveTranslationDialog(!showSaveTranslationDialog)
+        setSaveNoteOrder(props.order || 1)
+        setSaveNoteData(items)
+        setShowSaveNoteDialog(!showSaveNoteDialog)
     }
 
     const ocrPage = async () => {
@@ -319,48 +319,48 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (translationOCRFlag) {
+        if (noteOCRFlag) {
             ocrPage().then(() => {
-                setTranslationOCRFlag(false)
-                setTranslationOCRDialog(false)
+                setNoteOCRFlag(false)
+                setNoteOCRDialog(false)
             })
         }
-    }, [translationOCRFlag])
+    }, [noteOCRFlag])
 
     const ocrDialog = () => {
-        setTranslationOCRDialog(!translationOCRDialog)
+        setNoteOCRDialog(!noteOCRDialog)
     }
 
     const getBubbleText = () => {
-        if (shiftKey) return showTranscript ? bubbleData.translation : bubbleData.transcript
+        if (shiftKey) return showTranscript ? bubbleData.note : bubbleData.transcript
         return showTranscript ? bubbleData.transcript : bubbleData.translation
     }
 
     const showHistory = () => {
-        history.push(`/translation/history/${props.post.postID}/${props.order || 1}`)
+        history.push(`/note/history/${props.post.postID}/${props.order || 1}`)
     }
 
     return (
-        <div className="translation-editor" style={{display: translationMode ? "flex" : "none"}}>
-            <div className="translation-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
-                <div className={`translation-editor-buttons ${buttonHover ? "show-translation-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    {!props.unverified ? <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
-                    {session.username ? <img draggable={false} className="translation-editor-button" src={translationOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
-                    <img draggable={false} className="translation-editor-button" src={translationSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="translation-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
-                    <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
-                    <img draggable={false} className="translation-editor-button" src={translationDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/>
-                    <img draggable={false} className="translation-editor-button" src={translationDrawingEnabled ? translationEdit : translationView} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled(!translationDrawingEnabled)}/>
-                    <img draggable={false} className="translation-editor-button" src={translationToggleOff} style={{filter: getFilter()}} onClick={() => setTranslationMode(false)}/>
+        <div className="note-editor" style={{display: noteMode ? "flex" : "none"}}>
+            <div className="note-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
+                <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
+                    {session.username ? <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
+                    <img draggable={false} className="note-editor-button" src={noteSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="note-editor-button" src={noteText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={noteDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/>
+                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter: getFilter()}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
+                    <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter: getFilter()}} onClick={() => setNoteMode(false)}/>
                 </div>
-                {bubbleToggle ? <div className="translation-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
+                {bubbleToggle ? <div className="note-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
                 <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale}>
                     <ImageLayer src={img}/>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
-                        if (!translationDrawingEnabled) return
+                        if (!noteDrawingEnabled) return
                         setItems((prev: any) => {
                             setID(id + 1)
                             return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, imageHeight: targetHeight, transcript: "", translation: ""}]
@@ -377,18 +377,18 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         const newY = (y / imageHeight ) * targetHeight
 
                         const insertItem = (newRect: any) => {
-                            if (!translationDrawingEnabled) return
+                            if (!noteDrawingEnabled) return
                             setItems((prev: any) => functions.insertAtIndex(prev, index, {...item, ...newRect}))
                         }
 
                         const deleteItem = () => {
-                            if (!translationDrawingEnabled) return
+                            if (!noteDrawingEnabled) return
                             setItems((prev: any) => functions.insertAtIndex(prev, index, null).filter(Boolean))
                         }
 
                         const onContextMenu = (event: React.MouseEvent) => {
                             event.preventDefault()
-                            if (!translationDrawingEnabled) {
+                            if (!noteDrawingEnabled) {
                                 navigator.clipboard.writeText(item.transcript)
                             } else {
                                 deleteItem()
@@ -396,10 +396,10 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onDoubleClick = () => {
-                            if (!translationDrawingEnabled) return
-                            setEditTranslationTranscript(item.transcript)
-                            setEditTranslationText(item.translation)
-                            setEditTranslationID(index)
+                            if (!noteDrawingEnabled) return
+                            setEditNoteTranscript(item.transcript)
+                            setEditNoteText(item.translation)
+                            setEditNoteID(index)
                         }
 
                         const onMouseEnter = (event: any) => {
@@ -415,7 +415,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: any) => {
-                            if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            if (!item.transcript && !item.note) return setBubbleToggle(false)
                             const bounds = event.target.getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
@@ -430,7 +430,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseDown = (event: React.MouseEvent) => {
-                            if (!translationDrawingEnabled) {
+                            if (!noteDrawingEnabled) {
                                 event.stopPropagation()
                                 if (event.shiftKey) {
                                     navigator.clipboard.writeText(item.transcript)
@@ -452,4 +452,4 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default TranslationEditor
+export default NoteEditor

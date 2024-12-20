@@ -11,9 +11,9 @@ import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
 import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
-import TranslationHistoryRow from "../components/TranslationHistoryRow"
-import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
-import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryDialog"
+import NoteHistoryRow from "../components/NoteHistoryRow"
+import RevertNoteHistoryDialog from "../dialogs/RevertNoteHistoryDialog"
+import DeleteNoteHistoryDialog from "../dialogs/DeleteNoteHistoryDialog"
 import GroupHistoryRow from "../components/GroupHistoryRow"
 import RevertGroupHistoryDialog from "../dialogs/RevertGroupHistoryDialog"
 import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
@@ -32,13 +32,13 @@ import permissions from "../structures/Permissions"
 import historyPost from "../assets/icons/history-post.png"
 import historySearch from "../assets/icons/history-search.png"
 import historyTag from "../assets/icons/history-tag.png"
-import historyTranslate from "../assets/icons/history-translate.png"
+import historyTranslate from "../assets/icons/history-note.png"
 import historyGroup from "../assets/icons/history-group.png"
 import historyAlias from "../assets/icons/history-alias.png"
 import historyPostActive from "../assets/icons/history-post-active.png"
 import historySearchActive from "../assets/icons/history-search-active.png"
 import historyTagActive from "../assets/icons/history-tag-active.png"
-import historyTranslateActive from "../assets/icons/history-translate-active.png"
+import historyTranslateActive from "../assets/icons/history-note-active.png"
 import historyGroupActive from "../assets/icons/history-group-active.png"
 import historyAliasActive from "../assets/icons/history-alias-active.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
@@ -74,13 +74,13 @@ const HistoryPage: React.FunctionComponent = () => {
     const [index, setIndex] = useState(0)
     const [postStates, setPostStates] = useState([]) as any
     const [tagStates, setTagStates] = useState([]) as any
-    const [translationStates, setTranslationStates] = useState([]) as any
+    const [noteStates, setNoteStates] = useState([]) as any
     const [groupStates, setGroupStates] = useState([]) as any
     const [aliasStates, setAliasStates] = useState([]) as any
     const [searchStates, setSearchStates] = useState([]) as any
     const [visibleHistoryPosts, setVisibleHistoryPosts] = useState([]) as any
     const [visibleHistoryTags, setVisibleHistoryTags] = useState([]) as any
-    const [visibleHistoryTranslations, setVisibleHistoryTranslations] = useState([]) as any
+    const [visibleHistoryNotes, setVisibleHistoryNotes] = useState([]) as any
     const [visibleHistoryGroups, setVisibleHistoryGroups] = useState([]) as any
     const [visibleHistoryAliases, setVisibleHistoryAliases] = useState([]) as any
     const [visibleHistorySearch, setVisibleHistorySearch] = useState([]) as any
@@ -151,8 +151,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             return tagStates
         }
-        if (historyTab === "translation") {
-            return translationStates
+        if (historyTab === "note") {
+            return noteStates
         }
         if (historyTab === "group") {
             return groupStates
@@ -175,8 +175,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             setTagStates(states)
         }
-        if (historyTab === "translation") {
-            setTranslationStates(states)
+        if (historyTab === "note") {
+            setNoteStates(states)
         }
         if (historyTab === "group") {
             setGroupStates(states)
@@ -196,8 +196,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             return visibleHistoryTags
         }
-        if (historyTab === "translation") {
-            return visibleHistoryTranslations
+        if (historyTab === "note") {
+            return visibleHistoryNotes
         }
         if (historyTab === "group") {
             return visibleHistoryGroups
@@ -220,8 +220,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             setVisibleHistoryTags(visible)
         }
-        if (historyTab === "translation") {
-            setVisibleHistoryTranslations(visible)
+        if (historyTab === "note") {
+            setVisibleHistoryNotes(visible)
         }
         if (historyTab === "group") {
             setVisibleHistoryGroups(visible)
@@ -248,8 +248,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             result = await functions.get("/api/tag/history", {query: searchQuery}, session, setSessionFlag)
         }
-        if (historyTab === "translation") {
-            result = await functions.get("/api/translation/history", {query: searchQuery}, session, setSessionFlag)
+        if (historyTab === "note") {
+            result = await functions.get("/api/note/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "group") {
             result = await functions.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
@@ -346,8 +346,8 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "tag") {
             result = await functions.get("/api/tag/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
-        if (historyTab === "translation") {
-            result = await functions.get("/api/translation/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+        if (historyTab === "note") {
+            result = await functions.get("/api/note/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "group") {
             result = await functions.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
@@ -602,7 +602,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     onDelete={updateHistory} onEdit={updateHistory}/>)
             }
 
-            if (historyTab === "translation") {
+            if (historyTab === "note") {
                 let previous = visible[i + 1]
                 if (current.postID !== visible[i].postID &&
                     current.order !== visible[i].order) {
@@ -611,7 +611,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 }
                 if (previous?.postID !== current.postID &&
                     previous?.order !== current.order) previous = null
-                jsx.push(<TranslationHistoryRow key={i} previousHistory={previous} translationHistory={visible[i]} 
+                jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
                     onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
             }
 
@@ -702,10 +702,10 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div></>
             )
         }
-        if (historyTab === "translation") {
+        if (historyTab === "note") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">{i18n.history.translation}</span>
+                    <span className="history-heading">{i18n.history.note}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -779,8 +779,8 @@ const HistoryPage: React.FunctionComponent = () => {
         <DeletePostHistoryDialog/>
         <RevertTagHistoryDialog/>
         <DeleteTagHistoryDialog/>
-        <RevertTranslationHistoryDialog/>
-        <DeleteTranslationHistoryDialog/>
+        <RevertNoteHistoryDialog/>
+        <DeleteNoteHistoryDialog/>
         <RevertGroupHistoryDialog/>
         <DeleteGroupHistoryDialog/>
         <RevertAliasHistoryDialog/>
@@ -799,7 +799,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-icon" onClick={() => setHistoryTab("post")} src={historyTab === "post" ? historyPostActive : historyPost} style={{filter: historyTab === "post" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? historyTagActive : historyTag} style={{filter: historyTab === "tag" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? historyGroupActive : historyGroup} style={{filter: historyTab === "group" ? "" : getFilter()}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("translation")} src={historyTab === "translation" ? historyTranslateActive : historyTranslate} style={{filter: historyTab === "translation" ? "" : getFilter()}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? historyTranslateActive : historyTranslate} style={{filter: historyTab === "note" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? historyAliasActive : historyAlias} style={{filter: historyTab === "alias" ? "" : getFilter()}}/>
                     </div>
                     {generateHeaderJSX()}

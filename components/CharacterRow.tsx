@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
@@ -17,6 +17,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
+    const [images, setImages] = useState([])
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {
@@ -50,13 +51,20 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
+        let images = []
         if (!session.username) {
-            let filtered = props.character.posts.filter((p: any) => p.rating === "safe")
-            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            let filtered = props.character.posts.filter((p: any) => p.rating === functions.r13())
+            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+        } else {
+            let filtered = props.character.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
-        let filtered = props.character.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+        setImages(images)
     }
+
+    useEffect(() => {
+        getImages()
+    }, [props.character])
 
     const characterSocialJSX = () => {
         let jsx = [] as any
@@ -77,7 +85,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
                 </span>
             </div>
             <div className="characterrow-row">
-                <Carousel set={set} noKey={true} images={getImages()} height={200}/>
+                <Carousel set={set} noKey={true} images={images} height={200}/>
             </div>
         </div>
     )

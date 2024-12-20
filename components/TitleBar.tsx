@@ -46,6 +46,8 @@ const darkColorList = {
     "--progressBG": "#000000",
     "--audioPlayerColor": "#130737",
     "--buttonBG": "#ff11af",
+    "--previewBG": "#4a44ff",
+    "--editBG": "#347bff",
     "--r18BGColor": "#5603033d",
 }
 
@@ -82,6 +84,8 @@ const lightColorList = {
     "--progressBG": "#ffffff",
     "--audioPlayerColor": "#fbfaff",
     "--buttonBG": "#ff92ff",
+    "--previewBG": "#b2d0ff",
+    "--editBG": "#afe6ff",
     "--r18BGColor": "#e206444a",
 }
 
@@ -90,7 +94,7 @@ interface Props {
     goBack?: boolean
     post?: any
     historyID?: string
-    translationID?: string
+    noteID?: string
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -128,6 +132,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         if (theme.includes("light") && siteLightness > 50) targetLightness = 50
         let noRotation = [
             "--buttonBG",
+            "--previewBG",
             "--r18BGColor"
         ]
         for (let i = 0; i < Object.keys(colorList).length; i++) {
@@ -246,7 +251,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={lockIcon}/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[${i18n.sidebar.history}: ${props.historyID}]`}</span> : null}
-                    {props.translationID ? <span style={{color: "var(--translationColor)", marginRight: "10px"}}>{`[${i18n.labels.translation}: ${props.translationID}]`}</span> : null}
+                    {props.noteID ? <span style={{color: "var(--noteColor)", marginRight: "10px"}}>{`[${i18n.labels.note}: ${props.noteID}]`}</span> : null}
                     {functions.isR18(ratingType) ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup}]</span> : null}
                     {activeFavgroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeFavgroup.name}]</span> : null}

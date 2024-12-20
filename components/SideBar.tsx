@@ -15,7 +15,7 @@ import terms from "../assets/icons/terms.png"
 import contact from "../assets/icons/contact.png"
 import code from "../assets/icons/code.png"
 import setAvatar from "../assets/icons/setavatar.png"
-import addTranslation from "../assets/icons/translation-toggle-on.png"
+import addNote from "../assets/icons/note-toggle-on.png"
 import report from "../assets/icons/report.png"
 import takedown from "../assets/icons/takedown.png"
 import restore from "../assets/icons/restore.png"
@@ -86,8 +86,8 @@ let maxHeight3 = 672 // 698
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar} = useLayoutSelector()
-    const {search, translationMode, autoSearch, saveSearch} = useSearchSelector()
-    const {setSearch, setSearchFlag, setTranslationMode, setTranslationDrawingEnabled, setAutoSearch, setSaveSearch} = useSearchActions()
+    const {search, noteMode, autoSearch, saveSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setNoteMode, setNoteDrawingEnabled, setAutoSearch, setSaveSearch} = useSearchActions()
     const {posts, unverifiedPosts, tags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {mobileScrolling} = useInteractionSelector()
@@ -709,11 +709,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             tags: props.tags, unverified: props.unverified})
     }
 
-    const triggerAddTranslation = () => {
+    const triggerAddNote = () => {
         window.scrollTo(0, 0)
-        const newMode = !translationMode
-        setTranslationMode(newMode)
-        if (newMode) setTranslationDrawingEnabled(true)
+        const newMode = !noteMode
+        setNoteMode(newMode)
+        if (newMode) setNoteDrawingEnabled(true)
     }
 
     const triggerParent = () => {
@@ -1077,9 +1077,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerAddTranslation}>
-                                <img className="sidebar-icon" src={addTranslation} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.addTranslation}</span>
+                            <span className="tag-hover" onClick={triggerAddNote}>
+                                <img className="sidebar-icon" src={addNote} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.addNote}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">

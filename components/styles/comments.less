@@ -121,6 +121,53 @@
     cursor: pointer;
 }
 
+.comments-textarea-buttons {
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--inputBG);
+    border: 1px solid var(--inputBorder);
+    border-bottom: none;
+    margin-left: 10px;
+}
+
+.comments-textarea-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: transparent;
+    // border: 1px solid var(--sidebarBG);
+    padding: 8px 10px;
+    cursor: pointer;
+    & > img {
+        width: auto;
+        height: 20px;
+    }
+    &:hover {
+        filter: brightness(150%);
+    }
+}
+
+.comments-preview {
+    margin-left: 10px;
+    background-color: var(--inputBG);
+    border: 1px solid var(--inputBorder);
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 22px;
+    min-height: 200px;
+}
+
+.comments-preview-button {
+    .comments-button();
+    background-color: var(--previewBG);
+}
+
+.comments-edit-button {
+    .comments-button();
+    background-color: var(--editBG);
+}
+
 @media screen and (max-width: 500px) {
     .comments {
         padding-left: 20px;

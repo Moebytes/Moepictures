@@ -5,9 +5,9 @@ import axios from "axios"
 
 export default class SQLUser {
     /** Get uploads. */
-    public static uploads = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static uploads = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, username: sessionUsername})
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

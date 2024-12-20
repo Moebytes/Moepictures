@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../store"
 import functions from "../structures/Functions"
@@ -20,6 +20,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
+    const [images, setImages] = useState([])
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {
@@ -53,13 +54,20 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
+        let images = []
         if (!session.username) {
-            let filtered = props.artist.posts.filter((p: any) => p.rating === "safe")
-            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            let filtered = props.artist.posts.filter((p: any) => p.rating === functions.r13())
+            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+        } else {
+            let filtered = props.artist.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
-        let filtered = props.artist.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+        setImages(images)
     }
+
+    useEffect(() => {
+        getImages()
+    }, [props.artist])
 
     const artistSocialJSX = () => {
         let jsx = [] as any
@@ -90,7 +98,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 </span>
             </div>
             <div className="artistrow-row">
-                <Carousel set={set} noKey={true} images={getImages()} height={200}/>
+                <Carousel set={set} noKey={true} images={images} height={200}/>
             </div>
         </div>
     )

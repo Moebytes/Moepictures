@@ -680,6 +680,25 @@ const MiscRoutes = (app: Express) => {
             res.status(400).send("Bad request") 
         }
     })
+
+    app.post("/api/litterbox", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.body) return res.status(400).send("Image data must be provided")
+            const form = new FormData()
+            form.append("time", "1h")
+            form.append("reqtype", "fileupload")
+            const inputType = functions.bufferFileType(req.body)?.[0]
+            form.append("fileToUpload", Buffer.from(req.body, "binary"), {
+                filename: `file.${inputType.extension}`,
+                contentType: inputType.mime
+            })
+            let result = await axios.post("https://litterbox.catbox.moe/resources/internals/api.php", form, {headers: form.getHeaders()}).then((r) => r.data)
+            res.status(200).send(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
 }
 
 export default MiscRoutes

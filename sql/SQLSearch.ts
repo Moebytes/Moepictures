@@ -3,9 +3,10 @@ import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
 
 export default class SQLSearch {
-    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, 
-        offset?: string, limit?: string, username?: string, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean}) => {
-        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, favgroupOrder, outerSort} = options
+    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: string, 
+        limit?: string, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
+        format?: string}) => {
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -17,10 +18,10 @@ export default class SQLSearch {
         if (type === "live2d") typeQuery = `posts.type = 'live2d'`
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
-        if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`
+        if (rating === "flirty") ratingQuery = `posts.rating = 'flirty'`
         if (rating === "ecchi") ratingQuery = `posts.rating = 'ecchi'`
         if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'ecchi')`
+        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'flirty' OR posts.rating = 'ecchi')`
         let styleQuery = ""
         if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
         if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
@@ -133,17 +134,26 @@ export default class SQLSearch {
             i++
         }
         let offsetValue = i
-        if (offset) values.push(offset)
+        if (offset) {
+            values.push(offset)
+            i++
+        }
+        let formatValue = i
+        if (format) {
+            values.push(format)
+            i++
+        }
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery].filter(Boolean).join(" AND ")
+        let childQuery = showChildren ? "" : `posts."parentID" IS NULL`
+        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery, childQuery].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
 
         let postJSON = functions.multiTrim(/*sql*/`
             WITH post_json AS (
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${includeTags ? `"tag map tags"."tags",` : ""}
+                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 ${favgroupOrder ? `"favgroup map"."order",` : ""} 
-                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
                 MAX(DISTINCT images."size") AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "variationCount",
@@ -166,26 +176,35 @@ export default class SQLSearch {
                     WHEN COUNT("favgroup map"."username") FILTER (WHERE "favgroup map"."username" = $${userValue}) > 0 
                     THEN true ELSE false
                 END AS favgrouped` : ""}
+                ${format ? `,
+                CASE
+                    WHEN BOOL_OR(images."filename" LIKE '%' || $${formatValue})
+                    THEN true ELSE false
+                END AS "formatMatch"` : ""}
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 LEFT JOIN "child posts" ON posts."postID" = "child posts"."parentID"
                 LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
                 ${username || favgroupOrder ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}${favgroupOrder ? `, "favgroup map"."order"` : ""}
+                GROUP BY posts."postID"
+                ${includeTags ? `, "tag map tags"."tags"` : ""}
+                ${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
+                ${favgroupOrder ? `, "favgroup map"."order"` : ""}
                 ${!outerSort ? sortQuery : ""}
             )`)
 
-        return {postJSON, values, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue}
+        return {postJSON, values, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
     }
 
     /** Search posts. */
-    public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
+    public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: string, 
+        limit?: string, withTags?: boolean, showChildren?: boolean, username?: string) => {
         const {postJSON, values, tagQuery, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, limit, username, withTags})
+        SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, limit, username, withTags, showChildren})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -211,8 +230,8 @@ export default class SQLSearch {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                ${includeTags ? `"tag map tags"."tags",` : ""}
+                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 MAX(DISTINCT images."size") AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "variationCount",
@@ -220,11 +239,12 @@ export default class SQLSearch {
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 WHERE posts."link" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1
                 GROUP BY posts."postID"
+                ${includeTags ? `, "tag map tags"."tags"` : ""}
             )
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
@@ -243,8 +263,8 @@ export default class SQLSearch {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                ${includeTags ? `"tag map tags"."tags",` : ""}
+                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 MAX(DISTINCT images."size") AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "variationCount",
@@ -252,12 +272,13 @@ export default class SQLSearch {
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 WHERE posts."link" LIKE 'https://%x.com/%/status/' || $1 OR posts."link" LIKE 'https://%twitter.com/%/status/' || $1 OR 
                 posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1 
                 GROUP BY posts."postID"
+                ${includeTags ? `, "tag map tags"."tags"` : ""}
             )
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
@@ -276,8 +297,8 @@ export default class SQLSearch {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                ${includeTags ? `"tag map tags"."tags",` : ""}
+                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 MAX(DISTINCT images."size") AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "variationCount",
@@ -285,11 +306,12 @@ export default class SQLSearch {
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 WHERE posts."link" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%'
                 GROUP BY posts."postID"
+                ${includeTags ? `, "tag map tags"."tags"` : ""}
             )
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
@@ -302,11 +324,37 @@ export default class SQLSearch {
         return result
     }
 
+    /** Search format. */
+    public static searchFormat = async (format: string, type: string, rating: string, style: string, sort: string, 
+        offset?: string, limit?: string, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        const {postJSON, values, limitValue, offsetValue, i} = 
+        SQLQuery.search.boilerplate({format, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            ${postJSON}
+            SELECT post_json.*,
+            COUNT(*) OVER() AS "postCount"
+            FROM post_json
+            WHERE "formatMatch" IS TRUE
+            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+        `)
+        }
+        if (values?.[0]) query.values = values
+        console.log(query)
+        if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
+            return SQLQuery.run(query)
+        } else {
+            return SQLQuery.run(query, true)
+        }
+    }
+
     /** Get posts. */
     public static posts = async (postIDs?: number[]) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
+            SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+            json_agg(DISTINCT "tag map".tag) AS tags,
             COUNT(DISTINCT favorites."username") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
             FROM posts
@@ -374,7 +422,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL AND "isTranslation" IS NULL
+            WHERE "originalID" IS NOT NULL AND "isNote" IS NULL
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
@@ -395,7 +443,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL AND "isTranslation" IS NULL AND "unverified posts"."updater" = $1
+            WHERE "originalID" IS NOT NULL AND "isNote" IS NULL AND "unverified posts"."updater" = $1
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             `),
@@ -412,7 +460,6 @@ export default class SQLSearch {
         if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
         if (category === "characters") whereQueries.push(`tags.type = 'character'`)
         if (category === "series") whereQueries.push(`tags.type = 'series'`)
-        if (category === "tags") whereQueries.push(`tags.type = 'tag'`)
         let i = 1
         if (search) {
             whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
@@ -568,10 +615,10 @@ export default class SQLSearch {
     public static groupSearch = async (search: string, sort: string, rating: string, limit?: string, offset?: string) => {
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
-        if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
+        if (rating === "flirty") ratingQuery = `groups.rating = 'flirty'`
         if (rating === "ecchi") ratingQuery = `groups.rating = 'ecchi'`
         if (rating === "hentai") ratingQuery = `groups.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'ecchi')`
+        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'flirty' OR groups.rating = 'ecchi')`
         let searchQuery = ""
         let values = [] as any
         let i = 1

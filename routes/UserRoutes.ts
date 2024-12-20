@@ -1004,10 +1004,10 @@ const UserRoutes = (app: Express) => {
                 for (const groupDeleteRequest of groupDeleteRequests) {
                     await sql.request.deleteGroupDeleteRequest(username, groupDeleteRequest.group)
                 }
-                // Delete unverified translations
-                const unverifiedTranslations = await sql.translation.userUnverifiedTranslations(username)
-                for (const unverifiedTranslation of unverifiedTranslations) {
-                    await sql.translation.deleteUnverifiedTranslation(unverifiedTranslation.translationID)
+                // Delete unverified notes
+                const unverifiedNotes = await sql.note.userUnverifiedNotes(username)
+                for (const unverifiedNote of unverifiedNotes) {
+                    await sql.note.deleteUnverifiedNote(unverifiedNote.noteID)
                 }
                 // Delete reports
                 const reports = await sql.report.userReports(username)
@@ -1053,7 +1053,7 @@ const UserRoutes = (app: Express) => {
             let revertPostIDs = new Set()
             let revertTagIDs = new Set()
             let revertGroupIDs = new Set()
-            let revertTranslationIDs = new Set()
+            let revertNoteIDs = new Set()
             if (deleteHistoryChanges) {
                 // Revert post history
                 const postHistory = await sql.history.userPostHistory(username)
@@ -1080,11 +1080,11 @@ const UserRoutes = (app: Express) => {
                     await sql.history.deleteGroupHistory(history.historyID)
                     revertGroupIDs.add(history.slug)
                 }
-                // Revert translation history
-                const translationHistory = await sql.history.userTranslationHistory(username)
-                for (const history of translationHistory) {
-                    await sql.history.deleteTranslationHistory(history.historyID)
-                    revertTranslationIDs.add({postID: history.postID, order: history.order})
+                // Revert note history
+                const noteHistory = await sql.history.userNoteHistory(username)
+                for (const history of noteHistory) {
+                    await sql.history.deleteNoteHistory(history.historyID)
+                    revertNoteIDs.add({postID: history.postID, order: history.order})
                 }
             }
             await sql.report.insertBan(username, user.ip, req.session.username, reason)
@@ -1098,7 +1098,7 @@ const UserRoutes = (app: Express) => {
             }
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
-            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs), revertGroupIDs: Array.from(revertGroupIDs), revertTranslationIDs: Array.from(revertTranslationIDs)})
+            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs), revertGroupIDs: Array.from(revertGroupIDs), revertNoteIDs: Array.from(revertNoteIDs)})
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1267,12 +1267,12 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(400).send("No username")
             const postHistory = await sql.history.userPostHistory(username)
             const tagHistory = await sql.history.userTagHistory(username)
-            const translationHistory = await sql.history.userTranslationHistory(username)
+            const noteHistory = await sql.history.userNoteHistory(username)
             const groupHistory = await sql.history.userGroupHistory(username)
             const json = {
                 postEdits: postHistory[0]?.historyCount || 0,
                 tagEdits: tagHistory[0]?.historyCount || 0,
-                translationEdits: translationHistory[0]?.historyCount || 0,
+                noteEdits: noteHistory[0]?.historyCount || 0,
                 groupEdits: groupHistory[0]?.historyCount || 0
             }
             serverFunctions.sendEncrypted(json, req, res)

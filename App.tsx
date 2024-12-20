@@ -6,6 +6,7 @@ import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
+import NotesPage from "./pages/NotesPage"
 import ArtistsPage from "./pages/ArtistsPage"
 import CharactersPage from "./pages/CharactersPage"
 import SeriesPage from "./pages/SeriesPage"
@@ -46,7 +47,7 @@ import functions from "./structures/Functions"
 import ModQueuePage from "./pages/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/SetAvatarPage"
-import TranslationHistoryPage from "./pages/TranslationHistoryPage"
+import NoteHistoryPage from "./pages/NoteHistoryPage"
 import ForumPage from "./pages/ForumPage"
 import ThreadPage from "./pages/ThreadPage"
 import GroupsPage from "./pages/GroupsPage"
@@ -306,6 +307,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path="/characters"><CharactersPage/></Route>
                 <Route exact path="/artists"><ArtistsPage/></Route>
                 <Route exact path="/comments"><CommentsPage/></Route>
+                <Route exact path="/notes"><NotesPage/></Route>
                 <Route exact path="/groups"><GroupsPage/></Route>
                 <Route exact path="/history"><HistoryPage/></Route>
                 <Route exact path="/premium"><PremiumPage/></Route>
@@ -317,8 +319,8 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
                 <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
-                <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
-                <Route exact path="/user/:username/translation/history" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
+                <Route exact path="/note/history/:id/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
+                <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
                 <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
                 <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>

@@ -4,7 +4,14 @@ import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionA
 useActiveActions, useLayoutSelector, useFlagSelector, useFlagActions, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import highlight from "../assets/icons/highlight.png"
+import bold from "../assets/icons/bold.png"
+import italic from "../assets/icons/italic.png"
+import underline from "../assets/icons/underline.png"
+import strikethrough from "../assets/icons/strikethrough.png"
+import spoiler from "../assets/icons/spoiler.png"
 import Comment from "./Comment"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comments.less"
 
 interface Props {
@@ -12,7 +19,7 @@ interface Props {
 }
 
 const Comments: React.FunctionComponent<Props> = (props) => {
-    const {i18n} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -27,9 +34,15 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const [comments, setComments] = useState([]) as any
     const [commentFlag, setCommentFlag] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
     const errorRef = useRef(null) as any
     const emojiRef = useRef(null) as any
+    const textRef = useRef(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         const commentParam = new URLSearchParams(window.location.search).get("comment")
@@ -183,6 +196,37 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const parseText = () => {
+        const textarea = textRef.current
+        if (!textarea) return
+        const pieces = functions.parseComment(textarea.value)
+        let jsx = [] as any
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i]
+            if (piece.includes(">")) {
+                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
+                let username = ""
+                let said = ""
+                if (userPart) {
+                    username = functions.toProperCase(userPart.split(/ +/g)[0])
+                    said = userPart.split(/ +/g).slice(1).join(" ")
+                }
+                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
+                jsx.push(
+                    <div className="comment-quote-container">
+                        {userPart ? <span className="comment-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
+                        <span className="comment-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
+                    </div>
+                )
+            } else {
+                jsx.push(<span className="comment-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
+            }
+        }
+        return jsx
+    }
+
     const getCommentBox = () => {
         if (session.banned) return (
             <div className="comments-input-container">
@@ -192,15 +236,25 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (session.username) {
             return (
                 <div className="comments-input-container">
-                    <div className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <textarea className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
+                    <div className="comments-textarea-buttons">
+                        <button className="comments-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
                     </div>
+                    {previewMode ? <div className="comments-preview">{parseText()}</div> : 
+                    <div style={{marginTop: "0px"}} className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <textarea ref={textRef} className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
+                    </div>}
                     {error ? <div className="comments-validation-container"><span className="comments-validation" ref={errorRef}></span></div> : null}
                     <div className="comments-button-container-left">
                     <button className="comments-button" onClick={post}>{i18n.buttons.post}</button>
                     <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                         <img src={emojiSelect}/>
                     </button>
+                    <button className={previewMode ? "comments-edit-button" : "comments-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.edit : i18n.buttons.preview}</button>
                     </div>
                 </div>
             )

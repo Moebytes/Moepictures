@@ -393,9 +393,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
-                        {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
-                        {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
-                        {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
+                        {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-opt-icon" src={dmIcon} onClick={dmDialog}/> : null}
+                        {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-opt-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
+                        {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-opt-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
                     </div>
                     {banJSX()}
                     <div className="user-row">
@@ -411,8 +411,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {counts.tagEdits > 0 ? <div className="user-row">
                         <span className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
                     </div> : null}
-                    {counts.translationEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/translation/history`)}>{i18n.mod.translationEdits} <span className="user-text-alt">{counts.translationEdits}</span></span>
+                    {counts.noteEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/note/history`)}>{i18n.mod.noteEdits} <span className="user-text-alt">{counts.noteEdits}</span></span>
                     </div> : null}
                     {counts.groupEdits > 0 ? <div className="user-row">
                         <span className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>

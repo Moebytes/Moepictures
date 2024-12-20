@@ -18,8 +18,8 @@ import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
 import UpscalePostDialog from "../dialogs/UpscalePostDialog"
 import CompressPostDialog from "../dialogs/CompressPostDialog"
-import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
-import EditTranslationDialog from "../dialogs/EditTranslationDialog"
+import SaveNoteDialog from "../dialogs/SaveNoteDialog"
+import EditNoteDialog from "../dialogs/EditNoteDialog"
 import Children from "../components/Children"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
@@ -281,8 +281,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <SourceEditDialog/>
         {post ? <UpscalePostDialog post={post}/> : null}
         {post ? <CompressPostDialog post={post}/> : null}
-        {post ? <SaveTranslationDialog post={post} unverified={true}/> : null}
-        <EditTranslationDialog/>
+        {post ? <SaveNoteDialog post={post} unverified={true}/> : null}
+        <EditNoteDialog/>
         {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">

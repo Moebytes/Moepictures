@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -9,8 +9,8 @@ import permissions from "../structures/Permissions"
 const OCRDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {translationOCRDialog} = useTranslationDialogSelector()
-    const {setTranslationOCRDialog, setTranslationOCRFlag} = useTranslationDialogActions()
+    const {noteOCRDialog} = useNoteDialogSelector()
+    const {setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const [running, setRunning] = useState(false)
     const [error, setError] = useState(false)
@@ -22,25 +22,25 @@ const OCRDialog: React.FunctionComponent = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (translationOCRDialog) {
+        if (noteOCRDialog) {
             document.body.style.pointerEvents = "none"
             setRunning(false)
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [translationOCRDialog])
+    }, [noteOCRDialog])
 
     const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
-            setTranslationOCRFlag(true)
+            setNoteOCRFlag(true)
             setRunning(true)
         } else {
-            setTranslationOCRDialog(false)
+            setNoteOCRDialog(false)
         }
     }
 
-    if (translationOCRDialog) {
+    if (noteOCRDialog) {
         if (session.banned) {
             return (
                 <div className="dialog">

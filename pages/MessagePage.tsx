@@ -35,6 +35,12 @@ import emojiSelect from "../assets/icons/emoji-select.png"
 import lewdIcon from "../assets/icons/lewd.png"
 import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
+import highlight from "../assets/icons/highlight.png"
+import bold from "../assets/icons/bold.png"
+import italic from "../assets/icons/italic.png"
+import underline from "../assets/icons/underline.png"
+import strikethrough from "../assets/icons/strikethrough.png"
+import spoiler from "../assets/icons/spoiler.png"
 import "./styles/threadpage.less"
 
 interface Props {
@@ -74,10 +80,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [r18, setR18] = useState(false)
     const [defaultIcon, setDefaultIcon] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
     const history = useHistory()
     const errorRef = useRef(null) as any
     const emojiRef = useRef(null) as any
+    const textRef = useRef(null) as any
     const messageID = props?.match.params.id
 
     const getFilter = () => {
@@ -626,6 +634,38 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const parseText = () => {
+        const textarea = textRef.current
+        if (!textarea) return
+        const pieces = functions.parseComment(textarea.value)
+        let jsx = [] as any
+        if (r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i]
+            if (piece.includes(">")) {
+                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
+                let username = ""
+                let said = ""
+                if (userPart) {
+                    username = functions.toProperCase(userPart.split(/ +/g)[0])
+                    said = userPart.split(/ +/g).slice(1).join(" ")
+                }
+                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
+                jsx.push(
+                    <div className="reply-quote-container">
+                        {userPart ? <span className="reply-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
+                        <span className="reply-quote-text">{jsxFunctions.renderMessageText(text.trim(), emojis)}</span>
+                    </div>
+                )
+            } else {
+                jsx.push(<span className="reply-text">{jsxFunctions.renderMessageText(piece.trim(), emojis)}</span>)
+            }
+        }
+        return jsx
+    }
+
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
@@ -641,15 +681,25 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-page-reply-box">
                     <div className="thread-page-input-container">
-                        <div className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
-                            <textarea className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
+                        <div className="thread-page-textarea-buttons">
+                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
                         </div>
+                        {previewMode ? <div className="thread-page-preview">{parseText()}</div> : 
+                        <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
+                            <textarea ref={textRef} className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
+                        </div>}
                         {error ? <div className="thread-page-validation-container"><span className="thread-page-validation" ref={errorRef}></span></div> : null}
                         <div className="thread-page-button-container-left">
                             <button className="thread-page-button" onClick={reply}>{i18n.buttons.message}</button>
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
+                            <button className={previewMode ? "thread-page-edit-button" : "thread-page-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.edit : i18n.buttons.preview}</button>
                             {session.showR18 ?
                             <div className="thread-page-replybox-row">
                                 <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>

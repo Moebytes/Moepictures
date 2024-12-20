@@ -32,11 +32,11 @@ The video player has some additional controls for volume and pitch preservement.
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse. The 
 live2d player has controls for speed, parameters, and parts.
 
-### Translations
+### Notes
 
-<img src="assets/images/translations.png" height="600">
+<img src="assets/images/notes.png" height="600">
 
-As often images might contain japanese text, adding and viewing translations is also supported!
+As often images might contain japanese text, adding and viewing notes for translations is also supported!
 
 ### Self-hosting
 

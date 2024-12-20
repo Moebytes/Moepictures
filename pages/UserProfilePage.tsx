@@ -613,8 +613,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {counts.tagEdits > 0 ? <div className="user-row">
                         <span className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
                     </div> : null}
-                    {counts.translationEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/translation/history`)}>{i18n.mod.translationEdits} <span className="user-text-alt">{counts.translationEdits}</span></span>
+                    {counts.noteEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>{i18n.mod.noteEdits} <span className="user-text-alt">{counts.noteEdits}</span></span>
                     </div> : null}
                     {counts.groupEdits > 0 ? <div className="user-row">
                         <span className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>

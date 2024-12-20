@@ -33,7 +33,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {translationDrawingEnabled} = useSearchSelector()
+    const {noteDrawingEnabled} = useSearchSelector()
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -164,7 +164,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (!sliderRef?.current) return
         if ((event.target instanceof HTMLTextAreaElement) || (event.target instanceof HTMLInputElement) 
         || (event.target.classList.contains("dialog-textarea"))) return
-        if (translationDrawingEnabled) return
+        if (noteDrawingEnabled) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0

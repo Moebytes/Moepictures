@@ -1,26 +1,26 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
-const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
+const RevertNoteHistoryDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {revertTranslationHistoryID} = useTranslationDialogSelector()
-    const {setRevertTranslationHistoryID, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
+    const {revertNoteHistoryID} = useNoteDialogSelector()
+    const {setRevertNoteHistoryID, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {
-        document.title = i18n.dialogs.revertTranslationHistory.title
+        document.title = i18n.dialogs.revertNoteHistory.title
     }, [i18n])
 
     useEffect(() => {
-        if (revertTranslationHistoryID) {
+        if (revertNoteHistoryID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -28,27 +28,27 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [revertTranslationHistoryID])
+    }, [revertNoteHistoryID])
 
     const click = (button: "accept" | "reject", keep?: boolean) => {
         if (button === "accept") {
-            setRevertTranslationHistoryFlag(true)
+            setRevertNoteHistoryFlag(true)
         } else {
-            if (!keep) setRevertTranslationHistoryID(null)
+            if (!keep) setRevertNoteHistoryID(null)
         }
     }
 
     const close = () => {
-        setRevertTranslationHistoryID(null)
+        setRevertNoteHistoryID(null)
     }
 
-    if (revertTranslationHistoryID?.failed === "locked") {
+    if (revertNoteHistoryID?.failed === "locked") {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.revertNoteHistory.title}</span>
                         </div>
                         <span className="dialog-ban-text">{i18n.dialogs.revertPostHistory.locked}</span>
                         <button className="dialog-ban-button" onClick={() => click("reject")}>
@@ -60,14 +60,14 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
         )
     }
 
-    if (revertTranslationHistoryID?.failed) {
+    if (revertNoteHistoryID?.failed) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.revertNoteHistory.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.revertGroupHistory.currentState}</span>
@@ -82,14 +82,14 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
         )
     }
 
-    if (revertTranslationHistoryID) {
+    if (revertNoteHistoryID) {
         if (session.banned) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.revertNoteHistory.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.dialogs.revertGroupHistory.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
@@ -107,7 +107,7 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.revertTranslationHistory.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.revertNoteHistory.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.revertGroupHistory.header}</span>
@@ -125,4 +125,4 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default RevertTranslationHistoryDialog
+export default RevertNoteHistoryDialog

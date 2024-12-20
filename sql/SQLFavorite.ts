@@ -37,9 +37,9 @@ export default class SQLFavorite {
     }
 
     /** Get favorites. */
-    public static favorites = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static favorites = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, username: sessionUsername})
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -169,9 +169,9 @@ export default class SQLFavorite {
     }
 
     /** Get favgroup. */
-    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values} = 
-        SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, username: sessionUsername, favgroupOrder: true})
+        SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

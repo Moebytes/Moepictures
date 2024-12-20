@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions} from "../store"
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
+useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
@@ -16,10 +17,16 @@ import audioFullscreenIcon from "../assets/icons/audio-fullscreen.png"
 import audioVolumeIcon from "../assets/icons/audio-volume.png"
 import audioVolumeLowIcon from "../assets/icons/audio-volume-low.png"
 import audioVolumeMuteIcon from "../assets/icons/audio-volume-mute.png"
-import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import noteToggleOn from "../assets/icons/note-toggle-on.png"
+import reverseSearchIcon from "../assets/icons/reverse-search.png"
+import google from "../assets/icons/google-purple.png"
+import bing from "../assets/icons/bing-purple.png"
+import yandex from "../assets/icons/yandex-purple.png"
+import saucenao from "../assets/icons/saucenao-purple.png"
+import ascii2d from "../assets/icons/ascii2d-purple.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
-import TranslationEditor from "./TranslationEditor"
+import NoteEditor from "./NoteEditor"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import path from "path"
@@ -35,11 +42,11 @@ interface Props {
     noKeydown?: boolean
     comicPages?: any
     order?: number
-    noTranslations?: boolean
+    noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    translationID?: string
+    noteID?: string
 }
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
@@ -48,14 +55,15 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {audio, audioPost, rewindFlag, fastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, secondsProgress, progress, 
     dragProgress, reverse, speed, pitch, volume, previousVolume, paused, duration, dragging, seekTo} = usePlaybackSelector()
     const {setAudio, setAudioPost, setRewindFlag, setFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
     setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPitch, setVolume, setPreviousVolume, setPaused, 
     setDuration, setDragging, setSeekTo} = usePlaybackActions()
-    const {translationMode, imageExpand} = useSearchSelector()
-    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {noteMode, imageExpand} = useSearchSelector()
+    const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
@@ -80,6 +88,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [coverImg, setCoverImg] = useState("")
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
+    const [showReverseIcons, setShowReverseIcons] = useState(false)
+    const [tempLink, setTempLink] = useState("")
 
     useEffect(() => {
         const savedPaused = localStorage.getItem("paused")
@@ -105,6 +115,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setAudioPost(props.post)
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
+        if (props.audio) setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
     }, [props.audio])
 
     useEffect(() => {
@@ -135,8 +146,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (key === "t") {
-                setTranslationMode(!translationMode)
-                setTranslationDrawingEnabled(true)
+                setNoteMode(!noteMode)
+                setNoteDrawingEnabled(true)
             }
         }
     }
@@ -423,13 +434,38 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [coverImg])
 
+    const reverseSearch = async (service: string) => {
+        if (!coverImg) return
+        const baseMap = {
+            "google": "https://lens.google.com/uploadbyurl?url=",
+            "bing": "https://www.bing.com/images/searchbyimage?cbir=sbi&imgurl=",
+            "yandex": "https://yandex.com/images/search?rpt=imageview&url=",
+            "saucenao": "https://saucenao.com/search.php?url=",
+            "ascii2d": "https://ascii2d.net/search/url/"
+        }
+        let url = tempLink
+        if (!tempLink) {
+            const arrayBuffer = await fetch(coverImg).then((r) => r.arrayBuffer())
+            url = await functions.post("/api/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+            localStorage.setItem("reverseSearchLink", url)
+            setTempLink(url)
+        }
+        window.open(baseMap[service] + encodeURIComponent(url), "_blank", "noreferrer")
+    }
+
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
-            <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            <div className="post-song-box" ref={containerRef} style={{display: noteMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>

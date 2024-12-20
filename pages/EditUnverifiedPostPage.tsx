@@ -21,7 +21,7 @@ import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
 import cute from "../assets/icons/cute.png"
-import sexy from "../assets/icons/sexy.png"
+import flirty from "../assets/icons/flirty.png"
 import ecchi from "../assets/icons/ecchi.png"
 import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
@@ -536,8 +536,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleTagClick = async (tag: string, index: number) => {
-        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
-        if (tagDetail.image) {
+        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
+        if (tagDetail?.image) {
             const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
@@ -1247,6 +1247,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     characters[characters.length - 1].tag = charStrArr[i]
                     const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
                     seriesStrArr.push(seriesName)
+                    const tagDetail = await functions.get("/api/tag", {tag: charStrArr[i]}, session, setSessionFlag).catch(() => null)
+                    if (tagDetail?.image) {
+                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                        const bytes = new Uint8Array(arrayBuffer)
+                        const ext = path.extname(tagLink).replace(".", "")
+                        characters[characters.length - 1].image = tagLink
+                        characters[characters.length - 1].ext = ext
+                        characters[characters.length - 1].bytes = Object.values(bytes)
+                    }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
                     setCharacters(characters)
@@ -1257,6 +1267,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
                 for (let i = 0; i < seriesStrArr.length; i++) {
                     series[series.length - 1].tag = seriesStrArr[i]
+                    const tagDetail = await functions.get("/api/tag", {tag: seriesStrArr[i]}, session, setSessionFlag).catch(() => null)
+                    if (tagDetail?.image) {
+                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                        const bytes = new Uint8Array(arrayBuffer)
+                        const ext = path.extname(tagLink).replace(".", "")
+                        series[series.length - 1].tag.image = tagLink
+                        series[series.length - 1].tag.ext = ext
+                        series[series.length - 1].tag.bytes = Object.values(bytes)
+                    }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
                     setSeries(series)
@@ -1316,6 +1336,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
                 for (let i = 0; i < characterArr.length; i++) {
                     characters[characters.length - 1].tag = characterArr[i]
+                    const tagDetail = await functions.get("/api/tag", {tag: characterArr[i]}, session, setSessionFlag).catch(() => null)
+                    if (tagDetail?.image) {
+                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                        const bytes = new Uint8Array(arrayBuffer)
+                        const ext = path.extname(tagLink).replace(".", "")
+                        characters[characters.length - 1].image = tagLink
+                        characters[characters.length - 1].ext = ext
+                        characters[characters.length - 1].bytes = Object.values(bytes)
+                    }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
                     setCharacters(characters)
@@ -1324,6 +1354,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
                 for (let i = 0; i < seriesArr.length; i++) {
                     series[series.length - 1].tag = seriesArr[i]
+                    const tagDetail = await functions.get("/api/tag", {tag: seriesArr[i]}, session, setSessionFlag).catch(() => null)
+                    if (tagDetail?.image) {
+                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                        const bytes = new Uint8Array(arrayBuffer)
+                        const ext = path.extname(tagLink).replace(".", "")
+                        series[series.length - 1].image = tagLink
+                        series[series.length - 1].ext = ext
+                        series[series.length - 1].bytes = Object.values(bytes)
+                    }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
                     setSeries(series)
@@ -1468,13 +1508,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const getPostJSX = () => {
         if (functions.isLive2D(currentImg)) {
-            return <PostLive2D live2d={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.isModel(currentImg)) {
-            return <PostModel model={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.isAudio(currentImg)) {
-            return <PostSong audio={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noTranslations={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noNotes={true}/>
         }
     }
 
@@ -1804,9 +1844,9 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="upload-button-img" src={flirty}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
                 </button>
                 <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="upload-button-img" src={ecchi}/>
@@ -1826,9 +1866,9 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="upload-button-img" src={flirty}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
                 </button>
                 <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="upload-button-img" src={ecchi}/>

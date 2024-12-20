@@ -14,7 +14,7 @@ import ModPostDeletions from "../components/ModPostDeletions"
 import ModTagDeletions from "../components/ModTagDeletions"
 import ModTagAliases from "../components/ModTagAliases"
 import ModTagEdits from "../components/ModTagEdits"
-import ModTranslations from "../components/ModTranslations"
+import ModNotes from "../components/ModNotes"
 import ModGroups from "../components/ModGroups"
 import ModGroupEdits from "../components/ModGroupEdits"
 import ModGroupDeletions from "../components/ModGroupDeletions"
@@ -30,7 +30,7 @@ import modTagDeleteIcon from "../assets/icons/mod-tag-delete.png"
 import modGroupAddIcon from "../assets/icons/mod-group-add.png"
 import modGroupEditIcon from "../assets/icons/mod-group-edit.png"
 import modGroupDeleteIcon from "../assets/icons/mod-group-delete.png"
-import modTranslationIcon from "../assets/icons/history-translate.png"
+import modNoteIcon from "../assets/icons/history-note.png"
 import modReportIcon from "../assets/icons/mod-report.png"
 import modPostUploadActiveIcon from "../assets/icons/mod-post-upload-active.png"
 import modGroupAddActiveIcon from "../assets/icons/mod-group-add-active.png"
@@ -41,7 +41,7 @@ import modTagAliasActiveIcon from "../assets/icons/mod-tag-alias-active.png"
 import modTagDeleteActiveIcon from "../assets/icons/mod-tag-delete-active.png"
 import modGroupEditActiveIcon from "../assets/icons/mod-group-edit-active.png"
 import modGroupDeleteActiveIcon from "../assets/icons/mod-group-delete-active.png"
-import modTranslationActiveIcon from "../assets/icons/history-translate-active.png"
+import modNoteActiveIcon from "../assets/icons/history-note-active.png"
 import modReportActiveIcon from "../assets/icons/mod-report-active.png"
 import "./styles/modqueuepage.less"
 
@@ -153,7 +153,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "groups") return <ModGroups/>
         if (modState === "group-edits") return <ModGroupEdits/>
         if (modState === "group-deletions") return <ModGroupDeletions/>
-        if (modState === "translations") return <ModTranslations/>
+        if (modState === "notes") return <ModNotes/>
         if (modState === "reports") return <ModReports/>
         return null
     }
@@ -168,7 +168,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "groups") return i18n.sort.groups
         if (modState === "group-edits") return i18n.mod.groupEdits
         if (modState === "group-deletions") return i18n.mod.groupDeletions
-        if (modState === "translations") return i18n.navbar.translations
+        if (modState === "notes") return i18n.navbar.notes
         if (modState === "reports") return i18n.mod.reports
         return ""
     }
@@ -212,8 +212,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "group-deletions" ? "" : getFilter()}} onClick={() => setModState("group-deletions")}/>
                     </div>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={modState === "translations" ? modTranslationActiveIcon : modTranslationIcon} 
-                        style={{filter: modState === "translations" ? "" : getFilter()}} onClick={() => setModState("translations")}/>
+                        <img className="modqueue-icon" src={modState === "notes" ? modNoteActiveIcon : modNoteIcon} 
+                        style={{filter: modState === "notes" ? "" : getFilter()}} onClick={() => setModState("notes")}/>
                         <img className="modqueue-icon" src={modState === "reports" ? modReportActiveIcon : modReportIcon} 
                         style={{filter: modState === "reports" ? "" : getFilter()}} onClick={() => setModState("reports")}/>
                     </div>
@@ -239,8 +239,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "group-edits" ? "" : getFilter()}} onClick={() => setModState("group-edits")}/>
                         <img className="modqueue-icon" src={modState === "group-deletions" ? modGroupDeleteActiveIcon : modGroupDeleteIcon} 
                         style={{filter: modState === "group-deletions" ? "" : getFilter()}} onClick={() => setModState("group-deletions")}/>
-                        <img className="modqueue-icon" src={modState === "translations" ? modTranslationActiveIcon : modTranslationIcon} 
-                        style={{filter: modState === "translations" ? "" : getFilter()}} onClick={() => setModState("translations")}/>
+                        <img className="modqueue-icon" src={modState === "notes" ? modNoteActiveIcon : modNoteIcon} 
+                        style={{filter: modState === "notes" ? "" : getFilter()}} onClick={() => setModState("notes")}/>
                         <img className="modqueue-icon" src={modState === "reports" ? modReportActiveIcon : modReportIcon} 
                         style={{filter: modState === "reports" ? "" : getFilter()}} onClick={() => setModState("reports")}/>
                     </div></>}

@@ -238,7 +238,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleComments, index, sortType, sortReverse])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -338,31 +338,31 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setCommentsPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = commentsPage - 1 
         if (newPage < 1) newPage = 1 
         setCommentsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = commentsPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setCommentsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setCommentsPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number, noScroll?: boolean) => {
         setCommentsPage(newPage)
-        if (!noScroll) window.scrollTo(0, 0)
+        //if (!noScroll) window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

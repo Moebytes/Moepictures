@@ -217,7 +217,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleTags, index, session, sortType, sortReverse, typeType])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -292,31 +292,31 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setTagsPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = tagsPage - 1 
         if (newPage < 1) newPage = 1 
         setTagsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = tagsPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setTagsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setTagsPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number) => {
         setTagsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

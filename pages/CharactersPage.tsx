@@ -19,9 +19,9 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
 
-let limit = 25
+let limit = 10
 let replace = false
-let pageAmount = 7
+let pageAmount = 5
 
 const CharactersPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -215,7 +215,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleCharacters, index, sortType, sortReverse])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -290,31 +290,31 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setCharactersPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = charactersPage - 1 
         if (newPage < 1) newPage = 1 
         setCharactersPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = charactersPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setCharactersPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setCharactersPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number) => {
         setCharactersPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

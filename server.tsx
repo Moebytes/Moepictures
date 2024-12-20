@@ -34,7 +34,7 @@ import SearchRoutes from "./routes/SearchRoutes"
 import TagRoutes from "./routes/TagRoutes"
 import UploadRoutes from "./routes/UploadRoutes"
 import UserRoutes from "./routes/UserRoutes"
-import TranslationRoutes from "./routes/TranslationRoutes"
+import NoteRoutes from "./routes/NoteRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
@@ -119,6 +119,40 @@ app.use(session({
   saveUninitialized: false
 }))
 
+if (process.env.TESTING === "yes") {
+  app.use(middleware(compiler, {
+    index: false,
+    serverSideRender: false,
+    writeToDisk: false,
+  }))
+  app.use(hot(compiler))
+}
+
+app.use(express.static(path.join(__dirname, "./public")))
+app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
+app.use("/assets", express.static(path.join(__dirname, "./assets")))
+
+let blacklist = null as unknown as Set<string>
+
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (!blacklist) {
+    const blacklistObj = await sql.report.blacklist()
+    const blacklistSet = new Set<string>()
+    for (const entry of blacklistObj) {
+      blacklistSet.add(entry.ip?.trim())
+    }
+    blacklist = blacklistSet
+  }
+  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+  ip = ip?.toString().replace("::ffff:", "") || ""
+  if (blacklist.has(ip)) {
+    return res.status(403).json({message: "Your IP address has been blocked."})
+  }
+  next()
+})
+
+app.use(apiKeyLogin)
+
 $2FARoutes(app)
 CommentRoutes(app)
 CutenessRoutes(app)
@@ -129,7 +163,7 @@ SearchRoutes(app)
 TagRoutes(app)
 UploadRoutes(app)
 UserRoutes(app)
-TranslationRoutes(app)
+NoteRoutes(app)
 ThreadRoutes(app)
 MessageRoutes(app)
 GroupRoutes(app)
@@ -150,40 +184,6 @@ const tokenLimiter = rateLimit({
 	legacyHeaders: false,
     keyGenerator,
     handler
-})
-
-if (process.env.TESTING === "yes") {
-  app.use(middleware(compiler, {
-    index: false,
-    serverSideRender: false,
-    writeToDisk: false,
-  }))
-  app.use(hot(compiler))
-}
-
-app.use(express.static(path.join(__dirname, "./public")))
-app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
-app.use("/assets", express.static(path.join(__dirname, "./assets")))
-
-let blacklist = null as unknown as Set<string>
-
-app.use(apiKeyLogin)
-
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  if (!blacklist) {
-    const blacklistObj = await sql.report.blacklist()
-    const blacklistSet = new Set<string>()
-    for (const entry of blacklistObj) {
-      blacklistSet.add(entry.ip?.trim())
-    }
-    blacklist = blacklistSet
-  }
-  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-  ip = ip?.toString().replace("::ffff:", "") || ""
-  if (blacklist.has(ip)) {
-    return res.status(403).json({message: "Your IP address has been blocked."})
-  }
-  next()
 })
 
 app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {

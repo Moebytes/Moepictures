@@ -20,7 +20,7 @@ import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
 import cute from "../assets/icons/cute.png"
-import sexy from "../assets/icons/sexy.png"
+import flirty from "../assets/icons/flirty.png"
 import ecchi from "../assets/icons/ecchi.png"
 import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
@@ -951,13 +951,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const getPostJSX = () => {
         if (functions.isLive2D(currentImg)) {
-            return <PostLive2D live2d={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.isModel(currentImg)) {
-            return <PostModel model={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.isAudio(currentImg)) {
-            return <PostSong audio={currentImg} noKeydown={true} noTranslations={true}/>
+            return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noTranslations={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noNotes={true}/>
         }
     }
 
@@ -1050,9 +1050,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={cute}/>
                         <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                     </button>
-                    <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                        <img className="upload-button-img" src={sexy}/>
-                        <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                    <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                        <img className="upload-button-img" src={flirty}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
                     </button>
                     <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                         <img className="upload-button-img" src={ecchi}/>
@@ -1075,9 +1075,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={cute}/>
                         <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                     </button>
-                    <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                        <img className="upload-button-img" src={sexy}/>
-                        <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                    <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                        <img className="upload-button-img" src={flirty}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
                     </button>
                     <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                         <img className="upload-button-img" src={ecchi}/>

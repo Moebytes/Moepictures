@@ -1299,7 +1299,7 @@ export default class Functions {
     public static validRating = (rating: string, all?: boolean) => {
         if (all) if (rating === "all") return true
         if (rating === "cute" ||
-            rating === "sexy" ||
+            rating === "flirty" ||
             rating === "ecchi" ||
             rating === "hentai") return true 
         return false
@@ -1318,7 +1318,7 @@ export default class Functions {
     }
 
     public static r15 = () => {
-        return "sexy"
+        return "flirty"
     }
 
     public static r13 = () => {
@@ -1832,10 +1832,11 @@ export default class Functions {
         return new Promise<any>((resolve) => {
             fileReader.onloadend = async (f: any) => {
                 let bytes = new Uint8Array(f.target.result)
-                const result = fileType(bytes)?.[0] || {}
+                const result = Functions.bufferFileType(bytes)?.[0] || {}
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const webp = result?.mime === "image/webp"
+                const avif = result?.mime === "image/avif"
                 const gif = result?.mime === "image/gif"
                 const mp4 = result?.mime === "video/mp4"
                 const mp3 = result?.mime === "audio/mpeg"
@@ -1847,7 +1848,7 @@ export default class Functions {
                 if (fbx) result.typename = "fbx"
                 if (obj) result.typename = "obj"
                 const webm = (path.extname(file.name) === ".webm" && result?.typename === "mkv")
-                if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
+                if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
                     if (mp4 || webm) {
                         const url = URL.createObjectURL(file)
                         const thumbnail = await Functions.videoThumbnail(url)
@@ -2086,6 +2087,50 @@ export default class Functions {
           node.remove()
         }
         return rect
+    }
+
+    public static triggerTextboxButton = (textarea: HTMLTextAreaElement, setText: (text: string) => void, type: string) => {
+        if (!textarea) return
+
+        const insert = {
+            highlight: "====",
+            bold: "****",
+            italic: "////",
+            underline: "____",
+            strikethrough: "~~~~",
+            spoiler: "||||"
+        }[type]
+        if (!insert) return
+
+        const current = textarea.value
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const isSelected = start !== end
+        let updated = ""
+
+        if (isSelected) {
+            const before = current.slice(0, start)
+            const selected = current.slice(start, end)
+            const after = current.slice(end)
+            const half = Math.floor(insert.length / 2)
+            const first = insert.slice(0, half)
+            const second = insert.slice(half)
+    
+            updated = before + first + selected + second + after
+            const cursor = start + first.length + selected.length + second.length
+    
+            setTimeout(() => textarea.setSelectionRange(cursor, cursor), 0)
+        } else {
+            const before = current.slice(0, start)
+            const after = current.slice(start)
+            updated = before + insert + after
+            let shift = -2
+            const cursor = start + insert.length + shift
+    
+            setTimeout(() => textarea.setSelectionRange(cursor, cursor), 0)
+        }
+        setText(updated)
+        textarea.focus()
     }
 
     public static stripTags = (posts: any) => {
@@ -2716,7 +2761,7 @@ export default class Functions {
         return json
     }
 
-    public static parseTranslationDataChanges = (oldData: any, newData: any) => {
+    public static parseNoteDataChanges = (oldData: any, newData: any) => {
         if (!oldData) oldData = []
         if (!newData) newData = []
         const prevMap = new Map(oldData.map((item: any) => [item.transcript, item.translation]))
@@ -2842,7 +2887,11 @@ export default class Functions {
     }
 
     public static generateSlug = (name: string) => {
-        return String(name).trim().toLowerCase().replace(/\s+/g, "-").replaceAll("/", "").replaceAll("\\", "")
+        let slug = String(name).trim().toLowerCase().replace(/\s+/g, "-").replaceAll("/", "").replaceAll("\\", "")
+        if (slug.startsWith("#")) slug = slug.replaceAll("#", "")
+        if (slug.startsWith("?")) slug = slug.replaceAll("?", "")
+        if (slug.startsWith("&")) slug = slug.replaceAll("&", "")
+        return slug
     }
 
     public static postSlug = (title: string, translatedTitle: string) => {

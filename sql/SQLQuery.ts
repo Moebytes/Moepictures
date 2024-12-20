@@ -8,7 +8,7 @@ import SQLSearch from "./SQLSearch"
 import SQLUser from "./SQLUser"
 import SQLToken from "./SQLToken"
 import SQLComment from "./SQLComment"
-import SQLTranslation from "./SQLTranslation"
+import SQLNote from "./SQLNote"
 import SQLFavorite from "./SQLFavorite"
 import SQLCuteness from "./SQLCuteness"
 import SQLHistory from "./SQLHistory"
@@ -47,7 +47,7 @@ export default class SQLQuery {
   public static comment = SQLComment
   public static favorite = SQLFavorite
   public static cuteness = SQLCuteness
-  public static translation = SQLTranslation
+  public static note = SQLNote
   public static history = SQLHistory
   public static report = SQLReport
   public static request = SQLRequest

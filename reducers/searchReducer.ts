@@ -23,8 +23,8 @@ const searchSlice = createSlice({
         format: "jpg",
         autoSearch: false,
         saveSearch: false,
-        translationMode: false,
-        translationDrawingEnabled: false,
+        noteMode: false,
+        noteDrawingEnabled: false,
         imageExpand: false,
         showUpscaled: false,
         showChildren: false
@@ -47,8 +47,8 @@ const searchSlice = createSlice({
         setFormat: (state, action) => {state.format = action.payload},
         setAutoSearch: (state, action) => {state.autoSearch = action.payload},
         setSaveSearch: (state, action) => {state.saveSearch = action.payload},
-        setTranslationMode: (state, action) => {state.translationMode = action.payload},
-        setTranslationDrawingEnabled: (state, action) => {state.translationDrawingEnabled = action.payload},
+        setNoteMode: (state, action) => {state.noteMode = action.payload},
+        setNoteDrawingEnabled: (state, action) => {state.noteDrawingEnabled = action.payload},
         setImageExpand: (state, action) => {state.imageExpand = action.payload},
         setShowUpscaled: (state, action) => {state.showUpscaled = action.payload},
         setShowChildren: (state, action) => {state.showChildren = action.payload}
@@ -59,7 +59,7 @@ const {
     setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSizeType,
     setSortType, setSortReverse, setSquare, setScroll, setSelectionMode, setPageMultiplier,
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
-    setTranslationMode, setTranslationDrawingEnabled, setImageExpand, setShowUpscaled,
+    setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled,
     setShowChildren
 } = searchSlice.actions
 
@@ -83,8 +83,8 @@ export const useSearchSelector = () => {
         format: selector((state) => state.search.format),
         autoSearch: selector((state) => state.search.autoSearch),
         saveSearch: selector((state) => state.search.saveSearch),
-        translationMode: selector((state) => state.search.translationMode),
-        translationDrawingEnabled: selector((state) => state.search.translationDrawingEnabled),
+        noteMode: selector((state) => state.search.noteMode),
+        noteDrawingEnabled: selector((state) => state.search.noteDrawingEnabled),
         imageExpand: selector((state) => state.search.imageExpand),
         showUpscaled: selector((state) => state.search.showUpscaled),
         showChildren: selector((state) => state.search.showChildren),
@@ -111,8 +111,8 @@ export const useSearchActions = () => {
         setFormat: (state: any) => dispatch(setFormat(state)),
         setAutoSearch: (state: any) => dispatch(setAutoSearch(state)),
         setSaveSearch: (state: any) => dispatch(setSaveSearch(state)),
-        setTranslationMode: (state: any) => dispatch(setTranslationMode(state)),
-        setTranslationDrawingEnabled: (state: any) => dispatch(setTranslationDrawingEnabled(state)),
+        setNoteMode: (state: any) => dispatch(setNoteMode(state)),
+        setNoteDrawingEnabled: (state: any) => dispatch(setNoteDrawingEnabled(state)),
         setImageExpand: (state: any) => dispatch(setImageExpand(state)),
         setShowUpscaled: (state: any) => dispatch(setShowUpscaled(state)),
         setShowChildren: (state: any) => dispatch(setShowChildren(state))

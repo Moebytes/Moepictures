@@ -229,52 +229,52 @@ export default class SQLHistory {
         return result
     }
 
-    /** Insert translation history */
-    public static insertTranslationHistory = async (options: {postID: number, order: number, updater: string, data: any, addedEntries: any, removedEntries: any, reason?: string}) => {
+    /** Insert note history */
+    public static insertNoteHistory = async (options: {postID: number, order: number, updater: string, data: any, addedEntries: any, removedEntries: any, reason?: string}) => {
         const {postID, order, updater, data, addedEntries, removedEntries, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "translation history" ("postID", "order", "updater", "updatedDate", "data", "addedEntries", "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        text: /*sql*/`INSERT INTO "note history" ("postID", "order", "updater", "updatedDate", "data", "addedEntries", "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         values: [postID, order, updater, now, data, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
-    /** Delete translation history */
-    public static deleteTranslationHistory = async (historyID: number) => {
+    /** Delete note history */
+    public static deleteNoteHistory = async (historyID: number) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`DELETE FROM "translation history" WHERE "translation history"."historyID" = $1`),
+        text: functions.multiTrim(/*sql*/`DELETE FROM "note history" WHERE "note history"."historyID" = $1`),
         values: [historyID]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
-    /** Get translation history */
-    public static translationHistory = async (postID?: string, order?: string, offset?: string, search?: string) => {
+    /** Get note history */
+    public static noteHistory = async (postID?: string, order?: string, offset?: string, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
         let searchQuery = ""
         if (search) {
             values.push(search)
-            searchQuery = "(" + `array_to_string("translation history"."addedEntries", ' ') ILIKE '%' || $${searchValue} || '%' 
-            OR array_to_string("translation history"."removedEntries", ' ') ILIKE '%' || $${searchValue} || '%'` + ")"
+            searchQuery = "(" + `array_to_string("note history"."addedEntries", ' ') ILIKE '%' || $${searchValue} || '%' 
+            OR array_to_string("note history"."removedEntries", ' ') ILIKE '%' || $${searchValue} || '%'` + ")"
             i++
         }
         let postValue = i
         let postQuery = ""
         if (postID) {
             values.push(postID)
-            postQuery = `"translation history"."postID" = $${postValue}`
+            postQuery = `"note history"."postID" = $${postValue}`
             i++
         }
         let orderValue = i
         let orderQuery = ""
         if (order) {
             values.push(order)
-            orderQuery = `"translation history"."order" = $${orderValue}`
+            orderQuery = `"note history"."order" = $${orderValue}`
             i++
         }
         if (offset) values.push(offset)
@@ -287,14 +287,14 @@ export default class SQLHistory {
                     JOIN images ON images."postID" = posts."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "translation history".*, 
+                SELECT "note history".*, 
                 COUNT(*) OVER() AS "historyCount",
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "translation history"
-                JOIN post_json ON post_json."postID" = "translation history"."postID"
+                FROM "note history"
+                JOIN post_json ON post_json."postID" = "note history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "translation history"."historyID"
-                ORDER BY "translation history"."updatedDate" DESC
+                GROUP BY "note history"."historyID"
+                ORDER BY "note history"."updatedDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
         `),
         values: []
@@ -304,8 +304,8 @@ export default class SQLHistory {
         return result
     }
 
-    /** Get translation history id */
-    public static translationHistoryID = async (postID?: string, historyID?: string) => {
+    /** Get note history id */
+    public static noteHistoryID = async (postID?: string, historyID?: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                     WITH post_json AS (
@@ -314,13 +314,13 @@ export default class SQLHistory {
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
                     )
-                    SELECT "translation history".*, 
+                    SELECT "note history".*, 
                     COUNT(*) OVER() AS "historyCount",
                     to_json((array_agg(post_json.*))[1]) AS post
-                    FROM "translation history"
-                    JOIN post_json ON post_json."postID" = "translation history"."postID"
-                    WHERE "translation history"."postID" = $1 AND "translation history"."historyID" = $2
-                    GROUP BY "translation history"."historyID"
+                    FROM "note history"
+                    JOIN post_json ON post_json."postID" = "note history"."postID"
+                    WHERE "note history"."postID" = $1 AND "note history"."historyID" = $2
+                    GROUP BY "note history"."historyID"
             `),
             values: [postID, historyID]
         }
@@ -328,8 +328,8 @@ export default class SQLHistory {
         return result
     }
 
-    /** Get user translation history */
-    public static userTranslationHistory = async (username: string) => {
+    /** Get user note history */
+    public static userNoteHistory = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -338,14 +338,14 @@ export default class SQLHistory {
                     JOIN images ON images."postID" = posts."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "translation history".*, 
+                SELECT "note history".*, 
                 COUNT(*) OVER() AS "historyCount",
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "translation history"
-                JOIN post_json ON post_json."postID" = "translation history"."postID"
-                WHERE "translation history"."updater" = $1
-                GROUP BY "translation history"."historyID"
-                ORDER BY "translation history"."updatedDate" DESC
+                FROM "note history"
+                JOIN post_json ON post_json."postID" = "note history"."postID"
+                WHERE "note history"."updater" = $1
+                GROUP BY "note history"."historyID"
+                ORDER BY "note history"."updatedDate" DESC
         `),
         values: [username]
         }
@@ -486,11 +486,11 @@ export default class SQLHistory {
     }
 
     /** Get user search history */
-    public static userSearchHistory = async (username: string, limit?: string, offset?: string, search?: string, type?: string, rating?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static userSearchHistory = async (username: string, limit?: string, offset?: string, search?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         if (!sort || sort === "date") sort = "viewDate"
         if (sort === "reverse date") sort = "reverse viewDate"
         const {postJSON, values, searchValue, sortQuery, includeTags, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, search, type, rating, style, sort, offset, limit, username: sessionUsername, outerSort: true})
+        SQLQuery.search.boilerplate({i: 2, search, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername, outerSort: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useTranslationDialogSelector, useTranslationDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
-import translationHistoryRevert from "../assets/icons/revert.png"
-import translationHistoryDelete from "../assets/icons/delete.png"
+import noteHistoryRevert from "../assets/icons/revert.png"
+import noteHistoryDelete from "../assets/icons/delete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
@@ -16,34 +16,34 @@ import "./styles/historyrow.less"
 
 interface Props {
     previousHistory: any
-    translationHistory: any
+    noteHistory: any
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
     exact?: any
 }
 
-const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
+const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {deleteTranslationHistoryID, revertTranslationHistoryID, deleteTranslationHistoryFlag, revertTranslationHistoryFlag} = useTranslationDialogSelector()
-    const {setDeleteTranslationHistoryID, setRevertTranslationHistoryID, setDeleteTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
+    const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
+    const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
-    const postID = props.translationHistory.postID
-    const order = props.translationHistory.order
+    const postID = props.noteHistory.postID
+    const order = props.noteHistory.order
     let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateUserRole = async () => {
-        const user = await functions.get("/api/user", {username: props.translationHistory.updater}, session, setSessionFlag)
+        const user = await functions.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
     const updateImage = async () => {
-        const thumb = functions.getThumbnailLink(props.translationHistory.post.images[0].type, props.translationHistory.postID, props.translationHistory.order, props.translationHistory.post.images[0].filename, "medium", mobile)
+        const thumb = functions.getThumbnailLink(props.noteHistory.post.images[0].type, props.noteHistory.postID, props.noteHistory.order, props.noteHistory.post.images[0].filename, "medium", mobile)
         const decrypted = await functions.decryptThumb(thumb, session)
         setImg(decrypted)
     }
@@ -51,66 +51,66 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateUserRole()
         updateImage()
-    }, [props.translationHistory, session])
+    }, [props.noteHistory, session])
 
-    const revertTranslationHistory = async () => {
+    const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
-        await functions.put("/api/translation/save", {postID: props.translationHistory.postID, order: props.translationHistory.order,
-        data: props.translationHistory.data}, session, setSessionFlag)
+        await functions.put("/api/note/save", {postID: props.noteHistory.postID, order: props.noteHistory.order,
+        data: props.noteHistory.data}, session, setSessionFlag)
         props.onEdit?.()
     }
 
     useEffect(() => {
-        if (revertTranslationHistoryFlag && props.translationHistory.historyID === revertTranslationHistoryID?.historyID) {
-            revertTranslationHistory().then(() => {
-                setRevertTranslationHistoryFlag(false)
-                setRevertTranslationHistoryID(null)
+        if (revertNoteHistoryFlag && props.noteHistory.historyID === revertNoteHistoryID?.historyID) {
+            revertNoteHistory().then(() => {
+                setRevertNoteHistoryFlag(false)
+                setRevertNoteHistoryID(null)
             }).catch(() => {
-                setRevertTranslationHistoryFlag(false)
-                setRevertTranslationHistoryID({failed: true, historyID: props.translationHistory.historyID})
+                setRevertNoteHistoryFlag(false)
+                setRevertNoteHistoryID({failed: true, historyID: props.noteHistory.historyID})
             })
         }
-    }, [revertTranslationHistoryFlag, revertTranslationHistoryID, session, props.current])
+    }, [revertNoteHistoryFlag, revertNoteHistoryID, session, props.current])
 
-    const deleteTranslationHistory = async () => {
+    const deleteNoteHistory = async () => {
         if (props.current) return Promise.reject()
-        await functions.delete("/api/translation/history/delete", {postID, order, historyID: props.translationHistory.historyID}, session, setSessionFlag)
+        await functions.delete("/api/note/history/delete", {postID, order, historyID: props.noteHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteTranslationHistoryFlag && props.translationHistory.historyID === deleteTranslationHistoryID?.historyID) {
-            deleteTranslationHistory().then(() => {
-                setDeleteTranslationHistoryFlag(false)
-                setDeleteTranslationHistoryID(null)
+        if (deleteNoteHistoryFlag && props.noteHistory.historyID === deleteNoteHistoryID?.historyID) {
+            deleteNoteHistory().then(() => {
+                setDeleteNoteHistoryFlag(false)
+                setDeleteNoteHistoryID(null)
             }).catch(() => {
-                setDeleteTranslationHistoryFlag(false)
-                setDeleteTranslationHistoryID({failed: true, historyID: props.translationHistory.historyID})
+                setDeleteNoteHistoryFlag(false)
+                setDeleteNoteHistoryID({failed: true, historyID: props.noteHistory.historyID})
             })
         }
-    }, [deleteTranslationHistoryFlag, deleteTranslationHistoryID, session, props.current])
+    }, [deleteNoteHistoryFlag, deleteNoteHistoryID, session, props.current])
 
-    const revertTranslationHistoryDialog = async () => {
-        const post = await functions.get("/api/post", {postID: props.translationHistory.postID}, session, setSessionFlag)
-        if (post.locked && !permissions.isMod(session)) return setRevertTranslationHistoryID({failed: "locked", historyID: props.translationHistory.historyID})
-        setRevertTranslationHistoryID({failed: false, historyID: props.translationHistory.historyID})
+    const revertNoteHistoryDialog = async () => {
+        const post = await functions.get("/api/post", {postID: props.noteHistory.postID}, session, setSessionFlag)
+        if (post.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: props.noteHistory.historyID})
+        setRevertNoteHistoryID({failed: false, historyID: props.noteHistory.historyID})
     }
 
-    const deleteTranslationHistoryDialog = async () => {
-        setDeleteTranslationHistoryID({failed: false, historyID: props.translationHistory.historyID})
+    const deleteNoteHistoryDialog = async () => {
+        setDeleteNoteHistoryID({failed: false, historyID: props.noteHistory.historyID})
     }
 
-    const translationhistoryOptions = () => {
+    const notehistoryOptions = () => {
         if (session.banned) return null
         if (permissions.isMod(session)) {
             return (
                 <div className="historyrow-options">
-                    <div className="historyrow-options-container" onClick={revertTranslationHistoryDialog}>
-                        <img className="historyrow-options-img" src={translationHistoryRevert}/>
+                    <div className="historyrow-options-container" onClick={revertNoteHistoryDialog}>
+                        <img className="historyrow-options-img" src={noteHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
-                    <div className="historyrow-options-container" onClick={deleteTranslationHistoryDialog}>
-                        <img className="historyrow-options-img" src={translationHistoryDelete}/>
+                    <div className="historyrow-options-container" onClick={deleteNoteHistoryDialog}>
+                        <img className="historyrow-options-img" src={noteHistoryDelete}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -118,8 +118,8 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         } else if (permissions.isContributor(session)) {
             return (
                 <div className="historyrow-options">
-                    <div className="historyrow-options-container" onClick={revertTranslationHistoryDialog}>
-                        <img className="historyrow-options-img" src={translationHistoryRevert}/>
+                    <div className="historyrow-options-container" onClick={revertNoteHistoryDialog}>
+                        <img className="historyrow-options-img" src={noteHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>
@@ -128,26 +128,26 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        let historyIndex = props.current ? "" : `?translation=${props.translationHistory.historyID}&order=${props.translationHistory.order}`
+        let historyIndex = props.current ? "" : `?note=${props.noteHistory.historyID}&order=${props.noteHistory.order}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.translationHistory.postID}${historyIndex}`, "_blank")
+            window.open(`/post/${props.noteHistory.postID}${historyIndex}`, "_blank")
         } else {
-            history.push(`/post/${props.translationHistory.postID}${historyIndex}`)
+            history.push(`/post/${props.noteHistory.postID}${historyIndex}`)
         }
     }
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.translationHistory.updater}`, "_blank")
+            window.open(`/user/${props.noteHistory.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.translationHistory.updater}`)
+            history.push(`/user/${props.noteHistory.updater}`)
         }
     }
 
 
     const dateTextJSX = () => {
-        const targetDate = props.translationHistory.updatedDate
-        const targetUser = props.translationHistory.updater
+        const targetDate = props.noteHistory.updatedDate
+        const targetUser = props.noteHistory.updater
         const editText = i18n.time.updated
         if (userRole === "admin") {
             return (
@@ -204,13 +204,13 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const diffText = () => {
         if (!prevHistory) {
-            if (props.translationHistory.data[0].transcript === "No data") return "No data"
-            return props.translationHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
+            if (props.noteHistory.data[0].transcript === "No data") return "No data"
+            return props.noteHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
         }
-        let translationChanges = props.translationHistory.addedEntries?.length || props.translationHistory.removedEntries?.length
-        if (!translationChanges) return null
-        const addedJSX = props.translationHistory.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = props.translationHistory.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+        let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
+        if (!noteChanges) return null
+        const addedJSX = props.noteHistory.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = props.noteHistory.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]
@@ -219,16 +219,16 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
-        if (diffs === "No data") return <span className="historyrow-tag-text">{i18n.labels.noData}</span>
+        if (diffs === "No data") return <span className="historyrow-text">{i18n.labels.noData}</span>
         for (let i = 0; i < diffs?.length; i++) {
-            jsx.push(<span className="historyrow-tag-text">{diffs[i]}</span>)
+            jsx.push(<span className="historyrow-text">{diffs[i]}</span>)
         }
         return jsx
     }
 
     return (
         <div className="historyrow">
-            {session.username ? translationhistoryOptions() : null}
+            {session.username ? notehistoryOptions() : null}
             <div className="historyrow-container">
                 <img className="historyrow-img" src={img} onClick={imgClick}/>
             </div>
@@ -237,7 +237,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
                         {diffJSX()}
-                        {props.translationHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">{i18n.labels.reason}:</span> {props.translationHistory.reason}</span> : null}
+                        {props.noteHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">{i18n.labels.reason}:</span> {props.noteHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>
@@ -245,4 +245,4 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default TranslationHistoryRow
+export default NoteHistoryRow

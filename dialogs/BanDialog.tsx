@@ -106,12 +106,12 @@ const BanDialog: React.FunctionComponent = (props) => {
                 await functions.put("/api/group/edit", {silent: true, slug: currentHistory.slug, name: currentHistory.name, description: currentHistory.description}, session, setSessionFlag)
             }
         }
-        if (revertData.revertTranslationIDs?.length) {
-            for (const item of revertData.revertTranslationIDs) {
-                const result = await functions.get("/api/translation/history", {postID: item.postID, order: item.order}, session, setSessionFlag)
+        if (revertData.revertNoteIDs?.length) {
+            for (const item of revertData.revertNoteIDs) {
+                const result = await functions.get("/api/note/history", {postID: item.postID, order: item.order}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                await functions.put("/api/translation/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
+                await functions.put("/api/note/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
                 data: currentHistory.data}, session, setSessionFlag)
             }
         }

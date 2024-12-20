@@ -15,10 +15,10 @@ import live2d120FPSIcon from "../assets/icons/live2d-2x.png"
 import live2dParameterIcon from "../assets/icons/live2d-parameter.png"
 import live2dPartIcon from "../assets/icons/live2d-part.png"
 import live2dFullscreenIcon from "../assets/icons/live2d-fullscreen.png"
-import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import noteToggleOn from "../assets/icons/note-toggle-on.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
-import TranslationEditor from "./TranslationEditor"
+import NoteEditor from "./NoteEditor"
 import path from "path"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
@@ -38,11 +38,11 @@ interface Props {
     noKeydown?: boolean
     comicPages?: any
     order?: number
-    noTranslations?: boolean
+    noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    translationID?: string
+    noteID?: string
 }
 
 const PostLive2D: React.FunctionComponent<Props> = (props) => {
@@ -53,8 +53,8 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {disableZoom, paused} = usePlaybackSelector()
     const {setDisableZoom, setPaused} = usePlaybackActions()
-    const {translationMode, imageExpand} = useSearchSelector()
-    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {noteMode, imageExpand} = useSearchSelector()
+    const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const [showParameterDropdown, setShowParameterDropdown] = useState(false)
@@ -290,8 +290,8 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (value === "t") {
-                setTranslationMode(!translationMode)
-                setTranslationDrawingEnabled(true)
+                setNoteMode(!noteMode)
+                setNoteDrawingEnabled(true)
             }
         }
     }
@@ -667,11 +667,11 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.live2d} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
-            <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.live2d} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            <div className="post-model-box" ref={containerRef} style={{display: noteMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>

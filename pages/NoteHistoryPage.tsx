@@ -5,9 +5,9 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import TranslationHistoryRow from "../components/TranslationHistoryRow"
-import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
-import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryDialog"
+import NoteHistoryRow from "../components/NoteHistoryRow"
+import RevertNoteHistoryDialog from "../dialogs/RevertNoteHistoryDialog"
+import DeleteNoteHistoryDialog from "../dialogs/DeleteNoteHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
@@ -18,7 +18,7 @@ interface Props {
     all?: boolean
 }
 
-const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
+const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -41,7 +41,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            setRedirect(postID ? `/translation/history/${postID}/${order}` : "/translation/history")
+            setRedirect(postID ? `/note/history/${postID}/${order}` : "/note/history")
             history.push("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
@@ -50,9 +50,9 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as any
         if (props.all) {
-            result = await functions.get("/api/translation/history", null, session, setSessionFlag)
+            result = await functions.get("/api/note/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/translation/history", {postID, order, username}, session, setSessionFlag)
+            result = await functions.get("/api/note/history", {postID, order, username}, session, setSessionFlag)
         }
         if (!result.length) {
             const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
@@ -79,7 +79,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.history.translation
+        document.title = i18n.history.note
     }, [i18n])
 
     useEffect(() => {
@@ -105,7 +105,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/translation/history", {postID, order, username, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/note/history", {postID, order, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])
@@ -148,7 +148,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
             }
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
-            jsx.push(<TranslationHistoryRow key={i} previousHistory={previous} translationHistory={visibleRevisions[i]} 
+            jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visibleRevisions[i]} 
                 onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
         }
         return jsx
@@ -156,15 +156,15 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <RevertTranslationHistoryDialog/>
-        <DeleteTranslationHistoryDialog/>
+        <RevertNoteHistoryDialog/>
+        <DeleteNoteHistoryDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.translation}` : i18n.history.translation}</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.note}` : i18n.history.note}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>
@@ -176,4 +176,4 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default TranslationHistoryPage
+export default NoteHistoryPage

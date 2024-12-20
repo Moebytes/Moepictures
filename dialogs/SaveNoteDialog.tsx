@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector, 
+import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector, 
 useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -12,11 +12,11 @@ interface Props {
     unverified?: boolean
 }
 
-const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
+const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {showSaveTranslationDialog, saveTranslationData, saveTranslationOrder} = useTranslationDialogSelector()
-    const {setShowSaveTranslationDialog, setSaveTranslationData} = useTranslationDialogActions()
+    const {showSaveNoteDialog, saveNoteData, saveNoteOrder} = useNoteDialogSelector()
+    const {setShowSaveNoteDialog, setSaveNoteData} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
@@ -26,25 +26,25 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = i18n.dialogs.saveTranslation.title
+        document.title = i18n.dialogs.saveNote.title
     }, [i18n])
 
     useEffect(() => {
-        if (showSaveTranslationDialog) {
+        if (showSaveNoteDialog) {
             document.body.style.pointerEvents = "none"
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showSaveTranslationDialog])
+    }, [showSaveNoteDialog])
 
-    const saveTranslation = async () => {
+    const saveNote = async () => {
         if (props.unverified) {
-            await functions.put("/api/translation/save/unverified", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+            await functions.put("/api/note/save/unverified", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
             return setSubmitted(true)
         } else {
             if (permissions.isContributor(session)) {
-                await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+                await functions.post("/api/note/save", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } else {
                 const badReason = functions.validateReason(reason, i18n)
@@ -55,7 +55,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                     await functions.timeout(2000)
                     setError(false)
                 }
-                functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+                functions.post("/api/note/save/request", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             }
         }
@@ -63,32 +63,32 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
 
     const click = async (button: "accept" | "reject", keep?: boolean) => {
         if (button === "accept") {
-            saveTranslation()
+            saveNote()
         }
         if (!keep) {
-            setShowSaveTranslationDialog(false)
-            setSaveTranslationData(null)
+            setShowSaveNoteDialog(false)
+            setSaveNoteData(null)
             setReason("")
         }
     }
 
     const close = () => {
-        setShowSaveTranslationDialog(false)
-        setSaveTranslationData(null)
+        setShowSaveNoteDialog(false)
+        setSaveNoteData(null)
         setSubmitted(false)
         setReason("")
     }
 
-    if (showSaveTranslationDialog) {
+    if (showSaveNoteDialog) {
         if (session.banned) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{width: "340px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">{i18n.dialogs.saveTranslation.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.saveNote.title}</span>
                             </div>
-                            <span className="dialog-ban-text">{i18n.dialogs.saveTranslation.banText}</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.saveNote.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
@@ -104,9 +104,9 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" style={{width: "340px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">{i18n.dialogs.saveTranslation.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.saveNote.title}</span>
                             </div>
-                            <span className="dialog-ban-text">{i18n.dialogs.saveTranslation.locked}.</span>
+                            <span className="dialog-ban-text">{i18n.dialogs.saveNote.locked}.</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
@@ -123,10 +123,10 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" style={{width: "340px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">{i18n.dialogs.saveTranslation.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.saveNote.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">{i18n.dialogs.saveTranslation.header}</span>
+                                <span className="dialog-text">{i18n.dialogs.saveNote.header}</span>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">{i18n.labels.reason}: </span>
@@ -149,11 +149,11 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                 <div className="dialog-box" style={{width: "340px", height: submitted ? "155px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.saveTranslation.request}</span>
+                            <span className="dialog-title">{i18n.dialogs.saveNote.request}</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.dialogs.saveTranslation.submitText}</span>
+                            <span className="dialog-text">{i18n.dialogs.saveNote.submitText}</span>
                         </div>
                         <div className="dialog-row">
                             <button onClick={() => close()} className="dialog-button">{i18n.buttons.cancel}</button>
@@ -161,7 +161,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text-small">{i18n.dialogs.saveTranslation.header}</span>
+                            <span className="dialog-text-small">{i18n.dialogs.saveNote.header}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.reason}: </span>
@@ -182,4 +182,4 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     return null
 }
 
-export default SaveTranslationDialog
+export default SaveNoteDialog

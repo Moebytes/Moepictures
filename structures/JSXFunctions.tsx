@@ -57,6 +57,90 @@ export default class JSXFunctions {
         return [{text: text.replace(/(^|\n)-\s+/g, "$1▪ "), jsx: null}]
     }
 
+    public static parseBold = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\*\*[^*]+\*\*)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("**") && part.endsWith("**")) {
+                const boldText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} style={{fontWeight: "bold"}}>{boldText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseItalic = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\/\/[^/]+\/\/)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("//") && part.endsWith("//")) {
+                const italicText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} style={{fontStyle: "italic"}}>{italicText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseUnderline = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\_\_[^_]+\_\_)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("__") && part.endsWith("__")) {
+                const underlineText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} style={{textDecoration: "underline"}}>{underlineText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseStrikethrough = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\~\~[^~]+\~\~)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("~~") && part.endsWith("~~")) {
+                const strikethroughText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} style={{textDecoration: "line-through"}}>{strikethroughText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseSpoiler = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\|\|[^|]+\|\|)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("||") && part.endsWith("||")) {
+                const spoilerText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} className="spoiler">{spoilerText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseHighlight = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\=\=[^=]+\=\=)/g)
+        parts.forEach((part, index) => {
+            if (part.startsWith("==") && part.endsWith("==")) {
+                const highlightText = part.slice(2, -2)
+                items.push({text: null, jsx: <span key={index} style={{color: "var(--text-strong)"}}>{highlightText}</span>})
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
     public static parseMention = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
         const history = useHistory()
@@ -68,20 +152,6 @@ export default class JSXFunctions {
                 }
                 const style = {color: "var(--text-strong)", fontWeight: "bold", cursor: "pointer"}
                 items.push({text: null, jsx: <span key={index} style={style} onClick={click}>{part}</span>})
-            } else {
-                items.push({text: part, jsx: null})
-            }
-        })
-        return items
-    }
-
-    public static parseBold = (text: string) => {
-        let items = [] as {text: any, jsx: any}[]
-        const parts = text.split(/(\*\*[^*]+\*\*)/g)
-        parts.forEach((part, index) => {
-            if (part.startsWith("**") && part.endsWith("**")) {
-                const boldText = part.slice(2, -2)
-                items.push({text: null, jsx: <span key={index} style={{color: "var(--text-strong)"}}>{boldText}</span>})
             } else {
                 items.push({text: part, jsx: null})
             }
@@ -133,24 +203,30 @@ export default class JSXFunctions {
         let items = JSXFunctions.parseBullets(text)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
         items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseHighlight)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseItalic)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseUnderline)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseStrikethrough)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseSpoiler)
         return JSXFunctions.generateMarkup(items)
+    }
+
+    public static renderMessageText = (text: string, emojis: any) => {
+        return JSXFunctions.renderCommentText(text, emojis)
     }
 
     public static renderThreadText = (text: string, emojis: any) => {
         let items = JSXFunctions.parseBullets(text)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
         items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseHighlight)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseItalic)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseUnderline)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseStrikethrough)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseSpoiler)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseMention)
-        return JSXFunctions.generateMarkup(items)
-    }
-
-    public static renderMessageText = (text: string, emojis: any) => {
-        let items = JSXFunctions.parseBullets(text)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
-        items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
         return JSXFunctions.generateMarkup(items)
     }
 }

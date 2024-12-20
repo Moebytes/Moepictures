@@ -44,7 +44,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
-    const {translationMode, format} = useSearchSelector()
+    const {noteMode, format} = useSearchSelector()
     const {setFormat} = useSearchActions()
     const {posts} = useCacheSelector()
     const {setPosts} = useCacheActions()
@@ -164,7 +164,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const raw = window.innerWidth - rect.right
         let offset = -120
         if (mobile) offset += 80
-        if (translationMode) offset += 10
+        if (noteMode) offset += 10
         return `${raw + offset}px`
     }
 
@@ -174,7 +174,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (props.model) elementName = ".post-model-box"
         if (props.live2d) elementName = ".post-model-box"
         if (props.audio) elementName = ".post-song-box"
-        if (translationMode) elementName = ".translation-editor"
+        if (noteMode) elementName = ".note-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
@@ -204,7 +204,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (props.model) elementName = ".post-model-box"
         if (props.live2d) elementName = ".post-model-box"
         if (props.audio) elementName = ".post-song-box"
-        if (translationMode) elementName = ".translation-editor"
+        if (noteMode) elementName = ".note-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = formatRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"

@@ -9,6 +9,7 @@ const flagSlice = createSlice({
         imageSearchFlag: false,
         headerFlag: false,
         commentSearchFlag: null as string | null,
+        noteSearchFlag: null as string | null,
         threadSearchFlag: null as string | null,
         groupSearchFlag: null as string | null,
         pageFlag: null as number | null,
@@ -30,6 +31,7 @@ const flagSlice = createSlice({
         setImageSearchFlag: (state, action) => {state.imageSearchFlag = action.payload},
         setHeaderFlag: (state, action) => {state.headerFlag = action.payload},
         setCommentSearchFlag: (state, action) => {state.commentSearchFlag = action.payload},
+        setNoteSearchFlag: (state, action) => {state.noteSearchFlag = action.payload},
         setThreadSearchFlag: (state, action) => {state.threadSearchFlag = action.payload},
         setGroupSearchFlag: (state, action) => {state.groupSearchFlag = action.payload},
         setPageFlag: (state, action) => {state.pageFlag = action.payload},
@@ -53,7 +55,7 @@ const {
     setPageFlag, setDownloadIDs, setDownloadFlag, setReloadPostFlag,
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
-    setGroupSearchFlag, setThreadSearchFlag
+    setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -63,6 +65,7 @@ export const useFlagSelector = () => {
         imageSearchFlag: selector((state) => state.flag.imageSearchFlag),
         headerFlag: selector((state) => state.flag.headerFlag),
         commentSearchFlag: selector((state) => state.flag.commentSearchFlag),
+        noteSearchFlag: selector((state) => state.flag.noteSearchFlag),
         threadSearchFlag: selector((state) => state.flag.threadSearchFlag),
         groupSearchFlag: selector((state) => state.flag.groupSearchFlag),
         pageFlag: selector((state) => state.flag.pageFlag),
@@ -88,6 +91,7 @@ export const useFlagActions = () => {
         setImageSearchFlag: (state: any) => dispatch(setImageSearchFlag(state)),
         setHeaderFlag: (state: any) => dispatch(setHeaderFlag(state)),
         setCommentSearchFlag: (state: any) => dispatch(setCommentSearchFlag(state)),
+        setNoteSearchFlag: (state: any) => dispatch(setNoteSearchFlag(state)),
         setThreadSearchFlag: (state: any) => dispatch(setThreadSearchFlag(state)),
         setGroupSearchFlag: (state: any) => dispatch(setGroupSearchFlag(state)),
         setPageFlag: (state: any) => dispatch(setPageFlag(state)),

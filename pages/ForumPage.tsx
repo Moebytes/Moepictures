@@ -220,7 +220,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleThreads, index, session, sortType, sortReverse])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -295,31 +295,31 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setForumPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = forumPage - 1 
         if (newPage < 1) newPage = 1 
         setForumPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = forumPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setForumPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setForumPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number) => {
         setForumPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {

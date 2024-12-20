@@ -7,7 +7,7 @@ import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
 
-const ModTranslations: React.FunctionComponent = (props) => {
+const ModNotes: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -20,9 +20,9 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [unverifiedTranslations, setUnverifiedTranslations] = useState([]) as any
+    const [unverifiedNotes, setUnverifiedNotes] = useState([]) as any
     const [index, setIndex] = useState(0)
-    const [visibleTranslations, setVisibleTranslations] = useState([]) as any
+    const [visibleNotes, setVisibleNotes] = useState([]) as any
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
@@ -33,40 +33,40 @@ const ModTranslations: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateTranslations = async () => {
-        const translations = await functions.get("/api/translation/list/unverified", null, session, setSessionFlag)
+    const updateNotes = async () => {
+        const notes = await functions.get("/api/note/list/unverified", null, session, setSessionFlag)
         setEnded(false)
-        setUnverifiedTranslations(translations)
+        setUnverifiedNotes(notes)
     }
 
     useEffect(() => {
-        updateTranslations()
+        updateNotes()
     }, [session])
 
-    const updateVisibleTranslations = () => {
-        const newVisibleTranslations = [] as any
+    const updateVisibleNotes = () => {
+        const newVisibleNotes = [] as any
         for (let i = 0; i < index; i++) {
-            if (!unverifiedTranslations[i]) break
-            newVisibleTranslations.push(unverifiedTranslations[i])
+            if (!unverifiedNotes[i]) break
+            newVisibleNotes.push(unverifiedNotes[i])
         }
-        setVisibleTranslations(functions.removeDuplicates(newVisibleTranslations))
+        setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
     }
 
-    const refreshTranslations = async () => {
-        updateTranslations()
-        updateVisibleTranslations()
+    const refreshNotes = async () => {
+        updateNotes()
+        updateVisibleNotes()
     }
 
-    const approveTranslation = async (translationID: number, username: string, postID: number) => {
-        await functions.post("/api/translation/approve", {translationID, username, postID}, session, setSessionFlag)
-        await updateTranslations()
-        refreshTranslations()
+    const approveNote = async (noteID: number, username: string, postID: number) => {
+        await functions.post("/api/note/approve", {noteID, username, postID}, session, setSessionFlag)
+        await updateNotes()
+        refreshNotes()
     }
 
-    const rejectTranslation = async (translationID: number, username: string, postID: number) => {
-        await functions.post("/api/translation/reject", {translationID, username, postID}, session, setSessionFlag)
-        await updateTranslations()
-        refreshTranslations()
+    const rejectNote = async (noteID: number, username: string, postID: number) => {
+        await functions.post("/api/note/reject", {noteID, username, postID}, session, setSessionFlag)
+        await updateNotes()
+        refreshNotes()
     }
 
     const getPageAmount = () => {
@@ -76,19 +76,19 @@ const ModTranslations: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleTranslations = visibleTranslations as any
+            const newVisibleNotes = visibleNotes as any
             for (let i = 0; i < 10; i++) {
-                if (!unverifiedTranslations[currentIndex]) break
-                newVisibleTranslations.push(unverifiedTranslations[currentIndex])
+                if (!unverifiedNotes[currentIndex]) break
+                newVisibleNotes.push(unverifiedNotes[currentIndex])
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleTranslations(functions.removeDuplicates(newVisibleTranslations))
-            const newImagesRef = newVisibleTranslations.map(() => React.createRef()) as any
+            setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
+            const newImagesRef = newVisibleNotes.map(() => React.createRef()) as any
             setImagesRef(newImagesRef) as any
         }
         if (scroll) updateRequests()
-    }, [unverifiedTranslations, scroll])
+    }, [unverifiedNotes, scroll])
 
     const updateOffset = async () => {
         if (ended) return
@@ -104,28 +104,28 @@ const ModTranslations: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/translation/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = unverifiedTranslations.filter((t: any) => !t.fake)
+        const cleanHistory = unverifiedNotes.filter((t: any) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, translationCount: cleanHistory[0]?.translationCount}), ...result]
+                result = [...new Array(newOffset).fill({fake: true, noteCount: cleanHistory[0]?.noteCount}), ...result]
                 padded = true
             }
         }
         if (hasMore) {
             setOffset(newOffset)
             if (padded) {
-                setUnverifiedTranslations(result)
+                setUnverifiedNotes(result)
             } else {
-                setUnverifiedTranslations((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setUnverifiedNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
-                    setUnverifiedTranslations(result)
+                    setUnverifiedNotes(result)
                 } else {
-                    setUnverifiedTranslations((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setUnverifiedNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -136,31 +136,31 @@ const ModTranslations: React.FunctionComponent = (props) => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!unverifiedTranslations[currentIndex]) return updateOffset()
-                const newTranslations = visibleTranslations as any
+                if (!unverifiedNotes[currentIndex]) return updateOffset()
+                const newNotes = visibleNotes as any
                 for (let i = 0; i < 10; i++) {
-                    if (!unverifiedTranslations[currentIndex]) return updateOffset()
-                    newTranslations.push(unverifiedTranslations[currentIndex])
+                    if (!unverifiedNotes[currentIndex]) return updateOffset()
+                    newNotes.push(unverifiedNotes[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleTranslations(functions.removeDuplicates(newTranslations))
+                setVisibleNotes(functions.removeDuplicates(newNotes))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, index, visibleTranslations, modState, session])
+    }, [scroll, index, visibleNotes, modState, session])
 
     useEffect(() => {
         window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
-            setVisibleTranslations([])
+            setVisibleNotes([])
             setModPage(1)
-            updateTranslations()
+            updateNotes()
         }
     }, [scroll, modPage, modState, session])
 
@@ -171,24 +171,24 @@ const ModTranslations: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updatePageOffset = () => {
             const modOffset = (modPage - 1) * getPageAmount()
-            if (unverifiedTranslations[modOffset]?.fake) {
+            if (unverifiedNotes[modOffset]?.fake) {
                 setEnded(false)
                 return updateOffset()
             }
-            const modAmount = Number(unverifiedTranslations[0]?.translationCount)
+            const modAmount = Number(unverifiedNotes[0]?.noteCount)
             let maximum = modOffset + getPageAmount()
             if (maximum > modAmount) maximum = modAmount
-            const maxTag = unverifiedTranslations[maximum - 1]
+            const maxTag = unverifiedNotes[maximum - 1]
             if (!maxTag) {
                 setEnded(false)
                 updateOffset()
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, unverifiedTranslations, modPage, ended])
+    }, [scroll, unverifiedNotes, modPage, ended])
 
     useEffect(() => {
-        if (unverifiedTranslations?.length) {
+        if (unverifiedNotes?.length) {
             const maxTagPage = maxPage()
             if (maxTagPage === 1) return
             if (queryPage > maxTagPage) {
@@ -196,7 +196,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
                 setModPage(maxTagPage)
             }
         }
-    }, [unverifiedTranslations, modPage, queryPage])
+    }, [unverifiedNotes, modPage, queryPage])
 
     useEffect(() => {
         if (pageFlag) {
@@ -206,9 +206,9 @@ const ModTranslations: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     const maxPage = () => {
-        if (!unverifiedTranslations?.length) return 1
-        if (Number.isNaN(Number(unverifiedTranslations[0]?.translationCount))) return 10000
-        return Math.ceil(Number(unverifiedTranslations[0]?.translationCount) / getPageAmount())
+        if (!unverifiedNotes?.length) return 1
+        if (Number.isNaN(Number(unverifiedNotes[0]?.noteCount))) return 10000
+        return Math.ceil(Number(unverifiedNotes[0]?.noteCount) / getPageAmount())
     }
 
     const firstPage = () => {
@@ -267,24 +267,24 @@ const ModTranslations: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const translationDataJSX = (translation: any) => {
-        let translationChanges = translation.addedEntries?.length || translation.removedEntries?.length
-        if (!translationChanges) return null
-        const addedJSX = translation.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = translation.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+    const noteDataJSX = (note: any) => {
+        let noteChanges = note.addedEntries?.length || note.removedEntries?.length
+        if (!noteChanges) return null
+        const addedJSX = note.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = note.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]
     }
 
-    const generateTranslationsJSX = () => {
+    const generateNotesJSX = () => {
         let jsx = [] as any
         let visible = [] as any
         if (scroll) {
-            visible = functions.removeDuplicates(visibleTranslations) as any
+            visible = functions.removeDuplicates(visibleNotes) as any
         } else {
             const offset = (modPage - 1) * getPageAmount()
-            visible = unverifiedTranslations.slice(offset, offset + getPageAmount())
+            visible = unverifiedNotes.slice(offset, offset + getPageAmount())
         }
         if (!visible.length) {
             return (
@@ -297,14 +297,14 @@ const ModTranslations: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const translation = visible[i] as any
-            if (!translation) break
-            if (translation.fake) continue
+            const note = visible[i] as any
+            if (!note) break
+            if (note.fake) continue
             const imgClick = (event?: any, middle?: boolean) => {
-                if (middle) return window.open(`/unverified/post/${translation.postID}`, "_blank")
-                history.push(`/unverified/post/${translation.postID}`)
+                if (middle) return window.open(`/unverified/post/${note.postID}`, "_blank")
+                history.push(`/unverified/post/${note.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(note.post.images[0].type, note.postID, note.post.images[0].order, note.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
@@ -313,16 +313,16 @@ const ModTranslations: React.FunctionComponent = (props) => {
                         <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(translation?.updater) || i18n.user.deleted}</span>
-                        <span className="mod-post-text">{i18n.labels.reason}: {translation.reason}</span>
-                        {translationDataJSX(translation)}
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${note.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(note?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {note.reason}</span>
+                        {noteDataJSX(note)}
                     </div>
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID, translation.updater, translation.postID)}>
+                        <div className="mod-post-options-container" onClick={() => rejectNote(note.noteID, note.updater, note.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID, translation.updater, translation.postID)}>
+                        <div className="mod-post-options-container" onClick={() => approveNote(note.noteID, note.updater, note.postID)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
@@ -347,9 +347,9 @@ const ModTranslations: React.FunctionComponent = (props) => {
 
     return (
         <div className="mod-posts">
-            {generateTranslationsJSX()}
+            {generateNotesJSX()}
         </div>
     )
 }
 
-export default ModTranslations
+export default ModNotes

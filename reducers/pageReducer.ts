@@ -7,6 +7,7 @@ const pageSlice = createSlice({
     initialState: {
         page: 1,
         commentsPage: 1,
+        notesPage: 1,
         artistsPage: 1,
         charactersPage: 1,
         seriesPage: 1,
@@ -22,6 +23,7 @@ const pageSlice = createSlice({
     reducers: {
         setPage: (state, action) => {state.page = action.payload},
         setCommentsPage: (state, action) => {state.commentsPage = action.payload},
+        setNotesPage: (state, action) => {state.notesPage = action.payload},
         setArtistsPage: (state, action) => {state.artistsPage = action.payload},
         setCharactersPage: (state, action) => {state.charactersPage = action.payload},
         setSeriesPage: (state, action) => {state.seriesPage = action.payload},
@@ -37,10 +39,10 @@ const pageSlice = createSlice({
 })
 
 const {
-    setPage, setCommentsPage, setArtistsPage, setCharactersPage,
-    setSeriesPage, setTagsPage, setForumPage, setThreadPage,
-    setMailPage, setHistoryPage, setModPage, setGroupsPage,
-    setMessagePage
+    setPage, setCommentsPage, setNotesPage, setArtistsPage, 
+    setCharactersPage, setSeriesPage, setTagsPage, setForumPage, 
+    setThreadPage, setMailPage, setHistoryPage, setModPage, 
+    setGroupsPage, setMessagePage
 } = pageSlice.actions
 
 export const usePageSelector = () => {
@@ -48,6 +50,7 @@ export const usePageSelector = () => {
     return {
         page: selector((state) => state.page.page),
         commentsPage: selector((state) => state.page.commentsPage),
+        notesPage: selector((state) => state.page.notesPage),
         artistsPage: selector((state) => state.page.artistsPage),
         charactersPage: selector((state) => state.page.charactersPage),
         seriesPage: selector((state) => state.page.seriesPage),
@@ -67,6 +70,7 @@ export const usePageActions = () => {
     return {
         setPage: (state: any) => dispatch(setPage(state)),
         setCommentsPage: (state: any) => dispatch(setCommentsPage(state)),
+        setNotesPage: (state: any) => dispatch(setNotesPage(state)),
         setArtistsPage: (state: any) => dispatch(setArtistsPage(state)),
         setCharactersPage: (state: any) => dispatch(setCharactersPage(state)),
         setSeriesPage: (state: any) => dispatch(setSeriesPage(state)),

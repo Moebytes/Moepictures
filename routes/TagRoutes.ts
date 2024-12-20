@@ -35,6 +35,14 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.tag(tag)
+            if (!result) {
+                const alias = await sql.tag.alias(tag)
+                if (alias) result = await sql.tag.tag(alias.tag)
+                if (!alias && functions.isJapaneseText(tag)) {
+                    const pixivTag = await sql.tag.tagFromPixivTag(tag)
+                    if (pixivTag) result = await sql.tag.tag(pixivTag.tag)
+                }
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)

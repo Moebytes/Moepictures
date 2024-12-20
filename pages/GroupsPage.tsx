@@ -261,7 +261,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }, [scroll, visibleGroups, index, sortType, sortReverse, ratingType])
 
     useEffect(() => {
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -336,31 +336,31 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     const firstPage = () => {
         setGroupsPage(1)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const previousPage = () => {
         let newPage = groupsPage - 1 
         if (newPage < 1) newPage = 1 
         setGroupsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const nextPage = () => {
         let newPage = groupsPage + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setGroupsPage(newPage)
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const lastPage = () => {
         setGroupsPage(maxPage())
-        window.scrollTo(0, 0)
+        //window.scrollTo(0, 0)
     }
 
     const goToPage = (newPage: number, noScroll?: boolean) => {
         setGroupsPage(newPage)
-        if (!noScroll) window.scrollTo(0, 0)
+        //if (!noScroll) window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {
@@ -481,7 +481,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-row-container">
+                    <table className="items-row-container" style={{justifyContent: "space-evenly"}}>
                         {generateGroupsJSX()}
                     </table>
                 </div>

@@ -183,8 +183,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             let marginR = "30px"
             setMarginR(marginR)
         } else {
-            // 50, 60
-            let marginR = hideSidebar ? "40px" : "50px"
+            let marginR = hideSidebar ? "40px" : "45px"
             setMarginR(marginR)
         }
     }, [session, hideSidebar, tablet])
@@ -346,11 +345,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getFontSize = () => {
         if (tablet) {
-            //if (language === "ja") return "14px"
-            return "18px"
+            return "17px"
         } else {
-            //if (language === "ja") return "16px"
-            return "20px"
+            return "19px"
         }
     }
 
@@ -369,6 +366,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}
                     <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>{i18n.sort.posts}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/comments"); setHideMobileNavbar(true)}}>{i18n.navbar.comments}</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/notes"); setHideMobileNavbar(true)}}>{i18n.navbar.notes}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/artists"); setHideMobileNavbar(true)}}>{i18n.navbar.artists}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>{i18n.navbar.characters}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/series"); setHideMobileNavbar(true)}}>{i18n.tag.series}</span>
@@ -440,6 +438,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => history.push("/login")}>{i18n.navbar.login}</span>}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => postsClick()}>{i18n.sort.posts}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/comments")}>{i18n.navbar.comments}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/notes")}>{i18n.navbar.notes}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/artists")}>{i18n.navbar.artists}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/characters")}>{i18n.navbar.characters}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/series")}>{i18n.tag.series}</span>

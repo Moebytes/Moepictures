@@ -7,7 +7,7 @@ usePostDialogSelector} from "../store"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
-import addTranslation from "../assets/icons/translation-toggle-on.png"
+import addNote from "../assets/icons/note-toggle-on.png"
 import report from "../assets/icons/report.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
@@ -61,8 +61,8 @@ interface Props {
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
-    const {translationMode} = useSearchSelector()
-    const {setSearchFlag, setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
+    const {noteMode} = useSearchSelector()
+    const {setSearchFlag, setNoteMode, setNoteDrawingEnabled} = useSearchActions()
     const {posts, unverifiedPosts, tags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {setEnableDrag} = useInteractionActions()
@@ -468,11 +468,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return null
     }
 
-    const triggerAddTranslation = () => {
+    const triggerAddNote = () => {
         window.scrollTo(0, 0)
-        const newMode = !translationMode
-        setTranslationMode(newMode)
-        if (newMode) setTranslationDrawingEnabled(true)
+        const newMode = !noteMode
+        setNoteMode(newMode)
+        if (newMode) setNoteDrawingEnabled(true)
     }
 
     const triggerParent = () => {
@@ -745,9 +745,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerAddTranslation}>
-                                <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.addTranslation}</span>
+                            <span className="tag-hover" onClick={triggerAddNote}>
+                                <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.addNote}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">

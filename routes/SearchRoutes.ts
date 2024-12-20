@@ -29,6 +29,7 @@ const SearchRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
+            let showChildren = req.query.showChildren === "true"
             let withTags = req.query.withTags === "true"
             if (!query) query = ""
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
@@ -70,6 +71,9 @@ const SearchRoutes = (app: Express) => {
             } else if (query.startsWith("source:") || query.startsWith("http")) {
                 const source = query.replace("source:", "").trim()
                 result = await sql.search.searchSource(source, withTags)
+            } else if (query.startsWith("format:")) {
+                const format = query.replace("format:", "").trim()
+                result = await sql.search.searchFormat(format, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
             } else if (query.startsWith("hash:")) {
                 const sqlQuery = {
                     text: `SELECT * FROM "images" WHERE "images".hash = $1`,
@@ -81,20 +85,20 @@ const SearchRoutes = (app: Express) => {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user?.publicFavorites) return res.status(403).send("Unauthorized")
-                result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, req.session.username)
+                result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("uploads:")) {
                 const username = query.replace("uploads:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(400).send("Bad username")
-                result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, req.session.username)
+                result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("group:")) {
                 const [g, name] = query.split(":")
                 let group = await sql.group.group(functions.generateSlug(name))
                 if (!group) return res.status(400).send("Bad group")
-                result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, req.session.username)
+                result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("favgroup:")) {
                 const [f, username, name] = query.split(":")
-                let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, sort, req.session.username)
+                let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, sort, showChildren, req.session.username)
                 if (!favgroup) return res.status(400).send("Bad favgroup")
                 if (favgroup.private) {
                     if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
@@ -104,10 +108,10 @@ const SearchRoutes = (app: Express) => {
                 const [h, username] = query.split(":")
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
                 if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
-                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, req.session.username)
+                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, showChildren, req.session.username)
                 result = history.map((h: any) => ({postCount: h.historyCount, ...h.post}))
             } else {
-                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, req.session.username)
+                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
             }
             result = result.map((p: any) => {
                 if (p.images?.length > 1) {
@@ -334,6 +338,50 @@ const SearchRoutes = (app: Express) => {
                 }
                 if (comment.post.private) {
                     const categories = await serverFunctions.tagCategories(comment.post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                }
+            }
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/search/notes", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query = req.query.query as string
+            let sort = req.query.sort as string
+            const offset = req.query.offset as string
+            if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
+            const search = query?.trim() ?? ""
+            let parts = search.split(/ +/g)
+            let usernames = [] as any 
+            let parsedSearch = ""
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].includes("notes:")) {
+                    const username = parts[i].split(":")[1]
+                    usernames.push(username)
+                } else {
+                    parsedSearch += `${parts[i]} `
+                }
+            }
+            let result = [] as any
+            if (usernames.length) {
+                result = await sql.note.searchNotesByUsername(usernames, parsedSearch.trim(), sort, offset)
+            } else {
+                result = await sql.note.searchNotes(parsedSearch.trim(), sort, offset)
+            }
+            for (let i = result.length - 1; i >= 0; i--) {
+                const note = result[i]
+                if (!permissions.isMod(req.session)) {
+                    if (note.post.hidden) result.splice(i, 1)
+                }
+                if (!req.session.showR18) {
+                    if (functions.isR18(note.post.rating)) result.splice(i, 1)
+                }
+                if (note.post.private) {
+                    const categories = await serverFunctions.tagCategories(note.post.tags)
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }

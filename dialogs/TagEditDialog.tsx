@@ -10,7 +10,7 @@ import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
 import comic from "../assets/icons/comic.png"
 import cute from "../assets/icons/cute.png"
-import sexy from "../assets/icons/sexy.png"
+import flirty from "../assets/icons/flirty.png"
 import ecchi from "../assets/icons/ecchi.png"
 import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
@@ -454,9 +454,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={cute}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="quickedit-button-img" src={sexy}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="quickedit-button-img" src={flirty}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="quickedit-button-img" src={ecchi}/>
@@ -476,9 +476,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={cute}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="quickedit-button-img" src={sexy}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="quickedit-button-img" src={flirty}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="quickedit-button-img" src={ecchi}/>

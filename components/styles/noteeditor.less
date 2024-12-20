@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.translation-editor {
+.note-editor {
     position: relative;
     display: none;
     flex-direction: column;
@@ -11,14 +11,14 @@
     margin-bottom: 20px;
 }
 
-.translation-editor-filters {
+.note-editor-filters {
     position: relative;
     display: flex;
     width: max-content;
     height: max-content;
 }
 
-.translation-editor-buttons {
+.note-editor-buttons {
     opacity: 0;
     transition: opacity 0.6s;
     position: absolute;
@@ -30,12 +30,12 @@
     padding: 10px;
 }
 
-.show-translation-buttons {
+.show-note-buttons {
     opacity: 1;
     transition: opacity 0.6s;
 }
 
-.translation-editor-button {
+.note-editor-button {
     width: auto;
     height: 25px;
     cursor: pointer;
@@ -48,7 +48,7 @@
     }
 }
 
-.translation-bubble {
+.note-bubble {
     position: fixed;
     z-index: 2000;
     left: 0px;
