@@ -32,7 +32,7 @@ const pushMentionNotification = async (content: string, threadID: number, replyI
     try {
         const notified = new Set<string>()
         const thread = await sql.thread.thread(threadID)
-        const pieces = functions.parseComment(content)
+        const pieces = functions.parsePieces(content)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {

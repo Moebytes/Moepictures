@@ -6,6 +6,17 @@ import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import highlight from "../assets/icons/highlight.png"
+import bold from "../assets/icons/bold.png"
+import italic from "../assets/icons/italic.png"
+import underline from "../assets/icons/underline.png"
+import strikethrough from "../assets/icons/strikethrough.png"
+import spoiler from "../assets/icons/spoiler.png"
+import link from "../assets/icons/link-purple.png"
+import details from "../assets/icons/details.png"
+import hexcolor from "../assets/icons/hexcolor.png"
+import codeblock from "../assets/icons/codeblock.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import permissions from "../structures/Permissions"
 import lewdIcon from "../assets/icons/lewd.png"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -21,11 +32,12 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const emojiRef = useRef(null) as any
     const dialogRef = useRef(null) as any
-    const textAreaRef = useRef(null) as any
+    const textRef = useRef(null) as any
     const history = useHistory()
 
     const getFilter = () => {
@@ -61,7 +73,7 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
         if (typeof window === "undefined") return
         const observer = new ResizeObserver(() => forceUpdate())
         const dialogElement = dialogRef.current
-        const textareaElement = textAreaRef.current
+        const textareaElement = textRef.current
         if (dialogElement) observer.observe(dialogElement)
         if (textareaElement) observer.observe(textareaElement)
         return () => {
@@ -134,9 +146,22 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "330px"}} spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
+                        <div className="dialog-textarea-buttons">
+                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "highlight")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "bold")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "italic")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "underline")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "strikethrough")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "spoiler")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "link")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "details")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "color")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setEditThreadContent, "code")} style={{filter: getFilter()}}/></button>
                         </div>
+                        {previewMode ? <div className="dialog-textarea-preview">{jsxFunctions.renderText(editThreadContent, emojis, "reply")}</div> : 
+                        <div style={{marginTop: "0px"}} className="dialog-row">
+                            <textarea className="dialog-textarea" ref={textRef} style={{resize: "vertical", height: "330px"}} spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
+                        </div>}
                         {session.showR18 ?
                         <div className="dialog-row">
                             <img className="dialog-checkbox" src={editThreadR18 ? radioButtonChecked : radioButton} onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px", filter: getFilter()}}/>
@@ -149,6 +174,7 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
+                            <button className={previewMode ? "dialog-edit-button" : "dialog-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>

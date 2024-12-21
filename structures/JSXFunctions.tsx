@@ -294,14 +294,51 @@ export default class JSXFunctions {
         return JSXFunctions.generateMarkup(items)
     }
 
+    public static renderReplyText = (text: string, emojis: any) => {
+        let items = JSXFunctions.commonChain(text, emojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseMention)
+        return JSXFunctions.generateMarkup(items)
+    }
+
     public static renderMessageText = (text: string, emojis: any) => {
         let items = JSXFunctions.commonChain(text, emojis)
         return JSXFunctions.generateMarkup(items)
     }
 
-    public static renderThreadText = (text: string, emojis: any) => {
-        let items = JSXFunctions.commonChain(text, emojis)
-        items = JSXFunctions.appendChain(items, JSXFunctions.parseMention)
-        return JSXFunctions.generateMarkup(items)
+    public static renderText = (text: string, emojis: any, type: string = "comment", clickFunc?: (id: string) => any, r18?: boolean) => {
+        const renderFunction = {
+            "comment": JSXFunctions.renderCommentText,
+            "commentrow": JSXFunctions.renderCommentText,
+            "reply": JSXFunctions.renderReplyText,
+            "message": JSXFunctions.renderMessageText
+        }[type]
+        if (type === "message") type = "reply"
+        const pieces = functions.parsePieces(text)
+        let jsx = [] as any
+        if (r18) jsx.push(<span className={`${type}-text`} style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i]
+            if (piece.startsWith(">")) {
+                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
+                let username = ""
+                let said = ""
+                if (userPart) {
+                    username = functions.toProperCase(userPart.split(/ +/g)[0])
+                    said = userPart.split(/ +/g).slice(1).join(" ")
+                }
+                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
+                jsx.push(
+                    <div className={`${type}-quote-container`}>
+                        {userPart ? <span className={`${type}-quote-user`} onClick={() => clickFunc?.(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
+                        <span className={`${type}-quote-text`}>{renderFunction?.(text, emojis)}</span>
+                    </div>
+                )
+            } else {
+                jsx.push(<span className={`${type}-text`}>{renderFunction?.(piece, emojis)}</span>)
+            }
+        }
+        return jsx
     }
 }

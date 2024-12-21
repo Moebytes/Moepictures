@@ -5,21 +5,37 @@ useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import highlight from "../assets/icons/highlight.png"
+import bold from "../assets/icons/bold.png"
+import italic from "../assets/icons/italic.png"
+import underline from "../assets/icons/underline.png"
+import strikethrough from "../assets/icons/strikethrough.png"
+import spoiler from "../assets/icons/spoiler.png"
+import link from "../assets/icons/link-purple.png"
+import details from "../assets/icons/details.png"
+import hexcolor from "../assets/icons/hexcolor.png"
+import codeblock from "../assets/icons/codeblock.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import Draggable from "react-draggable"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {i18n} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {editCommentID, editCommentText} = useCommentDialogSelector()
     const {setEditCommentID, setEditCommentFlag, setEditCommentText} = useCommentDialogActions()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
     const emojiRef = useRef(null) as any
     const dialogRef = useRef(null) as any
-    const textAreaRef = useRef(null) as any
+    const textRef = useRef(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         document.title = i18n.dialogs.editComment.title
@@ -48,7 +64,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
         if (typeof window === "undefined") return
         const observer = new ResizeObserver(() => forceUpdate())
         const dialogElement = dialogRef.current
-        const textareaElement = textAreaRef.current
+        const textareaElement = textRef.current
         if (dialogElement) observer.observe(dialogElement)
         if (textareaElement) observer.observe(textareaElement)
         return () => {
@@ -114,14 +130,28 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-title-container">
                             <span className="dialog-title">{i18n.dialogs.editComment.title}</span>
                         </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "140px"}} spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
+                        <div className="dialog-textarea-buttons">
+                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "highlight")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "bold")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "italic")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "underline")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "strikethrough")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "spoiler")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "link")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "details")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "color")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setEditCommentText, "code")} style={{filter: getFilter()}}/></button>
                         </div>
+                        {previewMode ? <div className="dialog-textarea-preview">{jsxFunctions.renderText(editCommentText, emojis, "comment")}</div> : 
+                        <div style={{marginTop: "0px"}} className="dialog-row">
+                            <textarea className="dialog-textarea" ref={textRef} style={{resize: "vertical", height: "140px"}} spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
+                        </div>}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
+                            <button className={previewMode ? "dialog-edit-button" : "dialog-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>

@@ -67,7 +67,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanReply = functions.parseComment(props.reply?.content).filter((s: any) => !s.includes(">>>")).join(" ")
+        const cleanReply = functions.parsePieces(props.reply?.content).filter((s: any) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
             >>>[${props.reply?.replyID}] ${functions.toProperCase(props.reply?.creator)} said:
             > ${cleanReply}
@@ -77,36 +77,6 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const goToReply = (replyID: string) => {
         if (!replyID) return
         props.onReplyJump?.(Number(replyID))
-    }
-
-    const parseText = () => {
-        const pieces = functions.parseComment(props.reply.content)
-        let jsx = [] as any
-        if (props.reply.r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
-        for (let i = 0; i < pieces.length; i++) {
-            const piece = pieces[i]
-            if (piece.includes(">")) {
-                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
-                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
-                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
-                let username = ""
-                let said = ""
-                if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
-                    said = userPart.split(/ +/g).slice(1).join(" ")
-                }
-                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
-                jsx.push(
-                    <div className="reply-quote-container">
-                        {userPart ? <span className="reply-quote-user" onClick={() => goToReply(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{jsxFunctions.renderThreadText(text.trim(), emojis)}</span>
-                    </div>
-                )
-            } else {
-                jsx.push(<span className="reply-text">{jsxFunctions.renderThreadText(piece.trim(), emojis)}</span>)
-            }
-        }
-        return jsx
     }
 
     const deleteReply = async () => {
@@ -283,7 +253,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>
                 {session.username && !mobile ? replyOptions() : null}
-                {parseText()}
+                {jsxFunctions.renderText(props.reply?.content, emojis, "reply", goToReply, props.reply?.r18)}
             </div>
             {session.username && mobile ? replyOptions() : null}
         </div>

@@ -200,35 +200,6 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         )
     }
 
-    const parseText = () => {
-        const pieces = functions.parseComment(text)
-        let jsx = [] as any
-        for (let i = 0; i < pieces.length; i++) {
-            const piece = pieces[i]
-            if (piece.startsWith(">")) {
-                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
-                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
-                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
-                let username = ""
-                let said = ""
-                if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
-                    said = userPart.split(/ +/g).slice(1).join(" ")
-                }
-                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
-                jsx.push(
-                    <div className="comment-quote-container">
-                        {userPart ? <span className="comment-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
-                    </div>
-                )
-            } else {
-                jsx.push(<span className="comment-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
-            }
-        }
-        return jsx
-    }
-
     const getCommentBox = () => {
         if (session.banned) return (
             <div className="comments-input-container">
@@ -250,7 +221,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
                         <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
                         <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
                     </div>
-                    {previewMode ? <div className="comments-preview">{parseText()}</div> : 
+                    {previewMode ? <div className="comments-preview">{jsxFunctions.renderText(text, emojis, "comment")}</div> : 
                     <div style={{marginTop: "0px"}} className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <textarea ref={textRef} className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
                     </div>}
@@ -260,7 +231,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
                     <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                         <img src={emojiSelect}/>
                     </button>
-                    <button className={previewMode ? "comments-edit-button" : "comments-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.edit : i18n.buttons.preview}</button>
+                    <button className={previewMode ? "comments-edit-button" : "comments-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                     </div>
                 </div>
             )

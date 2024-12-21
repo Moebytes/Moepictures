@@ -537,7 +537,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         if (!message) return
-        const cleanReply = functions.parseComment(message.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parsePieces(message.content).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[0] ${functions.toProperCase(message.creator)} said:
             > ${cleanReply}
@@ -638,36 +638,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         )
     }
 
-    const parseText = () => {
-        const pieces = functions.parseComment(text)
-        let jsx = [] as any
-        if (r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
-        for (let i = 0; i < pieces.length; i++) {
-            const piece = pieces[i]
-            if (piece.startsWith(">")) {
-                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
-                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
-                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
-                let username = ""
-                let said = ""
-                if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
-                    said = userPart.split(/ +/g).slice(1).join(" ")
-                }
-                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
-                jsx.push(
-                    <div className="reply-quote-container">
-                        {userPart ? <span className="reply-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{jsxFunctions.renderMessageText(text.trim(), emojis)}</span>
-                    </div>
-                )
-            } else {
-                jsx.push(<span className="reply-text">{jsxFunctions.renderMessageText(piece.trim(), emojis)}</span>)
-            }
-        }
-        return jsx
-    }
-
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
@@ -695,7 +665,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
                             <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
                         </div>
-                        {previewMode ? <div className="thread-page-preview">{parseText()}</div> : 
+                        {previewMode ? <div className="thread-page-preview">{jsxFunctions.renderText(text, emojis, "message", undefined, r18)}</div> : 
                         <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
                             <textarea ref={textRef} className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
                         </div>}
@@ -705,7 +675,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
-                            <button className={previewMode ? "thread-page-edit-button" : "thread-page-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.edit : i18n.buttons.preview}</button>
+                            <button className={previewMode ? "thread-page-edit-button" : "thread-page-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                             {session.showR18 ?
                             <div className="thread-page-replybox-row">
                                 <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>

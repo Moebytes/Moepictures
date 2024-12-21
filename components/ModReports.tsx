@@ -105,11 +105,11 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             id = asset.postID
         } else if (props.request.type === "thread") {
             textType = `${i18n.labels.thread}: `
-            text = jsxFunctions.renderThreadText(asset.title, emojis)
+            text = jsxFunctions.renderReplyText(asset.title, emojis)
             id = asset.threadID
         } else if (props.request.type === "reply") {
             textType = `${i18n.buttons.reply}: `
-            text = jsxFunctions.renderThreadText(asset.content, emojis)
+            text = jsxFunctions.renderReplyText(asset.content, emojis)
             id = asset.threadID
         }
     }

@@ -165,6 +165,7 @@
         "deleteAll": "すべて削除",
         "post": "ポスト",
         "preview": "プレビュー",
+        "unpreview": "アンプレビュー",
         "reply": "返信",
         "message": "メッセージ",
         "submitting": "提出...",

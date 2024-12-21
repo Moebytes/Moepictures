@@ -403,6 +403,61 @@
     cursor: pointer;
 }
 
+.dialog-textarea-buttons {
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--inputBG);
+    border: 1px solid var(--inputBorder);
+    border-bottom: none;
+    width: 100%;
+}
+
+.dialog-textarea-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: transparent;
+    // border: 1px solid var(--sidebarBG);
+    padding: 8px 10px;
+    cursor: pointer;
+    & > img {
+        width: auto;
+        height: 15px;
+    }
+    &:hover {
+        filter: brightness(150%);
+    }
+}
+
+.dialog-textarea-preview {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-left: 10px;
+    background-color: var(--inputBG);
+    border: 1px solid var(--inputBorder);
+    min-height: 140px;
+    max-height: 480px;
+    overflow-y: auto;
+    & > div > span {
+        font-size: 15px;
+    }
+    & > span {
+        font-size: 17px;
+    }
+}
+
+.dialog-preview-button {
+    .dialog-button();
+    background-color: var(--previewBG);
+}
+
+.dialog-edit-button {
+    .dialog-button();
+    background-color: var(--editBG);
+}
+
 @media screen and (max-width: 500px) {
     .dialog-box {
         width: 350px;

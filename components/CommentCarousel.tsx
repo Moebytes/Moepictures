@@ -34,33 +34,6 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
         loadImages()
     }, [props.comments, session])
 
-    const parseText = (comment: string) => {
-        const pieces = functions.parseComment(comment)
-        let jsx = [] as any
-        for (let i = 0; i < pieces.length; i++) {
-            const piece = pieces[i]
-            if (piece.includes(">")) {
-                const userPart = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
-                let username = ""
-                let said = ""
-                if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
-                    said = userPart.split(/ +/g).slice(1).join(" ")
-                }
-                const text = piece.replace(userPart, "").replaceAll(">", "")
-                jsx.push(
-                    <div className="comment-carousel-commentrow-quote-container">
-                        {userPart ? <span className="comment-carousel-commentrow-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-carousel-commentrow-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
-                    </div>
-                )
-            } else {
-                jsx.push(<span className="comment-carousel-commentrow-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
-            }
-        }
-        return jsx
-    }
-
     const generateJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.comments.length; i++) {
@@ -83,7 +56,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
                     <div className="comment-carousel-commentrow-container-row">
                         <div className="comment-carousel-commentrow-container" style={{width: "100%"}}>
                             <span className="comment-carousel-commentrow-date-text">{functions.timeAgo(props.comments[i].postDate, i18n)}:</span>
-                            {parseText(props.comments[i].comment)}
+                            {jsxFunctions.renderText(props.comments[i].comment, emojis, "commentrow")}
                         </div>
                     </div>
                 </div>

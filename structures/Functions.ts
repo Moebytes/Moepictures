@@ -464,13 +464,13 @@ export default class Functions {
         return null
     }
 
-    public static parseComment = (comment: string) => {
+    public static parsePieces = (text: string) => {
         let segments = [] as any
-        const pieces = comment.split(/\n+/gm)
+        const pieces = text.split(/\n/gm)
         let intermediate = [] as any
         let codeBlock = false
         for (let i = 0; i < pieces.length; i++) {
-            let piece = pieces[i]
+            let piece = pieces[i] + "\n"
             if (piece.includes("```")) {
                 codeBlock = !codeBlock
                 if (!codeBlock) {
@@ -498,7 +498,7 @@ export default class Functions {
     public static validateComment = (comment: string, i18n: typeof enLocale) => {
         if (!comment) return i18n.errors.comment.empty
         if (comment.length > 1000) return i18n.errors.comment.length
-        const pieces = Functions.parseComment(comment)
+        const pieces = Functions.parsePieces(comment)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {

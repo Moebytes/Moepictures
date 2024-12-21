@@ -80,38 +80,9 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         props.onCommentJump?.(Number(commentID))
     }
 
-    const parseText = () => {
-        const pieces = functions.parseComment(props.comment?.comment)
-        let jsx = [] as any
-        for (let i = 0; i < pieces.length; i++) {
-            const piece = pieces[i]
-            if (piece.includes(">")) {
-                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
-                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
-                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
-                let username = ""
-                let said = ""
-                if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
-                    said = userPart.split(/ +/g).slice(1).join(" ")
-                }
-                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
-                jsx.push(
-                    <div className="commentrow-quote-container">
-                        {userPart ? <span className="commentrow-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="commentrow-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
-                    </div>
-                )
-            } else {
-                jsx.push(<span className="commentrow-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
-            }
-        }
-        return jsx
-    }
-
     const triggerQuote = () => {
         history.push(`/post/${props.comment?.postID}`)
-        const cleanComment = functions.parseComment(props.comment?.comment).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
             > ${cleanComment}
@@ -322,7 +293,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
                     <span className="commentrow-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
-                    {parseText()}
+                    {jsxFunctions.renderText(props.comment?.comment, emojis, "commentrow", goToComment)}
                 </div>
             </div>
             {session.username ? commentOptions() : null}
