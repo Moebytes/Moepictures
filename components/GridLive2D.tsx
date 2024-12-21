@@ -342,7 +342,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         if (!containerRef.current) return
-        if (imageLoaded) containerRef.current.style.boxShadow = getBorder()
+        containerRef.current.style.boxShadow = getBorder()
     }, [imageLoaded, sizeType, selected, session, props.post])
 
     useEffect(() => {
@@ -561,12 +561,14 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
+                if (!imageLoaded) return "none"
                 return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
+                if (!imageLoaded) return "none"
                 return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
             }
         }

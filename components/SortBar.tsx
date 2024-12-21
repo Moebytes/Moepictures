@@ -56,6 +56,7 @@ import selectOn from "../assets/icons/select-on.png"
 import star from "../assets/icons/star.png"
 import starGroup from "../assets/icons/stargroup.png"
 import tagEdit from "../assets/icons/tag-outline.png"
+import group from "../assets/icons/group-thin.png"
 import deleteIcon from "../assets/icons/tag-delete.png"
 import leftIcon from "../assets/icons/go-left.png"
 import rightIcon from "../assets/icons/go-right.png"
@@ -91,8 +92,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {mobileScrolling} = useInteractionSelector()
     const {showBulkTagEditDialog, showBulkDeleteDialog} = usePostDialogSelector()
     const {setShowBulkTagEditDialog, setShowBulkDeleteDialog} = usePostDialogActions()
-    const {bulkFavGroupDialog} = useGroupDialogSelector()
-    const {setBulkFavGroupDialog} = useGroupDialogActions()
+    const {bulkFavGroupDialog, bulkGroupDialog} = useGroupDialogSelector()
+    const {setBulkFavGroupDialog, setBulkGroupDialog} = useGroupDialogActions()
     const {page} = usePageSelector()
     const {posts} = useCacheSelector()
     const {setPosts} = useCacheActions()
@@ -777,6 +778,10 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
+    const bulkGroup = () => {
+        setBulkGroupDialog(!bulkGroupDialog)
+    }
+
     const bulkFavgroup = () => {
         setBulkFavGroupDialog(!bulkFavGroupDialog)
     }
@@ -880,6 +885,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     {permissions.isAdmin(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkTagEdit}>
                         <img className="sortbar-img" src={tagEdit} style={{filter: getFilter()}}/>
+                    </div> : null}
+                    {permissions.isContributor(session) && selectionMode ? 
+                    <div className="sortbar-item" onClick={bulkGroup}>
+                        <img className="sortbar-img" src={group} style={{filter: getFilter()}}/>
                     </div> : null}
                     {session.username && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkFavgroup}>

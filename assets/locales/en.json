@@ -421,7 +421,8 @@
         "confirmPassword": "Confirm Password",
         "subject": "Subject",
         "attachFiles": "Attach Files",
-        "sendMessage": "Send Message"
+        "sendMessage": "Send Message",
+        "postID": "Post ID"
     },
     "errors": {
         "$401":"401 error",
@@ -697,6 +698,9 @@
             "title": "Bulk Delete",
             "header": "Are you sure that you want to delete the selected posts?"
         },
+        "bulkGroup": {
+            "title": "Bulk Group"
+        },
         "bulkFavgroup": {
             "title": "Bulk Favorite Group"
         },
@@ -751,6 +755,12 @@
             "banText": "You are banned. Cannot submit a request.",
             "header": "Do you want to delete this group?",
             "reasonHeader": "Why do you want to delete this group?"
+        },
+        "deleteGroupPost": {
+            "title": "Delete Group Post",
+            "request": "Delete Group Post Request",
+            "header": "Do you want to delete this post from the group?",
+            "reasonHeader": "Why do you want to delete this post from the group?"
         },
         "deleteGroupHistory": {
             "title": "Delete Group History",
@@ -820,11 +830,20 @@
         "editFavgroup": {
             "title": "Edit Favorite Group"
         },
+        "addFavgroupPost": {
+            "title": "Add Favorite Group Post"
+        },
         "editGroup": {
             "title": "Edit Group",
             "request": "Edit Group Request",
             "submitText": "Your edit request was submitted.",
             "noName": "No name."
+        },
+        "addGroupPost": {
+            "title": "Add Group Post",
+            "request": "Add Group Post Request",
+            "noPostID": "No post ID.",
+            "banText": "You are banned. Cannot add post."
         },
         "editSaveSearch": {
             "title": "Edit Saved Search",
@@ -1099,7 +1118,7 @@
             "uploadGuidelines": {
                 "header": "Please read carefully through all of the uploading guidelines.",
                 "guide1": "⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles.",
-                "guide2": "⇾ The main subject should be a girl. Boys are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
+                "guide2": "⇾ The main subject must be a female character. Male characters are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
                 "guide3": "⇾ It should be moe/cute! This is the primary focus of the site.",
                 "guide4": "⇾ No duplicates are allowed. Variations of the same image should be added to the original post.",
                 "guide5": "⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much.",

@@ -8,6 +8,8 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
+import AddGroupPostDialog from "../dialogs/AddGroupPostDialog"
+import DeleteGroupPostDialog from "../dialogs/DeleteGroupPostDialog"
 import EditGroupDialog from "../dialogs/EditGroupDialog"
 import DeleteGroupDialog from "../dialogs/DeleteGroupDialog"
 import functions from "../structures/Functions"
@@ -16,9 +18,11 @@ import permissions from "../structures/Permissions"
 import groupReorder from "../assets/icons/group-reorder.png"
 import groupReorderActive from "../assets/icons/group-reorder-active.png"
 import groupHistory from "../assets/icons/tag-history.png"
+import groupAdd from "../assets/icons/group-add.png"
 import groupEdit from "../assets/icons/tag-edit.png"
 import groupDelete from "../assets/icons/tag-delete.png"
 import groupCancel from "../assets/icons/group-cancel.png"
+import groupCancelActive from "../assets/icons/group-cancel-active.png"
 import groupAccept from "../assets/icons/group-accept.png"
 import Reorder from "react-reorder"
 import RevertGroupHistoryDialog from "../dialogs/RevertGroupHistoryDialog"
@@ -43,12 +47,13 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {setEditGroupObj, setDeleteGroupObj, setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
+    const {setAddGroupPostObj, setDeleteGroupPostObj, setEditGroupObj, setDeleteGroupObj, setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
+    const [deleteMode, setDeleteMode] = useState(false)
     const [historyID, setHistoryID] = useState(null as any)
     const [group, setGroup] = useState(null) as any
     const [items, setItems] = useState([]) as any
@@ -143,7 +148,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
-            const openPost = (event: React.MouseEvent) => {
+            const openPost = async (event: React.MouseEvent) => {
+                if (deleteMode) {
+                    return setDeleteGroupPostObj({postID: item.post.postID, group})
+                }
                 if (reorderState) return
                 if (event.ctrlKey || event.metaKey || event.button === 1) {
                     window.open(`/post/${item.post.postID}/${item.post.slug}`, "_blank")
@@ -157,13 +165,13 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? "move" : "pointer"}}/>
+                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }
         return (
             <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState}
+            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState || deleteMode}
             component="ul" holdTime={50} onReorder={reorder}>{jsx}</Reorder>
         )
     }
@@ -191,6 +199,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const showGroupAddDialog = async () => {
+        setAddGroupPostObj(group)
+    }
+
     const showGroupEditDialog = async () => {
         setEditGroupObj(group)
     }
@@ -206,10 +218,11 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             if (!session.banned) {
                 jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
                 if (reorderState) {
-                    jsx.push(<img className="group-opt" src={groupCancel} onClick={() => cancelReorder()} style={{filter: getFilter()}}/>)
                     jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter: getFilter()}}/>)
                 }
             }
+            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showGroupAddDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showGroupEditDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showGroupDeleteDialog()} style={{filter: getFilter()}}/>)
         }
@@ -274,6 +287,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
+        <AddGroupPostDialog/>
+        <DeleteGroupPostDialog/>
         <EditGroupDialog/>
         <DeleteGroupDialog/>
         <RevertGroupHistoryDialog/>

@@ -7,6 +7,7 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
+import AddFavgroupPostDialog from "../dialogs/AddFavgroupPostDialog"
 import EditFavgroupDialog from "../dialogs/EditFavgroupDialog"
 import DeleteFavgroupDialog from "../dialogs/DeleteFavgroupDialog"
 import functions from "../structures/Functions"
@@ -15,9 +16,11 @@ import permissions from "../structures/Permissions"
 import groupReorder from "../assets/icons/group-reorder.png"
 import groupReorderActive from "../assets/icons/group-reorder-active.png"
 import groupHistory from "../assets/icons/tag-history.png"
+import groupAdd from "../assets/icons/group-add.png"
 import groupEdit from "../assets/icons/tag-edit.png"
 import groupDelete from "../assets/icons/tag-delete.png"
 import groupCancel from "../assets/icons/group-cancel.png"
+import groupCancelActive from "../assets/icons/group-cancel-active.png"
 import groupAccept from "../assets/icons/group-accept.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import Reorder from "react-reorder"
@@ -39,10 +42,11 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {setEditFavGroupObj, setDeleteFavGroupObj} = useGroupDialogActions()
+    const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj} = useGroupDialogActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
+    const [deleteMode, setDeleteMode] = useState(false)
     const {setPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null) as any
     const [items, setItems] = useState([]) as any
@@ -141,7 +145,11 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
-            const openPost = (event: React.MouseEvent) => {
+            const openPost = async (event: React.MouseEvent) => {
+                if (deleteMode) {
+                    await functions.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
+                    return setGroupFlag(true)
+                }
                 if (reorderState) return
                 if (event.ctrlKey || event.metaKey || event.button === 1) {
                     window.open(`/post/${item.post.postID}/${item.post.slug}`, "_blank")
@@ -155,13 +163,13 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? "move" : "pointer"}}/>
+                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }
         return (
             <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState}
+            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState || deleteMode}
             component="ul" holdTime={50} onReorder={reorder}>{jsx}</Reorder>
         )
     }
@@ -189,6 +197,10 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const showFavgroupAddDialog = async () => {
+        setAddFavgroupPostObj(favgroup)
+    }
+
     const showFavgroupDeleteDialog = async () => {
         setDeleteFavGroupObj(favgroup)
     }
@@ -202,9 +214,10 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         if (session.username === username) {
             jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
             if (reorderState) {
-                jsx.push(<img className="group-opt" src={groupCancel} onClick={() => cancelReorder()} style={{filter: getFilter()}}/>)
                 jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter: getFilter()}}/>)
             }
+            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showFavgroupAddDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showFavgroupEditDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showFavgroupDeleteDialog()} style={{filter: getFilter()}}/>)
         }
@@ -223,6 +236,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
+        <AddFavgroupPostDialog/>
         <EditFavgroupDialog/>
         <DeleteFavgroupDialog/>
         <TitleBar/>

@@ -95,9 +95,9 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.note.username}`, "_blank")
+            window.open(`/user/${props.note.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.note.username}`)
+            history.push(`/user/${props.note.updater}`)
         }
     }
 
