@@ -5,6 +5,25 @@ useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
+import xIcon from "../assets/icons/x.png"
+import image from "../assets/icons/image.png"
+import animation from "../assets/icons/animation.png"
+import video from "../assets/icons/video.png"
+import comic from "../assets/icons/comic.png"
+import cute from "../assets/icons/cute.png"
+import flirty from "../assets/icons/flirty.png"
+import ecchi from "../assets/icons/ecchi.png"
+import hentai from "../assets/icons/hentai.png"
+import $2d from "../assets/icons/2d.png"
+import $3d from "../assets/icons/3d.png"
+import pixel from "../assets/icons/pixel.png"
+import chibi from "../assets/icons/chibi.png"
+import daki from "../assets/icons/daki.png"
+import sketch from "../assets/icons/sketch.png"
+import promo from "../assets/icons/promo.png"
+import audio from "../assets/icons/audio.png"
+import model from "../assets/icons/model.png"
+import live2d from "../assets/icons/live2d.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
@@ -19,6 +38,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {selectionMode, selectionItems, selectionPosts} = useSearchSelector()
     const {setSelectionMode} = useSearchActions()
     const {mobile} = useLayoutSelector()
+    const [type, setType] = useState("x")
+    const [rating, setRating] = useState("x")
+    const [style, setStyle] = useState("x")
     const [artists, setArtists] = useState("") as any
     const [characters, setCharacters] = useState("") as any
     const [series, setSeries] = useState("") as any
@@ -123,9 +145,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 const data = {
                     postID: postID,
                     unverified: false,
-                    type: post.type,
-                    rating: post.rating,
-                    style: post.style,
+                    type: type === "x" ? post.type : type,
+                    rating: rating === "x" ? post.rating : rating,
+                    style: style === "x" ? post.style : style,
                     artists: artistData,
                     characters: characterData,
                     series: seriesData,
@@ -139,7 +161,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         await Promise.all(promiseArray)
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
-            //functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            functions.put("/api/post/quickedit", data, session, setSessionFlag)
         }
         setShowBulkTagEditDialog(false)
         setSelectionMode(false)
@@ -212,6 +234,265 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
+    const getStyleJSX = () => {
+        if (type === "model") {
+            return (
+                <div className="dialog-row">
+                    <button style={{padding: "7px 7px"}} className={`quickedit-button ${style === "x" ? "button-selected" : ""}`} onClick={() => setStyle("x")}>
+                        <img className="quickedit-button-img" src={xIcon}/>
+                    </button>
+                    <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="quickedit-button-img" src={$3d}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="quickedit-button-img" src={chibi}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
+                    </button>
+                </div>
+            )
+        } else if (type === "audio") {
+            return (
+                <div className="dialog-row">
+                    <button style={{padding: "7px 7px"}} className={`quickedit-button ${style === "x" ? "button-selected" : ""}`} onClick={() => setStyle("x")}>
+                        <img className="quickedit-button-img" src={xIcon}/>
+                    </button>
+                    <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="quickedit-button-img" src={$2d}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="quickedit-button-img" src={sketch}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button>
+                </div>
+            )
+        } else {
+            return (
+                <>
+                <div className="dialog-row">
+                    <button style={{padding: "7px 7px"}} className={`quickedit-button ${style === "x" ? "button-selected" : ""}`} onClick={() => setStyle("x")}>
+                        <img className="quickedit-button-img" src={xIcon}/>
+                    </button>
+                    <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="quickedit-button-img" src={$2d}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
+                    </button>
+                    {type !== "live2d" ? <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="quickedit-button-img" src={$3d}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
+                    </button> : null}
+                    <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="quickedit-button-img" src={chibi}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
+                    </button>
+                    {type !== "comic" ? 
+                    <button className={`quickedit-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                        <img className="quickedit-button-img" src={daki}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.daki}</span>
+                    </button> : null}
+                </div>
+                <div className="dialog-row">
+                    {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
+                        <img className="quickedit-button-img" src={sketch}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
+                    </button> : null}
+                    {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                        <img className="quickedit-button-img" src={promo}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
+                    </button> : null}
+                </div>
+                </>
+            )
+        }
+    }
+
+    useEffect(() => {
+        if (type === "comic") {
+            if (style === "daki") setStyle("2d")
+        } else if (type === "model") {
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
+        } else if (type === "live2d") {
+            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
+        } else if (type === "audio") {
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
+        }
+    }, [type, style])
+
+    const mainJSX = () => {
+        return (
+            <>
+            {mobile ? <>
+            <div className="dialog-row">
+                <button style={{padding: "7px 7px"}} className={`quickedit-button ${type === "x" ? "button-selected" : ""}`} onClick={() => setType("x")}>
+                    <img className="quickedit-button-img" src={xIcon}/>
+                </button>
+                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="quickedit-button-img" src={image}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
+                </button>
+                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="quickedit-button-img" src={animation}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="quickedit-button-img" src={video}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
+                </button>
+                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="quickedit-button-img" src={comic}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="quickedit-button-img" src={audio}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
+                </button>
+                <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
+                    <img className="quickedit-button-img" src={live2d}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="quickedit-button-img" src={model}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
+                </button>
+            </div>
+            </> : <>
+            <div className="dialog-row">
+                <button style={{padding: "7px 7px"}} className={`quickedit-button ${type === "x" ? "button-selected" : ""}`} onClick={() => setType("x")}>
+                    <img className="quickedit-button-img" src={xIcon}/>
+                </button>
+                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="quickedit-button-img" src={image}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
+                </button>
+                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="quickedit-button-img" src={animation}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
+                </button>
+                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="quickedit-button-img" src={video}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
+                </button>
+                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="quickedit-button-img" src={comic}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="quickedit-button-img" src={audio}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
+                </button>
+                <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
+                    <img className="quickedit-button-img" src={live2d}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
+                </button>
+                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="quickedit-button-img" src={model}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
+                </button>
+            </div> </>}
+            {mobile ? <>
+            <div className="dialog-row">
+                <button style={{padding: "7px 7px"}} className={`quickedit-button ${rating === "x" ? "button-selected" : ""}`} onClick={() => setRating("x")}>
+                    <img className="quickedit-button-img" src={xIcon}/>
+                </button>
+                <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="quickedit-button-img" src={cute}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="quickedit-button-img" src={flirty}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="quickedit-button-img" src={ecchi}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                {session.showR18 ?
+                <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="quickedit-button-img" src={hentai}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
+                </button> : null}
+            </div>
+            </> : <>
+            <div className="dialog-row">
+                <button style={{padding: "7px 7px"}} className={`quickedit-button ${rating === "x" ? "button-selected" : ""}`} onClick={() => setRating("x")}>
+                    <img className="quickedit-button-img" src={xIcon}/>
+                </button>
+                <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
+                    <img className="quickedit-button-img" src={cute}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
+                    <img className="quickedit-button-img" src={flirty}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
+                </button>
+                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
+                    <img className="quickedit-button-img" src={ecchi}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
+                </button>
+                {session.showR18 ?
+                <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
+                    <img className="quickedit-button-img" src={hentai}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
+                </button> : null}
+            </div>
+            </>}
+            {getStyleJSX()}
+            <div className="dialog-row">
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <span className="dialog-text">{i18n.navbar.artists}: </span>
+                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <span className="dialog-text">{i18n.navbar.characters}: </span>
+                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <span className="dialog-text">{i18n.tag.series}: </span>
+                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <span className="dialog-text">{i18n.tag.meta}: </span>
+                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">{i18n.pages.bulkUpload.appendTags}: </span>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(appendTags)} click={(tag) => handleTagClick(tag)} type="tag"/>
+                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => setAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+            </div>
+            </>
+        )
+    }
+
     if (showBulkTagEditDialog) {
         return (
             <div className="dialog">
@@ -221,33 +502,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-title-container">
                             <span className="dialog-title">{i18n.dialogs.bulkTagEdit.title}</span>
                         </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
-                            <span className="dialog-text">{i18n.navbar.artists}: </span>
-                            <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
-                            <span className="dialog-text">{i18n.navbar.characters}: </span>
-                            <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
-                            <span className="dialog-text">{i18n.tag.series}: </span>
-                            <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
-                            <span className="dialog-text">{i18n.tag.meta}: </span>
-                            <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">{i18n.pages.bulkUpload.appendTags}: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(appendTags)} click={(tag) => handleTagClick(tag)} type="tag"/>
-                            <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => setAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
-                        </div>
+                        {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
