@@ -19,6 +19,7 @@ import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
+import {NoteSearch, CommentSort} from "../types/Types"
 
 let replace = false
 
@@ -40,12 +41,12 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [notes, setNotes] = useState([]) as any
+    const [notes, setNotes] = useState([] as NoteSearch[])
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
-    const [visibleNotes, setVisibleNotes] = useState([]) as any
+    const [visibleNotes, setVisibleNotes] = useState([] as NoteSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -379,11 +380,11 @@ const NotesPage: React.FunctionComponent = (props) => {
             visible = notes.slice(postOffset, postOffset + getPageAmount())
         }
         for (let i = 0; i < visible.length; i++) {
-            const note = visible[i]
-            if (note.fake) continue
-            if (!session.username) if (note.post.rating !== "safe") continue
-            if (!functions.isR18(ratingType)) if (functions.isR18(note.post.rating)) continue
-            jsx.push(<NoteRow key={note.noteID} note={note} onDelete={updateNotes} onEdit={updateNotes}/>)
+            const noteGroup = visible[i]
+            if (noteGroup.fake) continue
+            if (!session.username) if (noteGroup.post.rating !== functions.r13()) continue
+            if (!functions.isR18(ratingType)) if (functions.isR18(noteGroup.post.rating)) continue
+            jsx.push(<NoteRow key={noteGroup.noteID} noteGroup={noteGroup} onDelete={updateNotes} onEdit={updateNotes}/>)
         }
         if (!scroll) {
             jsx.push(

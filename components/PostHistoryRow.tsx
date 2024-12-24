@@ -24,6 +24,7 @@ interface Props {
     onEdit?: () => void
     current?: boolean
     exact?: any
+    imageHeight?: number
 }
 
 const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -82,11 +83,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 englishTitle: props.postHistory.englishTitle,
                 artist: props.postHistory.artist,
                 posted: props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted), true) : "",
-                link: props.postHistory.link,
+                source: props.postHistory.source,
                 commentary: props.postHistory.commentary,
                 englishCommentary: props.postHistory.englishCommentary,
                 bookmarks: props.postHistory.bookmarks,
-                purchaseLink: props.postHistory.purchaseLink,
+                buyLink: props.postHistory.buyLink,
                 mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
             }
         }
@@ -386,8 +387,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.posted) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}:</span> {props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
         }
-        if (!prevHistory || changes.link) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.link}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link, i18n)}</span></span>)
+        if (!prevHistory || changes.source) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.getSiteName(props.postHistory.source, i18n)}</span></span>)
         }
         if (!prevHistory || changes.mirrors) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}:</span> {printMirrors()}</span>)
@@ -395,8 +396,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}:</span> {props.postHistory.bookmarks || "?"}</span>)
         }
-        if ((!prevHistory && props.postHistory.purchaseLink) || changes.purchaseLink) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}:</span> {props.postHistory.purchaseLink || i18n.labels.none}</span>)
+        if ((!prevHistory && props.postHistory.buyLink) || changes.buyLink) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}:</span> {props.postHistory.buyLink || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.commentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}:</span> {props.postHistory.commentary || i18n.labels.none}</span>)
@@ -411,9 +412,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
             <div className="historyrow-container">
-                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
-                <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
+                {functions.isVideo(img) ? <video style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}} className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
+                functions.isGIF(img) ? <img style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}} className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
+                <canvas style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}} className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

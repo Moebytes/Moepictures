@@ -1,31 +1,34 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Comment, CommentSearch} from "../types/Types"
 
 export default class SQLComment {
     /** Insert comment. */
-    public static insertComment = async (postID: number, username: string, comment: string) => {
+    public static insertComment = async (postID: string, username: string, comment: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "comments" ("postID", "username", "comment", "postDate", "editedDate") VALUES ($1, $2, $3, $4, $5)`,
+        const query: QueryArrayConfig = {
+        text: /*sql*/`INSERT INTO "comments" ("postID", "username", "comment", "postDate", "editedDate") 
+        VALUES ($1, $2, $3, $4, $5) RETURNING "commentID"`,
+        rowMode: "array",
         values: [postID, username, comment, now, now]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Updates a comment. */
-    public static updateComment = async (commentID: number, comment: string) => {
+    public static updateComment = async (commentID: string, comment: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "comments" SET "comment" = $1, "editedDate" = $2 WHERE "commentID" = $3`,
             values: [comment, now, commentID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get post comments. */
-    public static comments = async (postID: number) => {
+    public static comments = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT comments.*, users."image", users."imageHash", users."imagePost", users."role", users."banned"
@@ -38,7 +41,7 @@ export default class SQLComment {
             values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Comment[]>
     }
 
     /** Get user comments. */
@@ -55,11 +58,11 @@ export default class SQLComment {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Comment[]>
     }
 
     /** Search comments. */
-    public static searchComments = async (search: string, sort: string, offset?: string) => {
+    public static searchComments = async (search: string, sort: string, offset?: number) => {
         let whereQuery = ""
         let i = 1
         if (search) {
@@ -95,11 +98,11 @@ export default class SQLComment {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<CommentSearch[]>
     }
 
     /** Comments by usernames. */
-    public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: string) => {
+    public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: number) => {
         let i = 2
         let whereQuery = `WHERE comments."username" = ANY ($1)`
         if (search) {
@@ -135,11 +138,11 @@ export default class SQLComment {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<CommentSearch[]>
     }
 
     /** Get comment. */
-    public static comment = async (commentID: number) => {
+    public static comment = async (commentID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT comments.*, users."image", users."imageHash", users."imagePost", users."role", users."banned"
@@ -152,16 +155,15 @@ export default class SQLComment {
             values: [commentID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Comment>
     }
 
     /** Delete comment. */
-    public static deleteComment = async (commentID: number) => {
+    public static deleteComment = async (commentID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM comments WHERE comments."commentID" = $1`),
         values: [commentID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 }

@@ -35,19 +35,39 @@ const NoteRoutes = (app: Express) => {
             if (!post) return res.status(400).send("Invalid post ID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
-            const note = await sql.note.note(postID, order)
-            if (!note) {
-                if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.note.insertNote(postID, req.session.username, order, JSON.stringify(data))
+            const notes = await sql.note.notes(postID, order)
+            if (!notes?.[0]) {
+                if (!data.length) return res.status(200).send("Success")
+                for (const item of data) {
+                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                }
             } else {
-                if (JSON.stringify(data) === "[]") {
-                    await sql.note.deleteNote(note.noteID)
-                } else {
-                    await sql.note.updateNote(note.noteID, req.session.username, JSON.stringify(data))
+                let noMatch = [] as any
+                for (const note of notes) {
+                    if (!data.length) {
+                        await sql.note.deleteNote(note.noteID)
+                    } else {
+                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        if (match) {
+                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                        } else {
+                            noMatch.push(note)
+                        }
+                    }
+                }
+                for (const item of noMatch) {
+                    if (item.noteID) {
+                        await sql.note.deleteNote(item.noteID)
+                    } else {
+                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    }
                 }
             }
-            const {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
-            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason})
+            const {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), addedEntries, removedEntries, reason})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -68,15 +88,35 @@ const NoteRoutes = (app: Express) => {
             if (!post) return res.status(400).send("Invalid post ID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
-            const note = await sql.note.note(postID, order)
-            if (!note) {
-                if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.note.insertNote(postID, req.session.username, order, JSON.stringify(data))
+            const notes = await sql.note.notes(postID, order)
+            if (!notes?.[0]) {
+                if (!data.length) return res.status(200).send("Success")
+                for (const item of data) {
+                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                }
             } else {
-                if (JSON.stringify(data) === "[]") {
-                    await sql.note.deleteNote(note.noteID)
-                } else {
-                    await sql.note.updateNote(note.noteID, req.session.username, JSON.stringify(data))
+                let noMatch = [] as any
+                for (const note of notes) {
+                    if (!data.length) {
+                        await sql.note.deleteNote(note.noteID)
+                    } else {
+                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        if (match) {
+                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                        } else {
+                            noMatch.push(note)
+                        }
+                    }
+                }
+                for (const item of noMatch) {
+                    if (item.noteID) {
+                        await sql.note.deleteNote(item.noteID)
+                    } else {
+                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    }
                 }
             }
 
@@ -84,8 +124,8 @@ const NoteRoutes = (app: Express) => {
                 if (silent) return res.status(200).send("Success")
             }
         
-            const {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
-            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
+            const {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -95,9 +135,9 @@ const NoteRoutes = (app: Express) => {
 
     app.get("/api/notes", noteLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID
+            const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const notes = await sql.note.notes(Number(postID))
+            const notes = await sql.note.postNotes(postID)
             serverFunctions.sendEncrypted(notes, req, res)
         } catch (e) {
             console.log(e)
@@ -132,16 +172,16 @@ const NoteRoutes = (app: Express) => {
                 englishTitle: post.englishTitle,
                 artist: post.artist,
                 posted: post.posted ? functions.formatDate(new Date(post.posted), true) : null as any,
-                link: post.link,
+                source: post.source,
                 commentary: post.commentary,
                 englishCommentary: post.englishCommentary,
                 bookmarks: post.bookmarks,
-                purchaseLink: post.purchaseLink,
+                buyLink: post.buyLink,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
             }
 
             if (post.parentID) {
-                await sql.post.insertUnverifiedChild(postID, Number(post.parentID))
+                await sql.post.insertUnverifiedChild(postID, post.parentID)
             }
             if (type !== "comic") type = "image"
 
@@ -157,7 +197,8 @@ const NoteRoutes = (app: Express) => {
                 const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
                 const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
 
-                let current = upscaledBuffer ? upscaledBuffer : buffer
+                let original = buffer ? buffer : upscaledBuffer
+                let upscaled = upscaledBuffer ? upscaledBuffer : buffer
                 let order = i + 1
                 const ext = path.extname(post.images[i].upscaledFilename || post.images[i].filename).replace(".", "")
                 let fileOrder = post.images.length > 1 ? `${order}` : "1"
@@ -179,7 +220,7 @@ const NoteRoutes = (app: Express) => {
                 if (type === "comic") {
                     kind = "comic"
                   } else if (functions.isWebP(`.${ext}`)) {
-                    const animated = functions.isAnimatedWebp(current)
+                    const animated = functions.isAnimatedWebp(original)
                     if (animated) {
                       kind = "animation"
                       if (type !== "video") type = "animation"
@@ -216,21 +257,17 @@ const NoteRoutes = (app: Express) => {
                     hasUpscaled = true
                     upscaledCheck.push(newImagePath)
                 }
-                let dimensions = null as any
+                let dimensions = {} as {width: number, height: number}
                 let hash = ""
                 if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
-                    const buffer = functions.base64ToBuffer(post.thumbnail)
-                    hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-                    dimensions = await sharp(buffer).metadata()
-                    if (kind === "live2d") {
-                        dimensions.width = post.images[i].width
-                        dimensions.height = post.images[i].height
-                      }
+                    hash = post.images[i].hash
+                    dimensions.width = post.images[i].width
+                    dimensions.height = post.images[i].height
                 } else {
-                    hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
-                    dimensions = await sharp(current).metadata()
+                    hash = await phash(original).then((hash: string) => functions.binaryToHex(hash))
+                    dimensions = await sharp(upscaled).metadata() as {width: number, height: number}
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
+                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, String(upscaled.byteLength))
             }
             if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
             if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
@@ -247,11 +284,11 @@ const NoteRoutes = (app: Express) => {
                 englishTitle: source.englishTitle ? source.englishTitle : null,
                 artist: source.artist ? source.artist : null,
                 posted: source.posted ? source.posted : null,
-                link: source.link ? source.link : null,
+                source: source.source ? source.source : null,
                 commentary: source.commentary ? source.commentary : null,
                 englishCommentary: source.englishCommentary ? source.englishCommentary : null,
                 bookmarks: source.bookmarks ? source.bookmarks : null,
-                purchaseLink: source.purchaseLink ? source.purchaseLink : null,
+                buyLink: source.buyLink ? source.buyLink : null,
                 mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
                 slug: functions.postSlug(source.title, source.englishTitle),
                 uploader: post.uploader,
@@ -354,9 +391,12 @@ const NoteRoutes = (app: Express) => {
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
-            const note = await sql.note.note(postID, order)
-            let {addedEntries, removedEntries} = functions.parseNoteDataChanges(note?.data, data)
-            await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, JSON.stringify(data), addedEntries, removedEntries, reason)
+            const notes = await sql.note.notes(postID, order)
+            let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+            for (const item of data) {
+                await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
+                item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, removedEntries, reason)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -366,11 +406,11 @@ const NoteRoutes = (app: Express) => {
 
     app.get("/api/notes/unverified", noteLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID
+            const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const notes = await sql.note.unverifiedPostNotes(Number(postID))
+            const notes = await sql.note.unverifiedPostNotes(postID)
             serverFunctions.sendEncrypted(notes, req, res)
         } catch (e) {
             console.log(e)
@@ -387,9 +427,49 @@ const NoteRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return res.status(403).end()
             if (!data) return res.status(400).send("Bad data")
 
-            const note = await sql.note.unverifiedNote(postID, order)
-            if (!note) return res.status(400).send("Bad note")
-            await sql.note.updateUnverifiedNote(note.noteID, JSON.stringify(data), reason)
+            const notes = await sql.note.unverifiedNotes(postID, order)
+            let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+
+            let originalID = "" as any
+            for (const note of notes) {
+                if (note.originalID) {
+                    originalID = note.originalID
+                    break
+                }
+            }
+
+            if (!notes?.[0]) {
+                if (!data.length) return res.status(200).send("Success")
+                for (const item of data) {
+                    await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, 
+                    removedEntries, reason)
+                }
+            } else {
+                let noMatch = [] as any
+                for (const note of notes) {
+                    if (!data.length) {
+                        await sql.note.deleteUnverifiedNote(note.noteID)
+                    } else {
+                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        if (match) {
+                            await sql.note.updateUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
+                            match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, reason)
+                        } else {
+                            noMatch.push(note)
+                        }
+                    }
+                }
+                for (const item of noMatch) {
+                    if (item.noteID) {
+                        await sql.note.deleteUnverifiedNote(item.noteID)
+                    } else {
+                        await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, 
+                        removedEntries, reason)
+                    }
+                }
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -402,7 +482,7 @@ const NoteRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const result = await sql.note.unverifiedNotes(offset)
+            const result = await sql.note.allUnverifiedNotes(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -412,24 +492,55 @@ const NoteRoutes = (app: Express) => {
 
     app.post("/api/note/approve", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {noteID, username, postID} = req.body
+            let {postID, originalID, order, username, data} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            noteID = Number(req.body.noteID)
-            if (Number.isNaN(noteID)) return res.status(400).send("Bad noteID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const unverified = await sql.post.unverifiedPost(Number(postID))
+            const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return res.status(400).send("Bad postID")
-            await sql.post.deleteUnverifiedPost(Number(postID))
+            await sql.post.deleteUnverifiedPost(postID)
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
-            const unverifiedNote = await sql.note.unverifiedNoteID(Number(noteID))
-            if (!unverifiedNote) return res.status(400).send("Bad noteID")
-            await sql.note.insertNote(unverifiedNote.originalID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
-            await sql.note.deleteUnverifiedNote(Number(noteID))
+
+            const notes = await sql.note.notes(originalID, order)
+            if (!notes?.[0]) {
+                if (!data.length) return res.status(200).send("Success")
+                for (const item of data) {
+                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                }
+            } else {
+                let noMatch = [] as any
+                for (const note of notes) {
+                    if (!data.length) {
+                        await sql.note.deleteNote(note.noteID)
+                    } else {
+                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        if (match) {
+                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                        } else {
+                            noMatch.push(note)
+                        }
+                    }
+                }
+                for (const item of noMatch) {
+                    if (item.noteID) {
+                        await sql.note.deleteNote(item.noteID)
+                    } else {
+                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    }
+                }
+            }
+
+            const unverifiedNotes = await sql.note.unverifiedNotes(postID, order)
+            for (const unverifiedNote of unverifiedNotes) {
+                await sql.note.deleteUnverifiedNote(unverifiedNote.noteID)
+            }
 
             let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
             await serverFunctions.systemMessage(username, "Notice: Notes have been approved", message)
@@ -443,23 +554,22 @@ const NoteRoutes = (app: Express) => {
 
     app.post("/api/note/reject", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {noteID, username, postID} = req.body
+            let {postID, originalID, order, username, data} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            noteID = Number(req.body.noteID)
-            if (Number.isNaN(noteID)) return res.status(400).send("Bad noteID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const unverified = await sql.post.unverifiedPost(Number(postID))
+            const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return res.status(400).send("Bad postID")
-            await sql.post.deleteUnverifiedPost(Number(postID))
+            await sql.post.deleteUnverifiedPost(postID)
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
-            const unverifiedNote = await sql.note.unverifiedNoteID(Number(noteID))
-            if (!unverifiedNote) return res.status(400).send("Bad noteID")
-            await sql.note.deleteUnverifiedNote(Number(noteID))
+            const unverifiedNotes = await sql.note.unverifiedNotes(postID, order)
+            for (const unverifiedNote of unverifiedNotes) {
+                await sql.note.deleteUnverifiedNote(unverifiedNote.noteID)
+            }
 
             let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
             // await serverFunctions.systemMessage(username, "Notice: Notes have been rejected", message)
@@ -486,7 +596,7 @@ const NoteRoutes = (app: Express) => {
             } else if (username) {
                 result = await sql.history.userNoteHistory(username)
             } else {
-                result = await sql.history.noteHistory(postID, order, offset, query)
+                result = await sql.history.noteHistory(postID, order, Number(offset), query)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -507,7 +617,7 @@ const NoteRoutes = (app: Express) => {
             if (noteHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")
             } else {
-                await sql.history.deleteNoteHistory(Number(historyID))
+                await sql.history.deleteNoteHistory(historyID)
             }
             res.status(200).send("Success")
         } catch (e) {

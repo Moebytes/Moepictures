@@ -24,6 +24,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
 useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
+import {TagSearch, TagSort, TagType} from "../types/Types"
 
 let limit = 200
 let replace = false
@@ -46,13 +47,13 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
-    const [sortType, setSortType] = useState("posts")
+    const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [typeType, setTypeType] = useState("all")
-    const [tags, setTags] = useState([]) as any
+    const [typeType, setTypeType] = useState("all" as TagType)
+    const [tags, setTags] = useState([] as TagSearch[])
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
-    const [visibleTags, setVisibleTags] = useState([]) as any
+    const [visibleTags, setVisibleTags] = useState([] as TagSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)

@@ -1,6 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Thread, ThreadSearch, ThreadUser, Reply, ThreadRead} from "../types/Types"
 
 export default class SQLThread {
     /** Insert thread. */
@@ -14,7 +15,7 @@ export default class SQLThread {
             values: [creator, now, creator, now, sticky, locked, title, content, r18]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Get user threads */
@@ -31,7 +32,7 @@ export default class SQLThread {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Thread[]>
     }
 
     /** Get sticky threads */
@@ -50,11 +51,11 @@ export default class SQLThread {
         }
         if (sessionUsername) query.values?.push(sessionUsername)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Thread[]>
     }
 
     /** Search threads. */
-    public static searchThreads = async (search: string, sort: string, offset?: string, sessionUsername?: string) => {
+    public static searchThreads = async (search: string, sort: string, offset?: number, sessionUsername?: string) => {
         let whereQuery = `WHERE threads.sticky = 'false'`
         let i = 1
         let values = [] as any
@@ -78,7 +79,8 @@ export default class SQLThread {
                 SELECT threads.*, ${sessionUsername ? `"thread reads".read,` : ""}
                 COUNT(*) OVER() AS "threadCount"
                 FROM threads
-                ${sessionUsername ? `LEFT JOIN "thread reads" ON "thread reads"."threadID" = threads."threadID" AND "thread reads".username = $${userValue}` : ""}
+                ${sessionUsername ? `LEFT JOIN "thread reads" ON "thread reads"."threadID" = threads."threadID" 
+                AND "thread reads".username = $${userValue}` : ""}
                 ${whereQuery}
                 GROUP BY threads."threadID"${sessionUsername ? `, "thread reads".read` : ""}
                 ${sortQuery}
@@ -87,11 +89,12 @@ export default class SQLThread {
         }
         if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<ThreadSearch[]>
     }
 
     /** Search threads by username. */
-    public static searchThreadsByUsername = async (usernames: string[], search: string, sort: string, offset?: string, sessionUsername?: string) => {
+    public static searchThreadsByUsername = async (usernames: string[], search: string, sort: string, offset?: number, 
+        sessionUsername?: string) => {
         let i = 2
         let whereQuery = `WHERE (threads."creator" = ANY ($1) OR replies."creator" = ANY ($1))`
         let values = [] as any
@@ -116,7 +119,8 @@ export default class SQLThread {
                 COUNT(*) OVER() AS "threadCount"
                 FROM threads
                 LEFT JOIN replies ON replies."threadID" = threads."threadID"
-                ${sessionUsername ? `LEFT JOIN "thread reads" ON "thread reads"."threadID" = threads."threadID" AND "thread reads".username = $${userValue}` : ""}
+                ${sessionUsername ? `LEFT JOIN "thread reads" ON "thread reads"."threadID" = threads."threadID" 
+                AND "thread reads".username = $${userValue}` : ""}
                 ${whereQuery}
                 GROUP BY threads."threadID"${sessionUsername ? `, "thread reads".read` : ""}
                 ${sortQuery}
@@ -126,11 +130,11 @@ export default class SQLThread {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<ThreadSearch[]>
     }
 
     /** Get thread. */
-    public static thread = async (threadID: number) => {
+    public static thread = async (threadID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT threads.*, users.role, users.image, users.banned, 
@@ -144,43 +148,43 @@ export default class SQLThread {
         values: [threadID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<ThreadUser>
     }
 
     /** Update thread */
-    public static updateThread = async (threadID: number, column: string, value: string | number | boolean) => {
+    public static updateThread = async (threadID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "threads" SET "${column}" = $1 WHERE "threadID" = $2`,
             values: [value, threadID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete thread. */
-    public static deleteThread = async (threadID: number) => {
+    public static deleteThread = async (threadID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM threads WHERE threads."threadID" = $1`),
         values: [threadID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert reply. */
-    public static insertReply = async (threadID: number, creator: string, content: string, r18: boolean) => {
+    public static insertReply = async (threadID: string, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
+            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content", "r18") 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
             rowMode: "array",
             values: [threadID, creator, now, now, content, r18]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Get replies. */
-    public static replies = async (threadID: number, offset?: string) => {
-        if (offset && Number(offset) < 0) offset = "0"
+    public static replies = async (threadID: string, offset?: number) => {
+        if (offset && Number(offset) < 0) offset = 0
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT replies.*, users.role, users.image, users.banned, 
@@ -197,7 +201,7 @@ export default class SQLThread {
         }
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Reply[]>
     }
 
     /** Get user replies. */
@@ -216,11 +220,11 @@ export default class SQLThread {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Reply[]>
     }
 
     /** Get reply. */
-    public static reply = async (replyID: number) => {
+    public static reply = async (replyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT replies.*, users.role, users.image, users.banned, 
@@ -234,39 +238,38 @@ export default class SQLThread {
         values: [replyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Reply>
     }
 
     /** Update reply */
-    public static updateReply = async (replyID: number, column: string, value: string | number | boolean) => {
+    public static updateReply = async (replyID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "replies" SET "${column}" = $1 WHERE "replyID" = $2`,
             values: [value, replyID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete reply */
-    public static deleteReply = async (replyID: number) => {
+    public static deleteReply = async (replyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM replies WHERE replies."replyID" = $1`),
         values: [replyID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Bulk update thread reads */
-    public static bulkUpdateReads = async (threadID: number, value: boolean, ignoreUser: string) => {
+    public static bulkUpdateReads = async (threadID: string, value: boolean, ignoreUser: string) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "thread reads" SET "read" = $1 WHERE "threadID" = $2 AND "username" != $3`,
             values: [value, threadID, ignoreUser]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Update thread read */
-    public static updateRead = async (threadID: number, username: string, value: boolean) => {
+    public static updateRead = async (threadID: string, username: string, value: boolean) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "thread reads" ("threadID", "username", "read")
@@ -276,17 +279,17 @@ export default class SQLThread {
             `),
             values: [threadID, username, value]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get thread read */
-    public static getRead = async (threadID: number, username: string) => {
+    public static getRead = async (threadID: string, username: string) => {
         const query: QueryConfig = {
             text: /*sql*/`SELECT * FROM "thread reads" WHERE "threadID" = $1 AND "username" = $2`,
             values: [threadID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<ThreadRead>
     }
 
     /** Get post count of user */

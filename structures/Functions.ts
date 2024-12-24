@@ -26,6 +26,9 @@ import crypto from "crypto"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {GetEndpoint, PostType, PostRating, PostStyle, PostSort, CategorySort, MiniTag,
+TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges,
+PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -110,17 +113,18 @@ export default class Functions {
         }
     }
 
-    public static get = async (endpoint: string, params: any, session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: any, setSessionFlag?: (value: boolean) => void) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
-        const headers = {"x-csrf-token": session.csrfToken} as any
+        const headers = {"x-csrf-token": session.csrfToken}
         try {
             const response = await axios.get(endpoint, {params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
             let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
-            return decrypted as any
+            console.log({endpoint, response: decrypted})
+            return decrypted as GetEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
@@ -1134,19 +1138,19 @@ export default class Functions {
         })
     }
 
-    public static getImagePath = (folder: string, postID: number, order: number, filename: string) => {
+    public static getImagePath = (folder: string, postID: string, order: number, filename: string) => {
         return `${folder}/${postID}-${order}-${filename}`
     }
 
-    public static getUpscaledImagePath = (folder: string, postID: number, order: number, filename: string) => {
+    public static getUpscaledImagePath = (folder: string, postID: string, order: number, filename: string) => {
         return `${folder}-upscaled/${postID}-${order}-${filename}`
     }
 
-    public static getImageHistoryPath = (postID: number, key: number, order: number, filename: string) => {
+    public static getImageHistoryPath = (postID: string, key: number, order: number, filename: string) => {
         return `history/post/${postID}/original/${key}/${postID}-${order}-${filename}`
     }
 
-    public static getUpscaledImageHistoryPath = (postID: number, key: number, order: number, filename: string) => {
+    public static getUpscaledImageHistoryPath = (postID: string, key: number, order: number, filename: string) => {
         return `history/post/${postID}/upscaled/${key}/${postID}-${order}-${filename}`
     }
 
@@ -1154,7 +1158,7 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${historyFile}`
     }
 
-    public static getImageLink = (folder: string, postID: number, order: number, filename: string) => {
+    public static getImageLink = (folder: string, postID: string, order: number, filename: string) => {
         if (!filename) return ""
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
@@ -1168,12 +1172,12 @@ export default class Functions {
         return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
-    public static getUnverifiedImageLink = (folder: string, postID: number, order: number, filename: string) => {
+    public static getUnverifiedImageLink = (folder: string, postID: string, order: number, filename: string) => {
         if (!filename) return ""
         return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
-    public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string, mobile?: boolean) => {
+    public static getThumbnailLink = (folder: string, postID: string, order: number, filename: string, sizeType: string, mobile?: boolean) => {
         if (!filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
@@ -1189,7 +1193,7 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
-    public static getUnverifiedThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
+    public static getUnverifiedThumbnailLink = (folder: string, postID: string, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
         if (folder !== "image" && folder !== "comic") return Functions.getUnverifiedImageLink(folder, postID, order, filename)
         let size = 265
@@ -1285,7 +1289,8 @@ export default class Functions {
     }
 
     public static base64ToBuffer = (base64: string) => {
-        const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)!
+        const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+        if (!matches) return Buffer.from("")
         return Buffer.from(matches[2], "base64")
     }
 
@@ -1293,7 +1298,7 @@ export default class Functions {
         return fetch(base64).then((r) => r.arrayBuffer()).then((a) => new Uint8Array(a))
     }
 
-    public static validType = (type: string, all?: boolean) => {
+    public static validType = (type: PostType, all?: boolean) => {
         if (all) if (type === "all") return true
         if (type === "image" ||
             type === "animation" ||
@@ -1305,36 +1310,36 @@ export default class Functions {
         return false
     }
       
-    public static validRating = (rating: string, all?: boolean) => {
+    public static validRating = (rating: PostRating, all?: boolean) => {
         if (all) if (rating === "all") return true
         if (rating === "cute" ||
-            rating === "flirty" ||
+            rating === "sexy" ||
             rating === "ecchi" ||
             rating === "hentai") return true 
         return false
     }
 
-    public static isR18 = (ratingType: string) => {
+    public static isR18 = (ratingType: PostRating) => {
         return ratingType === "hentai"
     }
 
     public static r18 = () => {
-        return "hentai"
+        return "hentai" as PostRating
     }
 
     public static r17 = () => {
-        return "ecchi"
+        return "ecchi" as PostRating
     }
 
     public static r15 = () => {
-        return "flirty"
+        return "sexy" as PostRating
     }
 
     public static r13 = () => {
-        return "cute"
+        return "cute" as PostRating
     }
       
-    public static validStyle = (style: string, all?: boolean) => {
+    public static validStyle = (style: PostStyle, all?: boolean) => {
         if (all) if (style === "all") return true
         if (style === "2d" ||
             style === "3d" ||
@@ -1342,20 +1347,21 @@ export default class Functions {
             style === "chibi" ||
             style === "daki" ||
             style === "sketch" ||
+            style === "lineart" ||
             style === "promo") return true 
         return false
     }
 
-    public static parseSort = (sortType: string, sortReverse: boolean) => {
+    public static parseSort = <T>(sortType: T, sortReverse: boolean) => {
         if (sortType === "random") return "random"
         if (sortReverse) {
-            return `reverse ${sortType}`
+            return `reverse ${sortType}` as T
         } else {
-            return sortType
+            return sortType as T
         }
     }
 
-    public static validSort = (sort: string) => {
+    public static validSort = (sort: PostSort) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date" ||
@@ -1392,7 +1398,7 @@ export default class Functions {
         return false
     }
 
-    public static validCategorySort = (sort: string) => {
+    public static validCategorySort = (sort: CategorySort) => {
         if (sort === "random" ||
             sort === "cuteness" ||
             sort === "reverse cuteness" ||
@@ -1403,7 +1409,7 @@ export default class Functions {
         return false
     }
 
-    public static validTagSort = (sort: string) => {
+    public static validTagSort = (sort: TagSort) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date" ||
@@ -1420,8 +1426,9 @@ export default class Functions {
         return false
     }
 
-    public static validTagType = (type: string, noAll?: boolean) => {
+    public static validTagType = (type: TagType, noAll?: boolean) => {
         if (type === "all" && !noAll) return true
+        if (type === "tags" && !noAll) return true
         if (type === "artist" ||
             type === "character" ||
             type === "series" ||
@@ -1435,14 +1442,14 @@ export default class Functions {
         return false
     }
 
-    public static validCommentSort = (sort: string) => {
+    public static validCommentSort = (sort: CommentSort) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date") return true 
         return false
     }
 
-    public static validGroupSort = (sort: string) => {
+    public static validGroupSort = (sort: GroupSort) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date" ||
@@ -1451,14 +1458,14 @@ export default class Functions {
         return false
     }
 
-    public static validThreadSort = (sort: string) => {
+    public static validThreadSort = (sort: CommentSort) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date") return true 
         return false
     }
 
-    public static validRole = (role: string) => {
+    public static validRole = (role: UserRole) => {
         if (role === "admin" ||
             role === "mod" ||
             role === "premium-curator" ||
@@ -1470,7 +1477,7 @@ export default class Functions {
         return false
     }
 
-    public static isDemotion = (oldRole: string, newRole: string) => {
+    public static isDemotion = (oldRole: UserRole, newRole: UserRole) => {
         if (oldRole === newRole) return false
         let hierarchy = {
             "admin": 5,
@@ -1535,23 +1542,25 @@ export default class Functions {
         return result
     }
 
-    public static tagCategories = async (parsedTags: any[], session: any, setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+    public static tagCategories = async (parsedTags: string[] | TagCount[] | undefined, session: any, setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+        let artists = [] as MiniTag[] 
+        let characters = [] as MiniTag[] 
+        let series = [] as MiniTag[] 
+        let tags = [] as MiniTag[] 
+        if (!parsedTags) return {artists, characters, series, tags}
         let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", {tags: parsedTags.map((t: any) => t.tag ? t.tag : t)}, session, setSessionFlag)
-        let artists = [] as any 
-        let characters = [] as any 
-        let series = [] as any 
-        let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
-            let tag = parsedTags[i].tag ? parsedTags[i].tag : parsedTags[i]
-            let count = parsedTags[i].count ? parsedTags[i].count : 0
+            let tag = parsedTags[i].hasOwnProperty("tag") ? (parsedTags[i] as TagCount).tag : parsedTags[i] as string
+            let count = parsedTags[i].hasOwnProperty("count") ? (parsedTags[i] as TagCount).count : 0
             const foundTag = tagMap[tag]
             if (!foundTag) {
                 const unverifiedTag = await Functions.get("/api/tag/unverified", {tag}, session, setSessionFlag)
                 if (unverifiedTag) {
-                    const obj = {} as any 
+                    const obj = {} as MiniTag 
                     obj.tag = tag
-                    obj.count = count
+                    obj.count = String(count)
                     obj.image = unverifiedTag.image
+                    obj.imageHash = unverifiedTag.imageHash
                     obj.type = unverifiedTag.type
                     obj.description = unverifiedTag.description 
                     obj.social = unverifiedTag.social
@@ -1570,11 +1579,12 @@ export default class Functions {
                 }
                 continue
             }
-            const obj = {} as any 
+            const obj = {} as MiniTag 
             obj.tag = tag
-            obj.count = count
+            obj.count = String(count)
             obj.type = foundTag.type
             obj.image = foundTag.image
+            obj.imageHash = foundTag.imageHash
             obj.description = foundTag.description 
             obj.social = foundTag.social
             obj.twitter = foundTag.twitter
@@ -1598,7 +1608,7 @@ export default class Functions {
         if (cache) {
             return JSON.parse(cache as any)
         } else {
-            let tagMap = await Functions.get("/api/tag/map", null, session, setSessionFlag)
+            let tagMap = await Functions.get("/api/tag/map", {tags: []}, session, setSessionFlag)
             localforage.setItem("tags", JSON.stringify(tagMap))
             return tagMap
         }
@@ -1947,7 +1957,7 @@ export default class Functions {
         return parseTime(seconds, i18n.time.second)
     }    
 
-    public static timeUntil = (input: string, i18n: typeof enLocale) => {
+    public static timeUntil = (input: string | null, i18n: typeof enLocale) => {
         if (!input) return "?"
         const date = new Date(input.replace(/ +/g, "T"))
         const now = new Date().getTime()
@@ -2182,7 +2192,7 @@ export default class Functions {
     }
 
     public static cleanTitle = (title: string) => {
-        return title.replace(/[\/\?<>\\:\*\|"]/g, "")
+        return title.replace(/[\/\?<>\\:\*\|"%]/g, "")
     }
 
     public static render = (image: HTMLImageElement, brightness: number, contrast: number,
@@ -2623,7 +2633,7 @@ export default class Functions {
         if (revertPost.title !== currentPost.title) return true
         if (revertPost.englishTitle !== currentPost.englishTitle) return true
         if (revertPost.posted !== currentPost.posted) return true
-        if (revertPost.link !== currentPost.link) return true
+        if (revertPost.source !== currentPost.source) return true
         if (revertPost.artist !== currentPost.artist) return true
         if (revertPost.commentary !== currentPost.commentary) return true
         if (revertPost.englishCommentary !== currentPost.englishCommentary) return true
@@ -2688,8 +2698,8 @@ export default class Functions {
         return notExists
     }
 
-    public static parsePostChanges = (oldPost: any, newPost: any) => {
-        let json = {} as any
+    public static parsePostChanges = (oldPost: Post, newPost: Post) => {
+        let json = {} as PostChanges
         if (oldPost.images.length !== newPost.images.length) {
             json.images = newPost.images
         }
@@ -2717,8 +2727,8 @@ export default class Functions {
         if (Functions.formatDate(new Date(oldPost.posted)) !== Functions.formatDate(new Date(newPost.posted))) {
             json.posted = newPost.posted
         }
-        if (oldPost.link !== newPost.link) {
-            json.link = newPost.link
+        if (oldPost.source !== newPost.source) {
+            json.source = newPost.source
         }
         if (JSON.stringify(oldPost.mirrors) !== JSON.stringify(newPost.mirrors)) {
             json.mirrors = newPost.mirrors
@@ -2726,8 +2736,8 @@ export default class Functions {
         if (oldPost.bookmarks !== newPost.bookmarks) {
             json.bookmarks = newPost.bookmarks
         }
-        if (oldPost.purchaseLink !== newPost.purchaseLink) {
-            json.purchaseLink = newPost.purchaseLink
+        if (oldPost.buyLink !== newPost.buyLink) {
+            json.buyLink = newPost.buyLink
         }
         if (oldPost.commentary !== newPost.commentary) {
             json.commentary = newPost.commentary
@@ -2738,8 +2748,8 @@ export default class Functions {
         return json
     }
 
-    public static parseTagChanges = (oldTag: any, newTag: any) => {
-        let json = {} as any
+    public static parseTagChanges = (oldTag: Tag, newTag: Tag) => {
+        let json = {} as TagChanges
         if (oldTag.tag !== newTag.tag) {
             json.tag = newTag.tag
         }
@@ -2749,13 +2759,13 @@ export default class Functions {
         if (oldTag.description !== newTag.description) {
             json.description = newTag.description
         }
-        let oldAliases = oldTag.aliases?.filter(Boolean).map((a: any) => a.alias ? a.alias : a) || []
-        let newAliases = newTag.aliases?.filter(Boolean).map((a: any) => a.alias ? a.alias : a) || []
+        let oldAliases = oldTag.aliases?.filter(Boolean).map((a) => a?.alias ? a.alias : a) || []
+        let newAliases = newTag.aliases?.filter(Boolean).map((a) => a?.alias ? a.alias : a) || []
         if (JSON.stringify(oldAliases) !== JSON.stringify(newAliases)) {
             json.aliases = newTag.aliases
         }
-        let oldImplications = oldTag.implications?.filter(Boolean).map((i: any) => i.implication ? i.implication : i) || []
-        let newImplications = newTag.implications?.filter(Boolean).map((i: any) => i.implication ? i.implication : i) || []
+        let oldImplications = oldTag.implications?.filter(Boolean).map((i) => i?.implication ? i.implication : i) || []
+        let newImplications = newTag.implications?.filter(Boolean).map((i) => i?.implication ? i.implication : i) || []
         if (JSON.stringify(oldImplications) !== JSON.stringify(newImplications)) {
             json.implications = newTag.implications
         }
@@ -2774,14 +2784,17 @@ export default class Functions {
         if (oldTag.fandom !== newTag.fandom) {
             json.fandom = newTag.fandom
         }
+        if (oldTag.featured !== newTag.featured) {
+            json.featured = newTag.featured
+        }
         if (Boolean(oldTag.r18) !== Boolean(newTag.r18)) {
             json.r18 = newTag.r18
         }
         return json
     }
 
-    public static parseGroupChanges = (oldGroup: any, newGroup: any) => {
-        let json = {} as any
+    public static parseGroupChanges = (oldGroup: GroupPosts, newGroup: GroupPosts) => {
+        let json = {} as GroupChanges
         if (oldGroup.name !== newGroup.name) {
             json.name = newGroup.name
         }
@@ -2789,23 +2802,23 @@ export default class Functions {
             json.description = newGroup.description
         }
         if (JSON.stringify(oldGroup.posts) !== JSON.stringify(newGroup.posts)) {
-            json.posts = newGroup.posts
+            json.posts = newGroup.posts.map((post: PostOrdered) => ({postID: post.postID, order: post.order}))
         }
         return json
     }
 
-    public static parseNoteDataChanges = (oldData: any, newData: any) => {
-        if (!oldData) oldData = []
-        if (!newData) newData = []
-        const prevMap = new Map(oldData.map((item: any) => [item.transcript, item.translation]))
-        const newMap = new Map(newData.map((item: any) => [item.transcript, item.translation]))
+    public static parseNoteChanges = (oldNotes: Note[], newNotes:  Note[]) => {
+        if (!oldNotes) oldNotes = []
+        if (!newNotes) newNotes = []
+        const prevMap = new Map(oldNotes.map((item: any) => [`${item.transcript} -> ${item.translation}`, item]))
+        const newMap = new Map(newNotes.map((item: any) => [`${item.transcript} -> ${item.translation}`, item]))
 
-        const addedEntries = newData
-            .filter((item: any) => !prevMap.has(item.transcript))
+        const addedEntries = newNotes
+            .filter((item: any) => !prevMap.has(`${item.transcript} -> ${item.translation}`))
             .map((item: any) => `${item.transcript} -> ${item.translation}`)
 
-        const removedEntries = oldData
-            .filter((item: any) => !newMap.has(item.transcript))
+        const removedEntries = oldNotes
+            .filter((item: any) => !newMap.has(`${item.transcript} -> ${item.translation}`))
             .map((item: any) => `${item.transcript} -> ${item.translation}`)
 
         return {addedEntries, removedEntries}
@@ -3012,5 +3025,10 @@ export default class Functions {
         if (tag.type === "action") return "action-tag-color"
         if (tag.type === "scenery") return "scenery-tag-color"
         return "tag-color"
+    }
+
+    public static filterNulls = <T>(arr: (T | null)[] | null) => {
+        if (!arr) return []
+        return arr.filter((item) => item !== null) as T[]
     }
 }

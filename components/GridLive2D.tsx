@@ -10,18 +10,19 @@ import * as PIXI from "pixi.js"
 import type {Live2DModel} from "pixi-live2d-display"
 import JSZip from "jszip"
 import privateIcon from "../assets/icons/lock-opt.png"
+import {PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
 let imageTimer = null as any
 let id = null as any
 
 interface Props {
-    id: number
+    id: string
     img: string
     live2d: string
     width?: number
     height?: number
-    post: any
+    post: PostSearch
     reupdate?: () => void
 }
 

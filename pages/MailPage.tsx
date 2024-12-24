@@ -8,7 +8,7 @@ import functions from "../structures/Functions"
 import search from "../assets/icons/search.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
-import Message from "../components/Message"
+import MessageRow from "../components/MessageRow"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -23,6 +23,7 @@ import PageDialog from "../dialogs/PageDialog"
 import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/itemspage.less"
+import {MessageSearch, CommentSort} from "../types/Types"
 
 let replace = false
 
@@ -47,12 +48,12 @@ const MailPage: React.FunctionComponent = (props) => {
     const {softDeleteMessageID, softDeleteMessageFlag} = useMessageDialogSelector()
     const {setSoftDeleteMessageID, setSoftDeleteMessageFlag} = useMessageDialogActions()
     const [messageSearchFlag, setMessageSearchFlag] = useState(null) as any
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [messages, setMessages] = useState([]) as any
+    const [messages, setMessages] = useState([] as MessageSearch[])
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
-    const [visibleMessages, setVisibleMessages] = useState([]) as any
+    const [visibleMessages, setVisibleMessages] = useState([] as MessageSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -406,7 +407,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const generateMessagesJSX = () => {
         const jsx = [] as any
-        jsx.push(<Message key={"0"} titlePage={true}/>)
+        jsx.push(<MessageRow key={"0"} titlePage={true}/>)
         let visible = [] as any
         if (scroll) {
             visible = functions.removeDuplicates(visibleMessages) as any
@@ -416,7 +417,7 @@ const MailPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<Message key={visible[i].messageID} message={visible[i]} onDelete={updateMessages} onEdit={updateMessages}/>)
+            jsx.push(<MessageRow key={visible[i].messageID} message={visible[i]} onDelete={updateMessages} onEdit={updateMessages}/>)
         }
         if (!scroll) {
             jsx.push(

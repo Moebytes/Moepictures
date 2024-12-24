@@ -16,7 +16,6 @@
         "modQueue": "Mod Queue"
     },
     "sidebar": {
-        "source": "Source",
         "copyTags": "Copy Tags",
         "copyHash": "Copy Hash",
         "unlockPost": "Unlock Post",
@@ -65,7 +64,7 @@
         },
         "rating": {
             "cute": "Cute",
-            "flirty": "Flirty",
+            "sexy": "Sexy",
             "ecchi": "Ecchi",
             "hentai": "Hentai"
         },
@@ -76,6 +75,7 @@
             "pixel": "Pixel",
             "daki": "Daki",
             "sketch": "Sketch",
+            "lineart": "Lineart",
             "promo": "Promo"
         },
         "pages": "Pages",
@@ -333,6 +333,7 @@
         "title": "Title",
         "englishTitle": "English Title",
         "text": "Text",
+        "source": "Source",
         "link": "Link",
         "mirrors": "Mirrors",
         "commentary": "Commentary",
@@ -391,6 +392,8 @@
         "newFandom": "New Fandom",
         "oldR18": "Old R18",
         "newR18": "New R18",
+        "oldFeatured": "Old Featured",
+        "newFeatured": "New Featured",
         "days": "Days",
         "favoriteGroup": "Favorite Group",
         "privacy": "Privacy",
@@ -422,7 +425,9 @@
         "subject": "Subject",
         "attachFiles": "Attach Files",
         "sendMessage": "Send Message",
-        "postID": "Post ID"
+        "postID": "Post ID",
+        "featured": "Featured Post",
+        "edits": "Edits"
     },
     "errors": {
         "$401":"401 error",
@@ -614,6 +619,51 @@
             "error": "There was an error sending the message."
         },
         "upload": {
+            "guidelines": {
+                "line1": "Anime artwork of girls only. Please read the ",
+                "uploadingGuidelines": "uploading guidelines.",
+                "line2": "Posts should be efficiently compressed with no artifacts. Please read the ",
+                "compressingGuide": "compressing guide.",
+                "line3": "Images should have an upscaled version. Please read the ",
+                "upscalingGuide": "upscaling guide.",
+                "line4": "Duplicates are not allowed. Similar images should be added as a ",
+                "variation": "variation",
+                "or": " or ",
+                "childPost": "child post.",
+                "line5": "Max dimensions are ",
+                "size2000": "2000x2000px",
+                "forOriginal": " for original, ",
+                "size8000": "8000x8000px",
+                "forUpscaled": " for upscaled.",
+                "formats": {
+                    "image": {
+                        "title1": "Image Format (original) ⇾ ",
+                        "header1": "Progressive JPG or WEBP if transparent.",
+                        "title2": "Image Format (upscaled) ⇾ ",
+                        "header2": "AVIF."
+                    },
+                    "animation": {
+                        "title1": "Animation Format ⇾ ",
+                        "header1": "Animated WEBP."
+                    },
+                    "video": {
+                        "title1": "Video Format ⇾ ",
+                        "header1": "MP4 with H.264 codec or WEBM with VP9 codec."
+                    },
+                    "audio": {
+                        "title1": "Audio Format ⇾ ",
+                        "header1": "MP3 with embedded cover art."
+                    },
+                    "live2d": {
+                        "title1": "Live2D Format ⇾ ",
+                        "header1": "ZIP containing JSON files and textures."
+                    },
+                    "model": {
+                        "title1": "3D Model Format ⇾ ",
+                        "header1": "GLB or FBX."
+                    }
+                }
+            },
             "submitHeading": "Post was uploaded.",
             "submitHeadingApproval": "Your post was submitted and will appear on the site if approved.",
             "submitMore": "Submit More",
@@ -1153,7 +1203,7 @@
                     "line1": " - A content rating that may be used to restrict content you don't want to see.",
                     "items": {
                         "cute": " - Cute and adorable, with little to no suggestiveness.",
-                        "flirty": " - More hot than cute, with provocative poses or tight clothing (eg. leggings).",
+                        "sexy": " - More sexy than cute, with provocative poses or tight clothing (eg. leggings).",
                         "ecchi": " - Showing lots of skin (eg. bikinis), panty shots, and other borderline content."
                     }
                 },
@@ -1165,7 +1215,8 @@
                         "chibi": " - Art made in chibi or super deformed style.",
                         "pixel": " - Art made in pixel art style or chiptune music.",
                         "daki": " - Art made to be printed on a dakimakura pillow.",
-                        "sketch": " - Sketches, lineart, or other unfinished pieces.",
+                        "sketch": " - Sketches with rough coloring/lines or unfinished pieces.",
+                        "lineart": " - Lineart only with no coloring or shading.",
                         "promo": " - Promotion of paid content, merch, or other goods."
                     }
                 },
@@ -1313,7 +1364,7 @@
                 "header": "Moepictures has various user account levels that progressively give you more permissions and removes restrictions.",
                 "items": {
                     "No account": " - Can only view the site and the posts rated \"cute\".",
-                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/notes for approval. Can also view the \"flirty\" and \"ecchi\" posts.",
+                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/notes for approval. Can also view the \"sexy\" and \"ecchi\" posts.",
                     "Premium": " - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.",
                     "Contributor": " - Can edit posts and tags without passing through the mod queue. Given to members with a great track record of contributions that we don't want to inhibit with the queue.",
                     "Curator": " - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts that we don't want to inhibit with the queue.",

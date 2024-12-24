@@ -25,7 +25,7 @@ interface Props {
     titlePage?: boolean
 }
 
-const Thread: React.FunctionComponent<Props> = (props) => {
+const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -344,4 +344,4 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default Thread
+export default ThreadRow

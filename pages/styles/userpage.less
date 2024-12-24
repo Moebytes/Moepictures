@@ -113,7 +113,7 @@
     font-family: Tahoma, sans-serif;
     font-size: 20px;
     color: var(--text-strong);
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .user-text-action {
@@ -187,4 +187,34 @@
     margin-left: 10px;
     width: auto;
     height: 40px;
+}
+
+.user-emoji-button {
+    .form-button();
+    margin-left: 10px;  
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & > img {
+        height: 35px;
+        width: auto;
+        cursor: pointer;
+    }
+    &:hover {
+        border-color: white;
+        & > img {
+            filter: invert(1);
+        }
+    }
+}
+
+.user-preview-button {
+    .user-button();
+    background-color: var(--previewBG);
+}
+
+.user-edit-button {
+    .user-button();
+    background-color: var(--editBG);
 }

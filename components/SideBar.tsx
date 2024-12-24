@@ -505,54 +505,54 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const generateSourceJSX = () => {
         let jsx = [] as any
-        if (props.post.link) {
-            if (props.post.link.includes("pixiv")) {
-                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.link, "_blank")}/>)
+        if (props.post.source) {
+            if (props.post.source.includes("pixiv")) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("soundcloud")) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("soundcloud")) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("sketchfab")) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("sketchfab")) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("twitter") || props.post.link.includes("x.com")) {
-                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("twitter") || props.post.source.includes("x.com")) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("deviantart")) {
-                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("deviantart")) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("artstation")) {
-                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("artstation")) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("danbooru")) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("danbooru")) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("gelbooru")) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("gelbooru")) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("safebooru")) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("safebooru")) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("yande.re")) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("yande.re")) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("konachan")) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("konachan")) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("zerochan")) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("zerochan")) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("youtube")) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("youtube")) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
-            if (props.post.link.includes("bandcamp")) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.link, "_blank")}/>)
+            if (props.post.source.includes("bandcamp")) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.source, "_blank")}/>)
             }
         }
         return (
             <div className="sidebar-row">
-                <span className="tag">{i18n.sidebar.source}:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{functions.getSiteName(props.post.link, i18n)}</span>
+                <span className="tag">{i18n.labels.source}:</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.source, "_blank")}>{functions.getSiteName(props.post.source, i18n)}</span>
                 {jsx}
             </div>
         )

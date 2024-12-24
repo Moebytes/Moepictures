@@ -16,7 +16,7 @@ import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/commentrow.less"
 
 interface Props {
-    note: any
+    noteGroup: any
     onDelete?: () => void
     onEdit?: () => void
 }
@@ -28,8 +28,8 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const history = useHistory()
-    const rawImg = props.note?.post.images[props.note.order - 1]
-    const initialImg = functions.getThumbnailLink(rawImg.type, props.note?.postID, rawImg.order, rawImg.filename, "tiny")
+    const rawImg = props.noteGroup?.post.images[props.noteGroup?.order - 1]
+    const initialImg = functions.getThumbnailLink(rawImg.type, props.noteGroup?.postID, rawImg.order, rawImg.filename, "tiny")
     const [img, setImg] = useState(initialImg)
     const ref = useRef<HTMLCanvasElement>(null)
 
@@ -37,11 +37,11 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const defaultIcon = props.note?.image ? false : true
+    const defaultIcon = props.noteGroup?.image ? false : true
 
     const getNotePFP = () => {
-        if (props.note?.image) {
-            return functions.getTagLink("pfp", props.note.image, props.note.imageHash)
+        if (props.noteGroup?.image) {
+            return functions.getTagLink("pfp", props.noteGroup.image, props.noteGroup.imageHash)
         } else {
             return favicon
         }
@@ -49,35 +49,35 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.note.postID}`, "_blank")
+            window.open(`/post/${props.noteGroup.postID}`, "_blank")
         } else {
-            history.push(`/post/${props.note.postID}`)
+            history.push(`/post/${props.noteGroup.postID}`)
         }
     }
 
     const userImgClick = (event: React.MouseEvent) => {
-        if (!props.note?.imagePost) return
+        if (!props.noteGroup?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.note.imagePost}`, "_blank")
+            window.open(`/post/${props.noteGroup.imagePost}`, "_blank")
         } else {
-            history.push(`/post/${props.note.imagePost}`)
+            history.push(`/post/${props.noteGroup.imagePost}`)
         }
     }
 
     const parseText = () => {
         let jsx = [] as any
-        if (!props.note.data?.length) {
+        if (!props.noteGroup.notes?.length) {
             return <span className="commentrow-text">No data</span>
         }
-        for (const item of props.note.data) {
+        for (const item of props.noteGroup.notes) {
             jsx.push(<span className="commentrow-text">{`${item.transcript} -> ${item.translation}`}</span>)
         }
         return jsx
     }
 
     const showHistory = () => {
-        history.push(`/note/history/${props.note.postID}/${props.note.order || 1}`)
+        history.push(`/note/history/${props.noteGroup.postID}/${props.noteGroup.order || 1}`)
     }
 
     const commentOptions = () => {
@@ -95,71 +95,71 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.note.updater}`, "_blank")
+            window.open(`/user/${props.noteGroup.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.note.updater}`)
+            history.push(`/user/${props.noteGroup.updater}`)
         }
     }
 
     const generateUsernameJSX = () => {
-        if (props.note?.role === "admin") {
+        if (props.noteGroup?.role === "admin") {
             return (
                 <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.note.updater)}</span>
+                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (props.note?.role === "mod") {
+        } else if (props.noteGroup?.role === "mod") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (props.note?.role === "system") {
+        } else if (props.noteGroup?.role === "system") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text system-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={systemCrown}/>
                 </div>
             )
-        } else if (props.note?.role === "premium-curator") {
+        } else if (props.noteGroup?.role === "premium-curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
-        } else if (props.note?.role === "curator") {
+        } else if (props.noteGroup?.role === "curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={curatorStar}/>
                 </div>
             )
-        } else if (props.note?.role === "premium-contributor") {
+        } else if (props.noteGroup?.role === "premium-contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
-        } else if (props.note?.role === "contributor") {
+        } else if (props.noteGroup?.role === "contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text contributor-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={contributorPencil}/>
                 </div>
             )
-        } else if (props.note?.role === "premium") {
+        } else if (props.noteGroup?.role === "premium") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.noteGroup.updater)}</span>
                     <img className="commentrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`commentrow-user-text ${props.note?.banned ? "banned" : ""}`}>{functions.toProperCase(props.note?.updater) || i18n.user.deleted}</span>
+        return <span className={`commentrow-user-text ${props.noteGroup?.banned ? "banned" : ""}`}>{functions.toProperCase(props.noteGroup?.updater) || i18n.user.deleted}</span>
     }
 
     useEffect(() => {
@@ -196,7 +196,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
 
     return (
-        <div className="commentrow" note-id={props.note?.noteID}>
+        <div className="commentrow" note-id={props.noteGroup?.noteID}>
             <div className="commentrow-container" style={{justifyContent: "center"}}>
                 {functions.isVideo(img) && !mobile ? 
                 <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
@@ -211,7 +211,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-text" onClick={imgClick}>{functions.timeAgo(props.note?.updatedDate, i18n)}:</span>
+                    <span className="commentrow-date-text" onClick={imgClick}>{functions.timeAgo(props.noteGroup?.updatedDate, i18n)}:</span>
                     {parseText()}
                 </div>
             </div>

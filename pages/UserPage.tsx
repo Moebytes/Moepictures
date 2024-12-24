@@ -8,7 +8,7 @@ import Footer from "../components/Footer"
 import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
-useCacheActions} from "../store"
+useCacheSelector, useCacheActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -29,6 +29,7 @@ import BanDialog from "../dialogs/BanDialog"
 import SendMessageDialog from "../dialogs/SendMessageDialog"
 import UnbanDialog from "../dialogs/UnbanDialog"
 import PromoteDialog from "../dialogs/PromoteDialog"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/userpage.less"
 
 interface Props {
@@ -52,6 +53,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {setUpdateUserFlag, setCommentSearchFlag} = useFlagActions()
     const {setBanName, setUnbanName, setPromoteName} = useMiscDialogActions()
     const {setDMTarget} = useMessageDialogActions()
+    const {emojis} = useCacheSelector()
     const {setPosts} = useCacheActions()
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
@@ -399,25 +401,26 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {banJSX()}
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {user.bio || i18n.user.noBio}</span>
+                        <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(user.joinDate || ""), i18n)}</span>
                     </div>
-                    {counts ? <>
-                    {counts.postEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>{i18n.mod.postEdits} <span className="user-text-alt">{counts.postEdits}</span></span>
-                    </div>  : null}
-                    {counts.tagEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    {counts ? <div className="user-row">
+                    <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
+                    {counts.postEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
+                    : null}
+                    {counts.tagEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>{i18n.tag.tag} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    : null}
+                    {counts.noteEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/note/history`)}>{i18n.labels.note} <span className="user-text-alt">{counts.noteEdits}</span></span>
+                    : null}
+                    {counts.groupEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>{i18n.labels.group} <span className="user-text-alt">{counts.groupEdits}</span></span>
+                    : null}
                     </div> : null}
-                    {counts.noteEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/note/history`)}>{i18n.mod.noteEdits} <span className="user-text-alt">{counts.noteEdits}</span></span>
-                    </div> : null}
-                    {counts.groupEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>
-                    </div> : null}
-                    </> : null}
                     {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}
                     {uploads.length ?

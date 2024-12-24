@@ -3,6 +3,7 @@ import functions from "./Functions"
 import VerifyEmail from "../emails/VerifyEmail"
 import ChangeEmail from "../emails/ChangeEmail"
 import ResetPassword from "../emails/ResetPassword"
+import email from "../assets/icons/email.png"
 
 export default class JSXFunctions {
     public static verifyEmailJSX = (username: string, link: string) => {
@@ -253,14 +254,39 @@ export default class JSXFunctions {
                 if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
-    
-                if (functions.isImage(part) || functions.isGIF(part)) {
+
+                if (functions.arrayIncludes(name, ["Post", "Thread", "Message", "User", "Tag"])) {
+                    items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener">{name}</a>})
+                } else if (functions.isImage(part) || functions.isGIF(part)) {
                     items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
                 } else if (functions.isVideo(part)) {
                     items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
                 } else {
-                    items.push({text: null, jsx: <a key={index} href={part} target="_blank" rel="noopener">{name}</a>})
+                    items.push({text: null, jsx: (
+                        <span key={index} style={{display: "inline-flex", alignItems: "center"}}>
+                            <img className="link-favicon" src={`https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${part}&size=64`}/>
+                            <a href={part} target="_blank" rel="noopener">{name}</a>
+                        </span>
+                    )})
                 }
+            } else {
+                items.push({text: part, jsx: null})
+            }
+        })
+        return items
+    }
+
+    public static parseEmails = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
+        const parts = text.split(/(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/g)
+        parts.forEach((part, index) => {
+            if (part.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/)) {
+                items.push({text: null, jsx: (
+                    <span key={index}>
+                        <img className="link-favicon" src={email}/>
+                        <a href={`mailto:${part}`}>{part}</a>
+                    </span>
+                )})
             } else {
                 items.push({text: part, jsx: null})
             }
@@ -270,12 +296,14 @@ export default class JSXFunctions {
 
     public static renderCommentaryText = (text: string) => {
         let items = JSXFunctions.parseLinks(text)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseEmails)
         return JSXFunctions.generateMarkup(items)
     }
 
     public static commonChain = (text: string, emojis: any) => {
         let items = JSXFunctions.parseBullets(text)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseEmails)
         items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseDetails)
         items = JSXFunctions.appendChain(items, JSXFunctions.parseHighlight)

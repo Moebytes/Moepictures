@@ -1,73 +1,77 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Report, Ban, Blacklist} from "../types/Types"
 
 export default class SQLReport {
     /** Insert comment report. */
-    public static insertCommentReport = async (username: string, commentID: number, reason: string) => {
+    public static insertCommentReport = async (username: string, commentID: string, reason: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "reported comments" ("type", "reporter", "reportDate", "commentID", "reason") VALUES ($1, $2, $3, $4, $5)`,
-        values: ["comment", username, now, commentID, reason]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "reported comments" ("type", "reporter", "reportDate", "commentID", "reason") 
+            VALUES ($1, $2, $3, $4, $5) RETURNING "reportID"`,
+            rowMode: "array",
+            values: ["comment", username, now, commentID, reason]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete comment report. */
-    public static deleteCommentReport = async (reportID: number) => {
+    public static deleteCommentReport = async (reportID: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "reported comments" WHERE "reported comments"."reportID" = $1`,
         values: [reportID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
     
     /** Insert thread report. */
-    public static insertThreadReport = async (username: string, threadID: number, reason: string) => {
+    public static insertThreadReport = async (username: string, threadID: string, reason: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "reported threads" ("type", "reporter", "reportDate", "threadID", "reason") VALUES ($1, $2, $3, $4, $5)`,
-        values: ["thread", username, now, threadID, reason]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "reported threads" ("type", "reporter", "reportDate", "threadID", "reason") 
+            VALUES ($1, $2, $3, $4, $5) RETURNING "reportID"`,
+            rowMode: "array",
+            values: ["thread", username, now, threadID, reason]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete comment report. */
-    public static deleteThreadReport = async (reportID: number) => {
+    public static deleteThreadReport = async (reportID: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "reported threads" WHERE "reported threads"."reportID" = $1`,
         values: [reportID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert reply report. */
-    public static insertReplyReport = async (username: string, replyID: number, reason: string) => {
+    public static insertReplyReport = async (username: string, replyID: string, reason: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "reported replies" ("type", "reporter", "reportDate", "replyID", "reason") VALUES ($1, $2, $3, $4, $5)`,
-        values: ["reply", username, now, replyID, reason]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "reported replies" ("type", "reporter", "reportDate", "replyID", "reason") 
+            VALUES ($1, $2, $3, $4, $5) RETURNING "reportID"`,
+            rowMode: "array",
+            values: ["reply", username, now, replyID, reason]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete reply report. */
-    public static deleteReplyReport = async (reportID: number) => {
+    public static deleteReplyReport = async (reportID: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "reported replies" WHERE "reported replies"."reportID" = $1`,
         values: [reportID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get reports */
-    public static reports = async (offset?: string) => {
+    public static reports = async (offset?: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             WITH reports AS (
@@ -88,7 +92,7 @@ export default class SQLReport {
         }
         if (offset) query.values = [offset]
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Report[]>
     }
 
     /** Get user reports */
@@ -112,37 +116,38 @@ export default class SQLReport {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Report[]>
     }
     
     /** Insert ban */
     public static insertBan = async (username: string, ip: string, banner: string, reason: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO bans ("username", "ip", "banner", "banDate", "reason", "active") VALUES ($1, $2, $3, $4, $5, $6)`,
-        values: [username, ip, banner, now, reason, true]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO bans ("username", "ip", "banner", "banDate", "reason", "active") 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "banID"`,
+            rowMode: "array",
+            values: [username, ip, banner, now, reason, true]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete ban */
-    public static deleteBan = async (banID: number) => {
+    public static deleteBan = async (banID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM bans WHERE bans."banID" = $1`),
         values: [banID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Update ban */
-    public static updateBan = async (banID: number, column: string, value: string | number | boolean | null) => {
+    public static updateBan = async (banID: string, column: string, value: string | number | boolean | null) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE bans SET "${column}" = $1 WHERE "banID" = $2`,
             values: [value, banID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get active ban */
@@ -152,7 +157,7 @@ export default class SQLReport {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Ban>
     }
 
     /** Get banned IP */
@@ -162,7 +167,7 @@ export default class SQLReport {
         values: [ip]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Ban>
     }
 
     /** Insert blacklist */
@@ -172,7 +177,7 @@ export default class SQLReport {
             text: /*sql*/`INSERT INTO blacklist ("ip", "reason", "blacklistDate") VALUES ($1, $2, $3)`,
             values: [ip, reason, now]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete blacklist */
@@ -181,7 +186,7 @@ export default class SQLReport {
             text: /*sql*/`DELETE FROM blacklist WHERE blacklist."ip" = $1`,
             values: [ip]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get blacklist */
@@ -189,6 +194,6 @@ export default class SQLReport {
         const query: QueryConfig = {
             text: /*sql*/`SELECT * FROM blacklist`
         }
-        return SQLQuery.run(query)
+        return SQLQuery.run(query) as Promise<Blacklist[]>
     }
 }

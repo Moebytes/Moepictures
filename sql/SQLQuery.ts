@@ -1,4 +1,4 @@
-import {Pool, QueryArrayConfig, QueryConfig} from "pg"
+import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import * as Redis from "redis"
 import CreateDB from "./CreateDB.sql"
 import functions from "../structures/Functions"
@@ -21,6 +21,12 @@ import SQLGroup from "./SQLGroup"
 const redis = Redis.createClient({
   url: process.env.REDIS_URL
 })
+const jsonStringIDs = (json: string) => {
+  const transformed = json.replace(/"(\w*ID)": (\d+)/g, (match, key, value) => `"${key}":"${value}"`)
+  return JSON.parse(transformed)
+}
+types.setTypeParser(types.builtins.JSON, jsonStringIDs)
+types.setTypeParser(types.builtins.JSONB, jsonStringIDs)
 
 const pgPool = functions.isLocalHost() ? new Pool({
   user: process.env.PG_LOCAL_USER,

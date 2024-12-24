@@ -1,46 +1,49 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {PostFull, UnverifiedPost, MiniTag, ChildPost} from "../types/Types"
 
 export default class SQLPost {
     /** Create a new post. */
     public static insertPost = async () => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "posts" VALUES (default) RETURNING "postID"`,
-        rowMode: "array"
+            text: /*sql*/`INSERT INTO "posts" VALUES (default) RETURNING "postID"`,
+            rowMode: "array"
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Create a new post (unverified). */
     public static insertUnverifiedPost = async () => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "unverified posts" VALUES (default) RETURNING "postID"`,
-        rowMode: "array"
+            text: /*sql*/`INSERT INTO "unverified posts" VALUES (default) RETURNING "postID"`,
+            rowMode: "array"
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Updates a post */
-    public static updatePost = async (postID: number, column: string, value: string | number | boolean) => {
+    public static updatePost = async (postID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk updates a post */
-    public static bulkUpdatePost = async (postID: number, params: {rating?: string, style?: string, parentID?: string, 
-        title?: string, englishTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, 
-        englishCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, 
-        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
-        const {rating, style, parentID, title, englishTitle, artist, posted, link, commentary, englishCommentary, bookmarks, 
-        purchaseLink, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
+    public static bulkUpdatePost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
+        title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
+        uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, 
+        approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
+        const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, 
+        buyLink, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, 
+        hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -79,9 +82,9 @@ export default class SQLPost {
             values.push(posted)
             i++
         }
-        if (link !== undefined) {
-            setArray.push(`"link" = $${i}`)
-            values.push(link)
+        if (source !== undefined) {
+            setArray.push(`"source" = $${i}`)
+            values.push(source)
             i++
         }
         if (commentary !== undefined) {
@@ -99,9 +102,9 @@ export default class SQLPost {
             values.push(bookmarks)
             i++
         }
-        if (purchaseLink !== undefined) {
-            setArray.push(`"purchaseLink" = $${i}`)
-            values.push(purchaseLink)
+        if (buyLink !== undefined) {
+            setArray.push(`"buyLink" = $${i}`)
+            values.push(buyLink)
             i++
         }
         if (mirrors !== undefined) {
@@ -170,18 +173,19 @@ export default class SQLPost {
             values: [...values, postID]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk updates a post (unverified). */
-    public static bulkUpdateUnverifiedPost = async (postID: number, params: {rating?: string, style?: string, parentID?: string, 
-        title?: string, englishTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, englishCommentary?: string, 
-        bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
-        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, 
-        addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
-        const {rating, style, parentID, title, englishTitle, artist, posted, link, commentary, englishCommentary, bookmarks, purchaseLink, 
-        mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isNote, 
-        addedTags, removedTags, imageChanged, changes, reason} = params
+    public static bulkUpdateUnverifiedPost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
+        title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string, source?: string | null, commentary?: string | null, 
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string, slug?: string, type?: string, 
+        uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: number, 
+        reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
+        imageChanged?: boolean, changes?: any}) => {
+        const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
+        mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
+        isNote, addedTags, removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -220,9 +224,9 @@ export default class SQLPost {
             values.push(posted)
             i++
         }
-        if (link !== undefined) {
-            setArray.push(`"link" = $${i}`)
-            values.push(link)
+        if (source !== undefined) {
+            setArray.push(`"source" = $${i}`)
+            values.push(source)
             i++
         }
         if (commentary !== undefined) {
@@ -240,9 +244,9 @@ export default class SQLPost {
             values.push(bookmarks)
             i++
         }
-        if (purchaseLink !== undefined) {
-            setArray.push(`"purchaseLink" = $${i}`)
-            values.push(purchaseLink)
+        if (buyLink !== undefined) {
+            setArray.push(`"buyLink" = $${i}`)
+            values.push(buyLink)
             i++
         }
         if (mirrors !== undefined) {
@@ -345,83 +349,85 @@ export default class SQLPost {
             text: `UPDATE "unverified posts" ${setQuery} WHERE "postID" = $${i}`,
             values: [...values, postID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Updates a post (unverified) */
-    public static updateUnverifiedPost = async (postID: number, column: string, value: string | number | boolean) => {
+    public static updateUnverifiedPost = async (postID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Insert a new image. */
-    public static insertImage = async (postID: number, filename: string, upscaledFilename: string, type: string, order: number, hash: string, width: string, height: string, size: number) => {
+    public static insertImage = async (postID: string, filename: string, upscaledFilename: string, type: string, order: number, 
+        hash: string, width: number, height: number, size: number) => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
-        rowMode: "array",
-        values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
+            text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
+            "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
+            rowMode: "array",
+            values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Insert a new image (unverified). */
-    public static insertUnverifiedImage = async (postID: number, filename: string, upscaledFilename: string, type: string, order: number, hash: string, width: string, height: string, size: string) => {
+    public static insertUnverifiedImage = async (postID: string, filename: string, upscaledFilename: string, type: string, order: number, 
+        hash: string, width: number, height: number, size: string) => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
-        rowMode: "array",
-        values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
+            text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
+            "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
+            rowMode: "array",
+            values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: number, column: string, value: string | number | boolean) => {
+    public static updateImage = async (imageID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Updates an image (unverified) */
-    public static updateUnverifiedImage = async (imageID: number, column: string, value: string | number | boolean) => {
+    public static updateUnverifiedImage = async (imageID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete an image. */
-    public static deleteImage = async (imageID: number) => {
+    public static deleteImage = async (imageID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM images WHERE images."imageID" = $1`),
         values: [imageID]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete an image (unverified). */
-    public static deleteUnverifiedImage = async (imageID: number) => {
+    public static deleteUnverifiedImage = async (imageID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM "unverified images" WHERE "unverified images"."imageID" = $1`),
         values: [imageID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get post. */
-    public static post = async (postID: number) => {
+    public static post = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
@@ -438,11 +444,11 @@ export default class SQLPost {
             values: [postID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return result[0] as Promise<PostFull>
     }
 
     /** Get post (unverified). */
-    public static unverifiedPost = async (postID: number) => {
+    public static unverifiedPost = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
@@ -456,14 +462,16 @@ export default class SQLPost {
             values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<UnverifiedPost>
     }
 
     /** Get post tags. */
-    public static postTags = async (postID: number) => {
+    public static postTags = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'social', "tags".social, 'twitter', "tags".twitter)) AS tags
+            SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'imageHash', "tags"."imageHash", 
+            'description', "tags".description, 'social', "tags".social, 'twitter', "tags".twitter, 'website', "tags".website, 'fandom', 
+            "tags".fandom)) AS tags
             FROM "tag map"
             JOIN tags ON "tag map".tag = "tags".tag
             WHERE "tag map"."postID" = $1
@@ -472,74 +480,72 @@ export default class SQLPost {
             values: [postID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return (result[0]?.tags || []) as Promise<MiniTag[]>
     }
 
     /** Delete post. */
-    public static deletePost = async (postID: number) => {
+    public static deletePost = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM posts WHERE posts."postID" = $1`),
         values: [postID]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete post (unverified). */
-    public static deleteUnverifiedPost = async (postID: number) => {
+    public static deleteUnverifiedPost = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM "unverified posts" WHERE "unverified posts"."postID" = $1`),
         values: [postID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert child relation. */
-    public static insertChild = async (postID: number, parentID: number) => {
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "child posts" ("postID", "parentID") VALUES ($1, $2)`,
-        values: [postID, parentID]
+    public static insertChild = async (postID: string, parentID: string) => {
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "child posts" ("postID", "parentID") VALUES ($1, $2) RETURNING "childID"`,
+            rowMode: "array",
+            values: [postID, parentID]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Insert child relation (unverified). */
-    public static insertUnverifiedChild = async (postID: number, parentID: number) => {
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified child posts" ("postID", "parentID") VALUES ($1, $2)`,
+    public static insertUnverifiedChild = async (postID: string, parentID: string) => {
+        const query: QueryArrayConfig = {
+        text: /*sql*/`INSERT INTO "unverified child posts" ("postID", "parentID") VALUES ($1, $2) RETURNING "childID"`,
+        rowMode: "array",
         values: [postID, parentID]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete child relation. */
-    public static deleteChild = async (postID: number) => {
+    public static deleteChild = async (postID: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "child posts" WHERE "child posts"."postID" = $1`,
         values: [postID]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete child relation (unverified). */
-    public static deleteUnverifiedChild = async (postID: number) => {
+    public static deleteUnverifiedChild = async (postID: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "unverified child posts" WHERE "unverified child posts"."postID" = $1`,
         values: [postID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get child posts. */
-    public static childPosts = async (parentID: number) => {
+    public static childPosts = async (parentID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -560,11 +566,11 @@ export default class SQLPost {
         values: [parentID]
         }
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<ChildPost[]>
     }
 
     /** Get child posts (unverified). */
-    public static unverifiedChildPosts = async (parentID: number) => {
+    public static unverifiedChildPosts = async (parentID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -585,11 +591,11 @@ export default class SQLPost {
         values: [parentID]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<ChildPost[]>
     }
 
     /** Get the parent of a child post. */
-    public static parent = async (postID: number) => {
+    public static parent = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -610,11 +616,11 @@ export default class SQLPost {
         values: [postID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return result[0] as Promise<ChildPost>
     }
 
     /** Get the parent of a child post (unverified). */
-    public static unverifiedParent = async (postID: number) => {
+    public static unverifiedParent = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -635,6 +641,6 @@ export default class SQLPost {
         values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<ChildPost>
     }
 }

@@ -1,10 +1,11 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Cuteness} from "../types/Types"
 
 export default class SQLCuteness {
     /** Update cuteness. */
-    public static updateCuteness = async (postID: number, username: string, cuteness: number) => {
+    public static updateCuteness = async (postID: string, username: string, cuteness: number) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "cuteness" ("postID", "username", "cuteness", "cutenessDate")
@@ -14,12 +15,11 @@ export default class SQLCuteness {
             `),
             values: [postID, username, cuteness, new Date().toISOString()]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get cuteness. */
-    public static cuteness = async (postID: number, username: string) => {
+    public static cuteness = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -38,16 +38,15 @@ export default class SQLCuteness {
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Cuteness>
     }
 
     /** Delete cuteness. */
-    public static deleteCuteness = async (postID: number, username: string) => {
+    public static deleteCuteness = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM cuteness WHERE cuteness."postID" = $1 AND cuteness."username" = $2`),
         values: [postID, username]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 }

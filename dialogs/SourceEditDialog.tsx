@@ -22,10 +22,10 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [englishCommentary, setEnglishCommentary] = useState("")
     const [artist, setArtist] = useState("")
     const [posted, setPosted] = useState("")
-    const [link, setLink] = useState("")
+    const [source, setSource] = useState("")
     const [mirrors, setMirrors] = useState("")
     const [bookmarks, setBookmarks] = useState("")
-    const [purchaseLink, setPurchaseLink] = useState("")
+    const [buyLink, setBuyLink] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
@@ -41,9 +41,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setMirrors(sourceEditID.post.mirrors ? Object.values(sourceEditID.post.mirrors).join("\n") : "")
         setEnglishTitle(sourceEditID.post.englishTitle || "")
         if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
-        setLink(sourceEditID.post.link || "")
+        setSource(sourceEditID.post.source || "")
         setBookmarks(sourceEditID.post.bookmarks || "")
-        setPurchaseLink(sourceEditID.post.purchaseLink || "")
+        setBuyLink(sourceEditID.post.buyLink || "")
     }
 
     const reset = () => {
@@ -52,7 +52,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setCommentary("")
         setEnglishCommentary("")
         setArtist("")
-        setLink("")
+        setSource("")
         setPosted("")
         setMirrors("")
     }
@@ -82,11 +82,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     englishTitle,
                     artist,
                     posted,
-                    link,
+                    source,
                     commentary,
                     englishCommentary,
                     bookmarks,
-                    purchaseLink,
+                    buyLink,
                     mirrors
                 },
                 reason
@@ -112,11 +112,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     englishTitle,
                     artist,
                     posted,
-                    link,
+                    source,
                     commentary,
                     englishCommentary,
                     bookmarks,
-                    purchaseLink,
+                    buyLink,
                     mirrors
                 },
                 reason
@@ -160,8 +160,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
             </div>
             <div className="dialog-row">
-                <span className="dialog-text">{i18n.labels.link}: </span>
-                <input className="dialog-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
+                <span className="dialog-text">{i18n.labels.source}: </span>
+                <input className="dialog-input" type="text" spellCheck={false} value={source} onChange={(event) => setSource(event.target.value)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.sort.bookmarks}: </span>
@@ -187,7 +187,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.buyLink}: </span>
-                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
+                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={buyLink} onChange={(event) => setBuyLink(event.target.value)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.reason}: </span>

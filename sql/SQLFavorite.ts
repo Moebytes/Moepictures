@@ -1,20 +1,20 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Favorite, PostSearch, Favgroup, FavgroupSearch} from "../types/Types"
 
 export default class SQLFavorite {
     /** Insert favorite. */
-    public static insertFavorite = async (postID: number, username: string) => {
+    public static insertFavorite = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "favorites" ("postID", "username", "favoriteDate") VALUES ($1, $2, $3)`,
         values: [postID, username, new Date().toISOString()]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get favorite. */
-    public static favorite = async (postID: number, username: string) => {
+    public static favorite = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -33,11 +33,12 @@ export default class SQLFavorite {
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Favorite>
     }
 
     /** Get favorites. */
-    public static favorites = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+    public static favorites = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, 
+        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
         SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
@@ -56,17 +57,16 @@ export default class SQLFavorite {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<PostSearch[]>
     }
 
     /** Delete favorite. */
-    public static deleteFavorite = async (postID: number, username: string) => {
+    public static deleteFavorite = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM favorites WHERE favorites."postID" = $1 AND favorites."username" = $2`),
         values: [postID, username]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert favgroup. */
@@ -80,8 +80,7 @@ export default class SQLFavorite {
             `),
             values: [username, slug, name, rating, isPrivate, new Date().toISOString()]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Update favgroup. */
@@ -90,7 +89,7 @@ export default class SQLFavorite {
             text: /*sql*/`UPDATE favgroups SET "${column}" = $1 WHERE "username" = $2 AND "slug" = $3`,
             values: [value, username, slug]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete favgroup. */
@@ -102,22 +101,20 @@ export default class SQLFavorite {
             `),
             values: [username, slug]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert favgroup post. */
-    public static insertFavgroupPost = async (username: string, slug: string, postID: number, order: number) => {
+    public static insertFavgroupPost = async (username: string, slug: string, postID: string, order: number) => {
         const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "favgroup map" ("username", "slug", "postID", "order") VALUES ($1, $2, $3, $4)`,
             values: [username, slug, postID, order]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete favgroup post. */
-    public static deleteFavgroupPost = async (postID: number, username: string, slug: string) => {
+    public static deleteFavgroupPost = async (postID: string, username: string, slug: string) => {
         const orderQuery: QueryArrayConfig = {
             text: /*sql*/`SELECT "favgroup map"."order" FROM "favgroup map" WHERE "favgroup map"."postID" = $1 AND "favgroup map"."username" = $2 AND "favgroup map"."slug" = $3`,
             rowMode: "array",
@@ -140,11 +137,11 @@ export default class SQLFavorite {
             text: /*sql*/`UPDATE "favgroup map" SET "order" = "order" - 1 WHERE "username" = $1 AND "slug" = $2 AND "order" > $3`,
             values: [username, slug, deleteOrder]
         }
-        return SQLQuery.run(decrementQuery)
+        await SQLQuery.run(decrementQuery)
     }
 
     /** Get post favgroups. */
-    public static postFavgroups = async (postID: number, username: string) => {
+    public static postFavgroups = async (postID: string, username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -165,11 +162,12 @@ export default class SQLFavorite {
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Favgroup[]>
     }
 
     /** Get favgroup. */
-    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, 
+        sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values} = 
         SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
 
@@ -188,7 +186,7 @@ export default class SQLFavorite {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<FavgroupSearch>
     }
 
     /** Get user favgroup. */
@@ -213,7 +211,7 @@ export default class SQLFavorite {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Favgroup[]>
     }
     
     /** Bulk insert favgroup mappings. */
@@ -235,7 +233,7 @@ export default class SQLFavorite {
             text: /*sql*/`INSERT INTO "favgroup map" ("username", "slug", "postID", "order") ${valueQuery}`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk delete favgroup mappings. */
@@ -256,6 +254,6 @@ export default class SQLFavorite {
             text: /*sql*/`DELETE FROM "favgroup map" WHERE "username" = $1 AND "slug" = $2 AND "postID" IN (${valueQuery})`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 }

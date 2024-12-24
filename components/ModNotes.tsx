@@ -57,14 +57,14 @@ const ModNotes: React.FunctionComponent = (props) => {
         updateVisibleNotes()
     }
 
-    const approveNote = async (noteID: number, username: string, postID: number) => {
-        await functions.post("/api/note/approve", {noteID, username, postID}, session, setSessionFlag)
+    const approveNote = async (postID: number, originalID: number, order: number, data: any, username: string) => {
+        await functions.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
 
-    const rejectNote = async (noteID: number, username: string, postID: number) => {
-        await functions.post("/api/note/reject", {noteID, username, postID}, session, setSessionFlag)
+    const rejectNote = async (postID: number, originalID: number, order: number, data: any, username: string) => {
+        await functions.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
@@ -267,11 +267,11 @@ const ModNotes: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const noteDataJSX = (note: any) => {
-        let noteChanges = note.addedEntries?.length || note.removedEntries?.length
+    const noteDataJSX = (noteGroup: any) => {
+        let noteChanges = noteGroup.addedEntries?.length || noteGroup.removedEntries?.length
         if (!noteChanges) return null
-        const addedJSX = note.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = note.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+        const addedJSX = noteGroup.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = noteGroup.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]
@@ -297,14 +297,14 @@ const ModNotes: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const note = visible[i] as any
-            if (!note) break
-            if (note.fake) continue
+            const noteGroup = visible[i] as any
+            if (!noteGroup) break
+            if (noteGroup.fake) continue
             const imgClick = (event?: any, middle?: boolean) => {
-                if (middle) return window.open(`/unverified/post/${note.postID}`, "_blank")
-                history.push(`/unverified/post/${note.postID}`)
+                if (middle) return window.open(`/unverified/post/${noteGroup.postID}`, "_blank")
+                history.push(`/unverified/post/${noteGroup.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(note.post.images[0].type, note.postID, note.post.images[0].order, note.post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(noteGroup.post.images[0].type, noteGroup.postID, noteGroup.post.images[0].order, noteGroup.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
@@ -313,16 +313,16 @@ const ModNotes: React.FunctionComponent = (props) => {
                         <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${note.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(note?.updater) || i18n.user.deleted}</span>
-                        <span className="mod-post-text">{i18n.labels.reason}: {note.reason}</span>
-                        {noteDataJSX(note)}
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${noteGroup.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(noteGroup?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-text">{i18n.labels.reason}: {noteGroup.reason}</span>
+                        {noteDataJSX(noteGroup)}
                     </div>
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => rejectNote(note.noteID, note.updater, note.postID)}>
+                        <div className="mod-post-options-container" onClick={() => rejectNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => approveNote(note.noteID, note.updater, note.postID)}>
+                        <div className="mod-post-options-container" onClick={() => approveNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>

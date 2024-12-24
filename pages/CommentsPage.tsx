@@ -22,6 +22,7 @@ import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
+import {CommentSearch, CommentSort} from "../types/Types"
 
 let replace = false
 
@@ -43,12 +44,12 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [comments, setComments] = useState([]) as any
+    const [comments, setComments] = useState([] as CommentSearch[])
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
-    const [visibleComments, setVisibleComments] = useState([]) as any
+    const [visibleComments, setVisibleComments] = useState([] as CommentSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -423,7 +424,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const comment = visible[i]
             if (comment.fake) continue
-            if (!session.username) if (comment.post.rating !== "safe") continue
+            if (!session.username) if (comment.post.rating !== functions.r13()) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(comment.post.rating)) continue
             jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }

@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
+import {useHistory} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
-useMiscDialogActions, useInteractionSelector, useSessionActions} from "../store"
+useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions} from "../store"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -75,7 +76,7 @@ let id = 0
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {enableDrag} = useInteractionSelector()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
@@ -88,8 +89,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     setPreviousVolume, setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
     const {noteMode, imageExpand, format} = useSearchSelector()
     const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
+    const {setSidebarText} = useActiveActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
-    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setDownloadFlag, setDownloadIDs, setRedirect} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -138,6 +140,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [showReverseIcons, setShowReverseIcons] = useState(false)
     const [tempLink, setTempLink] = useState("")
     const [img, setImg] = useState("")
+    const history = useHistory()
 
     useEffect(() => {
         const savedDisableZoom = localStorage.getItem("disableZoom")
@@ -1044,8 +1047,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const multiRender = async () => {
         let filename = path.basename(props.img).replace(/\?.*$/, "")
-        if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
+        if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
+            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
         }
         if (functions.isVideo(props.img)) {
             const video = await renderVideo()
@@ -1063,8 +1066,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
                     let pageName = path.basename(page).replace(/\?.*$/, "")
-                    if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-                        pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
+                    if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
+                        pageName = `${props.post.source.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
                     const decryptedPage = await functions.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)
@@ -1254,6 +1257,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleUpscale = async () => {
+        if (!session.username) {
+            setRedirect(`/post/${props.post.postID}`)
+            history.push("/login")
+            return setSidebarText(i18n.sidebar.loginRequired)
+        }
         if (permissions.isPremium(session)) {
             await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
             setSessionFlag(true)
@@ -1299,7 +1307,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
-                        {!props.noNotes && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/> : null}
                     </div>

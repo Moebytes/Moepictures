@@ -8,20 +8,21 @@ import path from "path"
 import functions from "../structures/Functions"
 import privateIcon from "../assets/icons/lock-opt.png"
 import "./styles/gridimage.less"
+import {PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
 let id = 0
 let timeout = null as any
 
 interface Props {
-    id: number
+    id: string
     img: string
     original: string
     cached: boolean
     width?: number
     height?: number
     comicPages?: any
-    post: any,
+    post: PostSearch,
     square?: boolean
     marginBottom?: number
     reupdate?: () => void
@@ -696,8 +697,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const multiRender = async () => {
         let filename = path.basename(props.original).replace(/\?.*$/, "")
-        if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
+        if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
+            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
         }
         if (gifData || functions.isGIF(props.original) || functions.isVideo(props.original)) {
             functions.download(filename, props.original)
@@ -707,8 +708,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
                     let pageName = path.basename(page).replace(/\?.*$/, "")
-                    if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-                        pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
+                    if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
+                        pageName = `${props.post.source.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
                     const decryptedPage = await functions.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)

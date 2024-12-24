@@ -18,6 +18,16 @@
     }
 }
 
+.tag-row-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.tag-container {
+    display: flex;
+    flex-direction: column;
+}
+
 .tag-row {
     display: flex;
     flex-direction: row;
@@ -35,7 +45,7 @@
 
 .tag-text {
     font-family: Tahoma, sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--text);  
     white-space: preserve;
 }
@@ -65,6 +75,18 @@
     flex-direction: row;
     justify-content: flex-start;
     margin-right: 15px;
+}
+
+.tag-featured-img {
+    width: auto;
+    height: auto;
+    max-width: calc(50vw - @sidebar-width - 100px);
+    max-height: 400px;
+    padding: 5px;
+    border: 1px solid var(--text);
+    border-radius: 10px;
+    margin-right: 20px;
+    margin-top: 20px;
 }
 
 .tag-img {

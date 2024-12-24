@@ -9,6 +9,8 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
+import axios from "axios"
+import {MiniTag, PostImage, PostFull, PostTagged} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -360,18 +362,20 @@ export default class ServerFunctions {
         await s3.deleteObject({Key: file, Bucket: "moepictures-unverified"}).promise()
     }
 
-    public static tagCategories = async (tags: string[]) => {
+    public static tagCategories = async (tags: string[] | undefined) => {
         if (!tags) tags = []
         let result = await sql.tag.tags(tags.filter(Boolean))
-        let artists = [] as any 
-        let characters = [] as any 
-        let series = [] as any 
-        let newTags = [] as any
+        let artists = [] as MiniTag[] 
+        let characters = [] as MiniTag[] 
+        let series = [] as MiniTag[] 
+        let newTags = [] as MiniTag[] 
         for (let i = 0; i < tags.length; i++) {
             const index = result.findIndex((r: any) => tags[i] === r.tag)
-            const obj = {} as any 
+            const obj = {} as MiniTag 
             obj.tag = tags[i]
+            obj.type = result[index].type
             obj.image = result[index].image
+            obj.imageHash = result[index].imageHash
             obj.description = result[index].description 
             obj.social = result[index].social
             obj.twitter = result[index].twitter
@@ -390,18 +394,25 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static unverifiedTagCategories = async (tags: any[]) => {
+    public static unverifiedTagCategories = async (tags: string[] | undefined) => {
+        if (!tags) tags = []
         let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
-        let artists = [] as any 
-        let characters = [] as any 
-        let series = [] as any 
-        let newTags = [] as any
+        let artists = [] as MiniTag[] 
+        let characters = [] as MiniTag[] 
+        let series = [] as MiniTag[] 
+        let newTags = [] as MiniTag[]
         for (let i = 0; i < tags.length; i++) {
             const index = result.findIndex((r: any) => tags[i] === r.tag)
-            const obj = {} as any 
+            const obj = {} as MiniTag 
             obj.tag = tags[i]
-            obj.image = result[index].image 
+            obj.type = result[index].type
+            obj.image = result[index].image
+            obj.imageHash = result[index].imageHash
             obj.description = result[index].description 
+            obj.social = result[index].social
+            obj.twitter = result[index].twitter
+            obj.website = result[index].website
+            obj.fandom = result[index].fandom
             if (result[index].type === "artist") {
                 artists.push(obj)
             } else if (result[index].type === "character") {
@@ -415,8 +426,8 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static imagesChanged = async (oldImages: any[], currentImages: any[], upscaled: boolean, r18: boolean) => {
-        if (oldImages?.length !== currentImages?.length) return true
+    public static imagesChanged = async (oldImages: PostImage[], newImages: PostImage[] & {bytes: Uint8Array}[], upscaled: boolean, r18: boolean) => {
+        if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
             let oldPath = ""
@@ -427,17 +438,17 @@ export default class ServerFunctions {
             }
             const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
             if (!oldBuffer) continue
-            const currentImage = currentImages[i]
-            const currentBuffer = Buffer.from(currentImage.bytes) as any
+            const newImage = newImages[i]
+            const newBuffer = Buffer.from(newImage.bytes) as any
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
-            const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
+            const currentMD5 = crypto.createHash("md5").update(newBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true
         }
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[], upscaled: boolean, r18: boolean) => {
-        if (oldImages?.length !== currentImages?.length) return true
+    public static imagesChangedUnverified = async (oldImages: PostImage[], newImages: PostImage[], upscaled: boolean, r18: boolean) => {
+        if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
             let oldPath = ""
@@ -448,17 +459,17 @@ export default class ServerFunctions {
             }
             const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
             if (!oldBuffer) continue
-            const currentImage = currentImages[i]
-            let currentPath = ""
+            const newImage = newImages[i]
+            let newPath = ""
             if (upscaled) {
-                currentPath = functions.getUpscaledImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.upscaledFilename || currentImage.filename)
+                newPath = functions.getUpscaledImagePath(newImage.type, newImage.postID, newImage.order, newImage.upscaledFilename || newImage.filename)
             } else {
-                currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+                newPath = functions.getImagePath(newImage.type, newImage.postID, newImage.order, newImage.filename)
             }
-            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath, false) as any
-            if (!currentBuffer) continue
+            const newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false) as any
+            if (!newBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
-            const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
+            const currentMD5 = crypto.createHash("md5").update(newBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true
         }
         return false
@@ -473,7 +484,7 @@ export default class ServerFunctions {
         return false
     }
 
-    public static migratePost = async (post: any, oldType: string, newType: string, oldR18: boolean, newR18: boolean) => {
+    public static migratePost = async (post: PostFull, oldType: string, newType: string, oldR18: boolean, newR18: boolean) => {
         if (oldType === newType && oldR18 === newR18) return
         for (let i = 0; i < post.images.length; i++) {
             if ((post.images[i].type === "image" || post.images[i].type === "comic") && 
@@ -497,7 +508,7 @@ export default class ServerFunctions {
         }
     }
 
-    public static updateImplications = async (posts: any[], implications: string[]) => {
+    public static updateImplications = async (posts: PostTagged[], implications: string[]) => {
         for (const post of posts) {
             for (const implication of implications) {
                 if (!post.tags.includes(implication)) {
@@ -553,6 +564,13 @@ export default class ServerFunctions {
             tagMap[tag.tag] = tag
         }
         return tagMap
+    }
+
+    public static ipRegion = async (ip: string) => {
+        const ipInfo = await axios.get(`http://ip-api.com/json/${ip}`).then((r) => r.data).catch(() => null)
+        let region = ipInfo?.regionName || "unknown"
+        if (ip === "127.0.0.1" || ip.startsWith("192.168.68")) region = "localhost"
+        return region
     }
 
     private static removeLocalDirectory = (dir: string) => {

@@ -259,6 +259,45 @@
     font-weight: bold;
 }
 
+.upload-guidelines {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--text);
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    width: max-content;
+}
+
+.upload-guidelines-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 22px;
+    color: var(--text);
+}
+
+.upload-guideline {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text);
+}
+
+.upload-guideline-alt {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text-alt);
+}
+
+.upload-guideline-link {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text-alt);
+    font-weight: bold;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
 @media screen and (max-width: 500px) {
     .upload-input-wide {
         width: 100%;

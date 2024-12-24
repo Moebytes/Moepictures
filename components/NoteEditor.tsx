@@ -85,6 +85,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
+    const [targetHash, setTargetHash] = useState("")
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
     const [items, setItems] = useState([]) as any
@@ -114,18 +115,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         } else {
             notes = await functions.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
         }
+        notes = notes?.filter((n: any) => n.order === (props.order || 1))
         if (notes?.length) {
-            const note = notes.find((t: any) => t.order === (props.order || 1))
-            if (note?.data?.length) {
-                let largestID = note.data.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
-                setItems(note.data)
-                setID(largestID)
-                setNoteMode(true)
-                return
-            } else {
-                setItems([])
-                setID(0)
-            }
+            const noteData = notes[0].notes ? notes[0].notes : notes
+            let largestID = noteData.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
+            setItems(noteData)
+            setID(largestID)
+            setNoteMode(true)
         } else {
             setItems([])
             setID(0)
@@ -176,6 +172,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 setTargetWidth(img.width)
                 setTargetHeight(img.height)
             }
+            const currentImg = props.post.images[(props.order || 1) - 1]
+            setTargetHash(currentImg.hash)
         }
         decryptImg()
     }, [props.img, session])
@@ -279,13 +277,15 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const editText = (index: number, transcript: string, translation: string) => {
+    const editText = (index: number, transcript: string, translation: string, overlay = false) => {
         setItems((prev: any) => {
             const item = prev[index]
             item.transcript = transcript
             item.translation = translation
             item.imageWidth = targetWidth
             item.imageHeight = targetHeight
+            item.imageHash = targetHash
+            item.overlay = overlay
             return prev
         })
     }
@@ -312,10 +312,11 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const ocrPage = async () => {
-        const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+        const jpgURL = await functions.convertToFormat(img, "jpg")
+        const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = Object.values(new Uint8Array(arrayBuffer))
         let result = await functions.post(`/api/misc/ocr`, bytes, session, setSessionFlag).catch(() => null)
-        if (result?.length) setItems(result)
+        if (result?.length) setItems(result.map((item: any) => ({...item, imageHash: targetHash, overlay: false})))
     }
 
     useEffect(() => {
@@ -363,7 +364,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         if (!noteDrawingEnabled) return
                         setItems((prev: any) => {
                             setID(id + 1)
-                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, imageHeight: targetHeight, transcript: "", translation: ""}]
+                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, imageHeight: targetHeight, imageHash: targetHash, 
+                                transcript: "", translation: "", overlay: false}]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: any, index: number) => {

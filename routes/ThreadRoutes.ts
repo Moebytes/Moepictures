@@ -28,7 +28,7 @@ const threadUpdateLimiter = rateLimit({
     handler
 })
 
-const pushMentionNotification = async (content: string, threadID: number, replyID?: number) => {
+const pushMentionNotification = async (content: string, threadID: string, replyID?: string) => {
     try {
         const notified = new Set<string>()
         const thread = await sql.thread.thread(threadID)
@@ -108,14 +108,14 @@ const ThreadRoutes = (app: Express) => {
             if (badTitle) return res.status(400).send("Bad title")
             const badContent = functions.validateThread(content, enLocale)
             if (badContent) return res.status(400).send("Bad content")
-            const thread = await sql.thread.thread(Number(threadID))
+            const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.creator !== req.session.username) {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
-            await sql.thread.updateThread(Number(threadID), "title", title)
-            await sql.thread.updateThread(Number(threadID), "content", content)
-            await sql.thread.updateThread(Number(threadID), "r18", r18)
+            await sql.thread.updateThread(threadID, "title", title)
+            await sql.thread.updateThread(threadID, "content", content)
+            await sql.thread.updateThread(threadID, "r18", r18)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -125,9 +125,9 @@ const ThreadRoutes = (app: Express) => {
 
     app.get("/api/thread", threadLimiter, async (req: Request, res: Response) => {
         try {
-            const threadID = req.query.threadID
+            const threadID = req.query.threadID as string
             if (!threadID) return res.status(400).send("Bad threadID")
-            const result = await sql.thread.thread(Number(threadID))
+            const result = await sql.thread.thread(threadID)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -137,15 +137,15 @@ const ThreadRoutes = (app: Express) => {
 
     app.delete("/api/thread/delete", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const threadID = req.query.threadID
+            const threadID = req.query.threadID as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!threadID) return res.status(400).send("Bad threadID")
-            const thread = await sql.thread.thread(Number(threadID))
+            const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.creator !== req.session.username) {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
-            await sql.thread.deleteThread(Number(threadID))
+            await sql.thread.deleteThread(threadID)
             const postCount = await sql.thread.postCount(thread.creator)
             await sql.user.updateUser(thread.creator, "postCount", postCount)
             res.status(200).send("Success")
@@ -198,9 +198,9 @@ const ThreadRoutes = (app: Express) => {
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.locked) return res.status(400).send("Thread is locked")
-            const replyID = await sql.thread.insertReply(Number(threadID), req.session.username, content, r18)
-            await sql.thread.updateThread(Number(threadID), "updater", req.session.username)
-            await sql.thread.updateThread(Number(threadID), "updatedDate", new Date().toISOString())
+            const replyID = await sql.thread.insertReply(threadID, req.session.username, content, r18)
+            await sql.thread.updateThread(threadID, "updater", req.session.username)
+            await sql.thread.updateThread(threadID, "updatedDate", new Date().toISOString())
             pushMentionNotification(content, threadID, replyID)
             await sql.thread.bulkUpdateReads(threadID, false, req.session.username)
             const postCount = await sql.thread.postCount(req.session.username)
@@ -217,7 +217,7 @@ const ThreadRoutes = (app: Express) => {
             const threadID = req.query.threadID as string
             const offset = req.query.offset as string
             if (!threadID) return res.status(400).send("Bad threadID")
-            let result = await sql.thread.replies(Number(threadID), offset)
+            let result = await sql.thread.replies(threadID, Number(offset))
             if (!req.session.showR18) {
                 result = result.filter((r: any) => !r.r18)
             }
@@ -230,9 +230,9 @@ const ThreadRoutes = (app: Express) => {
 
     app.get("/api/reply", threadLimiter, async (req: Request, res: Response) => {
         try {
-            const replyID = req.query.replyID
+            const replyID = req.query.replyID as string
             if (!replyID) return res.status(400).send("Bad replyID")
-            const result = await sql.thread.reply(Number(replyID))
+            const result = await sql.thread.reply(replyID)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -252,9 +252,9 @@ const ThreadRoutes = (app: Express) => {
             if (reply.creator !== req.session.username) {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
-            await sql.thread.updateReply(Number(replyID), "content", content)
-            await sql.thread.updateReply(Number(replyID), "updatedDate", new Date().toISOString())
-            await sql.thread.updateReply(Number(replyID), "r18", r18)
+            await sql.thread.updateReply(replyID, "content", content)
+            await sql.thread.updateReply(replyID, "updatedDate", new Date().toISOString())
+            await sql.thread.updateReply(replyID, "r18", r18)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -264,30 +264,30 @@ const ThreadRoutes = (app: Express) => {
 
     app.delete("/api/reply/delete", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const threadID = req.query.threadID
-            const replyID = req.query.replyID
+            const threadID = req.query.threadID as string
+            const replyID = req.query.replyID as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!threadID || !replyID) return res.status(400).send("Bad threadID or replyID")
-            const reply = await sql.thread.reply(Number(replyID))
+            const reply = await sql.thread.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
-            const replies = await sql.thread.replies(Number(threadID))
+            const replies = await sql.thread.replies(threadID)
             const lastReply = replies[replies.length - 1]
             if (lastReply.replyID === reply.replyID) {
-                await sql.thread.deleteReply(Number(replyID))
+                await sql.thread.deleteReply(replyID)
                 const penultReply = replies[replies.length - 2]
                 if (penultReply) {
-                    await sql.thread.updateThread(Number(threadID), "updater", penultReply.creator)
-                    await sql.thread.updateThread(Number(threadID), "updatedDate", penultReply.createDate)
+                    await sql.thread.updateThread(threadID, "updater", penultReply.creator)
+                    await sql.thread.updateThread(threadID, "updatedDate", penultReply.createDate)
                 } else {
-                    const thread = await sql.thread.thread(Number(threadID))
-                    await sql.thread.updateThread(Number(threadID), "updater", thread.creator)
-                    await sql.thread.updateThread(Number(threadID), "updatedDate", thread.createDate)
+                    const thread = await sql.thread.thread(threadID)
+                    await sql.thread.updateThread(threadID, "updater", thread.creator)
+                    await sql.thread.updateThread(threadID, "updatedDate", thread.createDate)
                 }
             } else {
-                await sql.thread.deleteReply(Number(replyID))
+                await sql.thread.deleteReply(replyID)
             }
             const postCount = await sql.thread.postCount(reply.creator)
             await sql.user.updateUser(reply.creator, "postCount", postCount)
@@ -306,7 +306,7 @@ const ThreadRoutes = (app: Express) => {
             if (!threadID || !reason) return res.status(400).send("Bad threadID or reason")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
-            await sql.report.insertThreadReport(req.session.username, Number(threadID), reason)
+            await sql.report.insertThreadReport(req.session.username, threadID, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -322,7 +322,7 @@ const ThreadRoutes = (app: Express) => {
             if (!replyID || !reason) return res.status(400).send("Bad replyID or reason")
             const reply = await sql.thread.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
-            await sql.report.insertReplyReport(req.session.username, Number(replyID), reason)
+            await sql.report.insertReplyReport(req.session.username, replyID, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -336,7 +336,7 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad reportID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            await sql.report.deleteThreadReport(Number(reportID))
+            await sql.report.deleteThreadReport(reportID)
             if (accepted) {
                 let message = `Thread report on ${functions.getDomain()}/thread/${id} was accepted. The thread posted by ${username} was removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Thread report has been accepted", message)
@@ -360,7 +360,7 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad threadID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            await sql.report.deleteReplyReport(Number(reportID))
+            await sql.report.deleteReplyReport(reportID)
             if (accepted) {
                 let message = `Reply report on ${functions.getDomain()}/thread/${id} was accepted. The reply posted by ${username} was removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Reply report has been accepted", message)

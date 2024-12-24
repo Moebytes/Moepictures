@@ -387,8 +387,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.posted) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.posted}:</span> {newPost.posted ? functions.formatDate(new Date(newPost.posted)) : i18n.labels.unknown}</span>)
         }
-        if (changes.link) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.link}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link, i18n)}</span></span>)
+        if (changes.source) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.source}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.source, "_blank")}>{functions.getSiteName(newPost.source, i18n)}</span></span>)
         }
         if (changes.mirrors) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.mirrors}:</span> {printMirrors(newPost)}</span>)
@@ -396,8 +396,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.bookmarks) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.bookmarks}:</span> {newPost.bookmarks || "?"}</span>)
         }
-        if (changes.purchaseLink) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.buyLink}:</span> {newPost.purchaseLink || i18n.labels.none}</span>)
+        if (changes.buyLink) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.buyLink}:</span> {newPost.buyLink || i18n.labels.none}</span>)
         }
         if (changes.commentary) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.commentary}:</span> {newPost.commentary || i18n.labels.none}</span>)

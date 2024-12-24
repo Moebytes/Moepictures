@@ -1,6 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Group, GroupPosts, GroupPost, PostSearchOrdered} from "../types/Types"
 
 export default class SQLGroup {
     /** Get group. */
@@ -25,11 +26,11 @@ export default class SQLGroup {
             values: [slug]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<GroupPosts>
     }
 
     /** Get post groups. */
-    public static postGroups = async (postID: number) => {
+    public static postGroups = async (postID: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -52,7 +53,7 @@ export default class SQLGroup {
             values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<GroupPosts[]>
     }
 
     /** Get groups. */
@@ -68,7 +69,7 @@ export default class SQLGroup {
         }
         if (groups?.[0]) query.values = [groups]
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<Group[]>
     }
 
     /** Insert group. */
@@ -83,7 +84,7 @@ export default class SQLGroup {
             values: [name, slug, rating, creator, now, creator, now]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Update group name and description. */
@@ -95,7 +96,7 @@ export default class SQLGroup {
             `),
             values: [name, slug, description, updater, now, groupID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Update group. */
@@ -104,7 +105,7 @@ export default class SQLGroup {
             text: /*sql*/`UPDATE groups SET "${column}" = $1 WHERE "groupID" = $2`,
             values: [value, groupID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete group. */
@@ -113,7 +114,7 @@ export default class SQLGroup {
             text: /*sql*/`DELETE FROM groups WHERE groups."groupID" = $1`,
             values: [groupID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get group post. */
@@ -127,7 +128,7 @@ export default class SQLGroup {
             values: [groupID, postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<GroupPost>
     }
 
     /** Insert group post. */
@@ -138,7 +139,7 @@ export default class SQLGroup {
             `),
             values: [groupID, postID, order]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Update group post. */
@@ -149,7 +150,7 @@ export default class SQLGroup {
             `),
             values: [order, groupID, postID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete group post. */
@@ -173,7 +174,7 @@ export default class SQLGroup {
             text: /*sql*/`UPDATE "group map" SET "order" = "order" - 1 WHERE "groupID" = $1 AND "order" > $2`,
             values: [groupID, deleteOrder]
         }
-        return SQLQuery.run(decrementQuery)
+        await SQLQuery.run(decrementQuery)
     }
 
     /** Bulk insert group mappings. */
@@ -194,7 +195,7 @@ export default class SQLGroup {
             text: /*sql*/`INSERT INTO "group map" ("groupID", "postID", "order") ${valueQuery}`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk delete group mappings. */
@@ -215,11 +216,12 @@ export default class SQLGroup {
             text: /*sql*/`DELETE FROM "group map" WHERE "groupID" = $1 AND "postID" IN (${valueQuery})`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Search group. */
-    public static searchGroup = async (groupID: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+    public static searchGroup = async (groupID: string, limit?: number, offset?: number, type?: string, rating?: string, 
+        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
         SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
@@ -238,6 +240,6 @@ export default class SQLGroup {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<PostSearchOrdered[]>
     }
 }

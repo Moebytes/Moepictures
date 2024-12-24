@@ -8,7 +8,7 @@ import functions from "../structures/Functions"
 import search from "../assets/icons/search.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
-import Thread from "../components/Thread"
+import ThreadRow from "../components/ThreadRow"
 import NewThreadDialog from "../dialogs/NewThreadDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
@@ -20,6 +20,7 @@ import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
+import {ThreadSearch, CommentSort} from "../types/Types"
 
 let replace = false
 
@@ -42,12 +43,12 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {setPageFlag, setThreadSearchFlag} = useFlagActions()
     const {showNewThreadDialog} = useThreadDialogSelector()
     const {setShowNewThreadDialog} = useThreadDialogActions()
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [threads, setThreads] = useState([]) as any
+    const [threads, setThreads] = useState([] as ThreadSearch[])
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
-    const [visibleThreads, setVisibleThreads] = useState([]) as any
+    const [visibleThreads, setVisibleThreads] = useState([] as ThreadSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -374,7 +375,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const generateThreadsJSX = () => {
         const jsx = [] as any
-        jsx.push(<Thread key={"0"} titlePage={true}/>)
+        jsx.push(<ThreadRow key={"0"} titlePage={true}/>)
         let visible = [] as any
         if (scroll) {
             visible = functions.removeDuplicates(visibleThreads) as any
@@ -384,7 +385,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<Thread key={visible[i].threadID} thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
+            jsx.push(<ThreadRow key={visible[i].threadID} thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
         }
         if (!scroll) {
             jsx.push(

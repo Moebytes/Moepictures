@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
-useCacheActions, useInteractionActions, useMiscDialogSelector} from "../store"
+useCacheSelector, useCacheActions, useInteractionActions, useMiscDialogSelector} from "../store"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -29,7 +29,18 @@ import premiumStar from "../assets/icons/premium-star.png"
 import r18 from "../assets/icons/r18.png"
 import danger from "../assets/icons/danger.png"
 import lockIcon from "../assets/icons/private-lock.png"
-import deleteIcon from "../assets/icons/delete.png"
+import emojiSelect from "../assets/icons/emoji-select.png"
+import highlight from "../assets/icons/highlight.png"
+import bold from "../assets/icons/bold.png"
+import italic from "../assets/icons/italic.png"
+import underline from "../assets/icons/underline.png"
+import strikethrough from "../assets/icons/strikethrough.png"
+import spoiler from "../assets/icons/spoiler.png"
+import link from "../assets/icons/link-purple.png"
+import details from "../assets/icons/details.png"
+import hexcolor from "../assets/icons/hexcolor.png"
+import codeblock from "../assets/icons/codeblock.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/userpage.less"
 
 let intervalTimer = null as any
@@ -52,8 +63,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {showDeleteAccountDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setR18Confirmation, setShowDeleteAccountDialog} = useMiscDialogActions()
     const {setDMTarget} = useMessageDialogActions()
+    const {emojis} = useCacheSelector()
     const {setPosts} = useCacheActions()
-    const bioRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
@@ -73,6 +84,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [interval, setInterval] = useState("")
     const [init, setInit] = useState(true)
     const [bannerHidden, setBannerHidden] = useState(false)
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
+    const emojiRef = useRef(null) as any
+    const textRef = useRef(null) as any
     const history = useHistory()
 
     useEffect(() => {
@@ -87,7 +102,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const checkHiddenBanner = async () => {
         const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
         const bannerHideDate = localStorage.getItem("bannerHideDate")
-        if (bannerHideDate && new Date(bannerHideDate) > new Date(banner?.date)) {
+        if (bannerHideDate && new Date(bannerHideDate) > new Date(banner?.date || "")) {
             if (banner?.text) setBannerHidden(true)
         }
     }
@@ -485,7 +500,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const banExpirationJSX = () => {
         if (!session.banned && !session.banExpiration) return null
-        if (new Date(session.banExpiration) > new Date()) {
+        if (new Date(session.banExpiration || "") > new Date()) {
             return (
                 <div className="user-row">
                     <span className="user-text" style={{color: "var(--banText)"}}>{i18n.user.banExpires} {functions.timeUntil(session.banExpiration, i18n)}</span>
@@ -533,6 +548,90 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         return jsx
     }
 
+    const getEmojiMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -120
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const getEmojiMarginBottom = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".user-textarea"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = 390
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const emojiGrid = () => {
+        let rows = [] as any
+        let rowAmount = 7
+        for (let i = 0; i < Object.keys(emojis).length; i++) {
+            let items = [] as any
+            for (let j = 0; j < rowAmount; j++) {
+                const k = (i*rowAmount)+j
+                const key = Object.keys(emojis)[k]
+                if (!key) break
+                const appendText = () => {
+                    setBio((prev: string) => prev + ` :${key}:`)
+                    setShowEmojiDropdown(false)
+                }
+                items.push(
+                    <img draggable={false} src={emojis[key]} className="dialog-emoji-big" onClick={appendText}/>
+                )
+            }
+            if (items.length) rows.push(<div className="dialog-emoji-row">{items}</div>)
+        }
+        return (
+            <div className={`dialog-emoji-grid ${showEmojiDropdown ? "" : "hide-dialog-emoji-grid"}`}
+            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
+            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+                {rows}
+            </div>
+        )
+    }
+
+    const getBioTextArea = () => {
+        return (
+            <>
+            <div className="user-column">
+                <div className="dialog-textarea-buttons" style={{width: "50%"}}>
+                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter: getFilter()}}/></button>
+                </div>
+                {previewMode ? <div className="comments-preview" style={{width: "50%", minHeight: "100px"}}>{jsxFunctions.renderText(bio, emojis, "reply")}</div> : 
+                <div style={{marginTop: "0px"}} className="user-column">
+                    <textarea ref={textRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>}
+                {error ? <div className="user-validation-container"><span className="user-validation" ref={errorRef}></span></div> : null}
+            </div>
+            <div className="user-row">
+                <button className="user-button" onClick={changeBio}>{i18n.buttons.ok}</button>
+                <button className="user-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                    <img src={emojiSelect}/>
+                </button>
+                <button className={previewMode ? "user-edit-button" : "user-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
+            </div>
+            </>
+        )
+    }
+
     return (
         <>
         <DeleteFavgroupDialog/>
@@ -564,18 +663,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(session.joinDate), i18n)}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {session.bio || i18n.user.noBio}</span>
+                        <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>{i18n.user.updateBio}</span>
                     </div>
-                    {showBioInput ?
-                    <div className="user-column">
-                        <textarea ref={bioRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
-                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                        {error ? <div className="user-validation-container"><span className="user-validation" ref={errorRef}></span></div> : null}
-                        <button className="user-button" onClick={changeBio}>{i18n.buttons.ok}</button>
-                    </div> : null}
+                    {showBioInput ? getBioTextArea() : null}
                     <div className="user-row">
                         <span className="user-text">{i18n.user.favoritesPrivacy}: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
                         className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
@@ -606,20 +699,21 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <img className="user-icon" src={r18}/>
                         <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}
-                    {counts ? <>
-                    {counts.postEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>{i18n.mod.postEdits} <span className="user-text-alt">{counts.postEdits}</span></span>
-                    </div>  : null}
-                    {counts.tagEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.mod.tagEdits} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    {counts ? <div className="user-row">
+                    <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
+                    {counts.postEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
+                    : null}
+                    {counts.tagEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.tag.tag} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    : null}
+                    {counts.noteEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>{i18n.labels.note} <span className="user-text-alt">{counts.noteEdits}</span></span>
+                    : null}
+                    {counts.groupEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.labels.group} <span className="user-text-alt">{counts.groupEdits}</span></span>
+                    : null}
                     </div> : null}
-                    {counts.noteEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>{i18n.mod.noteEdits} <span className="user-text-alt">{counts.noteEdits}</span></span>
-                    </div> : null}
-                    {counts.groupEdits > 0 ? <div className="user-row">
-                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.mod.groupEdits} <span className="user-text-alt">{counts.groupEdits}</span></span>
-                    </div> : null}
-                    </> : null}
                     <div onClick={clearPfp} className="user-row">
                         <span className="user-link">{i18n.user.clearPfp}</span>
                     </div>
@@ -669,6 +763,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <img className="user-icon" src={danger}/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
+                    {emojiGrid()}
                 </div>
                 <Footer/>
             </div>

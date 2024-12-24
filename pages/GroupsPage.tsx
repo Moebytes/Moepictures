@@ -19,12 +19,13 @@ import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/itemspage.less"
+import {GroupSearch, GroupSort} from "../types/Types"
 
 let replace = false
 let limit = 100
 
 interface Props {
-    group: any
+    group: GroupSearch
 }
 
 const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
@@ -80,12 +81,12 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag, groupSearchFlag} = useFlagSelector()
     const {setPageFlag, setGroupSearchFlag} = useFlagActions()
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("date" as GroupSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [groups, setGroups] = useState([]) as any
+    const [groups, setGroups] = useState([] as GroupSearch[])
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
-    const [visibleGroups, setVisibleGroups] = useState([]) as any
+    const [visibleGroups, setVisibleGroups] = useState([] as GroupSearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -422,6 +423,9 @@ const GroupsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const group = visible[i]
             if (group.fake) continue
+            if (!session.username) if (group.rating !== functions.r13()) continue
+            if (!session.username) if (group.posts[0].rating !== functions.r13()) continue
+            if (!functions.isR18(ratingType)) if (functions.isR18(group.rating)) continue
             jsx.push(<GroupThumbnail key={group.groupID} group={group}/>)
         }
         if (!scroll) {

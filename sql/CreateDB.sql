@@ -44,12 +44,12 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "title" text,
     "englishTitle" text,
     "artist" text,
-    "link" text,
+    "source" text,
     "commentary" text,
     "englishCommentary" text,
     "bookmarks" int,
     "mirrors" jsonb,
-    "purchaseLink" text,
+    "buyLink" text,
     "slug" text,
     "hidden" boolean,
     "locked" boolean,
@@ -77,11 +77,11 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "title" text,
     "englishTitle" text,
     "artist" text,
-    "link" text,
+    "source" text,
     "commentary" text,
     "englishCommentary" text,
     "bookmarks" int,
-    "purchaseLink" text,
+    "buyLink" text,
     "slug" text,
     "hidden" boolean,
     "hasOriginal" boolean,
@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
+    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "banned" boolean,
     "hidden" boolean,
     "r18" boolean
@@ -151,7 +152,8 @@ CREATE TABLE IF NOT EXISTS "unverified tags" (
     "social" text,
     "twitter" text,
     "fandom" text,
-    "pixivTags" text[]
+    "pixivTags" text[],
+    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS "threads" (
@@ -315,6 +317,16 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "updater" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "updatedDate" timestamptz,
     "order" int,
+    "transcript" text,
+    "translation" text,
+    "x" double precision,
+    "y" double precision,
+    "width" double precision,
+    "height" double precision,
+    "imageWidth" int,
+    "imageHeight" int,
+    "imageHash" text,
+    "overlay" boolean,
     "data" jsonb
 );
 
@@ -325,6 +337,16 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "updater" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "updatedDate" timestamptz,
     "order" int,
+    "transcript" text,
+    "translation" text,
+    "x" double precision,
+    "y" double precision,
+    "width" double precision,
+    "height" double precision,
+    "imageWidth" int,
+    "imageHeight" int,
+    "imageHash" text,
+    "overlay" boolean,
     "data" jsonb,
     "addedEntries" text[],
     "removedEntries" text[],
@@ -406,6 +428,7 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
+    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,
     "reason" text
@@ -466,7 +489,7 @@ CREATE TABLE IF NOT EXISTS "note history" (
     "updater" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "updatedDate" timestamptz,
     "order" int,
-    "data" jsonb,
+    "notes" jsonb,
     "addedEntries" text[],
     "removedEntries" text[],
     "reason" text
@@ -506,6 +529,7 @@ CREATE TABLE IF NOT EXISTS "tag history" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
+    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,
     "reason" text
@@ -529,11 +553,11 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "title" text,
     "englishTitle" text,
     "artist" text,
-    "link" text,
+    "source" text,
     "commentary" text,
     "englishCommentary" text,
     "bookmarks" int,
-    "purchaseLink" text,
+    "buyLink" text,
     "mirrors" jsonb,
     "slug" text,
     "hasOriginal" boolean,
@@ -746,7 +770,7 @@ CREATE INDEX IF NOT EXISTS "idx_unverified_notes"
 CREATE INDEX IF NOT EXISTS "idx_sessions_expire"
     ON "sessions" ("expires");
 
--- Triggers
+-- Auto-generated tables
 
 CREATE TABLE IF NOT EXISTS "tag map tags" (
     "postID" bigint PRIMARY KEY REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE CASCADE,

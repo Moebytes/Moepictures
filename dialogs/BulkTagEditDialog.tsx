@@ -11,7 +11,7 @@ import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
 import comic from "../assets/icons/comic.png"
 import cute from "../assets/icons/cute.png"
-import flirty from "../assets/icons/flirty.png"
+import sexy from "../assets/icons/sexy.png"
 import ecchi from "../assets/icons/ecchi.png"
 import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
@@ -20,6 +20,7 @@ import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
 import sketch from "../assets/icons/sketch.png"
+import lineart from "../assets/icons/lineart.png"
 import promo from "../assets/icons/promo.png"
 import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
@@ -99,11 +100,12 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const bulkQuickEdit = async () => {
         if (!permissions.isAdmin(session)) return setShowBulkTagEditDialog(false)
         if (!selectionMode) return setShowBulkTagEditDialog(false)
-        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim() && !appendTags?.trim()) return setShowBulkTagEditDialog(false)
+        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim() && !appendTags?.trim()
+        && type === "x" && rating === "x" && style === "x") return setShowBulkTagEditDialog(false)
         let promiseArray = [] as Promise<any>[]
         for (const postID of selectionItems.values()) {
             const promise = new Promise(async (resolve) => {
-                const post = selectionPosts.get(postID)
+                const post = selectionPosts.get(String(postID))
                 const parsedTags = await functions.parseTagsSingle(post, session, setSessionFlag)
                 const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag, true)
 
@@ -311,6 +313,11 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
                     </button> : null}
                     {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
+                        <img className="quickedit-button-img" src={lineart}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
+                    </button> : null}
+                    {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
                         <img className="quickedit-button-img" src={promo}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
@@ -325,11 +332,11 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         if (type === "comic") {
             if (style === "daki") setStyle("2d")
         } else if (type === "model") {
-            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "lineart" || style === "promo") setStyle("3d")
         } else if (type === "live2d") {
-            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
+            if (style === "3d" || style === "sketch" || style === "lineart" || style === "promo") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "lineart" || style === "promo") setStyle("2d")
         }
     }, [type, style])
 
@@ -421,9 +428,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={cute}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
-                    <img className="quickedit-button-img" src={flirty}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
+                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="quickedit-button-img" src={sexy}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="quickedit-button-img" src={ecchi}/>
@@ -446,9 +453,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={cute}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
-                    <img className="quickedit-button-img" src={flirty}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.flirty}</span>
+                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="quickedit-button-img" src={sexy}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="quickedit-button-img" src={ecchi}/>

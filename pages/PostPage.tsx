@@ -513,7 +513,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const revertPostHistory = async () => {
         let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
         if (post.artists) {
-            let categories = await functions.tagCategories(currentPost.tags, session, setSessionFlag)
+            let categories = await functions.tagCategories(currentPost.tags!, session, setSessionFlag)
             currentPost.artists = categories.artists.map((a: any) => a.tag)
             currentPost.characters = categories.characters.map((c: any) => c.tag)
             currentPost.series = categories.series.map((s: any) => s.tag)
@@ -529,11 +529,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 englishTitle: post.englishTitle,
                 artist: post.artist,
                 posted: post.posted ? functions.formatDate(new Date(post.posted), true) : "",
-                link: post.link,
+                source: post.source,
                 commentary: post.commentary,
                 englishCommentary: post.englishCommentary,
                 bookmarks: post.bookmarks,
-                purchaseLink: post.purchaseLink,
+                buyLink: post.buyLink,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
             }
         }
@@ -739,7 +739,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {generateGroupsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
-                    {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
+                    {post?.purchaseLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}

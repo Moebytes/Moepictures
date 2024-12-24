@@ -10,8 +10,8 @@ import GridLive2D from "./GridLive2D"
 import noresults from "../assets/images/noresults.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import path from "path"
 import "./styles/imagegrid.less"
+import {PostSearch} from "../types/Types"
 
 let interval = null as any
 let reloadedPost = false
@@ -308,7 +308,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = null as any
+        let result = null as unknown as PostSearch[]
         if (isRandomSearch) {
             result = await functions.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, sort: "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
         } else {
@@ -316,7 +316,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, sort: functions.parseSort(sortType, sortReverse), showChildren, limit, offset: newOffset}, session, setSessionFlag)
         }
         let hasMore = result?.length >= limit
-        const cleanPosts = posts.filter((p: any) => !p.fake)
+        const cleanPosts = posts.filter((p) => !p.fake)
         if (!scroll) {
             if (cleanPosts.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, postCount: cleanPosts[0]?.postCount}), ...result]
@@ -347,7 +347,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!loaded) return
             if (visiblePosts.length < getPageAmount()) {
                 let currentIndex = index
-                const newVisiblePosts = visiblePosts as any
+                const newVisiblePosts = visiblePosts
                 const max = getPageAmount() - visiblePosts.length 
                 for (let i = 0; i < max; i++) {
                     if (!posts[currentIndex]) return updateOffset()
@@ -368,7 +368,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!posts[currentIndex]) return updateOffset()
-                const newVisiblePosts = visiblePosts as any
+                const newVisiblePosts = visiblePosts
                 for (let i = 0; i < getLoadAmount(); i++) {
                     if (!posts[currentIndex]) return updateOffset()
                     const post = posts[currentIndex]
@@ -388,7 +388,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
-        if (search) searchParams.set("search", search)
+        if (search) searchParams.set("query", search)
         if (!scroll) searchParams.set("page", String(page))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
@@ -556,7 +556,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const generateImagesJSX = () => {
         const jsx = [] as any
-        let visible = [] as any[]
+        let visible = [] as PostSearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visiblePosts)
         } else {
@@ -564,7 +564,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             visible = posts.slice(postOffset, postOffset + getPageAmount())
         }
         for (let i = 0; i < visible.length; i++) {
-            const post = visible[i] as any
+            const post = visible[i]
             if (post.fake) continue
             // if (!showChildren) if (post.parentID) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue

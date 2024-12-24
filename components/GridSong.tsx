@@ -8,17 +8,18 @@ import functions from "../structures/Functions"
 import "./styles/gridimage.less"
 import musicNote from "../assets/icons/music-note.png"
 import privateIcon from "../assets/icons/lock-opt.png"
+import {PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
 
 interface Props {
-    id: number
+    id: string
     img: string
     audio: string
     cached: boolean
     width?: number
     height?: number
-    post: any
+    post: PostSearch
     reupdate?: () => void
 }
 

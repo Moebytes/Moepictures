@@ -112,6 +112,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         let items = [] as any[]
         for (let i = 0; i < group.posts.length; i++) {
             const post = group.posts[i]
+            if (!session.username) if (post.rating !== functions.r13()) continue
             if (functions.isR18(post.rating)) if (!functions.isR18(ratingType)) continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
             let img = await functions.decryptThumb(imageLink, session)

@@ -1,15 +1,17 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Tag, BulkTag, TagCount, Implication, Alias, PostTagged, 
+AliasHistory, ImplicationHistory, AliasHistorySearch} from "../types/Types"
 
 export default class SQLTag {
     /** Insert a new tag. */
     public static insertTag = async (tag: string, type?: string, creator?: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tags" ("tag", "createDate"${type ? `, "type"` : ""}${creator ? `, "creator"` : ""}) 
-                VALUES ($1, $2${type ? `, $3` : ""}${creator ? `, $4` : ""})`,
-        values: [tag, now]
+            text: /*sql*/`INSERT INTO "tags" ("tag", "createDate"${type ? `, "type"` : ""}${creator ? `, "creator"` : ""}) 
+            VALUES ($1, $2${type ? `, $3` : ""}${creator ? `, $4` : ""})`,
+            values: [tag, now]
         }
         if (type) query.values?.push(type)
         if (creator) query.values?.push(creator)
@@ -23,17 +25,15 @@ export default class SQLTag {
     }
 
     /** Insert a new tag (all populated fields). */
-    public static insertTagFromData = async (data: {tag: string, type: string, image: string, imageHash: string, description: string, creator: string, 
-        createDate: string, updater: string, updatedDate: string, website: string, social: string, twitter: string, fandom: string,
-        pixivTags: string[], banned: boolean, hidden: boolean, r18: boolean}) => {
-        const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
-            banned, hidden, r18} = data
+    public static insertTagFromData = async (data: Tag) => {
+        const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
+            twitter, fandom, pixivTags, banned, hidden, r18, featured} = data
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", "updater", "updatedDate", 
-                "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7, 
-                $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-        values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
-                banned, hidden, r18]
+            text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", 
+            "updater", "updatedDate", "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18", 
+            "featured") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+            values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
+            twitter, fandom, pixivTags, banned, hidden, r18, featured]
         }
         try {
             await SQLQuery.flushDB()
@@ -45,7 +45,7 @@ export default class SQLTag {
     }
 
     /** Bulk insert new tags. */
-    public static bulkInsertTags = async (bulkTags: any[], creator: string, noImageUpdate?: boolean) => {
+    public static bulkInsertTags = async (bulkTags: BulkTag[], creator: string, noImageUpdate?: boolean) => {
         let tagValues = new Set<string>()
         let rawValues = [] as any
         let valueArray = [] as any 
@@ -68,9 +68,12 @@ export default class SQLTag {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tags" ("tag", "type", "description", "image", "imageHash", "createDate", "creator", "updatedDate", "updater") ${valueQuery} 
-                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`,
-        values: [...rawValues]
+            text: functions.multiTrim(
+                /*sql*/`INSERT INTO "tags" ("tag", "type", "description", "image", "imageHash", "createDate", "creator", 
+                "updatedDate", "updater") ${valueQuery} ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"
+                ${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`
+            ),
+            values: [...rawValues]
         }
         await SQLQuery.flushDB()
         return SQLQuery.run(query)
@@ -79,20 +82,20 @@ export default class SQLTag {
     /** Insert a new tag (unverified). */
     public static insertUnverifiedTag = async (tag: string, type?: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified tags" ("tag"${type ? `, "type"` : ""}) VALUES ($1${type ? `, $2` : ""})`,
-        values: [tag]
+            text: /*sql*/`INSERT INTO "unverified tags" ("tag"${type ? `, "type"` : ""}) VALUES ($1${type ? `, $2` : ""})`,
+            values: [tag]
         }
         if (type) query.values?.push(type)
         try {
-        await SQLQuery.run(query)
-        return false
+            await SQLQuery.run(query)
+            return false
         } catch {
-        return true
+            return true
         }
     }
 
     /** Bulk insert new tags (unverified). */
-    public static bulkInsertUnverifiedTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
+    public static bulkInsertUnverifiedTags = async (bulkTags: BulkTag[], noImageUpdate?: boolean) => {
         let tagValues = [] as any
         let rawValues = [] as any
         let valueArray = [] as any 
@@ -111,9 +114,12 @@ export default class SQLTag {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified tags" ("tag", "type", "description", "image", "imageHash") ${valueQuery} 
-                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`,
-        values: [...rawValues]
+            text: functions.multiTrim(
+                /*sql*/`INSERT INTO "unverified tags" ("tag", "type", "description", "image", "imageHash") ${valueQuery} 
+                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"
+                ${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`
+            ),
+            values: [...rawValues]
         }
         return SQLQuery.run(query)
     }
@@ -125,7 +131,7 @@ export default class SQLTag {
         values: [value, tag]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Update a tag (unverified). */
@@ -134,11 +140,11 @@ export default class SQLTag {
         text: /*sql*/`UPDATE "unverified tags" SET "${column}" = $1 WHERE "tag" = $2`,
         values: [value, tag]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Insert a new tag map. */
-    public static insertTagMap = async (postID: number, tags: string[]) => {
+    public static insertTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
         let i = 2
         let valueArray = [] as any
@@ -147,18 +153,16 @@ export default class SQLTag {
             i++
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
-        const query: QueryArrayConfig = {
+        const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
-            rowMode: "array",
             values: [postID, ...tags]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        await SQLQuery.run(query)
     }
 
     /** Delete tag map. */
-    public static deleteTagMap = async (postID: number, tags: string[]) => {
+    public static deleteTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
         const tagPlaceholders = tags.map((value, index) => `$${index + 2}`).join(", ")
         const query: QueryConfig = {
@@ -166,11 +170,11 @@ export default class SQLTag {
             values: [postID, ...tags]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Insert a new tag map (unverified). */
-    public static insertUnverifiedTagMap = async (postID: number, tags: string[]) => {
+    public static insertUnverifiedTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
         let i = 2
         let valueArray = [] as any
@@ -179,17 +183,15 @@ export default class SQLTag {
             i++
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
-        const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "unverified tag map" ("postID", "tag") ${valueQuery}`,
-        rowMode: "array",
-        values: [postID, ...tags]
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "unverified tag map" ("postID", "tag") ${valueQuery}`,
+            values: [postID, ...tags]
         }
-        const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        await SQLQuery.run(query)
     }
 
     /** Delete tag map (unverified). */
-    public static deleteUnverifiedTagMap = async (postID: number, tags: string[]) => {
+    public static deleteUnverifiedTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
         const tagPlaceholders = tags.map((value, index) => `$${index + 2}`).join(", ")
         const query: QueryConfig = {
@@ -197,7 +199,7 @@ export default class SQLTag {
             values: [postID, ...tags]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get tags. */
@@ -215,7 +217,7 @@ export default class SQLTag {
         }
         if (tags?.[0]) query.values = [tags]
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<Tag[]>
     }
 
     /** Get unverified tags. */
@@ -233,7 +235,7 @@ export default class SQLTag {
         }
         if (tags?.[0]) query.values = [tags]
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Tag[]>
     }
 
     /** Get tag. */
@@ -250,7 +252,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return result[0] as Promise<Tag>
     }
 
     /** Get tag counts. */
@@ -268,7 +270,7 @@ export default class SQLTag {
         }
         if (tags?.[0]) query.values = [tags]
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<TagCount[]>
     }
 
     /** Get related tags. */
@@ -282,7 +284,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return (result[0]?.related || []) as Promise<string[]>
     }
 
     /** Delete tag. */
@@ -292,8 +294,7 @@ export default class SQLTag {
         values: [tag]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete tag (unverified). */
@@ -302,8 +303,7 @@ export default class SQLTag {
         text: functions.multiTrim(/*sql*/`DELETE FROM "unverified tags" WHERE "unverified tags"."tag" = $1`),
         values: [tag]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert aliases. */
@@ -315,7 +315,7 @@ export default class SQLTag {
             values: [tag, ...aliases]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete aliases. */
@@ -327,7 +327,7 @@ export default class SQLTag {
             values: [tag, ...aliases]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Insert a new alias (unverified). */
@@ -355,7 +355,7 @@ export default class SQLTag {
             values: [alias]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return result[0] as Promise<Alias>
     }
 
     /** Alias search. */
@@ -371,7 +371,7 @@ export default class SQLTag {
         }
         if (search) query.values = [search.toLowerCase()]
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<Alias[]>
     }
 
     /** Bulk insert implications. */
@@ -383,7 +383,7 @@ export default class SQLTag {
             values: [tag, ...implications]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk delete implications. */
@@ -395,7 +395,7 @@ export default class SQLTag {
             values: [tag, ...implications]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get implications. */
@@ -409,7 +409,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<Implication[]>
     }
 
     /** Rename tag map. */
@@ -419,7 +419,7 @@ export default class SQLTag {
             values: [newTag, tag]
         }
         await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get tag posts. */
@@ -428,11 +428,11 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`
                     WITH post_json AS (
                         SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                        array_agg(DISTINCT "tag map".tag) AS tags
+                        "tag map tags"."tags"
                         FROM posts
                         JOIN images ON posts."postID" = images."postID"
-                        JOIN "tag map" ON posts."postID" = "tag map"."postID"
-                        GROUP BY posts."postID"
+                        JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"
+                        GROUP BY posts."postID", "tag map tags"."tags"
                     )
                     SELECT "tag map"."postID",
                     to_json((array_agg(post_json.*))[1]) AS post
@@ -444,7 +444,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query)
-        return result.map((r: any) => r.post)
+        return result.map((r: any) => r.post) as Promise<PostTagged[]>
     }
 
     /** Get tag from pixiv tag. */
@@ -458,57 +458,57 @@ export default class SQLTag {
             values: [pixivTag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0]
+        return result[0] as Promise<Tag>
     }
 
     /** Insert alias history */
     public static insertAliasHistory = async (username: string, source: string, target: string, type: string, 
         affectedPosts: any, sourceData: any, reason?: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
+        const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "alias history" ("user", "date", "source", "target", "type", "affectedPosts", "sourceData", 
-            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "historyID"`,
+            rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, sourceData, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete alias history */
-    public static deleteAliasHistory = async (historyID: number) => {
+    public static deleteAliasHistory = async (historyID: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`DELETE FROM "alias history" WHERE "alias history"."historyID" = $1`),
             values: [historyID]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert implication history */
     public static insertImplicationHistory = async (username: string, source: string, target: string, type: string, 
         affectedPosts: any, reason?: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
+        const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "implication history" ("user", "date", "source", "target", "type", "affectedPosts", 
-            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "historyID"`,
+            rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Delete implication history */
-    public static deleteImplicationHistory = async (historyID: number) => {
+    public static deleteImplicationHistory = async (historyID: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`DELETE FROM "implication history" WHERE "implication history"."historyID" = $1`),
             values: [historyID]
         }
         await SQLQuery.flushDB()
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get alias history ID */
@@ -522,7 +522,7 @@ export default class SQLTag {
             values: [historyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<AliasHistory>
     }
 
     /** Get implication history ID */
@@ -536,11 +536,11 @@ export default class SQLTag {
             values: [historyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<ImplicationHistory>
     }
 
     /** Get alias/implication history */
-    public static aliasImplicationHistory = async (offset?: string, search?: string) => {
+    public static aliasImplicationHistory = async (offset?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -574,6 +574,6 @@ export default class SQLTag {
         }
         if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<AliasHistorySearch[]>
     }
 }

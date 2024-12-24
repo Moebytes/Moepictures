@@ -22,7 +22,7 @@ const CommentRoutes = (app: Express) => {
         try {
             const commentID = req.query.commentID as string
             if (!commentID) return res.status(400).send("Bad commentID")
-            const result = await sql.comment.comment(Number(commentID))
+            const result = await sql.comment.comment(commentID)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -39,7 +39,7 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const badComment = functions.validateComment(comment, enLocale)
             if (badComment) return res.status(400).send("Bad comment")
-            await sql.comment.insertComment(Number(postID), req.session.username, comment)
+            await sql.comment.insertComment(postID, req.session.username, comment)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -49,14 +49,14 @@ const CommentRoutes = (app: Express) => {
 
     app.delete("/api/comment/delete", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
-            const commentID = req.query.commentID
+            const commentID = req.query.commentID as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
-            const comment = await sql.comment.comment(Number(commentID))
+            const comment = await sql.comment.comment(commentID)
             if (comment?.username !== req.session.username) {
                 if (!permissions.isMod(req.session)) return res.status(403).end()
             }
-            await sql.comment.deleteComment(Number(commentID))
+            await sql.comment.deleteComment(commentID)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -72,9 +72,9 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const badComment = functions.validateComment(comment as string, enLocale)
             if (badComment) return res.status(400).send("Bad comment")
-            const com = await sql.comment.comment(Number(commentID))
+            const com = await sql.comment.comment(commentID)
             if (com?.username !== req.session.username) return res.status(400).send("You can only edit your own comment")
-            await sql.comment.updateComment(Number(commentID), comment as string)
+            await sql.comment.updateComment(commentID, comment as string)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -106,7 +106,7 @@ const CommentRoutes = (app: Express) => {
             if (!reportID) return res.status(400).send("Bad reportID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
 
-            await sql.report.deleteCommentReport(Number(reportID))
+            await sql.report.deleteCommentReport(reportID)
             if (accepted) {
                 let message = `Comment report on ${functions.getDomain()}/post/${id} was accepted. The comment made by ${username} has been removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Comment report has been accepted", message)

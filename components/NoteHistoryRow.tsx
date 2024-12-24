@@ -56,7 +56,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.put("/api/note/save", {postID: props.noteHistory.postID, order: props.noteHistory.order,
-        data: props.noteHistory.data}, session, setSessionFlag)
+        data: props.noteHistory}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -204,8 +204,8 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const diffText = () => {
         if (!prevHistory) {
-            if (props.noteHistory.data[0].transcript === "No data") return "No data"
-            return props.noteHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
+            if (props.noteHistory.notes[0].transcript === "No data") return "No data"
+            return props.noteHistory.notes.map((item: any) => `${item.transcript} -> ${item.translation}`)
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return null

@@ -9,18 +9,19 @@ import "./styles/gridimage.less"
 import * as THREE from "three"
 import privateIcon from "../assets/icons/lock-opt.png"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
 let imageTimer = null as any
 let id = null as any
 
 interface Props {
-    id: number
+    id: string
     img: string
     model: string
     width?: number
     height?: number
-    post: any
+    post: PostSearch
     reupdate?: () => void
 }
 

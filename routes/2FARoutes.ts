@@ -35,7 +35,8 @@ const $2FARoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
                 res.status(200).send("Success")
             }
         } catch (e) {
@@ -73,7 +74,8 @@ const $2FARoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device, region)
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")
@@ -95,6 +97,7 @@ const $2FARoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
+            const region = await serverFunctions.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken.token, token, 60)
             if (validToken) {
@@ -127,10 +130,10 @@ const $2FARoutes = (app: Express) => {
                 req.session.postCount = user.postCount
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
-                await sql.user.insertLoginHistory(user.username, "login", ip, device)
+                await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")
             } else {
-                await sql.user.insertLoginHistory(user.username, "login 2fa failed", ip, device)
+                await sql.user.insertLoginHistory(user.username, "login 2fa failed", ip, device, region)
                 res.status(400).send("Bad token")
             }
         } catch (e) {

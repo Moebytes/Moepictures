@@ -296,6 +296,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
+        if ((!prevHistory && props.tagHistory.featured) || changes.featured) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}:</span> {props.tagHistory.featured}</span>)
+        }
         if ((!prevHistory && props.tagHistory.r18) || changes.r18) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
         }

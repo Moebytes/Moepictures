@@ -2,17 +2,18 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {PostType, PostRating, PostStyle, PostSize, PostSort} from "../types/Types"
 
 const searchSlice = createSlice({
     name: "search",
     initialState: {
         search: "",
         searchFlag: false,
-        imageType: "all",
-        ratingType: "all",
-        styleType: "all",
-        sizeType: "medium",
-        sortType: "random",
+        imageType: "all" as PostType,
+        ratingType: "all" as PostRating,
+        styleType: "all" as PostStyle,
+        sizeType: "medium" as PostSize,
+        sortType: "random" as PostSort,
         sortReverse: false,
         square: false,
         scroll: false,

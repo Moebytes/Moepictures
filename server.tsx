@@ -40,6 +40,7 @@ import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
 import {imageLock, imageMissing} from "./structures/ImageLock"
+import {ServerSession} from "./types/Types"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -51,37 +52,7 @@ app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 
 declare module "express-session" {
-  interface SessionData {
-      username: string
-      email: string
-      joinDate: string
-      image: string | null
-      imageHash: string | null
-      imagePost: string | null
-      bio: string 
-      emailVerified: boolean
-      publicFavorites: boolean
-      showRelated: boolean
-      showTooltips: boolean
-      showTagBanner: boolean
-      downloadPixivID: boolean
-      autosearchInterval: number
-      upscaledImages: boolean
-      savedSearches: string
-      showR18: boolean
-      premiumExpiration: string
-      banExpiration: string
-      postCount: number
-      $2fa: boolean
-      ip: string
-      role: string
-      captchaNeeded: boolean
-      csrfSecret: string
-      csrfToken: string
-      captchaAnswer: string
-      banned: boolean
-      publicKey: string
-  }
+  interface SessionData extends ServerSession {}
 }
 
 const s3 = new S3({region: "us-east-1", credentials: {
@@ -113,7 +84,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "lax", secure: "auto"},
+  cookie: {maxAge: Number.MAX_SAFE_INTEGER, sameSite: "lax", secure: "auto"},
   rolling: true,
   resave: false,
   saveUninitialized: false
@@ -234,7 +205,7 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
-        const post = await sql.post.post(Number(postID))
+        const post = await sql.post.post(postID)
         if (functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
@@ -285,7 +256,7 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
-        const post = await sql.post.post(Number(postID))
+        const post = await sql.post.post(postID)
         if (functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true

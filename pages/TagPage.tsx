@@ -60,6 +60,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const [postIndex, setPostIndex] = useState(0)
     const [relatedTags, setRelatedTags] = useState([]) as any
     const [historyID, setHistoryID] = useState(null as any)
+    const [featuredImage, setFeaturedImage] = useState("")
     const [count, setCount] = useState(0)
     const history = useHistory()
     const location = useLocation()
@@ -105,6 +106,19 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
+        if (tag.featured) {
+            const featuredPost = await functions.get("/api/post", {postID: tag.featured},  session, setSessionFlag)
+            const featuredImage = functions.getThumbnailLink(featuredPost.images[0].type, featuredPost.postID, featuredPost.images[0].order, featuredPost.images[0].filename, "massive", mobile)
+            const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
+            if ((!session.username && featuredPost.rating !== functions.r13()) || 
+                (!session.showR18 && featuredPost.rating !== functions.r18())) {
+                setFeaturedImage("")
+            } else {
+                setFeaturedImage(decrypted)
+            }
+        } else {
+            setFeaturedImage("")
+        }
     }
 
     const updateRelatedTags = async () => {
@@ -166,12 +180,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const searchTag = (event: React.MouseEvent, alias?: string) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open("/posts", "_blank")
+            window.open(`/posts?query=${alias ? alias : tag.tag}`, "_blank")
         } else {
             history.push("/posts")
+            setSearch(alias ? alias : tag.tag)
+            setSearchFlag(true)
         }
-        setSearch(alias ? alias : tag.tag)
-        setSearchFlag(true)
     }
 
     const tagSocialJSX = () => {
@@ -226,14 +240,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description,
             image, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
-            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
             history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+                r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: tag.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: tag.tag, failed: true})
@@ -265,6 +279,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             website: tag.website,
             fandom: tag.fandom,
             r18: tag.r18,
+            featured: tag.featured,
             reason: ""
         })
     }
@@ -381,7 +396,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (tagPosts.length) {
             return (
                 <div className="tag-column">
-                    <span><span className="tag-label" onClick={searchTag}>{i18n.sort.posts}</span> <span className="tag-label-alt">{count}</span></span>
+                    <span><span className="tag-label" onClick={searchTag} onAuxClick={searchTag}>{i18n.sort.posts}</span> <span className="tag-label-alt">{count}</span></span>
                     <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={250}/>
                 </div>
             )
@@ -450,6 +465,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         return functions.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
+    const featuredClick = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${tag.featured}`, "_blank")
+        } else {
+            history.push(`/post/${tag.featured}`)
+        }
+    }
+
     return (
         <>
         <CategorizeTagDialog/>
@@ -465,25 +488,33 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                 {tag ? 
                 <div className="tag-page">
                     {historyID ? getHistoryButtons() : null}
-                    <div className="tag-row">
-                        {tag.image ?
-                        <div className="tag-img-container">
-                            <img className="tag-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                    <div className="tag-row-container">
+                        {featuredImage ?
+                        <div className="tag-container" style={{justifyContent: "center", alignItems: "center"}}>
+                            <img className="tag-featured-img" src={featuredImage} onClick={featuredClick} onAuxClick={featuredClick}/>
                         </div> : null}
-                        <span className={`tag-heading ${functions.getTagColor(tag)}`}>{getTagName()}</span>
-                        {tagSocialJSX()}
-                        {tagOptionsJSX()}
+                        <div className="tag-container">
+                            <div className="tag-row">
+                                {tag.image ?
+                                <div className="tag-img-container">
+                                    <img className="tag-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                                </div> : null}
+                                <span className={`tag-heading ${functions.getTagColor(tag)}`}>{getTagName()}</span>
+                                {tagSocialJSX()}
+                                {tagOptionsJSX()}
+                            </div>
+                            {pixivTagsJSX()}
+                            {tagAliasJSX()}
+                            {tag.banned ? <div className="tag-row">
+                                <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
+                            </div> : null}
+                            <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                                <span className="tag-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>
+                            </div>
+                            {tagImplicationJSX()}
+                            {relatedTagJSX()}
+                        </div>
                     </div>
-                    {pixivTagsJSX()}
-                    {tagAliasJSX()}
-                    {tag.banned ? <div className="tag-row">
-                        <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
-                    </div> : null}
-                    <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="tag-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>
-                    </div>
-                    {tagImplicationJSX()}
-                    {relatedTagJSX()}
                     {postsJSX()}
                 </div> : null}
                 <Footer/>

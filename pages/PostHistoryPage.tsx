@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -35,6 +36,16 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const postID = props.match?.params.id
     const username = props.match?.params.username
+    const history = useHistory()
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (!session.username) {
+            setRedirect(postID ? `/post/history/${postID}` : "/post/history")
+            history.push("/login")
+            setSidebarText(i18n.sidebar.loginRequired)
+        }
+    }, [session])
 
     const updateHistory = async () => {
         let result = [] as any
@@ -44,9 +55,9 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/post/history", {postID, username}, session, setSessionFlag)
             if (!result.length) {
                 const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
-                postObject.date = postObject.uploadDate 
+                postObject.date = postObject.uploadDate
                 postObject.user = postObject.uploader
-                let categories = await functions.tagCategories(postObject.tags.map((tag: string) => ({tag})), session, setSessionFlag)
+                let categories = await functions.tagCategories(postObject.tags, session, setSessionFlag)
                 postObject.artists = categories.artists.map((a: any) => a.tag)
                 postObject.characters = categories.characters.map((c: any) => c.tag)
                 postObject.series = categories.series.map((s: any) => s.tag)
@@ -154,7 +165,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.postID !== current.postID) previous = null
             jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visibleRevisions[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={updateHistory} onEdit={updateHistory}/>)
+                onDelete={updateHistory} onEdit={updateHistory} imageHeight={300}/>)
         }
         return jsx
     }

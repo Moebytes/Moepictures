@@ -67,7 +67,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             }
             await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
             implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-            r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+            r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -247,6 +247,8 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 {editTagObj.image && editTagObj.image !== "delete" ? 
                 <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
                 : null}
+                <span style={{marginLeft: "20px"}} className="dialog-text">{i18n.labels.featured}: </span>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.featured} onChange={(event) => setEditTagObj({...editTagObj, featured: event.target.value})} style={{width: "20%"}}/>
             </div>
             {editTagObj.image && editTagObj.image !== "delete" ? 
             <div className="dialog-row">

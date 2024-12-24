@@ -21,7 +21,7 @@ import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import live2d from "../assets/icons/live2d.png"
 import cute from "../assets/icons/cute.png"
-import flirty from "../assets/icons/flirty.png"
+import sexy from "../assets/icons/sexy.png"
 import ecchi from "../assets/icons/ecchi.png"
 import hentai from "../assets/icons/hentai.png"
 import $2d from "../assets/icons/2d.png"
@@ -30,6 +30,7 @@ import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
 import daki from "../assets/icons/daki.png"
 import sketch from "../assets/icons/sketch.png"
+import lineart from "../assets/icons/lineart.png"
 import promo from "../assets/icons/promo.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
@@ -99,7 +100,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [sourceDate, setSourceDate] = useState("")
     const [sourceLink, setSourceLink] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
-    const [sourcePurchaseLink, setSourcePurchaseLink] = useState("")
+    const [sourceBuyLink, setSourceBuyLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
@@ -124,7 +125,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [danbooruLink, setDanbooruLink] = useState("")
     const [needsPermission, setNeedsPermission] = useState(false)
     const [postLocked, setPostLocked] = useState(false)
-    const postID = Number(props?.match.params.id)
+    const postID = props?.match.params.id
     const history = useHistory()
 
     const updateFields = async () => {
@@ -146,9 +147,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceEnglishCommentary(post.englishCommentary || "")
         setSourceMirrors(post.mirrors ? Object.values(post.mirrors).join("\n") : "")
         if (post.posted) setSourceDate(functions.formatDate(new Date(post.posted), true))
-        setSourceLink(post.link || "")
+        setSourceLink(post.source || "")
         setSourceBookmarks(post.bookmarks || "")
-        setSourcePurchaseLink(post.purchaseLink || "")
+        setSourceBuyLink(post.buyLink || "")
         const parentPost = await functions.get("/api/post/parent", {postID}, session, setSessionFlag)
         if (parentPost) setParentID(parentPost.parentID)
 
@@ -187,7 +188,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image, tagCategories.artists[i].imageHash))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image!, tagCategories.artists[i].imageHash))
                 artists[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 artists[i].ext = path.extname(imageLink).replace(".", "")
@@ -201,7 +202,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image, tagCategories.characters[i].imageHash))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image!, tagCategories.characters[i].imageHash))
                 characters[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -215,7 +216,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image, tagCategories.series[i].imageHash))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image!, tagCategories.series[i].imageHash))
                 series[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 series[i].ext = path.extname(imageLink).replace(".", "")
@@ -230,7 +231,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, rating, style, sourceTitle, sourceArtist, sourceCommentary, sourceEnglishCommentary, sourceMirrors, sourceEnglishTitle,
-    sourceLink, sourceBookmarks, sourcePurchaseLink, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
+    sourceLink, sourceBookmarks, sourceBuyLink, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -434,7 +435,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceDate("")
         setSourceLink("")
         setSourceBookmarks("")
-        setSourcePurchaseLink("")
+        setSourceBuyLink("")
         setRawTags("")
         setArtists([{}])
         setCharacters([{}])
@@ -947,11 +948,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 englishTitle: sourceEnglishTitle,
                 artist: sourceArtist,
                 posted: sourceDate,
-                link: sourceLink,
+                source: sourceLink,
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
                 bookmarks: sourceBookmarks,
-                purchaseLink: sourcePurchaseLink,
+                buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
             artists,
@@ -1014,7 +1015,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         } else {
             bytes = Object.values(current.bytes) as any
         }
-        let link = ""
+        let source = ""
         let artist = ""
         let title = ""
         let englishTitle = ""
@@ -1028,14 +1029,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             let basename = path.basename(current.name, path.extname(current.name)).trim()
             if (/^\d+(?=$|_p)/.test(basename)) {
                 const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
-                link = `https://www.pixiv.net/en/artworks/${pixivID}`
+                source = `https://www.pixiv.net/artworks/${pixivID}`
                 const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
                 if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                 try {
-                    const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
+                    const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
                     commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                     date = functions.formatDate(new Date(illust.create_date), true)
-                    link = illust.url 
+                    source = illust.url
                     title = illust.title
                     artist = illust.user.name
                     bookmarks = illust.total_bookmarks
@@ -1055,7 +1056,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 } catch (e) {
                     console.log(e)
                 }
-                mirrors = await functions.post("/api/misc/boorulinks", {pixivID}, session, setSessionFlag)
+                mirrors = await functions.post("/api/misc/boorulinks", {bytes, pixivID}, session, setSessionFlag)
             } else {
                 let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
                 if (results.length) {
@@ -1068,7 +1069,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     const konachan = results.filter((r: any) => r.header.index_id === 26)
                     const yandere = results.filter((r: any) => r.header.index_id === 12)
                     const anime = results.filter((r: any) => r.header.index_id === 21)
-                    if (pixiv.length) mirrors.push(`https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`)
+                    if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
                     if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
                     if (deviantart.length) {
                         let redirectedLink = ""
@@ -1086,7 +1087,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
                     if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
                     if (pixiv.length) {
-                        link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
+                        source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
                         if (!danbooru.length) {
                             const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                             if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
@@ -1094,10 +1095,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         artist = pixiv[0].data.author_name
                         title = pixiv[0].data.title
                         try {
-                            const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
+                            const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
                             commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                             date = functions.formatDate(new Date(illust.create_date), true)
-                            link = illust.url 
+                            source = illust.url 
                             title = illust.title
                             artist = illust.user.name
                             bookmarks = illust.total_bookmarks
@@ -1128,14 +1129,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         } catch {
                             // ignore
                         }
-                        link = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
+                        source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
                         artist = deviantart[0].data.member_name 
                         title = deviantart[0].data.title
                         try {
-                            const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
+                            const deviation = await functions.get(`/api/misc/deviantart?url=${source}`, null, session, setSessionFlag)
                             title = deviation.title
                             artist = deviation.author.user.username
-                            link = deviation.url
+                            source = deviation.url
                             commentary = deviation.description
                             date = functions.formatDate(new Date(deviation.date), true)
                             if (deviation.rating === "adult") {
@@ -1156,24 +1157,24 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         } 
                     } else if (anime.length) {
                         title = anime[0].data.source 
-                        link = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
+                        source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
                     } else if (twitter.length) {
-                        link = twitter[0].data.ext_urls[0]
+                        source = twitter[0].data.ext_urls[0]
                         artist = twitter[0].data.twitter_user_handle
                     } else if (danbooru.length) {
-                        link = danbooru[0].data.ext_urls[0]
+                        source = danbooru[0].data.ext_urls[0]
                         artist = danbooru[0].data.creator
                         title = danbooru[0].data.characters
                     } else if (gelbooru.length) {
-                        link = gelbooru[0].data.ext_urls[0]
+                        source = gelbooru[0].data.ext_urls[0]
                         artist = gelbooru[0].data.creator
                         title = gelbooru[0].data.characters
                     } else if (yandere.length) {
-                        link = yandere[0].data.ext_urls[0]
+                        source = yandere[0].data.ext_urls[0]
                         artist = yandere[0].data.creator
                         title = yandere[0].data.characters
                     } else if (konachan.length) {
-                        link = konachan[0].data.ext_urls[0]
+                        source = konachan[0].data.ext_urls[0]
                         artist = konachan[0].data.creator
                         title = konachan[0].data.characters
                     }
@@ -1182,14 +1183,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             setSourceTitle(title)
             setSourceEnglishTitle(englishTitle)
             setSourceArtist(artist)
-            setSourceLink(link)
+            setSourceLink(source)
             setSourceCommentary(commentary)
             setSourceEnglishCommentary(englishCommentary)
             setSourceBookmarks(bookmarks)
             setSourceDate(date)
-            mirrors = functions.removeItem(mirrors, link)
+            mirrors = functions.removeItem(mirrors, source)
             setSourceMirrors(mirrors.join("\n"))
-            if (!title && !artist && !link) {
+            if (!title && !artist && !source) {
                 saucenaoErrorRef.current.innerText = i18n.pages.upload.noResults
                 await functions.timeout(3000)
             }
@@ -1238,7 +1239,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
                 if (tagArr.includes("dakimakura")) setStyle("daki")
                 if (tagArr.includes("sketch")) setStyle("sketch")
-                if (tagArr.includes("lineart")) setStyle("sketch")
+                if (tagArr.includes("lineart")) setStyle("lineart")
                 if (tagArr.includes("ad")) setStyle("promo")
                 if (tagArr.includes("comic")) setType("comic")
 
@@ -1309,7 +1310,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
                 if (tagArr.includes("dakimakura")) setStyle("daki")
                 if (tagArr.includes("sketch")) setStyle("sketch")
-                if (tagArr.includes("lineart")) setStyle("sketch")
+                if (tagArr.includes("lineart")) setStyle("lineart")
                 if (tagArr.includes("ad")) setStyle("promo")
                 if (tagArr.includes("comic")) setType("comic")
 
@@ -1602,6 +1603,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
+                            <img className="upload-button-img" src={lineart}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
                             <img className="upload-button-img" src={promo}/>
                             <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
@@ -1639,6 +1645,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
+                            <img className="upload-button-img" src={lineart}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
                             <img className="upload-button-img" src={promo}/>
                             <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
@@ -1653,11 +1664,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (type === "comic") {
             if (style === "daki") setStyle("2d")
         } else if (type === "model") {
-            if (style === "2d" || style === "daki" || style === "sketch" || style === "promo") setStyle("3d")
+            if (style === "2d" || style === "daki" || style === "sketch" || style === "lineart" || style === "promo") setStyle("3d")
         } else if (type === "live2d") {
-            if (style === "3d" || style === "sketch" || style === "promo") setStyle("2d")
+            if (style === "3d" || style === "sketch" || style === "lineart" || style === "promo") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi" || style === "daki" || style === "promo") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki" || style === "lineart" || style === "promo") setStyle("2d")
         }
     }, [type, style])
 
@@ -1881,9 +1892,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
-                    <img className="upload-button-img" src={flirty}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
+                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="upload-button-img" src={sexy}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="upload-button-img" src={ecchi}/>
@@ -1903,9 +1914,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "flirty" ? "button-selected" : ""}`} onClick={() => setRating("flirty")}>
-                    <img className="upload-button-img" src={flirty}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.flirty}</span>
+                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
+                    <img className="upload-button-img" src={sexy}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`upload-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
                     <img className="upload-button-img" src={ecchi}/>
@@ -1924,7 +1935,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         <input className="upload-input" type="number" value={parentID} onChange={(event) => setParentID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
             </div>
-            <span className="upload-heading">{i18n.sidebar.source}</span>
+            <span className="upload-heading">{i18n.labels.source}</span>
             <div className="upload-container">
                 {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
                 <span className="upload-link" onClick={sourceLookup}>{i18n.pages.upload.fetchFromPixiv}</span>
@@ -1945,7 +1956,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.labels.link}: </span>
+                    <span className="upload-text">{i18n.labels.source}: </span>
                     <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
@@ -1954,7 +1965,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.buyLink}: </span>
-                    <input className="upload-input-wide2" type="url" value={sourcePurchaseLink} onChange={(event) => setSourcePurchaseLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input className="upload-input-wide2" type="url" value={sourceBuyLink} onChange={(event) => setSourceBuyLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.commentary}: </span>

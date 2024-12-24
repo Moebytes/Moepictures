@@ -1,6 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {EmailToken, $2FAToken, PasswordToken} from "../types/Types"
 
 export default class SQLToken {
     /** Insert email token. */
@@ -11,8 +12,7 @@ export default class SQLToken {
         text: /*sql*/`INSERT INTO "email tokens" ("email", "token", "expires") VALUES ($1, $2, $3)`,
         values: [email, token, now.toISOString()]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Updates email token. */
@@ -23,7 +23,7 @@ export default class SQLToken {
             text: /*sql*/`UPDATE "email tokens" SET "token" = $1, "expires" = $2 WHERE "email" = $3`,
             values: [token, now.toISOString(), email]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get email token. */
@@ -38,7 +38,7 @@ export default class SQLToken {
             values: [token]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<EmailToken>
     }
 
     /** Get email tokens. */
@@ -51,7 +51,7 @@ export default class SQLToken {
             `)
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<EmailToken[]>
     }
 
     /** Delete email token. */
@@ -60,8 +60,7 @@ export default class SQLToken {
         text: /*sql*/`DELETE FROM "email tokens" WHERE "email tokens"."email" = $1`,
         values: [email]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get 2fa token. */
@@ -76,7 +75,7 @@ export default class SQLToken {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<$2FAToken>
     }
 
     /** Insert 2fa token. */
@@ -87,8 +86,7 @@ export default class SQLToken {
         text: /*sql*/`INSERT INTO "2fa tokens" ("username", "token", "qrcode") VALUES ($1, $2, $3)`,
         values: [username, token, qrcode]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Delete 2fa token. */
@@ -97,8 +95,7 @@ export default class SQLToken {
         text: /*sql*/`DELETE FROM "2fa tokens" WHERE "2fa tokens"."username" = $1`,
         values: [username]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert password token. */
@@ -109,8 +106,7 @@ export default class SQLToken {
         text: /*sql*/`INSERT INTO "password tokens" ("username", "token", "expires") VALUES ($1, $2, $3)`,
         values: [username, token, now.toISOString()]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get password token. */
@@ -125,7 +121,7 @@ export default class SQLToken {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<PasswordToken>
     }
 
     /** Get password tokens. */
@@ -138,7 +134,7 @@ export default class SQLToken {
             `)
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<PasswordToken[]>
     }
 
     /** Delete password token. */
@@ -147,8 +143,7 @@ export default class SQLToken {
         text: /*sql*/`DELETE FROM "password tokens" WHERE "password tokens"."username" = $1`,
         values: [username]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Insert payment. */
@@ -157,7 +152,6 @@ export default class SQLToken {
         text: /*sql*/`INSERT INTO "payments" ("chargeID", "username", "email") VALUES ($1, $2, $3)`,
         values: [chargeID, username, email]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 }

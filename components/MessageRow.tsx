@@ -24,7 +24,7 @@ interface Props {
     titlePage?: boolean
 }
 
-const Message: React.FunctionComponent<Props> = (props) => {
+const MessageRow: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -365,4 +365,4 @@ const Message: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default Message
+export default MessageRow

@@ -355,7 +355,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">{i18n.labels.newTags}: {post.newTags || 0}</span>
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-text">{i18n.sidebar.source}: {post.link ? i18n.buttons.yes : i18n.buttons.no}</span>
+                        <span className="mod-post-text">{i18n.labels.source}: {post.source ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.similarPosts}: {post.duplicates ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.resolution}: {post.images[0].width}x{post.images[0].height}</span>
                         <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc: any, obj: any) => acc + obj.size, 0))}</span>

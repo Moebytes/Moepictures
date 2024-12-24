@@ -76,7 +76,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text" style={{color: "var(--premiumColor)"}}>
                             {i18n.pages.premiumSuccess.thankYou}<br/><br/>
 
-                            {i18n.pages.premiumSuccess.lastUntil} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}.
+                            {i18n.pages.premiumSuccess.lastUntil} {functions.prettyDate(new Date(session.premiumExpiration || ""), i18n)}.
                         </span>
                     </div>
                     <div className="sitepage-button-container">

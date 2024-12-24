@@ -1,21 +1,24 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {Message, MessageUser, MessageSearch, MessageReply} from "../types/Types"
 
 export default class SQLMessage {
     /** Insert DM message. */
     public static insertMessage = async (creator: string, title: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updater", "updatedDate", "title", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "messageID"`,
-        values: [creator, now, creator, now, title, content, r18]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updater", "updatedDate", "title", "content", "r18") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "messageID"`,
+            rowMode: "array",
+            values: [creator, now, creator, now, title, content, r18]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0]?.messageID as number
+        return String(result.flat(Infinity)[0])
     }
 
     /** Bulk insert message recipients. */
-    public static bulkInsertRecipients = async (messageID: number, recipients: string[]) => {
+    public static bulkInsertRecipients = async (messageID: string, recipients: string[]) => {
         if (!recipients.length) return
         let dupeCheck = new Set<string>()
         let rawValues = [] as any
@@ -34,11 +37,11 @@ export default class SQLMessage {
             text: /*sql*/`INSERT INTO "message recipients" ("messageID", "recipient") ${valueQuery}`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Bulk delete message recipients. */
-    public static bulkDeleteRecipients = async (messageID: number, recipients: string[]) => {
+    public static bulkDeleteRecipients = async (messageID: string, recipients: string[]) => {
         if (!recipients.length) return
         let dupeCheck = new Set<string>()
         let rawValues = [messageID] as any
@@ -56,11 +59,11 @@ export default class SQLMessage {
             text: /*sql*/`DELETE FROM "message recipients" WHERE "messageID" = $1 AND "recipient" IN (${valueQuery})`,
             values: [...rawValues]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Search all messages. */
-    public static allMessages = async (username: string, search: string, sort: string, offset?: string, limit?: string) => {
+    public static allMessages = async (username: string, search: string, sort: string, offset?: number, limit?: number) => {
         let i = 2
         let whereQuery = `WHERE (messages.creator = $1 OR "message recipients".recipient = $1)`
         if (search) {
@@ -73,7 +76,7 @@ export default class SQLMessage {
         if (sort === "reverse date") sortQuery = `ORDER BY messages."updatedDate" ASC`
         let limitQuery = "LIMIT 100"
         if (limit) {
-            if (Number(limit) > 100) limit = "100"
+            if (Number(limit) > 100) limit = 100
             limitQuery = `LIMIT $${i}`
             i++
         }
@@ -95,7 +98,7 @@ export default class SQLMessage {
         if (limit) query.values?.push(limit)
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<MessageSearch[]>
     }
 
     /** Get user messages */
@@ -114,11 +117,11 @@ export default class SQLMessage {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<MessageSearch[]>
     }
 
     /** Get message. */
-    public static message = async (messageID: number) => {
+    public static message = async (messageID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
@@ -133,51 +136,52 @@ export default class SQLMessage {
         values: [messageID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<MessageUser>
     }
 
     /** Update message */
-    public static updateMessage = async (messageID: number, column: string, value: string | number | boolean) => {
+    public static updateMessage = async (messageID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "messages" SET "${column}" = $1 WHERE "messageID" = $2`,
             values: [value, messageID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete message */
-    public static deleteMessage = async (messageID: number) => {
+    public static deleteMessage = async (messageID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM messages WHERE messages."messageID" = $1`),
         values: [messageID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Update recipient */
-    public static updateRecipient = async (messageID: number, recipient: string, column: string, value: string | number | boolean) => {
+    public static updateRecipient = async (messageID: string, recipient: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "message recipients" SET "${column}" = $1 WHERE "messageID" = $2 AND "recipient" = $3`,
             values: [value, messageID, recipient]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Insert message reply. */
-    public static insertMessageReply = async (messageID: number, creator: string, content: string, r18: boolean) => {
+    public static insertMessageReply = async (messageID: string, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6)`,
-        values: [messageID, creator, now, now, content, r18]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content", "r18") 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
+            rowMode: "array",
+            values: [messageID, creator, now, now, content, r18]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return String(result.flat(Infinity)[0])
     }
 
     /** Get message replies. */
-    public static messageReplies = async (messageID: number, offset?: string) => {
-        if (offset && Number(offset) < 0) offset = "0"
+    public static messageReplies = async (messageID: string, offset?: number) => {
+        if (offset && Number(offset) < 0) offset = 0
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
@@ -192,7 +196,7 @@ export default class SQLMessage {
         }
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<MessageReply[]>
     }
 
     /** Get user message replies. */
@@ -209,14 +213,15 @@ export default class SQLMessage {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<MessageReply[]>
     }
 
     /** Get message reply. */
-    public static messageReply = async (replyID: number) => {
+    public static messageReply = async (replyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
+                COUNT(*) OVER() AS "replyCount"
                 FROM "message replies" 
                 JOIN users ON users.username = "message replies".creator
                 WHERE "message replies"."replyID" = $1
@@ -225,26 +230,25 @@ export default class SQLMessage {
         values: [replyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<MessageReply>
     }
 
     /** Update message reply */
-    public static updateMessageReply = async (replyID: number, column: string, value: string | number | boolean) => {
+    public static updateMessageReply = async (replyID: string, column: string, value: string | number | boolean) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "message replies" SET "${column}" = $1 WHERE "replyID" = $2`,
             values: [value, replyID]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Delete message reply */
-    public static deleteMessageReply = async (replyID: number) => {
+    public static deleteMessageReply = async (replyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`DELETE FROM "message replies" WHERE "message replies"."replyID" = $1`),
         values: [replyID]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Grab unread message from user (if exists) */
@@ -262,6 +266,6 @@ export default class SQLMessage {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<Message[]>
     }
 }

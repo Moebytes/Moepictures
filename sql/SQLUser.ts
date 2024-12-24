@@ -1,11 +1,12 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import axios from "axios"
+import {PostSearch, User, LoginHistory, Banner} from "../types/Types"
 
 export default class SQLUser {
     /** Get uploads. */
-    public static uploads = async (username: string, limit?: string, offset?: string, type?: string, rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+    public static uploads = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, style?: string, 
+        sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         const {postJSON, values, limitValue, offsetValue} = 
         SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
@@ -22,7 +23,7 @@ export default class SQLUser {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<PostSearch[]>
     }
 
     /** Create a new user. */
@@ -31,8 +32,7 @@ export default class SQLUser {
         text: /*sql*/`INSERT INTO "users" ("username", "email") VALUES ($1, $2)`,
         values: [username, email]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Updates a user */
@@ -41,7 +41,7 @@ export default class SQLUser {
             text: /*sql*/`UPDATE "users" SET "${column}" = $1 WHERE "username" = $2`,
             values: [value, username]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get user. */
@@ -56,7 +56,7 @@ export default class SQLUser {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<User>
     }
 
     /** Get user by email. */
@@ -71,7 +71,7 @@ export default class SQLUser {
             values: [email]
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<User>
     }
 
     /** Delete user. */
@@ -80,8 +80,7 @@ export default class SQLUser {
             text: functions.multiTrim(/*sql*/`DELETE FROM users WHERE users."username" = $1`),
             values: [username]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(query)
     }
 
     /** Get all admins. */
@@ -90,30 +89,28 @@ export default class SQLUser {
             text: /*sql*/`SELECT * FROM users WHERE users."role" = 'admin'`
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<User[]>
     }
 
     /** Insert login history. */
-    public static insertLoginHistory = async (username: string, type: string, ip: string, device: string) => {
-        const ipInfo = await axios.get(`http://ip-api.com/json/${ip}`).then((r) => r.data).catch(() => null)
-        let region = ipInfo?.regionName || "unknown"
-        if (ip === "127.0.0.1" || ip.startsWith("192.168.68")) region = "localhost"
+    public static insertLoginHistory = async (username: string, type: string, ip: string, device: string, region: string) => {
         const now = new Date().toISOString()
-        const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "login history" ("username", "type", "ip", "device", "region", "timestamp") VALUES ($1, $2, $3, $4, $5, $6)`,
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "login history" ("username", "type", "ip", "device", "region", "timestamp") 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "loginID"`,
+            rowMode: "array",
             values: [username, type, ip, device, region, now]
         }
-        return SQLQuery.run(query)
+        const result = await SQLQuery.run(query)
+        return String(result.flat(Infinity)[0])
     }
 
     /** Get login history. */
     public static loginHistory = async (username: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                SELECT "login history".*, 
-                to_json((array_agg(users.*))[1]) AS user
+                SELECT "login history".*
                 FROM "login history"
-                JOIN users ON users.username = "login history"."username"
                 WHERE "login history"."username" = $1
                 GROUP BY "login history"."loginID"
                 ORDER BY "login history"."timestamp" DESC
@@ -121,7 +118,7 @@ export default class SQLUser {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<LoginHistory[]>
     }
 
     /** Destroy other sessions. */
@@ -130,7 +127,7 @@ export default class SQLUser {
             text: /*sql*/`DELETE FROM sessions WHERE session->>'username' = $1 AND "sessionID" != $2`,
             values: [username, currentSession]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Set banner */
@@ -150,7 +147,7 @@ export default class SQLUser {
             `),
             values: [text, link, now]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.run(query)
     }
 
     /** Get banner. */
@@ -159,6 +156,6 @@ export default class SQLUser {
             text: /*sql*/`SELECT * FROM banner`
         }
         const result = await SQLQuery.run(query)
-        return result[0]
+        return result[0] as Promise<Banner>
     }
 }

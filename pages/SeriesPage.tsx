@@ -18,6 +18,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
 useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
+import {TagCategorySearch, CategorySort} from "../types/Types"
 
 let limit = 10
 let replace = false
@@ -41,12 +42,12 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
-    const [sortType, setSortType] = useState("posts")
+    const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [series, setSeries] = useState([]) as any
+    const [series, setSeries] = useState([] as TagCategorySearch[])
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
-    const [visibleSeries, setVisibleSeries] = useState([]) as any
+    const [visibleSeries, setVisibleSeries] = useState([] as TagCategorySearch[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)

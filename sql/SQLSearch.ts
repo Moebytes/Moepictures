@@ -1,12 +1,13 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import {PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch} from "../types/Types"
 
 export default class SQLSearch {
-    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: string, 
-        limit?: string, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
-        format?: string}) => {
-        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format} = options
+    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
+        limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
+        format?: string, condition?: string}) => {
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format, condition} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -18,10 +19,11 @@ export default class SQLSearch {
         if (type === "live2d") typeQuery = `posts.type = 'live2d'`
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
-        if (rating === "flirty") ratingQuery = `posts.rating = 'flirty'`
+        if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`
         if (rating === "ecchi") ratingQuery = `posts.rating = 'ecchi'`
         if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'flirty' OR posts.rating = 'ecchi')`
+        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'ecchi')`
+        if (rating === "all" && !username) ratingQuery = `posts.rating = 'cute'`
         let styleQuery = ""
         if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
         if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
@@ -29,6 +31,7 @@ export default class SQLSearch {
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
         if (style === "daki") styleQuery = `posts.style = 'daki'`
         if (style === "sketch") styleQuery = `posts.style = 'sketch'`
+        if (style === "lineart") styleQuery = `posts.style = 'lineart'`
         if (style === "promo") styleQuery = `posts.style = 'promo'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
@@ -66,6 +69,7 @@ export default class SQLSearch {
         if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
         if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
         if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
+        let childQuery = showChildren ? "" : `posts."parentID" IS NULL`
         let ANDtags = [] as string[]
         let ORtags = [] as string[]
         let NOTtags = [] as string[]
@@ -129,7 +133,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 100) limit = "100"
+            if (Number(limit) > 100) limit = 100
             values.push(limit)
             i++
         }
@@ -144,8 +148,7 @@ export default class SQLSearch {
             i++
         }
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        let childQuery = showChildren ? "" : `posts."parentID" IS NULL`
-        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery, childQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery, childQuery, condition].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
 
         let postJSON = functions.multiTrim(/*sql*/`
@@ -201,8 +204,8 @@ export default class SQLSearch {
     }
 
     /** Search posts. */
-    public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: string, 
-        limit?: string, withTags?: boolean, showChildren?: boolean, username?: string) => {
+    public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: number, 
+        limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
         const {postJSON, values, tagQuery, limitValue, offsetValue} = 
         SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, limit, username, withTags, showChildren})
 
@@ -218,115 +221,88 @@ export default class SQLSearch {
         }
         if (values?.[0]) query.values = values
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query)
+            return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true) as Promise<PostSearch[]>
         }
     }
 
     /** Search pixiv id. */
-    public static searchPixivID = async (pixivID: number, includeTags?: boolean) => {
+    public static searchPixivID = async (pixivID: string, type: string, rating: string, style: string, sort: string, 
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        let condition = `(posts."source" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1)`
+        const {postJSON, values, limitValue, offsetValue} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-            WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `"tag map tags"."tags",` : ""}
-                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "fileSize",
-                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
-                COUNT(DISTINCT images."imageID") AS "variationCount",
-                COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
-                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                WHERE posts."link" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1
-                GROUP BY posts."postID"
-                ${includeTags ? `, "tag map tags"."tags"` : ""}
-            )
-            SELECT post_json.*,
-            COUNT(*) OVER() AS "postCount"
-            FROM post_json
-            LIMIT 1
-        `),
-        values: [pixivID]
+            text: functions.multiTrim(/*sql*/`
+                ${postJSON}
+                SELECT post_json.*,
+                COUNT(*) OVER() AS "postCount"
+                FROM post_json
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+            `),
+            values: [pixivID]
         }
-        const result = await SQLQuery.run(query, true)
-        return result
+        if (values?.[0]) query.values?.push(...values)
+        if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
+            return SQLQuery.run(query) as Promise<PostSearch[]>
+        } else {
+            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+        }
     }
 
     /** Search twitter id. */
-    public static searchTwitterID = async (twitterID: string, includeTags?: boolean) => {
+    public static searchTwitterID = async (twitterID: string, type: string, rating: string, style: string, sort: string, 
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        let condition = `(posts."source" LIKE 'https://%x.com/%/status/' || $1 OR posts."source" LIKE 'https://%twitter.com/%/status/' || $1 
+        OR posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1)`
+        const {postJSON, values, limitValue, offsetValue} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-            WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `"tag map tags"."tags",` : ""}
-                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "fileSize",
-                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
-                COUNT(DISTINCT images."imageID") AS "variationCount",
-                COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
-                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                WHERE posts."link" LIKE 'https://%x.com/%/status/' || $1 OR posts."link" LIKE 'https://%twitter.com/%/status/' || $1 OR 
-                posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1 
-                GROUP BY posts."postID"
-                ${includeTags ? `, "tag map tags"."tags"` : ""}
-            )
-            SELECT post_json.*,
-            COUNT(*) OVER() AS "postCount"
-            FROM post_json
-            LIMIT 1
-        `),
-        values: [twitterID]
+            text: functions.multiTrim(/*sql*/`
+                ${postJSON}
+                SELECT post_json.*,
+                COUNT(*) OVER() AS "postCount"
+                FROM post_json
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+            `),
+            values: [twitterID]
         }
-        const result = await SQLQuery.run(query, true)
-        return result
+        if (values?.[0]) query.values?.push(...values)
+        if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
+            return SQLQuery.run(query) as Promise<PostSearch[]>
+        } else {
+            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+        }
     }
 
     /** Search search. */
-    public static searchSource = async (source: string, includeTags?: boolean) => {
+    public static searchSource = async (source: string, type: string, rating: string, style: string, sort: string, 
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        let condition = `(posts."source" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%')`
+        const {postJSON, values, limitValue, offsetValue} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-            WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                ${includeTags ? `"tag map tags"."tags",` : ""}
-                ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "fileSize",
-                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
-                COUNT(DISTINCT images."imageID") AS "variationCount",
-                COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON posts."postID" = images."postID"
-                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
-                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                WHERE posts."link" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%'
-                GROUP BY posts."postID"
-                ${includeTags ? `, "tag map tags"."tags"` : ""}
-            )
-            SELECT post_json.*,
-            COUNT(*) OVER() AS "postCount"
-            FROM post_json
-            LIMIT 1
-        `),
-        values: [source]
+            text: functions.multiTrim(/*sql*/`
+                ${postJSON}
+                SELECT post_json.*,
+                COUNT(*) OVER() AS "postCount"
+                FROM post_json
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+            `),
+            values: [source]
         }
-        const result = await SQLQuery.run(query, true)
-        return result
+        if (values?.[0]) query.values?.push(...values)
+        if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
+            return SQLQuery.run(query) as Promise<PostSearch[]>
+        } else {
+            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+        }
     }
 
     /** Search format. */
     public static searchFormat = async (format: string, type: string, rating: string, style: string, sort: string, 
-        offset?: string, limit?: string, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
         const {postJSON, values, limitValue, offsetValue, i} = 
         SQLQuery.search.boilerplate({format, type, rating, style, sort, offset, limit, username, withTags, showChildren})
 
@@ -343,14 +319,14 @@ export default class SQLSearch {
         if (values?.[0]) query.values = values
         console.log(query)
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query)
+            return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true) as Promise<PostSearch[]>
         }
     }
 
     /** Get posts. */
-    public static posts = async (postIDs?: number[]) => {
+    public static posts = async (postIDs?: string[]) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
@@ -368,11 +344,11 @@ export default class SQLSearch {
         }
         if (postIDs) query.values = [postIDs]
         const result = await SQLQuery.run(query, true)
-        return result
+        return result as Promise<PostFull[]>
     }
 
     /** Get posts (unverified). */
-    public static unverifiedPosts = async (offset?: string) => {
+    public static unverifiedPosts = async (offset?: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
@@ -389,7 +365,7 @@ export default class SQLSearch {
         }
         if (offset) query.values = [offset]
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<UnverifiedPost[]>
     }
 
     /** Get posts by user (unverified). */
@@ -409,11 +385,11 @@ export default class SQLSearch {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<UnverifiedPost[]>
     }
 
     /** Get post edits (unverified). */
-    public static unverifiedPostEdits = async (offset?: string) => {
+    public static unverifiedPostEdits = async (offset?: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
@@ -430,7 +406,7 @@ export default class SQLSearch {
         }
         if (offset) query.values = [offset]
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<UnverifiedPost[]>
     }
 
     /** Get post edits by user (unverified). */
@@ -450,11 +426,11 @@ export default class SQLSearch {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<UnverifiedPost[]>
     }
 
     /** Tag category search */
-    public static tagCategory = async (category: string, sort: string, search?: string, limit?: string, offset?: string) => {
+    public static tagCategory = async (category: string, sort: string, search?: string, limit?: number, offset?: number) => {
         let whereQueries = [] as string[]
         let values = [] as any
         if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
@@ -468,7 +444,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 25) limit = "25"
+            if (Number(limit) > 25) limit = 25
             values.push(limit)
             i++
         }
@@ -506,14 +482,14 @@ export default class SQLSearch {
         if (offset) values.push(offset)
         if (values?.[0]) query.values = values
         if (sort === "random") {
-            return SQLQuery.run(query)
+            return SQLQuery.run(query) as Promise<TagCategorySearch[]>
         } else {
-            return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true) as Promise<TagCategorySearch[]>
         }
     }
 
     /** Tag search */
-    public static tagSearch = async (search: string, sort: string, type?: string, limit?: string, offset?: string) => {
+    public static tagSearch = async (search: string, sort: string, type?: string, limit?: number, offset?: number) => {
         let whereArray = [] as string[]
         let values = [] as any
         let i = 1
@@ -531,7 +507,7 @@ export default class SQLSearch {
         }
         if (type === "all") type = undefined
         if (type) {
-            if (type === "all tags") {
+            if (type === "tags") {
                 whereArray.push(`(tags.type = 'appearance' OR tags.type = 'outfit' OR 
                 tags.type = 'accessory' OR tags.type = 'scenery' OR tags.type = 'action' 
                 OR tags.type = 'tag')`)
@@ -543,7 +519,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 200) limit = "200"
+            if (Number(limit) > 200) limit = 200
             values.push(limit)
             i++
         }
@@ -582,9 +558,9 @@ export default class SQLSearch {
         if (offset) values.push(offset)
         if (values?.[0]) query.values = values
         if (sort === "random") {
-            return SQLQuery.run(query)
+            return SQLQuery.run(query) as Promise<TagSearch[]>
         } else {
-            return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true) as Promise<TagSearch[]>
         }
     }
 
@@ -608,17 +584,18 @@ export default class SQLSearch {
             `),
             values: [social]
         }
-        return SQLQuery.run(query, true)
+        return SQLQuery.run(query, true) as Promise<TagSearch[]>
     }
 
     /** Group search. */
-    public static groupSearch = async (search: string, sort: string, rating: string, limit?: string, offset?: string) => {
+    public static groupSearch = async (search: string, sort: string, rating: string, limit?: number, offset?: number, username?: string) => {
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
-        if (rating === "flirty") ratingQuery = `groups.rating = 'flirty'`
+        if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
         if (rating === "ecchi") ratingQuery = `groups.rating = 'ecchi'`
         if (rating === "hentai") ratingQuery = `groups.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'flirty' OR groups.rating = 'ecchi')`
+        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'ecchi')`
+        if (rating === "all" && !username) ratingQuery = `groups.rating = 'cute'`
         let searchQuery = ""
         let values = [] as any
         let i = 1
@@ -630,7 +607,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 100) limit = "100"
+            if (Number(limit) > 100) limit = 100
             values.push(limit)
             i++
         }
@@ -666,6 +643,6 @@ export default class SQLSearch {
         }
         if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query)
-        return result
+        return result as Promise<GroupSearch[]>
     }
 }

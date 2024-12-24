@@ -1,40 +1,12 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-
-interface SessionData {
-    cookie: any
-    username: string
-    email: string
-    joinDate: string
-    image: string | null
-    imageHash: string | null
-    imagePost: string | null
-    bio: string 
-    emailVerified: boolean
-    publicFavorites: boolean
-    showRelated: boolean
-    showTooltips: boolean
-    showTagBanner: boolean
-    downloadPixivID: boolean
-    autosearchInterval: number
-    upscaledImages: boolean
-    savedSearches: string
-    showR18: boolean
-    premiumExpiration: string
-    banExpiration: string
-    $2fa: boolean
-    role: string
-    captchaNeeded: boolean
-    csrfToken: string
-    banned: boolean
-    publicKey: string
-}
+import {Session} from "../types/Types"
 
 const sessionSlice = createSlice({
     name: "session",
     initialState: {
-        session: {} as SessionData,
+        session: {} as Session,
         sessionFlag: false,
         userImg: "",
         userImgPost: "",

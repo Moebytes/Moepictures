@@ -75,7 +75,7 @@ const UserRoutes = (app: Express) => {
             delete user.downloadPixivID
             delete user.autosearchInterval
             delete user.showTagBanner
-            delete user.upscaledImage
+            delete user.upscaledImages
             delete user.savedSearches
             delete user.premiumExpiration
             delete user.showR18
@@ -134,7 +134,8 @@ const UserRoutes = (app: Express) => {
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
                 await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(user, link))
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(username, "account created", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(username, "account created", ip, device, region)
                 return res.status(200).send("Success")
             } catch {
                 return res.status(400).send("Username taken")
@@ -154,10 +155,11 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
+            const region = await serverFunctions.ipRegion(ip)
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad request")
-            const matches = await bcrypt.compare(password, user.password)
+            const matches = await bcrypt.compare(password, user.password!)
             if (matches) {
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email
@@ -180,7 +182,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
                 req.session.showTagBanner = user.showTagBanner
-                req.session.downloadPixivID = user.dowautosearchInterval
+                req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
@@ -188,10 +190,10 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
-                await sql.user.insertLoginHistory(user.username, "login", ip, device)
+                await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 return res.status(200).send("Success")
             } else {
-                await sql.user.insertLoginHistory(user.username, "login failed", ip, device)
+                await sql.user.insertLoginHistory(user.username, "login failed", ip, device, region)
                 return res.status(400).send("Bad request")
             }
         } catch (e) {
@@ -551,7 +553,8 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
-            await sql.user.insertLoginHistory(user.username, "username changed", ip, device)
+            const region = await serverFunctions.ipRegion(ip)
+            await sql.user.insertLoginHistory(user.username, "username changed", ip, device, region)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
@@ -578,14 +581,15 @@ const UserRoutes = (app: Express) => {
             if (badPassword) return res.status(400).send("Bad newPassword")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
-            const matches = await bcrypt.compare(oldPassword, user.password)
+            const matches = await bcrypt.compare(oldPassword, user.password!)
             if (matches) {
                 const newHash = await bcrypt.hash(newPassword, 13)
                 await sql.user.updateUser(req.session.username, "password", newHash)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(user.username, "password changed", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad oldPassword")
@@ -612,7 +616,8 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device, region)
                 res.status(200).redirect("/change-email-success")
             } else {
                 await sql.token.deleteEmailToken(tokenData.email)
@@ -698,7 +703,8 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(user.username, "email verified", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(user.username, "email verified", ip, device, region)
                 res.status(200).redirect("/verify-email-success")
             } else {
                 await sql.token.deleteEmailToken(tokenData.email)
@@ -750,11 +756,12 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
+            await serverFunctions.email(user.email!, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
-            await sql.user.insertLoginHistory(user.username, "password reset request", ip, device)
+            const region = await serverFunctions.ipRegion(ip)
+            await sql.user.insertLoginHistory(user.username, "password reset request", ip, device, region)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -781,7 +788,8 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(username, "password reset", ip, device)
+                const region = await serverFunctions.ipRegion(ip)
+                await sql.user.insertLoginHistory(username, "password reset", ip, device, region)
                 res.status(200).send("Success")
             } else {
                 await sql.token.deletePasswordToken(username)
@@ -799,8 +807,8 @@ const UserRoutes = (app: Express) => {
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             try {
-                await sql.token.deleteEmailToken(user.email)
-                await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image, user.imageHash), false)
+                await sql.token.deleteEmailToken(user.email!)
+                if (user.image) await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image, user.imageHash), false)
             } catch (e) {
             console.log(e)
                 // ignore
@@ -826,10 +834,10 @@ const UserRoutes = (app: Express) => {
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                favorites = await sql.favorite.favorites(username, limit, offset, "all", rating)
+                favorites = await sql.favorite.favorites(username, Number(limit), Number(offset), "all", rating)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                favorites = await sql.favorite.favorites(req.session.username, limit, offset, "all", rating)
+                favorites = await sql.favorite.favorites(req.session.username, Number(limit), Number(offset), "all", rating)
             }
             if (!permissions.isMod(req.session)) {
                 favorites = favorites.filter((p: any) => !p.hidden)
@@ -860,10 +868,10 @@ const UserRoutes = (app: Express) => {
             const limit = req.query.limit as string
             let uploads = [] as any
             if (username) {
-                uploads = await sql.user.uploads(username, limit, offset, "all", rating)
+                uploads = await sql.user.uploads(username, Number(limit), Number(offset), "all", rating)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                uploads = await sql.user.uploads(req.session.username, limit, offset, "all", rating)
+                uploads = await sql.user.uploads(req.session.username, Number(limit), Number(offset), "all", rating)
             }
             if (!permissions.isMod(req.session)) {
                 uploads = uploads.filter((p: any) => !p.hidden)
@@ -914,10 +922,10 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username as string
             let comments = [] as any
             if (username) {
-                comments = await sql.comment.searchCommentsByUsername([username], query, sort, offset)
+                comments = await sql.comment.searchCommentsByUsername([username], query, sort, Number(offset))
             } else {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, offset)
+                comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, Number(offset))
             }
             for (let i = comments.length - 1; i >= 0; i--) {
                 const comment = comments[i]
@@ -1058,9 +1066,11 @@ const UserRoutes = (app: Express) => {
                 // Revert post history
                 const postHistory = await sql.history.userPostHistory(username)
                 for (const history of postHistory) {
-                    if (history.image?.startsWith("history/")) {
-                        let r18 = functions.isR18(history.rating)
-                        await serverFunctions.deleteFile(history.image, r18)
+                    for (const image of history.images) {
+                        if (image?.startsWith("history/")) {
+                            let r18 = functions.isR18(history.rating)
+                            await serverFunctions.deleteFile(image, r18)
+                        }
                     }
                     await sql.history.deletePostHistory(history.historyID)
                     revertPostIDs.add(history.postID)
@@ -1087,7 +1097,7 @@ const UserRoutes = (app: Express) => {
                     revertNoteIDs.add({postID: history.postID, order: history.order})
                 }
             }
-            await sql.report.insertBan(username, user.ip, req.session.username, reason)
+            await sql.report.insertBan(username, user.ip!, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
             let banDuration = ""
             if (days) {
@@ -1224,7 +1234,7 @@ const UserRoutes = (app: Express) => {
             const query = req.query.query as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
-            const result = await sql.history.userSearchHistory(req.session.username, "100", offset, query)
+            const result = await sql.history.userSearchHistory(req.session.username, 100, Number(offset), query)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -1234,14 +1244,15 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/history/delete", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, all} = req.query
+            const postID = req.query.postID as string
+            const all = req.query.all === "true"
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (all) {
                 await sql.history.deleteAllSearchHistory(req.session.username)
                 return res.status(200).send("Success")
             }
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
-            await sql.history.deleteSearchHistory(Number(postID), req.session.username)
+            await sql.history.deleteSearchHistory(postID, req.session.username)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
