@@ -10,7 +10,8 @@ import rateLimit from "express-rate-limit"
 import sharp from "sharp"
 import phash from "sharp-phash"
 import axios from "axios"
-import {PostHistory} from "../types/Types"
+import {PostHistory, UploadParams, UploadImage, EditParams, BulkTag, UnverifiedUploadParams,
+UnverifiedEditParams} from "../types/Types"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -38,7 +39,7 @@ const modLimiter = rateLimit({
 	legacyHeaders: false
 })
 
-const validImages = (images: any[], skipMBCheck?: boolean) => {
+const validImages = (images: UploadImage[], skipMBCheck?: boolean) => {
   if (!images.length) return false
   for (let i = 0; i < images.length; i++) {
     if (functions.isModel(images[i].link) || functions.isLive2D(images[i].link)) {
@@ -80,20 +81,8 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const images = req.body.images 
-        const upscaledImages = req.body.upscaledImages
-        let type = req.body.type 
-        const rating = req.body.rating 
-        const style = req.body.style
-        const parentID = req.body.parentID 
-        const source = req.body.source 
-        let artists = req.body.artists
-        let characters = req.body.characters
-        let series = req.body.series
-        let tags = req.body.tags
-        let newTags = req.body.newTags
-        let unverifiedID = req.body.unverifiedID
-        const noImageUpdate = req.body.noImageUpdate
+        let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        tags, newTags, unverifiedID, noImageUpdate} = req.body as UploadParams
 
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (!permissions.isCurator(req.session)) return res.status(403).send("Unauthorized")
@@ -151,10 +140,10 @@ const CreateRoutes = (app: Express) => {
         if (images.length !== upscaledImages.length) {
           const maxLength = Math.max(images.length, upscaledImages.length)
           while (images.length < maxLength) {
-            images.push(null)
+            images.push(null as any)
           }
           while (upscaledImages.length < maxLength) {
-            upscaledImages.push(null)
+            upscaledImages.push(null as any)
           }
         }
 
@@ -285,7 +274,7 @@ const CreateRoutes = (app: Express) => {
 
         let tagObjectMapping = await serverFunctions.tagMap()
         let tagMap = tags
-        let bulkTagUpdate = [] as any
+        let bulkTagUpdate = [] as BulkTag[]
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
@@ -294,7 +283,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -308,7 +297,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(artists[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -323,7 +312,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(characters[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -338,7 +327,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(series[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -382,25 +371,8 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const postID = req.body.postID
-        const images = req.body.images 
-        const upscaledImages = req.body.upscaledImages
-        let type = req.body.type 
-        const rating = req.body.rating 
-        const style = req.body.style
-        const parentID = req.body.parentID 
-        const source = req.body.source 
-        let artists = req.body.artists
-        let characters = req.body.characters
-        let series = req.body.series
-        let tags = req.body.tags
-        let newTags = req.body.newTags
-        let unverifiedID = req.body.unverifiedID
-        let reason = req.body.reason
-        let noImageUpdate = req.body.noImageUpdate
-        let preserveChildren = req.body.preserveChildren
-        let updatedDate = req.body.updatedDate
-        let silent = req.body.silent
+        let {postID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        tags, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -613,7 +585,7 @@ const CreateRoutes = (app: Express) => {
         let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
-        let bulkTagUpdate = [] as any
+        let bulkTagUpdate = [] as BulkTag[]
         let tagObjectMapping = await serverFunctions.tagMap()
 
         for (let i = 0; i < newTags.length; i++) {
@@ -623,7 +595,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -637,7 +609,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(artists[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -651,7 +623,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(characters[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -665,7 +637,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(series[i].bytes!))
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -706,9 +678,9 @@ const CreateRoutes = (app: Express) => {
           if (silent) return res.status(200).send("Success")
         }
 
-        artists = artists.map((a: any) => a.tag)
-        characters = characters.map((c: any) => c.tag)
-        series = series.map((s: any) => s.tag)
+        const artistsArr = artists.map((a: any) => a.tag)
+        const charactersArr = characters.map((c: any) => c.tag)
+        const seriesArr = series.map((s: any) => s.tag)
 
 
         const updated = await sql.post.post(postID)
@@ -778,8 +750,8 @@ const CreateRoutes = (app: Express) => {
               style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
               posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
               englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
-              changes, reason})
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, tags, 
+              addedTags, removedTags, imageChanged: imgChanged, changes, reason})
         } else {
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -817,8 +789,8 @@ const CreateRoutes = (app: Express) => {
               style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
               posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
               englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
-              changes, reason})
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, tags, 
+              addedTags, removedTags, imageChanged: imgChanged, changes, reason})
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -829,19 +801,8 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const images = req.body.images 
-        const upscaledImages = req.body.upscaledImages 
-        let type = req.body.type 
-        const rating = req.body.rating 
-        const style = req.body.style
-        const parentID = req.body.parentID 
-        const source = req.body.source 
-        let artists = req.body.artists
-        let characters = req.body.characters
-        let series = req.body.series
-        let tags = req.body.tags
-        let newTags = req.body.newTags
-        let duplicates = req.body.duplicates
+        let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series, 
+        tags, newTags, duplicates} = req.body as UnverifiedUploadParams
 
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
@@ -1017,7 +978,7 @@ const CreateRoutes = (app: Express) => {
         })
 
         let tagMap = tags
-        let bulkTagUpdate = [] as any
+        let bulkTagUpdate = [] as BulkTag[]
         let tagObjectMapping = await serverFunctions.tagMap()
 
         for (let i = 0; i < tagMap.length; i++) {
@@ -1031,7 +992,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1045,7 +1006,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(artists[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1060,7 +1021,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(characters[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1075,7 +1036,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(series[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1108,21 +1069,8 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let postID = req.body.postID
-        let unverifiedID = req.body.unverifiedID
-        const images = req.body.images 
-        const upscaledImages = req.body.upscaledImages 
-        let type = req.body.type 
-        const rating = req.body.rating 
-        const style = req.body.style
-        const parentID = req.body.parentID 
-        const source = req.body.source 
-        let artists = req.body.artists
-        let characters = req.body.characters
-        let series = req.body.series
-        let tags = req.body.tags
-        let newTags = req.body.newTags
-        let reason = req.body.reason
+        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        tags, newTags, reason} = req.body as UnverifiedEditParams
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad unverifiedID")
@@ -1343,7 +1291,7 @@ const CreateRoutes = (app: Express) => {
         let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
-        let bulkTagUpdate = [] as any
+        let bulkTagUpdate = [] as BulkTag[]
         let tagObjectMapping = await serverFunctions.tagMap()
         
         for (let i = 0; i < tags.length; i++) {
@@ -1357,7 +1305,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1371,7 +1319,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(artists[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1385,7 +1333,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(characters[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1399,7 +1347,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            const buffer = Buffer.from(Object.values(series[i].bytes!))
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1432,8 +1380,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let reason = req.body.reason
-        let postID = req.body.postID
+        let {postID, reason} = req.body as {postID: string, reason: string}
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -1622,7 +1569,7 @@ const CreateRoutes = (app: Express) => {
         let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
   
-        let bulkTagUpdate = [] as any
+        let bulkTagUpdate = [] as BulkTag[]
         let tagObjectMapping = await serverFunctions.tagMap()
 
         for (let i = 0; i < tags.length; i++) {
@@ -1709,6 +1656,11 @@ const CreateRoutes = (app: Express) => {
           const updated = await sql.post.post(unverified.originalID)
           let r18 = functions.isR18(updated.rating)
 
+          const artistsArr = artists.map((a) => a.tag)
+          const charactersArr = characters.map((c) => c.tag)
+          const seriesArr = series.map((s) => s.tag)
+          const tagsArr = tags.map((t) => t.tag)
+
           const changes = functions.parsePostChanges(post, updated)
           const postHistory = await sql.history.postHistory(newPostID)
           const nextKey = await serverFunctions.getNextKey("post", String(newPostID), r18)
@@ -1774,8 +1726,8 @@ const CreateRoutes = (app: Express) => {
                 style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                 posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
                 englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artists.map((a) => a.tag), characters: characters.map((c) => c.tag), 
-                series: series.map((s) => s.tag), tags: tags.map((t) => t.tag), addedTags, removedTags, imageChanged: imgChanged,
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, 
+                series: seriesArr, tags: tagsArr, addedTags, removedTags, imageChanged: imgChanged,
                 changes, reason})
           } else {
               let newImages = [] as any
@@ -1816,8 +1768,8 @@ const CreateRoutes = (app: Express) => {
                 style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                 posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
                 englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artists.map((a) => a.tag), characters: characters.map((c) => c.tag), 
-                series: series.map((s) => s.tag), tags: tags.map((t) => t.tag), addedTags, removedTags, imageChanged: imgChanged,
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, 
+                series: seriesArr, tags: tagsArr, addedTags, removedTags, imageChanged: imgChanged,
                 changes, reason})
           }
         }
@@ -1839,7 +1791,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let postID = req.body.postID
+        let postID = req.body.postID as string
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!permissions.isMod(req.session)) return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)

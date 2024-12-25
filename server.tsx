@@ -423,10 +423,7 @@ const deleteExpiredTokens = async () => {
   }
 }
 
-const run = async () => {
-  await sql.createDB()
-  await deleteExpiredTokens()
-
+const defaultTagInserts = async () => {
   /** Unverified tags */
   await sql.tag.insertUnverifiedTag("unknown-artist", "artist")
   await sql.tag.insertUnverifiedTag("unknown-character", "character")
@@ -486,7 +483,11 @@ const run = async () => {
   if (!exists) await sql.tag.updateTag("third-party-edit", "description", "The post is a third party edit.")
   exists = await sql.tag.insertTag("third-party-source", "meta")
   if (!exists) await sql.tag.updateTag("third-party-source", "description", "The source of the post is a repost (not posted by the original artist).")
+}
 
+const run = async () => {
+  await sql.createDB()
+  await deleteExpiredTokens()
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
 }
 

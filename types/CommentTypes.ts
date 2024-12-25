@@ -19,3 +19,29 @@ export interface CommentSearch extends Comment {
     commentCount: number
     fake?: boolean
 }
+
+export interface CommentReportFulfillParams {
+    reportID: string 
+    reporter: string 
+    username: string 
+    id: string 
+    accepted: boolean
+}
+
+export type CommentGetEndpoint<T extends string> = 
+    T extends "/api/comment" ? {params: {commentID: string}, response: Comment} :
+    never
+
+export type CommentPostEndpoint<T extends string> = 
+    T extends "/api/comment/create" ? {params: {comment: string, postID: string}, response: string} :
+    T extends "/api/comment/report" ? {params: {commentID: string, reason: string}, response: string} :
+    T extends "/api/comment/report/fulfill" ? {params: CommentReportFulfillParams, response: string} :
+    never
+
+export type CommentPutEndpoint<T extends string> = 
+    T extends "/api/comment/edit" ? {params: {comment: string, postID: string}, response: string} :
+    never
+
+export type CommentDeleteEndpoint<T extends string> = 
+    T extends "/api/comment/delete" ? {params: {commentID: string}, response: string} :
+    never

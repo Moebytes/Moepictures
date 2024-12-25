@@ -2,7 +2,7 @@ import {Express, NextFunction, Request, Response} from "express"
 import axios from "axios"
 import FormData from "form-data"
 import path from "path"
-import Pixiv from "pixiv.ts"
+import Pixiv, { PixivIllust } from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
 import snoowrap from "snoowrap"
 import googleTranslate from "@vitalets/google-translate-api"
@@ -24,6 +24,8 @@ import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
+import {SaucenaoResponse, PixivResponse, ContactParams, Attachment, CopyrightParams, WDTaggerResponse, OCRResponse,
+CoinbaseEvent} from "../types/Types"
 
 svgCaptcha.loadFont(dotline)
 
@@ -89,7 +91,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {captchaResponse} = req.body
+            const {captchaResponse} = req.body as {captchaResponse: string}
             if (req.session.captchaAnswer === captchaResponse?.trim()) {
                 req.session.captchaNeeded = false
                 res.status(200).send("Success")
@@ -113,9 +115,10 @@ const MiscRoutes = (app: Express) => {
                 filename: `file.${inputType.extension}`,
                 contentType: inputType.mime
             })
-            let result = await axios.post("https://saucenao.com/search.php", form, {headers: form.getHeaders()}).then((r) => r.data.results)
-            result = result.sort((a: any, b: any) => b.header.similarity - a.header.similarity)
-            result = result.filter((r: any) => Number(r.header.similarity) > 70)
+            let result = await axios.post("https://saucenao.com/search.php", form, {headers: form.getHeaders()})
+            .then((r) => r.data.results) as SaucenaoResponse[]
+            result = result.sort((a, b) => Number(b.header.similarity) - Number(a.header.similarity))
+            result = result.filter((r) => Number(r.header.similarity) > 70)
             res.status(200).json(result)
         } catch {
             res.status(400).end()
@@ -123,7 +126,7 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const {bytes, pixivID} = req.body
+        const {bytes, pixivID} = req.body as {bytes: Uint8Array, pixivID: string}
         try {
             const handleFallback = async () => {
                 if (!pixivID) return res.status(400).send("No pixivID")
@@ -165,7 +168,7 @@ const MiscRoutes = (app: Express) => {
             const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
             const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
             const cookie = html.headers["set-cookie"]?.[0] || ""
-            const oldBuffer = Buffer.from(bytes, "binary")
+            const oldBuffer = Buffer.from(bytes)
             const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
             const form = new FormData()
             form.append("authenticity_token", csrfToken)
@@ -245,7 +248,7 @@ const MiscRoutes = (app: Express) => {
                 resolvable = Number(id)
             }
             try {
-                const illust = await pixiv.illust.get(resolvable) as any
+                const illust = await pixiv.illust.get(resolvable) as PixivResponse
                 const html = await axios.get(`https://www.pixiv.net/en/users/${illust.user.id}`).then((r) => r.data)
                 const twitter = html.match(/(?<=twitter\.com\/|x\.com\/)(.*?)(?=[\\"&])/)?.[0]
                 illust.user.twitter = twitter
@@ -291,7 +294,7 @@ const MiscRoutes = (app: Express) => {
                 }
                 const illust = await pixiv.illust.get(resolvable)
                 if (illust.meta_pages.length) {
-                    let images = [] as any[]
+                    let images = [] as ArrayBuffer[]
                     for (let i = 0; i < illust.meta_pages.length; i++) {
                         const link = illust.meta_pages[i].image_urls.original
                         const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
@@ -462,15 +465,16 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/contact", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {email, subject, message, files} = req.body 
+            let {email, subject, message, files} = req.body as ContactParams
+            if (!files) files = []
             if (!email || !subject || !message) return res.status(400).send("Bad email, subejct, or message.")
             const badEmail = functions.validateEmail(email, enLocale)
             if (badEmail) return res.status(400).send("Bad email")
             const badMessage = functions.validateMessage(message, enLocale)
             if (badMessage) return res.status(400).send("Bad message")
-            const attachments = [] as any
+            const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
-                const attachment = {} as any 
+                const attachment = {} as Attachment 
                 attachment.filename = files[i].name 
                 attachment.content = Buffer.from(files[i].bytes)
                 attachments.push(attachment)
@@ -490,14 +494,15 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/copyright", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, files} = req.body 
+            let {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, files} = req.body as CopyrightParams
+            if (!files) files = []
             if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return res.status(400).send("Bad fields.")
             if (!files.length && !proofLinks) return res.status(400).send("Bad proof links.")
             const badEmail = functions.validateEmail(email, enLocale)
             if (badEmail) return res.status(400).send("Bad email")
-            const attachments = [] as any
+            const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
-                const attachment = {} as any 
+                const attachment = {} as Attachment 
                 attachment.filename = files[i].name 
                 attachment.content = Buffer.from(files[i].bytes)
                 attachments.push(attachment)
@@ -553,7 +558,7 @@ const MiscRoutes = (app: Express) => {
             const scriptPath = path.join(__dirname, "../assets/misc/wdtagger.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-            const json = JSON.parse(str)
+            const json = JSON.parse(str) as WDTaggerResponse
             fs.unlinkSync(imagePath)
             processingQueue.delete(ip)
             res.status(200).json(json)
@@ -581,7 +586,7 @@ const MiscRoutes = (app: Express) => {
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             console.log(str)
-            const json = JSON.parse(str)
+            const json = JSON.parse(str) as OCRResponse[]
             fs.unlinkSync(imagePath)
             processingQueue.delete(req.session.username)
             res.status(200).json(json)
@@ -596,7 +601,7 @@ const MiscRoutes = (app: Express) => {
         try {
             const dir = path.join(__dirname, "../assets/emojis")
             let files = fs.readdirSync(dir)
-            let fileData = {} as any
+            let fileData = {} as {[key: string]: string}
             for (const file of files) {
                 if (file === ".DS_Store") continue
                 const filePath = path.join(dir, file)
@@ -640,7 +645,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/premium/payment", async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {event} = req.body
+            const {event} = req.body as {event: CoinbaseEvent}
             const signature = req.headers["x-cc-webhook-signature"]
 
             const computedSignature = crypto.createHmac("sha256", process.env.COINBASE_WEBHOOK_SECRET!)
@@ -683,7 +688,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/setbanner", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {text, link} = req.body
+            const {text, link} = req.body as {text: string, link: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return res.status(403).end()
             await sql.user.setBanner(text, link)
@@ -704,28 +709,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/client-key", miscLimiter, async (req: Request, res: Response) => {
-        try {
-            const {publicKey} = req.body
-            req.session.publicKey = publicKey
-            res.status(200).send("Success")
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
-    app.post("/api/server-key", miscLimiter, async (req: Request, res: Response) => {
-        try {
-            const publicKey = cryptoFunctions.serverPublicKey()
-            res.status(200).json({publicKey})
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
-    app.post("/api/litterbox", miscLimiter, async (req: Request, res: Response) => {
+    app.post("/api/misc/litterbox", miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.body) return res.status(400).send("Image data must be provided")
             const form = new FormData()
@@ -741,6 +725,27 @@ const MiscRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).end()
+        }
+    })
+
+    app.post("/api/client-key", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            const {publicKey} = req.body as {publicKey: string}
+            req.session.publicKey = publicKey
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/server-key", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            const publicKey = cryptoFunctions.serverPublicKey()
+            res.status(200).json({publicKey})
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
         }
     })
 }

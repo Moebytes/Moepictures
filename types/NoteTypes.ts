@@ -1,4 +1,4 @@
-import {UserRole, Post, UnverifiedPost} from "./Types"
+import {UserRole, Post, UnverifiedPost, NoteHistory} from "./Types"
 
 export interface Note {
     noteID: string
@@ -51,3 +51,63 @@ export interface UnverifiedNoteSearch extends NoteSearch {
     removedEntries: string[]
     reason: string | null
 }
+
+export interface NoteSaveParams {
+    postID: string
+    order: number
+    data: Note[]
+    reason: string
+}
+
+export interface NoteEditParams {
+    postID: string
+    order: number
+    data: Note[]
+    silent?: boolean
+}
+
+export interface NoteApproveParams {
+    postID: string
+    originalID: string
+    order: number
+    username: string
+    data: Note[]
+}
+
+export interface NoteHistoryParams {
+    postID?: string
+    order?: number
+    historyID?: string
+    username?: string
+    query?: string
+    offset: number
+}
+
+export interface NoteHistoryDeleteParams {
+    postID: string
+    order: number
+    historyID: string
+}
+
+export type NoteGetEndpoint<T extends string> = 
+    T extends "/api/notes" ? {params: {postID: string}, response: Note[]} :
+    T extends "/api/notes/unverified" ? {params: {postID: string}, response: UnverifiedNote[]} :
+    T extends "/api/note/list/unverified" ? {params: {offset: number}, response: UnverifiedNoteSearch[]} :
+    T extends "/api/note/history" ? {params: NoteHistoryParams, response: NoteHistory[]} :
+    never
+
+export type NotePostEndpoint<T extends string> = 
+    T extends "/api/note/save" ? {params: NoteSaveParams, response: string} :
+    T extends "/api/note/save/request" ? {params: NoteSaveParams, response: string} :
+    T extends "/api/note/approve" ? {params: NoteApproveParams, response: string} :
+    T extends "/api/note/reject" ? {params: NoteApproveParams, response: string} :
+    never
+
+export type NotePutEndpoint<T extends string> = 
+    T extends "/api/note/save" ? {params: NoteEditParams, response: string} :
+    T extends "/api/note/save/unverified" ? {params: NoteSaveParams, response: string} :
+    never
+
+export type NoteDeleteEndpoint<T extends string> = 
+    T extends "/api/note/history/delete" ? {params: NoteHistoryDeleteParams, response: string} :
+    never

@@ -134,3 +134,15 @@ export type AliasHistoryType =
     | "implication" 
     | "undo alias" 
     | "undo implication"
+
+export type ImageFormat =
+    | "jpg" 
+    | "png" 
+    | "gif" 
+    | "webp"
+    | "avif"
+
+export type Upscaler =
+    | "real-cugan" 
+    | "real-esrgan" 
+    | "waifu2x"

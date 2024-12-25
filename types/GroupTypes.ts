@@ -1,4 +1,5 @@
-import {Post, PostSearch, PostRating} from "./Types"
+import {Post, PostSearch, PostRating, GroupRequest, GroupDeleteRequest,
+GroupEditRequest, GroupHistory} from "./Types"
 
 export interface PostOrdered extends Post {
     order: number
@@ -35,3 +36,123 @@ export interface GroupPost {
     postID: string
     order: number
 }
+
+export interface GroupParams {
+    postID: string
+    name: string
+    username?: string
+    date?: string
+}
+
+export interface GroupEditParams {
+    slug: string
+    name: string
+    description: string
+    username?: string
+    date?: string
+    reason?: string
+    silent?: boolean
+}
+
+export interface GroupReorderParams {
+    slug: string
+    posts: {postID: string, order: number}[]
+    silent?: boolean
+}
+
+export interface GroupPostDeleteParams {
+    postID: string
+    name: string
+    username?: string
+    date?: string
+}
+
+export interface GroupRequestParams {
+    postID: string
+    name: string
+    reason: string
+}
+
+export interface GroupRequestFulfillParams {
+    username: string
+    slug: string
+    postID: string
+    accepted: boolean
+}
+
+export interface GroupDeleteRequestParams {
+    slug: string
+    reason: string
+}
+
+export interface GroupPostDeleteRequestParams {
+    removalItems: {slug: string, postID: string}[]
+    reason: string
+}
+
+export interface GroupDeleteRequestFulfillParams {
+    username: string
+    slug: string
+    accepted: boolean
+}
+
+export interface GroupPostDeleteRequestFulfillParams {
+    username: string
+    slug: string
+    postID: string
+    accepted: boolean
+}
+
+export interface GroupEditRequestParams {
+    slug: string
+    name: string
+    description: string
+    reason: string
+}
+
+export interface GroupEditRequestFulfillParams {
+    username: string
+    slug: string
+    accepted: boolean
+}
+
+export interface GroupHistoryParams {
+    slug?: string
+    historyID?: string
+    username?: string
+    query?: string
+    offset: number
+}
+
+export type GroupGetEndpoint<T extends string> = 
+    T extends "/api/group" ? {params: {name: string}, response: GroupPosts} :
+    T extends "/api/groups" ? {params: {postID: string}, response: GroupPosts[]} :
+    T extends "/api/groups/list" ? {params: {groups: string[]}, response: Group[]} :
+    T extends "/api/group/request/list" ? {params: {offset: number}, response: GroupRequest[]} :
+    T extends "/api/group/delete/request/list" ? {params: {offset: number}, response: GroupDeleteRequest[]} :
+    T extends "/api/group/edit/request/list" ? {params: {offset: number}, response: GroupEditRequest[]} :
+    T extends "/api/group/history" ? {params: GroupHistoryParams, response: GroupHistory[]} :
+    never
+
+export type GroupPostEndpoint<T extends string> = 
+    T extends "/api/group" ? {params: GroupParams, response: string} :
+    T extends "/api/group/request" ? {params: GroupRequestParams, response: string} :
+    T extends "/api/group/request/fulfill" ? {params: GroupRequestFulfillParams, response: string} :
+    T extends "/api/group/delete/request" ? {params: GroupDeleteRequestParams, response: string} :
+    T extends "/api/group/post/delete/request" ? {params: GroupPostDeleteRequestParams, response: string} :
+    T extends "/api/group/delete/request/fulfill" ? {params: GroupDeleteRequestFulfillParams, response: string} :
+    T extends "/api/group/post/delete/request/fulfill" ? {params: GroupPostDeleteRequestFulfillParams, response: string} :
+    T extends "/api/group/edit/request" ? {params: GroupEditRequestParams, response: string} :
+    T extends "/api/group/edit/request/fulfill" ? {params: GroupEditRequestFulfillParams, response: string} :
+    never
+
+export type GroupPutEndpoint<T extends string> = 
+    T extends "/api/group/edit" ? {params: GroupEditParams, response: string} :
+    T extends "/api/group/reorder" ? {params: GroupReorderParams, response: string} :
+    never
+
+export type GroupDeleteEndpoint<T extends string> = 
+    T extends "/api/group/delete" ? {params: {slug: string}, response: string} :
+    T extends "/api/group/post/delete" ? {params: GroupPostDeleteParams, response: string} :
+    T extends "/api/group/history/delete" ? {params: {slug: string, historyID: string}, response: string} :
+    never

@@ -178,10 +178,10 @@ export default class SQLPost {
 
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
-        title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string, source?: string | null, commentary?: string | null, 
+        title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
         englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: number, 
-        reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
+        reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
         imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
@@ -377,7 +377,7 @@ export default class SQLPost {
 
     /** Insert a new image (unverified). */
     public static insertUnverifiedImage = async (postID: string, filename: string, upscaledFilename: string, type: string, order: number, 
-        hash: string, width: number, height: number, size: string) => {
+        hash: string, width: number, height: number, size: number) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
             "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,

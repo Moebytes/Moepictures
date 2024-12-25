@@ -11,7 +11,8 @@ import waifu2x from "waifu2x"
 import phash from "sharp-phash"
 import fs from "fs"
 import path from "path"
-import {PostSearch, PostFull} from "../types/PostTypes"
+import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
+PostQuickEditParams, PostQuickEditUnverifiedParams} from "../types/PostTypes"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -161,7 +162,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/takedown", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID} = req.body
+            const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -182,7 +183,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/lock", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID} = req.body
+            const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -203,7 +204,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/private", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID} = req.body
+            const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const post = await sql.post.post(postID).catch(() => null)
@@ -343,7 +344,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/delete/request", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, reason} = req.body
+            const {postID, reason} = req.body as {postID: string, reason: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -372,7 +373,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/delete/request/fulfill", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, postID, accepted} = req.body
+            const {username, postID, accepted} = req.body as PostDeleteRequestFulfillParams
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
@@ -395,19 +396,8 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const postID = req.body.postID
-            const unverified = String(req.body.unverified) === "true"
-            let type = req.body.type 
-            const rating = req.body.rating 
-            const style = req.body.style
-            const source = req.body.source
-            const parentID = req.body.parentID
-            let artists = req.body.artists
-            let characters = req.body.characters
-            let series = req.body.series
-            let tags = req.body.tags
-            let reason = req.body.reason
-            let silent = req.body.silent
+            let {postID, unverified, type, rating, style, source, parentID, artists, characters, 
+            series, tags, reason, silent} = req.body as PostQuickEditParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -418,6 +408,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
+            if (!reason) reason = null
 
             const post = unverified ? await sql.post.unverifiedPost(postID) :  await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
@@ -446,7 +437,7 @@ const PostRoutes = (app: Express) => {
                     })
                 }
             } 
-            if (sourceEdit) {
+            if (source && sourceEdit) {
                 const updatedDate = new Date().toISOString()
 
                 if (unverified) {
@@ -485,7 +476,7 @@ const PostRoutes = (app: Express) => {
             } 
             if (tagEdit) {
                 if (!artists?.[0]) artists = ["unknown-artist"]
-                if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
+                if (!series?.[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
                 if (!characters?.[0]) characters = ["unknown-character"]
                 if (!tags?.[0]) tags = ["needs-tags"]
 
@@ -659,17 +650,8 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit/unverified", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let postID = req.body.postID
-            let type = req.body.type 
-            let rating = req.body.rating 
-            let style = req.body.style
-            let source = req.body.source
-            let parentID = req.body.parentID
-            let artists = req.body.artists
-            let characters = req.body.characters
-            let series = req.body.series
-            let tags = req.body.tags
-            let reason = req.body.reason
+            let {postID, type, rating, style, source, parentID, artists, characters, 
+            series, tags, reason} = req.body as PostQuickEditUnverifiedParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -678,6 +660,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
+            if (!reason) reason = null
 
             const originalPostID = postID as any
             const post = await sql.post.post(originalPostID)
@@ -695,7 +678,7 @@ const PostRoutes = (app: Express) => {
                 rating = post.rating
                 style = post.style
             } 
-            if (!sourceEdit) {
+            if (!source || !sourceEdit) {
                 source = {
                     title: post.title,
                     englishTitle: post.englishTitle,
@@ -715,7 +698,7 @@ const PostRoutes = (app: Express) => {
             }
     
             if (!artists?.[0]) artists = ["unknown-artist"]
-            if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
+            if (!series?.[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
             if (!characters?.[0]) characters = ["unknown-character"]
             if (!tags?.[0]) tags = ["needs-tags"]
 
@@ -760,13 +743,13 @@ const PostRoutes = (app: Express) => {
                 if (post.images[i].filename) {
                     let ext = path.extname(post.images[i].filename).replace(".", "")
                     filename = post.title ? `${post.title}.${ext}` : 
-                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+                    characters[0] !== "unknown-character" ? `${characters[0]}.${ext}` :
                     `${postID}.${ext}`
                 }
                 if (post.images[i].upscaledFilename) {
                     let upscaledExt = path.extname(post.images[i].upscaledFilename).replace(".", "")
                     upscaledFilename = post.title ? `${post.title}.${upscaledExt}` : 
-                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledExt}` :
+                    characters[0] !== "unknown-character" ? `${characters[0]}.${upscaledExt}` :
                     `${postID}.${upscaledExt}`
                 }
                 let kind = "image" as any
@@ -820,7 +803,7 @@ const PostRoutes = (app: Express) => {
                     hash = await phash(original).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(upscaled).metadata() as {width: number, height: number}
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, String(upscaled.byteLength))
+                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, upscaled.byteLength)
             }
             if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
             if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
@@ -953,14 +936,10 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID as string
-            const historyID = req.query.historyID as string
-            const username = req.query.username as string
-            const query = req.query.query as string
-            const offset = req.query.offset as string
+            const {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = null as any
-            if (historyID) {
+            if (postID && historyID) {
                 result = await sql.history.postHistoryID(postID, historyID)
                 if (req.session.captchaNeeded) delete result.tags
             } else if (username) {
@@ -1013,7 +992,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/view", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {postID} = req.body
+            const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = await sql.post.post(postID)
@@ -1028,7 +1007,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/compress", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {postID, quality, format, maxDimension, maxUpscaledDimension, original, upscaled} = req.body
+            const {postID, quality, format, maxDimension, maxUpscaledDimension, original, upscaled} = req.body as PostCompressParams
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -1136,7 +1115,7 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/upscale", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {postID, upscaler, scaleFactor, compressJPG} = req.body
+            const {postID, upscaler, scaleFactor, compressJPG} = req.body as PostUpscaleParams
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()

@@ -192,9 +192,9 @@ export default class SQLRequest {
 
     /** Insert tag edit request. */
     public static insertTagEditRequest = async (username: string, tag: string, key: string, type: string, description: string, 
-        image: string | null, imageHash: string | null, aliases: string[], implications: string[], pixivTags: string[], social: string, 
-        twitter: string, website: string, fandom: string, r18: boolean, featured: string, imageChanged: boolean, changes: any, 
-        reason: string) => {
+        image: string | null, imageHash: string | null, aliases: string[], implications: string[], pixivTags: string[], social: string | null, 
+        twitter: string | null, website: string | null, fandom: string | null, r18: boolean, featured: string | null, imageChanged: boolean, changes: any, 
+        reason?: string) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "tag edit requests" ("username", "tag", "key", "type", "description", "image", "imageHash", "aliases", 
             "implications", "pixivTags", "social", "twitter", "website", "fandom", "r18", "featured", "imageChanged", "changes", "reason") 

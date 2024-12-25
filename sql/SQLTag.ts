@@ -125,7 +125,7 @@ export default class SQLTag {
     }
 
     /** Update a tag. */
-    public static updateTag = async (tag: string, column: string, value: string | boolean) => {
+    public static updateTag = async (tag: string, column: string, value: string | boolean | string[] | null) => {
         const query: QueryConfig = {
         text: /*sql*/`UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
         values: [value, tag]

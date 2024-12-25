@@ -513,7 +513,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const revertPostHistory = async () => {
         let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
         if (post.artists) {
-            let categories = await functions.tagCategories(currentPost.tags!, session, setSessionFlag)
+            let categories = await functions.tagCategories(currentPost.tags, session, setSessionFlag)
             currentPost.artists = categories.artists.map((a: any) => a.tag)
             currentPost.characters = categories.characters.map((c: any) => c.tag)
             currentPost.series = categories.series.map((s: any) => s.tag)

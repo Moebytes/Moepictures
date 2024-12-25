@@ -118,11 +118,11 @@ export default class SQLHistory {
 
     /** Insert post history */
     public static insertPostHistory = async (options: {username: string, postID: string, images: string[], uploader: string, 
-        updater?: string, uploadDate: string, updatedDate: string, type: string, rating: string, style: string, parentID: string | null, 
+        updater: string, uploadDate: string, updatedDate: string, type: string, rating: string, style: string, parentID: string | null, 
         title: string, englishTitle: string, posted: string, artist: string, source: string, hasUpscaled: boolean | null, hasOriginal: boolean | null, 
         commentary: string, englishCommentary: string, bookmarks: number, buyLink: string | null, mirrors: string, slug: string | null, artists: string[], 
         characters: string[], series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, 
-        changes: any, reason: string}) => {
+        changes: any, reason?: string | null}) => {
         const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
         englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, hasOriginal, hasUpscaled, 
         slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
@@ -259,7 +259,7 @@ export default class SQLHistory {
     }
 
     /** Get note history */
-    public static noteHistory = async (postID?: string, order?: string, offset?: number, search?: string) => {
+    public static noteHistory = async (postID?: string, order?: number, offset?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -463,19 +463,16 @@ export default class SQLHistory {
     /** Update search history view date */
     public static updateSearchHistory = async (username: string, postID: string) => {
         const now = new Date().toISOString()
-        const query: QueryArrayConfig = {
+        const query: QueryConfig = {
             text: /*sql*/`
                 INSERT INTO "history" ("username", "postID", "viewDate") 
                 VALUES ($1, $2, $3)
                 ON CONFLICT ("username", "postID") 
                 DO UPDATE SET "viewDate" = $3
-                RETURNING "historyID"
             `,
-            rowMode: "array",
             values: [username, postID, now]
         }
-        const result = await SQLQuery.run(query)
-        return String(result.flat(Infinity)[0])
+        await SQLQuery.run(query)
     }
 
     /** Delete search history */

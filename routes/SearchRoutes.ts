@@ -8,8 +8,9 @@ import dist from "sharp-phash/distance"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
-import {PostSearch, TagSearch, TagType, CommentSort, PostSearchParams, CategorySearchParams, 
-TagSearchParams, GroupSearchParams} from "../types/Types"
+import {PostSearch, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
+GroupSearchParams, PostImage, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
+SidebarTagParams, ThreadSearch, MessageSearchParams, MessageSearch} from "../types/Types"
 
 const searchLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -79,8 +80,8 @@ const SearchRoutes = (app: Express) => {
                     text: `SELECT * FROM "images" WHERE "images".hash = $1`,
                     values: [query.replace("hash:", "").trim()]
                 }
-                let images = await sql.run(sqlQuery)
-                if (images?.length) result = await sql.search.posts(images.map((i: any) => i.postID)) as PostSearch[]
+                let images = await sql.run(sqlQuery) as PostImage[]
+                if (images?.length) result = await sql.search.posts(images.map((i) => i.postID)) as PostSearch[]
             } else if (query.startsWith("favorites:")) {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
@@ -103,28 +104,28 @@ const SearchRoutes = (app: Express) => {
                 if (favgroup.private) {
                     if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
                 }
-                result = favgroup.posts.map((p: any) => ({postCount: favgroup.postCount, ...p}))
+                result = favgroup.posts.map((p) => ({...p, postCount: favgroup.postCount}))
             } else if (query.startsWith("history:")) {
                 const [h, username] = query.split(":")
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
                 if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
                 let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, showChildren, req.session.username)
-                result = history.map((h: any) => ({postCount: h.historyCount, ...h.post}))
+                result = history.map((h) => ({...h.post, postCount: h.historyCount}))
             } else {
                 result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
             }
-            result = result.map((p: any) => {
+            result = result.map((p) => {
                 if (p.images?.length > 1) {
-                    p.images = p.images.sort((a: any, b: any) => a.order - b.order)
+                    p.images = p.images.sort((a, b) => a.order - b.order)
                 }
                 return p 
             })
             if (!permissions.isMod(req.session)) {
-                result = result.filter((p: any) => !p.hidden)
+                result = result.filter((p) => !p.hidden)
                 result = functions.stripTags(result)
             }
             if (!req.session.showR18) {
-                result = result.filter((p: any) => !functions.isR18(p.rating))
+                result = result.filter((p) => !functions.isR18(p.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
@@ -142,7 +143,7 @@ const SearchRoutes = (app: Express) => {
 
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {bytes, useMD5} = req.body
+            const {bytes, useMD5} = req.body as SimilarSearchParams
             if (!bytes) return res.status(400).send("Image data must be provided as bytes")
             const buffer = Buffer.from(Object.values(bytes) as any) as any
             let hash = ""
@@ -155,7 +156,7 @@ const SearchRoutes = (app: Express) => {
                 text: `SELECT * FROM "images" WHERE "images".hash = $1`,
                 values: [hash]
               }
-            let images = await sql.run(query)
+            let images = await sql.run(query) as PostImage[]
             if (!images.length) images = await sql.run(`SELECT * FROM "images"`)
             let postIDs = new Set<string>()
             for (let i = 0; i < images.length; i++) {
@@ -301,9 +302,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/comments", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
-            let sort = req.query.sort as CommentSort
-            const offset = req.query.offset as string
+            let {query, sort, offset} = req.query as CommentSearchParams
+            if (!sort) sort = "random"
             if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
@@ -317,7 +317,7 @@ const SearchRoutes = (app: Express) => {
                     parsedSearch += `${parts[i]} `
                 }
             }
-            let result = [] as any
+            let result = [] as CommentSearch[]
             if (usernames.length) {
                 result = await sql.comment.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, Number(offset))
             } else {
@@ -332,7 +332,8 @@ const SearchRoutes = (app: Express) => {
                     if (functions.isR18(comment.post.rating)) result.splice(i, 1)
                 }
                 if (comment.post.private) {
-                    const categories = await serverFunctions.tagCategories(comment.post.tags)
+                    const tags = await sql.post.postTags(comment.post.postID)
+                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
@@ -345,9 +346,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/notes", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
-            let sort = req.query.sort as CommentSort
-            const offset = req.query.offset as string
+            let {query, sort, offset} = req.query as CommentSearchParams
+            if (!sort) sort = "random"
             if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
@@ -361,7 +361,7 @@ const SearchRoutes = (app: Express) => {
                     parsedSearch += `${parts[i]} `
                 }
             }
-            let result = [] as any
+            let result = [] as NoteSearch[]
             if (usernames.length) {
                 result = await sql.note.searchNotesByUsername(usernames, parsedSearch.trim(), sort, Number(offset))
             } else {
@@ -376,7 +376,8 @@ const SearchRoutes = (app: Express) => {
                     if (functions.isR18(note.post.rating)) result.splice(i, 1)
                 }
                 if (note.post.private) {
-                    const categories = await serverFunctions.tagCategories(note.post.tags)
+                    const tags = await sql.post.postTags(note.post.postID)
+                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
@@ -407,8 +408,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let query = req.query.query as string
-            let type = req.query.type as TagType
+            let {query, type} = req.query as SearchSuggestionsParams
+            if (!query) query = ""
             if (!type) type = "all"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             query = functions.trimSpecialCharacters(query)
@@ -433,7 +434,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const postIDs = req.query.postIDs as string[] || []
+            let {postIDs} = req.query as SidebarTagParams
+            if (!postIDs) postIDs = []
             const isBanner = req.query.isBanner === "true"
             let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
@@ -445,13 +447,13 @@ const SearchRoutes = (app: Express) => {
             let slice = false
             if (!postArray?.length) slice = true
             let posts = await sql.search.posts(postArray)
-            let uniqueTags = new Set()
+            let uniqueTags = new Set<string>()
             for (let i = 0; i < posts.length; i++) {
                 for (let j = 0; j < posts[i].tags.length; j++) {
                     uniqueTags.add(posts[i].tags[j])
                 }
             }
-            const uniqueTagArray = Array.from(uniqueTags) as any
+            const uniqueTagArray = Array.from(uniqueTags)
             let result = await sql.tag.tagCounts(uniqueTagArray.filter(Boolean))
             for (let i = 0; i < uniqueTagArray.length; i++) {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
@@ -462,7 +464,7 @@ const SearchRoutes = (app: Express) => {
             let seriesTags = result.filter((t: any) => t.type === "series")
             //let metaTags = result.filter((t: any) => t.type === "meta")
             //let tags = result.filter((t: any) => t.type === "tag")
-            let finalTags = [] as any[]
+            let finalTags = [] as TagCount[]
             if (isBanner) {
                 finalTags = [...seriesTags, ...characterTags]
             } else {
@@ -478,9 +480,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/threads", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
-            let sort = req.query.sort as CommentSort
-            const offset = req.query.offset as string
+            let {query, sort, offset} = req.query as CommentSearchParams
+            if (!sort) sort = "random"
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
@@ -494,25 +495,25 @@ const SearchRoutes = (app: Express) => {
                     parsedSearch += `${parts[i]} `
                 }
             }
-            let result = [] as any
+            let result = [] as ThreadSearch[]
             if (usernames.length) {
                 let unsorted = await sql.thread.searchThreadsByUsername(usernames, parsedSearch.trim(), sort, Number(offset), req.session.username)
-                let stickyThreads = unsorted.filter((thread: any) => thread.sticky)
-                const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
+                let stickyThreads = unsorted.filter((thread) => thread.sticky)
+                const rulesThread = stickyThreads.find((thread) => thread.title.toLowerCase().includes("rules"))
                 if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
-                let threadResult = unsorted.filter((thread: any) => !thread.sticky)
-                result = [rulesThread, ...stickyThreads, ...threadResult].filter(Boolean)
+                let threadResult = unsorted.filter((thread) => !thread.sticky)
+                result = functions.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
             } else {
                 let stickyThreads = await sql.thread.stickyThreads(req.session.username)
-                const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
+                const rulesThread = stickyThreads.find((thread) => thread.title.toLowerCase().includes("rules"))
                 if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
                 let threadResult = await sql.thread.searchThreads(parsedSearch.trim(), sort, Number(offset), req.session.username)
-                result = [rulesThread, ...stickyThreads, ...threadResult].filter(Boolean)
+                result = functions.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
                 const newThreadCount = (Number(stickyThreads[0]?.threadCount) || 0) + (Number(threadResult[0]?.threadCount) || 0)
-                result = result.map((t: any) => ({...t, threadCount: String(newThreadCount)}))
+                result = result.map((t) => ({...t, threadCount: String(newThreadCount)}))
             }
             if (!req.session.showR18) {
-                result = result.filter((t: any) => !t.r18)
+                result = result.filter((t) => !t.r18)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -523,15 +524,14 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/messages", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
-            let sort = req.query.sort as CommentSort
-            const offset = req.query.offset as string
+            let {query, sort, offset} = req.query as MessageSearchParams
+            if (!sort) sort = "random"
             const hideSystem = req.query.hideSystem === "true"
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, Number(offset))
-            let filtered = [] as any
+            let filtered = [] as MessageSearch[]
             let messageCount = messages[0]?.messageCount || 0
             for (const message of messages) {
                 if (message.r18 && !req.session.showR18) {

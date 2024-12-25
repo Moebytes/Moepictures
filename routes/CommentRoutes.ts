@@ -7,6 +7,7 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import {CommentReportFulfillParams} from "../types/Types"
 
 const commentLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -32,7 +33,7 @@ const CommentRoutes = (app: Express) => {
 
     app.post("/api/comment/create", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {comment, postID} = req.body
+            const {comment, postID} = req.body as {comment: string, postID: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!comment || !postID) return res.status(400).send("Bad comment or post ID")
@@ -84,7 +85,7 @@ const CommentRoutes = (app: Express) => {
 
     app.post("/api/comment/report", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {commentID, reason} = req.body
+            const {commentID, reason} = req.body as {commentID: string, reason: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!commentID) return res.status(400).send("Bad commentID")
@@ -101,7 +102,7 @@ const CommentRoutes = (app: Express) => {
 
     app.post("/api/comment/report/fulfill", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {reportID, reporter, username, id, accepted} = req.body
+            const {reportID, reporter, username, id, accepted} = req.body as CommentReportFulfillParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad reportID")
             if (!permissions.isMod(req.session)) return res.status(403).end()

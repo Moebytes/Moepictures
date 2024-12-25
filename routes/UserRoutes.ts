@@ -11,6 +11,9 @@ import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
+import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
+ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
+PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts} from "../types/Types"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -88,7 +91,7 @@ const UserRoutes = (app: Express) => {
     
     app.post("/api/user/signup", csrfProtection, signupLimiter, async (req: Request, res: Response) => {
         try {
-            let {username, email, password, captchaResponse} = req.body
+            let {username, email, password, captchaResponse} = req.body as SignupParams
             if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad username, email, password, or captchaResponse.")
             username = username.trim().toLowerCase()
             email = email.trim()
@@ -148,7 +151,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/login", csrfProtection, loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
-            let {username, password, captchaResponse} = req.body
+            let {username, password, captchaResponse} = req.body as LoginParams
             if (!username || !password || !captchaResponse) return res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
             password = password.trim()
@@ -291,8 +294,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/pfp", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const bytes = req.body.bytes
-            const postID = req.body.postID
+            const {bytes, postID} = req.body as UserPfpParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = functions.bufferFileType(bytes)?.[0]
             const jpg = result?.mime === "image/jpeg"
@@ -427,7 +429,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/autosearchinterval", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {interval} = req.body
+            const {interval} = req.body as {interval: number}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (Number.isNaN(Number(interval))) return res.status(400).send("Bad interval")
             const user = await sql.user.user(req.session.username)
@@ -445,7 +447,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/upscaledimages", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {reset} = req.body
+            const {reset} = req.body as {reset?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -466,7 +468,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/savesearch", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {name, tags} = req.body
+            const {name, tags} = req.body as SaveSearchParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -483,7 +485,7 @@ const UserRoutes = (app: Express) => {
 
     app.put("/api/user/savesearch", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {name, key, tags} = req.body
+            const {name, key, tags} = req.body as SaveSearchEditParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -501,7 +503,7 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/savesearch/delete", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {name, all} = req.query
+            const {name, all} = req.query as unknown as {name: string, all?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -510,7 +512,7 @@ const UserRoutes = (app: Express) => {
                 return res.status(200).send("Success")
             }
             let savedSearches = user.savedSearches || {}
-            delete savedSearches[name as string]
+            delete savedSearches[name]
             req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
             res.status(200).send("Success")
@@ -522,7 +524,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/r18", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {r18} = req.body
+            const {r18} = req.body as {r18?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -539,7 +541,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/changeusername", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            let {newUsername, captchaResponse} = req.body
+            let {newUsername, captchaResponse} = req.body as ChangeUsernameParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
@@ -572,7 +574,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/changepassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            let {oldPassword, newPassword} = req.body
+            let {oldPassword, newPassword} = req.body as ChangePasswordParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!oldPassword || !newPassword) return res.status(400).send("Bad oldPassword or newPassword")
             oldPassword = oldPassword.trim()
@@ -631,7 +633,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/changeemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            let {newEmail, captchaResponse} = req.body
+            let {newEmail, captchaResponse} = req.body as ChangeEmailParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validateEmail(newEmail, enLocale)
@@ -648,34 +650,6 @@ const UserRoutes = (app: Express) => {
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
             await serverFunctions.email(newEmail, "Moepictures Email Address Change", jsxFunctions.changeEmailJSX(username, link))
-            res.status(200).send("Success")
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/user/verifyemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
-        try {
-            let {email, captchaResponse} = req.body
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            const badEmail = functions.validateEmail(email, enLocale)
-            if (badEmail) return res.status(400).send("Bad email")
-            const user = await sql.user.user(req.session.username)
-            if (!user) return res.status(400).send("Bad username")
-            const token = crypto.randomBytes(32).toString("hex")
-            const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-            try {
-                await sql.token.insertEmailToken(email, hashToken)
-            } catch {
-                await sql.token.updateEmailToken(email, hashToken)
-            }
-            const username = functions.toProperCase(req.session.username)
-            const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
-            await sql.user.updateUser(req.session.username, "email", email)
-            req.session.email = email
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -716,9 +690,37 @@ const UserRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/user/verifyemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
+        try {
+            let {email, captchaResponse} = req.body as VerifyEmailParams
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
+            const badEmail = functions.validateEmail(email, enLocale)
+            if (badEmail) return res.status(400).send("Bad email")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const token = crypto.randomBytes(32).toString("hex")
+            const hashToken = crypto.createHash("sha256").update(token).digest("hex")
+            try {
+                await sql.token.insertEmailToken(email, hashToken)
+            } catch {
+                await sql.token.updateEmailToken(email, hashToken)
+            }
+            const username = functions.toProperCase(req.session.username)
+            const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
+            await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
+            await sql.user.updateUser(req.session.username, "email", email)
+            req.session.email = email
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.post("/api/user/changebio", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            let {bio} = req.body
+            let {bio} = req.body as {bio: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!bio) return res.status(400).send("Bad bio")
             bio = bio.trim()
@@ -735,7 +737,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/forgotpassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {email, captchaResponse} = req.body
+            const {email, captchaResponse} = req.body as ForgotPasswordParams
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             if (!email) {
                 await functions.timeout(2000) 
@@ -771,7 +773,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/resetpassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, password, token} = req.body
+            const {username, password, token} = req.body as ResetPasswordParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username || !token || !password) return res.status(400).send("Bad username, token, or password")
             const badPassword = functions.validatePassword(username, password, enLocale)
@@ -810,7 +812,7 @@ const UserRoutes = (app: Express) => {
                 await sql.token.deleteEmailToken(user.email!)
                 if (user.image) await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image, user.imageHash), false)
             } catch (e) {
-            console.log(e)
+                console.log(e)
                 // ignore
             }
             await sql.user.deleteUser(req.session.username)
@@ -826,11 +828,8 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const username = req.query.username as string
-            const rating = req.query.rating as string
-            const offset = req.query.offset as string
-            const limit = req.query.limit as string
-            let favorites = [] as any
+            const {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            let favorites = [] as PostSearch[]
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
@@ -862,11 +861,8 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const username = req.query.username as string
-            const rating = req.query.rating as string
-            const offset = req.query.offset as string
-            const limit = req.query.limit as string
-            let uploads = [] as any
+            const {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            let uploads = [] as PostSearch[]
             if (username) {
                 uploads = await sql.user.uploads(username, Number(limit), Number(offset), "all", rating)
             } else {
@@ -897,7 +893,7 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/favgroups", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
-            let favgroups = null as any
+            let favgroups = [] as Favgroup[]
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(200).send([])
@@ -920,7 +916,7 @@ const UserRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const username = req.query.username as string
-            let comments = [] as any
+            let comments = [] as CommentSearch[]
             if (username) {
                 comments = await sql.comment.searchCommentsByUsername([username], query, sort, Number(offset))
             } else {
@@ -936,7 +932,8 @@ const UserRoutes = (app: Express) => {
                     if (functions.isR18(comment.post.rating)) comments.splice(i, 1)
                 }
                 if (comment.post.private) {
-                    const categories = await serverFunctions.tagCategories(comment.post.tags)
+                    const tags = await sql.post.postTags(comment.post.postID)
+                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) comments.splice(i, 1)
                 }
             }
@@ -949,7 +946,8 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/ban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days} = req.body
+            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, 
+            deleteComments, deleteMessages, days} = req.body as BanParams
             if (!username) return res.status(400).send("Bad username")
             if (days && Number.isNaN(Number(days))) return res.status(400).send("Bad days")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -1108,7 +1106,8 @@ const UserRoutes = (app: Express) => {
             }
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
-            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs), revertGroupIDs: Array.from(revertGroupIDs), revertNoteIDs: Array.from(revertNoteIDs)})
+            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs), 
+            revertGroupIDs: Array.from(revertGroupIDs), revertNoteIDs: Array.from(revertNoteIDs)})
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1117,7 +1116,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/unban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username} = req.body
+            const {username} = req.body as {username: string}
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -1154,7 +1153,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/promote", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, role} = req.body
+            const {username, role} = req.body as {username: string, role: UserRole}
             if (!username) return res.status(400).send("Bad username")
             if (!functions.validRole(role)) return res.status(400).send("Bad role")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -1281,11 +1280,11 @@ const UserRoutes = (app: Express) => {
             const noteHistory = await sql.history.userNoteHistory(username)
             const groupHistory = await sql.history.userGroupHistory(username)
             const json = {
-                postEdits: postHistory[0]?.historyCount || 0,
-                tagEdits: tagHistory[0]?.historyCount || 0,
-                noteEdits: noteHistory[0]?.historyCount || 0,
-                groupEdits: groupHistory[0]?.historyCount || 0
-            }
+                postEdits: Number(postHistory[0]?.historyCount || 0),
+                tagEdits: Number(tagHistory[0]?.historyCount || 0),
+                noteEdits: Number(noteHistory[0]?.historyCount || 0),
+                groupEdits: Number(groupHistory[0]?.historyCount || 0)
+            } as EditCounts
             serverFunctions.sendEncrypted(json, req, res)
         } catch (e) {
             console.log(e)

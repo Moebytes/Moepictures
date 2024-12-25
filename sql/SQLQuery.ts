@@ -78,6 +78,7 @@ export default class SQLQuery {
             if (cache) await redis.set(JSON.stringify(query), JSON.stringify(result.rows)).catch(() => null)
             return result.rows as any
         } catch (error) {
+            console.log(query)
             return Promise.reject(error)
         } finally {
             pgClient.release(true)

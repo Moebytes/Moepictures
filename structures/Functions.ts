@@ -26,9 +26,9 @@ import crypto from "crypto"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
-import {GetEndpoint, PostType, PostRating, PostStyle, PostSort, CategorySort, MiniTag,
-TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges,
-PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note} from "../types/Types"
+import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, 
+CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges,
+PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -83,7 +83,7 @@ export default class Functions {
         return url.toString()
     }
 
-    public static updateClientKeys = async (session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (privateKey) return
         if (clientKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
         if (!privateKey) {
@@ -103,7 +103,7 @@ export default class Functions {
         }
     }
 
-    public static updateServerPublicKey = async (session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static updateServerPublicKey = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (serverPublicKey) return
         if (serverKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
         if (!serverPublicKey) {
@@ -113,12 +113,13 @@ export default class Functions {
         }
     }
 
-    public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: Session, 
+        setSessionFlag?: (value: boolean) => void) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         const headers = {"x-csrf-token": session.csrfToken}
         try {
-            const response = await axios.get(endpoint, {params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            const response = await axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
             let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
@@ -130,31 +131,34 @@ export default class Functions {
         }
     }
 
-    public static post = async (endpoint: string, data: any, session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static post = async <T extends string>(endpoint: T, data: PostEndpoint<T>["params"], session: Session, 
+        setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
-            const response = await axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
-            return response
+            const response = await axios.post(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
+            return response as PostEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
     }
 
-    public static put = async (endpoint: string, data: any, session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static put = async <T extends string>(endpoint: T, data: PutEndpoint<T>["params"], session: Session, 
+        setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
-            const response = await axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
-            return response
+            const response = await axios.put(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
+            return response as PutEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
     }
 
-    public static delete = async (endpoint: string, params: any, session: any, setSessionFlag?: (value: boolean) => void) => {
+    public static delete = async <T extends string>(endpoint: T, params: DeleteEndpoint<T>["params"], session: Session, 
+        setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
-            return response
+            return response as DeleteEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
@@ -191,7 +195,7 @@ export default class Functions {
             const images = await Functions.post(`/api/misc/proxy`, {url: encodeURIComponent(link)}, session, setSessionFlag)
             let files = [] as File[]
             for (let i = 0; i < images.length; i++) {
-                const blob = new Blob([new Uint8Array(images[i].data)])
+                const blob = new Blob([new Uint8Array(images[i])])
                 const file = new File([blob], path.basename(link) + ".png")
                 files.push(file)
             }
@@ -1873,7 +1877,7 @@ export default class Functions {
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
                     }
-                    const similar = await Functions.post("/api/search/similar", {bytes: Object.values(bytes), type: result.typename}, session, setSessionFlag)
+                    const similar = await Functions.post("/api/search/similar", {bytes, useMD5: false}, session, setSessionFlag)
                     resolve(similar)
                 }
             }
@@ -3027,8 +3031,8 @@ export default class Functions {
         return "tag-color"
     }
 
-    public static filterNulls = <T>(arr: (T | null)[] | null) => {
+    public static filterNulls = <T>(arr?: (T | null | undefined)[] | null) => {
         if (!arr) return []
-        return arr.filter((item) => item !== null) as T[]
+        return arr.filter((item) => item !== null && item !== undefined) as T[]
     }
 }

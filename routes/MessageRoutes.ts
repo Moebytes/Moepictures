@@ -7,6 +7,8 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import {MessageCreateParams, MessageEditParams, MessageReplyParams, MessageReplyEditParams,
+MessageForwardParams} from "../types/Types"
 
 const messageLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -38,7 +40,7 @@ const pushNotification = (username: string) => {
 const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {title, content, r18, recipients} = req.body
+            const {title, content, r18, recipients} = req.body as MessageCreateParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
@@ -68,7 +70,7 @@ const MessageRoutes = (app: Express) => {
 
     app.put("/api/message/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, title, content, r18} = req.body
+            const {messageID, title, content, r18} = req.body as MessageEditParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!title || !content) return res.status(400).send("Bad title or content")
             const badTitle = functions.validateTitle(title, enLocale)
@@ -131,7 +133,7 @@ const MessageRoutes = (app: Express) => {
 
     app.post("/api/message/reply", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, content, r18} = req.body
+            const {messageID, content, r18} = req.body as MessageReplyParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!messageID || !content) return res.status(400).send("Bad messageID or content")
@@ -201,7 +203,7 @@ const MessageRoutes = (app: Express) => {
 
     app.put("/api/message/reply/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {replyID, content, r18} = req.body
+            const {replyID, content, r18} = req.body as MessageReplyEditParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!replyID || !content) return res.status(400).send("Bad replyID or content")
             const badReply = functions.validateReply(content, enLocale)
@@ -257,7 +259,7 @@ const MessageRoutes = (app: Express) => {
 
     app.post("/api/message/softdelete", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID} = req.body
+            const {messageID} = req.body as {messageID: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
@@ -295,7 +297,7 @@ const MessageRoutes = (app: Express) => {
 
     app.post("/api/message/read", csrfProtection, messageLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, forceRead} = req.body
+            const {messageID, forceRead} = req.body as {messageID: string, forceRead?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
@@ -355,7 +357,7 @@ const MessageRoutes = (app: Express) => {
 
     app.post("/api/message/forward", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, recipients} = req.body
+            const {messageID, recipients} = req.body as MessageForwardParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!messageID) return res.status(400).send("Bad messageID or content")
@@ -373,7 +375,7 @@ const MessageRoutes = (app: Express) => {
                 if (message.r18 && !user.showR18) return res.status(400).send("Cannot send r18 message")
             }
             let toAdd = recipients.filter((r: string) => !message.recipients.includes(r))
-            let toRemove = message.recipients.filter((r) => !recipients.includes(r))
+            let toRemove = message.recipients.filter((r) => r !== null && !recipients.includes(r))
             await sql.message.bulkDeleteRecipients(messageID, functions.filterNulls(toRemove))
             await sql.message.bulkInsertRecipients(messageID, toAdd)
             for (const recipient of toAdd) {

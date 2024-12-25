@@ -59,7 +59,7 @@ const $2FARoutes = (app: Express) => {
 
     app.post("/api/2fa/enable", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            let {token} = req.body
+            let {token} = req.body as {token: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!token) return res.status(400).send("Bad token")
             token = token.trim()
@@ -88,7 +88,7 @@ const $2FARoutes = (app: Express) => {
 
     app.post("/api/2fa", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            let {token} = req.body
+            let {token} = req.body as {token: string}
             if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("2FA isn't enabled")
             if (req.session.username) return res.status(400).send("Already authenticated")
             token = token.trim()

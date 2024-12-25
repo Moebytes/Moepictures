@@ -10,7 +10,7 @@ import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
 import axios from "axios"
-import {MiniTag, PostImage, PostFull, PostTagged} from "../types/Types"
+import {MiniTag, PostImage, UploadImage, PostFull, PostTagged, Attachment} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -118,7 +118,7 @@ export default class ServerFunctions {
         })
     }
 
-    public static contactEmail = async (email: string, subject: string, message: string, attachments?: any[]) => {
+    public static contactEmail = async (email: string, subject: string, message: string, attachments?: Attachment[]) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -426,7 +426,7 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static imagesChanged = async (oldImages: PostImage[], newImages: PostImage[] & {bytes: Uint8Array}[], upscaled: boolean, r18: boolean) => {
+    public static imagesChanged = async (oldImages: PostImage[], newImages: UploadImage[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -447,7 +447,7 @@ export default class ServerFunctions {
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: PostImage[], newImages: PostImage[], upscaled: boolean, r18: boolean) => {
+    public static imagesChangedUnverified = async (oldImages: PostImage[], newImages: PostImage[] | UploadImage[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -460,16 +460,22 @@ export default class ServerFunctions {
             const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
             if (!oldBuffer) continue
             const newImage = newImages[i]
-            let newPath = ""
-            if (upscaled) {
-                newPath = functions.getUpscaledImagePath(newImage.type, newImage.postID, newImage.order, newImage.upscaledFilename || newImage.filename)
+            let newBuffer = null as Buffer | null
+            if (newImage.hasOwnProperty("bytes")) {
+                newBuffer = Buffer.from((newImage as UploadImage).bytes)
             } else {
-                newPath = functions.getImagePath(newImage.type, newImage.postID, newImage.order, newImage.filename)
+                let newPath = ""
+                let postImage = newImage as PostImage
+                if (upscaled) {
+                    newPath = functions.getUpscaledImagePath(postImage.type, postImage.postID, postImage.order, postImage.upscaledFilename || postImage.filename)
+                } else {
+                    newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
+                }
+                newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false)
             }
-            const newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false) as any
             if (!newBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
-            const currentMD5 = crypto.createHash("md5").update(newBuffer).digest("hex")
+            const currentMD5 = crypto.createHash("md5").update(newBuffer as any).digest("hex")
             if (imgMD5 !== currentMD5) return true
         }
         return false

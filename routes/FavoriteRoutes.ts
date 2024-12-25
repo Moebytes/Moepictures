@@ -6,6 +6,7 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import {Favgroup, FavgroupUpdateParams, FavgroupEditParams, FavgroupReorderParams} from "../types/Types"
 
 const favoriteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -37,10 +38,10 @@ const FavoriteRoutes = (app: Express) => {
 
     app.post("/api/favorite/update", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, favorited} = req.body
+            const {postID, favorited} = req.body as {postID: string, favorited: boolean}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (favorited == null) return res.status(400).send("Bad favorited")
+            if (favorited === null || favorited === undefined) return res.status(400).send("Bad favorited")
             const favorite = await sql.favorite.favorite(postID, req.session.username)
             if (favorited) {
                 if (!favorite) await sql.favorite.insertFavorite(postID, req.session.username)
@@ -69,7 +70,7 @@ const FavoriteRoutes = (app: Express) => {
 
     app.post("/api/favgroup/update", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, name, isPrivate} = req.body
+            const {postID, name, isPrivate} = req.body as FavgroupUpdateParams
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const post = await sql.post.post(postID)
@@ -107,7 +108,7 @@ const FavoriteRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            let newFavgroups = [] as any[]
+            let newFavgroups = [] as Favgroup[]
             const favgroups = await sql.favorite.postFavgroups(postID, req.session.username)
             for (let i = 0; i < favgroups.length; i++) {
                 const group = favgroups[i]
@@ -136,8 +137,7 @@ const FavoriteRoutes = (app: Express) => {
 
     app.delete("/api/favgroup/post/delete", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID as string
-            const name = req.query.name as string
+            const {postID, name} = req.query as {postID: string, name: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const slug = functions.generateSlug(name)
@@ -164,8 +164,7 @@ const FavoriteRoutes = (app: Express) => {
 
     app.get("/api/favgroup", favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const username = req.query.username as string
-            const name = req.query.name as string
+            const {username, name} = req.query as {username: string, name: string}
             if (!username) return res.status(400).send("Bad username")
             const slug = functions.generateSlug(name)
             const favgroup = await sql.favorite.favgroup(username, slug)
@@ -195,7 +194,7 @@ const FavoriteRoutes = (app: Express) => {
 
     app.put("/api/favgroup/edit", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {key, name, isPrivate} = req.body
+            const {key, name, isPrivate} = req.body as FavgroupEditParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const slug = functions.generateSlug(key)
             const favgroup = await sql.favorite.favgroup(req.session.username, slug)
@@ -233,7 +232,7 @@ const FavoriteRoutes = (app: Express) => {
 
     app.put("/api/favgroup/reorder", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {name, posts} = req.body
+            const {name, posts} = req.body as FavgroupReorderParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             const slug = functions.generateSlug(name)
@@ -245,7 +244,7 @@ const FavoriteRoutes = (app: Express) => {
             let toChange = [] as any
             for (let i = 0; i < posts.length; i++) {
                 let newPost = posts[i]
-                let oldPost = favgroup.posts.find((p: any) => p.postID === newPost.postID)
+                let oldPost = favgroup.posts.find((p) => p.postID === String(newPost.postID))
                 if (Number(oldPost?.order) !== Number(newPost.order)) toChange.push(newPost)
             }
             await sql.favorite.bulkDeleteFavgroupMappings(req.session.username, favgroup.slug, toChange)

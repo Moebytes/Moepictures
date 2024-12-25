@@ -1,4 +1,5 @@
-import {PostType, PostRating, PostStyle, PostChanges} from "./Types"
+import {PostType, PostRating, PostStyle, PostChanges, MiniTag, PostDeleteRequest, PostHistory,
+ImageFormat, Upscaler, SourceData} from "./Types"
 
 export interface PostMirrors {
     twitter?: string
@@ -106,3 +107,89 @@ export interface ChildPost {
     parentID: string
     post: PostCuteness
 }
+
+export interface PostDeleteRequestFulfillParams {
+    username: string
+    postID: string
+    accepted: boolean
+}
+
+export interface PostHistoryParams {
+    postID?: string
+    historyID?: string
+    username?: string
+    query?: string
+    offset: number
+}
+
+export interface PostCompressParams {
+    postID: string 
+    quality: number 
+    format: ImageFormat 
+    maxDimension: number 
+    maxUpscaledDimension: number 
+    original: boolean 
+    upscaled: boolean
+}
+
+export interface PostUpscaleParams {
+    postID: string 
+    upscaler: Upscaler 
+    scaleFactor: number
+    compressJPG: boolean
+}
+
+export interface PostQuickEditParams {
+    postID: string
+    unverified: boolean
+    type: PostType
+    rating: PostRating
+    style: PostStyle
+    source?: SourceData
+    parentID?: string | null
+    artists?: string[]
+    characters?: string[]
+    series?: string[]
+    tags?: string[]
+    reason?: string | null
+    silent?: boolean
+}
+
+export interface PostQuickEditUnverifiedParams extends Omit<PostQuickEditParams, "unverified" | "silent"> {}
+
+export type PostGetEndpoint<T extends string> = 
+    T extends "/api/post" ? {params: {postID: string}, response: PostFull} :
+    T extends "/api/posts" ? {params: {postIDs: string[]}, response: PostFull[]} :
+    T extends "/api/post/tags" ? {params: {postID: string}, response: MiniTag[]} :
+    T extends "/api/post/comments" ? {params: {postID: string}, response: Comment[]} :
+    T extends "/api/post/children" ? {params: {postID: string}, response: ChildPost[]} :
+    T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost} :
+    T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost} :
+    T extends "/api/post/list/unverified" ? {params: {offset: number}, response: UnverifiedPost[]} :
+    T extends "/api/post-edits/list/unverified" ? {params: {offset: number}, response: UnverifiedPost[]} :
+    T extends "/api/post/children/unverified" ? {params: {postID: string}, response: ChildPost[]} :
+    T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost} :
+    T extends "/api/post/delete/request/list" ? {params: {offset: number}, response: PostDeleteRequest[]} :
+    T extends "/api/post/history" ? {params: PostHistoryParams, response: PostHistory[]} :
+    never
+
+export type PostPostEndpoint<T extends string> = 
+    T extends "/api/post/takedown" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/lock" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/private" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/delete/request" ? {params: {postID: string, reason: string}, response: string} :
+    T extends "/api/post/delete/request/fulfill" ? {params: PostDeleteRequestFulfillParams, response: string} :
+    T extends "/api/post/view" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/compress" ? {params: PostCompressParams, response: string} :
+    T extends "/api/post/upscale" ? {params: PostUpscaleParams, response: string} :
+    never
+
+export type PostPutEndpoint<T extends string> = 
+    T extends "/api/post/quickedit" ? {params: PostQuickEditParams, response: string} :
+    T extends "/api/post/quickedit/unverified" ? {params: PostQuickEditUnverifiedParams, response: string} :
+    never
+
+export type PostDeleteEndpoint<T extends string> = 
+    T extends "/api/post/delete" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/history/delete" ? {params: {postID: string, historyID: string}, response: string} :
+    never
