@@ -12,7 +12,7 @@ const DeleteReplyDialog: React.FunctionComponent = (props) => {
     const {deleteReplyID} = useThreadDialogSelector()
     const {setDeleteReplyID, setDeleteReplyFlag} = useThreadDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

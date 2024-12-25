@@ -30,7 +30,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState(" ")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -86,6 +86,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     }
 
     const login = async () => {
+        if (!errorRef.current) return
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)

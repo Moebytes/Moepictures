@@ -56,7 +56,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
         }
         if (!result.length) {
             const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
-            result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No data"}]}]
+            if (post) result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No data"}]}]
         }
         setEnded(false)
         setIndex(0)

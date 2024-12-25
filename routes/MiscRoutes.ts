@@ -728,6 +728,18 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/misc/imghash", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.body) return res.status(400).send("Image data must be provided")
+            const buffer = Buffer.from(req.body, "binary")
+            const hash = await phash(buffer).then((hash: any) => functions.binaryToHex(hash))
+            res.status(200).send(hash)
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
+
     app.post("/api/client-key", miscLimiter, async (req: Request, res: Response) => {
         try {
             const {publicKey} = req.body as {publicKey: string}

@@ -52,23 +52,24 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import mime from "mime-types"
 import "./styles/postimage.less"
+import {PostFull, PostHistory} from "../types/Types"
 const ffmpeg = createFFmpeg()
 
 interface Props {
-    post?: any
+    post?: PostFull | PostHistory
     img: string
     width?: number
     height?: number
     scale?: number
     noKeydown?: boolean
-    comicPages?: any
+    comicPages?: string[] | null
     order?: number
     noEncryption?: boolean
     noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    noteID?: string
+    noteID?: string | null
 }
 
 let timeout = null as any
@@ -1061,7 +1062,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             functions.download(filename, gif)
             window.URL.revokeObjectURL(gif)
         } else {
-            if (props.comicPages?.length > 1) {
+            if (props.comicPages && props.comicPages?.length > 1) {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
@@ -1099,10 +1100,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
                 multiRender()
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }
@@ -1257,6 +1259,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleUpscale = async () => {
+        if (!props.post) return
         if (!session.username) {
             setRedirect(`/post/${props.post.postID}`)
             history.push("/login")
@@ -1275,6 +1278,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const reverseSearch = async (service: string) => {
+        if (!props.post) return
         const baseMap = {
             "google": "https://lens.google.com/uploadbyurl?url=",
             "bing": "https://www.bing.com/images/searchbyimage?cbir=sbi&imgurl=",
@@ -1285,7 +1289,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         let url = tempLink
         if (!tempLink) {
             const image = props.post.images[(props.order || 1) - 1]
-            const thumbnail = functions.getThumbnailLink(image.type, props.post.postID, image.order, image.filename, "massive")
+            let thumbnail = ""
+            if (typeof image === "string") {
+                thumbnail = functions.getRawThumbnailLink(image, "massive", mobile)
+            } else {
+                thumbnail = functions.getThumbnailLink(image.type, props.post.postID, image.order, image.filename, "massive")
+            }
             const decryptedImage = await functions.decryptThumb(thumbnail, session, `reverse-${thumbnail}`, true)
             const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
             url = await functions.post("/api/misc/litterbox", new Uint8Array(arrayBuffer), session, setSessionFlag)

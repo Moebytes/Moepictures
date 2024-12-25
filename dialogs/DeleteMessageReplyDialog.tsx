@@ -12,7 +12,7 @@ const DeleteMessageReplyDialog: React.FunctionComponent = (props) => {
     const {deleteMsgReplyID} = useMessageDialogSelector()
     const {setDeleteMsgReplyID, setDeleteMsgReplyFlag} = useMessageDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

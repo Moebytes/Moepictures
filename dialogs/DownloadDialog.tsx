@@ -64,7 +64,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
         if (start < 0) start = 0
         if (end < 0) end = 0
         const postArray = posts.slice(start, end)
-        const newDownloadIDs = [] as any
+        const newDownloadIDs = [] as string[]
         for (let i = 0; i < postArray.length; i++) {
             const post = postArray[i]
             if (!post) continue 

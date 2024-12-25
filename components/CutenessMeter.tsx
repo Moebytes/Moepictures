@@ -10,9 +10,10 @@ import cuteness4 from "../assets/images/cuteness4.png"
 import cuteness5 from "../assets/images/cuteness5.png"
 import deleteStar from "../assets/icons/deletestar.png"
 import "./styles/cutenessmeter.less"
+import {PostSearch, PostHistory} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory
 }
 
 let cutenessTimer = null as any
@@ -88,7 +89,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }, [cuteness, session])
 
     const setCutenessValue = (value: number) => {
-        if (isAverage) return setCuteness(averageCuteness)
+        if (isAverage) return setCuteness(Number(averageCuteness))
         return setCuteness(value)
     }
 
@@ -104,7 +105,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
                 <img className="cuteness-img" src={deleteStar} style={{filter: getFilter()}} onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
-                <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={getCutenessValue()} allowFraction={true} fullFraction={true} 
+                <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={Number(getCutenessValue())} allowFraction={true} fullFraction={true} 
                 allowTitleTag={false} multiplier={200} showTooltip={true} tooltipClassName="cuteness-tooltip" tooltipDefaultText={`${averageCuteness}`}
                 iconsCount={5} size={80} snap={2} SVGstrokeColor="black" SVGstorkeWidth={1} fillColor="#4b22f0" emptyColor="black"/>
                 {/* <Slider ref={sliderRef} renderTrack={(props, state) => <div {...props} className={`cuteness-track-${state.index}`}><span className="cuteness-text">{state.value}</span></div>} className="cuteness-slider" thumbClassName="cuteness-thumb" onChange={(value) => setCuteness(value)} min={0} max={1000} step={1} value={cuteness}/> */}

@@ -51,7 +51,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -140,7 +140,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateCharacters = () => {
             let currentIndex = index
-            const newVisibleCharacters = visibleCharacters as any
+            const newVisibleCharacters = visibleCharacters
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!characters[currentIndex]) break
                 newVisibleCharacters.push(characters[currentIndex])
@@ -168,7 +168,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/characters", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
-        const cleanCharacters = characters.filter((t: any) => !t.fake)
+        const cleanCharacters = characters.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanCharacters.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, tagCount: cleanCharacters[0]?.tagCount}), ...result]
@@ -180,14 +180,14 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setCharacters(result)
             } else {
-                setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setCharacters((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setCharacters(result)
                 } else {
-                    setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setCharacters((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -199,7 +199,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!characters[currentIndex]) return updateOffset()
-                const newVisibleCharacters = visibleCharacters as any
+                const newVisibleCharacters = visibleCharacters
                 for (let i = 0; i < 15; i++) {
                     if (!characters[currentIndex]) return updateOffset()
                     newVisibleCharacters.push(characters[currentIndex])
@@ -319,7 +319,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -367,7 +367,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }
 
     const generateCharactersJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visibleCharacters)

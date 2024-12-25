@@ -29,7 +29,7 @@ export interface CommentReportFulfillParams {
 }
 
 export type CommentGetEndpoint<T extends string> = 
-    T extends "/api/comment" ? {params: {commentID: string}, response: Comment} :
+    T extends "/api/comment" ? {params: {commentID: string}, response: Comment | undefined} :
     never
 
 export type CommentPostEndpoint<T extends string> = 

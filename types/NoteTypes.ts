@@ -1,6 +1,7 @@
 import {UserRole, Post, UnverifiedPost, NoteHistory} from "./Types"
 
 export interface Note {
+    id?: number
     noteID: string
     postID: string
     order: number
@@ -16,6 +17,15 @@ export interface Note {
     imageHeight: number
     imageHash: string
     overlay: boolean
+}
+
+export interface BubbleData {
+    transcript: string
+    translation: string
+    x: number
+    y: number
+    width: number
+    height: number
 }
 
 export interface NoteSearch {

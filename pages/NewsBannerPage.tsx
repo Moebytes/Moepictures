@@ -23,7 +23,7 @@ const NewsBannerPage: React.FunctionComponent = (props) => {
     const [text, setText] = useState("")
     const [link, setLink] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

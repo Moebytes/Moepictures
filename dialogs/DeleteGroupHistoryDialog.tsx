@@ -12,7 +12,7 @@ const DeleteGroupHistoryDialog: React.FunctionComponent = (props) => {
     const {deleteGroupHistoryID} = useGroupDialogSelector()
     const {setDeleteGroupHistoryID, setDeleteGroupHistoryFlag} = useGroupDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

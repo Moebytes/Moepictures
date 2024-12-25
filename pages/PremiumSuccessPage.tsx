@@ -20,10 +20,6 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSession, setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const [submitted, setSubmitted] = useState(false)
-    const [newEmail, setNewEmail] = useState("")
-    const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
     const history = useHistory()
 
     const getSessionCookie = async () => {

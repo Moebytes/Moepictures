@@ -24,7 +24,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const [isPrivate, setIsPrivate] = useState(false)
     const [favGroups, setFavGroups] = useState([] as Favgroup[])
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -80,9 +80,9 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     }
 
     const favgroupJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < favGroups.length; i++) {
-            const favgroup = favGroups[i] as any
+            const favgroup = favGroups[i]
             const deleteFromFavGroup = async () => {
                 await functions.delete("/api/favgroup/post/delete", {postID: favGroupID, name: favgroup.name}, session, setSessionFlag)
                 updateFavGroups()

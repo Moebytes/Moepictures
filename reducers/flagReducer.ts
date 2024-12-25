@@ -11,6 +11,7 @@ const flagSlice = createSlice({
         commentSearchFlag: null as string | null,
         noteSearchFlag: null as string | null,
         threadSearchFlag: null as string | null,
+        messageSearchFlag: null as string | null,
         groupSearchFlag: null as string | null,
         pageFlag: null as number | null,
         downloadIDs: [] as string[],
@@ -24,7 +25,7 @@ const flagSlice = createSlice({
         postFlag: false,
         groupFlag: false,
         messageFlag: false,
-        tagFlag: false
+        tagFlag: false as string | boolean
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -33,6 +34,7 @@ const flagSlice = createSlice({
         setCommentSearchFlag: (state, action) => {state.commentSearchFlag = action.payload},
         setNoteSearchFlag: (state, action) => {state.noteSearchFlag = action.payload},
         setThreadSearchFlag: (state, action) => {state.threadSearchFlag = action.payload},
+        setMessageSearchFlag: (state, action) => {state.messageSearchFlag = action.payload},
         setGroupSearchFlag: (state, action) => {state.groupSearchFlag = action.payload},
         setPageFlag: (state, action) => {state.pageFlag = action.payload},
         setDownloadIDs: (state, action) => {state.downloadIDs = action.payload},
@@ -55,7 +57,7 @@ const {
     setPageFlag, setDownloadIDs, setDownloadFlag, setReloadPostFlag,
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
-    setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag
+    setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -67,6 +69,7 @@ export const useFlagSelector = () => {
         commentSearchFlag: selector((state) => state.flag.commentSearchFlag),
         noteSearchFlag: selector((state) => state.flag.noteSearchFlag),
         threadSearchFlag: selector((state) => state.flag.threadSearchFlag),
+        messageSearchFlag: selector((state) => state.flag.messageSearchFlag),
         groupSearchFlag: selector((state) => state.flag.groupSearchFlag),
         pageFlag: selector((state) => state.flag.pageFlag),
         downloadIDs: selector((state) => state.flag.downloadIDs),
@@ -93,6 +96,7 @@ export const useFlagActions = () => {
         setCommentSearchFlag: (state: any) => dispatch(setCommentSearchFlag(state)),
         setNoteSearchFlag: (state: any) => dispatch(setNoteSearchFlag(state)),
         setThreadSearchFlag: (state: any) => dispatch(setThreadSearchFlag(state)),
+        setMessageSearchFlag: (state: any) => dispatch(setMessageSearchFlag(state)),
         setGroupSearchFlag: (state: any) => dispatch(setGroupSearchFlag(state)),
         setPageFlag: (state: any) => dispatch(setPageFlag(state)),
         setDownloadIDs: (state: any) => dispatch(setDownloadIDs(state)),

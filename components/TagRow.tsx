@@ -17,9 +17,10 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import "./styles/tagrow.less"
+import {TagSearch} from "../types/Types"
 
 interface Props {
-    tag: any
+    tag: TagSearch
     onDelete?: () => void
     onEdit?: () => void
 }
@@ -86,7 +87,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const generateAliasesJSX = () => {
         let jsx = [] as any 
         for (let i = 0; i < props.tag.aliases.length; i++) {
-            jsx.push(<span className="tagrow-alias">{props.tag.aliases[i].alias.replaceAll("-", " ")}</span>)
+            jsx.push(<span className="tagrow-alias">{props.tag.aliases[i]?.alias.replaceAll("-", " ")}</span>)
         }
         return jsx
     }
@@ -94,7 +95,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const generateImplicationsJSX = () => {
         let jsx = [] as any 
         for (let i = 0; i < props.tag.implications.length; i++) {
-            jsx.push(<span className="tagrow-alias">{props.tag.implications[i].implication.replaceAll("-", " ")}</span>)
+            jsx.push(<span className="tagrow-alias">{props.tag.implications[i]?.implication.replaceAll("-", " ")}</span>)
         }
         return jsx
     }
@@ -211,30 +212,30 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (props.tag.type === "artist") {
             if (props.tag.website) {
-                jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website!, "_blank", "noreferrer")}/>)
             }
             if (props.tag.social?.includes("pixiv.net")) {
-                jsx.push(<img className="tagrow-social" src={pixiv} onClick={() => window.open(props.tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={pixiv} onClick={() => window.open(props.tag.social!, "_blank", "noreferrer")}/>)
             } else if (props.tag.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="tagrow-social" src={soundcloud} onClick={() => window.open(props.tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={soundcloud} onClick={() => window.open(props.tag.social!, "_blank", "noreferrer")}/>)
             } else if (props.tag.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="tagrow-social" src={sketchfab} onClick={() => window.open(props.tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={sketchfab} onClick={() => window.open(props.tag.social!, "_blank", "noreferrer")}/>)
             }
             if (props.tag.twitter) {
-                jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         if (props.tag.type === "character") {
             if (props.tag.fandom) {
-                jsx.push(<img className="tagrow-social" src={fandom} onClick={() => window.open(props.tag.fandom, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={fandom} onClick={() => window.open(props.tag.fandom!, "_blank", "noreferrer")}/>)
             }
         }
         if (props.tag.type === "series") {
             if (props.tag.website) {
-                jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website!, "_blank", "noreferrer")}/>)
             }
             if (props.tag.twitter) {
-                jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         return jsx

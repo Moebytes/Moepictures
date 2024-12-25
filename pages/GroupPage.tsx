@@ -31,9 +31,10 @@ import currentIcon from "../assets/icons/current.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import GroupThumbnail from "../components/GroupThumbnail"
 import "./styles/grouppage.less"
+import {GroupPosts, GroupHistory, GroupItem, PostOrdered} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {group: string}}
 }
 
 let limit = 25
@@ -56,13 +57,13 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const {setPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
-    const [historyID, setHistoryID] = useState(null as any)
-    const [group, setGroup] = useState(null) as any
-    const [items, setItems] = useState([]) as any
+    const [historyID, setHistoryID] = useState(null as string | null)
+    const [group, setGroup] = useState(null as GroupPosts | null)
+    const [items, setItems] = useState([] as GroupItem[])
     const history = useHistory()
     const location = useLocation()
     const imageFiltersRef = useRef<HTMLDivElement>(null)
-    const slug = props?.match.params.group
+    const slug = props.match.params.group
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -84,13 +85,14 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const groupInfo = async () => {
-        let group = null as any
+        let group = null as GroupPosts | null
         if (historyID) {
-            group = await functions.get("/api/group/history", {slug, historyID}, session, setSessionFlag).catch(() => null)
-            let posts = await functions.get("/api/posts", {postIDs: group.posts.map((p: any) => p.postID)}, session, setSessionFlag).catch(() => [])
-            group.posts = posts.map((post: any, i: number) => ({...post, order: group.posts[i].order}))
+            const history = await functions.get("/api/group/history", {slug, historyID}, session, setSessionFlag).catch(() => null)
+            group = history as unknown as GroupPosts
+            let posts = await functions.get("/api/posts", {postIDs: group.posts.map((p) => p.postID)}, session, setSessionFlag).catch(() => []) as PostOrdered[]
+            group.posts = posts.map((post: PostOrdered, i: number) => ({...post, order: group?.posts[i].order || 1}))
         } else {
-            group = await functions.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null)
+            group = await functions.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null) as GroupPosts
         }
         if (!group) return functions.replaceLocation("/404")
         if (functions.isR18(group.rating)) {
@@ -112,7 +114,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }, [slug, historyID, session, groupFlag])
 
     const updateItems = async () => {
-        let items = [] as any[]
+        if (!group) return
+        let items = [] as GroupItem[]
         for (let i = 0; i < group.posts.length; i++) {
             const post = group.posts[i]
             if (!session.username) if (post.rating !== functions.r13()) continue
@@ -141,7 +144,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const reorder = (event: React.MouseEvent, from: number, to: number) => {
-        setItems((prev: any) => {
+        setItems((prev) => {
             const newState = [...prev]
             newState.splice(to, 0, newState.splice(from, 1)[0])
             return newState
@@ -149,7 +152,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const groupImagesJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!group) return jsx
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
             const openPost = async (event: React.MouseEvent) => {
@@ -164,7 +168,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                 }
                 setPosts(group.posts)
                 setTimeout(() => {
-                    setActiveGroup(group.name)
+                    setActiveGroup(group)
                 }, 200)
             }
             jsx.push(
@@ -181,7 +185,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const commitReorder = async () => {
-        let posts = [] as any[]
+        if (!group) return
+        let posts = [] as {postID: string, order: number}[]
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
@@ -216,7 +221,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const groupOptionsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!group) return jsx
         if (session.username) {
             jsx.push(<img className="group-opt" src={groupHistory} onClick={() => history.push(`/group/history/${group.slug}`)} style={{filter: getFilter()}}/>)
             if (!session.banned) {
@@ -234,6 +240,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const searchGroup = (event: React.MouseEvent, alias?: string) => {
+        if (!group) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open("/posts", "_blank")
         } else {
@@ -250,6 +257,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const revertGroupHistory = async () => {
+        if (!group) return
         await functions.put("/api/group/reorder", {slug, posts: group.posts}, session, setSessionFlag)
         await functions.put("/api/group/edit", {slug, name: group.name, description: group.description}, session, setSessionFlag)
         currentHistory(functions.generateSlug(group.name))

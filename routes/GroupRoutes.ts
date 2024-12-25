@@ -55,7 +55,7 @@ const GroupRoutes = (app: Express) => {
                 } catch {}
 
                 const groupHistory = await sql.history.groupHistory(group.groupID)
-                const updated = await sql.group.group(slug)
+                const updated = await sql.group.group(slug) as GroupPosts
                 const changes = functions.parseGroupChanges(group, updated)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
                 if (!date) date = new Date().toISOString()
@@ -100,7 +100,7 @@ const GroupRoutes = (app: Express) => {
                 if (silent) return res.status(200).send("Success")
             }
         
-            const updated = await sql.group.group(newSlug)
+            const updated = await sql.group.group(newSlug) as GroupPosts
             const changes = functions.parseGroupChanges(group, updated)
             const groupHistory = await sql.history.groupHistory(group.groupID)
             let posts = group.posts.map((post: any) => ({postID: post.postID, order: post.order}))
@@ -144,7 +144,7 @@ const GroupRoutes = (app: Express) => {
             const name = req.query.name as string
             if (!name) return res.status(400).send("Invalid name")
             const slug = functions.generateSlug(name)
-            const group = await sql.group.group(slug)
+            const group = await sql.group.group(slug) as GroupPosts
             if (!permissions.isMod(req.session)) {
                 group.posts = group.posts.filter((p: any) => !p?.hidden)
             }
@@ -246,7 +246,7 @@ const GroupRoutes = (app: Express) => {
                 if (username && permissions.isMod(req.session)) targetUser = username
 
                 const groupHistory = await sql.history.groupHistory(group.groupID)
-                const updated = await sql.group.group(slug)
+                const updated = await sql.group.group(slug) as GroupPosts
                 const changes = functions.parseGroupChanges(group, updated)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
                 if (!date) date = new Date().toISOString()
@@ -317,7 +317,7 @@ const GroupRoutes = (app: Express) => {
             }
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
-            const updated = await sql.group.group(slug)
+            const updated = await sql.group.group(slug) as GroupPosts
             const changes = functions.parseGroupChanges(group, updated)
             const date = new Date().toISOString()
             if (!groupHistory.length) {
@@ -546,7 +546,7 @@ const GroupRoutes = (app: Express) => {
                 if (!group) return res.status(400).send("Bad group")
                 if (historyID) {
                     const history = await sql.history.groupHistoryID(group.groupID, historyID)
-                    result = [history]
+                    if (history) result = [history]
                 } else if (username) {
                     result = await sql.history.userGroupHistory(username)
                 } else {

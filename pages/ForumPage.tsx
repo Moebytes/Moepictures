@@ -52,7 +52,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -145,7 +145,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateThreads = () => {
             let currentIndex = index
-            const newVisibleThreads = visibleThreads as any
+            const newVisibleThreads = visibleThreads
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!threads[currentIndex]) break
                 newVisibleThreads.push(threads[currentIndex])
@@ -173,7 +173,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/threads", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanThreads = threads.filter((t: any) => !t.fake)
+        const cleanThreads = threads.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanThreads.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, threadCount: cleanThreads[0]?.threadCount}), ...result]
@@ -185,14 +185,14 @@ const ForumPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setThreads(result)
             } else {
-                setThreads((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setThreads((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setThreads(result)
                 } else {
-                    setThreads((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setThreads((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -204,7 +204,7 @@ const ForumPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!threads[currentIndex]) return updateOffset()
-                const newVisibleThreads = visibleThreads as any
+                const newVisibleThreads = visibleThreads
                 for (let i = 0; i < 15; i++) {
                     if (!threads[currentIndex]) return updateOffset()
                     newVisibleThreads.push(threads[currentIndex])
@@ -324,7 +324,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -374,11 +374,11 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const generateThreadsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         jsx.push(<ThreadRow key={"0"} titlePage={true}/>)
-        let visible = [] as any
+        let visible = [] as ThreadSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleThreads) as any
+            visible = functions.removeDuplicates(visibleThreads)
         } else {
             const postOffset = (forumPage - 1) * getPageAmount()
             visible = threads?.slice(postOffset, postOffset + getPageAmount())

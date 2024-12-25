@@ -13,7 +13,7 @@ const RevertGroupHistoryDialog: React.FunctionComponent = (props) => {
     const {setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

@@ -21,7 +21,7 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
     const {setSelectionMode} = useSearchActions()
     const [name, setName] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

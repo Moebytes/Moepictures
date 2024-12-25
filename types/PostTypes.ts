@@ -2,16 +2,23 @@ import {PostType, PostRating, PostStyle, PostChanges, MiniTag, PostDeleteRequest
 ImageFormat, Upscaler, SourceData} from "./Types"
 
 export interface PostMirrors {
+    pixiv?: string
+    soundcloud?: string
+    sketchfab?: string
     twitter?: string
+    deviantart?: string
+    artstation?: string
     danbooru?: string
     gelbooru?: string
     safebooru?: string
     yandere?: string
     konachan?: string
     zerochan?: string
+    youtube?: string
+    bandcamp?: string
 }
 
-export interface PostImage {
+export interface Image {
     imageID: string
     postID: string
     type: PostType
@@ -52,7 +59,7 @@ export interface Post {
     hidden: boolean | null
     locked: boolean | null
     private: boolean | null
-    images: PostImage[]
+    images: Image[]
 }
 
 export interface PostCuteness extends Post {
@@ -64,9 +71,9 @@ export interface PostTagged extends Post {
 }
 
 export interface PostFull extends Post {
-    cuteness: string
     tags: string[]
     favoriteCount: string
+    cuteness: string
 }
 
 export interface PostSearch extends Post {
@@ -158,17 +165,17 @@ export interface PostQuickEditParams {
 export interface PostQuickEditUnverifiedParams extends Omit<PostQuickEditParams, "unverified" | "silent"> {}
 
 export type PostGetEndpoint<T extends string> = 
-    T extends "/api/post" ? {params: {postID: string}, response: PostFull} :
+    T extends "/api/post" ? {params: {postID: string}, response: PostFull | undefined} :
     T extends "/api/posts" ? {params: {postIDs: string[]}, response: PostFull[]} :
     T extends "/api/post/tags" ? {params: {postID: string}, response: MiniTag[]} :
     T extends "/api/post/comments" ? {params: {postID: string}, response: Comment[]} :
     T extends "/api/post/children" ? {params: {postID: string}, response: ChildPost[]} :
-    T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost} :
-    T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost} :
+    T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost | undefined} :
+    T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost | undefined} :
     T extends "/api/post/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post-edits/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post/children/unverified" ? {params: {postID: string}, response: ChildPost[]} :
-    T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost} :
+    T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost | undefined} :
     T extends "/api/post/delete/request/list" ? {params: {offset?: number} | null, response: PostDeleteRequest[]} :
     T extends "/api/post/history" ? {params: PostHistoryParams | null, response: PostHistory[]} :
     never

@@ -13,7 +13,7 @@ import permissions from "../structures/Permissions"
 import path from "path"
 import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
 ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
-PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams} from "../types/Types"
+PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams, User} from "../types/Types"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -231,7 +231,7 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/session", sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (req.session.username) {
-                const user = await sql.user.user(req.session.username)
+                const user = await sql.user.user(req.session.username) as User
                 req.session.$2fa = user.$2fa
                 req.session.banned = user.banned
                 req.session.email = user.email
@@ -270,8 +270,8 @@ const UserRoutes = (app: Express) => {
                 }
 
                 if (user.banned && user.banExpiration) {
-                    if (new Date(user.banExpiration) < new Date()) {
-                        const activeBan = await sql.report.activeBan(req.session.username)
+                    const activeBan = await sql.report.activeBan(req.session.username)
+                    if (activeBan && new Date(user.banExpiration) < new Date()) {
                         await sql.report.updateBan(activeBan.banID, "active", false)
                         await sql.user.updateUser(req.session.username, "banned", false)
                         await sql.user.updateUser(req.session.username, "banExpiration", null)
@@ -666,8 +666,8 @@ const UserRoutes = (app: Express) => {
             const tokenData = await sql.token.emailToken(hashToken)
             if (!tokenData) return res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
-            if (new Date() <= expireDate) {
-                const user = await sql.user.userByEmail(tokenData.email)
+            const user = await sql.user.userByEmail(tokenData.email)
+            if (user && new Date() <= expireDate) {
                 await sql.user.updateUser(user.username, "email", tokenData.email)
                 await sql.user.updateUser(user.username, "emailVerified", true)
                 req.session.email = tokenData.email
@@ -1129,7 +1129,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
             const activeBan = await sql.report.activeBan(username)
-            await sql.report.updateBan(activeBan.banID, "active", false)
+            if (activeBan) await sql.report.updateBan(activeBan.banID, "active", false)
             await sql.user.updateUser(username, "banned", false)
             await sql.user.updateUser(username, "banExpiration", null)
             const message = `You have been unbanned. You may interact on the site again, but don't repeat the behavior that got you banned because you likely won't get another chance.`

@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostType, PostRating, PostStyle, PostSize, PostSort} from "../types/Types"
+import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch} from "../types/Types"
 
 const searchSlice = createSlice({
     name: "search",
@@ -19,7 +19,7 @@ const searchSlice = createSlice({
         scroll: false,
         selectionMode: false,
         selectionItems: Array.from(new Set<string>()),
-        selectionPosts: Object.fromEntries(new Map<string, any>()),
+        selectionPosts: Object.fromEntries(new Map<string, PostSearch>()),
         pageMultiplier: 1,
         format: "jpg",
         autoSearch: false,
@@ -79,7 +79,7 @@ export const useSearchSelector = () => {
         scroll: selector((state) => state.search.scroll),
         selectionMode: selector((state) => state.search.selectionMode),
         selectionItems: selector(createSelector((state: StoreState) => state.search, (search) => new Set<string>(search.selectionItems))),
-        selectionPosts: selector(createSelector((state: StoreState) => state.search, (search) => new Map<string, any>(Object.entries(search.selectionPosts)))),
+        selectionPosts: selector(createSelector((state: StoreState) => state.search, (search) => new Map<string, PostSearch>(Object.entries(search.selectionPosts)))),
         pageMultiplier: selector((state) => state.search.pageMultiplier),
         format: selector((state) => state.search.format),
         autoSearch: selector((state) => state.search.autoSearch),

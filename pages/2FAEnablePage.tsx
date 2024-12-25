@@ -21,11 +21,11 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {disable2FAFlag} = useMiscDialogSelector()
     const {setDisable2FAFlag, setDisable2FADialog} = useMiscDialogActions()
-    const [qr, setQR] = useState("") as any
+    const [qr, setQR] = useState("")
     const [showValidation, setShowValidation] = useState(false)
     const [token, setToken] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
             setQR(qr)
             setShowValidation(true)
         } else {
-            setQR(null)
+            setQR("")
             setShowValidation(false)
         }
         setSessionFlag(true)

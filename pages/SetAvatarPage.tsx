@@ -78,7 +78,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = posts.find((p: any) => p.postID === postID) as PostFull
+            let post = posts.find((p: any) => p.postID === postID) as PostFull | undefined
             let $401Error = false
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)

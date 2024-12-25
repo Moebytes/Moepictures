@@ -11,6 +11,7 @@ import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
 import privateIcon from "../assets/icons/private.png"
+import {PostFull, PostHistory} from "../types/Types"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -92,9 +93,9 @@ const lightColorList = {
 interface Props {
     reset?: boolean
     goBack?: boolean
-    post?: any
-    historyID?: string
-    noteID?: string
+    post?: PostFull | PostHistory | null
+    historyID?: string | null
+    noteID?: string | null
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -253,7 +254,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[${i18n.sidebar.history}: ${props.historyID}]`}</span> : null}
                     {props.noteID ? <span style={{color: "var(--noteColor)", marginRight: "10px"}}>{`[${i18n.labels.note}: ${props.noteID}]`}</span> : null}
                     {functions.isR18(ratingType) ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
-                    {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup}]</span> : null}
+                    {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup.name}]</span> : null}
                     {activeFavgroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeFavgroup.name}]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[{i18n.labels.autoSearch}]</span> : null}
                     {headerText}

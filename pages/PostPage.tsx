@@ -47,12 +47,12 @@ useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
-import {PostFull, PostSearch} from "../types/PostTypes"
+import {PostSearch, TagCategories, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../types/Types"
 
 let characterTag = ""
 
 interface Props {
-    match?: any
+    match: {params: {id: string, slug: string}}
 }
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
@@ -74,23 +74,23 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {setRevertPostHistoryID, setRevertPostHistoryFlag} = usePostDialogActions()
     const {revertNoteHistoryID, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setRevertNoteHistoryID, setRevertNoteHistoryFlag} = useNoteDialogActions()
-    const [images, setImages] = useState([]) as any
-    const [childPosts, setChildPosts] = useState([]) as any
-    const [artistPosts, setArtistPosts] = useState([]) as any
-    const [relatedPosts, setRelatedPosts] = useState([]) as any
-    const [parentPost, setParentPost] = useState(null) as any
-    const [image, setImage] = useState("") as any
-    const [post, setPost] = useState(null) as any
+    const [images, setImages] = useState([] as string[])
+    const [childPosts, setChildPosts] = useState([] as ChildPost[])
+    const [artistPosts, setArtistPosts] = useState([] as PostSearch[])
+    const [relatedPosts, setRelatedPosts] = useState([] as PostSearch[])
+    const [parentPost, setParentPost] = useState(null as ChildPost | null)
+    const [image, setImage] = useState("")
+    const [post, setPost] = useState(null as PostSearch | PostHistory | null)
     const [loaded, setLoaded] = useState(false)
-    const [tagCategories, setTagCategories] = useState(null) as any
+    const [tagCategories, setTagCategories] = useState(null as TagCategories | null)
     const [order, setOrder] = useState(1)
-    const [historyID, setHistoryID] = useState(null as any)
-    const [noteID, setNoteID] = useState(null as any)
-    const [groups, setGroups] = useState([]) as any
+    const [historyID, setHistoryID] = useState(null as string | null)
+    const [noteID, setNoteID] = useState(null as string | null)
+    const [groups, setGroups] = useState([] as GroupPosts[])
     const history = useHistory()
     const location = useLocation()
     const postID = props?.match.params.id
-    const slug = props?.match.params.slug
+    const slug = props.match.params.slug
 
     useEffect(() => {
         setHideNavbar(false)
@@ -249,7 +249,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
                 let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
-                artistPosts = artistPosts.filter((p: any) => p.postID !== postID)
+                artistPosts = artistPosts.filter((p) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
                 console.log(err)
@@ -260,7 +260,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (tagCategories?.characters?.[0]?.tag !== characterTag) {
                 try {
                     let relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, rating: functions.isR18(post.rating) ? functions.r18() : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
-                    relatedPosts = relatedPosts.filter((p: any) => p.postID !== postID)
+                    relatedPosts = relatedPosts.filter((p) => p.postID !== postID)
                     if (relatedPosts?.length) setRelatedPosts(relatedPosts)
                     characterTag = tagCategories.characters[0].tag
                 } catch (err) {
@@ -278,9 +278,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateHistory = async () => {
+            if (!historyID) return
             const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag).then((r) => r[0])
             if (!historyPost) return functions.replaceLocation("/404")
-            let images = historyPost.images.map((i: any) => functions.getHistoryImageLink(i))
+            let images = historyPost.images.map((i) => functions.getHistoryImageLink(i))
             setImages(images)
             if (images[order-1]) {
                 setImage(images[order-1])
@@ -295,7 +296,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             setTags(tags)
             setPost(historyPost)
         }
-        if (historyID) updateHistory()
+        updateHistory()
     }, [postID, historyID, order, session])
 
     useEffect(() => {
@@ -303,29 +304,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (historyParam) return
         const updatePost = async () => {
             setLoaded(false)
-            let post = posts.find((p: any) => p.postID === postID) as PostFull
+            let post = posts.find((p) => p.postID === postID)
             try {
-                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (err: any) {
                 if (err.response?.status === 404) functions.replaceLocation("/404")
                 if (err.response?.status === 403) functions.replaceLocation("/403")
                 return
             }
             if (post) {
-                /*
-                let images = [] as string[]
-                if (session.upscaledImages) {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
-                } else {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
-                }
-                setImages(images)
-                if (images[order-1]) {
-                    setImage(images[order-1])
-                } else {
-                    setImage(images[0])
-                    setOrder(1)
-                }*/
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
@@ -333,8 +320,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setPost(post)
                 if (!post.tags) {
                     try {
-                        post = await functions.get("/api/post", {postID}, session, setSessionFlag)
-                        setPost(post)
+                        post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
+                        if (post) setPost(post)
                     } catch (err: any) {
                         if (err.response?.status === 404) functions.replaceLocation("/404")
                         if (err.response?.status === 403) functions.replaceLocation("/403")
@@ -355,9 +342,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i)
+                : functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
             } else {
-                images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i) 
+                : functions.getImageLink(i.type, post.postID, i.order, i.filename))
             }
             setImages(images)
             if (images[order-1]) {
@@ -380,9 +369,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updatePost = async () => {
             setLoaded(false)
             setPostFlag(false)
-            let post = null as any
+            let post = null as PostSearch | null
             try {
-                post = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | null
             } catch (err: any) {
                 if (err.response?.status === 404) functions.replaceLocation("/404")
                 if (err.response?.status === 403) functions.replaceLocation("/403")
@@ -391,9 +380,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
                 } else {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 }
                 setImages(images)
                 if (images[order-1]) {
@@ -423,7 +412,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const next = async () => {
-        let currentIndex = posts.findIndex((p: any) => String(p.postID) === String(postID))
+        let currentIndex = posts.findIndex((p) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex++
             if (!session.username) {
@@ -448,7 +437,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const previous = async () => {
-        let currentIndex = posts.findIndex((p: any) => String(p.postID) === String(postID))
+        let currentIndex = posts.findIndex((p) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex--
             if (!session.username) {
@@ -489,6 +478,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const revertNoteHistory = async () => {
+        if (!post || !noteID) return
         const note = await functions.get("/api/note/history", {postID: post.postID, historyID: noteID}, session, setSessionFlag).then((r) => r[0])
         await functions.put("/api/note/save", {postID: note.postID, order: note.order, data: note.notes}, session, setSessionFlag)
         currentHistory()
@@ -507,23 +497,27 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [revertNoteHistoryFlag, revertNoteHistoryID, noteID, post, session])
 
     const revertNoteHistoryDialog = async () => {
-        if (post.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: noteID})
+        if (!post) return
+        const postObject = await functions.get("/api/post", {postID: post.postID}, session, setSessionFlag)
+        if (postObject?.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: noteID})
         setRevertNoteHistoryID({failed: false, historyID: noteID})
     }
 
     const revertPostHistory = async () => {
+        if (!post) return
+        const historyPost = post as PostHistory
         let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
-        if (post.artists) {
+        if (historyPost.artists) {
             let categories = await functions.tagCategories(currentPost.tags, session, setSessionFlag)
-            currentPost.artists = categories.artists.map((a: any) => a.tag)
-            currentPost.characters = categories.characters.map((c: any) => c.tag)
-            currentPost.series = categories.series.map((s: any) => s.tag)
-            currentPost.tags = categories.tags.map((t: any) => t.tag)
+            currentPost.artists = categories.artists.map((a) => a.tag)
+            currentPost.characters = categories.characters.map((c) => c.tag)
+            currentPost.series = categories.series.map((s) => s.tag)
+            currentPost.tags = categories.tags.map((t) => t.tag)
         }
         const imgChanged = await functions.imagesChanged(post, currentPost, session)
         const tagsChanged = functions.tagsChanged(post, currentPost)
         const srcChanged = functions.sourceChanged(post, currentPost)
-        let source = undefined as any
+        let source = undefined as SourceData | undefined
         if (imgChanged || srcChanged) {
             source = {
                 title: post.title,
@@ -542,13 +536,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
-            await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
-            series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
+            await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
+            style: post.style, artists: functions.tagObject(historyPost.artists), characters: functions.tagObject(historyPost.characters), 
+            preserveChildren: Boolean(post.parentID), series: functions.tagObject(historyPost.series), tags: post.tags, newTags, reason: historyPost.reason}, 
+            session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
-            style: post.style, artists: post.artists, characters: post.characters, series: post.series, tags: post.tags, 
-            reason: post.reason}, session, setSessionFlag)
+            style: post.style, artists: historyPost.artists, characters: historyPost.characters, series: historyPost.series, tags: post.tags, 
+            reason: historyPost.reason}, session, setSessionFlag)
         }
         currentHistory()
     }
@@ -566,7 +561,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [revertPostHistoryFlag, revertPostHistoryID, historyID, post, session])
 
     const revertPostHistoryDialog = async () => {
-        if (post.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID})
+        if (!post) return
+        const postObject = await functions.get("/api/post", {postID: post.postID}, session, setSessionFlag)
+        if (postObject?.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID})
         setRevertPostHistoryID({failed: false, historyID})
     }
 
@@ -615,7 +612,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const generateActiveFavgroupJSX = () => {
         if (activeFavgroup) {
             if (functions.isR18(activeFavgroup.rating)) if (!functions.isR18(ratingType)) return null
-            const images = activeFavgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
                 history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
@@ -635,18 +632,18 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateGroupsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
             if (functions.isR18(group.rating)) if (!functions.isR18(ratingType)) continue
-            const images = group.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
                 history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(group.posts)
                 setTimeout(() => {
-                    setActiveGroup(group.name)
+                    setActiveGroup(group)
                 }, 200)
             }
             jsx.push(
@@ -740,7 +737,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {generateGroupsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
-                    {post?.purchaseLink ? <BuyLink link={post.buyLink}/> : null}
+                    {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}

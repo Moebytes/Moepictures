@@ -11,7 +11,7 @@ const Disable2FADialog: React.FunctionComponent = (props) => {
     const {disable2FADialog} = useMiscDialogSelector()
     const {setDisable2FADialog, setDisable2FAFlag} = useMiscDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

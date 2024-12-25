@@ -55,6 +55,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/tag/history", {tag, username}, session, setSessionFlag)
             if (!result.length) {
                 const tagObject = await functions.get("/api/tag", {tag}, session, setSessionFlag)
+                if (!tagObject) return
                 const historyObject = tagObject as unknown as TagHistory
                 if (!tagObject.createDate && !tagObject.creator) {
                     const oldestPost = await functions.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)

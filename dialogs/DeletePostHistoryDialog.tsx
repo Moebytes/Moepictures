@@ -12,7 +12,7 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
     const {deletePostHistoryID} = usePostDialogSelector()
     const {setDeletePostHistoryID, setDeletePostHistoryFlag} = usePostDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

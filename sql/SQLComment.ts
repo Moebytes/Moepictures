@@ -155,7 +155,7 @@ export default class SQLComment {
             values: [commentID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Comment>
+        return result[0] as Promise<Comment | undefined>
     }
 
     /** Delete comment. */

@@ -4,9 +4,10 @@ import {useLayoutSelector, useCacheActions, useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import "./styles/related.less"
+import {PostFull} from "../types/Types"
 
 interface Props {
-    posts: any
+    posts: PostFull[]
 }
 
 const ArtistWorks: React.FunctionComponent<Props> = (props) => {

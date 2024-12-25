@@ -56,6 +56,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/post/history", {postID, username}, session, setSessionFlag)
             if (!result.length) {
                 const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                if (!postObject) return
                 const historyObject = postObject as unknown as PostHistory
                 historyObject.date = postObject.uploadDate
                 historyObject.user = postObject.uploader

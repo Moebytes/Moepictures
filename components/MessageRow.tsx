@@ -16,9 +16,10 @@ import read from "../assets/icons/read.png"
 import readLight from "../assets/icons/read-light.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/message.less"
+import {MessageSearch} from "../types/Types"
 
 interface Props {
-    message?: any
+    message?: MessageSearch
     onDelete?: () => void
     onEdit?: () => void
     titlePage?: boolean
@@ -41,12 +42,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateRecipient = async () => {
+        if (!props.message?.recipients[0]) return
         const recipient = await functions.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
         setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
 
     const updateCreator = async () => {
+        if (!props.message) return
         const creator = await functions.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
         setCreatorData(creator)
         setCreatorDefaultIcon(creator?.image ? false : true)
@@ -60,6 +63,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const messagePage = (event: React.MouseEvent) => {
+        if (!props.message) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/message/${props.message.messageID}`, "_blank")
         } else {
@@ -76,6 +80,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorPage = (event: React.MouseEvent) => {
+        if (!props.message) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.message.creator}`, "_blank")
         } else {
@@ -121,6 +126,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCreatorJSX = () => {
+        if (!props.message) return
         if (creatorData?.role === "admin") {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
@@ -195,6 +201,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateRecipientJSX = () => {
+        if (!props.message?.recipients[0]) return
         if (recipientData?.role === "admin") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
@@ -283,6 +290,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const readStatus = () => {
+        if (!props.message) return
         if (props.message.creator === session.username) {
             return props.message.read
         } else {
@@ -295,16 +303,19 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleRead = async () => {
+        if (!props.message) return
         await functions.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
         props.onEdit?.()
         checkMail()
     }
 
     const toggleSoftDelete = () => {
+        if (!props.message) return
         setSoftDeleteMessageID(props.message.messageID)
     }
 
     const dateTextJSX = () => {
+        if (!props.message) return
         const targetDate = props.message.updatedDate
         return <span className="message-date-text">{functions.timeAgo(targetDate, i18n)}</span>
     }
@@ -346,9 +357,9 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
                         <img draggable={false} className="message-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/>
                         <img draggable={false} className="message-opt-icon" src={softDelete} onClick={toggleSoftDelete} style={{filter: getFilter()}}/>
                         <span className={`message-title ${readStatus() ? "message-read" : ""}`} onClick={messagePage} onAuxClick={messagePage}>
-                            {props.message.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
-                            {props.message.title}
-                        </span>
+                            {props.message?.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {props.message?.title || ""}
+                        </span> 
                     </div>
                     {!mobile ? <div className="message-row">
                         {generateCreatorJSX()}

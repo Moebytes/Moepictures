@@ -5,9 +5,10 @@ import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
+import {PostSearch, PostHistory} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory
 }
 
 const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
@@ -20,7 +21,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

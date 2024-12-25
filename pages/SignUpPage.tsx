@@ -30,7 +30,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const [submitted, setSubmitted] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -90,6 +90,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
+        if (!errorRef.current) return
         if (password.trim() !== confirmPassword.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

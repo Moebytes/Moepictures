@@ -942,16 +942,17 @@ export default class Functions {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
-        let result = [] as any
+        let result = [] as {frame: HTMLCanvasElement, delay: number}[]
         while (true) {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
-                const canvas = document.createElement("canvas") as any
+                const canvas = document.createElement("canvas")
                 canvas.width = decoded.codedWidth 
                 canvas.height = decoded.codedHeight
-                const canvasContext = canvas.getContext("2d")
-                canvasContext.drawImage(decoded.image, 0, 0)
-                result.push({frame: await createImageBitmap(decoded.image), delay: decoded.image.duration / 1000.0})
+                const canvasContext = canvas.getContext("2d")!
+                const image = await createImageBitmap(decoded.image)
+                canvasContext.drawImage(image, 0, 0)
+                result.push({frame: canvas, delay: decoded.image.duration / 1000.0})
             } catch {
                 break
             }
@@ -964,9 +965,9 @@ export default class Functions {
         if ("ImageDecoder" in window) {
             return Functions.extractGIFFramesNative(gif)
         } else {
-            if (nativeOnly) return null
+            if (nativeOnly) return []
             const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
-            const newGIFData = [] as any
+            const newGIFData = [] as {frame: HTMLCanvasElement, delay: number}[]
             for (let i = 0; i < frames.length; i++) {
                 newGIFData.push({
                     frame: frames[i].getImage(),
@@ -1164,8 +1165,13 @@ export default class Functions {
 
     public static getImageLink = (folder: string, postID: string, order: number, filename: string) => {
         if (!filename) return ""
-        if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
+        if (!folder || filename.includes("history/")) return Functions.getRawImageLink(filename)
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
+    }
+
+    public static getRawImageLink = (filename: string) => {
+        if (!filename) return ""
+        return `${window.location.protocol}//${window.location.host}/${filename}`
     }
 
     public static linkToBase64 = async (link: string) => {
@@ -1198,6 +1204,7 @@ export default class Functions {
     }
 
     public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {
+        if (filename.startsWith(window.location.protocol)) return filename
         if (!filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
@@ -1230,7 +1237,7 @@ export default class Functions {
         return `history/tag/${tag}/${key}/${filename}`
     }
 
-    public static getTagLink = (folder: string, filename: string, hash: string | null) => {
+    public static getTagLink = (folder: string, filename: string | null, hash: string | null) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
@@ -1238,7 +1245,7 @@ export default class Functions {
         return hash ? `${link}?hash=${hash}` : link
     }
 
-    public static getUnverifiedTagLink = (folder: string, filename: string) => {
+    public static getUnverifiedTagLink = (folder: string, filename: string | null) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${encodeURIComponent(filename)}`
@@ -1905,8 +1912,9 @@ export default class Functions {
         })
     }
 
-    public static crop = async (url: string, aspectRatio: number, buffer?: boolean, jpeg?: boolean) => {
-        return new Promise<any>((resolve) => {
+    public static crop = async <T extends boolean | undefined>(url: string, aspectRatio: number, buffer?: T, jpeg?: boolean) => {
+        type CropReturn = T extends true ? Buffer : string
+        return new Promise<CropReturn>((resolve) => {
             const inputImage = new Image()
             inputImage.onload = () => {
                 const inputWidth = inputImage.naturalWidth
@@ -1927,13 +1935,13 @@ export default class Functions {
                 outputImage.width = 300
                 outputImage.height = 300
     
-                const ctx = outputImage.getContext("2d") as any
+                const ctx = outputImage.getContext("2d")!
                 ctx.drawImage(inputImage, outputX, outputY, outputImage.width, outputImage.height)
                 if (buffer) {
                     const img = ctx.getImageData(0, 0, outputImage.width, outputImage.height)
-                    resolve(img.data.buffer)
+                    resolve(img.data.buffer as CropReturn)
                 } else {
-                    resolve(outputImage.toDataURL(jpeg ? "image/jpeg" : "image/png"))
+                    resolve(outputImage.toDataURL(jpeg ? "image/jpeg" : "image/png") as CropReturn)
                 }
             }
             inputImage.src = url
@@ -2124,9 +2132,8 @@ export default class Functions {
         return rect
     }
 
-    public static triggerTextboxButton = (textarea: HTMLTextAreaElement, setText: (text: string) => void, type: string) => {
+    public static triggerTextboxButton = (textarea: HTMLTextAreaElement | null, setText: (text: string) => void, type: string) => {
         if (!textarea) return
-
         const insert = {
             highlight: "====",
             bold: "****",

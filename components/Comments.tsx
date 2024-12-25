@@ -17,9 +17,10 @@ import codeblock from "../assets/icons/codeblock.png"
 import Comment from "./Comment"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comments.less"
+import {PostSearch, PostHistory} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory
 }
 
 const Comments: React.FunctionComponent<Props> = (props) => {

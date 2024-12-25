@@ -12,7 +12,7 @@ const RevertNoteHistoryDialog: React.FunctionComponent = (props) => {
     const {revertNoteHistoryID} = useNoteDialogSelector()
     const {setRevertNoteHistoryID, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const {session} = useSessionSelector()
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

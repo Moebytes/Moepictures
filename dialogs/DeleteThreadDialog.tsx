@@ -11,7 +11,7 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const {deleteThreadID} = useThreadDialogSelector()
     const {setDeleteThreadID, setDeleteThreadFlag} = useThreadDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

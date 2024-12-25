@@ -13,7 +13,7 @@ const RevertPostHistoryDialog: React.FunctionComponent = (props) => {
     const {setRevertPostHistoryID, setRevertPostHistoryFlag} = usePostDialogActions()
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

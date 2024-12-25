@@ -25,7 +25,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [deleteMessages, setDeleteMessages] = useState(true)
     const [days, setDays] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -83,17 +83,17 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                let image = null as any
+                let image = null as Uint8Array | ["delete"] | null
                 if (!currentHistory.image) {
                     image = ["delete"]
                 } else {
                     const imageLink = functions.getTagLink(currentHistory.type, currentHistory.image, currentHistory.imageHash)
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
-                    image = Object.values(bytes)
+                    image = bytes
                 }
                 await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
-                image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
+                image: image!, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
                 website: currentHistory.website, fandom: currentHistory.fandom, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }

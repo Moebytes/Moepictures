@@ -1,14 +1,15 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {GroupPosts, Favgroup} from "../types/Types"
 
 const activeSlice = createSlice({
     name: "active",
     initialState: {
         activeDropdown: "none",
         filterDropActive: false,
-        activeGroup: null as unknown as string,
-        activeFavgroup: null as any,
+        activeGroup: null as unknown as GroupPosts,
+        activeFavgroup: null as unknown as Favgroup,
         headerText: "",
         sidebarText: "",
         quoteText: "",
@@ -60,8 +61,8 @@ export const useActiveActions = () => {
     return {
         setActiveDropdown: (state: any) => dispatch(setActiveDropdown(state)),
         setFilterDropActive: (state: any) => dispatch(setFilterDropActive(state)),
-        setActiveGroup: (state: any) => dispatch(setActiveGroup(state)),
-        setActiveFavgroup: (state: any) => dispatch(setActiveFavgroup(state)),
+        setActiveGroup: (state: GroupPosts | null) => dispatch(setActiveGroup(state)),
+        setActiveFavgroup: (state: Favgroup | null) => dispatch(setActiveFavgroup(state)),
         setHeaderText: (state: any) => dispatch(setHeaderText(state)),
         setSidebarText: (state: any) => dispatch(setSidebarText(state)),
         setQuoteText: (state: any) => dispatch(setQuoteText(state)),

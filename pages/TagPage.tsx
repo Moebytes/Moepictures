@@ -30,10 +30,11 @@ import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import jsxFunctions from "../structures/JSXFunctions"
+import {Tag, TagHistory, PostSearch, Alias, Implication} from "../types/Types"
 import "./styles/tagpage.less"
 
 interface Props {
-    match?: any
+    match: {params: {tag: string}}
 }
 
 let limit = 25
@@ -53,18 +54,18 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {setSearch, setSearchFlag} = useSearchActions()
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, revertTagHistoryID, revertTagHistoryFlag} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag, setTakedownTag, setDeleteTagID, setDeleteTagFlag, setRevertTagHistoryID, setRevertTagHistoryFlag, setCategorizeTag} = useTagDialogActions()
-    const [tag, setTag] = useState(null) as any
-    const [tagPosts, setTagPosts] = useState([]) as any
-    const [postImages, setPostImages] = useState([]) as any
-    const [appendImages, setAppendImages] = useState([]) as any
+    const [tag, setTag] = useState(null as Tag | TagHistory | null)
+    const [tagPosts, setTagPosts] = useState([] as PostSearch[])
+    const [postImages, setPostImages] = useState([] as string[])
+    const [appendImages, setAppendImages] = useState([] as string[])
     const [postIndex, setPostIndex] = useState(0)
-    const [relatedTags, setRelatedTags] = useState([]) as any
-    const [historyID, setHistoryID] = useState(null as any)
+    const [relatedTags, setRelatedTags] = useState([] as string[])
+    const [historyID, setHistoryID] = useState(null as string | null)
     const [featuredImage, setFeaturedImage] = useState("")
     const [count, setCount] = useState(0)
     const history = useHistory()
     const location = useLocation()
-    const tagName = props?.match.params.tag
+    const tagName = props.match.params.tag
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -88,11 +89,11 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const tagInfo = async () => {
-        let tag = null as any
+        let tag = null as Tag | TagHistory | null
         if (historyID) {
-            tag = await functions.get("/api/tag/history", {tag: tagName, historyID}, session, setSessionFlag)
+            tag = await functions.get("/api/tag/history", {tag: tagName, historyID}, session, setSessionFlag).then((r) => r[0])
         } else {
-            tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
+            tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag) as Tag
         }
         if (!tag) return functions.replaceLocation("/404")
         if (tag.hidden) {
@@ -108,13 +109,15 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setCount(tagCount)
         if (tag.featured) {
             const featuredPost = await functions.get("/api/post", {postID: tag.featured},  session, setSessionFlag)
-            const featuredImage = functions.getThumbnailLink(featuredPost.images[0].type, featuredPost.postID, featuredPost.images[0].order, featuredPost.images[0].filename, "massive", mobile)
-            const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
-            if ((!session.username && featuredPost.rating !== functions.r13()) || 
-                (!session.showR18 && featuredPost.rating !== functions.r18())) {
-                setFeaturedImage("")
-            } else {
-                setFeaturedImage(decrypted)
+            if (featuredPost) {
+                const featuredImage = functions.getThumbnailLink(featuredPost.images[0].type, featuredPost.postID, featuredPost.images[0].order, featuredPost.images[0].filename, "massive", mobile)
+                const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
+                if ((!session.username && featuredPost.rating !== functions.r13()) || 
+                    (!session.showR18 && featuredPost.rating !== functions.r18())) {
+                    setFeaturedImage("")
+                } else {
+                    setFeaturedImage(decrypted)
+                }
             }
         } else {
             setFeaturedImage("")
@@ -129,18 +132,19 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
-        const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(uploads)
         setPostImages(images)
     }
 
     const updateOffset = async () => {
+        if (!tag) return
         let uploads = tagPosts
         let offset = tagPosts.length
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
-        const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(uploads)
         setAppendImages(images)
     }
@@ -179,6 +183,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const searchTag = (event: React.MouseEvent, alias?: string) => {
+        if (!tag) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${alias ? alias : tag.tag}`, "_blank")
         } else {
@@ -189,73 +194,77 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagSocialJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!tag) return jsx
         if (tag.type === "artist") {
             if (tag.website) {
-                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
             }
             if (tag.social?.includes("pixiv.net")) {
-                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="tag-social" src={soundcloud} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={soundcloud} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="tag-social" src={sketchfab} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={sketchfab} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "character") {
             if (tag.fandom) {
-                jsx.push(<img className="tag-social" src={fandom} onClick={() => window.open(tag.fandom, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={fandom} onClick={() => window.open(tag.fandom!, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "series") {
             if (tag.website) {
-                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank", "noreferrer")}/>)
+                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         return jsx
     }
 
     const showTagHistory = async () => {
+        if (!tag) return
         window.scrollTo(0, 0)
         history.push(`/tag/history/${tag.tag}`)
     }
 
     const editTag = async () => {
-        let image = null as any
+        let image = null as Uint8Array | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
                 const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
-                image = Object.values(bytes)
+                image = bytes
             }
         }
         try {
-            await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description,
-            image, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
-            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+            await functions.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
+            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
+            social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, 
+            featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
             history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
-                await functions.post("/api/tag/edit/request", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+                await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
-                setEditTagObj({tag: tag.tag, failed: "implication"})
+                setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
-                setEditTagObj({tag: tag.tag, failed: true})
+                setEditTagObj({tag: editTagObj.tag, failed: true})
             }
         }
     }
 
     useEffect(() => {
+        if (!tag) return
         if (editTagFlag && editTagObj?.tag === tag.tag) {
             editTag()
             setEditTagFlag(false)
@@ -264,14 +273,17 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }, [editTagFlag, session])
 
     const showTagEditDialog = async () => {
+        if (!tag) return
         setEditTagObj({
             failed: false,
             tag: tag.tag,
             key: tag.tag,
             description: tag.description,
             image: tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null,
-            aliases: tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [],
-            implications: tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [],
+            aliases: tag.aliases?.[0] ? tag.aliases.map((a: Alias | string | null) => 
+            typeof a === "string" ? a as string : a?.alias) : [],
+            implications: tag.implications?.[0] ? tag.implications.map((i: Implication | string | null) => 
+            typeof i === "string" ? i : i?.implication) : [],
             pixivTags: tag.pixivTags?.[0] ? tag.pixivTags : [],
             type: tag.type,
             social: tag.social,
@@ -285,11 +297,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteTag = async () => {
+        if (!tag) return
         await functions.delete("/api/tag/delete", {tag: tag.tag}, session, setSessionFlag)
         history.push("/tags")
     }
 
     useEffect(() => {
+        if (!tag) return
         if (deleteTagFlag && deleteTagID === tag.tag) {
             deleteTag()
             setDeleteTagFlag(false)
@@ -298,15 +312,18 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }, [deleteTagFlag, session])
 
     const showTagDeleteDialog = async () => {
+        if (!tag) return
         setDeleteTagID(tag.tag)
     }
 
     const showTagCategorizeDialog = async () => {
+        if (!tag) return
         setCategorizeTag({tag: tag.tag, type: tag.type})
     }
 
     const tagOptionsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!tag) return jsx
         if (session.username) {
             jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter: getFilter()}}/>)
@@ -320,10 +337,11 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const pixivTagsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!tag) return jsx
         if (tag.pixivTags?.[0]) {
             for (let i = 0; i < tag.pixivTags.length; i++) {
-                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/en/tags/${tag.pixivTags[i]}/artworks`, "_blank", "noreferrer")}>{tag.pixivTags[i]}</button>)
+                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/tags/${tag.pixivTags?.[i]}/artworks`, "_blank", "noreferrer")}>{tag.pixivTags[i]}</button>)
             }
         }
         if (jsx.length) {
@@ -334,10 +352,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagAliasJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!tag) return jsx
         if (tag.aliases?.[0]) {
             for (let i = 0; i < tag.aliases.length; i++) {
-                let alias = tag.aliases[i]?.alias ? tag.aliases[i].alias : tag.aliases[i]
+                const item = tag.aliases[i]
+                let alias = typeof item === "string" ? item : item?.alias 
+                if (!alias) continue
                 jsx.push(<button className="tag-alias-button" onClick={(event) => searchTag(event, alias)}>{alias.replaceAll("-", " ")}</button>)
             }
         }
@@ -349,10 +370,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagImplicationJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
+        if (!tag) return jsx
         if (tag.implications?.[0]) {
             for (let i = 0; i < tag.implications.length; i++) {
-                let implication = tag.implications[i]?.implication ? tag.implications[i].implication : tag.implications[i]
+                const item = tag.implications[i]
+                let implication = typeof item === "string" ? item : item?.implication 
+                if (!implication) continue
                 let implicationSpace = implication.replaceAll("-", " ")
                 if (i !== tag.implications.length - 1) implication += ", "
                 jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${implication}`)}>{implicationSpace}</span>)
@@ -371,7 +395,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const relatedTagJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (relatedTags.length) {
             for (let i = 0; i < relatedTags.length; i++) {
                 let relatedTag = relatedTags[i].replaceAll("-", " ")
@@ -392,6 +416,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const postsJSX = () => {
+        if (!tag) return
         if (!permissions.isMod(session) && tag.banned) return null 
         if (tagPosts.length) {
             return (
@@ -404,19 +429,21 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const revertTagHistory = async () => {
-        let image = null as any
+        if (!tag) return
+        const history = tag as TagHistory
+        let image = null as Uint8Array | ["delete"] | null
         if (!tag.image) {
             image = ["delete"]
         } else {
             const imageLink = functions.getTagLink(tag.type, tag.image, tag.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
-            image = Object.values(bytes)
+            image = bytes
         }
-        await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description, image,
-        aliases: tag.aliases, implications: tag.implications, pixivTags: tag.pixivTags, social: tag.social,
+        await functions.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
+        aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
         twitter: tag.twitter, website: tag.website, fandom: tag.fandom, type: tag.type}, session, setSessionFlag)
-        currentHistory(tag.key)
+        currentHistory(history.key)
     }
 
     useEffect(() => {
@@ -461,11 +488,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getTagName = () => {
-        if (historyID && tag.key) return functions.toProperCase(tag.key.replaceAll("-", " "))
+        if (!tag) return
+        if (historyID && (tag as TagHistory).key) return functions.toProperCase((tag as TagHistory).key.replaceAll("-", " "))
         return functions.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
     const featuredClick = (event: React.MouseEvent) => {
+        if (!tag) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${tag.featured}`, "_blank")
         } else {

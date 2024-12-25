@@ -46,9 +46,10 @@ import hexcolor from "../assets/icons/hexcolor.png"
 import link from "../assets/icons/link-purple.png"
 import codeblock from "../assets/icons/codeblock.png"
 import "./styles/threadpage.less"
+import {MessageUser, MessageUserReply} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {id: string}}
 }
 
 const MessagePage: React.FunctionComponent<Props> = (props) => {
@@ -71,10 +72,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {deleteMessageID, deleteMessageFlag, editMessageID, editMessageFlag, editMessageTitle, editMessageContent, editMessageR18} = useMessageDialogSelector()
     const {setDeleteMessageID, setDeleteMessageFlag, setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18, setForwardMessageObj} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
-    const [message, setMessage] = useState(null) as any
-    const [replies, setReplies] = useState([]) as any
+    const [message, setMessage] = useState(null as unknown as MessageUser)
+    const [replies, setReplies] = useState([] as MessageUserReply[])
     const [index, setIndex] = useState(0)
-    const [visibleReplies, setVisibleReplies] = useState([]) as any
+    const [visibleReplies, setVisibleReplies] = useState([] as MessageUserReply[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -90,7 +91,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const errorRef = useRef(null) as any
     const emojiRef = useRef(null) as any
     const textRef = useRef(null) as any
-    const messageID = props?.match.params.id
+    const messageID = props.match.params.id
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

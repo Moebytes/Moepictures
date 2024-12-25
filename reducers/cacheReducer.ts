@@ -2,17 +2,17 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch} from "../types/Types"
+import {PostSearch, MiniTag, UnverifiedPost} from "../types/Types"
 
 const cacheSlice = createSlice({
     name: "cache",
     initialState: {
-        emojis: [] as any[],
+        emojis: [] as {[key: string]: string}[],
         posts: [] as PostSearch[],
-        tags: [] as any[],
+        tags: [] as MiniTag[],
         visiblePosts: [] as PostSearch[],
-        unverifiedPosts: [] as any[],
-        uploadDropFiles: [] as any[],
+        unverifiedPosts: [] as UnverifiedPost[],
+        uploadDropFiles: [] as File[],
     },
     reducers: {
         setEmojis: (state, action) => {state.emojis = action.payload},

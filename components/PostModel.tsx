@@ -29,25 +29,26 @@ import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {PostFull, PostHistory} from "../types/Types"
 import "./styles/postmodel.less"
 
 let imageTimer = null as any
 let id = null as any
 
 interface Props {
-    post?: any
+    post?: PostFull | PostHistory
     model: string
     width?: number
     height?: number
     scale?: number
     noKeydown?: boolean
-    comicPages?: any
+    comicPages?: string[]
     order?: number
     noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    noteID?: string
+    noteID?: string | null
 }
 
 const PostModel: React.FunctionComponent<Props> = (props) => {
@@ -562,10 +563,11 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }, [pixelate, image, ref])
 
     useEffect(() => {
+        if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
                 functions.download(path.basename(props.model), props.model)
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }

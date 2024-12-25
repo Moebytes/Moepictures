@@ -4,18 +4,20 @@ import functions from "../structures/Functions"
 import {useThemeSelector} from "../store"
 import "./styles/children.less"
 import Carousel from "./Carousel"
+import {ChildPost} from "../types/Types"
 
 interface Props {
-    posts: any
+    posts: ChildPost[]
 }
 
 const Children: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const history = useHistory()
-    const images = props.posts.map((t: any) => functions.getThumbnailLink(t.post.images[0].type, t.postID, t.post.images[0].order, t.post.images[0].filename, "small"))
+    const images = props.posts.map((child) => functions.getThumbnailLink(child.post.images[0].type, child.postID, 
+    child.post.images[0].order, child.post.images[0].filename, "small"))
 
     const click = (img: string, index: number) => {
-        const post = props.posts[index]
+        const post = props.posts[index].post
         history.push(`/post/${post.postID}/${post.slug}`)
     }
 

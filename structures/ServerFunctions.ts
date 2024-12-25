@@ -10,7 +10,7 @@ import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
 import axios from "axios"
-import {MiniTag, PostImage, UploadImage, PostFull, PostTagged, Attachment} from "../types/Types"
+import {MiniTag, Image, UploadImage, PostFull, PostTagged, Attachment} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -42,6 +42,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
     if (req.session.username) return next()
     if (ServerFunctions.validateAPIKey(req)) {
         const user = await sql.user.user(process.env.API_USERNAME!)
+        if (!user) return next()
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         req.session.$2fa = user.$2fa
@@ -426,7 +427,7 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static imagesChanged = async (oldImages: PostImage[], newImages: UploadImage[], upscaled: boolean, r18: boolean) => {
+    public static imagesChanged = async (oldImages: Image[], newImages: UploadImage[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -447,7 +448,7 @@ export default class ServerFunctions {
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: PostImage[], newImages: PostImage[] | UploadImage[], upscaled: boolean, r18: boolean) => {
+    public static imagesChangedUnverified = async (oldImages: Image[], newImages: Image[] | UploadImage[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -465,7 +466,7 @@ export default class ServerFunctions {
                 newBuffer = Buffer.from((newImage as UploadImage).bytes)
             } else {
                 let newPath = ""
-                let postImage = newImage as PostImage
+                let postImage = newImage as Image
                 if (upscaled) {
                     newPath = functions.getUpscaledImagePath(postImage.type, postImage.postID, postImage.order, postImage.upscaledFilename || postImage.filename)
                 } else {
@@ -498,7 +499,7 @@ export default class ServerFunctions {
                 await sql.post.updateImage(post.images[i].imageID, "type", newType)
             }
         }
-        const updated = await sql.post.post(post.postID)
+        const updated = await sql.post.post(post.postID) as PostFull
         for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
             const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)

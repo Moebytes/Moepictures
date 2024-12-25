@@ -20,7 +20,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [error, setError] = useState(false)
     const [token, setToken] = useState("")
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

@@ -2,11 +2,11 @@ import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../store"
 import functions from "../structures/Functions"
-import {GroupSearch} from "../types/Types"
+import {GroupSearch, GroupPosts, GroupHistory} from "../types/Types"
 import "./styles/groupthumbnail.less"
 
 interface Props {
-    group?: GroupSearch
+    group?: GroupSearch | GroupPosts
     image?: string
     onClick?: (event: React.MouseEvent) => void
     style?: any

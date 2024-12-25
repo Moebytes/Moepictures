@@ -252,7 +252,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<Tag>
+        return result[0] as Promise<Tag | undefined>
     }
 
     /** Get tag counts. */
@@ -355,7 +355,7 @@ export default class SQLTag {
             values: [alias]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<Alias>
+        return result[0] as Promise<Alias | undefined>
     }
 
     /** Alias search. */
@@ -458,7 +458,7 @@ export default class SQLTag {
             values: [pixivTag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<Tag>
+        return result[0] as Promise<Tag | undefined>
     }
 
     /** Insert alias history */
@@ -522,7 +522,7 @@ export default class SQLTag {
             values: [historyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<AliasHistory>
+        return result[0] as Promise<AliasHistory | undefined>
     }
 
     /** Get implication history ID */
@@ -536,7 +536,7 @@ export default class SQLTag {
             values: [historyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<ImplicationHistory>
+        return result[0] as Promise<ImplicationHistory | undefined>
     }
 
     /** Get alias/implication history */

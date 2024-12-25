@@ -11,10 +11,10 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
-import {Upscaler} from "../types/Types"
+import {PostSearch, PostHistory, Upscaler} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory
 }
 
 const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
@@ -28,7 +28,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
     const [upscaler, setUpscaler] = useState("real-cugan" as Upscaler)
     const [scaleFactor, setScaleFactor] = useState("4")
     const [compressJPG, setCompressJPG] = useState(true)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

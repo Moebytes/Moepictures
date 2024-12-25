@@ -8,9 +8,10 @@ import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/modposts.less"
+import {Report} from "../types/Types"
 
 interface Props {
-    request: any
+    request: Report
     updateReports?: () => void
 }
 

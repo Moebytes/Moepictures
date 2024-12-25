@@ -33,6 +33,7 @@ const pushMentionNotification = async (content: string, threadID: string, replyI
     try {
         const notified = new Set<string>()
         const thread = await sql.thread.thread(threadID)
+        if (!thread) return
         const pieces = functions.parsePieces(content)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
@@ -269,6 +270,8 @@ const ThreadRoutes = (app: Express) => {
             const replyID = req.query.replyID as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!threadID || !replyID) return res.status(400).send("Bad threadID or replyID")
+            const thread = await sql.thread.thread(threadID)
+            if (!thread) return res.status(400).send("Invalid threadID")
             const reply = await sql.thread.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
@@ -283,7 +286,6 @@ const ThreadRoutes = (app: Express) => {
                     await sql.thread.updateThread(threadID, "updater", penultReply.creator)
                     await sql.thread.updateThread(threadID, "updatedDate", penultReply.createDate)
                 } else {
-                    const thread = await sql.thread.thread(threadID)
                     await sql.thread.updateThread(threadID, "updater", thread.creator)
                     await sql.thread.updateThread(threadID, "updatedDate", thread.createDate)
                 }

@@ -177,7 +177,7 @@ app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Re
   res.status(200).send("Success")
 })
 
-let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "live2d", "history"]
+let folders = ["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "history"]
 let noCache = ["artist", "character", "series", "pfp", "tag"]
 let encrypted = ["image", "comic"]
 
@@ -206,11 +206,11 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.post(postID)
-        if (functions.isR18(post.rating)) {
+        if (post && functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
-        if (post.hidden) {
+        if (post && post.hidden) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
@@ -257,11 +257,11 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.post(postID)
-        if (functions.isR18(post.rating)) {
+        if (post && functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
-        if (post.hidden) {
+        if (post && post.hidden) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }

@@ -38,7 +38,7 @@ export default class SQLCuteness {
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Cuteness>
+        return result[0] as Promise<Cuteness | undefined>
     }
 
     /** Delete cuteness. */

@@ -295,7 +295,6 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             const ref = imagesRef[i]
             if (post.fake) continue
             const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
-            if (functions.isGIF(img)) continue
             if (!ref.current) continue
             let src = img
             if (functions.isModel(img)) {
@@ -437,12 +436,13 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 history.push(`/unverified/post/${post.postID}`)
             }
             const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            let canvasImg = functions.isModel(img) || functions.isLive2D(img) || functions.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                        functions.isGIF(img) ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
+                        !canvasImg ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">

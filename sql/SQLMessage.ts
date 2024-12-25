@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Message, MessageUser, MessageSearch, MessageReply} from "../types/Types"
+import {Message, MessageUser, MessageSearch, MessageUserReply} from "../types/Types"
 
 export default class SQLMessage {
     /** Insert DM message. */
@@ -136,7 +136,7 @@ export default class SQLMessage {
         values: [messageID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<MessageUser>
+        return result[0] as Promise<MessageUser | undefined>
     }
 
     /** Update message */
@@ -196,7 +196,7 @@ export default class SQLMessage {
         }
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result as Promise<MessageReply[]>
+        return result as Promise<MessageUserReply[]>
     }
 
     /** Get user message replies. */
@@ -213,7 +213,7 @@ export default class SQLMessage {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result as Promise<MessageReply[]>
+        return result as Promise<MessageUserReply[]>
     }
 
     /** Get message reply. */
@@ -230,7 +230,7 @@ export default class SQLMessage {
         values: [replyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<MessageReply>
+        return result[0] as Promise<MessageUserReply | undefined>
     }
 
     /** Update message reply */

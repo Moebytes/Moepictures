@@ -22,7 +22,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const [email, setEmail] = useState("")
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

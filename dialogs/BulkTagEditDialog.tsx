@@ -28,7 +28,7 @@ import live2d from "../assets/icons/live2d.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
-import {PostType, PostRating, PostStyle} from "../types/Types"
+import {PostType, PostRating, PostStyle, PostQuickEditParams, PostSearch} from "../types/Types"
 
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -43,9 +43,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [type, setType] = useState("x")
     const [rating, setRating] = useState("x")
     const [style, setStyle] = useState("x")
-    const [artists, setArtists] = useState("") as any
-    const [characters, setCharacters] = useState("") as any
-    const [series, setSeries] = useState("") as any
+    const [artists, setArtists] = useState("")
+    const [characters, setCharacters] = useState("")
+    const [series, setSeries] = useState("")
     const [metaTags, setMetaTags] = useState("")
     const [appendTags, setAppendTags] = useState("")
     const [artistsActive, setArtistsActive] = useState(false)
@@ -58,20 +58,20 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
-    const tagRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
+    const tagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const reset = () => {
         setArtists("")
-        setCharacters("") as any
+        setCharacters("")
         setSeries("")
         setMetaTags("")
         setAppendTags("")
     }
 
     useEffect(() => {
-        const logPosition = (event: any) => {
+        const logPosition = (event: MouseEvent) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
             const rect = element.getBoundingClientRect()
@@ -103,17 +103,17 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         if (!selectionMode) return setShowBulkTagEditDialog(false)
         if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim() && !appendTags?.trim()
         && type === "x" && rating === "x" && style === "x") return setShowBulkTagEditDialog(false)
-        let promiseArray = [] as Promise<any>[]
+        let promiseArray = [] as Promise<PostQuickEditParams>[]
         for (const postID of selectionItems.values()) {
-            const promise = new Promise(async (resolve) => {
-                const post = selectionPosts.get(String(postID))
+            const promise = new Promise<PostQuickEditParams>(async (resolve) => {
+                const post = selectionPosts.get(String(postID)) as PostSearch
                 const parsedTags = await functions.parseTagsSingle(post, session, setSessionFlag)
                 const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag, true)
 
-                let artistData = tagCategories.artists.map((a: any) => a.tag)
-                let characterData = tagCategories.characters.map((c: any) => c.tag)
-                let seriesData = tagCategories.series.map((s: any) => s.tag)
-                let tagData = tagCategories.tags.map((t: any) => t.tag)
+                let artistData = tagCategories.artists.map((a) => a.tag)
+                let characterData = tagCategories.characters.map((c) => c.tag)
+                let seriesData = tagCategories.series.map((s) => s.tag)
+                let tagData = tagCategories.tags.map((t) => t.tag)
 
                 if (functions.cleanHTML(artists)?.trim()) {
                     artistData = functions.cleanHTML(artists).trim().split(/[\n\r\s]+/g)

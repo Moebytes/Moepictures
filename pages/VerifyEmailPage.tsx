@@ -25,7 +25,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

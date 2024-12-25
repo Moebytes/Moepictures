@@ -13,7 +13,7 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
     const {setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

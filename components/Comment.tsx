@@ -21,9 +21,10 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comment.less"
+import {Comment} from "../types/Types"
 
 interface Props {
-    comment: any
+    comment: Comment
     onDelete?: () => void
     onEdit?: () => void
     onCommentJump?: (commentID: number) => void

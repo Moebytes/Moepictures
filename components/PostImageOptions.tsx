@@ -22,14 +22,15 @@ import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
+import {PostFull, PostHistory} from "../types/Types"
 
 interface Props {
     img?: string
     model?: string
     live2d?: string
     audio?: string
-    post?: any
-    comicPages?: any
+    post?: PostFull | PostHistory
+    comicPages?: string[] | null
     download: () => void
     previous?: () => void
     next?: () => void
@@ -265,7 +266,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                 </div> : null}
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)}
+                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                     <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
@@ -281,7 +282,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                     <div className="post-image-text">{i18n.buttons.download}</div>
                 </div>
-                {props.post.type === "image" ? 
+                {props.post?.type === "image" ? 
                 <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                 {String(format).toUpperCase()}</button> : null}
                 <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
@@ -303,7 +304,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
-                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                         <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                     </div> : null}
@@ -316,7 +317,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                         <div className="post-image-text">{i18n.buttons.download}</div>
                     </div>
-                    {props.post.type === "image" ? 
+                    {props.post?.type === "image" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                     {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

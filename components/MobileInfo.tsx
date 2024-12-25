@@ -47,14 +47,15 @@ import unlockIcon from "../assets/icons/unlock-red.png"
 import privateIcon from "../assets/icons/private.png"
 import unprivateIcon from "../assets/icons/unprivate.png"
 import functions from "../structures/Functions"
+import {PostSearch, PostHistory, MiniTag} from "../types/Types"
 import "./styles/mobileinfo.less"
 
 interface Props {
-    post?: any
-    artists?: any 
-    characters?: any 
-    series?: any
-    tags?: any
+    post?: PostSearch | PostHistory
+    artists?: MiniTag[] 
+    characters?: MiniTag[]  
+    series?: MiniTag[]
+    tags?: MiniTag[]
     unverified?: boolean
     order?: number
 }
@@ -116,27 +117,30 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }, [posts])
 
     const generateArtistsJSX = () => {
+        if (!props.artists) return
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
             const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             if (!props.artists[i]) break
             const tagClick = () => {
+                if (!props.artists) return
                 history.push(`/tag/${props.artists[i].tag}`)
             }
             const artistSocials = () => {
+                if (!props.artists) return
                 let jsx = [] as any 
                 if (props.artists[i].website) {
-                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.artists[i].website, "_blank")}/>)
+                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.artists?.[i].website!, "_blank")}/>)
                 }
                 if (props.artists[i].social?.includes("pixiv.net")) {
-                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
+                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
                 } else if (props.artists[i].social?.includes("soundcloud.com")) {
-                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
+                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
                 } else if (props.artists[i].social?.includes("sketchfab.com")) {
-                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
+                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
                 }
                 if (props.artists[i].twitter) {
-                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.artists[i].twitter, "_blank")}/>)
+                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.artists?.[i].twitter!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -158,17 +162,20 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCharactersJSX = () => {
+        if (!props.characters) return
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
             const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             if (!props.characters[i]) break
             const tagClick = () => {
+                if (!props.characters) return
                 history.push(`/tag/${props.characters[i].tag}`)
             }
             const characterSocials = () => {
+                if (!props.characters) return
                 let jsx = [] as any 
                 if (props.characters[i].fandom) {
-                    jsx.push(<img className="mobileinfo-social" src={fandom} onClick={() => window.open(props.characters[i].fandom, "_blank")}/>)
+                    jsx.push(<img className="mobileinfo-social" src={fandom} onClick={() => window.open(props.characters?.[i].fandom!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -190,20 +197,23 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateSeriesJSX = () => {
+        if (!props.series) return
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
             const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             if (!props.series[i]) break
             const tagClick = () => {
+                if (!props.series) return
                 history.push(`/tag/${props.series[i].tag}`)
             }
             const seriesSocials = () => {
+                if (!props.series) return
                 let jsx = [] as any 
                 if (props.series[i].website) {
-                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.series[i].website, "_blank")}/>)
+                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.series?.[i].website!, "_blank")}/>)
                 }
                 if (props.series[i].twitter) {
-                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.series[i].twitter, "_blank")}/>)
+                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.series?.[i].twitter!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -225,6 +235,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const organizeTags = () => {
+        if (!props.tags) return [] as MiniTag[]
         const meta = props.tags.filter((t: any) => t.type === "meta")
         const appearance = props.tags.filter((t: any) => t.type === "appearance")
         const outfit = props.tags.filter((t: any) => t.type === "outfit")
@@ -257,6 +268,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const copyTags = (replaceDash?: boolean, commas?: boolean) => {
+        if (!props.artists || !props.characters || !props.series || !props.tags) return
         const artists = props.artists.map((a: any) => a.tag)
         const characters = props.characters.map((c: any) => c.tag)
         const series = props.series.map((s: any) => s.tag)
@@ -268,9 +280,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const copyHash = () => {
-        if (!props.order) return
-        const hash = props.post.images[props.order-1]?.hash
-        navigator.clipboard.writeText(hash)
+        if (!props.post || !props.order) return
+        const image = props.post.images[props.order-1]
+        if (typeof image === "string") return
+        navigator.clipboard.writeText(image.hash)
         setActionBanner("copy-hash")
     }
 
@@ -298,20 +311,23 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const editPost = async () => {
+        if (!props.post) return
         if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
         history.push(`/edit-post/${props.post.postID}`)
     }
 
     const privatePost = async () => {
+        if (!props.post) return
         setPrivatePostObj({postID: props.post.postID, artists: props.artists})
     }
 
     const lockPost = async () => {
+        if (!props.post) return
         setLockPostID(props.post.postID)
     }
 
     const modNext = () => {
-        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === props.post.postID)
+        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === props.post?.postID)
         if (currentIndex !== -1) {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
@@ -331,21 +347,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const approvePost = async () => {
+        if (!props.post) return
         await functions.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
     const rejectPost = async () => {
+        if (!props.post) return
         await functions.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
     const triggerSetAvatar = () => {
+        if (!props.post) return
         window.scrollTo(0, 0)
         history.push(`/set-avatar/${props.post.postID}`)
     }
 
     const triggerTagEdit = () => {
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
             tags: props.tags, unverified: props.unverified})
@@ -356,55 +376,56 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateSourceJSX = () => {
+        if (!props.post) return
         let jsx = [] as any
         if (props.post.source) {
             if (props.post.source.includes("pixiv")) {
-                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("soundcloud")) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("sketchfab")) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("twitter") || props.post.source.includes("x.com")) {
-                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("deviantart")) {
-                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("artstation")) {
-                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("danbooru")) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("gelbooru")) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("safebooru")) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("yande.re")) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("konachan")) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("zerochan")) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("youtube")) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
             if (props.post.source.includes("bandcamp")) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.source, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
         }
         return (
             <div className="mobileinfo-row">
                 <span className="tag">{i18n.labels.source}:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.source, "_blank")}>{functions.getSiteName(props.post.source, i18n)}</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.getSiteName(props.post.source, i18n)}</span>
                 {jsx}
             </div>
         )
@@ -412,49 +433,50 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateMirrorsJSX = () => {
+        if (!props.post) return
         let jsx = [] as any
         if (props.post.mirrors) {
             if (props.post.mirrors.pixiv) {
-                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.mirrors.pixiv, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.mirrors?.pixiv, "_blank")}/>)
             }
             if (props.post.mirrors.soundcloud) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.mirrors.soundcloud, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post?.mirrors?.soundcloud, "_blank")}/>)
             }
             if (props.post.mirrors.sketchfab) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.mirrors.sketchfab, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post?.mirrors?.sketchfab, "_blank")}/>)
             }
             if (props.post.mirrors.twitter) {
-                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.mirrors.twitter, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post?.mirrors?.twitter, "_blank")}/>)
             }
             if (props.post.mirrors.deviantart) {
-                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.mirrors.deviantart, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post?.mirrors?.deviantart, "_blank")}/>)
             }
             if (props.post.mirrors.artstation) {
-                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.mirrors.artstation, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post?.mirrors?.artstation, "_blank")}/>)
             }
             if (props.post.mirrors.danbooru) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.mirrors.danbooru, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post?.mirrors?.danbooru, "_blank")}/>)
             }
             if (props.post.mirrors.gelbooru) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.mirrors.gelbooru, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post?.mirrors?.gelbooru, "_blank")}/>)
             }
             if (props.post.mirrors.safebooru) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.mirrors.safebooru, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post?.mirrors?.safebooru, "_blank")}/>)
             }
             if (props.post.mirrors.yandere) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.mirrors.yandere, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post?.mirrors?.yandere, "_blank")}/>)
             }
             if (props.post.mirrors.konachan) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post?.mirrors?.konachan, "_blank")}/>)
             }
             if (props.post.mirrors.zerochan) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.mirrors.zerochan, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.mirrors?.zerochan, "_blank")}/>)
             }
             if (props.post.mirrors.youtube) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.mirrors.youtube, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.mirrors?.youtube, "_blank")}/>)
             }
             if (props.post.mirrors.bandcamp) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.mirrors.bandcamp, "_blank")}/>)
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.mirrors?.bandcamp, "_blank")}/>)
             }
         }
         if (jsx.length) {
@@ -480,6 +502,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerGroup = () => {
+        if (!props.post) return
         setGroupPostID(props.post.postID)
     }
 
@@ -488,11 +511,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const postHistory = () => {
+        if (!props.post) return
         window.scrollTo(0, 0)
         history.push(`/post/history/${props.post.postID}`)
     }
 
     const generateUsernameJSX = (type?: string) => {
+        if (!props.post) return
         let username = props.post.uploader
         let role = uploaderRole
         if (type === "updater") {
@@ -560,7 +585,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const noTagsArtist = () => {
-        if (!session) return
+        if (!props.post || !session) return
         if (session.captchaNeeded) {
             return (
             <div className="mobileinfo-row">
@@ -580,7 +605,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 {copyTagsJSX()}
                 {tagCaptchaJSX()}
 
-                {props.artists ? <>
+                {props.post && props.artists ? <>
                     <div className="mobileinfo-title-container">
                         <span className="mobileinfo-title">{props.artists.length > 1 ? i18n.navbar.artists : i18n.tag.artist}</span>
                     </div>

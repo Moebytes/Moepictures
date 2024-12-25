@@ -14,7 +14,7 @@ const OCRDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const [running, setRunning] = useState(false)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

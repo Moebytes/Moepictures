@@ -11,10 +11,10 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
-import {ImageFormat} from "../types/Types"
+import {PostSearch, PostHistory, ImageFormat} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory 
 }
 
 const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
@@ -32,7 +32,7 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
     const [original, setOriginal] = useState(true)
     const [upscaled, setUpscaled] = useState(true)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

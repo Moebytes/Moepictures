@@ -26,12 +26,12 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [name, setName] = useState("")
     const [tags, setTags] = useState("")
-    const errorRef = useRef<any>(null)
-    const tagRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
+    const tagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
-        const logPosition = (event: any) => {
+        const logPosition = (event: MouseEvent) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
             const rect = element.getBoundingClientRect()

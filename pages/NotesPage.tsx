@@ -53,7 +53,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {noteSearchFlag} = useFlagSelector()
     const {setNoteSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -146,7 +146,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateNotes = () => {
             let currentIndex = index
-            const newVisibleNotes = visibleNotes as any
+            const newVisibleNotes = visibleNotes
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!notes[currentIndex]) break
                 newVisibleNotes.push(notes[currentIndex])
@@ -174,7 +174,7 @@ const NotesPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/notes", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanNotes = notes.filter((t: any) => !t.fake)
+        const cleanNotes = notes.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanNotes.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, noteCount: cleanNotes[0]?.noteCount}), ...result]
@@ -186,14 +186,14 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setNotes(result)
             } else {
-                setNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setNotes((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setNotes(result)
                 } else {
-                    setNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setNotes((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -205,7 +205,7 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!notes[currentIndex]) return updateOffset()
-                const newVisibleNotes = visibleNotes as any
+                const newVisibleNotes = visibleNotes
                 for (let i = 0; i < 15; i++) {
                     if (!notes[currentIndex]) return updateOffset()
                     newVisibleNotes.push(notes[currentIndex])
@@ -325,7 +325,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -371,10 +371,10 @@ const NotesPage: React.FunctionComponent = (props) => {
     }
 
     const generateNotesJSX = () => {
-        const jsx = [] as any
-        let visible = [] as any
+        const jsx = [] as React.ReactElement[]
+        let visible = [] as NoteSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleNotes) as any
+            visible = functions.removeDuplicates(visibleNotes)
         } else {
             const postOffset = (notesPage - 1) * getPageAmount()
             visible = notes.slice(postOffset, postOffset + getPageAmount())

@@ -26,7 +26,7 @@ export default class SQLGroup {
             values: [slug]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<GroupPosts>
+        return result[0] as Promise<GroupPosts | undefined>
     }
 
     /** Get post groups. */
@@ -128,7 +128,7 @@ export default class SQLGroup {
             values: [groupID, postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<GroupPost>
+        return result[0] as Promise<GroupPost | undefined>
     }
 
     /** Insert group post. */

@@ -1,4 +1,4 @@
-import {Post, PostImage, PostType, PostStyle, PostMirrors, PostSearch, 
+import {Post, Image, PostType, PostStyle, PostMirrors, PostSearch, 
 PostRating, Alias, Implication, TagType, Note, AliasHistorySearch} from "./Types"
 
 export type History = 
@@ -10,7 +10,7 @@ export type History =
     | SearchHistory
 
 export interface  PostChanges {
-    images?: PostImage[]
+    images?: Image[]
     type?: PostType
     rating?: PostRating
     style?: PostStyle
@@ -54,7 +54,7 @@ export interface PostHistory {
     series: string[]
     tags: string[]
     reason: string | null
-    mirrors: PostMirrors[] | null
+    mirrors: PostMirrors | null
     bookmarks: number
     hasOriginal: boolean | null
     hasUpscaled: boolean | null
@@ -65,6 +65,14 @@ export interface PostHistory {
     changes: PostChanges
     historyCount: string
     fake?: boolean
+    // These don't exist here but are here to avoid errors.
+    locked: boolean
+    hidden: boolean
+    private: boolean
+    approver: string
+    approveDate: string
+    favoriteCount: string
+    cuteness: string
 }
 
 export interface TagChanges {

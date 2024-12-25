@@ -3,17 +3,18 @@ import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
+import {PostFull, Tag} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostFull
 }
 
 const NewTags: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const [rawNewTags, setRawNewTags] = useState([]) as any
-    const [newTags, setNewTags] = useState([]) as any
+    const [rawNewTags, setRawNewTags] = useState([] as string[])
+    const [newTags, setNewTags] = useState([] as Tag[])
     const history = useHistory()
 
     const updateNewTags = async () => {

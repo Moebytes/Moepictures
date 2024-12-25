@@ -18,7 +18,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     const {setGroupFlag} = useFlagActions()
     const [postID, setPostID] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

@@ -16,12 +16,11 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
     const [needsVerification, setNeedsVerification] = useState(false)
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState("")
-    const captchaRef = useRef<any>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -49,9 +48,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!props.forceCaptcha) {
-            let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha") as any
-            ignoreCaptcha = ignoreCaptcha ? ignoreCaptcha === "true" : false
-            if (ignoreCaptcha) return setNeedsVerification(false)
+            let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha")
+            if (ignoreCaptcha === "true") return setNeedsVerification(false)
         }
         if (session.captchaNeeded) {
             if (!needsVerification) setNeedsVerification(true)
@@ -64,7 +62,6 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         if (needsVerification) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
-            captchaRef.current?.resetCaptcha()
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
@@ -73,6 +70,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     }, [needsVerification])
 
     const submitCaptcha = async () => {
+        if (!errorRef.current) return
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
@@ -82,7 +80,6 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
         try {
             await functions.post("/api/misc/captcha", {captchaResponse}, session, setSessionFlag)
-            captchaRef.current?.resetCaptcha?.()
             setSessionFlag(true)
             setNeedsVerification(false)
             history.go(0)

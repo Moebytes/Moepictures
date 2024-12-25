@@ -24,7 +24,7 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
     const [ip, setIP] = useState("")
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

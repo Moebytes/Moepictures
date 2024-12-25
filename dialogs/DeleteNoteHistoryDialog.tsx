@@ -12,7 +12,7 @@ const DeleteNoteHistoryDialog: React.FunctionComponent = (props) => {
     const {deleteNoteHistoryID} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setDeleteNoteHistoryFlag} = useNoteDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

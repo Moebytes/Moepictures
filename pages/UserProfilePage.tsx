@@ -65,7 +65,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {setDMTarget} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
     const {setPosts} = useCacheActions()
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
     const [uploadIndex, setUploadIndex] = useState(0)
@@ -241,13 +241,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                                 frameArray.push(cropped)
                                 delayArray.push(gifData[i].delay)
                             }
-                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
+                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
                             const {width, height} = await functions.imageDimensions(firstURL, session)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([buffer])
                             croppedURL = URL.createObjectURL(blob)
                         } else {
-                            croppedURL = await functions.crop(url, 1)
+                            croppedURL = await functions.crop(url, 1, false)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = new Uint8Array(arrayBuffer)

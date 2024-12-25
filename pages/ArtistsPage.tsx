@@ -51,7 +51,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -139,7 +139,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateArtists = () => {
             let currentIndex = index
-            const newVisibleArtists = visibleArtists as any
+            const newVisibleArtists = visibleArtists
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!artists[currentIndex]) break
                 newVisibleArtists.push(artists[currentIndex])
@@ -167,7 +167,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/artists", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
-        const cleanArtists = artists.filter((t: any) => !t.fake)
+        const cleanArtists = artists.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanArtists.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, tagCount: cleanArtists[0]?.tagCount}), ...result]
@@ -179,14 +179,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setArtists(result)
             } else {
-                setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setArtists((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setArtists(result)
                 } else {
-                    setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setArtists((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -198,7 +198,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!artists[currentIndex]) return updateOffset()
-                const newVisibleArtists = visibleArtists as any
+                const newVisibleArtists = visibleArtists
                 for (let i = 0; i < 15; i++) {
                     if (!artists[currentIndex]) return updateOffset()
                     newVisibleArtists.push(artists[currentIndex])
@@ -318,7 +318,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -366,7 +366,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }
 
     const generateArtistsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visibleArtists)

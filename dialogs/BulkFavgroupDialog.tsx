@@ -23,7 +23,7 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const [name, setName] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

@@ -18,13 +18,14 @@ import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
 import noteOCR from "../assets/icons/note-ocr.png"
 import "./styles/noteeditor.less"
+import {PostFull, PostHistory, Note, BubbleData} from "../types/Types"
 
 interface Props {
-    post?: any
+    post?: PostFull | PostHistory
     img: string
     order?: number
     unverified?: boolean
-    noteID?: string
+    noteID?: string | null
 }
 
 let isAnimatedWebP = false
@@ -88,7 +89,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [targetHash, setTargetHash] = useState("")
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
-    const [items, setItems] = useState([]) as any
+    const [items, setItems] = useState([] as Note[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [buttonHover, setButtonHover] = useState(false)
     const filtersRef = useRef(null) as any
@@ -96,7 +97,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const overlayRef = useRef<HTMLImageElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const [bubbleToggle, setBubbleToggle] = useState(false)
-    const [bubbleData, setBubbleData] = useState({}) as any
+    const [bubbleData, setBubbleData] = useState({} as BubbleData)
     const [shiftKey, setShiftKey] = useState(false)
     const [showTranscript, setShowTranscript] = useState(false)
     const history = useHistory()
@@ -107,19 +108,19 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const updateNotes = async () => {
         if (!props.post) return
-        let notes = [] as any
+        let notes = [] as Note[]
         if (props.unverified) {
             notes = await functions.get("/api/notes/unverified", {postID: props.post.postID}, session, setSessionFlag)
         } else if (props.noteID) {
-            notes = await functions.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
+            const history = await functions.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
+            notes = history.flatMap((h) => h.notes)
         } else {
             notes = await functions.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
         }
-        notes = notes?.filter((n: any) => n.order === (props.order || 1))
+        notes = notes?.filter((n) => n.order === (props.order || 1))
         if (notes?.length) {
-            const noteData = notes[0].notes ? notes[0].notes : notes
-            let largestID = noteData.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
-            setItems(noteData)
+            let largestID = notes.reduce((prev, current) => {return Math.max(prev, current.id || 1)}, -Infinity)
+            setItems(notes)
             setID(largestID)
             setNoteMode(true)
         } else {
@@ -155,6 +156,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const decryptImg = async () => {
+            if (!props.post) return
             let url = await functions.decryptThumb(props.img, session, props.img, true)
             isAnimatedWebP = false
             if (functions.isWebP(props.img)) {
@@ -173,7 +175,15 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 setTargetHeight(img.height)
             }
             const currentImg = props.post.images[(props.order || 1) - 1]
-            setTargetHash(currentImg.hash)
+            if (typeof currentImg === "string") {
+                const imgLink = functions.getRawThumbnailLink(currentImg, "massive")
+                const decrypted = await functions.decryptThumb(imgLink, session)
+                const arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
+                const hash = await functions.post("/api/misc/imghash", new Uint8Array(arrayBuffer), session, setSessionFlag)
+                setTargetHash(hash)
+            } else {
+                setTargetHash(currentImg.hash)
+            }
         }
         decryptImg()
     }, [props.img, session])
@@ -301,6 +311,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }, [editNoteFlag])
 
     const saveTextDialog = () => {
+        if (!props.post) return
         if (!session.username) {
             setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
             history.push("/login")
@@ -333,11 +344,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const getBubbleText = () => {
-        if (shiftKey) return showTranscript ? bubbleData.note : bubbleData.transcript
+        if (shiftKey) return showTranscript ? bubbleData.translation : bubbleData.transcript
         return showTranscript ? bubbleData.transcript : bubbleData.translation
     }
 
     const showHistory = () => {
+        if (!props.post) return
         history.push(`/note/history/${props.post.postID}/${props.order || 1}`)
     }
 
@@ -368,7 +380,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 transcript: "", translation: "", overlay: false}]
                         })
                     }} DrawPreviewComponent={RectShape}/>
-                    {items.map((item: any, index: number) => {
+                    {items.map((item: Note, index: number) => {
                         let {id, height, width, x, y, imageWidth, imageHeight} = item
                         if (!imageWidth) imageWidth = targetWidth
                         if (!imageHeight) imageHeight = targetHeight
@@ -417,7 +429,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: any) => {
-                            if (!item.transcript && !item.note) return setBubbleToggle(false)
+                            if (!item.transcript && !item.translation) return setBubbleToggle(false)
                             const bounds = event.target.getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
@@ -443,7 +455,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         return (
-                            <RectShape key={id} shapeId={id} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
+                            <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
                             extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown}}/>
                         )

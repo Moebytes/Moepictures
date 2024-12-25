@@ -6,9 +6,10 @@ import permissions from "../structures/Permissions"
 import GridImage from "./GridImage"
 import Carousel from "./Carousel"
 import "./styles/related.less"
+import {PostSearch} from "../types/Types"
 
 interface Props {
-    related: any
+    related: PostSearch[]
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {

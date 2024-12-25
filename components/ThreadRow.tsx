@@ -17,9 +17,10 @@ import favicon from "../assets/icons/favicon.png"
 import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
 import lock from "../assets/icons/lock.png"
+import {ThreadSearch} from "../types/Types"
 
 interface Props {
-    thread?: any
+    thread?: ThreadSearch
     onDelete?: () => void
     onEdit?: () => void
     titlePage?: boolean
@@ -41,12 +42,14 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateUpdater = async () => {
+        if (!props.thread) return
         const updater = await functions.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
         setUpdaterData(updater)
         setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
     const updateCreator = async () => {
+        if (!props.thread) return
         const creator = await functions.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
         setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
@@ -66,6 +69,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const threadPage = (event: React.MouseEvent) => {
+        if (!props.thread) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/thread/${props.thread.threadID}`, "_blank")
         } else {
@@ -82,6 +86,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorPage = (event: React.MouseEvent) => {
+        if (!props.thread) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.thread.creator}`, "_blank")
         } else {
@@ -108,6 +113,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updaterPage = (event: React.MouseEvent) => {
+        if (!props.thread) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.thread.updater}`, "_blank")
         } else {
@@ -126,6 +132,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCreatorJSX = () => {
+        if (!props.thread) return
         if (creatorData?.role === "admin") {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
@@ -200,6 +207,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUpdaterJSX = () => {
+        if (!props.thread) return
         if (updaterData?.role === "admin") {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
@@ -274,10 +282,11 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const readStatus = () => {
-        return props.thread.read
+        return props.thread?.read ?? false
     }
 
     const toggleRead = async () => {
+        if (!props.thread) return
         await functions.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
         props.onEdit?.()
     }
@@ -289,6 +298,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
+        if (!props.thread) return
         const targetDate = props.thread.updatedDate
         return <span className="thread-date-text">{functions.timeAgo(targetDate, i18n)}</span>
     }
@@ -322,11 +332,11 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
                 <div className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
                         {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/> : null}
-                        {props.thread.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
-                        {props.thread.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
+                        {props.thread?.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
+                        {props.thread?.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
                         <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>
-                            {props.thread.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
-                            {props.thread.title}
+                            {props.thread?.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {props.thread?.title || ""}
                         </span>
                     </div>
                     {!mobile ? <div className="thread-row">

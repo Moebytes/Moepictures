@@ -37,6 +37,12 @@ export interface GroupPost {
     order: number
 }
 
+export interface GroupItem {
+    id: number
+    image: string
+    post: PostOrdered
+}
+
 export interface GroupParams {
     postID: string
     name: string
@@ -125,7 +131,7 @@ export interface GroupHistoryParams {
 }
 
 export type GroupGetEndpoint<T extends string> = 
-    T extends "/api/group" ? {params: {name: string}, response: GroupPosts} :
+    T extends "/api/group" ? {params: {name: string}, response: GroupPosts | undefined} :
     T extends "/api/groups" ? {params: {postID: string}, response: GroupPosts[]} :
     T extends "/api/groups/list" ? {params: {groups: string[]}, response: Group[]} :
     T extends "/api/group/request/list" ? {params: {offset?: number} | null, response: GroupRequest[]} :

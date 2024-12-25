@@ -25,12 +25,13 @@ import prevIcon from "../assets/icons/go-left.png"
 import * as PIXI from "pixi.js"
 import type {Live2DModel} from "pixi-live2d-display"
 import JSZip from "jszip"
+import {PostFull, PostHistory} from "../types/Types"
 import "./styles/postmodel.less"
 
 let id = null as any
 
 interface Props {
-    post?: any
+    post?: PostFull | PostHistory
     live2d: string
     width?: number
     height?: number
@@ -42,7 +43,7 @@ interface Props {
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    noteID?: string
+    noteID?: string | null
 }
 
 const PostLive2D: React.FunctionComponent<Props> = (props) => {
@@ -403,10 +404,11 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }, [pixelate, image])
 
     useEffect(() => {
+        if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
                 functions.download(path.basename(props.live2d), props.live2d)
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }

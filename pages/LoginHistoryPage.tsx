@@ -21,7 +21,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     const {setActionBanner} = useActiveActions()
     const [loginHistory, setLoginHistory] = useState([] as any)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {

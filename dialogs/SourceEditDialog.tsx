@@ -29,7 +29,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const updateFields = async () => {

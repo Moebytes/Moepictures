@@ -157,7 +157,7 @@ export default class SQLReport {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Ban>
+        return result[0] as Promise<Ban | undefined>
     }
 
     /** Get banned IP */
@@ -167,7 +167,7 @@ export default class SQLReport {
         values: [ip]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Ban>
+        return result[0] as Promise<Ban | undefined>
     }
 
     /** Insert blacklist */

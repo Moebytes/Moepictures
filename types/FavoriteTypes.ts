@@ -40,9 +40,9 @@ export interface FavgroupReorderParams {
 }
 
 export type FavoriteGetEndpoint<T extends string> = 
-    T extends "/api/favorite" ? {params: {postID: string}, response: Favorite} :
+    T extends "/api/favorite" ? {params: {postID: string}, response: Favorite | undefined} :
     T extends "/api/favgroups" ? {params: {postID: string}, response: Favgroup[]} :
-    T extends "/api/favgroup" ? {params: {username: string, name: string}, response: FavgroupSearch} :
+    T extends "/api/favgroup" ? {params: {username: string, name: string}, response: FavgroupSearch | undefined} :
     never
 
 export type FavoritePostEndpoint<T extends string> = 

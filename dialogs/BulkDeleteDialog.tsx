@@ -18,7 +18,7 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
     const {selectionMode, selectionItems} = useSearchSelector()
     const {setSelectionMode} = useSearchActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

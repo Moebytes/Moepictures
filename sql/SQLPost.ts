@@ -444,7 +444,7 @@ export default class SQLPost {
             values: [postID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<PostFull>
+        return result[0] as Promise<PostFull | undefined>
     }
 
     /** Get post (unverified). */
@@ -462,7 +462,7 @@ export default class SQLPost {
             values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<UnverifiedPost>
+        return result[0] as Promise<UnverifiedPost | undefined>
     }
 
     /** Get post tags. */
@@ -616,7 +616,7 @@ export default class SQLPost {
         values: [postID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<ChildPost>
+        return result[0] as Promise<ChildPost | undefined>
     }
 
     /** Get the parent of a child post (unverified). */
@@ -641,6 +641,6 @@ export default class SQLPost {
         values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<ChildPost>
+        return result[0] as Promise<ChildPost | undefined>
     }
 }

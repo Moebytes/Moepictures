@@ -11,7 +11,7 @@ import sharp from "sharp"
 import phash from "sharp-phash"
 import axios from "axios"
 import {PostHistory, UploadParams, UploadImage, EditParams, BulkTag, UnverifiedUploadParams,
-UnverifiedEditParams} from "../types/Types"
+UnverifiedEditParams, PostFull, UnverifiedPost} from "../types/Types"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -353,7 +353,7 @@ const CreateRoutes = (app: Express) => {
         await sql.tag.insertTagMap(postID, tagMap)
 
         if (unverifiedID) {
-          const unverifiedPost = await sql.post.unverifiedPost(unverifiedID)
+          const unverifiedPost = await sql.post.unverifiedPost(unverifiedID) as UnverifiedPost
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename)
@@ -662,7 +662,7 @@ const CreateRoutes = (app: Express) => {
         await sql.tag.insertTagMap(postID, addedTags)
 
         if (unverifiedID) {
-          const unverifiedPost = await sql.post.unverifiedPost(unverifiedID)
+          const unverifiedPost = await sql.post.unverifiedPost(unverifiedID) as UnverifiedPost
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename)
@@ -683,7 +683,7 @@ const CreateRoutes = (app: Express) => {
         const seriesArr = series.map((s: any) => s.tag)
 
 
-        const updated = await sql.post.post(postID)
+        const updated = await sql.post.post(postID) as PostFull
         let r18 = functions.isR18(updated.rating)
 
         const changes = functions.parsePostChanges(post, updated)
@@ -1265,7 +1265,7 @@ const CreateRoutes = (app: Express) => {
         })
 
         if (originalPostID) {
-          const updated = await sql.post.unverifiedPost(postID)
+          const updated = await sql.post.unverifiedPost(postID) as UnverifiedPost
           let combinedTags = [...artists.map((a: any) => a.tag), ...characters.map((c: any) => c.tag), 
             ...series.map((s: any) => s.tag), ...newTags.map((n: any) => n.tag), ...tags]
           let oldTagsSet = new Set<string>(post.tags)
@@ -1653,7 +1653,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         if (post && unverified.originalID) {
-          const updated = await sql.post.post(unverified.originalID)
+          const updated = await sql.post.post(unverified.originalID) as PostFull
           let r18 = functions.isR18(updated.rating)
 
           const artistsArr = artists.map((a) => a.tag)

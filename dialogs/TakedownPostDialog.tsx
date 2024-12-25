@@ -6,9 +6,10 @@ import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
+import {PostSearch, PostHistory} from "../types/Types"
 
 interface Props {
-    post: any
+    post: PostSearch | PostHistory
 }
 
 const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
@@ -21,8 +22,6 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {

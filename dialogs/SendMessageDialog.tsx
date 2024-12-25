@@ -40,10 +40,10 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const [content, setContent] = useState("")
     const [r18, setR18] = useState(false)
     const [error, setError] = useState(false)
-    const emojiRef = useRef(null) as any
-    const dialogRef = useRef(null) as any
-    const textRef = useRef(null) as any
-    const errorRef = useRef<any>(null)
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const dialogRef = useRef<HTMLDivElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -68,7 +68,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     }, [dmTarget])
 
     const sendMessage = async () => {
-        let cleanedRecipients = recipients.split(/\s+/g).map((r: any) => r.trim())
+        let cleanedRecipients = recipients.split(/\s+/g).map((r) => r.trim())
         if (cleanedRecipients.length < 1) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -156,10 +156,10 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     }
 
     const emojiGrid = () => {
-        let rows = [] as any
+        let rows = [] as React.ReactElement[]
         let rowAmount = 7
         for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as any
+            let items = [] as React.ReactElement[]
             for (let j = 0; j < rowAmount; j++) {
                 const k = (i*rowAmount)+j
                 const key = Object.keys(emojis)[k]

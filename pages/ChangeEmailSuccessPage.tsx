@@ -21,7 +21,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [newEmail, setNewEmail] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

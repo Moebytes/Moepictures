@@ -10,6 +10,7 @@ import deleteIcon from "../assets/icons/delete.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
+import {GroupPosts} from "../types/Types"
 
 const GroupDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -21,12 +22,12 @@ const GroupDialog: React.FunctionComponent = (props) => {
     const {setGroupPostID} = useGroupDialogActions()
     const {setPostFlag} = useFlagActions()
     const [name, setName] = useState("")
-    const [groups, setGroups] = useState([] as any[])
+    const [groups, setGroups] = useState([] as GroupPosts[])
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [removalItems, setRemovalItems] = useState([] as any[])
+    const [removalItems, setRemovalItems] = useState([] as {slug: string, postID: string}[])
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -118,9 +119,9 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }
 
     const groupJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < groups.length; i++) {
-            const group = groups[i] as any
+            const group = groups[i]
             const deleteFromGroup = async () => {
                 if (permissions.isContributor(session)) {
                     await functions.delete("/api/group/post/delete", {postID: groupPostID, name: group.name}, session, setSessionFlag)

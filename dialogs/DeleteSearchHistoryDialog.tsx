@@ -11,7 +11,7 @@ const DeleteSearchHistoryDialog: React.FunctionComponent = (props) => {
     const {deleteSearchHistoryID} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {

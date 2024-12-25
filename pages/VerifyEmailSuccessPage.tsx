@@ -15,10 +15,6 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {mobile} = useLayoutSelector()
-    const [submitted, setSubmitted] = useState(false)
-    const [newEmail, setNewEmail] = useState("")
-    const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {

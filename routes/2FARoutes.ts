@@ -99,7 +99,7 @@ const $2FARoutes = (app: Express) => {
             const device = functions.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
-            const validToken = verifyToken($2FAToken.token, token, 60)
+            const validToken = verifyToken($2FAToken?.token || "", token, 60)
             if (validToken) {
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email

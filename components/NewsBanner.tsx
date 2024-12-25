@@ -13,6 +13,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
 
     const updateBanner = async () => {
         const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
+        if (!banner) return
         const bannerHideDate = localStorage.getItem("bannerHideDate")
         if (!bannerHideDate || new Date(bannerHideDate) <= new Date(banner.date || "")) {
             if (banner?.text) setNewsBanner(banner)

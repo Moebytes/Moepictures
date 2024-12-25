@@ -41,7 +41,7 @@ export interface MessageSearch extends Message {
     fake?: boolean
 }
 
-export interface MessageReply {
+export interface MessageUserReply {
     replyID: string
     messageID: string
     creator: string
@@ -89,8 +89,8 @@ export interface MessageForwardParams {
 }
 
 export type MessageGetEndpoint<T extends string> = 
-    T extends "/api/message" ? {params: {messageID: string}, response: MessageUser} :
-    T extends "/api/message/replies" ? {params: {messageID: string, offset?: number}, response: MessageReply[]} :
+    T extends "/api/message" ? {params: {messageID: string}, response: MessageUser | undefined} :
+    T extends "/api/message/replies" ? {params: {messageID: string, offset?: number}, response: MessageUserReply[]} :
     T extends "/api/notifications" ? {params: null, response: string} :
     never
 

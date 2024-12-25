@@ -18,9 +18,10 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
+import {MessageUserReply} from "../types/Types"
 
 interface Props {
-    reply: any
+    reply: MessageUserReply
     onDelete?: () => void
     onEdit?: () => void
     onReplyJump?: (replyID: number) => void
@@ -37,7 +38,6 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const {setDeleteMsgReplyID, setDeleteMsgReplyFlag, setEditMsgReplyFlag, setEditMsgReplyID, setEditMsgReplyContent, setEditMsgReplyR18} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
     const history = useHistory()
-    const reply = props.reply.reply
 
     const defaultIcon = props.reply?.image ? false : true
 

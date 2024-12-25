@@ -96,6 +96,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertNoteHistoryDialog = async () => {
         const post = await functions.get("/api/post", {postID: props.noteHistory.postID}, session, setSessionFlag)
+        if (!post) return
         if (post.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: props.noteHistory.historyID})
         setRevertNoteHistoryID({failed: false, historyID: props.noteHistory.historyID})
     }

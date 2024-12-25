@@ -173,7 +173,7 @@ export interface EditCounts {
 }
 
 export type UserGetEndpoint<T extends string> = 
-    T extends "/api/user" ? {params: {username: string}, response: PrunedUser} :
+    T extends "/api/user" ? {params: {username: string}, response: PrunedUser | undefined} :
     T extends "/api/user/session" ? {params: null, response: Session} :
     T extends "/api/user/changeemail" ? {params: {token: string}, response: string} :
     T extends "/api/user/verifyemail" ? {params: {token: string}, response: string} :
@@ -181,7 +181,7 @@ export type UserGetEndpoint<T extends string> =
     T extends "/api/user/uploads" ? {params: UserFavoritesParams, response: PostSearch[]} :
     T extends "/api/user/favgroups" ? {params: {username: string} | null, response: Favgroup[]} :
     T extends "/api/user/comments" ? {params: UserCommentsParams, response: CommentSearch[]} :
-    T extends "/api/user/ban" ? {params: {username: string}, response: Ban} :
+    T extends "/api/user/ban" ? {params: {username: string}, response: Ban | undefined} :
     T extends "/api/user/checkmail" ? {params: null, response: boolean} :
     T extends "/api/user/history" ? {params: {offset?: number, query?: string}, response: SearchHistory[]} :
     T extends "/api/user/login/history" ? {params: null, response: LoginHistory[]} :

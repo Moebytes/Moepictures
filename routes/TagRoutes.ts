@@ -331,7 +331,7 @@ const TagRoutes = (app: Express) => {
                 if (silent) return res.status(200).send("Success")
             }
 
-            const updated = await sql.tag.tag(targetTag)
+            const updated = await sql.tag.tag(targetTag) as Tag
             const updatedAliases = updated.aliases?.filter(Boolean).map((a: any) => a.alias)
             const updatedImplications = updated.implications?.filter(Boolean).map((i: any) => i.implication)
             const changes = functions.parseTagChanges(tagObj, updated)
@@ -724,7 +724,7 @@ const TagRoutes = (app: Express) => {
             let result = [] as TagHistory[]
             if (tag && historyID) {
                 const history = await sql.history.tagHistoryID(tag, historyID)
-                result = [history]
+                if (history) result = [history]
             } else if (username) {
                 result = await sql.history.userTagHistory(username)
             } else {

@@ -280,6 +280,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             let result = await sql.post.unverifiedPost(postID)
+            if (!result) return res.status(400).send("Invalid postID") 
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }

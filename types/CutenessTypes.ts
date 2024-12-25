@@ -9,7 +9,7 @@ export interface Cuteness {
 }
 
 export type CutenessGetEndpoint<T extends string> = 
-    T extends "/api/cuteness" ? {params: {postID: string}, response: Cuteness} :
+    T extends "/api/cuteness" ? {params: {postID: string}, response: Cuteness | undefined} :
     never
 
 export type CutenessPostEndpoint<T extends string> = 

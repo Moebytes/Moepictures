@@ -5,9 +5,10 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentcarousel.less"
+import {CommentSearch} from "../types/Types"
 
 interface Props {
-    comments: any[]
+    comments: CommentSearch[]
 }
 
 
@@ -50,7 +51,6 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
                     <div className="comment-carousel-commentrow-container">
                         {functions.isVideo(img) && !mobile ? 
                         <video className="comment-carousel-commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                        functions.isGIF(img) ? <img className="comment-carousel-commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> :
                         <img className="comment-carousel-commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
                     </div>
                     <div className="comment-carousel-commentrow-container-row">

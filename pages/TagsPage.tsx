@@ -57,8 +57,8 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const sortRef = useRef(null) as any
-    const typeRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
+    const typeRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -142,7 +142,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateTags = () => {
             let currentIndex = index
-            const newVisibleTags = visibleTags as any
+            const newVisibleTags = visibleTags
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!tags[currentIndex]) break
                 newVisibleTags.push(tags[currentIndex])
@@ -170,7 +170,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/tags", {sort: functions.parseSort(sortType, sortReverse), type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
-        const cleanTags = tags.filter((t: any) => !t.fake)
+        const cleanTags = tags.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanTags.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, tagCount: cleanTags[0]?.tagCount}), ...result]
@@ -182,14 +182,14 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setTags(result)
             } else {
-                setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setTags((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setTags(result)
                 } else {
-                    setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setTags((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -201,7 +201,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!tags[currentIndex]) return updateOffset()
-                const newVisibleTags = visibleTags as any
+                const newVisibleTags = visibleTags
                 for (let i = 0; i < 15; i++) {
                     if (!tags[currentIndex]) return updateOffset()
                     newVisibleTags.push(tags[currentIndex])
@@ -321,7 +321,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -395,10 +395,10 @@ const TagsPage: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        const jsx = [] as any
-        let visible = [] as any
+        const jsx = [] as React.ReactElement[]
+        let visible = [] as TagSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleTags) as any
+            visible = functions.removeDuplicates(visibleTags)
         } else {
             const postOffset = (tagsPage - 1) * getPageAmount()
             visible = tags.slice(postOffset, postOffset + getPageAmount())

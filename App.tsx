@@ -111,7 +111,7 @@ const App: React.FunctionComponent = (props) => {
             getSessionCookie()
             functions.clearCache()
             cacheEmojis()
-            if (savedActiveGroup) setActiveGroup(savedActiveGroup)
+            if (savedActiveGroup) setActiveGroup(JSON.parse(savedActiveGroup))
             if (savedActiveFavgroup) setActiveFavgroup(JSON.parse(savedActiveFavgroup))
         }
         window.addEventListener("load", onDOMLoaded)
@@ -122,7 +122,7 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (activeGroup) {
-            localStorage.setItem("activeGroup", activeGroup)
+            localStorage.setItem("activeGroup", JSON.stringify(activeGroup))
         } else {
             localStorage.removeItem("activeGroup")
         }

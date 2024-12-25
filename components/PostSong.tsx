@@ -30,23 +30,24 @@ import NoteEditor from "./NoteEditor"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import path from "path"
+import {PostFull, PostHistory} from "../types/Types"
 import "./styles/postsong.less"
 
 interface Props {
-    post?: any
+    post?: PostFull | PostHistory
     audio: string
     coverImg?: string
     width?: number
     height?: number
     scale?: number
     noKeydown?: boolean
-    comicPages?: any
+    comicPages?: string[]
     order?: number
     noNotes?: boolean
     unverified?: boolean
     previous?: () => void
     next?: () => void
-    noteID?: string
+    noteID?: string | null
 }
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
@@ -320,10 +321,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [pixelate])
 
     useEffect(() => {
+        if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
                 functions.download(path.basename(props.audio), props.audio)
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }

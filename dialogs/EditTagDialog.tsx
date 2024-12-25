@@ -20,7 +20,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -55,14 +55,14 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            let image = null as any
+            let image = null as Uint8Array | ["delete"] | null
             if (editTagObj.image) {
                 if (editTagObj.image === "delete") {
                     image = ["delete"]
                 } else {
                     const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
-                    image = Object.values(bytes)
+                    image = bytes
                 }
             }
             await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
@@ -85,13 +85,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         setSubmitted(false)
     }
 
-    const uploadTagImg = async (event: any) => {
+    const uploadTagImg = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
         const fileReader = new FileReader()
         await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: any) => {
-                let bytes = new Uint8Array(f.target.result)
+            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
+                let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                 const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
@@ -108,21 +108,21 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         let croppedURL = ""
                         if (gif) {
                             const gifData = await functions.extractGIFFrames(url)
-                            let frameArray = [] as any 
-                            let delayArray = [] as any
+                            let frameArray = [] as Buffer[] 
+                            let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
                                 const canvas = gifData[i].frame as HTMLCanvasElement
                                 const cropped = await functions.crop(canvas.toDataURL(), 1, true)
                                 frameArray.push(cropped)
                                 delayArray.push(gifData[i].delay)
                             }
-                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
+                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
                             const {width, height} = await functions.imageDimensions(firstURL, session)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([buffer])
                             croppedURL = URL.createObjectURL(blob)
                         } else {
-                            croppedURL = await functions.crop(url, 1)
+                            croppedURL = await functions.crop(url, 1, false)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         bytes = new Uint8Array(arrayBuffer)
@@ -139,7 +139,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     const tagSocialJSX = () => {
-        let jsx = [] as any 
+        let jsx = [] as React.ReactElement[] 
         if (editTagObj.type === "artist") {
             jsx.push(
                 <>

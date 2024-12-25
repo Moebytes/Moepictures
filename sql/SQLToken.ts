@@ -38,7 +38,7 @@ export default class SQLToken {
             values: [token]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<EmailToken>
+        return result[0] as Promise<EmailToken | undefined>
     }
 
     /** Get email tokens. */
@@ -75,7 +75,7 @@ export default class SQLToken {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<$2FAToken>
+        return result[0] as Promise<$2FAToken | undefined>
     }
 
     /** Insert 2fa token. */
@@ -121,7 +121,7 @@ export default class SQLToken {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<PasswordToken>
+        return result[0] as Promise<PasswordToken | undefined>
     }
 
     /** Get password tokens. */

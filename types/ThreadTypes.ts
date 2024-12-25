@@ -28,7 +28,7 @@ export interface ThreadSearch extends Thread {
     fake?: boolean
 }
 
-export interface Reply {
+export interface ThreadReply {
     replyID: string
     threadID: string
     creator: string
@@ -85,9 +85,9 @@ export interface ThreadReportFulfillParams {
 }
 
 export type ThreadGetEndpoint<T extends string> = 
-    T extends "/api/thread" ? {params: {threadID: string}, response: ThreadUser} :
-    T extends "/api/thread/replies" ? {params: {threadID: string, offset?: number}, response: Reply[]} :
-    T extends "/api/reply" ? {params: {replyID: string}, response: Reply} :
+    T extends "/api/thread" ? {params: {threadID: string}, response: ThreadUser | undefined} :
+    T extends "/api/thread/replies" ? {params: {threadID: string, offset?: number}, response: ThreadReply[]} :
+    T extends "/api/reply" ? {params: {replyID: string}, response: ThreadReply | undefined} :
     never
 
 export type ThreadPostEndpoint<T extends string> = 

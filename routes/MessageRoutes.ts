@@ -9,6 +9,7 @@ import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {MessageCreateParams, MessageEditParams, MessageReplyParams, MessageReplyEditParams,
 MessageForwardParams} from "../types/Types"
+import { String } from "aws-sdk/clients/acm"
 
 const messageLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -94,10 +95,10 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/message", messageLimiter, async (req: Request, res: Response) => {
         try {
-            const messageID = req.query.messageID as string
-            if (!messageID) return res.status(400).send("Bad messageID")
+            const messageID = req.query.messageID as String
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(messageID)
+            if (!message) return res.status(400).send("Bad messageID")
             let canView = false
             for (const recipient of message.recipients) {
                 if (req.session.username === message.creator || req.session.username === recipient) {
@@ -229,6 +230,8 @@ const MessageRoutes = (app: Express) => {
             const replyID = req.query.replyID as string
             if (!messageID || !replyID) return res.status(400).send("Bad messageID or replyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            const message = await sql.message.message(messageID)
+            if (!message) return res.status(400).send("Invalid messageID")
             const reply = await sql.message.messageReply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
@@ -243,7 +246,6 @@ const MessageRoutes = (app: Express) => {
                     await sql.message.updateMessage(messageID, "updater", penultReply.creator)
                     await sql.message.updateMessage(messageID, "updatedDate", penultReply.createDate)
                 } else {
-                    const message = await sql.message.message(messageID)
                     await sql.message.updateMessage(messageID, "updater", message.creator)
                     await sql.message.updateMessage(messageID, "updatedDate", message.createDate)
                 }

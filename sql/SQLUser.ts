@@ -56,7 +56,7 @@ export default class SQLUser {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<User>
+        return result[0] as Promise<User | undefined>
     }
 
     /** Get user by email. */
@@ -71,7 +71,7 @@ export default class SQLUser {
             values: [email]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<User>
+        return result[0] as Promise<User | undefined>
     }
 
     /** Delete user. */
@@ -156,6 +156,6 @@ export default class SQLUser {
             text: /*sql*/`SELECT * FROM banner`
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Banner>
+        return result[0] as Promise<Banner | undefined>
     }
 }

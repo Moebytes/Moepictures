@@ -28,7 +28,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
     const [confirmNewPassword, setConfirmNewPassword] = useState("")
     const [token, setToken] = useState("")
     const history = useHistory()
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

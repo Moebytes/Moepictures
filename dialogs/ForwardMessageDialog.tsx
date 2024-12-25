@@ -17,7 +17,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [recipients, setRecipients] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -38,7 +38,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
     }, [forwardMessageObj])
 
     const forwardMessage = async () => {
-        let cleanedRecipients = recipients.split(/\s+/g).map((r: any) => r.trim())
+        let cleanedRecipients = recipients.split(/\s+/g).map((r) => r.trim())
         if (cleanedRecipients.length < 1) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

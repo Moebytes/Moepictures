@@ -20,10 +20,11 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
+import {ThreadUser, ThreadReply} from "../types/Types"
 
 interface Props {
-    thread: any
-    reply: any
+    thread: ThreadUser
+    reply: ThreadReply
     onDelete?: () => void
     onEdit?: () => void
     onReplyJump?: (replyID: number) => void

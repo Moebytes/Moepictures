@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Thread, ThreadSearch, ThreadUser, Reply, ThreadRead} from "../types/Types"
+import {Thread, ThreadSearch, ThreadUser, ThreadReply, ThreadRead} from "../types/Types"
 
 export default class SQLThread {
     /** Insert thread. */
@@ -148,7 +148,7 @@ export default class SQLThread {
         values: [threadID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<ThreadUser>
+        return result[0] as Promise<ThreadUser | undefined>
     }
 
     /** Update thread */
@@ -201,7 +201,7 @@ export default class SQLThread {
         }
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
-        return result as Promise<Reply[]>
+        return result as Promise<ThreadReply[]>
     }
 
     /** Get user replies. */
@@ -220,7 +220,7 @@ export default class SQLThread {
         values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result as Promise<Reply[]>
+        return result as Promise<ThreadReply[]>
     }
 
     /** Get reply. */
@@ -238,7 +238,7 @@ export default class SQLThread {
         values: [replyID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Reply>
+        return result[0] as Promise<ThreadReply | undefined>
     }
 
     /** Update reply */
@@ -289,7 +289,7 @@ export default class SQLThread {
             values: [threadID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<ThreadRead>
+        return result[0] as Promise<ThreadRead | undefined>
     }
 
     /** Get post count of user */

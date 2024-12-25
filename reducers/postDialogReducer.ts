@@ -1,7 +1,16 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch} from "../types/Types"
+import {PostSearch, PostHistory, MiniTag} from "../types/Types"
+
+interface TagEditID {
+    post: PostSearch | PostHistory, 
+    unverified?: boolean, 
+    artists: MiniTag[], 
+    characters: MiniTag[], 
+    series: MiniTag[], 
+    tags: MiniTag[]
+}
 
 const postDialogSlice = createSlice({
     name: "postDialog",
@@ -14,7 +23,7 @@ const postDialogSlice = createSlice({
         revertPostHistoryFlag: false,
         lockPostID: null as any,
         privatePostObj: null as any,
-        tagEditID: null as any,
+        tagEditID: null as TagEditID | null,
         sourceEditID: null as unknown as {unverified: boolean, post: PostSearch},
         showBulkTagEditDialog: false,
         showBulkDeleteDialog: false,
@@ -80,7 +89,7 @@ export const usePostDialogActions = () => {
         setRevertPostHistoryFlag: (state: any) => dispatch(setRevertPostHistoryFlag(state)),
         setLockPostID: (state: any) => dispatch(setLockPostID(state)),
         setPrivatePostObj: (state: any) => dispatch(setPrivatePostObj(state)),
-        setTagEditID: (state: any) => dispatch(setTagEditID(state)),
+        setTagEditID: (state: TagEditID | null) => dispatch(setTagEditID(state)),
         setSourceEditID: (state: any) => dispatch(setSourceEditID(state)),
         setShowBulkTagEditDialog: (state: any) => dispatch(setShowBulkTagEditDialog(state)),
         setShowBulkDeleteDialog: (state: any) => dispatch(setShowBulkDeleteDialog(state)),

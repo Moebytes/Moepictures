@@ -48,6 +48,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
         props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
         const post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag)
+        if (!post) return
         const initialImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
         const initialImg = await functions.decryptThumb(initialImgLink, session)
         setImg(initialImg)
@@ -222,6 +223,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
             let newPostIndex = postIndex + 1 
             if (newPostIndex > props.groupHistory.posts.length - 1) newPostIndex = 0
             const post = await functions.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
+            if (!post) return
             const filename = post.images[0]?.filename
             const newImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
             const newImg = await functions.decryptThumb(newImgLink, session)

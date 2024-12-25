@@ -15,8 +15,6 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {

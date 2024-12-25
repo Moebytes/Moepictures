@@ -51,7 +51,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -140,7 +140,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateSeries = () => {
             let currentIndex = index
-            const newVisibleSeries = visibleSeries as any
+            const newVisibleSeries = visibleSeries
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!series[currentIndex]) break
                 newVisibleSeries.push(series[currentIndex])
@@ -168,7 +168,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/series", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
-        const cleanSeries = series.filter((t: any) => !t.fake)
+        const cleanSeries = series.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanSeries.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, tagCount: cleanSeries[0]?.tagCount}), ...result]
@@ -180,14 +180,14 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setSeries(result)
             } else {
-                setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setSeries((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setSeries(result)
                 } else {
-                    setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setSeries((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -199,7 +199,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!series[currentIndex]) return updateOffset()
-                const newVisibleSeries = visibleSeries as any
+                const newVisibleSeries = visibleSeries
                 for (let i = 0; i < 15; i++) {
                     if (!series[currentIndex]) return updateOffset()
                     newVisibleSeries.push(series[currentIndex])
@@ -319,7 +319,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -367,7 +367,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }
 
     const generateSeriesJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visibleSeries)

@@ -42,9 +42,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const [type, setType] = useState("image" as PostType)
     const [rating, setRating] = useState("cute" as PostRating)
     const [style, setStyle] = useState("2d" as PostStyle)
-    const [artists, setArtists] = useState("") as any
-    const [characters, setCharacters] = useState("") as any
-    const [series, setSeries] = useState("") as any
+    const [artists, setArtists] = useState("")
+    const [characters, setCharacters] = useState("")
+    const [series, setSeries] = useState("")
     const [tags, setTags] = useState("")
     const [metaTags, setMetaTags] = useState("")
     const [artistsActive, setArtistsActive] = useState(false)
@@ -59,23 +59,24 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<any>(null)
-    const tagRef = useRef<any>(null)
+    const errorRef = useRef<HTMLSpanElement>(null)
+    const tagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const updateFields = async () => {
+        if (!tagEditID) return
         setType(tagEditID.post.type)
         setRating(tagEditID.post.rating)
         setStyle(tagEditID.post.style)
-        setArtists(tagEditID.artists.map((t: any) => t.tag).join(" "))
-        setCharacters(tagEditID.characters.map((t: any) => t.tag).join(" "))
-        setSeries(tagEditID.series.map((t: any) => t.tag).join(" "))
-        const rawMetaTags = tagEditID.tags.filter((t: any) => t.type === "meta")
-        const rawTags = tagEditID.tags.filter((t: any) => t.type === "appearance" || 
+        setArtists(tagEditID.artists.map((t) => t.tag).join(" "))
+        setCharacters(tagEditID.characters.map((t) => t.tag).join(" "))
+        setSeries(tagEditID.series.map((t) => t.tag).join(" "))
+        const rawMetaTags = tagEditID.tags.filter((t) => t.type === "meta")
+        const rawTags = tagEditID.tags.filter((t) => t.type === "appearance" || 
         t.type === "outfit" ||  t.type === "accessory" ||  t.type === "action" || 
         t.type === "scenery" || t.type === "tag")
-        setMetaTags(rawMetaTags.map((t: any) => t.tag).join(" "))
-        setTags(rawTags.map((t: any) => t.tag).join(" "))
+        setMetaTags(rawMetaTags.map((t) => t.tag).join(" "))
+        setTags(rawTags.map((t) => t.tag).join(" "))
     }
 
     const reset = () => {
@@ -83,13 +84,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setRating("cute")
         setStyle("2d")
         setArtists("")
-        setCharacters("") as any
+        setCharacters("")
         setSeries("")
         setTags("")
     }
 
     useEffect(() => {
-        const logPosition = (event: any) => {
+        const logPosition = (event: MouseEvent) => {
             const element = document.querySelector(".dialog-box")
             if (!element) return
             const rect = element.getBoundingClientRect()
@@ -118,6 +119,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     }, [tagEditID])
 
     const tagEdit = async () => {
+        if (!tagEditID || !errorRef.current) return
         if (permissions.isContributor(session)) {
             const joined = `${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {

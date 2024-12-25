@@ -14,6 +14,13 @@ export interface MiniTag {
     count?: string
 }
 
+export interface TagCategories {
+    artists: MiniTag[]
+    characters: MiniTag[]
+    series: MiniTag[]
+    tags: MiniTag[]
+}
+
 export interface TagCount {
     tag: string
     type: TagType
@@ -164,9 +171,9 @@ export interface TagEditParams {
 export interface TagEditRequestParams extends Omit<TagEditParams, "updater" | "updatedDate" | "silent"> {}
 
 export type TagGetEndpoint<T extends string> = 
-    T extends "/api/tag" ? {params: {tag: string}, response: Tag} :
+    T extends "/api/tag" ? {params: {tag: string}, response: Tag | undefined} :
     T extends "/api/tag/related" ? {params: {tag: string}, response: string[]} :
-    T extends "/api/tag/unverified" ? {params: {tag: string}, response: Tag} :
+    T extends "/api/tag/unverified" ? {params: {tag: string}, response: Tag | undefined} :
     T extends "/api/tag/counts" ? {params: {tags: string[]}, response: TagCount[]} :
     T extends "/api/tag/list" ? {params: {tags: string[]}, response: Tag[]} :
     T extends "/api/tag/map" ? {params: {tags: string[]}, response: {[key: string]: Tag}} :

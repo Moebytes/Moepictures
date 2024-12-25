@@ -148,7 +148,7 @@ export default class SQLNote {
             values: [noteID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<UnverifiedNote>
+        return result[0] as Promise<UnverifiedNote | undefined>
     }
 
     /** Delete note (unverified). */

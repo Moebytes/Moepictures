@@ -96,7 +96,7 @@ export default class SQLHistory {
             values: [tag, historyID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<TagHistory>
+        return result[0] as Promise<TagHistory | undefined>
     }
 
     /** Get user tag history */
@@ -214,7 +214,7 @@ export default class SQLHistory {
             values: [postID, historyID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<PostHistory>
+        return result[0] as Promise<PostHistory | undefined>
     }
 
     /** Get user post history */
@@ -440,7 +440,7 @@ export default class SQLHistory {
             values: [groupID, historyID]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<GroupHistory>
+        return result[0] as Promise<GroupHistory | undefined>
     }
 
     /** Get user group history */

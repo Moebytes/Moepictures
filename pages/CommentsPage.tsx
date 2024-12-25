@@ -56,7 +56,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {commentID, commentJumpFlag, commentSearchFlag} = useFlagSelector()
     const {setCommentID, setCommentJumpFlag, setCommentSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
-    const sortRef = useRef(null) as any
+    const sortRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -163,7 +163,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateComments = () => {
             let currentIndex = index
-            const newVisibleComments = visibleComments as any
+            const newVisibleComments = visibleComments
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!comments[currentIndex]) break
                 newVisibleComments.push(comments[currentIndex])
@@ -191,7 +191,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/comments", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanComments = comments.filter((t: any) => !t.fake)
+        const cleanComments = comments.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanComments.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, commentCount: cleanComments[0]?.commentCount}), ...result]
@@ -203,14 +203,14 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setComments(result)
             } else {
-                setComments((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setComments((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setComments(result)
                 } else {
-                    setComments((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setComments((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -222,7 +222,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!comments[currentIndex]) return updateOffset()
-                const newVisibleComments = visibleComments as any
+                const newVisibleComments = visibleComments
                 for (let i = 0; i < 15; i++) {
                     if (!comments[currentIndex]) return updateOffset()
                     newVisibleComments.push(comments[currentIndex])
@@ -367,7 +367,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -413,10 +413,10 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }
 
     const generateCommentsJSX = () => {
-        const jsx = [] as any
-        let visible = [] as any
+        const jsx = [] as React.ReactElement[]
+        let visible = [] as CommentSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleComments) as any
+            visible = functions.removeDuplicates(visibleComments)
         } else {
             const postOffset = (commentsPage - 1) * getPageAmount()
             visible = comments.slice(postOffset, postOffset + getPageAmount())

@@ -9,7 +9,7 @@ import serverFunctions, {keyGenerator, handler} from "../structures/ServerFuncti
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 import {PostSearch, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
-GroupSearchParams, PostImage, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
+GroupSearchParams, Image, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
 SidebarTagParams, ThreadSearch, MessageSearchParams, MessageSearch} from "../types/Types"
 
 const searchLimiter = rateLimit({
@@ -80,7 +80,7 @@ const SearchRoutes = (app: Express) => {
                     text: `SELECT * FROM "images" WHERE "images".hash = $1`,
                     values: [query.replace("hash:", "").trim()]
                 }
-                let images = await sql.run(sqlQuery) as PostImage[]
+                let images = await sql.run(sqlQuery) as Image[]
                 if (images?.length) result = await sql.search.posts(images.map((i) => i.postID)) as PostSearch[]
             } else if (query.startsWith("favorites:")) {
                 const username = query.replace("favorites:", "").trim()
@@ -156,7 +156,7 @@ const SearchRoutes = (app: Express) => {
                 text: `SELECT * FROM "images" WHERE "images".hash = $1`,
                 values: [hash]
               }
-            let images = await sql.run(query) as PostImage[]
+            let images = await sql.run(query) as Image[]
             if (!images.length) images = await sql.run(`SELECT * FROM "images"`)
             let postIDs = new Set<string>()
             for (let i = 0; i < images.length; i++) {

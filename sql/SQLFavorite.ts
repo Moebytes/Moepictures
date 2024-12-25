@@ -33,7 +33,7 @@ export default class SQLFavorite {
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Favorite>
+        return result[0] as Promise<Favorite | undefined>
     }
 
     /** Get favorites. */
@@ -186,7 +186,7 @@ export default class SQLFavorite {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<FavgroupSearch>
+        return result[0] as Promise<FavgroupSearch | undefined>
     }
 
     /** Get user favgroup. */

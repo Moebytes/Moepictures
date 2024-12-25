@@ -9,11 +9,11 @@ import "./styles/carousel.less"
 interface Props {
     set?: (img: string, index: number, newTab: boolean) => any
     noKey?: boolean
-    images: any[]
+    images: string[]
     height?: number
     index?: number
     update?: () => void
-    appendImages?: any[]
+    appendImages?: string[]
     marginLeft?: number
     marginTop?: number
 }
@@ -400,7 +400,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             const ref = imagesRef[i]
             if (!ref.current) continue
             let src = visibleImages[i] 
-            if (functions.isVideo(src) || functions.isGIF(src)) continue
+            if (functions.isVideo(src)) continue
             src = await functions.decryptThumb(visibleImages[i], session)
             const imgElement = document.createElement("img")
             imgElement.src = src
@@ -426,8 +426,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             const img = visible[i] as string
             if (functions.isVideo(img)) {
                 jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
-            } else if (functions.isGIF(img)) {
-                jsx.push(<img key={i} ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
             } else {
                 jsx.push(<canvas key={i} ref={imagesRef[i]} className="carousel-img" onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></canvas>)
             }
