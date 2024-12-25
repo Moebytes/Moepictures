@@ -1,13 +1,15 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
+useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
 import "./styles/historyrow.less"
 import path from "path"
+import {SearchHistory} from "../types/Types"
 
 interface Props {
-    history: any
+    history: SearchHistory
     onDelete?: () => void
 }
 
@@ -16,15 +18,18 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const [img, setImg] = useState("")
-    const ref = useRef(null) as any
+    const [imageIndex, setImageIndex] = useState(0)
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const updateImage = async () => {
-        const thumb = functions.getThumbnailLink(props.history.post.images[0].type, props.history.postID, 1, props.history.post.images[0].filename, "medium", mobile)
-        setImg(thumb + `#${path.extname(thumb)}`)
+        const thumbLink = functions.getThumbnailLink(props.history.post.images[0].type, props.history.postID, 1, props.history.post.images[0].filename, "medium", mobile)
+        const thumb = await functions.decryptThumb(thumbLink, session)
+        setImg(thumb)
     }
 
     useEffect(() => {
@@ -67,40 +72,38 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const loadImage = async () => {
-        if (functions.isGIF(img)) return
-        if (!ref.current) return
-        let src = await functions.decryptThumb(img, session)
-        const imgElement = document.createElement("img")
-        imgElement.src = src 
-        imgElement.onload = () => {
-            if (!ref.current) return
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = imgElement.width
-            ref.current.height = imgElement.height
-            refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
+    const updateImg = async (event: React.MouseEvent) => {
+        event.preventDefault()
+        if (props.history.images.length > 1) {
+            let newImageIndex = imageIndex + 1 
+            if (newImageIndex > props.history.images.length - 1) newImageIndex = 0
+            const newImage = props.history.post.images[newImageIndex]
+            const thumbLink = functions.getThumbnailLink(newImage.type, props.history.postID, newImage.order, newImage.filename, "medium", mobile)
+            const thumb = await functions.decryptThumb(thumbLink, session)
+            setImg(thumb)
+            setImageIndex(newImageIndex)
         }
     }
 
-    useEffect(() => {
-        loadImage()
-    }, [img, session])
-
     const printMirrors = () => {
-        const mapped = Object.values(props.history.post.mirrors) as string[]
+        const mapped = Object.values(props.history.post.mirrors || {}) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
             return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
         })
     }
 
+    useEffect(() => {
+        if (!imageFiltersRef.current) return
+        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+    }, [brightness, contrast, hue, saturation, blur])
+
     return (
         <div className="historyrow">
             {searchHistoryOptions()}
-            <div className="historyrow-container">
-                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> : 
-                <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick}></canvas>}
+            <div className="historyrow-container" ref={imageFiltersRef}>
+                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
+                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/>}
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
@@ -110,7 +113,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
                         {props.history.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}:</span> {props.history.post.englishTitle}</span> : null}
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}:</span> {props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.tag.artist}:</span> {props.history.post.artist ? props.history.post.artist : i18n.labels.unknown}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.link}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{functions.getSiteName(props.history.post.link, i18n)}</span></span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.source}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.source, "_blank")}>{functions.getSiteName(props.history.post.source, i18n)}</span></span>
                         {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.mirrors}:</span> {printMirrors()}</span> : null}
                     </div>
                 </div>

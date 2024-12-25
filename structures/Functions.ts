@@ -125,7 +125,6 @@ export default class Functions {
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
-            console.log({endpoint, response: decrypted})
             return decrypted as GetEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
@@ -1192,10 +1191,22 @@ export default class Functions {
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
         if (folder !== "image" && folder !== "comic" && folder !== "animation") {
-            if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
+            if (!folder || filename.includes("history/")) return Functions.getRawThumbnailLink(filename, sizeType, mobile)
             return Functions.getImageLink(folder, postID, order, filename)
         }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
+    }
+
+    public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {
+        if (!filename) return ""
+        let size = 265
+        if (sizeType === "tiny") size = 350
+        if (sizeType === "small") size = 400
+        if (sizeType === "medium") size = 600
+        if (sizeType === "large") size = 800
+        if (sizeType === "massive") size = 1000
+        if (mobile) size = Math.floor(size / 2)
+        return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
     }
 
     public static getUnverifiedThumbnailLink = (folder: string, postID: string, order: number, filename: string, sizeType: string) => {

@@ -14,9 +14,10 @@ import premiumContributorPencil from "../assets/icons/premium-contributor-pencil
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/historyrow.less"
+import {AliasHistorySearch} from "../types/Types"
 
 interface Props {
-    history: any
+    history: AliasHistorySearch
     onDelete?: () => void
     onEdit?: () => void
 }

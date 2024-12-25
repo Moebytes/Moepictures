@@ -169,7 +169,6 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
             const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
-            if (functions.isGIF(img)) continue
             if (!ref.current) continue
             let src = await functions.decryptThumb(img, session)
             const imgElement = document.createElement("img")
@@ -345,7 +344,6 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                        functions.isGIF(img) ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">

@@ -17,51 +17,12 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import cryptoFunctions from "../structures/CryptoFunctions"
-import "./styles/itemspage.less"
+import GroupThumbnail from "../components/GroupThumbnail"
 import {GroupSearch, GroupSort} from "../types/Types"
+import "./styles/itemspage.less"
 
 let replace = false
 let limit = 100
-
-interface Props {
-    group: GroupSearch
-}
-
-const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
-    const {mobile} = useLayoutSelector()
-    const {session} = useSessionSelector()
-    const [img, setImg] = useState("")
-    const history = useHistory()
-
-    const updateImage = async () => {
-        const post = props.group.posts[0]
-        const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
-        let img = await functions.decryptThumb(imageLink, session)
-        setImg(img)
-    }
-
-    useEffect(() => {
-        updateImage()
-    }, [props.group, session])
-
-    const click = (event: React.MouseEvent) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/group/${props.group.slug}`, "_blank")
-        } else {
-            history.push(`/group/${props.group.slug}`)
-        }
-    }
-
-    return (
-        <div className="group-thumbnail" onClick={click}>
-            <img draggable={false} className="group-thumbnail-img" src={img}/>
-            <div className="group-thumbnail-text-container">
-                <span className="group-thumbnail-text">{props.group.name}</span>
-            </div>
-        </div>
-    )
-}
 
 const GroupsPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

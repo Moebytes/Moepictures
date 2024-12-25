@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector,
+useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import groupHistoryRevert from "../assets/icons/revert.png"
 import groupHistoryDelete from "../assets/icons/delete.png"
@@ -14,16 +15,17 @@ import premiumStar from "../assets/icons/premium-star.png"
 import permissions from "../structures/Permissions"
 import path from "path"
 import "./styles/historyrow.less"
+import {GroupHistory} from "../types/Types"
 
 interface Props {
-    groupHistory: any
+    groupHistory: GroupHistory
     historyIndex: number
-    previousHistory: any
-    currentHistory: any
+    previousHistory: GroupHistory | null
+    currentHistory: GroupHistory
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
-    exact?: any
+    exact?: boolean
 }
 
 const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -31,23 +33,24 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteGroupHistoryID, revertGroupHistoryID, deleteGroupHistoryFlag, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setDeleteGroupHistoryID, setRevertGroupHistoryID, setDeleteGroupHistoryFlag, setRevertGroupHistoryFlag} = useGroupDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
-    const ref = useRef(null) as any
     const slug = props.groupHistory.slug
     let prevHistory = props.previousHistory || Boolean(props.exact)
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const updateImages = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
         props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
         const post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag)
-        const filename = post.images[0]?.filename
-        const initialImg = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
-        setImg(initialImg + `#${path.extname(filename)}`)
+        const initialImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
+        const initialImg = await functions.decryptThumb(initialImgLink, session)
+        setImg(initialImg)
         const index = props.groupHistory.posts.findIndex((p: any) => String(p.postID) === String(targetID))
         setPostIndex(index)
     }
@@ -158,9 +161,8 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const dateTextJSX = () => {
         let firstHistory = props.historyIndex === Number(props.groupHistory.historyCount)
         if (props.exact) firstHistory = false
-        let targetDate = firstHistory ? props.groupHistory.createDate : props.groupHistory.date
-        if (!targetDate) targetDate = props.groupHistory.date
-        const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
+        let targetDate = props.groupHistory.date
+        const editText = firstHistory ? i18n.time.created : i18n.time.edited
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
@@ -214,25 +216,6 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user) || i18n.user.deleted}</span>
     }
 
-    const loadImage = async () => {
-        if (functions.isGIF(img)) return
-        if (!ref.current) return
-        let src = await functions.decryptThumb(img, session)
-        const imgElement = document.createElement("img")
-        imgElement.src = src 
-        imgElement.onload = () => {
-            if (!ref.current) return
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = imgElement.width
-            ref.current.height = imgElement.height
-            refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
-        }
-    }
-
-    useEffect(() => {
-        loadImage()
-    }, [img, session])
-
     const updateImg = async (event: React.MouseEvent) => {
         event.preventDefault()
         if (props.groupHistory.posts.length > 1) {
@@ -240,8 +223,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (newPostIndex > props.groupHistory.posts.length - 1) newPostIndex = 0
             const post = await functions.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
             const filename = post.images[0]?.filename
-            const newImg = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
-            setImg(newImg + `#${path.extname(filename)}`)
+            const newImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
+            const newImg = await functions.decryptThumb(newImgLink, session)
+            setImg(newImg)
             setPostIndex(newPostIndex)
         }
     }
@@ -271,13 +255,17 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    useEffect(() => {
+        if (!imageFiltersRef.current) return
+        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+    }, [brightness, contrast, hue, saturation, blur])
+
     return (
         <div className="historyrow">
             {session.username ? groupHistoryOptions() : null}
-            <div className="historyrow-container">
+            <div className="historyrow-container" ref={imageFiltersRef}>
                 {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
-                <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
+                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/>}
                 {!mobile ? <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span> : null}
             </div>
             {mobile ? <div className="historyrow-container">

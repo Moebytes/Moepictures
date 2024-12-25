@@ -575,7 +575,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.postID !== current.postID) previous = null
-                jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
+                jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory} exact={commitSearch}/>)
             }
@@ -589,7 +589,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.tag !== current.tag) previous = null
-                jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
+                jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory}/>)
             }
@@ -603,7 +603,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.groupID !== current.groupID) previous = null
-                jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
+                jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory}/>)
             }
@@ -619,16 +619,16 @@ const HistoryPage: React.FunctionComponent = () => {
                 }
                 if (previous?.postID !== current.postID &&
                     previous?.order !== current.order) previous = null
-                jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
+                jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={item} 
                     onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
             }
 
             if (historyTab === "alias") {
-                jsx.push(<AliasHistoryRow key={i} history={visible[i]} onDelete={updateHistory} onEdit={updateHistory}/>)
+                jsx.push(<AliasHistoryRow key={i} history={visible[i] as AliasHistorySearch} onDelete={updateHistory} onEdit={updateHistory}/>)
             }
 
             if (historyTab === "search") {
-                jsx.push(<SearchHistoryRow key={i} history={visible[i]} onDelete={updateHistory}/>)
+                jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={updateHistory}/>)
             }
         }
         if (!scroll) {

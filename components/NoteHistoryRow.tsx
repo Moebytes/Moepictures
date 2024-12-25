@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector,
+useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import noteHistoryRevert from "../assets/icons/revert.png"
 import noteHistoryDelete from "../assets/icons/delete.png"
@@ -12,11 +13,12 @@ import premiumContributorPencil from "../assets/icons/premium-contributor-pencil
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import permissions from "../structures/Permissions"
+import {NoteHistory} from "../types/Types"
 import "./styles/historyrow.less"
 
 interface Props {
-    previousHistory: any
-    noteHistory: any
+    previousHistory: NoteHistory | null
+    noteHistory: NoteHistory
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
@@ -28,6 +30,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const history = useHistory()
@@ -36,6 +39,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
     let prevHistory = props.previousHistory || Boolean(props.exact)
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const updateUserRole = async () => {
         const user = await functions.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag)
@@ -56,7 +60,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.put("/api/note/save", {postID: props.noteHistory.postID, order: props.noteHistory.order,
-        data: props.noteHistory}, session, setSessionFlag)
+        data: props.noteHistory.notes}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -204,7 +208,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const diffText = () => {
         if (!prevHistory) {
-            if (props.noteHistory.notes[0].transcript === "No data") return "No data"
+            if (props.noteHistory.notes[0].transcript === "No data") return null
             return props.noteHistory.notes.map((item: any) => `${item.transcript} -> ${item.translation}`)
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
@@ -219,18 +223,24 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
-        if (diffs === "No data") return <span className="historyrow-text">{i18n.labels.noData}</span>
-        for (let i = 0; i < diffs?.length; i++) {
+        if (!diffs) return <span className="historyrow-text">{i18n.labels.noData}</span>
+        for (let i = 0; i < diffs.length; i++) {
             jsx.push(<span className="historyrow-text">{diffs[i]}</span>)
         }
         return jsx
     }
 
+    useEffect(() => {
+        if (!imageFiltersRef.current) return
+        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+    }, [brightness, contrast, hue, saturation, blur])
+
     return (
         <div className="historyrow">
             {session.username ? notehistoryOptions() : null}
-            <div className="historyrow-container">
-                <img className="historyrow-img" src={img} onClick={imgClick}/>
+            <div className="historyrow-container" ref={imageFiltersRef}>
+                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
+                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

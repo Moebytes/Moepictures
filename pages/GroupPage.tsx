@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
-useGroupDialogSelector} from "../store"
+useGroupDialogSelector, useFilterSelector} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -29,6 +29,7 @@ import RevertGroupHistoryDialog from "../dialogs/RevertGroupHistoryDialog"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import jsxFunctions from "../structures/JSXFunctions"
+import GroupThumbnail from "../components/GroupThumbnail"
 import "./styles/grouppage.less"
 
 interface Props {
@@ -51,6 +52,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {setPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
@@ -59,6 +61,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const [items, setItems] = useState([]) as any
     const history = useHistory()
     const location = useLocation()
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
     const slug = props?.match.params.group
 
     const getFilter = () => {
@@ -166,7 +169,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
+                    <GroupThumbnail image={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }

@@ -384,7 +384,7 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (noteGroup.fake) continue
             if (!session.username) if (noteGroup.post.rating !== functions.r13()) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(noteGroup.post.rating)) continue
-            jsx.push(<NoteRow key={noteGroup.noteID} noteGroup={noteGroup} onDelete={updateNotes} onEdit={updateNotes}/>)
+            jsx.push(<NoteRow key={noteGroup.noteID} note={noteGroup} onDelete={updateNotes} onEdit={updateNotes}/>)
         }
         if (!scroll) {
             jsx.push(

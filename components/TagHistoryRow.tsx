@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
+useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import tagHistoryRevert from "../assets/icons/revert.png"
 import tagHistoryDelete from "../assets/icons/delete.png"
@@ -20,12 +21,13 @@ import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import crypto from "crypto"
 import "./styles/historyrow.less"
+import {TagHistory} from "../types/Types"
 
 interface Props {
-    tagHistory: any
+    tagHistory: TagHistory
     historyIndex: number
-    previousHistory: any
-    currentHistory: any
+    previousHistory: TagHistory | null
+    currentHistory: TagHistory
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
@@ -36,6 +38,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteTagHistoryID, revertTagHistoryID, deleteTagHistoryFlag, revertTagHistoryFlag} = useTagDialogSelector()
     const {setDeleteTagHistoryID, setRevertTagHistoryID, setDeleteTagHistoryFlag, setRevertTagHistoryFlag} = useTagDialogActions()
     const history = useHistory()
@@ -43,8 +46,10 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [userRole, setUserRole] = useState("")
     const tag = props.tagHistory.tag
     let prevHistory = props.previousHistory || Boolean(props.exact)
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const updateImage = () => {
+        if (!props.tagHistory.image) return
         const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image, props.tagHistory.imageHash)
         setImg(img)
     }
@@ -167,30 +172,30 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (props.tagHistory.type === "artist") {
             if (props.tagHistory.website) {
-                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website!, "_blank")}/>)
             }
             if (props.tagHistory.social?.includes("pixiv.net")) {
-                jsx.push(<img className="historyrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.social!, "_blank")}/>)
             } else if (props.tagHistory.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="historyrow-social" src={soundcloud} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={soundcloud} onClick={() => window.open(props.tagHistory.social!, "_blank")}/>)
             } else if (props.tagHistory.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="historyrow-social" src={sketchfab} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={sketchfab} onClick={() => window.open(props.tagHistory.social!, "_blank")}/>)
             }
             if (props.tagHistory.twitter) {
-                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter!, "_blank")}/>)
             }
         }
         if (props.tagHistory.type === "character") {
             if (props.tagHistory.fandom) {
-                jsx.push(<img className="historyrow-social" src={fandom} onClick={() => window.open(props.tagHistory.fandom, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={fandom} onClick={() => window.open(props.tagHistory.fandom!, "_blank")}/>)
             }
         }
         if (props.tagHistory.type === "series") {
             if (props.tagHistory.website) {
-                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website!, "_blank")}/>)
             }
             if (props.tagHistory.twitter) {
-                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter!, "_blank")}/>)
             }
         }
         return jsx
@@ -199,8 +204,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const dateTextJSX = () => {
         let firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
         if (props.exact) firstHistory = false
-        let targetDate = firstHistory ? props.tagHistory.createDate : props.tagHistory.date
-        if (!targetDate) targetDate = props.tagHistory.date
+        let targetDate = props.tagHistory.date
         const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
         if (userRole === "admin") {
             return (
@@ -268,16 +272,16 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}:</span> {props.tagHistory.description || i18n.labels.none}</span>)
         }
         if ((!prevHistory && props.tagHistory.website) || changes.website) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.website}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website, "_blank")}>{props.tagHistory.website}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.website}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website!, "_blank")}>{props.tagHistory.website}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.social) || changes.social) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.social}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social, "_blank")}>{props.tagHistory.social}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.social}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social!, "_blank")}>{props.tagHistory.social}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.twitter) || changes.twitter) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.twitter}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter, "_blank")}>{props.tagHistory.twitter}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.twitter}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter!, "_blank")}>{props.tagHistory.twitter}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.fandom) || changes.fandom) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.fandom}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom, "_blank")}>{props.tagHistory.fandom}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.fandom}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom!, "_blank")}>{props.tagHistory.fandom}</span></span>)
         }
         if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
@@ -305,10 +309,15 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    useEffect(() => {
+        if (!imageFiltersRef.current) return
+        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+    }, [brightness, contrast, hue, saturation, blur])
+
     return (
         <div className="historyrow">
             {session.username ? tagHistoryOptions() : null}
-            <div className="historyrow-container">
+            <div className="historyrow-container" ref={imageFiltersRef}>
                 <img className="historyrow-img-small" src={img} onClick={imgClick} onAuxClick={imgClick}/>
                 <span className={`historyrow-tag-text ${functions.getTagColor(props.tagHistory)}`} onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
                 {socialJSX()}

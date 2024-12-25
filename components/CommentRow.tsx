@@ -19,9 +19,10 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentrow.less"
+import {CommentSearch} from "../types/Types"
 
 interface Props {
-    comment: any
+    comment: CommentSearch
     onDelete?: () => void
     onEdit?: () => void
     onCommentJump?: (commentID: number) => void
@@ -34,14 +35,13 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {emojis} = useCacheSelector()
     const {setQuoteText} = useActiveActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
     const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const history = useHistory()
-    const initialImg = functions.getThumbnailLink(props.comment?.post.images[0].type, props.comment?.postID, props.comment?.post.images[0].order, props.comment?.post.images[0].filename, "tiny")
-    const [img, setImg] = useState(initialImg)
-    const ref = useRef<HTMLCanvasElement>(null)
+    const [img, setImg] = useState("")
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -238,33 +238,19 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (functions.isVideo(img) && mobile) {
-            functions.videoThumbnail(img).then((thumbnail) => {
+        const loadImage = async () => {
+            if (functions.isVideo(img) && mobile) {
+                const thumbnail = await functions.videoThumbnail(img)
                 setImg(thumbnail)
-            })
+            } else {
+                const image = props.comment.post.images[0]
+                const thumb = functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "medium", mobile)
+                const img = await functions.decryptThumb(thumb, session)
+                setImg(img)
+            }
         }
-        const base64Img = async () => {
-            const base64 = await functions.linkToBase64(img)
-            setImg(base64)
-        }
-        // base64Img()
+        loadImage()
     }, [])
-
-    const loadImage = async () => {
-        if (functions.isGIF(img)) return
-        if (!ref.current) return
-        let src = await functions.decryptThumb(img, session)
-        const imgElement = document.createElement("img")
-        imgElement.src = src 
-        imgElement.onload = () => {
-            if (!ref.current) return
-            const rendered = functions.render(imgElement, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate)
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = rendered.width
-            ref.current.height = rendered.height
-            refCtx?.drawImage(rendered, 0, 0, rendered.width, rendered.height)
-        }
-    }
 
     const commentJump = () => {
         setCommentID(Number(props.comment?.commentID))
@@ -273,16 +259,16 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        loadImage()
-    }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
+        if (!imageFiltersRef.current) return
+        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+    }, [brightness, contrast, hue, saturation, blur])
 
     return (
         <div className="commentrow" comment-id={props.comment?.commentID}>
-            <div className="commentrow-container">
+            <div className="commentrow-container" ref={imageFiltersRef}>
                 {functions.isVideo(img) && !mobile ? 
                 <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                functions.isGIF(img) ? <img className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> :
-                <canvas className="commentrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick}></canvas>}
+                <img className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
             </div>
             <div className="commentrow-container-row">
                 <div className="commentrow-container">
