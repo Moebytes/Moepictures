@@ -15,6 +15,7 @@ import curatorStar from "../assets/icons/curator-star.png"
 import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
+import {UserRole} from "../types/Types"
 
 const PromoteDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -26,7 +27,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [role, setRole] = useState("user")
+    const [role, setRole] = useState("user" as UserRole)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

@@ -11,6 +11,7 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
+import {Upscaler} from "../types/Types"
 
 interface Props {
     post: any
@@ -24,7 +25,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
     const {setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const [upscaler, setUpscaler] = useState("real-cugan")
+    const [upscaler, setUpscaler] = useState("real-cugan" as Upscaler)
     const [scaleFactor, setScaleFactor] = useState("4")
     const [compressJPG, setCompressJPG] = useState(true)
     const errorRef = useRef<any>(null)
@@ -51,7 +52,8 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
 
     const upscalePost = async () => {
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/upscale",  {postID: props.post.postID, upscaler, scaleFactor, compressJPG}, session, setSessionFlag)
+            await functions.post("/api/post/upscale",  {postID: props.post.postID, upscaler, 
+            scaleFactor: functions.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
             setPostFlag(true)
             history.go(0)
         }

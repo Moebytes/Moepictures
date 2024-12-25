@@ -1380,7 +1380,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, reason} = req.body as {postID: string, reason: string}
+        let {postID, reason} = req.body as {postID: string, reason?: string}
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (!permissions.isMod(req.session)) return res.status(403).end()

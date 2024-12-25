@@ -1,14 +1,14 @@
 import {PostType, PostRating, PostStyle} from "./Types"
 
 export interface SourceData {
-    title: string
-    englishTitle: string
-    artist: string
+    title: string | null
+    englishTitle: string | null
+    artist: string | null
     posted: string | null
-    source: string
-    commentary: string
-    englishCommentary: string
-    bookmarks: number
+    source: string | null
+    commentary: string | null
+    englishCommentary: string | null
+    bookmarks: number | null
     buyLink: string | null
     mirrors: string | null
 }
@@ -54,7 +54,7 @@ export interface EditParams extends UploadParams {
     postID: string
     preserveChildren?: boolean
     updatedDate?: string
-    reason?: string
+    reason?: string | null
     silent?: boolean
 }
 
@@ -70,10 +70,11 @@ export interface UnverifiedEditParams extends Omit<UploadParams, "noImageUpdate"
 export type UploadPostEndpoint<T extends string> = 
     T extends "/api/post/upload" ? {params: UploadParams, response: string} :
     T extends "/api/post/upload/unverified" ? {params: UnverifiedUploadParams, response: string} :
-    T extends "/api/post/approve" ? {params: {postID: string, reason: string}, response: string} :
+    T extends "/api/post/approve" ? {params: {postID: string, reason?: string}, response: string} :
     T extends "/api/post/reject" ? {params: {postID: string}, response: string} :
     never
 
 export type UploadPutEndpoint<T extends string> = 
     T extends "/api/post/edit" ? {params: EditParams, response: string} :
+    T extends "/api/post/edit/unverified" ? {params: UnverifiedEditParams, response: string} :
     never

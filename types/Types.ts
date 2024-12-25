@@ -3,7 +3,7 @@ import {CutenessGetEndpoint, CutenessPostEndpoint, CutenessDeleteEndpoint} from 
 import {FavoriteGetEndpoint, FavoritePostEndpoint, FavoritePutEndpoint, FavoriteDeleteEndpoint} from "./FavoriteTypes"
 import {GroupGetEndpoint, GroupPostEndpoint, GroupPutEndpoint, GroupDeleteEndpoint} from "./GroupTypes"
 import {MessageGetEndpoint, MessagePostEndpoint, MessagePutEndpoint, MessageDeleteEndpoint} from "./MessageTypes"
-import {MiscGetEndpoint, MiscPostEndpoint} from "./MiscTypes"
+import {MiscGetEndpoint, MiscPostEndpoint, MiscDeleteEndpoint} from "./MiscTypes"
 import {NoteGetEndpoint, NotePostEndpoint, NotePutEndpoint, NoteDeleteEndpoint} from "./NoteTypes"
 import {PostGetEndpoint, PostPostEndpoint, PostPutEndpoint, PostDeleteEndpoint} from "./PostTypes"
 import {SearchGetEndpoint, SearchPostEndpoint} from "./SearchTypes"
@@ -61,6 +61,7 @@ export type DeleteEndpoint<T extends string> =
     | FavoriteDeleteEndpoint<T>
     | GroupDeleteEndpoint<T>
     | MessageDeleteEndpoint<T>
+    | MiscDeleteEndpoint<T>
     | NoteDeleteEndpoint<T>
     | PostDeleteEndpoint<T>
     | TagDeleteEndpoint<T>

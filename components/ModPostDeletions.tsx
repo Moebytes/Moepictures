@@ -63,14 +63,14 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const deletePost = async (username: string, postID: number) => {
+    const deletePost = async (username: string, postID: string) => {
         await functions.delete("/api/post/delete", {postID}, session, setSessionFlag)
         await functions.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisibleRequestFlag(true)
     }
 
-    const rejectRequest = async (username: string, postID: number) => {
+    const rejectRequest = async (username: string, postID: string) => {
         await functions.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisibleRequestFlag(true)

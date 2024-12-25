@@ -67,7 +67,7 @@ const CommentRoutes = (app: Express) => {
 
     app.put("/api/comment/edit", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {comment, commentID} = req.body
+            const {comment, commentID} = req.body as {comment: string, commentID: string}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!comment || !commentID) return res.status(400).send("Bad comment or comment ID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")

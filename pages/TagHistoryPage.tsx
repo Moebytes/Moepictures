@@ -12,6 +12,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutA
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
+import {TagHistory} from "../types/Types"
 
 interface Props {
     match?: any
@@ -54,17 +55,18 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/tag/history", {tag, username}, session, setSessionFlag)
             if (!result.length) {
                 const tagObject = await functions.get("/api/tag", {tag}, session, setSessionFlag)
+                const historyObject = tagObject as unknown as TagHistory
                 if (!tagObject.createDate && !tagObject.creator) {
                     const oldestPost = await functions.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
                     tagObject.createDate = oldestPost[0].uploadDate
                     tagObject.creator = oldestPost[0].uploader
                 }
-                tagObject.date = tagObject.createDate 
-                tagObject.user = tagObject.creator
-                tagObject.key = tag
-                tagObject.aliases = tagObject.aliases.map((alias: any) => alias?.alias)
-                tagObject.implications = tagObject.implications.map((implication: any) => implication?.implication)
-                result = [tagObject]
+                historyObject.date = tagObject.createDate 
+                historyObject.user = tagObject.creator
+                historyObject.key = tag
+                historyObject.aliases = tagObject.aliases.map((alias: any) => alias?.alias)
+                historyObject.implications = tagObject.implications.map((implication: any) => implication?.implication)
+                result = [historyObject]
             }
         }
         setEnded(false)

@@ -1,5 +1,13 @@
 import {Post, PostImage, PostType, PostStyle, PostMirrors, PostSearch, 
-PostRating, Alias, Implication, TagType, Note} from "./Types"
+PostRating, Alias, Implication, TagType, Note, AliasHistorySearch} from "./Types"
+
+export type History = 
+    | PostHistory 
+    | TagHistory 
+    | NoteHistory 
+    | GroupHistory 
+    | AliasHistorySearch 
+    | SearchHistory
 
 export interface  PostChanges {
     images?: PostImage[]
@@ -56,6 +64,7 @@ export interface PostHistory {
     imageChanged: boolean
     changes: PostChanges
     historyCount: string
+    fake?: boolean
 }
 
 export interface TagChanges {
@@ -98,6 +107,7 @@ export interface TagHistory {
     imageChanged: boolean
     changes: TagChanges
     historyCount: string
+    fake?: boolean
 }
 
 export interface NoteHistory {
@@ -112,6 +122,7 @@ export interface NoteHistory {
     removedEntries: string[]
     historyCount: string
     post: Post
+    fake?: boolean
 }
 
 export interface GroupChanges {
@@ -136,9 +147,10 @@ export interface GroupHistory {
     addedPosts: string[]
     removedPosts: string[]
     historyCount: string
+    fake?: boolean
 }
 
-export interface PostHistorySearch extends Omit<PostSearch, "postCount"> {
+export interface SearchHistory extends Omit<PostSearch, "postCount"> {
     postID: string
     username: string
     viewDate: string

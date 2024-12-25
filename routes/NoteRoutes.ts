@@ -480,7 +480,8 @@ const NoteRoutes = (app: Express) => {
 
     app.get("/api/note/list/unverified", noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.note.allUnverifiedNotes(Number(offset))
@@ -584,7 +585,8 @@ const NoteRoutes = (app: Express) => {
 
     app.get("/api/note/history", noteLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, order, historyID, username, query, offset} = req.query as unknown as NoteHistoryParams
+            let {postID, order, historyID, username, query, offset} = req.query as unknown as NoteHistoryParams
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = [] as NoteHistory[]
             if (historyID) {

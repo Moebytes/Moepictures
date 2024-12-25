@@ -121,17 +121,17 @@ export interface GroupHistoryParams {
     historyID?: string
     username?: string
     query?: string
-    offset: number
+    offset?: number
 }
 
 export type GroupGetEndpoint<T extends string> = 
     T extends "/api/group" ? {params: {name: string}, response: GroupPosts} :
     T extends "/api/groups" ? {params: {postID: string}, response: GroupPosts[]} :
     T extends "/api/groups/list" ? {params: {groups: string[]}, response: Group[]} :
-    T extends "/api/group/request/list" ? {params: {offset: number}, response: GroupRequest[]} :
-    T extends "/api/group/delete/request/list" ? {params: {offset: number}, response: GroupDeleteRequest[]} :
-    T extends "/api/group/edit/request/list" ? {params: {offset: number}, response: GroupEditRequest[]} :
-    T extends "/api/group/history" ? {params: GroupHistoryParams, response: GroupHistory[]} :
+    T extends "/api/group/request/list" ? {params: {offset?: number} | null, response: GroupRequest[]} :
+    T extends "/api/group/delete/request/list" ? {params: {offset?: number} | null, response: GroupDeleteRequest[]} :
+    T extends "/api/group/edit/request/list" ? {params: {offset?: number} | null, response: GroupEditRequest[]} :
+    T extends "/api/group/history" ? {params: GroupHistoryParams | null, response: GroupHistory[]} :
     never
 
 export type GroupPostEndpoint<T extends string> = 

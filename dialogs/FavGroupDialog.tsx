@@ -10,6 +10,7 @@ import deleteIcon from "../assets/icons/delete.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
+import {Favgroup} from "../types/Types"
 
 const FavgroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -21,7 +22,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [name, setName] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
-    const [favGroups, setFavGroups] = useState([])
+    const [favGroups, setFavGroups] = useState([] as Favgroup[])
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

@@ -48,6 +48,7 @@ import xButton from "../assets/icons/x-button-magenta.png"
 import tagConvert from "../assets/json/tag-convert.json"
 import "./styles/uploadpage.less"
 import path from "path"
+import {PostType, PostRating, PostStyle} from "../types/Types"
 
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
@@ -85,9 +86,9 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [currentIndex, setCurrentIndex] = useState(0) as any
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [currentDupIndex, setCurrentDupIndex] = useState(0) as any
-    const [type, setType] = useState("image")
-    const [rating, setRating] = useState("cute")
-    const [style, setStyle] = useState("2d")
+    const [type, setType] = useState("image" as PostType)
+    const [rating, setRating] = useState("cute" as PostRating)
+    const [style, setStyle] = useState("2d" as PostStyle)
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [parentID, setParentID] = useState("")
     const [sourceTitle, setSourceTitle] = useState("")
@@ -178,9 +179,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             let dupes = null as any
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes), type: img.ext}, session, setSessionFlag)
+                dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
             } else {
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(img.bytes), type: img.ext}, session, setSessionFlag)
+                dupes = await functions.post("/api/search/similar", {bytes: img.bytes}, session, setSessionFlag)
             }
             setDupPosts(dupes)
         }
@@ -432,7 +433,8 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const handleTagClick = async (tag: string, index: number) => {
         const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
-        if (tagDetail?.image) {
+        if (!tagDetail) return
+        if (tagDetail.image) {
             const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
@@ -770,6 +772,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         const newLink = currentFiles[newIndex]?.link || null
         showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
+        if (!(showUpscaled ? upscaledFiles : originalFiles).length) setDupPosts([])
         forceUpdate()
     }
     
@@ -854,7 +857,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 source: sourceLink,
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
-                bookmarks: sourceBookmarks,
+                bookmarks: functions.safeNumber(sourceBookmarks),
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -920,13 +923,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
                 if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                 try {
-                    const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
+                    const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
                     commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                     date = functions.formatDate(new Date(illust.create_date), true)
-                    source = illust.url
+                    source = illust.url!
                     title = illust.title
                     artist = illust.user.name
-                    bookmarks = illust.total_bookmarks
+                    bookmarks = String(illust.total_bookmarks)
                     const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                     englishTitle = translated[0]
                     englishCommentary = translated[1]
@@ -961,7 +964,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     if (deviantart.length) {
                         let redirectedLink = ""
                         try {
-                            redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                            redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
                         } catch {
                             // ignore
                         }
@@ -979,16 +982,16 @@ const UploadPage: React.FunctionComponent = (props) => {
                             const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                             if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                         }
-                        artist = pixiv[0].data.author_name
-                        title = pixiv[0].data.title
+                        artist = pixiv[0].data.author_name || ""
+                        title = pixiv[0].data.title || ""
                         try {
-                            const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
+                            const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
                             commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                             date = functions.formatDate(new Date(illust.create_date), true)
-                            source = illust.url 
+                            source = illust.url!
                             title = illust.title
                             artist = illust.user.name
-                            bookmarks = illust.total_bookmarks
+                            bookmarks = String(illust.total_bookmarks)
                             const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                             englishTitle = translated[0]
                             englishCommentary = translated[1]
@@ -1012,15 +1015,15 @@ const UploadPage: React.FunctionComponent = (props) => {
                     } else if (deviantart.length) {
                         let redirectedLink = ""
                         try {
-                            redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                            redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
                         } catch {
                             // ignore
                         }
                         source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
-                        artist = deviantart[0].data.member_name 
-                        title = deviantart[0].data.title
+                        artist = deviantart[0].data.member_name || ""
+                        title = deviantart[0].data.title || ""
                         try {
-                            const deviation = await functions.get(`/api/misc/deviantart?url=${source}`, null, session, setSessionFlag)
+                            const deviation = await functions.get(`/api/misc/deviantart`, {url: source}, session, setSessionFlag)
                             title = deviation.title
                             artist = deviation.author.user.username
                             source = deviation.url
@@ -1043,27 +1046,27 @@ const UploadPage: React.FunctionComponent = (props) => {
                             console.log(e)
                         } 
                     } else if (anime.length) {
-                        title = anime[0].data.source 
+                        title = anime[0].data.source || ""
                         source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
                     } else if (twitter.length) {
                         source = twitter[0].data.ext_urls[0]
-                        artist = twitter[0].data.twitter_user_handle
+                        artist = twitter[0].data.twitter_user_handle || ""
                     } else if (danbooru.length) {
                         source = danbooru[0].data.ext_urls[0]
-                        artist = danbooru[0].data.creator
-                        title = danbooru[0].data.characters
+                        artist = danbooru[0].data.creator || ""
+                        title = danbooru[0].data.characters || ""
                     } else if (gelbooru.length) {
                         source = gelbooru[0].data.ext_urls[0]
-                        artist = gelbooru[0].data.creator
-                        title = gelbooru[0].data.characters
+                        artist = gelbooru[0].data.creator || ""
+                        title = gelbooru[0].data.characters || ""
                     } else if (yandere.length) {
                         source = yandere[0].data.ext_urls[0]
-                        artist = yandere[0].data.creator
-                        title = yandere[0].data.characters
+                        artist = yandere[0].data.creator || ""
+                        title = yandere[0].data.characters || ""
                     } else if (konachan.length) {
                         source = konachan[0].data.ext_urls[0]
-                        artist = konachan[0].data.creator
-                        title = konachan[0].data.characters
+                        artist = konachan[0].data.creator || ""
+                        title = konachan[0].data.characters || ""
                     }
                 }
             }
@@ -1230,7 +1233,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 let seriesArr = [] as string[]
 
                 for (let i = 0; i < characterArr.length; i++) {
-                    const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                    const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "") || ""
                     seriesArr.push(seriesName)
                 }
 

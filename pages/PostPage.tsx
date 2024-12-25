@@ -47,6 +47,7 @@ useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
+import {PostFull, PostSearch} from "../types/PostTypes"
 
 let characterTag = ""
 
@@ -277,7 +278,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateHistory = async () => {
-            const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag)
+            const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag).then((r) => r[0])
             if (!historyPost) return functions.replaceLocation("/404")
             let images = historyPost.images.map((i: any) => functions.getHistoryImageLink(i))
             setImages(images)
@@ -302,7 +303,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (historyParam) return
         const updatePost = async () => {
             setLoaded(false)
-            let post = posts.find((p: any) => p.postID === postID)
+            let post = posts.find((p: any) => p.postID === postID) as PostFull
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (err: any) {
@@ -489,7 +490,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const revertNoteHistory = async () => {
         const note = await functions.get("/api/note/history", {postID: post.postID, historyID: noteID}, session, setSessionFlag).then((r) => r[0])
-        await functions.put("/api/note/save", {postID: note.postID, order: note.order, data: note.data}, session, setSessionFlag)
+        await functions.put("/api/note/save", {postID: note.postID, order: note.order, data: note.notes}, session, setSessionFlag)
         currentHistory()
     }
 
@@ -511,7 +512,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const revertPostHistory = async () => {
-        let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
         if (post.artists) {
             let categories = await functions.tagCategories(currentPost.tags, session, setSessionFlag)
             currentPost.artists = categories.artists.map((a: any) => a.tag)
@@ -546,8 +547,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
-            series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
+            style: post.style, artists: post.artists, characters: post.characters, series: post.series, tags: post.tags, 
+            reason: post.reason}, session, setSessionFlag)
         }
         currentHistory()
     }

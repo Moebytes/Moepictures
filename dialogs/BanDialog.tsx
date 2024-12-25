@@ -53,7 +53,7 @@ const BanDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days, reason}, session, setSessionFlag)
+        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days: functions.safeNumber(days)!, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
                 const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
@@ -66,16 +66,16 @@ const BanDialog: React.FunctionComponent = (props) => {
                     englishTitle: currentHistory.englishTitle,
                     artist: currentHistory.artist,
                     posted: currentHistory.posted,
-                    link: currentHistory.link,
+                    source: currentHistory.source,
                     commentary: currentHistory.commentary,
                     englishCommentary: currentHistory.englishCommentary,
                     bookmarks: currentHistory.bookmarks,
-                    purchaseLink: currentHistory.purchaseLink,
-                    mirrors: currentHistory.mirrors
+                    buyLink: currentHistory.buyLink,
+                    mirrors: currentHistory.mirrors ? Object.values(currentHistory.mirrors).join("\n") : null
                 }
                 await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, rating: currentHistory.rating, source,
-                style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveChildren: Boolean(currentHistory.parentID),
-                series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, session, setSessionFlag)
+                style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
+                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {
@@ -94,7 +94,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 }
                 await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
-                website: currentHistory.website, fandom: currentHistory.fandom, category: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
+                website: currentHistory.website, fandom: currentHistory.fandom, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }
         if (revertData.revertGroupIDs?.length) {
@@ -112,7 +112,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
                 await functions.put("/api/note/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
-                data: currentHistory.data}, session, setSessionFlag)
+                data: currentHistory.notes}, session, setSessionFlag)
             }
         }
         setBanName(null)

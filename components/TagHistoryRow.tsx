@@ -72,7 +72,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
-        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, category: props.tagHistory.type}, session, setSessionFlag)
+        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, type: props.tagHistory.type}, session, setSessionFlag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             history.push(`/tag/history/${props.tagHistory.key}`)
         } else {

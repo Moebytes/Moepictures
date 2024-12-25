@@ -10,6 +10,7 @@ useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useIntera
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
+import {PostFull} from "../types/Types"
 
 interface Props {
     match?: any
@@ -77,7 +78,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = posts.find((p: any) => p.postID === postID)
+            let post = posts.find((p: any) => p.postID === postID) as PostFull
             let $401Error = false
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
@@ -255,7 +256,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const croppedURL = await getCroppedURL()
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-        const bytes = Object.values(new Uint8Array(arrayBuffer))
+        const bytes = new Uint8Array(arrayBuffer)
         await functions.post("/api/user/pfp", {postID, bytes}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)

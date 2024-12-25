@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {TagHistory, PostHistory, NoteHistory, GroupHistory, PostHistorySearch} from "../types/Types"
+import {TagHistory, PostHistory, NoteHistory, GroupHistory, SearchHistory} from "../types/Types"
 
 export default class SQLHistory {
     /** Insert tag history */
@@ -524,6 +524,6 @@ export default class SQLHistory {
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
-        return result as Promise<PostHistorySearch[]>
+        return result as Promise<SearchHistory[]>
     }
 }

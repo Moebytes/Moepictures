@@ -360,7 +360,8 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group/request/list", groupLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupRequests(Number(offset))
@@ -429,7 +430,8 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group/delete/request/list", groupLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupDeleteRequests(Number(offset))
@@ -500,7 +502,8 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group/edit/request/list", groupLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupEditRequests(Number(offset))
@@ -534,7 +537,8 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group/history", groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {slug, historyID, username, query, offset} = req.query as unknown as GroupHistoryParams
+            let {slug, historyID, username, query, offset} = req.query as unknown as GroupHistoryParams
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = [] as GroupHistory[]
             if (slug) {

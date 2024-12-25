@@ -8,9 +8,10 @@ import website from "../assets/icons/support.png"
 import twitter from "../assets/icons/twitter.png"
 import permissions from "../structures/Permissions"
 import "./styles/seriesrow.less"
+import {TagCategorySearch} from "../types/Types"
 
 interface Props {
-    series: any
+    series: TagCategorySearch
 }
 
 const SeriesRow: React.FunctionComponent<Props> = (props) => {
@@ -18,7 +19,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
-    const [images, setImages] = useState([])
+    const [images, setImages] = useState([] as string[])
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {
@@ -52,7 +53,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        let images = []
+        let images = [] as string[]
         if (!session.username) {
             let filtered = props.series.posts.filter((p: any) => p.rating === functions.r13())
             images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
@@ -70,10 +71,10 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const seriesSocialJSX = () => {
         let jsx = [] as any
         if (props.series.website) {
-            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.series.website, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.series.website!, "_blank", "noreferrer")}/>)
         }
         if (props.series.twitter) {
-            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter!, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

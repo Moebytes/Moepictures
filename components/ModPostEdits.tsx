@@ -69,13 +69,13 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         }
     }, [unverifiedPosts, index, updateVisiblePostFlag])
 
-    const approvePost = async (postID: number, reason: string) => {
+    const approvePost = async (postID: string, reason: string) => {
         await functions.post("/api/post/approve", {postID, reason}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
 
-    const rejectPost = async (postID: number) => {
+    const rejectPost = async (postID: string) => {
         await functions.post("/api/post/reject", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)

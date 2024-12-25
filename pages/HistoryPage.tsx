@@ -47,6 +47,7 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions, useSearchDialogActions,
 useSearchDialogSelector} from "../store"
 import "./styles/historypage.less"
+import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch} from "../types/Types"
 
 let replace = false
 
@@ -72,18 +73,18 @@ const HistoryPage: React.FunctionComponent = () => {
     const {setShowDeleteAllHistoryDialog} = useSearchDialogActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [index, setIndex] = useState(0)
-    const [postStates, setPostStates] = useState([]) as any
-    const [tagStates, setTagStates] = useState([]) as any
-    const [noteStates, setNoteStates] = useState([]) as any
-    const [groupStates, setGroupStates] = useState([]) as any
-    const [aliasStates, setAliasStates] = useState([]) as any
-    const [searchStates, setSearchStates] = useState([]) as any
-    const [visibleHistoryPosts, setVisibleHistoryPosts] = useState([]) as any
-    const [visibleHistoryTags, setVisibleHistoryTags] = useState([]) as any
-    const [visibleHistoryNotes, setVisibleHistoryNotes] = useState([]) as any
-    const [visibleHistoryGroups, setVisibleHistoryGroups] = useState([]) as any
-    const [visibleHistoryAliases, setVisibleHistoryAliases] = useState([]) as any
-    const [visibleHistorySearch, setVisibleHistorySearch] = useState([]) as any
+    const [postStates, setPostStates] = useState([] as PostHistory[])
+    const [tagStates, setTagStates] = useState([] as TagHistory[])
+    const [noteStates, setNoteStates] = useState([] as NoteHistory[])
+    const [groupStates, setGroupStates] = useState([] as GroupHistory[])
+    const [aliasStates, setAliasStates] = useState([] as AliasHistorySearch[])
+    const [searchStates, setSearchStates] = useState([] as SearchHistory[])
+    const [visibleHistoryPosts, setVisibleHistoryPosts] = useState([] as PostHistory[])
+    const [visibleHistoryTags, setVisibleHistoryTags] = useState([] as TagHistory[])
+    const [visibleHistoryNotes, setVisibleHistoryNotes] = useState([] as NoteHistory[])
+    const [visibleHistoryGroups, setVisibleHistoryGroups] = useState([] as GroupHistory[])
+    const [visibleHistoryAliases, setVisibleHistoryAliases] = useState([] as AliasHistorySearch[])
+    const [visibleHistorySearch, setVisibleHistorySearch] = useState([] as SearchHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -166,7 +167,7 @@ const HistoryPage: React.FunctionComponent = () => {
         return []
     }
 
-    const historyStates = getHistoryStates()
+    const historyStates = getHistoryStates() as History[]
 
     const setHistoryStates = (states: any) => {
         if (historyTab === "post") {
@@ -211,7 +212,7 @@ const HistoryPage: React.FunctionComponent = () => {
         return []
     }
 
-    const visibleHistory = getVisibleHistory()
+    const visibleHistory = getVisibleHistory() as History[]
 
     const setVisibleHistory = (visible: any) => {
         if (historyTab === "post") {
@@ -241,7 +242,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }
 
     const updateHistory = async () => {
-        let result = []
+        let result = [] as History[]
         if (historyTab === "post") {
             result = await functions.get("/api/post/history", {query: searchQuery}, session, setSessionFlag)
         }
@@ -306,12 +307,12 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!historyStates[currentIndex]) break
                 if (!session.showR18) {
                     if (historyTab === "tag") {
-                        if (historyStates[currentIndex].r18) {
+                        if ((historyStates[currentIndex] as TagHistory).r18) {
                             currentIndex++
                             continue
                         }
                     } else {
-                        if (functions.isR18(historyStates[currentIndex].rating)) {
+                        if (functions.isR18((historyStates[currentIndex] as PostHistory).rating)) {
                             continue
                         }
                     }
@@ -395,12 +396,12 @@ const HistoryPage: React.FunctionComponent = () => {
                     if (!historyStates[currentIndex]) return updateOffset()
                     if (!session.showR18) {
                         if (historyTab === "tag" || historyTab === "alias") {
-                            if (historyStates[currentIndex].r18) {
+                            if ((historyStates[currentIndex] as TagHistory).r18) {
                                 currentIndex++
                                 continue
                             }
                         } else {
-                            if (functions.isR18(historyStates[currentIndex].rating)) {
+                            if (functions.isR18((historyStates[currentIndex] as PostHistory).rating)) {
                                 continue
                             }
                         }
@@ -551,9 +552,9 @@ const HistoryPage: React.FunctionComponent = () => {
 
     const generateHistoryJSX = () => {
         const jsx = [] as any
-        let visible = [] as any
+        let visible = [] as History[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleHistory) as any
+            visible = functions.removeDuplicates(visibleHistory)
         } else {
             const postOffset = (historyPage - 1) * getPageAmount()
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
@@ -562,14 +563,15 @@ const HistoryPage: React.FunctionComponent = () => {
                 !item.r18 : !functions.isR18(item.rating))
             }
         }
-        let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (historyTab === "post") {
-                let previous = visible[i + 1]
-                if (current.postID !== visible[i].postID) {
-                    current = visible[i]
+                let current = visible[0] as PostHistory
+                let item = visible[i] as PostHistory
+                let previous = visible[i + 1] as PostHistory | null
+                if (current.postID !== item.postID) {
+                    current = item
                     currentIndex = i
                 }
                 if (previous?.postID !== current.postID) previous = null
@@ -579,9 +581,11 @@ const HistoryPage: React.FunctionComponent = () => {
             }
 
             if (historyTab === "tag") {
-                let previous = visible[i + 1]
-                if (current.tag !== visible[i].tag) {
-                    current = visible[i]
+                let current = visible[0] as TagHistory
+                let item = visible[i] as TagHistory
+                let previous = visible[i + 1] as TagHistory | null
+                if (current.tag !== item.tag) {
+                    current = item
                     currentIndex = i
                 }
                 if (previous?.tag !== current.tag) previous = null
@@ -591,9 +595,11 @@ const HistoryPage: React.FunctionComponent = () => {
             }
 
             if (historyTab === "group") {
-                let previous = visible[i + 1]
-                if (current.groupID !== visible[i].groupID) {
-                    current = visible[i]
+                let current = visible[0] as GroupHistory
+                let item = visible[i] as GroupHistory
+                let previous = visible[i + 1] as GroupHistory | null
+                if (current.groupID !== item.groupID) {
+                    current = item
                     currentIndex = i
                 }
                 if (previous?.groupID !== current.groupID) previous = null
@@ -603,10 +609,12 @@ const HistoryPage: React.FunctionComponent = () => {
             }
 
             if (historyTab === "note") {
-                let previous = visible[i + 1]
-                if (current.postID !== visible[i].postID &&
-                    current.order !== visible[i].order) {
-                    current = visible[i]
+                let current = visible[0] as NoteHistory
+                let item = visible[i] as NoteHistory
+                let previous = visible[i + 1] as NoteHistory | null
+                if (current.postID !== item.postID &&
+                    current.order !== item.order) {
+                    current = item
                     currentIndex = i
                 }
                 if (previous?.postID !== current.postID &&

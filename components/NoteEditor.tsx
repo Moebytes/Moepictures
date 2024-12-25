@@ -314,7 +314,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const ocrPage = async () => {
         const jpgURL = await functions.convertToFormat(img, "jpg")
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
-        const bytes = Object.values(new Uint8Array(arrayBuffer))
+        const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.post(`/api/misc/ocr`, bytes, session, setSessionFlag).catch(() => null)
         if (result?.length) setItems(result.map((item: any) => ({...item, imageHash: targetHash, overlay: false})))
     }

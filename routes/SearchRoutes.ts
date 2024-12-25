@@ -570,7 +570,8 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/reports", searchLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.report.reports(Number(offset))

@@ -367,9 +367,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const generateArtistsJSX = () => {
         const jsx = [] as any
-        let visible = [] as any
+        let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleArtists) as any
+            visible = functions.removeDuplicates(visibleArtists)
         } else {
             const postOffset = (artistsPage - 1) * getPageAmount()
             visible = artists.slice(postOffset, postOffset + getPageAmount())

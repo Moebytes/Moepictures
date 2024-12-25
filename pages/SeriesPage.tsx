@@ -368,9 +368,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const generateSeriesJSX = () => {
         const jsx = [] as any
-        let visible = [] as any
+        let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleSeries) as any
+            visible = functions.removeDuplicates(visibleSeries)
         } else {
             const postOffset = (seriesPage - 1) * getPageAmount()
             visible = series.slice(postOffset, postOffset + getPageAmount())

@@ -215,8 +215,8 @@ const ThreadRoutes = (app: Express) => {
 
     app.get("/api/thread/replies", threadLimiter, async (req: Request, res: Response) => {
         try {
-            const threadID = req.query.threadID as string
-            const offset = req.query.offset as string
+            let {threadID, offset} = req.query as unknown as {threadID: string, offset: number}
+            if (!offset) offset = 0
             if (!threadID) return res.status(400).send("Bad threadID")
             let result = await sql.thread.replies(threadID, Number(offset))
             if (!req.session.showR18) {

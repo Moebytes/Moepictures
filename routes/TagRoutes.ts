@@ -7,7 +7,7 @@ import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import path from "path"
 import {TagHistory, Tag, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
-TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams} from "../types/Types"
+TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType} from "../types/Types"
 
 const tagLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -542,7 +542,8 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/delete/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagDeleteRequests(Number(offset))
@@ -594,7 +595,8 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/aliasto/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.aliasRequests(Number(offset))
@@ -679,7 +681,8 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/edit/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagEditRequests(Number(offset))
@@ -715,7 +718,8 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/history", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, historyID, username, query, offset} = req.query as unknown as TagHistoryParams
+            let {tag, historyID, username, query, offset} = req.query as unknown as TagHistoryParams
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = [] as TagHistory[]
             if (tag && historyID) {
@@ -735,7 +739,7 @@ const TagRoutes = (app: Express) => {
 
     app.delete("/api/tag/history/delete", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, historyID} = req.query as any
+            const {tag, historyID} = req.query as {tag: string, historyID: string}
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -760,8 +764,8 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/alias/history", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const query = req.query.query as string
-            const offset = req.query.offset as string
+            let {query, offset} = req.query as unknown as {query?: string, offset?: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.tag.aliasImplicationHistory(Number(offset), query)
             serverFunctions.sendEncrypted(result, req, res)
@@ -773,7 +777,7 @@ const TagRoutes = (app: Express) => {
 
     app.delete("/api/alias/history/delete", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {historyID, type} = req.query as any
+            const {historyID, type} = req.query as {historyID: string, type: AliasHistoryType}
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return res.status(403).end()

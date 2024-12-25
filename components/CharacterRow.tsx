@@ -7,9 +7,10 @@ import Carousel from "./Carousel"
 import fandom from "../assets/icons/fandom.png"
 import permissions from "../structures/Permissions"
 import "./styles/characterrow.less"
+import {TagCategorySearch} from "../types/Types"
 
 interface Props {
-    character: any
+    character: TagCategorySearch
 }
 
 const CharacterRow: React.FunctionComponent<Props> = (props) => {
@@ -17,7 +18,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
-    const [images, setImages] = useState([])
+    const [images, setImages] = useState([] as string[])
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {
@@ -51,7 +52,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        let images = []
+        let images = [] as string[]
         if (!session.username) {
             let filtered = props.character.posts.filter((p: any) => p.rating === functions.r13())
             images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
@@ -69,7 +70,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const characterSocialJSX = () => {
         let jsx = [] as any
         if (props.character.fandom) {
-            jsx.push(<img className="characterrow-social" src={fandom} onClick={() => window.open(props.character.fandom, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="characterrow-social" src={fandom} onClick={() => window.open(props.character.fandom!, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

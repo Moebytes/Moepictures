@@ -28,7 +28,8 @@ import enLocale from "../assets/locales/en.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, 
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges,
-PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session} from "../types/Types"
+PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session,
+UploadTag} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -2195,7 +2196,8 @@ export default class Functions {
         return tag.normalize("NFD").replace(/[^a-z0-9_\-()><&!#@]/gi, "").replaceAll("_", "-")
     }
 
-    public static cleanTitle = (title: string) => {
+    public static cleanTitle = (title?: string | null) => {
+        if (!title) return ""
         return title.replace(/[\/\?<>\\:\*\|"%]/g, "")
     }
 
@@ -2944,7 +2946,7 @@ export default class Functions {
         return slug
     }
 
-    public static postSlug = (title: string, englishTitle: string) => {
+    public static postSlug = (title?: string | null, englishTitle?: string | null) => {
         if (!title) return "untitled"
         if (englishTitle) return Functions.generateSlug(englishTitle)
         return Functions.generateSlug(title)
@@ -3034,5 +3036,14 @@ export default class Functions {
     public static filterNulls = <T>(arr?: (T | null | undefined)[] | null) => {
         if (!arr) return []
         return arr.filter((item) => item !== null && item !== undefined) as T[]
+    }
+
+    public static safeNumber = (text: string) => {
+        if (Number.isNaN(Number(text))) return null
+        return Number(text)
+    }
+
+    public static tagObject = (tags: string[]) => {
+        return tags.map((tag) => ({tag})) as UploadTag[]
     }
 }

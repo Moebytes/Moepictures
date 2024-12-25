@@ -8,6 +8,7 @@ import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
+import {TagType} from "../types/Types"
 
 const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -17,7 +18,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setTagFlag} = useFlagActions()
-    const [category, setCategory] = useState("tag")
+    const [category, setCategory] = useState("tag" as TagType)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)

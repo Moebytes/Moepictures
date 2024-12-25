@@ -292,7 +292,8 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPosts(Number(offset))
@@ -305,7 +306,8 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post-edits/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(Number(offset))
@@ -360,7 +362,8 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/delete/request/list", postLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.postDeleteRequests(Number(offset))
@@ -410,7 +413,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!reason) reason = null
 
-            const post = unverified ? await sql.post.unverifiedPost(postID) :  await sql.post.post(postID)
+            const post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
@@ -936,7 +939,8 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
+            let {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = null as any
             if (postID && historyID) {

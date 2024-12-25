@@ -100,9 +100,9 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const message = await functions.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
+            const messageID = await functions.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
             setDMTarget(null)
-            if (message.messageID) history.push(`/message/${message.messageID}`)
+            if (messageID) history.push(`/message/${messageID}`)
         } catch (err: any) {
             setError(true)
             let errMsg = i18n.dialogs.sendMessage.error

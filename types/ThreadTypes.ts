@@ -86,7 +86,7 @@ export interface ThreadReportFulfillParams {
 
 export type ThreadGetEndpoint<T extends string> = 
     T extends "/api/thread" ? {params: {threadID: string}, response: ThreadUser} :
-    T extends "/api/thread/replies" ? {params: {threadID: string, offset: number}, response: Reply[]} :
+    T extends "/api/thread/replies" ? {params: {threadID: string, offset?: number}, response: Reply[]} :
     T extends "/api/reply" ? {params: {replyID: string}, response: Reply} :
     never
 

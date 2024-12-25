@@ -17,7 +17,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
-    const [translatedText, setTranslatedText] = useState(null)
+    const [translatedText, setTranslatedText] = useState("")
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

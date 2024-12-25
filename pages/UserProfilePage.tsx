@@ -250,7 +250,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                             croppedURL = await functions.crop(url, 1)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                        const bytes = Object.values(new Uint8Array(arrayBuffer))
+                        const bytes = new Uint8Array(arrayBuffer)
                         await functions.post("/api/user/pfp", {bytes}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
@@ -309,7 +309,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const autosearchInterval = async () => {
             clearTimeout(intervalTimer) 
             intervalTimer = setTimeout(() => {
-                functions.post("/api/user/autosearchinterval", {interval}, session, setSessionFlag)
+                functions.post("/api/user/autosearchinterval", {interval: functions.safeNumber(interval)}, session, setSessionFlag)
                 .then(() => setSessionFlag(true))
             }, 1000)
         }

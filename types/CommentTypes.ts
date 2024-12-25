@@ -39,7 +39,7 @@ export type CommentPostEndpoint<T extends string> =
     never
 
 export type CommentPutEndpoint<T extends string> = 
-    T extends "/api/comment/edit" ? {params: {comment: string, postID: string}, response: string} :
+    T extends "/api/comment/edit" ? {params: {comment: string, commentID: string}, response: string} :
     never
 
 export type CommentDeleteEndpoint<T extends string> = 

@@ -42,7 +42,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setEnglishTitle(sourceEditID.post.englishTitle || "")
         if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
         setSource(sourceEditID.post.source || "")
-        setBookmarks(sourceEditID.post.bookmarks || "")
+        setBookmarks(String(sourceEditID.post.bookmarks) || "")
         setBuyLink(sourceEditID.post.buyLink || "")
     }
 
@@ -77,6 +77,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             const data = {
                 postID: sourceEditID.post.postID,
                 unverified: sourceEditID.unverified,
+                type: sourceEditID.post.type,
+                rating: sourceEditID.post.rating,
+                style: sourceEditID.post.style,
                 source: {
                     title,
                     englishTitle,
@@ -85,7 +88,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
-                    bookmarks,
+                    bookmarks: functions.safeNumber(bookmarks),
                     buyLink,
                     mirrors
                 },
@@ -107,6 +110,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             const data = {
                 postID: sourceEditID.post.postID,
                 unverified: sourceEditID.unverified,
+                type: sourceEditID.post.type,
+                rating: sourceEditID.post.rating,
+                style: sourceEditID.post.style,
                 source: {
                     title,
                     englishTitle,
@@ -115,7 +121,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
-                    bookmarks,
+                    bookmarks: functions.safeNumber(bookmarks),
                     buyLink,
                     mirrors
                 },

@@ -41,6 +41,7 @@ export interface SaucenaoResponse {
         tweet_id?: string
         twitter_user_id?: string
         twitter_user_handle?: string
+        mal_id?: string
     }
 }
 
@@ -122,10 +123,15 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/copyright" ? {params: CopyrightParams, response: string} :
     T extends "/api/misc/wdtagger" ? {params: Uint8Array, response: WDTaggerResponse} :
     T extends "/api/misc/ocr" ? {params: Uint8Array, response: OCRResponse[]} :
-    T extends "/api/premium/paymentlink" ? {params: null, response: string} :
+    T extends "/api/premium/paymentlink" ? {params: null, response: {hosted_url: string}} :
     T extends "/api/premium/payment" ? {params: {event: CoinbaseEvent}, response: string} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :
     T extends "/api/misc/litterbox" ? {params: Uint8Array, response: string} :
     T extends "/api/client-key" ? {params: {publicKey: string}, response: string} :
     T extends "/api/server-key" ? {params: null, response: {publicKey: string}} :
+    T extends "/api/misc/blacklistip" ? {params: {ip: string, reason: string}, response: string} :
+    never
+
+export type MiscDeleteEndpoint<T extends string> = 
+    T extends "/api/misc/unblacklistip" ? {params: {ip: string}, response: string} :
     never

@@ -79,7 +79,7 @@ export type SearchGetEndpoint<T extends string> =
     T extends "/api/search/sidebartags" ? {params: SidebarTagParams, response: TagCount[]} :
     T extends "/api/search/threads" ? {params: CommentSearchParams, response: ThreadSearch[]} :
     T extends "/api/search/messages" ? {params: MessageSearchParams, response: MessageSearch[]} :
-    T extends "/api/search/reports" ? {params: {offset: number}, response: Report[]} :
+    T extends "/api/search/reports" ? {params: {offset?: number} | null, response: Report[]} :
     never
 
 export type SearchPostEndpoint<T extends string> = 

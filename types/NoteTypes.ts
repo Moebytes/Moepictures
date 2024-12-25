@@ -80,7 +80,7 @@ export interface NoteHistoryParams {
     historyID?: string
     username?: string
     query?: string
-    offset: number
+    offset?: number
 }
 
 export interface NoteHistoryDeleteParams {
@@ -92,8 +92,8 @@ export interface NoteHistoryDeleteParams {
 export type NoteGetEndpoint<T extends string> = 
     T extends "/api/notes" ? {params: {postID: string}, response: Note[]} :
     T extends "/api/notes/unverified" ? {params: {postID: string}, response: UnverifiedNote[]} :
-    T extends "/api/note/list/unverified" ? {params: {offset: number}, response: UnverifiedNoteSearch[]} :
-    T extends "/api/note/history" ? {params: NoteHistoryParams, response: NoteHistory[]} :
+    T extends "/api/note/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedNoteSearch[]} :
+    T extends "/api/note/history" ? {params: NoteHistoryParams | null, response: NoteHistory[]} :
     never
 
 export type NotePostEndpoint<T extends string> = 

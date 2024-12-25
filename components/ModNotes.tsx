@@ -57,13 +57,13 @@ const ModNotes: React.FunctionComponent = (props) => {
         updateVisibleNotes()
     }
 
-    const approveNote = async (postID: number, originalID: number, order: number, data: any, username: string) => {
+    const approveNote = async (postID: string, originalID: string, order: number, data: any, username: string) => {
         await functions.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
 
-    const rejectNote = async (postID: number, originalID: number, order: number, data: any, username: string) => {
+    const rejectNote = async (postID: string, originalID: string, order: number, data: any, username: string) => {
         await functions.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()

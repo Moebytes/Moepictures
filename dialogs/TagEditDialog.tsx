@@ -27,6 +27,7 @@ import live2d from "../assets/icons/live2d.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
+import {PostType, PostRating, PostStyle} from "../types/Types"
 
 const TagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -38,9 +39,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const {setTagEditID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {mobile} = useLayoutSelector()
-    const [type, setType] = useState("image")
-    const [rating, setRating] = useState("cute")
-    const [style, setStyle] = useState("2d")
+    const [type, setType] = useState("image" as PostType)
+    const [rating, setRating] = useState("cute" as PostRating)
+    const [style, setStyle] = useState("2d" as PostStyle)
     const [artists, setArtists] = useState("") as any
     const [characters, setCharacters] = useState("") as any
     const [series, setSeries] = useState("") as any

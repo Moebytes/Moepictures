@@ -10,9 +10,10 @@ import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import permissions from "../structures/Permissions"
 import "./styles/artistrow.less"
+import {TagCategorySearch} from "../types/Types"
 
 interface Props {
-    artist: any
+    artist: TagCategorySearch
 }
 
 const ArtistRow: React.FunctionComponent<Props> = (props) => {
@@ -20,7 +21,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
-    const [images, setImages] = useState([])
+    const [images, setImages] = useState([] as string[])
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {
@@ -54,7 +55,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        let images = []
+        let images = [] as string[]
         if (!session.username) {
             let filtered = props.artist.posts.filter((p: any) => p.rating === functions.r13())
             images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
@@ -72,17 +73,17 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const artistSocialJSX = () => {
         let jsx = [] as any
         if (props.artist.website) {
-            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website!, "_blank", "noreferrer")}/>)
         }
         if (props.artist.social?.includes("pixiv.net")) {
-            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.social!, "_blank", "noreferrer")}/>)
         } else if (props.artist.social?.includes("soundcloud.com")) {
-            jsx.push(<img className="artistrow-social" src={soundcloud} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={soundcloud} onClick={() => window.open(props.artist.social!, "_blank", "noreferrer")}/>)
         } else if (props.artist.social?.includes("sketchfab.com")) {
-            jsx.push(<img className="artistrow-social" src={sketchfab} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={sketchfab} onClick={() => window.open(props.artist.social!, "_blank", "noreferrer")}/>)
         }
         if (props.artist.twitter) {
-            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter, "_blank", "noreferrer")}/>)
+            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter!, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

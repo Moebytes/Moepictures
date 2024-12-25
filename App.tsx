@@ -165,7 +165,7 @@ const App: React.FunctionComponent = (props) => {
 
     const destroy2FA = async () => {
         try {
-            await functions.post("/api/2fa/delete", null, session, setSessionFlag)
+            await functions.delete("/api/2fa/delete", null, session, setSessionFlag)
             setSessionFlag(true)
         } catch {
             // ignore

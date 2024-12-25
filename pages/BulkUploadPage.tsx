@@ -48,6 +48,7 @@ import xButton from "../assets/icons/x-button-magenta.png"
 import tagConvert from "../assets/json/tag-convert.json"
 import "./styles/uploadpage.less"
 import path from "path"
+import {PostType, PostRating, PostStyle} from "../types/Types"
 
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
@@ -75,16 +76,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [danbooruError, setDanbooruError] = useState(false)
     const [originalFiles, setOriginalFiles] = useState([]) as any
     const [upscaledFiles, setUpscaledFiles] = useState([]) as any
-    const [dupPosts, setDupPosts] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [currentIndex, setCurrentIndex] = useState(0) as any
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
-    const [type, setType] = useState("image")
-    const [rating, setRating] = useState("cute")
-    const [style, setStyle] = useState("2d")
+    const [type, setType] = useState("image" as PostType)
+    const [rating, setRating] = useState("cute" as PostRating)
+    const [style, setStyle] = useState("2d" as PostStyle)
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const [rawArtist, setRawArtist] = useState("")
@@ -299,7 +299,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const readImage = async (image: string) => {
-        const arrayBuffer = await functions.get(`/api/misc/proxy?url=${image}`, null, session, setSessionFlag)
+        const arrayBuffer = await functions.proxyImage(image, session, setSessionFlag).then((r) => r[0].arrayBuffer())
         let bytes = new Uint8Array(arrayBuffer)
         let blob = new Blob([bytes])
         const result = functions.bufferFileType(bytes)?.[0]
@@ -414,9 +414,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let dupes = [] as any
             if (current.thumbnail) {
                 const bytes = await functions.base64toUint8Array(current.thumbnail)
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes), type: current.ext}, session, setSessionFlag)
+                dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
             } else {
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(current.bytes), type: current.ext}, session, setSessionFlag)
+                dupes = await functions.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
             }
             if (dupes.length) continue
             let id = current.name.includes("_s") ? current.name : current.name.split("_")[0]
@@ -476,7 +476,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     source: sourceData.source.source,
                     commentary: sourceData.source.commentary,
                     englishCommentary: sourceData.source.englishCommentary,
-                    bookmarks: sourceData.source.bookmarks,
+                    bookmarks: functions.safeNumber(sourceData.source.bookmarks),
+                    buyLink: "",
                     mirrors: sourceData.source.mirrors
                 },
                 artists: dataArtists,
@@ -556,7 +557,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setProgressText("")
     }
 
-    const sourceLookup = async (current: any, rating: string) => {
+    const sourceLookup = async (current: any, rating: PostRating) => {
         let bytes = "" as any 
         if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -586,13 +587,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 if (result[0].rating === "e") rating = "hentai"
             }
             try {
-                const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
+                const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
                 commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                 posted = functions.formatDate(new Date(illust.create_date), true)
-                source = illust.url 
+                source = illust.url!
                 title = illust.title
                 artist = illust.user.name
-                bookmarks = illust.total_bookmarks
+                bookmarks = String(illust.total_bookmarks)
                 const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                 englishTitle = translated[0]
                 englishCommentary = translated[1]
@@ -643,7 +644,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                        redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -665,16 +666,16 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             if (result[0].rating === "e") rating = "hentai"
                         }
                     }
-                    artist = pixiv[0].data.author_name
-                    title = pixiv[0].data.title
+                    artist = pixiv[0].data.author_name || ""
+                    title = pixiv[0].data.title || ""
                     try {
-                        const illust = await functions.get(`/api/misc/pixiv?url=${source}`, null, session, setSessionFlag)
+                        const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                         posted = functions.formatDate(new Date(illust.create_date), true)
-                        source = illust.url 
+                        source = illust.url!
                         title = illust.title
-                        artist = illust.user.name
-                        bookmarks = illust.total_bookmarks
+                        artist = illust.user.name 
+                        bookmarks = String(illust.total_bookmarks)
                         const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         englishTitle = translated[0]
                         englishCommentary = translated[1]
@@ -693,15 +694,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                        redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
                     source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
-                    artist = deviantart[0].data.member_name 
-                    title = deviantart[0].data.title
+                    artist = deviantart[0].data.member_name || ""
+                    title = deviantart[0].data.title || ""
                     try {
-                        const deviation = await functions.get(`/api/misc/deviantart?url=${source}`, null, session, setSessionFlag)
+                        const deviation = await functions.get(`/api/misc/deviantart`, {url: source}, session, setSessionFlag)
                         title = deviation.title
                         artist = deviation.author.user.username
                         source = deviation.url
@@ -720,27 +721,27 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         console.log(e)
                     } 
                 } else if (anime.length) {
-                    title = anime[0].data.source 
+                    title = anime[0].data.source || ""
                     source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
                 } else if (twitter.length) {
                     source = twitter[0].data.ext_urls[0]
-                    artist = twitter[0].data.twitter_user_handle
+                    artist = twitter[0].data.twitter_user_handle || ""
                 } else if (danbooru.length) {
                     source = danbooru[0].data.ext_urls[0]
-                    artist = danbooru[0].data.creator
-                    title = danbooru[0].data.characters
+                    artist = danbooru[0].data.creator || ""
+                    title = danbooru[0].data.characters || ""
                 } else if (gelbooru.length) {
                     source = gelbooru[0].data.ext_urls[0]
-                    artist = gelbooru[0].data.creator
-                    title = gelbooru[0].data.characters
+                    artist = gelbooru[0].data.creator || ""
+                    title = gelbooru[0].data.characters || ""
                 } else if (yandere.length) {
                     source = yandere[0].data.ext_urls[0]
-                    artist = yandere[0].data.creator
-                    title = yandere[0].data.characters
+                    artist = yandere[0].data.creator || ""
+                    title = yandere[0].data.characters || ""
                 } else if (konachan.length) {
                     source = konachan[0].data.ext_urls[0]
-                    artist = konachan[0].data.creator
-                    title = konachan[0].data.characters
+                    artist = konachan[0].data.creator || ""
+                    title = konachan[0].data.characters || ""
                 }
             }
             mirrors = functions.removeItem(mirrors, source)
@@ -764,7 +765,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
     }
 
-    const tagLookup = async (current: any, type: string, style: string, danbooruLink: string, rating: string) => {
+    const tagLookup = async (current: any, type: PostType, style: PostStyle, danbooruLink: string, rating: PostRating) => {
         let tagArr = [] as any
         let blockedTags = tagConvert.blockedTags
         let tagReplaceMap = tagConvert.tagReplaceMap
@@ -857,7 +858,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             newTags = notExists
         } else {
-            let result = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
+            let result = await functions.post("/api/misc/wdtagger", bytes, session, setSessionFlag)
 
             let tagArr = result.tags
             let characterArr = result.characters
@@ -901,7 +902,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let seriesArr = [] as string[]
 
             for (let i = 0; i < characterArr.length; i++) {
-                const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "") || ""
                 seriesArr.push(seriesName)
             }
 

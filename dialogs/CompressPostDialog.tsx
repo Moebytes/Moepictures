@@ -11,6 +11,7 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
+import {ImageFormat} from "../types/Types"
 
 interface Props {
     post: any
@@ -25,7 +26,7 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [quality, setQuality] = useState("95")
-    const [format, setFormat] = useState(props.post.type === "animation" ? "webp" : "jpg")
+    const [format, setFormat] = useState(props.post.type === "animation" ? "webp" : "jpg" as ImageFormat)
     const [maxDimension, setMaxDimension] = useState("2000")
     const [maxUpscaledDimension, setMaxUpscaledDimension] = useState("8000")
     const [original, setOriginal] = useState(true)
@@ -55,7 +56,9 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
 
     const compressPost = async () => {
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/compress",  {postID: props.post.postID, quality, format, maxDimension, maxUpscaledDimension, original, upscaled}, session, setSessionFlag)
+            await functions.post("/api/post/compress",  {postID: props.post.postID, 
+            quality: functions.safeNumber(quality) || 95, format, maxDimension: functions.safeNumber(maxDimension) || 2000, 
+            maxUpscaledDimension: functions.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
             setPostFlag(true)
         }
     }

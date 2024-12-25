@@ -5,6 +5,7 @@ useSearchSelector, useSearchActions} from "../store"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
+import {TagType} from "../types/Types"
 
 interface Props {
     active: boolean
@@ -13,7 +14,7 @@ interface Props {
     y?: number
     width?: number
     click?: (tag: string) => void
-    type?: string
+    type?: TagType
     sticky?: boolean
     fontSize?: number
 }

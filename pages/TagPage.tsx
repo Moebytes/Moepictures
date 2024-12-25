@@ -415,7 +415,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description, image,
         aliases: tag.aliases, implications: tag.implications, pixivTags: tag.pixivTags, social: tag.social,
-        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, category: tag.type}, session, setSessionFlag)
+        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, type: tag.type}, session, setSessionFlag)
         currentHistory(tag.key)
     }
 

@@ -368,9 +368,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const generateCharactersJSX = () => {
         const jsx = [] as any
-        let visible = [] as any
+        let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleCharacters) as any
+            visible = functions.removeDuplicates(visibleCharacters)
         } else {
             const postOffset = (charactersPage - 1) * getPageAmount()
             visible = characters.slice(postOffset, postOffset + getPageAmount())

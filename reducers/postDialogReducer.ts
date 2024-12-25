@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {PostSearch} from "../types/Types"
 
 const postDialogSlice = createSlice({
     name: "postDialog",
@@ -14,12 +15,12 @@ const postDialogSlice = createSlice({
         lockPostID: null as any,
         privatePostObj: null as any,
         tagEditID: null as any,
-        sourceEditID: null as any,
+        sourceEditID: null as unknown as {unverified: boolean, post: PostSearch},
         showBulkTagEditDialog: false,
         showBulkDeleteDialog: false,
         showCompressingDialog: false,
         showUpscalingDialog: false,
-        childPostObj: null as any
+        childPostObj: null as unknown as {unverified: boolean, post: PostSearch}
     },
     reducers: {
         setShowDeletePostDialog: (state, action) => {state.showDeletePostDialog = action.payload},

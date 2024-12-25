@@ -177,8 +177,8 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/message/replies", messageLimiter, async (req: Request, res: Response) => {
         try {
-            const messageID = req.query.messageID as string
-            const offset = req.query.offset as string
+            let {messageID, offset} = req.query as unknown as {messageID: string, offset: number}
+            if (!offset) offset = 0
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")

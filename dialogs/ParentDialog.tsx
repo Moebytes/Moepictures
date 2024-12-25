@@ -49,6 +49,9 @@ const ParentDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             const data = {
                 postID: childPostObj.post.postID,
+                type: childPostObj.post.type,
+                rating: childPostObj.post.rating,
+                style: childPostObj.post.style,
                 unverified: childPostObj.unverified,
                 parentID
             }
@@ -67,6 +70,9 @@ const ParentDialog: React.FunctionComponent = (props) => {
             }
             const data = {
                 postID: childPostObj.post.postID,
+                type: childPostObj.post.type,
+                rating: childPostObj.post.rating,
+                style: childPostObj.post.style,
                 unverified: childPostObj.unverified,
                 parentID,
                 reason

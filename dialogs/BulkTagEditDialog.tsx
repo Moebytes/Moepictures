@@ -28,6 +28,7 @@ import live2d from "../assets/icons/live2d.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
+import {PostType, PostRating, PostStyle} from "../types/Types"
 
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -147,9 +148,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 const data = {
                     postID: postID,
                     unverified: false,
-                    type: type === "x" ? post.type : type,
-                    rating: rating === "x" ? post.rating : rating,
-                    style: style === "x" ? post.style : style,
+                    type: type === "x" ? post.type : type as PostType,
+                    rating: rating === "x" ? post.rating : rating as PostRating,
+                    style: style === "x" ? post.style : style as PostStyle,
                     artists: artistData,
                     characters: characterData,
                     series: seriesData,

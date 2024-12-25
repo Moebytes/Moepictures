@@ -446,7 +446,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         let url = tempLink
         if (!tempLink) {
             const arrayBuffer = await fetch(coverImg).then((r) => r.arrayBuffer())
-            url = await functions.post("/api/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+            url = await functions.post("/api/misc/litterbox", new Uint8Array(arrayBuffer), session, setSessionFlag)
             localStorage.setItem("reverseSearchLink", url)
             setTempLink(url)
         }

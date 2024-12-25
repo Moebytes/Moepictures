@@ -12,6 +12,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutA
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
+import {GroupHistory} from "../types/Types"
 
 interface Props {
     match?: any
@@ -54,9 +55,10 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/group/history", {slug, username}, session, setSessionFlag)
             if (!result.length) {
                 const groupObject = await functions.get("/api/group", {name: slug}, session, setSessionFlag)
-                groupObject.date = groupObject.createDate
-                groupObject.user = groupObject.creator
-                result = [groupObject]
+                const historyObject = groupObject as unknown as GroupHistory
+                historyObject.date = groupObject.createDate
+                historyObject.user = groupObject.creator
+                result = [historyObject]
             }
         }
         setEnded(false)

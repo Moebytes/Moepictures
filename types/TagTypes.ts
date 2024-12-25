@@ -137,7 +137,7 @@ export interface TagHistoryParams {
     historyID?: string
     username?: string
     query?: string
-    offset: number
+    offset?: number
 }
 
 export interface TagEditParams {
@@ -171,11 +171,11 @@ export type TagGetEndpoint<T extends string> =
     T extends "/api/tag/list" ? {params: {tags: string[]}, response: Tag[]} :
     T extends "/api/tag/map" ? {params: {tags: string[]}, response: {[key: string]: Tag}} :
     T extends "/api/tag/list/unverified" ? {params: {tags: string[]}, response: Tag[]} :
-    T extends "/api/tag/delete/request/list" ? {params: {offset: number}, response: TagDeleteRequest[]} :
-    T extends "/api/tag/aliasto/request/list" ? {params: {offset: number}, response: AliasRequest[]} :
-    T extends "/api/tag/edit/request/list" ? {params: {offset: number}, response: TagEditRequest[]} :
-    T extends "/api/tag/history" ? {params: TagHistoryParams, response: TagHistory[]} :
-    T extends "/api/alias/history" ? {params: {offset: number, query: string}, response: AliasHistorySearch[]} :
+    T extends "/api/tag/delete/request/list" ? {params: {offset?: number} | null, response: TagDeleteRequest[]} :
+    T extends "/api/tag/aliasto/request/list" ? {params: {offset?: number} | null, response: AliasRequest[]} :
+    T extends "/api/tag/edit/request/list" ? {params: {offset?: number} | null, response: TagEditRequest[]} :
+    T extends "/api/tag/history" ? {params: TagHistoryParams | null, response: TagHistory[]} :
+    T extends "/api/alias/history" ? {params: {offset?: number, query?: string} | null, response: AliasHistorySearch[]} :
     never
 
 export type TagPostEndpoint<T extends string> = 

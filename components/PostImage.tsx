@@ -1288,7 +1288,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const thumbnail = functions.getThumbnailLink(image.type, props.post.postID, image.order, image.filename, "massive")
             const decryptedImage = await functions.decryptThumb(thumbnail, session, `reverse-${thumbnail}`, true)
             const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
-            url = await functions.post("/api/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+            url = await functions.post("/api/misc/litterbox", new Uint8Array(arrayBuffer), session, setSessionFlag)
             localStorage.setItem("reverseSearchLink", url)
             setTempLink(url)
         }

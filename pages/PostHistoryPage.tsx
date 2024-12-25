@@ -12,6 +12,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutA
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
+import {PostHistory} from "../types/Types"
 
 interface Props {
     match?: any
@@ -55,14 +56,15 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/post/history", {postID, username}, session, setSessionFlag)
             if (!result.length) {
                 const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
-                postObject.date = postObject.uploadDate
-                postObject.user = postObject.uploader
+                const historyObject = postObject as unknown as PostHistory
+                historyObject.date = postObject.uploadDate
+                historyObject.user = postObject.uploader
                 let categories = await functions.tagCategories(postObject.tags, session, setSessionFlag)
-                postObject.artists = categories.artists.map((a: any) => a.tag)
-                postObject.characters = categories.characters.map((c: any) => c.tag)
-                postObject.series = categories.series.map((s: any) => s.tag)
-                postObject.tags = categories.tags.map((t: any) => t.tag)
-                result = [postObject]
+                historyObject.artists = categories.artists.map((a: any) => a.tag)
+                historyObject.characters = categories.characters.map((c: any) => c.tag)
+                historyObject.series = categories.series.map((s: any) => s.tag)
+                historyObject.tags = categories.tags.map((t: any) => t.tag)
+                result = [historyObject]
             }
         }
         setEnded(false)

@@ -1,5 +1,4 @@
-import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban,
-PostHistorySearch} from "./Types"
+import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory} from "./Types"
 
 export interface PrunedUser {
     username: string
@@ -90,7 +89,7 @@ export interface LoginParams {
 
 export interface UserPfpParams {
     bytes: Uint8Array
-    postID: string
+    postID?: string
 }
 
 export interface SaveSearchParams {
@@ -138,15 +137,15 @@ export interface ResetPasswordParams {
 export interface UserFavoritesParams {
     username?: string
     rating: PostRating
-    offset: number
-    limit: number
+    offset?: number
+    limit?: number
 }
 
 export interface UserCommentsParams {
     username?: string
-    query: string
+    query?: string
     sort: CommentSort
-    offset: number
+    offset?: number
 }
 
 export interface BanParams {
@@ -163,7 +162,7 @@ export interface BanResponse {
     revertPostIDs: string[]
     revertTagIDs: string[]
     revertGroupIDs: string[]
-    revertNoteIDs: string[]
+    revertNoteIDs: {postID: string, order: number}[]
 }
 
 export interface EditCounts {
@@ -180,13 +179,13 @@ export type UserGetEndpoint<T extends string> =
     T extends "/api/user/verifyemail" ? {params: {token: string}, response: string} :
     T extends "/api/user/favorites" ? {params: UserFavoritesParams, response: PostSearch[]} :
     T extends "/api/user/uploads" ? {params: UserFavoritesParams, response: PostSearch[]} :
-    T extends "/api/user/favgroups" ? {params: {username: string}, response: Favgroup[]} :
+    T extends "/api/user/favgroups" ? {params: {username: string} | null, response: Favgroup[]} :
     T extends "/api/user/comments" ? {params: UserCommentsParams, response: CommentSearch[]} :
     T extends "/api/user/ban" ? {params: {username: string}, response: Ban} :
     T extends "/api/user/checkmail" ? {params: null, response: boolean} :
-    T extends "/api/user/history" ? {params: {offset: number, query?: string}, response: PostHistorySearch[]} :
+    T extends "/api/user/history" ? {params: {offset?: number, query?: string}, response: SearchHistory[]} :
     T extends "/api/user/login/history" ? {params: null, response: LoginHistory[]} :
-    T extends "/api/user/edit/counts" ? {params: {username?: string}, response: EditCounts} :
+    T extends "/api/user/edit/counts" ? {params: {username: string} | null, response: EditCounts} :
     never
 
 export type UserPostEndpoint<T extends string> = 
@@ -200,8 +199,8 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/showtooltips" ? {params: null, response: string} :
     T extends "/api/user/showtagbanner" ? {params: null, response: string} :
     T extends "/api/user/downloadpixivid" ? {params: null, response: string} :
-    T extends "/api/user/autosearchinterval" ? {params: {interval: number}, response: string} :
-    T extends "/api/user/upscaledimages" ? {params: {reset?: boolean}, response: string} :
+    T extends "/api/user/autosearchinterval" ? {params: {interval: number | null}, response: string} :
+    T extends "/api/user/upscaledimages" ? {params: {reset: boolean} | null, response: string} :
     T extends "/api/user/savesearch" ? {params: SaveSearchParams, response: string} :
     T extends "/api/user/r18" ? {params: {r18?: boolean}, response: string} :
     T extends "/api/user/changebio" ? {params: {bio: string}, response: string} :
@@ -222,7 +221,7 @@ export type UserPutEndpoint<T extends string> =
 
 export type UserDeleteEndpoint<T extends string> = 
     T extends "/api/user/pfp" ? {params: null, response: string} :
-    T extends "/api/user/savesearch/delete" ? {params: {name: string, all?: boolean}, response: string} :
+    T extends "/api/user/savesearch/delete" ? {params: {name?: string, all?: boolean}, response: string} :
     T extends "/api/user/delete" ? {params: null, response: string} :
-    T extends "/api/user/history/delete" ? {params: {postID: string, all?: boolean}, response: string} :
+    T extends "/api/user/history/delete" ? {params: {postID?: string, all?: boolean}, response: string} :
     never

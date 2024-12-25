@@ -119,7 +119,7 @@ export interface PostHistoryParams {
     historyID?: string
     username?: string
     query?: string
-    offset: number
+    offset?: number
 }
 
 export interface PostCompressParams {
@@ -141,7 +141,7 @@ export interface PostUpscaleParams {
 
 export interface PostQuickEditParams {
     postID: string
-    unverified: boolean
+    unverified?: boolean
     type: PostType
     rating: PostRating
     style: PostStyle
@@ -165,12 +165,12 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/children" ? {params: {postID: string}, response: ChildPost[]} :
     T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost} :
     T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost} :
-    T extends "/api/post/list/unverified" ? {params: {offset: number}, response: UnverifiedPost[]} :
-    T extends "/api/post-edits/list/unverified" ? {params: {offset: number}, response: UnverifiedPost[]} :
+    T extends "/api/post/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
+    T extends "/api/post-edits/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post/children/unverified" ? {params: {postID: string}, response: ChildPost[]} :
     T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost} :
-    T extends "/api/post/delete/request/list" ? {params: {offset: number}, response: PostDeleteRequest[]} :
-    T extends "/api/post/history" ? {params: PostHistoryParams, response: PostHistory[]} :
+    T extends "/api/post/delete/request/list" ? {params: {offset?: number} | null, response: PostDeleteRequest[]} :
+    T extends "/api/post/history" ? {params: PostHistoryParams | null, response: PostHistory[]} :
     never
 
 export type PostPostEndpoint<T extends string> = 

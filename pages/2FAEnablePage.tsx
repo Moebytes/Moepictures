@@ -21,7 +21,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {disable2FAFlag} = useMiscDialogSelector()
     const {setDisable2FAFlag, setDisable2FADialog} = useMiscDialogActions()
-    const [qr, setQR] = useState(null) as any
+    const [qr, setQR] = useState("") as any
     const [showValidation, setShowValidation] = useState(false)
     const [token, setToken] = useState("")
     const [error, setError] = useState(false)

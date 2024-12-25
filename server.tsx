@@ -158,7 +158,7 @@ const tokenLimiter = rateLimit({
 })
 
 app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
-  const {ip, reason} = req.body
+  const {ip, reason} = req.body as {ip: string, reason: string}
   if (!req.session.username) return res.status(403).send("Unauthorized")
   if (!permissions.isAdmin(req.session)) return res.status(403).end()
   if (!ip) return res.status(400).send("Bad ip")
@@ -168,7 +168,7 @@ app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Respon
 })
 
 app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
-  const {ip} = req.query as any
+  const {ip} = req.query as {ip: string}
   if (!req.session.username) return res.status(403).send("Unauthorized")
   if (!permissions.isAdmin(req.session)) return res.status(403).end()
   if (!ip) return res.status(400).send("Bad ip")

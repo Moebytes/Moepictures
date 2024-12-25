@@ -13,7 +13,7 @@ import permissions from "../structures/Permissions"
 import path from "path"
 import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
 ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
-PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts} from "../types/Types"
+PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams} from "../types/Types"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -503,7 +503,7 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/savesearch/delete", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {name, all} = req.query as unknown as {name: string, all?: boolean}
+            const {name, all} = req.query as unknown as {name?: string, all?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
@@ -511,6 +511,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(req.session.username, "savedSearches", null)
                 return res.status(200).send("Success")
             }
+            if (!name) return res.status(400).send("Bad name")
             let savedSearches = user.savedSearches || {}
             delete savedSearches[name]
             req.session.savedSearches = savedSearches 
@@ -828,7 +829,9 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            let {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            if (!offset) offset = 0
+            if (!limit) limit = 100
             let favorites = [] as PostSearch[]
             if (username) {
                 const user = await sql.user.user(username as string)
@@ -861,7 +864,9 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            let {username, rating, offset, limit} = req.query as unknown as UserFavoritesParams
+            if (!offset) offset = 0
+            if (!limit) limit = 100
             let uploads = [] as PostSearch[]
             if (username) {
                 uploads = await sql.user.uploads(username, Number(limit), Number(offset), "all", rating)
@@ -912,10 +917,9 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/comments", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const query = req.query.query as string
-            const sort = req.query.sort as string
-            const offset = req.query.offset as string
-            const username = req.query.username as string
+            let {query, sort, offset, username} = req.query as unknown as UserCommentsParams
+            if (!query) query = ""
+            if (!offset) offset = 0
             let comments = [] as CommentSearch[]
             if (username) {
                 comments = await sql.comment.searchCommentsByUsername([username], query, sort, Number(offset))
@@ -1229,8 +1233,8 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/history", userLimiter, async (req: Request, res: Response) => {
         try {
-            const offset = req.query.offset as string
-            const query = req.query.query as string
+            let {query, offset} = req.query as unknown as {query: string, offset: number}
+            if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             const result = await sql.history.userSearchHistory(req.session.username, 100, Number(offset), query)
@@ -1243,14 +1247,13 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/history/delete", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID as string
-            const all = req.query.all === "true"
+            const {postID, all} = req.query as {postID?: string, all?: boolean}
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (all) {
                 await sql.history.deleteAllSearchHistory(req.session.username)
                 return res.status(200).send("Success")
             }
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
+            if (!postID || Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
             await sql.history.deleteSearchHistory(postID, req.session.username)
             res.status(200).send("Success")
         } catch (e) {

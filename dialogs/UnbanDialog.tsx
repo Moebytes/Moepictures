@@ -36,7 +36,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
 
     const unban = async () => {
         if (!permissions.isMod(session)) return setUnbanName(null)
-        await functions.post("/api/user/unban", {username: unbanName, reason}, session, setSessionFlag)
+        await functions.post("/api/user/unban", {username: unbanName}, session, setSessionFlag)
         setUnbanName(null)
         setUpdateUserFlag(true)
     }
