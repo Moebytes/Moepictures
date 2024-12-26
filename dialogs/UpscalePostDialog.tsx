@@ -11,10 +11,10 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
-import {PostSearch, PostHistory, Upscaler} from "../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, Upscaler} from "../types/Types"
 
 interface Props {
-    post: PostSearch | PostHistory
+    post: PostSearch | PostHistory | UnverifiedPost
 }
 
 const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {

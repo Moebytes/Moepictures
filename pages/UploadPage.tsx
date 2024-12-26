@@ -46,9 +46,9 @@ import ContentEditable from "react-contenteditable"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
 import tagConvert from "../assets/json/tag-convert.json"
-import "./styles/uploadpage.less"
 import path from "path"
-import {PostType, PostRating, PostStyle} from "../types/Types"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile} from "../types/Types"
+import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
@@ -74,18 +74,18 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
-    const [originalFiles, setOriginalFiles] = useState([]) as any
-    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
-    const [dupPosts, setDupPosts] = useState([]) as any
-    const uploadErrorRef = useRef<any>(null)
-    const submitErrorRef = useRef<any>(null)
-    const saucenaoErrorRef = useRef<any>(null)
-    const danbooruErrorRef = useRef<any>(null)
-    const enterLinksRef = useRef<any>(null)
-    const [currentImg, setCurrentImg] = useState(null) as any
-    const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
+    const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
+    const [dupPosts, setDupPosts] = useState([] as Post[])
+    const uploadErrorRef = useRef<HTMLSpanElement>(null)
+    const submitErrorRef = useRef<HTMLSpanElement>(null)
+    const saucenaoErrorRef = useRef<HTMLSpanElement>(null)
+    const danbooruErrorRef = useRef<HTMLSpanElement>(null)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const [currentImg, setCurrentImg] = useState("")
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
-    const [currentDupIndex, setCurrentDupIndex] = useState(0) as any
+    const [currentDupIndex, setCurrentDupIndex] = useState(0)
     const [type, setType] = useState("image" as PostType)
     const [rating, setRating] = useState("cute" as PostRating)
     const [style, setStyle] = useState("2d" as PostStyle)
@@ -101,23 +101,23 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourceBuyLink, setSourceBuyLink] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
-    const [artists, setArtists] = useState([{}]) as any
-    const [characters, setCharacters] = useState([{}]) as any
-    const [series, setSeries] = useState([{}]) as any
-    const [newTags, setNewTags] = useState([]) as any
+    const [artists, setArtists] = useState([{}] as UploadTag[])
+    const [characters, setCharacters] = useState([{}] as UploadTag[])
+    const [series, setSeries] = useState([{}] as UploadTag[])
+    const [newTags, setNewTags] = useState([] as UploadTag[])
     const [rawTags, setRawTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [artistActive, setArtistActive] = useState([]) as any
-    const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a: any) => React.createRef())) as any
-    const [characterActive, setCharacterActive] = useState([]) as any
-    const [characterInputRefs, setCharacterInputRefs] = useState(characters.map((a: any) => React.createRef())) as any
-    const [seriesActive, setSeriesActive] = useState([]) as any
-    const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a: any) => React.createRef())) as any
+    const [artistActive, setArtistActive] = useState([] as boolean[])
+    const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a) => React.createRef<HTMLInputElement>()))
+    const [characterActive, setCharacterActive] = useState([] as boolean[])
+    const [characterInputRefs, setCharacterInputRefs] = useState(characters.map((a) => React.createRef<HTMLInputElement>()))
+    const [seriesActive, setSeriesActive] = useState([] as boolean[])
+    const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a) => React.createRef<HTMLInputElement>()))
     const [tagActive, setTagActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [danbooruLink, setDanbooruLink] = useState("")
-    const rawTagRef = useRef<any>(null)
+    const rawTagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const parseLinkParam = async () => {
@@ -176,7 +176,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         let currentFiles = getCurrentFiles()
         if (currentFiles[currentIndex]) {
             const img = currentFiles[currentIndex]
-            let dupes = null as any
+            let dupes = [] as Post[]
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
                 dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
@@ -199,15 +199,16 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        let acceptedArray = [] as any 
+        if (!uploadErrorRef.current) return
+        let acceptedArray = [] as UploadImageFile[] 
         let error = ""
-        let isLive2DArr = [] as any
+        let isLive2DArr = [] as boolean[]
         for (let i = 0; i < files.length; i++) {
             const fileReader = new FileReader()
             await new Promise<void>((resolve) => {
-                fileReader.onloadend = async (f: any) => {
+                fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
                     let live2d = false
-                    const bytes = new Uint8Array(f.target.result)
+                    const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                     const result = functions.bufferFileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
@@ -243,7 +244,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
                                 if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                     resolve()
                                 } else {
                                     const reader = new JSZip()
@@ -269,7 +270,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                                         if (obj) result.typename = "obj"
                                         const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: data})
                                         } else {
                                             error = i18n.pages.upload.supportedFiletypesZip
                                         }
@@ -277,7 +278,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     resolve()
                                 }
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                 resolve()
                             }
                         } else {
@@ -294,13 +295,13 @@ const UploadPage: React.FunctionComponent = (props) => {
             })
         }
         if (acceptedArray.length) {
-            let urls = [] as any
+            let urls = [] as UploadImage[]
             for (let i = 0; i < acceptedArray.length; i++) {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                let width = ""
-                let height = ""
+                let width = 0
+                let height = 0
                 if (isLive2DArr[i]) {
                     thumbnail = await functions.live2dScreenshot(link)
                     let dimensions = await functions.live2dDimensions(link)
@@ -319,9 +320,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
             if (showUpscaled) {
-                setUpscaledFiles((prev: any) => [...prev, ...urls])
+                setUpscaledFiles((prev) => [...prev, ...urls])
             } else {
-                setOriginalFiles((prev: any) => [...prev, ...urls])
+                setOriginalFiles((prev) => [...prev, ...urls])
             }
         }
         if (error) {
@@ -354,21 +355,21 @@ const UploadPage: React.FunctionComponent = (props) => {
         setStyle("2d")
     }
 
-    const upload = async (event: any) => {
+    const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
         if (!files?.[0]) return
-        await validate(files)
+        await validate(Array.from(files))
         event.target.value = ""
         // reset()
     }
 
-    const uploadTagImg = async (event: any, type: string, index: number) => {
+    const uploadTagImg = async (event: File | React.ChangeEvent<HTMLInputElement>, type: string, index: number) => {
         const file = event instanceof File ? event : event.target.files?.[0]
         if (!file) return
         const fileReader = new FileReader()
         await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: any) => {
-                let bytes = new Uint8Array(f.target.result)
+            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
+                let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                 const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
@@ -381,8 +382,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                     let croppedURL = ""
                     if (gif) {
                         const gifData = await functions.extractGIFFrames(url)
-                        let frameArray = [] as any 
-                        let delayArray = [] as any
+                        let frameArray = [] as Buffer[] 
+                        let delayArray = [] as number[]
                         for (let i = 0; i < gifData.length; i++) {
                             const canvas = gifData[i].frame as HTMLCanvasElement
                             const cropped = await functions.crop(canvas.toDataURL(), 1, true)
@@ -404,22 +405,22 @@ const UploadPage: React.FunctionComponent = (props) => {
                     if (type === "artist") {
                         artists[index].image = `${url}#.${ext}`
                         artists[index].ext = result.typename
-                        artists[index].bytes = Object.values(bytes)
+                        artists[index].bytes = bytes
                         setArtists(artists)
                     } else if (type === "character") {
                         characters[index].image = `${url}#.${ext}`
                         characters[index].ext = result.typename
-                        characters[index].bytes = Object.values(bytes)
+                        characters[index].bytes = bytes
                         setCharacters(characters)
                     } else if (type === "series") {
                         series[index].image = `${url}#.${ext}`
                         series[index].ext = result.typename
-                        series[index].bytes = Object.values(bytes)
+                        series[index].bytes = bytes
                         setSeries(series)
                     } else if (type === "tag") {
                         newTags[index].image = `${url}#.${ext}`
                         newTags[index].ext = result.typename
-                        newTags[index].bytes = Object.values(bytes)
+                        newTags[index].bytes = bytes
                         setNewTags(newTags)
                     }
                 }
@@ -427,7 +428,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             fileReader.readAsArrayBuffer(file)
         })
-        if (event.target) event.target.value = ""
+        if (!(event instanceof File)) event.target.value = ""
         forceUpdate()
     }
 
@@ -443,19 +444,19 @@ const UploadPage: React.FunctionComponent = (props) => {
                 artists[index].tag = tagDetail.tag
                 artists[index].image = tagLink
                 artists[index].ext = ext
-                artists[index].bytes = Object.values(bytes)
+                artists[index].bytes = bytes
                 setArtists(artists)
             } else if (tagDetail.type === "character") {
                 characters[index].tag = tagDetail.tag
                 characters[index].image = tagLink
                 characters[index].ext = ext
-                characters[index].bytes = Object.values(bytes)
+                characters[index].bytes = bytes
                 setCharacters(characters)
             } else if (tagDetail.type === "series") {
                 series[index].tag = tagDetail.tag
                 series[index].image = tagLink
                 series[index].ext = ext
-                series[index].bytes = Object.values(bytes)
+                series[index].bytes = bytes
                 setSeries(series)
             }
         } else {
@@ -477,7 +478,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const generateArtistsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < artists.length; i++) {
             const changeTagInput = (value: string) => {
                 artists[i].tag = value 
@@ -560,7 +561,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const generateCharactersJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < characters.length; i++) {
             const changeTagInput = (value: string) => {
                 characters[i].tag = value 
@@ -643,7 +644,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const generateSeriesJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < series.length; i++) {
             const changeTagInput = (value: string) => {
                 series[i].tag = value 
@@ -725,7 +726,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const linkUpload = async (event: any) => {
+    const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
@@ -757,7 +758,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const clear = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         if (enterLinksRef.current) {
             const link = currentFiles[currentIndex]?.originalLink
             if (link) {
@@ -769,7 +770,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         currentFiles.splice(currentIndex, 1)
         const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
-        const newLink = currentFiles[newIndex]?.link || null
+        const newLink = currentFiles[newIndex]?.link || ""
         showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         if (!(showUpscaled ? upscaledFiles : originalFiles).length) setDupPosts([])
@@ -778,7 +779,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     
     const left = () => {
         const currentFiles = showUpscaled ? upscaledFiles : originalFiles
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -789,7 +790,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const right = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex + 1
         if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -799,6 +800,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
+        if (!submitErrorRef.current) return
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
             await functions.timeout(20)
@@ -824,8 +826,8 @@ const UploadPage: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        const upscaledMB = upscaledFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        const originalMB = originalFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
+        const originalMB = originalFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const MB = upscaledMB + originalMB
         if (MB > 300 && !permissions.isMod(session)) {
             setSubmitError(true)
@@ -834,17 +836,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        let newOriginalFiles = originalFiles.map((a: any) => {
-            a.bytes = Object.values(a.bytes)
-            return a
-        })
-        let newUpscaledFiles = upscaledFiles.map((a: any) => {
-            a.bytes = Object.values(a.bytes)
-            return a
-        })
         const data = {
-            images: newOriginalFiles,
-            upscaledImages: newUpscaledFiles,
+            images: originalFiles,
+            upscaledImages: upscaledFiles,
             type,
             rating,
             style,
@@ -889,6 +883,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const sourceLookup = async () => {
+        if (!saucenaoErrorRef.current) return
         setSaucenaoError(true)
         await functions.timeout(20)
         saucenaoErrorRef.current.innerText = i18n.buttons.fetching
@@ -899,11 +894,11 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         const currentFiles = getCurrentFiles()
         let current = currentFiles[currentIndex]
-        let bytes = "" as any 
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
         let source = ""
         let artist = ""
@@ -913,7 +908,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         let englishCommentary = ""
         let date = ""
         let bookmarks = ""
-        let mirrors = [] as any
+        let mirrors = [] as string[]
         saucenaoTimeout = true
         try {
             let basename = path.basename(current.name, path.extname(current.name)).trim()
@@ -950,15 +945,15 @@ const UploadPage: React.FunctionComponent = (props) => {
             } else {
                 let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
                 if (results.length) {
-                    const pixiv = results.filter((r: any) => r.header.index_id === 5)
-                    const twitter = results.filter((r: any) => r.header.index_id === 41)
-                    const artstation = results.filter((r: any) => r.header.index_id === 39)
-                    const deviantart = results.filter((r: any) => r.header.index_id === 34)
-                    const danbooru = results.filter((r: any) => r.header.index_id === 9)
-                    const gelbooru = results.filter((r: any) => r.header.index_id === 25)
-                    const konachan = results.filter((r: any) => r.header.index_id === 26)
-                    const yandere = results.filter((r: any) => r.header.index_id === 12)
-                    const anime = results.filter((r: any) => r.header.index_id === 21)
+                    const pixiv = results.filter((r) => r.header.index_id === 5)
+                    const twitter = results.filter((r) => r.header.index_id === 41)
+                    const artstation = results.filter((r) => r.header.index_id === 39)
+                    const deviantart = results.filter((r) => r.header.index_id === 34)
+                    const danbooru = results.filter((r) => r.header.index_id === 9)
+                    const gelbooru = results.filter((r) => r.header.index_id === 25)
+                    const konachan = results.filter((r) => r.header.index_id === 26)
+                    const yandere = results.filter((r) => r.header.index_id === 12)
+                    const anime = results.filter((r) => r.header.index_id === 21)
                     if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
                     if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
                     if (deviantart.length) {
@@ -1007,8 +1002,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                             artistInputRefs.push(React.createRef())
                             setArtists(artists)
                             forceUpdate()
-                            // const englishTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
-                            // setRawTags(englishTags.map((t: string) => t.toLowerCase()).join(" "))
                         } catch (e) {
                             console.log(e)
                         }
@@ -1097,21 +1090,22 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const tagLookup = async () => {
+        if (!danbooruErrorRef.current) return
         setDanbooruError(true)
         await functions.timeout(20)
         danbooruErrorRef.current.innerText = i18n.buttons.fetching
-        let tagArr = [] as any
+        let tagArr = [] as string[]
 
         let blockedTags = tagConvert.blockedTags
         let tagReplaceMap = tagConvert.tagReplaceMap
 
         const currentFiles = getCurrentFiles()
         let current = currentFiles[currentIndex]
-        let bytes = "" as any 
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
 
         try {
@@ -1160,7 +1154,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         characters[characters.length - 1].image = tagLink
                         characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
+                        characters[characters.length - 1].bytes = bytes
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
@@ -1180,7 +1174,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         series[series.length - 1].image = tagLink
                         series[series.length - 1].ext = ext
-                        series[series.length - 1].bytes = Object.values(bytes)
+                        series[series.length - 1].bytes = bytes
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
@@ -1249,7 +1243,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         characters[characters.length - 1].image = tagLink
                         characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
+                        characters[characters.length - 1].bytes = bytes
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
@@ -1267,7 +1261,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         series[series.length - 1].image = tagLink
                         series[series.length - 1].ext = ext
-                        series[series.length - 1].bytes = Object.values(bytes)
+                        series[series.length - 1].bytes = bytes
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
@@ -1290,7 +1284,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         reset()
         setOriginalFiles([])
         setUpscaledFiles([])
-        setCurrentImg(null)
+        setCurrentImg("")
         setCurrentIndex(0)
         setCurrentDupIndex(0)
         setShowLinksInput(false)
@@ -1307,13 +1301,13 @@ const UploadPage: React.FunctionComponent = (props) => {
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
             const tagMap = await functions.tagsCache(session, setSessionFlag)
-            let notExists = [] as any
+            let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
                 if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
                 if (index !== -1) notExists[i] = newTags[index]
             }
             setNewTags(notExists)
@@ -1321,7 +1315,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < newTags.length; i++) {
             const changeTagDesc = (value: string) => {
                 newTags[i].desc = value 
@@ -1571,7 +1565,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 current = currentFiles[0]
                 index = 0
             }
-            setCurrentImg(current?.link || null)
+            setCurrentImg(current?.link || "")
             setCurrentIndex(index)
             setImgChangeFlag(false)
         }
@@ -1712,7 +1706,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
@@ -1834,7 +1828,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             {dupPosts.length ? <>
             <span className="upload-heading">{i18n.pages.upload.possibleDuplicates}</span>
             <div className="upload-row">
-                <Carousel images={dupPosts.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))} set={setDup} index={currentDupIndex}/>
+                <Carousel images={dupPosts.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))} set={setDup} index={currentDupIndex}/>
             </div>
             </> : null}
             <div className="upload-container">

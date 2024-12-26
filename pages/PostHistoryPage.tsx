@@ -11,11 +11,11 @@ import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
+import {PostHistory, TagHistory} from "../types/Types"
 import "./styles/historypage.less"
-import {PostHistory} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {id: string, username?: string}}
     all?: boolean
     user?: boolean
 }
@@ -30,13 +30,13 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([]) as any
+    const [revisions, setRevisions] = useState([] as PostHistory[])
     const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([]) as any
+    const [visibleRevisions, setVisibleRevisions] = useState([] as PostHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const postID = props.match?.params.id
-    const username = props.match?.params.username
+    const postID = props.match.params.id
+    const username = props.match.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -49,7 +49,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const updateHistory = async () => {
-        let result = [] as any
+        let result = [] as PostHistory[]
         if (props.all) {
             result = await functions.get("/api/post/history", null, session, setSessionFlag)
         } else {
@@ -62,10 +62,10 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 historyObject.user = postObject.uploader
                 historyObject.images = postObject.images.map((i) => functions.getThumbnailLink(i.type, i.postID, i.order, i.filename, "medium", mobile))
                 let categories = await functions.tagCategories(postObject.tags, session, setSessionFlag)
-                historyObject.artists = categories.artists.map((a: any) => a.tag)
-                historyObject.characters = categories.characters.map((c: any) => c.tag)
-                historyObject.series = categories.series.map((s: any) => s.tag)
-                historyObject.tags = categories.tags.map((t: any) => t.tag)
+                historyObject.artists = categories.artists.map((a) => a.tag)
+                historyObject.characters = categories.characters.map((c) => c.tag)
+                historyObject.series = categories.series.map((s) => s.tag)
+                historyObject.tags = categories.tags.map((t) => t.tag)
                 result = [historyObject]
             }
         }
@@ -104,7 +104,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         let currentIndex = index
-        const newVisibleRevisions = [] as any
+        const newVisibleRevisions = [] as PostHistory[]
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
             if (functions.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
@@ -124,7 +124,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev: any) => [...prev, ...result])
+            setRevisions((prev) => [...prev, ...result])
         } else {
             setEnded(true)
         }
@@ -136,7 +136,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions as any
+                const newRevisions = visibleRevisions
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
                     if (functions.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
@@ -157,11 +157,11 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     })
 
     const generateRevisionsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let current = visibleRevisions[0]
         let currentIndex = 0
         for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1]
+            let previous = visibleRevisions[i + 1] as PostHistory | null
             if (current.postID !== visibleRevisions[i].postID) {
                 current = visibleRevisions[i]
                 currentIndex = i

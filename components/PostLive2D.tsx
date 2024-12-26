@@ -25,13 +25,13 @@ import prevIcon from "../assets/icons/go-left.png"
 import * as PIXI from "pixi.js"
 import type {Live2DModel} from "pixi-live2d-display"
 import JSZip from "jszip"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 import "./styles/postmodel.less"
 
 let id = null as any
 
 interface Props {
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     live2d: string
     width?: number
     height?: number

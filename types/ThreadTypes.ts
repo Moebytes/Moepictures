@@ -43,6 +43,7 @@ export interface ThreadReply {
     banned: boolean | null
     replyCount: string
     postCount: number
+    fake?: boolean
 }
 
 export interface ThreadRead {

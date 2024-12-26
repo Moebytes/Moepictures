@@ -29,14 +29,14 @@ import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 import "./styles/postmodel.less"
 
 let imageTimer = null as any
 let id = null as any
 
 interface Props {
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     model: string
     width?: number
     height?: number

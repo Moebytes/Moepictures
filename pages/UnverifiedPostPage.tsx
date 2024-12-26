@@ -28,9 +28,10 @@ import {useSessionSelector, useSessionActions, useLayoutActions, useActiveAction
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
+import {TagCategories, UnverifiedPost, ChildPost} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {id: string}}
 }
 
 const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
@@ -45,15 +46,15 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {setTags} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
-    const [images, setImages] = useState([]) as any
-    const [childPosts, setChildPosts] = useState([]) as any
-    const [parentPost, setParentPost] = useState(null) as any
-    const [image, setImage] = useState("") as any
-    const [post, setPost] = useState(null) as any
-    const [tagCategories, setTagCategories] = useState(null) as any
+    const [images, setImages] = useState([] as string[])
+    const [childPosts, setChildPosts] = useState([] as ChildPost[])
+    const [parentPost, setParentPost] = useState(null as ChildPost | null)
+    const [image, setImage] = useState("")
+    const [post, setPost] = useState(null as UnverifiedPost | null)
+    const [tagCategories, setTagCategories] = useState(null as TagCategories | null)
     const [order, setOrder] = useState(1)
     const history = useHistory()
-    const postID = props?.match.params.id
+    const postID = props.match.params.id
 
     useEffect(() => {
         setHideNavbar(false)
@@ -122,18 +123,9 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = unverifiedPosts.find((p: any) => p.postID === postID)
+            let post = unverifiedPosts.find((p) => p.postID === postID)
             if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
             if (post) {
-                /*
-                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
-                setImages(images)
-                if (images[order-1]) {
-                    setImage(images[order-1])
-                } else {
-                    setImage(images[0])
-                    setOrder(1)
-                }*/
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
@@ -150,9 +142,9 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
             } else {
-                images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
+                images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
             }
             setImages(images)
             if (images[order-1]) {
@@ -169,7 +161,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setPostFlag(false)
             let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
             if (post) {
-                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
+                const images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 if (images[order-1]) {
                     setImage(images[order-1])
@@ -195,7 +187,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const next = () => {
-        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === postID)
+        let currentIndex = unverifiedPosts.findIndex((p) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
@@ -206,7 +198,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const previous = () => {
-        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === postID)
+        let currentIndex = unverifiedPosts.findIndex((p) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex--
             if (unverifiedPosts[currentIndex]) {
@@ -302,7 +294,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {childPosts.length ? <Children posts={childPosts}/>: null}
-                    {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
+                    {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     <Footer/>
                 </div>

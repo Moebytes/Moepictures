@@ -1784,8 +1784,8 @@ export default class Functions {
         // @ts-expect-error
         const {Live2DModel} = await import("pixi-live2d-display/cubism4")
         const model = await Live2DModel.from(live2d)
-        const width = model.internalModel.width
-        const height = model.internalModel.height
+        const width = Number(model.internalModel.width)
+        const height = Number(model.internalModel.height)
         const r = await fetch(live2d).then((r) => r.arrayBuffer())
         const size = r.byteLength
         return {width, height, size}

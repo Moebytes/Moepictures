@@ -52,11 +52,16 @@ export interface Attachment {
     content: Buffer
 }
 
+export interface FileUpload {
+    name: string
+    bytes: Uint8Array
+}
+
 export interface ContactParams {
     email: string
     subject: string 
     message: string 
-    files?: {name: string, bytes: Uint8Array}[]
+    files?: FileUpload[]
 }
 
 export interface CopyrightParams {

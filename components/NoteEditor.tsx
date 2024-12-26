@@ -18,10 +18,10 @@ import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
 import noteOCR from "../assets/icons/note-ocr.png"
 import "./styles/noteeditor.less"
-import {PostFull, PostHistory, Note, BubbleData} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../types/Types"
 
 interface Props {
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     img: string
     order?: number
     unverified?: boolean

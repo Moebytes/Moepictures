@@ -46,13 +46,11 @@ import {ProgressBar} from "react-bootstrap"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
 import tagConvert from "../assets/json/tag-convert.json"
-import "./styles/uploadpage.less"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile} from "../types/Types"
 import path from "path"
-import {PostType, PostRating, PostStyle} from "../types/Types"
+import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
-let saucenaoTimeout = false
-let tagsTimer = null as any
 
 const BulkUploadPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -69,18 +67,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen} = useFilterActions()
     const {uploadDropFiles} = useCacheSelector()
     const {setUploadDropFiles} = useCacheActions()
-    const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
-    const [saucenaoError, setSaucenaoError] = useState(false)
-    const [danbooruError, setDanbooruError] = useState(false)
-    const [originalFiles, setOriginalFiles] = useState([]) as any
-    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
-    const uploadErrorRef = useRef<any>(null)
-    const submitErrorRef = useRef<any>(null)
-    const enterLinksRef = useRef<any>(null)
-    const [currentImg, setCurrentImg] = useState(null) as any
-    const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
+    const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
+    const uploadErrorRef = useRef<HTMLSpanElement>(null)
+    const submitErrorRef = useRef<HTMLSpanElement>(null)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const [currentImg, setCurrentImg] = useState("")
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [type, setType] = useState("image" as PostType)
     const [rating, setRating] = useState("cute" as PostRating)
@@ -91,19 +86,19 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [rawCharacter, setRawCharacter] = useState("")
     const [rawSeries, setRawSeries] = useState("")
     const [rawAppendTags, setRawAppendTags] = useState("")
-    const [artistActive, setArtistActive] = useState(false) as any
-    const [characterActive, setCharacterActive] = useState(false) as any
-    const [seriesActive, setSeriesActive] = useState(false) as any
-    const [tagActive, setTagActive] = useState(false) as any
+    const [artistActive, setArtistActive] = useState(false)
+    const [characterActive, setCharacterActive] = useState(false)
+    const [seriesActive, setSeriesActive] = useState(false)
+    const [tagActive, setTagActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [progress, setProgress] = useState(0)
     const [progressText, setProgressText] = useState("")
-    const progressBarRef = useRef<any>(null)
-    const artistInputRef = useRef(null) as any
-    const characterInputRef = useRef(null) as any
-    const seriesInputRef = useRef(null) as any
-    const appendTagsRef = useRef(null) as any
+    const progressBarRef = useRef<HTMLDivElement>(null)
+    const artistInputRef = useRef<HTMLInputElement>(null)
+    const characterInputRef = useRef<HTMLInputElement>(null)
+    const seriesInputRef = useRef<HTMLInputElement>(null)
+    const appendTagsRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -151,15 +146,16 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        let acceptedArray = [] as any 
+        if (!uploadErrorRef.current) return
+        let acceptedArray = [] as UploadImageFile[] 
         let error = ""
-        let isLive2DArr = [] as any
+        let isLive2DArr = [] as boolean[]
         for (let i = 0; i < files.length; i++) {
             const fileReader = new FileReader()
             await new Promise<void>((resolve) => {
-                fileReader.onloadend = async (f: any) => {
+                fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
                     let live2d = false
-                    const bytes = new Uint8Array(f.target.result)
+                    const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                     const result = functions.bufferFileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
@@ -195,7 +191,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
                                 if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                     resolve()
                                 } else {
                                     const reader = new JSZip()
@@ -221,7 +217,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                         if (obj) result.typename = "obj"
                                         const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: data})
                                         } else {
                                             error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
                                         }
@@ -229,7 +225,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                     resolve()
                                 }
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                 resolve()
                             }
                         } else {
@@ -246,13 +242,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             })
         }
         if (acceptedArray.length) {
-            let urls = [] as any
+            let urls = [] as UploadImage[]
             for (let i = 0; i < acceptedArray.length; i++) {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                let width = ""
-                let height = ""
+                let width = 0
+                let height = 0
                 if (isLive2DArr[i]) {
                     thumbnail = await functions.live2dScreenshot(link)
                     let dimensions = await functions.live2dDimensions(link)
@@ -265,15 +261,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else if (functions.isAudio(acceptedArray[i].ext)) {
                     thumbnail = await functions.songCover(link)
                 }
-                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
+                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail, width, height,
                 originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
             if (showUpscaled) {
-                setUpscaledFiles((prev: any) => [...prev, ...urls])
+                setUpscaledFiles((prev) => [...prev, ...urls])
             } else {
-                setOriginalFiles((prev: any) => [...prev, ...urls])
+                setOriginalFiles((prev) => [...prev, ...urls])
             }
         }
         if (error) {
@@ -291,10 +287,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setStyle("2d")
     }
 
-    const upload = async (event: any) => {
+    const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
         if (!files?.[0]) return
-        await validate(files)
+        await validate(Array.from(files))
         event.target.value = ""
     }
 
@@ -314,8 +310,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let croppedURL = ""
             if (gif) {
                 const gifData = await functions.extractGIFFrames(url)
-                let frameArray = [] as any 
-                let delayArray = [] as any
+                let frameArray = [] as Buffer[] 
+                let delayArray = [] as number[]
                 for (let i = 0; i < gifData.length; i++) {
                     const canvas = gifData[i].frame as HTMLCanvasElement
                     const cropped = await functions.crop(canvas.toDataURL(), 1, true)
@@ -337,12 +333,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             return {
                 image: `${url}#.${ext}`,
                 ext: result.typename,
-                bytes: Object.values(bytes)
+                bytes
             }
         }
     }
 
-    const linkUpload = async (event: any) => {
+    const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
@@ -364,7 +360,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const clear = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         if (enterLinksRef.current) {
             const link = currentFiles[currentIndex]?.originalLink
             if (link) {
@@ -376,7 +372,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
         currentFiles.splice(currentIndex, 1)
         const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
-        const newLink = currentFiles[newIndex]?.link || null
+        const newLink = currentFiles[newIndex]?.link || ""
         showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         forceUpdate()
@@ -384,7 +380,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     
     const left = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -395,7 +391,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const right = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex + 1
         if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -405,13 +401,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
-        let submitObj = {} as any
-        let upscaledSubmitObj = {} as any
+        if (!submitErrorRef.current) return
+        let submitObj = {} as UploadImage
+        let upscaledSubmitObj = {} as UploadImage
         for (let i = 0; i < originalFiles.length; i++) {
             const current = originalFiles[i]
             const upscaledCurrent = upscaledFiles[i]
-            current.bytes = Object.values(current.bytes)
-            let dupes = [] as any
+            let dupes = [] as Post[]
             if (current.thumbnail) {
                 const bytes = await functions.base64toUint8Array(current.thumbnail)
                 dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
@@ -432,8 +428,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 upscaledSubmitObj[upscaledID] = [upscaledCurrent]
             }
         }
-        const submitData = Object.values(submitObj) as any[][]
-        const upscaledSubmitData = Object.values(upscaledSubmitObj) as any[][]
+        const submitData = Object.values(submitObj) as UploadImage[][]
+        const upscaledSubmitData = Object.values(upscaledSubmitObj) as UploadImage[][]
         if (!submitData.length) {
             setSubmitError(true)
             submitErrorRef.current.innerText = "All of the posts already exist."
@@ -452,18 +448,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
-            let newOriginalFiles = currentArr.map((a: any) => {
-                a.bytes = Object.values(a.bytes)
-                return a
-            })
-            let newUpscaledFiles = upscaledCurrentArr.map((a: any) => {
-                a.bytes = Object.values(a.bytes)
-                return a
-            })
-
             const data = {
-                images: newOriginalFiles,
-                upscaledImages: newUpscaledFiles,
+                images: originalFiles,
+                upscaledImages: upscaledFiles,
                 type: tagData.type,
                 rating: tagData.rating,
                 style: tagData.style,
@@ -491,7 +478,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             if (rawArtist?.trim()) {
                 const artistArr = functions.cleanHTML(rawArtist).trim().split(/[\n\r\s]+/g)
-                let newArtists = [] as any
+                let newArtists = [] as UploadTag[]
                 for (let i = 0; i < artistArr.length; i++) {
                     newArtists.push({tag: artistArr[i]})
                 }
@@ -499,11 +486,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             if (rawCharacter?.trim()) {
                 const characterArr = functions.cleanHTML(rawCharacter).trim().split(/[\n\r\s]+/g)
-                let newCharacters = [] as any
+                let newCharacters = [] as UploadTag[]
                 for (let i = 0; i < characterArr.length; i++) {
                     newCharacters.push({tag: characterArr[i]})
                 }
-                if (data.characters.map((s: any) => s.tag).filter(Boolean).length === 1) {
+                if (data.characters.map((s) => s.tag).filter(Boolean).length === 1) {
                     data.characters = newCharacters
                 } else {
                     data.characters.push(...newCharacters)
@@ -512,11 +499,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             if (rawSeries?.trim()) {
                 const seriesArr = functions.cleanHTML(rawSeries).trim().split(/[\n\r\s]+/g)
-                let newSeries = [] as any
+                let newSeries = [] as UploadTag[]
                 for (let i = 0; i < seriesArr.length; i++) {
                     newSeries.push({tag: seriesArr[i]})
                 }
-                if (data.series.map((s: any) => s.tag).filter(Boolean).length === 1) {
+                if (data.series.map((s) => s.tag).filter(Boolean).length === 1) {
                     data.series = newSeries
                 } else {
                     data.series.push(...newSeries)
@@ -557,12 +544,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setProgressText("")
     }
 
-    const sourceLookup = async (current: any, rating: PostRating) => {
-        let bytes = "" as any 
+    const sourceLookup = async (current: UploadImage, rating: PostRating) => {
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
         let source = ""
         let artist = ""
@@ -573,8 +560,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let posted = ""
         let bookmarks = ""
         let danbooruLink = ""
-        let mirrors = [] as any
-        let artists = [{}] as any
+        let mirrors = [] as string[]
+        let artists = [{}] as UploadTag[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
         if (/^\d+(?=$|_p)/.test(basename)) {
@@ -610,7 +597,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 console.log(e)
             }
             mirrors = await functions.post("/api/misc/boorulinks", {bytes, pixivID}, session, setSessionFlag)
-            mirrors = mirrors?.length ? mirrors.join("\n") : ""
+            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 rating,
                 artists,
@@ -624,21 +611,21 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     englishCommentary,
                     bookmarks,
                     posted,
-                    mirrors
+                    mirrors: mirrorStr
                 }
             }
         } else {
             let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
             if (results.length) {
-                const pixiv = results.filter((r: any) => r.header.index_id === 5)
-                const twitter = results.filter((r: any) => r.header.index_id === 41)
-                const artstation = results.filter((r: any) => r.header.index_id === 39)
-                const deviantart = results.filter((r: any) => r.header.index_id === 34)
-                const danbooru = results.filter((r: any) => r.header.index_id === 9)
-                const gelbooru = results.filter((r: any) => r.header.index_id === 25)
-                const konachan = results.filter((r: any) => r.header.index_id === 26)
-                const yandere = results.filter((r: any) => r.header.index_id === 12)
-                const anime = results.filter((r: any) => r.header.index_id === 21)
+                const pixiv = results.filter((r) => r.header.index_id === 5)
+                const twitter = results.filter((r) => r.header.index_id === 41)
+                const artstation = results.filter((r) => r.header.index_id === 39)
+                const deviantart = results.filter((r) => r.header.index_id === 34)
+                const danbooru = results.filter((r) => r.header.index_id === 9)
+                const gelbooru = results.filter((r) => r.header.index_id === 25)
+                const konachan = results.filter((r) => r.header.index_id === 26)
+                const yandere = results.filter((r) => r.header.index_id === 12)
+                const anime = results.filter((r) => r.header.index_id === 21)
                 if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
                 if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
                 if (deviantart.length) {
@@ -745,7 +732,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
             mirrors = functions.removeItem(mirrors, source)
-            mirrors = mirrors?.length ? mirrors.join("\n") : ""
+            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 rating,
                 artists,
@@ -759,28 +746,28 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     englishCommentary,
                     bookmarks,
                     posted,
-                    mirrors
+                    mirrors: mirrorStr
                 }
             }
         }
     }
 
-    const tagLookup = async (current: any, type: PostType, style: PostStyle, danbooruLink: string, rating: PostRating) => {
-        let tagArr = [] as any
+    const tagLookup = async (current: UploadImage, type: PostType, style: PostStyle, danbooruLink: string, rating: PostRating) => {
+        let tagArr = [] as string[]
         let blockedTags = tagConvert.blockedTags
         let tagReplaceMap = tagConvert.tagReplaceMap
-        let artists = [{}] as any
-        let characters = [{}] as any
-        let series = [{}] as any
-        let tags = [] as any
-        let newTags = [] as any
+        let artists = [{}] as UploadTag[]
+        let characters = [{}] as UploadTag[]
+        let series = [{}] as UploadTag[]
+        let tags = [] as string[]
+        let newTags = [] as UploadTag[]
         const tagMap = await functions.tagsCache(session, setSessionFlag)
 
-        let bytes = "" as any 
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
 
         if (!danbooruLink) danbooruLink = await functions.post(`/api/misc/revdanbooru`, bytes, session, setSessionFlag)
@@ -847,13 +834,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
 
-            let notExists = [] as any
+            let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
                 if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
                 if (index !== -1) notExists[i] = newTags[index]
             }
             newTags = notExists
@@ -918,13 +905,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 series.push({})
             }
             tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
-            let notExists = [] as any
+            let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
                 if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
                 if (index !== -1) notExists[i] = newTags[index]
             }
             newTags = notExists
@@ -945,7 +932,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         reset()
         setOriginalFiles([])
         setUpscaledFiles([])
-        setCurrentImg(null)
+        setCurrentImg("")
         setCurrentIndex(0)
         setShowLinksInput(false)
         setSubmitted(false)
@@ -1267,7 +1254,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const getX = (kind: string) => {
         if (typeof document === "undefined") return 15
-        let element = null as any
+        let element = null as HTMLInputElement | null
         if (kind === "artist") {
             element = artistInputRef?.current
         } else if (kind === "character") {
@@ -1282,7 +1269,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const getY = (kind: string) => {
         if (typeof document === "undefined") return 177
-        let element = null as any
+        let element = null as HTMLInputElement | null
         if (kind === "artist") {
             element = artistInputRef?.current
         } else if (kind === "character") {
@@ -1354,7 +1341,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 current = currentFiles[0]
                 index = 0
             }
-            setCurrentImg(current?.link || null)
+            setCurrentImg(current?.link || "")
             setCurrentIndex(index)
             setImgChangeFlag(false)
         }
@@ -1466,7 +1453,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

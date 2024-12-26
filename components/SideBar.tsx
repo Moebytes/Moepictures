@@ -65,11 +65,11 @@ import unprivateIcon from "../assets/icons/unprivate.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
 import TagHover from "./TagHover"
-import {PostSearch, PostHistory, MiniTag} from "../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
 import "./styles/sidebar.less"
 
 interface Props {
-    post?: PostSearch | PostHistory
+    post?: PostSearch | PostHistory | UnverifiedPost
     artists?: MiniTag[] 
     characters?: MiniTag[]  
     series?: MiniTag[]
@@ -1060,11 +1060,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sort.favorites}:</span>
-                            <span className="tag-alt">{props.post.favoriteCount || 0}</span>
+                            <span className="tag-alt">{(props.post as PostSearch).favoriteCount || 0}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sort.cuteness}:</span>
-                            <span className="tag-alt">{props.post.cuteness || 500}</span>
+                            <span className="tag-alt">{(props.post as PostSearch).cuteness || 500}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>

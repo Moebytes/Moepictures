@@ -41,6 +41,7 @@ import details from "../assets/icons/details.png"
 import hexcolor from "../assets/icons/hexcolor.png"
 import codeblock from "../assets/icons/codeblock.png"
 import jsxFunctions from "../structures/JSXFunctions"
+import {EditCounts, CommentSearch, Favgroup, PostSearch} from "../types/Types"
 import "./styles/userpage.less"
 
 let intervalTimer = null as any
@@ -69,25 +70,26 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
     const [uploadIndex, setUploadIndex] = useState(0)
-    const [favoriteIndex, setFavoriteIndex] = useState(0) as any
-    const [uploads, setUploads] = useState([]) as any
-    const [favorites, setFavorites] = useState([]) as any
-    const [comments, setComments] = useState([]) as any
-    const [favgroups, setFavgroups] = useState([]) as any
-    const [uploadImages, setUploadImages] = useState([]) as any
-    const [appendUploadImages, setAppendUploadImages] = useState([]) as any
-    const [favoriteImages, setFavoriteImages] = useState([]) as any
-    const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
+    const [favoriteIndex, setFavoriteIndex] = useState(0)
+
+    const [uploads, setUploads] = useState([] as PostSearch[])
+    const [appendUploadImages, setAppendUploadImages] = useState([] as string[])
+    const [favorites, setFavorites] = useState([] as PostSearch[])
+    const [appendFavoriteImages, setAppendFavoriteImages] = useState([] as string[])
+    const [comments, setComments] = useState([] as CommentSearch[])
+    const [favgroups, setFavgroups] = useState([] as Favgroup[])
+    const [uploadImages, setUploadImages] = useState([] as string[])
+    const [favoriteImages, setFavoriteImages] = useState([] as string[])
+    const [counts, setCounts] = useState(null as EditCounts | null)
     const [banReason, setBanReason] = useState("")
-    const [counts, setCounts] = useState(null as any)
     const [bio, setBio] = useState("")
     const [interval, setInterval] = useState("")
     const [init, setInit] = useState(true)
     const [bannerHidden, setBannerHidden] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
-    const emojiRef = useRef(null) as any
-    const textRef = useRef(null) as any
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -114,7 +116,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploads = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const uploads = await functions.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
-        const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -125,7 +127,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
@@ -133,7 +135,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavorites = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const favorites = await functions.get("/api/user/favorites", {limit, rating}, session, setSessionFlag)
-        const images = favorites.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -144,7 +146,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = result.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
@@ -156,7 +158,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
-        let filtered = comments.filter((c: any) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
+        let filtered = comments.filter((c) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
         setComments(filtered)
     }
 
@@ -208,13 +210,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }, [session, init])
 
-    const uploadPfp = async (event: any) => {
+    const uploadPfp = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
         const fileReader = new FileReader()
         await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: any) => {
-                const bytes = new Uint8Array(f.target.result)
+            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
+                const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                 const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
@@ -233,8 +235,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         let croppedURL = ""
                         if (gif) {
                             const gifData = await functions.extractGIFFrames(url)
-                            let frameArray = [] as any 
-                            let delayArray = [] as any
+                            let frameArray = [] as Buffer[] 
+                            let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
                                 const canvas = gifData[i].frame as HTMLCanvasElement
                                 const cropped = await functions.crop(canvas.toDataURL(), 1, true)
@@ -510,7 +512,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const generateFavgroupsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
             if (functions.isR18(ratingType)) {
@@ -518,7 +520,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             } else {
                 if (functions.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${session.username}/${favgroup.slug}`)
             }
@@ -571,10 +573,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const emojiGrid = () => {
-        let rows = [] as any
+        let rows = [] as React.ReactElement[]
         let rowAmount = 7
         for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as any
+            let items = [] as React.ReactElement[]
             for (let j = 0; j < rowAmount; j++) {
                 const k = (i*rowAmount)+j
                 const key = Object.keys(emojis)[k]

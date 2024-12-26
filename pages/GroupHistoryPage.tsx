@@ -11,11 +11,11 @@ import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
-import "./styles/historypage.less"
 import {GroupHistory} from "../types/Types"
+import "./styles/historypage.less"
 
 interface Props {
-    match?: any
+    match: {params: {group: string, username?: string}}
     all?: boolean
 }
 
@@ -29,13 +29,13 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([]) as any
+    const [revisions, setRevisions] = useState([] as GroupHistory[])
     const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([]) as any
+    const [visibleRevisions, setVisibleRevisions] = useState([] as GroupHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const slug = props.match?.params.group
-    const username = props.match?.params.username
+    const slug = props.match.params.group
+    const username = props.match.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -48,7 +48,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const updateHistory = async () => {
-        let result = [] as any
+        let result = [] as GroupHistory[]
         if (props.all) {
             result = await functions.get("/api/group/history", null, session, setSessionFlag)
         } else {
@@ -97,7 +97,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         let currentIndex = index
-        const newVisibleRevisions = [] as any
+        const newVisibleRevisions = [] as GroupHistory[]
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
             if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
@@ -117,7 +117,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/group/history", {slug, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev: any) => [...prev, ...result])
+            setRevisions((prev) => [...prev, ...result])
         } else {
             setEnded(true)
         }
@@ -129,7 +129,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions as any
+                const newRevisions = visibleRevisions
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
                     if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
@@ -150,11 +150,11 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     })
 
     const generateRevisionsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let current = visibleRevisions[0]
         let currentIndex = 0
         for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1]
+            let previous = visibleRevisions[i + 1] as GroupHistory | null
             if (current.groupID !== visibleRevisions[i].groupID) {
                 current = visibleRevisions[i]
                 currentIndex = i

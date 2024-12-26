@@ -25,9 +25,10 @@ import groupAccept from "../assets/icons/group-accept.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import Reorder from "react-reorder"
 import "./styles/grouppage.less"
+import {GroupItem, Favgroup} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {username: string, favgroup: string}}
 }
 
 let limit = 25
@@ -48,12 +49,12 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const {setPosts} = useCacheActions()
-    const [favgroup, setFavgroup] = useState(null) as any
-    const [items, setItems] = useState([]) as any
+    const [favgroup, setFavgroup] = useState(null as Favgroup | null)
+    const [items, setItems] = useState([] as GroupItem[])
     const history = useHistory()
     const location = useLocation()
-    const username = props?.match.params.username
-    const favgroupName = props?.match.params.favgroup
+    const username = props.match.params.username
+    const favgroupName = props.match.params.favgroup
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -103,7 +104,8 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }, [favgroupName, session, groupFlag])
 
     const updateItems = async () => {
-        let items = [] as any[]
+        if (!favgroup) return
+        let items = [] as GroupItem[]
         for (let i = 0; i < favgroup.posts.length; i++) {
             const post = favgroup.posts[i]
             if (functions.isR18(post.rating)) if (!functions.isR18(ratingType)) continue
@@ -134,7 +136,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const reorder = (event: React.MouseEvent, from: number, to: number) => {
-        setItems((prev: any) => {
+        setItems((prev) => {
             const newState = [...prev]
             newState.splice(to, 0, newState.splice(from, 1)[0])
             return newState
@@ -142,7 +144,8 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const favgroupImagesJSX = () => {
-        let jsx = [] as any
+        if (!favgroup) return
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
             const openPost = async (event: React.MouseEvent) => {
@@ -175,7 +178,8 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const commitReorder = async () => {
-        let posts = [] as any[]
+        if (!favgroup) return
+        let posts = [] as {postID: string, order: number}[]
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
@@ -210,7 +214,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const favgroupOptionsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (session.username === username) {
             jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
             if (reorderState) {
@@ -225,6 +229,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const searchGroup = (event: React.MouseEvent, alias?: string) => {
+        if (!favgroup) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open("/posts", "_blank")
         } else {

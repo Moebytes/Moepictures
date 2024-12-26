@@ -47,11 +47,11 @@ import unlockIcon from "../assets/icons/unlock-red.png"
 import privateIcon from "../assets/icons/private.png"
 import unprivateIcon from "../assets/icons/unprivate.png"
 import functions from "../structures/Functions"
-import {PostSearch, PostHistory, MiniTag} from "../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
 import "./styles/mobileinfo.less"
 
 interface Props {
-    post?: PostSearch | PostHistory
+    post?: PostSearch | PostHistory | UnverifiedPost
     artists?: MiniTag[] 
     characters?: MiniTag[]  
     series?: MiniTag[]
@@ -723,11 +723,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sort.favorites}:</span>
-                                <span className="tag-alt">{props.post.favoriteCount || 0}</span>
+                                <span className="tag-alt">{(props.post as PostSearch).favoriteCount || 0}</span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sort.cuteness}:</span>
-                                <span className="tag-alt">{props.post.cuteness || 500}</span>
+                                <span className="tag-alt">{(props.post as PostSearch).cuteness || 500}</span>
                             </div>
                         </div>
                         <div className="mobileinfo-sub-row">

@@ -52,11 +52,11 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import mime from "mime-types"
 import "./styles/postimage.less"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 const ffmpeg = createFFmpeg()
 
 interface Props {
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     img: string
     width?: number
     height?: number

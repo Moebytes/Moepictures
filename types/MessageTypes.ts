@@ -55,6 +55,7 @@ export interface MessageUserReply {
     imageHash: string | null
     banned: boolean | null
     replyCount: string
+    fake?: boolean
 }
 
 export interface MessageCreateParams {

@@ -30,11 +30,11 @@ import NoteEditor from "./NoteEditor"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
 import path from "path"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 import "./styles/postsong.less"
 
 interface Props {
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     audio: string
     coverImg?: string
     width?: number

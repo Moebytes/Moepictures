@@ -6,10 +6,10 @@ import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import {PostSearch, PostHistory} from "../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost} from "../types/Types"
 
 interface Props {
-    post: PostSearch | PostHistory
+    post: PostSearch | PostHistory | UnverifiedPost
     unverified?: boolean
 }
 

@@ -52,10 +52,11 @@ import link from "../assets/icons/link-purple.png"
 import details from "../assets/icons/details.png"
 import hexcolor from "../assets/icons/hexcolor.png"
 import codeblock from "../assets/icons/codeblock.png"
+import {ThreadReply, ThreadUser} from "../types/Types"
 import "./styles/threadpage.less"
 
 interface Props {
-    match?: any
+    match: {params: {id: string}}
 }
 
 const ThreadPage: React.FunctionComponent<Props> = (props) => {
@@ -78,10 +79,10 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const {deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
     const {setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, setEditThreadR18, setReportThreadID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
-    const [thread, setThread] = useState(null) as any
-    const [replies, setReplies] = useState([]) as any
+    const [thread, setThread] = useState(null as ThreadUser | null)
+    const [replies, setReplies] = useState([] as ThreadReply[])
     const [index, setIndex] = useState(0)
-    const [visibleReplies, setVisibleReplies] = useState([]) as any
+    const [visibleReplies, setVisibleReplies] = useState([] as ThreadReply[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -94,10 +95,10 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
     const history = useHistory()
-    const errorRef = useRef(null) as any
-    const emojiRef = useRef(null) as any
-    const textRef = useRef(null) as any
-    const threadID = props?.match.params.id
+    const errorRef = useRef<HTMLDivElement>(null)
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
+    const threadID = props.match.params.id
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -193,7 +194,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updateReplies = () => {
             let currentIndex = index
-            const newVisibleReplies = visibleReplies as any
+            const newVisibleReplies = visibleReplies
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!replies[currentIndex]) break
                 newVisibleReplies.push(replies[currentIndex])
@@ -210,7 +211,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!replies[currentIndex]) return
-                const newVisibleReplies = visibleReplies as any
+                const newVisibleReplies = visibleReplies
                 for (let i = 0; i < 15; i++) {
                     if (!replies[currentIndex]) return
                     newVisibleReplies.push(replies[currentIndex])
@@ -327,7 +328,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -365,10 +366,11 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateRepliesJSX = () => {
-        const jsx = [] as any
-        let visible = [] as any
+        if (!thread) return
+        const jsx = [] as React.ReactElement[]
+        let visible = [] as ThreadReply[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleReplies) as any
+            visible = functions.removeDuplicates(visibleReplies)
         } else {
             const postOffset = (threadPage - 1) * getPageAmount()
             visible = replies.slice(postOffset, postOffset + getPageAmount())
@@ -382,6 +384,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorPFP = () => {
+        if (!thread) return
         if (thread.image) {
             return functions.getTagLink("pfp", thread.image, thread.imageHash)
         } else {
@@ -399,7 +402,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
-        if (!thread.imagePost) return
+        if (!thread?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${thread.imagePost}`, "_blank")
@@ -409,6 +412,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorJSX = () => {
+        if (!thread) return
         if (thread.role === "admin") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
@@ -528,7 +532,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         if (!thread) return
-        const cleanReply = functions.parsePieces(thread.content).filter((s: any) => !s.includes(">>>")).join(" ")
+        const cleanReply = functions.parsePieces(thread.content).filter((s: string) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
             >>>[0] ${functions.toProperCase(thread.creator)} said:
             > ${cleanReply}
@@ -537,7 +541,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const getOptionsJSX = () => {
         if (!thread) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (permissions.isMod(session)) {
             jsx.push(
                 <>
@@ -611,10 +615,10 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const emojiGrid = () => {
-        let rows = [] as any
+        let rows = [] as React.ReactElement[]
         let rowAmount = 7
         for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as any
+            let items = [] as React.ReactElement[]
             for (let j = 0; j < rowAmount; j++) {
                 const k = (i*rowAmount)+j
                 const key = Object.keys(emojis)[k]
@@ -638,11 +642,13 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const viewThreads = () => {
+        if (!thread) return
         history.push("/forum")
         setThreadSearchFlag(`posts:${thread.creator}`)
     }
 
     const getReplyBoxJSX = () => {
+        if (!thread) return
         if (thread.locked) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>

@@ -30,10 +30,11 @@ import SendMessageDialog from "../dialogs/SendMessageDialog"
 import UnbanDialog from "../dialogs/UnbanDialog"
 import PromoteDialog from "../dialogs/PromoteDialog"
 import jsxFunctions from "../structures/JSXFunctions"
+import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch} from "../types/Types"
 import "./styles/userpage.less"
 
 interface Props {
-    match?: any
+    match: {params: {username: string}}
 }
 
 let limit = 25
@@ -56,20 +57,20 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {emojis} = useCacheSelector()
     const {setPosts} = useCacheActions()
     const [uploadIndex, setUploadIndex] = useState(0)
-    const [favoriteIndex, setFavoriteIndex] = useState(0) as any
-    const [uploads, setUploads] = useState([]) as any
-    const [appendUploadImages, setAppendUploadImages] = useState([]) as any
-    const [favorites, setFavorites] = useState([]) as any
-    const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
-    const [comments, setComments] = useState([]) as any
-    const [favgroups, setFavgroups] = useState([]) as any
-    const [uploadImages, setUploadImages] = useState([]) as any
-    const [favoriteImages, setFavoriteImages] = useState([]) as any
-    const [user, setUser] = useState(null) as any
+    const [favoriteIndex, setFavoriteIndex] = useState(0)
+    const [uploads, setUploads] = useState([] as PostSearch[])
+    const [appendUploadImages, setAppendUploadImages] = useState([] as string[])
+    const [favorites, setFavorites] = useState([] as PostSearch[])
+    const [appendFavoriteImages, setAppendFavoriteImages] = useState([] as string[])
+    const [comments, setComments] = useState([] as CommentSearch[])
+    const [favgroups, setFavgroups] = useState([] as Favgroup[])
+    const [uploadImages, setUploadImages] = useState([] as string[])
+    const [favoriteImages, setFavoriteImages] = useState([] as string[])
+    const [user, setUser] = useState(null as PrunedUser | null)
     const [defaultIcon, setDefaultIcon] = useState(false)
-    const [counts, setCounts] = useState(null as any)
+    const [counts, setCounts] = useState(null as EditCounts | null)
     const history = useHistory()
-    const username = props?.match.params.username
+    const username = props.match.params.username
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -90,7 +91,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateUploads = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const uploads = await functions.get("/api/user/uploads", {username, rating}, session, setSessionFlag)
-        const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -101,7 +102,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
@@ -109,7 +110,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateFavorites = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const favorites = await functions.get("/api/user/favorites", {username, rating}, session, setSessionFlag)
-        const images = favorites.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -120,7 +121,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = result.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
@@ -132,7 +133,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
-        let filtered = comments.filter((c: any) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
+        let filtered = comments.filter((c) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
         setComments(filtered)
     }
 
@@ -208,18 +209,21 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const viewFavorites = () => {
+        if (!user) return
         history.push("/posts")
         setSearch(`favorites:${user.username}`)
         setSearchFlag(true)
     }
 
     const viewUploads = () => {
+        if (!user) return
         history.push("/posts")
         setSearch(`uploads:${user.username}`)
         setSearchFlag(true)
     }
 
     const viewComments = () => {
+        if (!user) return
         history.push("/comments")
         setCommentSearchFlag(`comments:${user.username}`)
     }
@@ -244,6 +248,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = () => {
+        if (!user) return
         if (user?.role === "admin") {
             return (
                 <div className="user-name-container">
@@ -305,6 +310,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const banDialog = () => {
+        if (!user) return
         if (user.banned) {
             setUnbanName(username)
         } else {
@@ -328,7 +334,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }, [updateUserFlag])
 
     const banJSX = () => {
-        if (!user.banned) return null
+        if (!user?.banned) return null
         if (user.banExpiration && new Date(user.banExpiration) > new Date()) {
             return (
                 <div className="user-row">
@@ -341,7 +347,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateFavgroupsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
             if (favgroup.private) continue
@@ -350,7 +356,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             } else {
                 if (functions.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${username}/${favgroup.slug}`)
             }

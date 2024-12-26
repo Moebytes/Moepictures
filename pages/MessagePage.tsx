@@ -72,7 +72,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {deleteMessageID, deleteMessageFlag, editMessageID, editMessageFlag, editMessageTitle, editMessageContent, editMessageR18} = useMessageDialogSelector()
     const {setDeleteMessageID, setDeleteMessageFlag, setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18, setForwardMessageObj} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
-    const [message, setMessage] = useState(null as unknown as MessageUser)
+    const [message, setMessage] = useState(null as MessageUser | null)
     const [replies, setReplies] = useState([] as MessageUserReply[])
     const [index, setIndex] = useState(0)
     const [visibleReplies, setVisibleReplies] = useState([] as MessageUserReply[])
@@ -88,9 +88,9 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
     const history = useHistory()
-    const errorRef = useRef(null) as any
-    const emojiRef = useRef(null) as any
-    const textRef = useRef(null) as any
+    const errorRef = useRef<HTMLDivElement>(null)
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
     const messageID = props.match.params.id
 
     const getFilter = () => {
@@ -213,7 +213,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updateReplies = () => {
             let currentIndex = index
-            const newVisibleReplies = visibleReplies as any
+            const newVisibleReplies = visibleReplies
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!replies[currentIndex]) break
                 newVisibleReplies.push(replies[currentIndex])
@@ -230,7 +230,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!replies[currentIndex]) return
-                const newVisibleReplies = visibleReplies as any
+                const newVisibleReplies = visibleReplies
                 for (let i = 0; i < 15; i++) {
                     if (!replies[currentIndex]) return
                     newVisibleReplies.push(replies[currentIndex])
@@ -347,7 +347,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -385,10 +385,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateRepliesJSX = () => {
-        const jsx = [] as any
-        let visible = [] as any
+        const jsx = [] as React.ReactElement[]
+        let visible = [] as MessageUserReply[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleReplies) as any
+            visible = functions.removeDuplicates(visibleReplies)
         } else {
             const postOffset = (messagePage - 1) * getPageAmount()
             visible = replies.slice(postOffset, postOffset + getPageAmount())
@@ -401,6 +401,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorPFP = () => {
+        if (!message) return
         if (message.image) {
             return functions.getTagLink("pfp", message.image, message.imageHash)
         } else {
@@ -418,7 +419,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
-        if (!message.imagePost) return
+        if (!message?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${message.imagePost}`, "_blank")
@@ -428,6 +429,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorJSX = () => {
+        if (!message) return
         if (message.role === "admin") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
@@ -538,7 +540,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         if (!message) return
-        const cleanReply = functions.parsePieces(message.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parsePieces(message.content).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[0] ${functions.toProperCase(message.creator)} said:
             > ${cleanReply}
@@ -547,7 +549,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const getOptionsJSX = () => {
         if (!message) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (message.role !== "system" && session.username && !session.banned) {
             jsx.push(
                 <>
@@ -613,10 +615,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const emojiGrid = () => {
-        let rows = [] as any
+        let rows = [] as React.ReactElement[]
         let rowAmount = 7
         for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as any
+            let items = [] as React.ReactElement[]
             for (let j = 0; j < rowAmount; j++) {
                 const k = (i*rowAmount)+j
                 const key = Object.keys(emojis)[k]
@@ -640,6 +642,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getReplyBoxJSX = () => {
+        if (!message) return
         if (message.role === "system") return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.system}</span>
@@ -713,7 +716,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                         {getOptionsJSX()}
                     </div>
                     <div className="thread-page-title-container">
-                        <span className="thread-page-info">{`${message.creator} -> ${message.recipients.map((r: any) => r === null ? "deleted" : r).join(", ")}`}</span>
+                        <span className="thread-page-info">{`${message.creator} -> ${message.recipients.map((r) => r === null ? "deleted" : r).join(", ")}`}</span>
                     </div>
                     <div className="thread-page-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="thread-page-user-container">

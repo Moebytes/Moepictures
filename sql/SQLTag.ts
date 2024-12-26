@@ -239,7 +239,8 @@ export default class SQLTag {
     }
 
     /** Get tag. */
-    public static tag = async (tag: string) => {
+    public static tag = async (tag?: string) => {
+        if (!tag) return undefined
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                     SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications

@@ -3,10 +3,10 @@ import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
-import {PostFull, Tag} from "../types/Types"
+import {PostFull, Tag, UnverifiedPost} from "../types/Types"
 
 interface Props {
-    post: PostFull
+    post: PostFull | UnverifiedPost
 }
 
 const NewTags: React.FunctionComponent<Props> = (props) => {

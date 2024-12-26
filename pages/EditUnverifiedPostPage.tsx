@@ -41,21 +41,21 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../store"
 import JSZip from "jszip"
-import "./styles/uploadpage.less"
 import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
 import tagConvert from "../assets/json/tag-convert.json"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile} from "../types/Types"
 import path from "path"
-import {PostType, PostRating, PostStyle} from "../types/Types"
+import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
 let tagsTimer = null as any
 
 interface Props {
-    match?: any
+    match: {params: {id: string}}
 }
 
 const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
@@ -78,15 +78,15 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
-    const [originalFiles, setOriginalFiles] = useState([]) as any
-    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
-    const editPostErrorRef = useRef<any>(null)
-    const submitErrorRef = useRef<any>(null)
-    const saucenaoErrorRef = useRef<any>(null)
-    const danbooruErrorRef = useRef<any>(null)
-    const enterLinksRef = useRef<any>(null)
-    const [currentImg, setCurrentImg] = useState(null) as any
-    const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
+    const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
+    const editPostErrorRef = useRef<HTMLSpanElement>(null)
+    const submitErrorRef = useRef<HTMLSpanElement>(null)
+    const saucenaoErrorRef = useRef<HTMLSpanElement>(null)
+    const danbooruErrorRef = useRef<HTMLSpanElement>(null)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const [currentImg, setCurrentImg] = useState("")
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [type, setType] = useState("image" as PostType)
     const [rating, setRating] = useState("cute" as PostRating)
@@ -103,26 +103,26 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
-    const [artists, setArtists] = useState([{}]) as any
-    const [characters, setCharacters] = useState([{}]) as any
-    const [series, setSeries] = useState([{}]) as any
-    const [newTags, setNewTags] = useState([]) as any
+    const [artists, setArtists] = useState([{}] as UploadTag[])
+    const [characters, setCharacters] = useState([{}] as UploadTag[])
+    const [series, setSeries] = useState([{}] as UploadTag[])
+    const [newTags, setNewTags] = useState([] as UploadTag[])
     const [rawTags, setRawTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const [artistActive, setArtistActive] = useState([]) as any
-    const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a: any) => React.createRef())) as any
-    const [characterActive, setCharacterActive] = useState([]) as any
-    const [characterInputRefs, setCharacterInputRefs] = useState(characters.map((a: any) => React.createRef())) as any
-    const [seriesActive, setSeriesActive] = useState([]) as any
-    const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a: any) => React.createRef())) as any
+    const [artistActive, setArtistActive] = useState([] as boolean[])
+    const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a) => React.createRef<HTMLInputElement>()))
+    const [characterActive, setCharacterActive] = useState([] as boolean[])
+    const [characterInputRefs, setCharacterInputRefs] = useState(characters.map((a) => React.createRef<HTMLInputElement>()))
+    const [seriesActive, setSeriesActive] = useState([] as boolean[])
+    const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a) => React.createRef<HTMLInputElement>()))
     const [tagActive, setTagActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
-    const rawTagRef = useRef<any>(null)
+    const rawTagRef = useRef<HTMLDivElement>(null)
     const [edited, setEdited] = useState(false)
     const [originalID, setOriginalID] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
-    const postID = props?.match.params.id
+    const postID = props.match.params.id
     const history = useHistory()
 
     const updateFields = async () => {
@@ -145,10 +145,10 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         const parentPost = await functions.get("/api/post/parent/unverified", {postID}, session, setSessionFlag)
         if (parentPost) setParentID(parentPost.parentID)
 
-        let files = [] as any
-        let links = [] as any
-        let upscaledFiles = [] as any
-        let upscaledLinks = [] as any
+        let files = [] as File[]
+        let links = [] as string[]
+        let upscaledFiles = [] as File[]
+        let upscaledLinks = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             const response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
@@ -173,7 +173,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         const parsedTags = await functions.parseTagsUnverified([post])
         const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag)
 
-        let artists = [{}] as any
+        let artists = [{}] as UploadTag[]
         for (let i = 0; i < tagCategories.artists.length; i++) {
             if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
@@ -184,19 +184,19 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     artists[i].ext = path.extname(imageLink).replace(".", "")
-                    artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    artists[i].bytes = new Uint8Array(arrayBuffer)
                 } catch {
                     const imageLink = functions.getUnverifiedTagLink("artist", tagCategories.artists[i].image!)
                     artists[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     artists[i].ext = path.extname(imageLink).replace(".", "")
-                    artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    artists[i].bytes = new Uint8Array(arrayBuffer)
                 }
             }
         }
         setArtists(artists)
 
-        let characters = [{}] as any
+        let characters = [{}] as UploadTag[]
         for (let i = 0; i < tagCategories.characters.length; i++) {
             if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
@@ -207,19 +207,19 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     characters[i].ext = path.extname(imageLink).replace(".", "")
-                    characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    characters[i].bytes = new Uint8Array(arrayBuffer)
                 } catch {
                     const imageLink = functions.getUnverifiedTagLink("character", tagCategories.characters[i].image!)
                     characters[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     characters[i].ext = path.extname(imageLink).replace(".", "")
-                    characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    characters[i].bytes = new Uint8Array(arrayBuffer)
                 }
             }
         }
         setCharacters(characters)
 
-        let series = [{}] as any
+        let series = [{}] as UploadTag[]
         for (let i = 0; i < tagCategories.series.length; i++) {
             if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
@@ -230,18 +230,18 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     series[i].ext = path.extname(imageLink).replace(".", "")
-                    series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    series[i].bytes = new Uint8Array(arrayBuffer)
                 } catch {
                     const imageLink = functions.getUnverifiedTagLink("series", tagCategories.series[i].image!)
                     series[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     series[i].ext = path.extname(imageLink).replace(".", "")
-                    series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    series[i].bytes = new Uint8Array(arrayBuffer)
                 }
             }
         }
         setSeries(series)
-        setRawTags(tagCategories.tags.map((t: any) => t.tag).join(" "))
+        setRawTags(tagCategories.tags.map((t) => t.tag).join(" "))
         setEdited(false)
     }
 
@@ -297,15 +297,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
-        let acceptedArray = [] as any 
+        if (!editPostErrorRef.current) return
+        let acceptedArray = [] as UploadImageFile[] 
         let error = ""
-        let isLive2DArr = [] as any
+        let isLive2DArr = [] as boolean[]
         for (let i = 0; i < files.length; i++) {
             const fileReader = new FileReader()
             await new Promise<void>((resolve) => {
-                fileReader.onloadend = async (f: any) => {
+                fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
                     let live2d = false
-                    const bytes = new Uint8Array(f.target.result)
+                    const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                     const result = functions.bufferFileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
@@ -341,7 +342,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
                                 if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                     resolve()
                                 } else {
                                     const reader = new JSZip()
@@ -367,7 +368,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                         if (obj) result.typename = "obj"
                                         const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: data})
                                         } else {
                                             error = i18n.pages.upload.supportedFiletypesZip
                                         }
@@ -375,7 +376,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                     resolve()
                                 }
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
                                 resolve()
                             }
                         } else {
@@ -392,13 +393,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             })
         }
         if (acceptedArray.length) {
-            let urls = [] as any
+            let urls = [] as UploadImage[]
             for (let i = 0; i < acceptedArray.length; i++) {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                let width = ""
-                let height = ""
+                let width = 0
+                let height = 0
                 if (isLive2DArr[i]) {
                     thumbnail = await functions.live2dScreenshot(link)
                     let dimensions = await functions.live2dDimensions(link)
@@ -411,22 +412,22 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 } else if (functions.isAudio(acceptedArray[i].ext)) {
                     thumbnail = await functions.songCover(link)
                 }
-                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
+                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail, width, height,
                 originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
             if (forceUpscale !== undefined) {
                 if (forceUpscale) {
-                    setUpscaledFiles((prev: any) => [...prev, ...urls])
+                    setUpscaledFiles((prev) => [...prev, ...urls])
                 } else {
-                    setOriginalFiles((prev: any) => [...prev, ...urls])
+                    setOriginalFiles((prev) => [...prev, ...urls])
                 }
             } else {
                 if (showUpscaled) {
-                    setUpscaledFiles((prev: any) => [...prev, ...urls])
+                    setUpscaledFiles((prev) => [...prev, ...urls])
                 } else {
-                    setOriginalFiles((prev: any) => [...prev, ...urls])
+                    setOriginalFiles((prev) => [...prev, ...urls])
                 }
             }
         }
@@ -460,21 +461,21 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setStyle("2d")
     }
 
-    const upload = async (event: any) => {
+    const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
         if (!files?.[0]) return
-        await validate(files)
+        await validate(Array.from(files))
         event.target.value = ""
         // reset()
     }
 
-    const uploadTagImg = async (event: any, type: string, index: number) => {
+    const uploadTagImg = async (event: File | React.ChangeEvent<HTMLInputElement>, type: string, index: number) => {
         const file = event instanceof File ? event : event.target.files?.[0]
         if (!file) return
         const fileReader = new FileReader()
         await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: any) => {
-                let bytes = new Uint8Array(f.target.result)
+            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
+                let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                 const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
@@ -487,8 +488,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     let croppedURL = ""
                     if (gif) {
                         const gifData = await functions.extractGIFFrames(url)
-                        let frameArray = [] as any 
-                        let delayArray = [] as any
+                        let frameArray = [] as Buffer[] 
+                        let delayArray = [] as number[]
                         for (let i = 0; i < gifData.length; i++) {
                             const canvas = gifData[i].frame as HTMLCanvasElement
                             const cropped = await functions.crop(canvas.toDataURL(), 1, true)
@@ -510,22 +511,22 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     if (type === "artist") {
                         artists[index].image = `${url}#.${ext}`
                         artists[index].ext = result.typename
-                        artists[index].bytes = Object.values(bytes)
+                        artists[index].bytes = bytes
                         setArtists(artists)
                     } else if (type === "character") {
                         characters[index].image = `${url}#.${ext}`
                         characters[index].ext = result.typename
-                        characters[index].bytes = Object.values(bytes)
+                        characters[index].bytes = bytes
                         setCharacters(characters)
                     } else if (type === "series") {
                         series[index].image = `${url}#.${ext}`
                         series[index].ext = result.typename
-                        series[index].bytes = Object.values(bytes)
+                        series[index].bytes = bytes
                         setSeries(series)
                     } else if (type === "tag") {
                         newTags[index].image = `${url}#.${ext}`
                         newTags[index].ext = result.typename
-                        newTags[index].bytes = Object.values(bytes)
+                        newTags[index].bytes = bytes
                         setNewTags(newTags)
                     }
                 }
@@ -533,7 +534,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             fileReader.readAsArrayBuffer(file)
         })
-        if (event.target) event.target.value = ""
+        if (!(event instanceof File)) event.target.value = ""
         forceUpdate()
     }
 
@@ -549,19 +550,19 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 artists[index].tag = tagDetail.tag
                 artists[index].image = tagLink
                 artists[index].ext = ext
-                artists[index].bytes = Object.values(bytes)
+                artists[index].bytes = bytes
                 setArtists(artists)
             } else if (tagDetail.type === "character") {
                 characters[index].tag = tagDetail.tag
                 characters[index].image = tagLink
                 characters[index].ext = ext
-                characters[index].bytes = Object.values(bytes)
+                characters[index].bytes = bytes
                 setCharacters(characters)
             } else if (tagDetail.type === "series") {
                 series[index].tag = tagDetail.tag
                 series[index].image = tagLink
                 series[index].ext = ext
-                series[index].bytes = Object.values(bytes)
+                series[index].bytes = bytes
                 setSeries(series)
             }
         } else {
@@ -583,7 +584,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateArtistsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < artists.length; i++) {
             const changeTagInput = (value: string) => {
                 artists[i].tag = value 
@@ -666,7 +667,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCharactersJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < characters.length; i++) {
             const changeTagInput = (value: string) => {
                 characters[i].tag = value 
@@ -749,7 +750,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateSeriesJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < series.length; i++) {
             const changeTagInput = (value: string) => {
                 series[i].tag = value 
@@ -831,7 +832,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const linkUpload = async (event: any) => {
+    const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
@@ -853,7 +854,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const clear = () => {
         let currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         if (enterLinksRef.current) {
             const link = currentFiles[currentIndex]?.originalLink
             if (link) {
@@ -865,7 +866,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         currentFiles.splice(currentIndex, 1)
         const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
-        const newLink = currentFiles[newIndex]?.link || null
+        const newLink = currentFiles[newIndex]?.link || ""
         showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         forceUpdate()
@@ -873,7 +874,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     
     const left = () => {
         let currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -884,7 +885,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const right = () => {
         let currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
+        const currentIndex = currentFiles.findIndex((a) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex + 1
         if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -894,6 +895,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const submit = async () => {
+        if (!submitErrorRef.current) return
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
             await functions.timeout(20)
@@ -926,8 +928,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        const upscaledMB = upscaledFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        const originalMB = originalFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
+        const originalMB = originalFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const MB = upscaledMB + originalMB
         if (MB > 300 && !permissions.isMod(session)) {
             setSubmitError(true)
@@ -936,19 +938,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        let newOriginalFiles = originalFiles.map((a: any) => {
-            a.bytes = Object.values(a.bytes)
-            return a
-        })
-        let newUpscaledFiles = upscaledFiles.map((a: any) => {
-            a.bytes = Object.values(a.bytes)
-            return a
-        })
         const data = {
             unverifiedID: postID,
             postID: originalID,
-            images: newOriginalFiles,
-            upscaledImages: newUpscaledFiles,
+            images: originalFiles,
+            upscaledImages: upscaledFiles,
             type,
             rating,
             style,
@@ -987,6 +981,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const sourceLookup = async () => {
+        if (!saucenaoErrorRef.current) return
         setSaucenaoError(true)
         await functions.timeout(20)
         saucenaoErrorRef.current.innerText = i18n.buttons.fetching
@@ -997,11 +992,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         const currentFiles = getCurrentFiles()
         let current = currentFiles[currentIndex]
-        let bytes = "" as any 
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
         let source = ""
         let artist = ""
@@ -1011,7 +1006,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         let englishCommentary = ""
         let date = ""
         let bookmarks = ""
-        let mirrors = [] as any
+        let mirrors = [] as string[]
         saucenaoTimeout = true
         try {
             let basename = path.basename(current.name, path.extname(current.name)).trim()
@@ -1048,15 +1043,15 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             } else {
                 let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
                 if (results.length) {
-                    const pixiv = results.filter((r: any) => r.header.index_id === 5)
-                    const twitter = results.filter((r: any) => r.header.index_id === 41)
-                    const artstation = results.filter((r: any) => r.header.index_id === 39)
-                    const deviantart = results.filter((r: any) => r.header.index_id === 34)
-                    const danbooru = results.filter((r: any) => r.header.index_id === 9)
-                    const gelbooru = results.filter((r: any) => r.header.index_id === 25)
-                    const konachan = results.filter((r: any) => r.header.index_id === 26)
-                    const yandere = results.filter((r: any) => r.header.index_id === 12)
-                    const anime = results.filter((r: any) => r.header.index_id === 21)
+                    const pixiv = results.filter((r) => r.header.index_id === 5)
+                    const twitter = results.filter((r) => r.header.index_id === 41)
+                    const artstation = results.filter((r) => r.header.index_id === 39)
+                    const deviantart = results.filter((r) => r.header.index_id === 34)
+                    const danbooru = results.filter((r) => r.header.index_id === 9)
+                    const gelbooru = results.filter((r) => r.header.index_id === 25)
+                    const konachan = results.filter((r) => r.header.index_id === 26)
+                    const yandere = results.filter((r) => r.header.index_id === 12)
+                    const anime = results.filter((r) => r.header.index_id === 21)
                     if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
                     if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
                     if (deviantart.length) {
@@ -1105,8 +1100,6 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             artistInputRefs.push(React.createRef())
                             setArtists(artists)
                             forceUpdate()
-                            // const englishTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
-                            // setRawTags(englishTags.map((t: string) => t.toLowerCase()).join(" "))
                         } catch (e) {
                             console.log(e)
                         }
@@ -1195,21 +1188,22 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagLookup = async () => {
+        if (!danbooruErrorRef.current) return
         setDanbooruError(true)
         await functions.timeout(20)
         danbooruErrorRef.current.innerText = i18n.buttons.fetching
-        let tagArr = [] as any
+        let tagArr = [] as string[]
 
         let blockedTags = tagConvert.blockedTags
         let tagReplaceMap = tagConvert.tagReplaceMap
 
         const currentFiles = getCurrentFiles()
         let current = currentFiles[currentIndex]
-        let bytes = "" as any 
+        let bytes = null as Uint8Array | null
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            bytes = await functions.base64toUint8Array(current.thumbnail)
         } else {
-            bytes = Object.values(current.bytes) as any
+            bytes = current.bytes
         }
 
         try {
@@ -1258,7 +1252,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         characters[characters.length - 1].image = tagLink
                         characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
+                        characters[characters.length - 1].bytes = bytes
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
@@ -1276,9 +1270,9 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                         const bytes = new Uint8Array(arrayBuffer)
                         const ext = path.extname(tagLink).replace(".", "")
-                        series[series.length - 1].tag.image = tagLink
-                        series[series.length - 1].tag.ext = ext
-                        series[series.length - 1].tag.bytes = Object.values(bytes)
+                        series[series.length - 1].image = tagLink
+                        series[series.length - 1].ext = ext
+                        series[series.length - 1].bytes = bytes
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
@@ -1347,7 +1341,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         characters[characters.length - 1].image = tagLink
                         characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
+                        characters[characters.length - 1].bytes = bytes
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
@@ -1365,7 +1359,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         const ext = path.extname(tagLink).replace(".", "")
                         series[series.length - 1].image = tagLink
                         series[series.length - 1].ext = ext
-                        series[series.length - 1].bytes = Object.values(bytes)
+                        series[series.length - 1].bytes = bytes
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
@@ -1388,7 +1382,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         reset()
         setUpscaledFiles([])
         setOriginalFiles([])
-        setCurrentImg(null)
+        setCurrentImg("")
         setCurrentIndex(0)
         setShowLinksInput(false)
         setSubmitted(false)
@@ -1404,13 +1398,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
             const tagMap = await functions.tagsCache(session, setSessionFlag)
-            let notExists = [] as any
+            let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
                 if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
                 if (index !== -1) notExists[i] = newTags[index]
             }
             setNewTags(notExists)
@@ -1418,7 +1412,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateTagsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         for (let i = 0; i < newTags.length; i++) {
             const changeTagDesc = (value: string) => {
                 newTags[i].desc = value 
@@ -1668,7 +1662,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 current = currentFiles[0]
                 index = 0
             }
-            setCurrentImg(current?.link || null)
+            setCurrentImg(current?.link || "")
             setCurrentIndex(index)
             setImgChangeFlag(false)
         }
@@ -1779,7 +1773,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-row">
                     {getCurrentFiles().length > 1 ? 
                     <div className="upload-container">
-                        <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
+                        <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex}/>
                         {getPostJSX()}
                     </div>
                     : getPostJSX()}

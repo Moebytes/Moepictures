@@ -8,12 +8,12 @@ import functions from "../structures/Functions"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions,  useThemeSelector,
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
-import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
+import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
-import {PostFull} from "../types/Types"
+import {TagCategories, PostSearch} from "../types/Types"
 
 interface Props {
-    match?: any
+    match: {params: {id: string}}
 }
 
 const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
@@ -28,18 +28,18 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const {setPosts, setTags} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setRedirect, setPostFlag} = useFlagActions()
-    const [images, setImages] = useState([]) as any
-    const [image, setImage] = useState("") as any
-    const [post, setPost] = useState(null) as any
-    const [tagCategories, setTagCategories] = useState(null) as any
-    const [crop, setCrop] = useState({unit: "%", x: 25, y: 25, width: 50, height: 50, aspect: 1})
-    const [pixelCrop, setPixelCrop] = useState({unit: "px", x: 0, y: 0, width: 100, height: 100, aspect: 1})
+    const [images, setImages] = useState([] as string[])
+    const [image, setImage] = useState("")
+    const [post, setPost] = useState(null as PostSearch | null)
+    const [tagCategories, setTagCategories] = useState(null as TagCategories |  null)
+    const [crop, setCrop] = useState({unit: "%", x: 25, y: 25, width: 50, height: 50, aspect: 1} as PercentCrop)
+    const [pixelCrop, setPixelCrop] = useState({unit: "px", x: 0, y: 0, width: 100, height: 100, aspect: 1} as PixelCrop)
     const [imageLoaded, setImageLoaded] = useState(false)
     const [isAnimated, setIsAnimated] = useState(false)
-    const ref = useRef<any>(null)
+    const ref = useRef<HTMLImageElement>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
-    const postID = props?.match.params.id
+    const postID = props.match.params.id
 
     useEffect(() => {
         setHideNavbar(false)
@@ -78,19 +78,19 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = posts.find((p: any) => p.postID === postID) as PostFull | undefined
+            let post = posts.find((p) => p.postID === postID)
             let $401Error = false
             try {
-                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
                 } else {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 }
                 setImages(images)
                 const thumb = await functions.decryptThumb(images[0], session, undefined, true)
@@ -110,19 +110,19 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updatePost = async () => {
             setPostFlag(false)
-            let post = null as any
+            let post = null as PostSearch | null
             let $401Error = false
             try {
-                post = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
                 } else {
-                    images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 }
                 setImages(images) 
                 const thumb = await functions.decryptThumb(images[0], session, undefined, true)
@@ -154,22 +154,16 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             width = event.currentTarget.width
             height = event.currentTarget.height
         }
-        const newCrop = centerCrop(makeAspectCrop({unit: "%", width: 50} as any, 1, width, height), width, height)
-        setCrop(newCrop as any)
+        const newCrop = centerCrop(makeAspectCrop({unit: "%", width: 50}, 1, width, height), width, height)
+        setCrop(newCrop as PercentCrop)
         const x = newCrop.x / 100 * width
         const y = newCrop.y / 100 * height
         const pixelWidth = newCrop.width / 100 * width
         const pixelHeight = newCrop.height / 100 * height
-        setPixelCrop({unit: "px", x, y, width: pixelWidth, height: pixelHeight, aspect: 1})
+        setPixelCrop({unit: "px", x, y, width: pixelWidth, height: pixelHeight, aspect: 1} as unknown as PixelCrop)
     }
 
-    useEffect(() => {
-        if (imageLoaded) {
-            onImageLoad()
-        }
-    }, [imageLoaded])
-
-    const drawCanvas = (image: any, canvas: HTMLCanvasElement, crop: any)  => {
+    const drawCanvas = (image: HTMLImageElement, canvas: HTMLCanvasElement, crop: PercentCrop)  => {
         const ctx = canvas.getContext("2d")
         if (!ctx) return
 
@@ -192,41 +186,20 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         ctx.drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight)
     }
 
-    const loadImage = async () => {
-        if (!ref.current) return
-        if (isAnimated) return
-        let src = await functions.decryptThumb(image, session)
-        const img = document.createElement("img")
-        img.src = src 
-        img.onload = () => {
-            if (!ref.current) return
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = img.width
-            ref.current.height = img.height
-            refCtx?.drawImage(img, 0, 0, img.width, img.height)
-            setImageLoaded(true)
-        }
-    }
-
-    useEffect(() => {
-        setImageLoaded(false)
-        loadImage()
-    }, [image, session])
-
     const getCroppedURL = async () => {
         if (!previewRef.current) return
         const url = previewRef.current.toDataURL("image/jpeg")
         let croppedURL = ""
         if (isAnimated && permissions.isPremium(session)) {
-            let gifData = null as any
+            let gifData = [] as {frame: HTMLCanvasElement, delay: number}[]
             if (functions.isGIF(image)) {
                 gifData = await functions.extractGIFFrames(image)
             } else if (functions.isWebP(image)) {
                 gifData = await functions.extractAnimatedWebpFrames(image)
             }
-            let frameArray = [] as any 
-            let delayArray = [] as any
-            let firstURL = null as any
+            let frameArray = [] as Buffer[] 
+            let delayArray = [] as number[]
+            let firstURL = ""
             for (let i = 0; i < gifData.length; i++) {
                 const frame = gifData[i].frame as HTMLCanvasElement
                 const canvas = document.createElement("canvas")
@@ -305,9 +278,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                     <div className="set-avatar">
                         <span className="set-avatar-title">{i18n.sidebar.setAvatar}</span>
                         <div className="set-avatar-container">
-                            <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
-                                {isAnimated ? <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/> : 
-                                <canvas className="set-avatar-image" ref={ref}></canvas>}
+                            <ReactCrop className="set-avatar-crop" crop={crop} onChange={(crop, percentCrop) => {setCrop(percentCrop); setPixelCrop(crop); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
+                                <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/>
                             </ReactCrop>
                             <div className="set-avatar-preview-container">
                                 <canvas className="set-avatar-preview" ref={previewRef}></canvas>

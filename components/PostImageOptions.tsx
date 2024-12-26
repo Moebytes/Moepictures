@@ -22,14 +22,14 @@ import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 
 interface Props {
     img?: string
     model?: string
     live2d?: string
     audio?: string
-    post?: PostFull | PostHistory
+    post?: PostFull | PostHistory | UnverifiedPost
     comicPages?: string[] | null
     download: () => void
     previous?: () => void

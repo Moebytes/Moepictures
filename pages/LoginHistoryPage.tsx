@@ -7,6 +7,7 @@ import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
+import {LoginHistory} from "../types/Types"
 import "./styles/sitepage.less"
 
 const LoginHistoryPage: React.FunctionComponent = (props) => {
@@ -19,7 +20,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile, tablet} = useLayoutSelector()
     const {setActionBanner} = useActiveActions()
-    const [loginHistory, setLoginHistory] = useState([] as any)
+    const [loginHistory, setLoginHistory] = useState([] as LoginHistory[])
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
@@ -70,7 +71,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         setActionBanner("logout-sessions")
     }
 
-    const failedLogin = (log: any) => {
+    const failedLogin = (log: LoginHistory) => {
         if (log.type === "login failed") return true
         if (log.type === "login 2fa failed") return true
         if (log.type === "2fa disabled") return true
@@ -82,7 +83,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     }
 
     const loginHistoryJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < loginHistory.length; i++) {
             const log = loginHistory[i]
             jsx.push(

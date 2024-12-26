@@ -278,7 +278,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -303,7 +303,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(artists[i].tag)
+          tagMap.push(artists[i].tag!)
         }
 
         for (let i = 0; i < characters.length; i++) {
@@ -318,7 +318,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(characters[i].tag)
+          tagMap.push(characters[i].tag!)
         }
 
         for (let i = 0; i < series.length; i++) {
@@ -333,7 +333,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(series[i].tag)
+          tagMap.push(series[i].tag!)
         }
         await sql.cuteness.updateCuteness(postID, req.session.username, 500)
 
@@ -590,7 +590,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -987,7 +987,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -1012,7 +1012,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(artists[i].tag)
+          tagMap.push(artists[i].tag!)
         }
 
         for (let i = 0; i < characters.length; i++) {
@@ -1027,7 +1027,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(characters[i].tag)
+          tagMap.push(characters[i].tag!)
         }
 
         for (let i = 0; i < series.length; i++) {
@@ -1042,7 +1042,7 @@ const CreateRoutes = (app: Express) => {
             bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(series[i].tag)
+          tagMap.push(series[i].tag!)
         }
 
         for (let i = 0; i < tagMap.length; i++) {
@@ -1300,7 +1300,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`

@@ -11,10 +11,11 @@ import DeleteNoteHistoryDialog from "../dialogs/DeleteNoteHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
+import {NoteHistory, Note} from "../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match?: any
+    match: {params: {id: string, order: string, username?: string}}
     all?: boolean
 }
 
@@ -28,14 +29,14 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([]) as any
+    const [revisions, setRevisions] = useState([] as NoteHistory[])
     const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([]) as any
+    const [visibleRevisions, setVisibleRevisions] = useState([] as NoteHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const postID = props.match?.params.id
-    const order = props.match?.params.order
-    const username = props.match?.params.username
+    const postID = props.match.params.id
+    const order = props.match.params.order
+    const username = props.match.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -48,15 +49,15 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const updateHistory = async () => {
-        let result = [] as any
+        let result = [] as NoteHistory[]
         if (props.all) {
             result = await functions.get("/api/note/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/note/history", {postID, order, username}, session, setSessionFlag)
+            result = await functions.get("/api/note/history", {postID, order: Number(order), username}, session, setSessionFlag)
         }
         if (!result.length) {
             const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
-            if (post) result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No data"}]}]
+            if (post) result = [{post, postID, order: Number(order), updater: post.uploader, updatedDate: post.uploadDate, notes: [{transcript: "No data"}]} as unknown as NoteHistory]
         }
         setEnded(false)
         setIndex(0)
@@ -92,7 +93,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         let currentIndex = index
-        const newVisibleRevisions = [] as any
+        const newVisibleRevisions = [] as NoteHistory[]
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
             newVisibleRevisions.push(revisions[currentIndex])
@@ -105,10 +106,10 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/note/history", {postID, order, username, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/note/history", {postID, order: Number(order), username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev: any) => [...prev, ...result])
+            setRevisions((prev) => [...prev, ...result])
         } else {
             setEnded(true)
         }
@@ -119,7 +120,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions as any
+                const newRevisions = visibleRevisions
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
                     newRevisions.push(revisions[currentIndex])
@@ -136,11 +137,11 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     })
 
     const generateRevisionsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let current = visibleRevisions[0]
         let currentIndex = 0
         for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1]
+            let previous = visibleRevisions[i + 1] as NoteHistory | null
             if (current.postID !== visibleRevisions[i].postID &&
                 current.order !== visibleRevisions[i].order) {
                 current = visibleRevisions[i]

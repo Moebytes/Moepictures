@@ -46,8 +46,8 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
 useMiscDialogActions, useSearchDialogActions,
 useSearchDialogSelector} from "../store"
-import "./styles/historypage.less"
 import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch} from "../types/Types"
+import "./styles/historypage.less"
 
 let replace = false
 
@@ -169,24 +169,24 @@ const HistoryPage: React.FunctionComponent = () => {
 
     const historyStates = getHistoryStates() as History[]
 
-    const setHistoryStates = (states: any) => {
+    const setHistoryStates = (states: History[]) => {
         if (historyTab === "post") {
-            setPostStates(states)
+            setPostStates(states as PostHistory[])
         }
         if (historyTab === "tag") {
-            setTagStates(states)
+            setTagStates(states as TagHistory[])
         }
         if (historyTab === "note") {
-            setNoteStates(states)
+            setNoteStates(states as NoteHistory[])
         }
         if (historyTab === "group") {
-            setGroupStates(states)
+            setGroupStates(states as GroupHistory[])
         }
         if (historyTab === "alias") {
-            setAliasStates(states)
+            setAliasStates(states as AliasHistorySearch[])
         }
         if (historyTab === "search") {
-            setSearchStates(states)
+            setSearchStates(states as SearchHistory[])
         }
     }
 
@@ -214,24 +214,24 @@ const HistoryPage: React.FunctionComponent = () => {
 
     const visibleHistory = getVisibleHistory() as History[]
 
-    const setVisibleHistory = (visible: any) => {
+    const setVisibleHistory = (visible: History[]) => {
         if (historyTab === "post") {
-            setVisibleHistoryPosts(visible)
+            setVisibleHistoryPosts(visible as PostHistory[])
         }
         if (historyTab === "tag") {
-            setVisibleHistoryTags(visible)
+            setVisibleHistoryTags(visible as TagHistory[])
         }
         if (historyTab === "note") {
-            setVisibleHistoryNotes(visible)
+            setVisibleHistoryNotes(visible as NoteHistory[])
         }
         if (historyTab === "group") {
-            setVisibleHistoryGroups(visible)
+            setVisibleHistoryGroups(visible as GroupHistory[])
         }
         if (historyTab === "alias") {
-            setVisibleHistoryAliases(visible)
+            setVisibleHistoryAliases(visible as AliasHistorySearch[])
         }
         if (historyTab === "search") {
-            setVisibleHistorySearch(visible)
+            setVisibleHistorySearch(visible as SearchHistory[])
         }
     }
 
@@ -302,7 +302,7 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         const updateHistory = () => {
             let currentIndex = index
-            const newVisibleHistory = [] as any
+            const newVisibleHistory = [] as History[]
             for (let i = 0; i < 10; i++) {
                 if (!historyStates[currentIndex]) break
                 if (!session.showR18) {
@@ -340,7 +340,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 }
             }
         }
-        let result = [] as any
+        let result = [] as History[]
         if (historyTab === "post") {
             result = await functions.get("/api/post/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
@@ -360,7 +360,7 @@ const HistoryPage: React.FunctionComponent = () => {
             result = await functions.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         let hasMore = result?.length >= 100
-        const cleanHistory = historyStates.filter((t: any) => !t.fake)
+        const cleanHistory = historyStates.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, historyCount: cleanHistory[0]?.historyCount}), ...result]
@@ -372,14 +372,14 @@ const HistoryPage: React.FunctionComponent = () => {
             if (padded) {
                 setHistoryStates(result)
             } else {
-                setHistoryStates((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setHistoryStates(functions.removeDuplicates([...historyStates, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setHistoryStates(result)
                 } else {
-                    setHistoryStates((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setHistoryStates(functions.removeDuplicates([...historyStates, ...result]))
                 }
             }
             setEnded(true)
@@ -391,7 +391,7 @@ const HistoryPage: React.FunctionComponent = () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!historyStates[currentIndex]) return updateOffset()
-                const newHistory = visibleHistory as any
+                const newHistory = visibleHistory
                 for (let i = 0; i < 15; i++) {
                     if (!historyStates[currentIndex]) return updateOffset()
                     if (!session.showR18) {
@@ -524,7 +524,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -551,7 +551,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }
 
     const generateHistoryJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = [] as History[]
         if (scroll) {
             visible = functions.removeDuplicates(visibleHistory)
@@ -559,8 +559,8 @@ const HistoryPage: React.FunctionComponent = () => {
             const postOffset = (historyPage - 1) * getPageAmount()
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
             if (!session.showR18) {
-                visible = visible.filter((item: any) => historyTab === "tag" ||  historyTab === "alias" ? 
-                !item.r18 : !functions.isR18(item.rating))
+                visible = visible.filter((item) => historyTab === "tag" ||  historyTab === "alias" ? 
+                !(item as TagHistory).r18 : !functions.isR18((item as PostHistory).rating))
             }
         }
         let currentIndex = 0

@@ -14,11 +14,18 @@ export interface SourceData {
 }
 
 export interface UploadTag {
-    tag: string
+    tag?: string
     desc?: string
     image?: string
     ext?: string
     bytes?: Uint8Array
+}
+
+export interface UploadImageFile {
+    file: File
+    ext: string
+    originalLink: string
+    bytes: Uint8Array
 }
 
 export interface UploadImage {

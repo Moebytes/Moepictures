@@ -8,6 +8,7 @@ import XButton from "../assets/icons/x-button.png"
 import functions from "../structures/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
+import {FileUpload} from "../types/Types"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
@@ -22,11 +23,11 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const [files, setFiles] = useState([]) as any
+    const [files, setFiles] = useState([] as FileUpload[])
     const [email, setEmail] = useState("")
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
-    const errorRef = useRef(null) as any
+    const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -58,12 +59,12 @@ const ContactPage: React.FunctionComponent = (props) => {
     const fileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files?.[0]) return
         const fileArray = Array.from(event.target.files)
-        const acceptedFiles = [] as any
+        const acceptedFiles = [] as FileUpload[]
         for (let i = 0; i < fileArray.length; i++) {
             const MB = fileArray[i].size / (1024*1024)
             if (MB > 25) continue
-            let obj = {} as any
-            obj.bytes = Object.values(new Uint8Array(await fileArray[i].arrayBuffer()))
+            let obj = {} as FileUpload
+            obj.bytes = new Uint8Array(await fileArray[i].arrayBuffer())
             obj.name = fileArray[i].name
             acceptedFiles.push(obj)
         }
@@ -104,7 +105,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     }
 
     const generateFilesJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < files.length; i++) {
             const deleteFile = () => {
                 files.splice(i, 1)

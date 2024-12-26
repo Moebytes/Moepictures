@@ -11,7 +11,7 @@ import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
 import privateIcon from "../assets/icons/private.png"
-import {PostFull, PostHistory} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -93,7 +93,7 @@ const lightColorList = {
 interface Props {
     reset?: boolean
     goBack?: boolean
-    post?: PostFull | PostHistory | null
+    post?: PostFull | PostHistory | UnverifiedPost | null
     historyID?: string | null
     noteID?: string | null
 }

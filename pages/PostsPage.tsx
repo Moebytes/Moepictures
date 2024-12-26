@@ -66,14 +66,14 @@ const PostsPage: React.FunctionComponent = (props) => {
             }, 500)
             if (Math.abs(currentScroll - lastPos) > 200) setMobileScrolling(true)
         }
-        const handleMouseMove = (event: any) => {
+        const handleMouseMove = (event: MouseEvent) => {
             if (window.scrollY < 5) return setMobileScrolling(false)
             const amt = 180
             if (event.clientY < amt) {
                 setMobileScrolling(false)
             }
         }
-        const handleTouchEnd = (event: any) => {
+        const handleTouchEnd = (event: TouchEvent) => {
             if (window.scrollY < 5) return setMobileScrolling(false)
             const amt = 180
             if (event.touches[0].clientY < amt) {
