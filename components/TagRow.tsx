@@ -126,14 +126,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
 
     const editTag = async () => {
         if (!editTagObj) return
-        let image = null as Uint8Array | ["delete"] | null
+        let image = null as number[] | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
                 const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
-                image = bytes
+                image = Object.values(bytes)
             }
         }
         try {

@@ -10,7 +10,9 @@ import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
 import axios from "axios"
-import {MiniTag, Image, UploadImage, PostFull, PostTagged, Attachment} from "../types/Types"
+import phash from "sharp-phash"
+import dist from "sharp-phash/distance"
+import {MiniTag, Image, UploadImage, PostFull, PostTagged, Attachment, Note} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -448,7 +450,7 @@ export default class ServerFunctions {
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: Image[], newImages: Image[] | UploadImage[], upscaled: boolean, r18: boolean) => {
+    public static imagesChangedUnverified = async (oldImages: Image[], newImages: Image[] | UploadImage[], upscaled: boolean, isEdit?: boolean, r18?: boolean) => {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -458,12 +460,12 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
+            const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false) : await ServerFunctions.getUnverifiedFile(oldPath, false) as any
             if (!oldBuffer) continue
             const newImage = newImages[i]
             let newBuffer = null as Buffer | null
-            if (newImage.hasOwnProperty("bytes")) {
-                newBuffer = Buffer.from((newImage as UploadImage).bytes)
+            if ("bytes" in newImage) {
+                newBuffer = Buffer.from(newImage.bytes)
             } else {
                 let newPath = ""
                 let postImage = newImage as Image
@@ -512,6 +514,70 @@ export default class ServerFunctions {
         }
         if (oldR18 !== newR18) {
             ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
+        }
+    }
+
+    public static orderHashes = async (oldImages: Image[], newImages: Image[] | UploadImage[], r18: boolean, unverified?: boolean) => {
+        let oldHashes = [] as {hash: string, order: number}[]
+        let newHashes = [] as {hash: string, order: number}[]
+        for (let i = 0; i < oldImages.length; i++) {
+            const oldImage = oldImages[i]
+            let oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            const oldBuffer = unverified ? await ServerFunctions.getUnverifiedFile(oldPath, false)
+            : await ServerFunctions.getFile(oldPath, false, r18)
+            const newImage = newImages[i]
+            let newBuffer = null as Buffer | null
+            if ("bytes" in newImage) {
+                newBuffer = Buffer.from(newImage.bytes)
+            } else {
+                let postImage = newImage as Image
+                let newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
+                newBuffer = unverified ? await ServerFunctions.getUnverifiedFile(newPath, false)
+                : await ServerFunctions.getFile(newPath, false, r18)
+            }
+            let oldHash = await phash(oldBuffer).then((hash: string) => functions.binaryToHex(hash))
+            let newHash = await phash(newBuffer).then((hash: string) => functions.binaryToHex(hash))
+            oldHashes.push({hash: oldHash, order: oldImages[i].order})
+            newHashes.push({hash: newHash, order: (newImages[i] as Image)?.order || i + 1})
+        }
+        return {oldHashes, newHashes}
+    }
+
+    public static migrateNotes = async (oldImages: Image[], newImages: Image[] | UploadImage[], r18: boolean, unverified?: boolean) => {
+        const {oldHashes, newHashes} = await ServerFunctions.orderHashes(oldImages, newImages, r18, unverified)
+        let changedNotes = [] as {noteID: string, oldOrder: number, newOrder: number}[]
+        let deletedNotes = [] as {noteID: string}[]
+        const postID = oldImages[0].postID
+        let postNotes = [] as Note[]
+        if (unverified) {
+            postNotes = await sql.note.unverifiedPostNotes(postID)
+        } else {
+            postNotes = await sql.note.postNotes(postID)
+        }
+        for (const note of postNotes) {
+            const hash = note.imageHash
+            const oldOrder = oldHashes.find((o) => dist(o.hash, hash) < 7)?.order
+            if (!oldOrder) continue
+            const newOrder = newHashes.find((n) => dist(n.hash, hash) < 7)?.order
+            if (newOrder === undefined) {
+                deletedNotes.push({noteID: note.noteID})
+            } else if (oldOrder !== newOrder) {
+                changedNotes.push({noteID: note.noteID, oldOrder, newOrder})
+            }
+        }
+        for (const changed of changedNotes) {
+            if (unverified) {
+                await sql.note.updateUnverifiedNote(changed.noteID, "order", changed.newOrder)
+            } else {
+                await sql.note.updateNote(changed.noteID, "order", changed.newOrder)
+            }
+        }
+        for (const deleted of deletedNotes) {
+            if (unverified) {
+                await sql.note.deleteUnverifiedNote(deleted.noteID)
+            } else {
+                await sql.note.deleteNote(deleted.noteID)
+            }
         }
     }
 

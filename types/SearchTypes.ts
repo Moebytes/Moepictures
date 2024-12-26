@@ -52,7 +52,7 @@ export type MessageSearchParams = {
 }
 
 export interface SimilarSearchParams {
-    bytes: Uint8Array
+    bytes: number[]
     useMD5?: boolean
 }
 

@@ -64,7 +64,7 @@ const ContactPage: React.FunctionComponent = (props) => {
             const MB = fileArray[i].size / (1024*1024)
             if (MB > 25) continue
             let obj = {} as FileUpload
-            obj.bytes = new Uint8Array(await fileArray[i].arrayBuffer())
+            obj.bytes = Object.values(new Uint8Array(await fileArray[i].arrayBuffer()))
             obj.name = fileArray[i].name
             acceptedFiles.push(obj)
         }

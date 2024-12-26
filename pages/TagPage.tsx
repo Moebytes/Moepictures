@@ -235,14 +235,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const editTag = async () => {
         if (!editTagObj) return
-        let image = null as Uint8Array | ["delete"] | null
+        let image = null as number[] | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
                 const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
-                image = bytes
+                image = Object.values(bytes)
             }
         }
         try {
@@ -432,14 +432,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const revertTagHistory = async () => {
         if (!tag) return
         const history = tag as TagHistory
-        let image = null as Uint8Array | ["delete"] | null
+        let image = null as number[] | ["delete"] | null
         if (!tag.image) {
             image = ["delete"]
         } else {
             const imageLink = functions.getTagLink(tag.type, tag.image, tag.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
-            image = bytes
+            image = Object.values(bytes)
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,

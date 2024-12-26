@@ -59,7 +59,7 @@ export interface Attachment {
 
 export interface FileUpload {
     name: string
-    bytes: Uint8Array
+    bytes: number[]
 }
 
 export interface ContactParams {
@@ -77,7 +77,7 @@ export interface CopyrightParams {
     postLinks: string 
     removeAllRequest: boolean 
     proofLinks?: string
-    files?: {name: string, bytes: Uint8Array}[]
+    files?: {name: string, bytes: number[]}[]
 }
 
 export interface WDTaggerResponse {
@@ -123,24 +123,24 @@ export type MiscGetEndpoint<T extends string> =
 
 export type MiscPostEndpoint<T extends string> = 
     T extends "/api/misc/captcha" ? {params: {captchaResponse: string}, response: null} :
-    T extends "/api/misc/saucenao" ? {params: Uint8Array, response: SaucenaoResponse[]} :
-    T extends "/api/misc/boorulinks" ? {params: {bytes: Uint8Array, pixivID: string}, response: string[]} :
-    T extends "/api/misc/revdanbooru" ? {params: Uint8Array, response: string} :
+    T extends "/api/misc/saucenao" ? {params: number[], response: SaucenaoResponse[]} :
+    T extends "/api/misc/boorulinks" ? {params: {bytes: number[], pixivID: string}, response: string[]} :
+    T extends "/api/misc/revdanbooru" ? {params: number[], response: string} :
     T extends "/api/misc/proxy" ? {params: {url: string}, response: ArrayBuffer[]} :
     T extends "/api/misc/translate" ? {params: string[], response: string[]} :
     T extends "/api/misc/romajinize" ? {params: string[], response: string[]} :
     T extends "/api/misc/contact" ? {params: ContactParams, response: string} :
     T extends "/api/misc/copyright" ? {params: CopyrightParams, response: string} :
-    T extends "/api/misc/wdtagger" ? {params: Uint8Array, response: WDTaggerResponse} :
-    T extends "/api/misc/ocr" ? {params: Uint8Array, response: OCRResponse[]} :
+    T extends "/api/misc/wdtagger" ? {params: number[], response: WDTaggerResponse} :
+    T extends "/api/misc/ocr" ? {params: number[], response: OCRResponse[]} :
     T extends "/api/premium/paymentlink" ? {params: null, response: {hosted_url: string}} :
     T extends "/api/premium/payment" ? {params: {event: CoinbaseEvent}, response: string} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :
-    T extends "/api/misc/litterbox" ? {params: Uint8Array, response: string} :
+    T extends "/api/misc/litterbox" ? {params: number[], response: string} :
     T extends "/api/client-key" ? {params: {publicKey: string}, response: string} :
     T extends "/api/server-key" ? {params: null, response: {publicKey: string}} :
     T extends "/api/misc/blacklistip" ? {params: {ip: string, reason: string}, response: string} :
-    T extends "/api/misc/imghash" ? {params: Uint8Array, response: string} :
+    T extends "/api/misc/imghash" ? {params: number[], response: string} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 

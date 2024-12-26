@@ -1,5 +1,6 @@
 import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import * as Redis from "redis"
+import crypto from "crypto"
 import CreateDB from "./CreateDB.sql"
 import functions from "../structures/Functions"
 import SQLPost from "./SQLPost"
@@ -44,6 +45,10 @@ const pgPool = functions.isLocalHost() ? new Pool({
 
 if (process.env.REDIS === "on") redis.connect()
 
+const generateCacheKey = (query: QueryConfig | QueryArrayConfig | string): string => {
+  return crypto.createHash("sha256").update(typeof query === "string" ? query : JSON.stringify(query)).digest("hex")
+}
+
 export default class SQLQuery {
   public static post = SQLPost
   public static tag = SQLTag
@@ -63,19 +68,24 @@ export default class SQLQuery {
 
   /** Run an SQL Query */
   public static run = async (query: QueryConfig | QueryArrayConfig | string, cache?: boolean) => {
-      let redisResult = null
+      let cacheKey: string | null = null
+      let redisResult: string | null = null
       if (cache) {
         try {
-          redisResult = await redis.get(JSON.stringify(query)) as any
+          cacheKey = generateCacheKey(query)
+          redisResult = await redis.get(cacheKey)
           if (redisResult) return (JSON.parse(redisResult))
-        } catch {
-          // ignore
+        } catch (error) {
+          console.error("Redis read error:", error)
         }
       }
       const pgClient = await pgPool.connect()
       try {
             const result = await pgClient.query(query)
-            if (cache) await redis.set(JSON.stringify(query), JSON.stringify(result.rows)).catch(() => null)
+            if (cache && cacheKey) {
+              await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600})
+              .catch((error) => console.error("Redis write error:", error))
+            }
             return result.rows as any
         } catch (error) {
             console.log(query)

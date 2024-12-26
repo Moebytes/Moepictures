@@ -20,8 +20,8 @@ export default class SQLNote {
         return String(result.flat(Infinity)[0])
     }
 
-    /** Updates a note. */
-    public static updateNote = async (noteID: string, updater: string, transcript: string, translation: string,
+    /** Resaves a note. */
+    public static resaveNote = async (noteID: string, updater: string, transcript: string, translation: string,
         x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean) => {
         const now = new Date().toISOString()
@@ -30,6 +30,26 @@ export default class SQLNote {
             "width" = $7, "height" = $8, "imageWidth" = $9, "imageHeight" = $10, "imageHash" = $11, "overlay" = $12 WHERE "noteID" = $13`,
             values: [updater, now, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay, noteID]
         }
+        await SQLQuery.run(query)
+    }
+
+    /** Updates a note */
+    public static updateNote = async (noteID: string, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "notes" SET "${column}" = $1 WHERE "noteID" = $2`,
+            values: [value, noteID]
+        }
+        await SQLQuery.flushDB()
+        await SQLQuery.run(query)
+    }
+
+    /** Updates a note (unverified) */
+    public static updateUnverifiedNote = async (noteID: string, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "unverified notes" SET "${column}" = $1 WHERE "noteID" = $2`,
+            values: [value, noteID]
+        }
+        await SQLQuery.flushDB()
         await SQLQuery.run(query)
     }
 
@@ -92,7 +112,7 @@ export default class SQLNote {
     }
 
     /** Updates a note (unverified). */
-    public static updateUnverifiedNote = async (noteID: string, transcript: string, translation: string, x: number, 
+    public static resaveUnverifiedNote = async (noteID: string, transcript: string, translation: string, x: number, 
         y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, reason: string) => {
         const now = new Date().toISOString()

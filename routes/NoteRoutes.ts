@@ -51,7 +51,7 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         const match = data.find((item: any) => item.noteID === note.noteID)
                         if (match) {
-                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
                         } else {
                             noMatch.push(note)
@@ -104,7 +104,7 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         const match = data.find((item: any) => item.noteID === note.noteID)
                         if (match) {
-                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
                         } else {
                             noMatch.push(note)
@@ -454,7 +454,7 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         const match = data.find((item: any) => item.noteID === note.noteID)
                         if (match) {
-                            await sql.note.updateUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
+                            await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
                             match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, reason)
                         } else {
                             noMatch.push(note)
@@ -522,7 +522,7 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         const match = data.find((item: any) => item.noteID === note.noteID)
                         if (match) {
-                            await sql.note.updateNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
+                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
                         } else {
                             noMatch.push(note)

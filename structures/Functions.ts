@@ -1859,7 +1859,7 @@ export default class Functions {
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
                     }
-                    const similar = await Functions.post("/api/search/similar", {bytes, useMD5: false}, session, setSessionFlag)
+                    const similar = await Functions.post("/api/search/similar", {bytes: Object.values(bytes), useMD5: false}, session, setSessionFlag)
                     resolve(similar)
                 }
             }
@@ -1972,8 +1972,8 @@ export default class Functions {
         return parseTime(seconds, i18n.time.second)
     }
 
-    public static fileExtension = (uint8Array: Uint8Array) => {
-        const result = fileType(uint8Array)?.[0]
+    public static fileExtension = (uint8Array: Uint8Array | number[]) => {
+        const result = Functions.bufferFileType(uint8Array)?.[0]
         return result?.extension || ""
     }
 
@@ -2162,7 +2162,7 @@ export default class Functions {
         textarea.focus()
     }
 
-    public static stripTags = <T extends Post[] | PostSearch[] | PostFull[]>(posts: T) => {
+    public static stripTags = <T extends Post[] | PostSearch[] | PostFull[] | PostHistory[]>(posts: T) => {
         for (let i = 0; i < posts.length; i++) {
             // @ts-ignore
             delete posts[i].tags
@@ -2445,8 +2445,8 @@ export default class Functions {
         return scaleFactor
     }
 
-    public static bufferFileType = (buffer: Uint8Array | ArrayBuffer | Buffer) => {
-        buffer = Buffer.from(buffer)
+    public static bufferFileType = (buffer: Uint8Array | ArrayBuffer | Buffer | number[]) => {
+        buffer = Buffer.from(new Uint8Array(buffer))
 
         const majorBrand = buffer.toString("utf8", 8, 12)
         if (majorBrand === "avif" || majorBrand === "avis") {
@@ -2669,7 +2669,7 @@ export default class Functions {
                 }
                 let decrypted = await Functions.decryptBuffer(buffer, imgLink, session)
                 images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail, width, height,
-                originalLink: imgLink, bytes: new Uint8Array(decrypted), name: path.basename(imgLink)})
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
             }
             if (upscaledBuffer.byteLength) {
                 let upscaledExt = path.extname(upscaledImgLink)
@@ -2692,7 +2692,7 @@ export default class Functions {
                 }
                 let decrypted = await Functions.decryptBuffer(upscaledBuffer, upscaledImgLink, session)
                 upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), size: decrypted.byteLength, thumbnail,
-                width, height, originalLink: upscaledImgLink, bytes: new Uint8Array(decrypted), name: path.basename(upscaledImgLink)})
+                width, height, originalLink: upscaledImgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
             }
         }
         return {images, upscaledImages}

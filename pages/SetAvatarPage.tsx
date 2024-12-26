@@ -230,7 +230,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
-        await functions.post("/api/user/pfp", {postID, bytes}, session, setSessionFlag)
+        await functions.post("/api/user/pfp", {postID, bytes: Object.values(bytes)}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
         history.push(`/post/${postID}`)

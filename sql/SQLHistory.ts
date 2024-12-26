@@ -192,7 +192,7 @@ export default class SQLHistory {
                 posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                JOIN posts ON posts."postID" = "post history"."postID"
+                FULL JOIN posts ON posts."postID" = "post history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
@@ -213,7 +213,7 @@ export default class SQLHistory {
                 SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
                 FROM "post history"
-                JOIN posts ON posts."postID" = "post history"."postID"
+                FULL JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
@@ -232,7 +232,7 @@ export default class SQLHistory {
                 posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                JOIN posts ON posts."postID" = "post history"."postID"
+                FULL JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"

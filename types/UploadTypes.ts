@@ -18,14 +18,14 @@ export interface UploadTag {
     desc?: string
     image?: string
     ext?: string
-    bytes?: Uint8Array
+    bytes?: number[]
 }
 
 export interface UploadImageFile {
     file: File
     ext: string
     originalLink: string
-    bytes: Uint8Array
+    bytes: number[]
 }
 
 export interface UploadImage {
@@ -37,7 +37,7 @@ export interface UploadImage {
     thumbnail: string
     width: number
     height: number
-    bytes: Uint8Array
+    bytes: number[]
 }
 
 export interface UploadParams {

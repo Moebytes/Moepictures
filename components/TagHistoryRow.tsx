@@ -66,14 +66,14 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertTagHistory = async () => {
         if (props.current) return Promise.reject()
-        let image = null as Uint8Array | ["delete"] | null
+        let image = null as number[] | ["delete"] | null
         if (!props.tagHistory.image) {
             image = ["delete"]
         } else {
             const imageLink = functions.getTagLink(props.tagHistory.type, props.tagHistory.image, props.tagHistory.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
-            image = bytes
+            image = Object.values(bytes)
         }
         await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 

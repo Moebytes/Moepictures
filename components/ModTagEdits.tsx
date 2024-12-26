@@ -70,7 +70,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], social: string, twitter: string, website: string, fandom: string) => {
-        let bytes = null as Uint8Array | ["delete"] | null
+        let bytes = null as number[] | ["delete"] | null
         if (image) {
             if (image === "delete") {
                 bytes = ["delete"]
@@ -78,7 +78,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 const parts = image.split("/")
                 const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
                 const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
-                bytes = new Uint8Array(arrayBuffer)
+                bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
         await functions.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom}, session, setSessionFlag)

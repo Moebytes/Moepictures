@@ -12,7 +12,7 @@ import phash from "sharp-phash"
 import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
-PostQuickEditParams, PostQuickEditUnverifiedParams} from "../types/PostTypes"
+PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory} from "../types/Types"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -64,7 +64,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/posts", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postIDs = req.query.postIDs as string[]
-            if (!postIDs?.length) return res.status(200).json([])
+            if (!postIDs?.filter(id => id !== "undefined").length) return res.status(200).json([])
             if (!permissions.isMod(req.session)) return res.status(403).end()
             let result = await sql.search.posts(postIDs)
             if (!permissions.isMod(req.session)) {
@@ -943,10 +943,11 @@ const PostRoutes = (app: Express) => {
             let {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
             if (!offset) offset = 0
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            let result = null as any
+            let result = [] as PostHistory[]
             if (postID && historyID) {
-                result = await sql.history.postHistoryID(postID, historyID)
-                if (req.session.captchaNeeded) delete result.tags
+                const history = await sql.history.postHistoryID(postID, historyID)
+                if (history) result = [history]
+                if (req.session.captchaNeeded) result = functions.stripTags(result)
             } else if (username) {
                 result = await sql.history.userPostHistory(username)
                 if (req.session.captchaNeeded) result = functions.stripTags(result)

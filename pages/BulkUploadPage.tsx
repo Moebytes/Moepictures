@@ -146,7 +146,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        if (!uploadErrorRef.current) return
         let acceptedArray = [] as UploadImageFile[] 
         let error = ""
         let isLive2DArr = [] as boolean[]
@@ -191,7 +190,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
                                 if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
+                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
                                     resolve()
                                 } else {
                                     const reader = new JSZip()
@@ -217,7 +216,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                         if (obj) result.typename = "obj"
                                         const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: data})
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(data)})
                                         } else {
                                             error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
                                         }
@@ -225,7 +224,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                     resolve()
                                 }
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes})
+                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
                                 resolve()
                             }
                         } else {
@@ -274,8 +273,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
         if (error) {
             setUploadError(true)
-            await functions.timeout(20)
-            uploadErrorRef.current.innerText = error
+            if (!uploadErrorRef.current) await functions.timeout(20)
+            uploadErrorRef.current!.innerText = error
             await functions.timeout(3000)
             setUploadError(false)
         }
@@ -401,7 +400,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
-        if (!submitErrorRef.current) return
         let submitObj = {} as UploadImage
         let upscaledSubmitObj = {} as UploadImage
         for (let i = 0; i < originalFiles.length; i++) {
@@ -410,7 +408,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let dupes = [] as Post[]
             if (current.thumbnail) {
                 const bytes = await functions.base64toUint8Array(current.thumbnail)
-                dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
+                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
             } else {
                 dupes = await functions.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
             }
@@ -432,7 +430,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const upscaledSubmitData = Object.values(upscaledSubmitObj) as UploadImage[][]
         if (!submitData.length) {
             setSubmitError(true)
-            submitErrorRef.current.innerText = "All of the posts already exist."
+            if (!submitErrorRef.current) await functions.timeout(20)
+            submitErrorRef.current!.innerText = "All of the posts already exist."
             setTimeout(() => {
                 setSubmitError(false)
             }, 2000)
@@ -533,7 +532,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             } catch (e) {
                 console.log(e)
                 setSubmitError(true)
-                submitErrorRef.current.innerText = `Failed to submit ${data.images[0].name}`
+                if (!submitErrorRef.current) await functions.timeout(20)
+                submitErrorRef.current!.innerText = `Failed to submit ${data.images[0].name}`
                 setTimeout(() => {
                     return setSubmitError(false)
                 }, 2000)
@@ -545,9 +545,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const sourceLookup = async (current: UploadImage, rating: PostRating) => {
-        let bytes = null as Uint8Array | null
+        let bytes = [] as number[]
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail)
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
         } else {
             bytes = current.bytes
         }
@@ -591,7 +591,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 const imageData = await readImage(illust.user.profile_image_urls.medium)
                 artists[artists.length - 1].image = imageData?.image
                 artists[artists.length - 1].ext = imageData?.ext
-                artists[artists.length - 1].bytes = imageData?.bytes
+                artists[artists.length - 1].bytes = Object.values(imageData?.bytes || [])
                 artists.push({})
             } catch (e) {
                 console.log(e)
@@ -673,7 +673,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         const imageData = await readImage(illust.user.profile_image_urls.medium)
                         artists[artists.length - 1].image = imageData?.image
                         artists[artists.length - 1].ext = imageData?.ext
-                        artists[artists.length - 1].bytes = imageData?.bytes
+                        artists[artists.length - 1].bytes = Object.values(imageData?.bytes || [])
                         artists.push({})
                     } catch (e) {
                         console.log(e)
@@ -702,7 +702,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         const imageData = await readImage(deviation.author.user.usericon)
                         artists[artists.length - 1].image = imageData?.image
                         artists[artists.length - 1].ext = imageData?.ext
-                        artists[artists.length - 1].bytes = imageData?.bytes
+                        artists[artists.length - 1].bytes = Object.values(imageData?.bytes || [])
                         artists.push({})
                     } catch (e) {
                         console.log(e)
@@ -763,9 +763,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let newTags = [] as UploadTag[]
         const tagMap = await functions.tagsCache(session, setSessionFlag)
 
-        let bytes = null as Uint8Array | null
+        let bytes = [] as number[]
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail)
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
         } else {
             bytes = current.bytes
         }

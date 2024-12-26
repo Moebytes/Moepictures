@@ -537,7 +537,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
-            style: post.style, artists: functions.tagObject(historyPost.artists), characters: functions.tagObject(historyPost.characters), 
+            style: post.style, artists: functions.tagObject(historyPost.artists), characters: functions.tagObject(historyPost.characters), noImageUpdate: true,
             preserveChildren: Boolean(post.parentID), series: functions.tagObject(historyPost.series), tags: post.tags, newTags, reason: historyPost.reason}, 
             session, setSessionFlag)
         } else {

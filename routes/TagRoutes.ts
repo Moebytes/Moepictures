@@ -251,7 +251,7 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 if (image[0] !== "delete") {
-                    const filename = `${tag}.${functions.fileExtension(image as Uint8Array)}`
+                    const filename = `${tag}.${functions.fileExtension(image as number[])}`
                     const imagePath = functions.getTagPath(tagObj.type, filename)
                     const newBuffer = Buffer.from(Object.values(image) as any)
                     imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
@@ -309,7 +309,7 @@ const TagRoutes = (app: Express) => {
             if (key && key.trim() !== tag) {
                 if (tagObj.image) {
                     let newFilename = `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
-                    if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.fileExtension(image as Uint8Array)}`
+                    if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.fileExtension(image as number[])}`
                     const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
                     const newImagePath = functions.getTagPath(tagObj.type, newFilename)
                     await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
@@ -654,7 +654,7 @@ const TagRoutes = (app: Express) => {
             let imageChanged = false
             if (image?.[0]) {
                 if (image[0] !== "delete") {
-                    const filename = `${tag}.${functions.fileExtension(image as Uint8Array)}`
+                    const filename = `${tag}.${functions.fileExtension(image as number[])}`
                     imagePath = functions.getTagPath(tagObj.type, filename)
                     const buffer = Buffer.from(Object.values(image))
                     await serverFunctions.uploadUnverifiedFile(imagePath, buffer)

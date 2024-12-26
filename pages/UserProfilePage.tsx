@@ -253,7 +253,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = new Uint8Array(arrayBuffer)
-                        await functions.post("/api/user/pfp", {bytes}, session, setSessionFlag)
+                        await functions.post("/api/user/pfp", {bytes: Object.values(bytes)}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
                     }

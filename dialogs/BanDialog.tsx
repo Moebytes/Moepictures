@@ -84,14 +84,14 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                let image = null as Uint8Array | ["delete"] | null
+                let image = null as number[] | ["delete"] | null
                 if (!currentHistory.image) {
                     image = ["delete"]
                 } else {
                     const imageLink = functions.getTagLink(currentHistory.type, currentHistory.image, currentHistory.imageHash)
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
-                    image = bytes
+                    image = Object.values(bytes)
                 }
                 await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image: image!, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,

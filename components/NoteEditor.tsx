@@ -179,7 +179,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 const imgLink = functions.getRawThumbnailLink(currentImg, "massive")
                 const decrypted = await functions.decryptThumb(imgLink, session)
                 const arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
-                const hash = await functions.post("/api/misc/imghash", new Uint8Array(arrayBuffer), session, setSessionFlag)
+                const hash = await functions.post("/api/misc/imghash", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
                 setTargetHash(hash)
             } else {
                 setTargetHash(currentImg.hash)
@@ -327,7 +327,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const jpgURL = await functions.convertToFormat(img, "jpg")
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
-        let result = await functions.post(`/api/misc/ocr`, bytes, session, setSessionFlag).catch(() => null)
+        let result = await functions.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
         if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash, overlay: false} as Note)))
     }
 

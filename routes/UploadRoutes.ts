@@ -435,8 +435,13 @@ const CreateRoutes = (app: Express) => {
         let imgChanged = await serverFunctions.imagesChanged(post.images, images, false, oldR18)
         if (!imgChanged) imgChanged = await serverFunctions.imagesChanged(post.images, upscaledImages, true, oldR18)
 
-        let vanillaBuffers = [] as any
-        let upscaledVanillaBuffers = [] as any
+        if (imgChanged) {
+          if (!permissions.isMod(req.session)) return res.status(403).send("No permission to modify images")
+          await serverFunctions.migrateNotes(post.images, images, oldR18)
+        }
+
+        let vanillaBuffers = [] as Buffer[]
+        let upscaledVanillaBuffers = [] as Buffer[]
         for (let i = 0; i < post.images.length; i++) {
           const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
           const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
@@ -445,7 +450,6 @@ const CreateRoutes = (app: Express) => {
           vanillaBuffers.push(oldImage)
           upscaledVanillaBuffers.push(oldUpscaledImage)
           if (imgChanged) {
-            if (!permissions.isMod(req.session)) return res.status(403).send("No permission to modify images")
             await sql.post.deleteImage(post.images[i].imageID)
             await serverFunctions.deleteFile(imagePath, oldR18)
             await serverFunctions.deleteFile(upscaledImagePath, oldR18)
@@ -1136,9 +1140,11 @@ const CreateRoutes = (app: Express) => {
 
         let imgChanged = true
         if (unverifiedID) {
-          imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, images, false, oldR18)
-          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, upscaledImages, true, oldR18)
+          imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, images, false)
+          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, upscaledImages, true)
           if (imgChanged) {
+            await serverFunctions.migrateNotes(unverifiedPost.images, images, oldR18, true)
+
             for (let i = 0; i < unverifiedPost.images.length; i++) {
               await sql.post.deleteUnverifiedImage(unverifiedPost.images[i].imageID)
               await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
@@ -1397,8 +1403,8 @@ const CreateRoutes = (app: Express) => {
 
         let imgChanged = true
         if (post && unverified.originalID) {
-          imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, false, oldR18)
-          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, true, oldR18)
+          imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, false, true, oldR18)
+          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, true, true, oldR18)
         }
 
         let vanillaBuffers = [] as any

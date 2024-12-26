@@ -88,7 +88,7 @@ export interface LoginParams {
 }
 
 export interface UserPfpParams {
-    bytes: Uint8Array
+    bytes: number[]
     postID?: string
 }
 
