@@ -44,6 +44,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     }, [categorizeTag])
 
     const categorize = async () => {
+        if (!categorizeTag) return
         if (permissions.isContributor(session)) {
             await functions.put("/api/tag/edit", {tag: categorizeTag.tag, type: category}, session, setSessionFlag)
             setTagFlag(categorizeTag.tag)

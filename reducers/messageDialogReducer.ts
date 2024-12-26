@@ -1,27 +1,28 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {Message} from "../types/Types"
 
 const messageDialogSlice = createSlice({
     name: "messageDialog",
     initialState: {
-        dmTarget: null as any,
-        deleteMessageID: null as any,
+        dmTarget: null as string | null,
+        deleteMessageID: null as string | null,
         deleteMessageFlag: false,
-        softDeleteMessageID: null as any,
+        softDeleteMessageID: null as string | null,
         softDeleteMessageFlag: false,
-        editMessageID: null as any,
+        editMessageID: null as string | null,
         editMessageFlag: false,
         editMessageTitle: "",
         editMessageContent: "",
         editMessageR18: false,
-        deleteMsgReplyID: null as any,
+        deleteMsgReplyID: null as string | null,
         deleteMsgReplyFlag: false,
-        editMsgReplyID: null as any,
+        editMsgReplyID: null as string | null,
         editMsgReplyFlag: false,
         editMsgReplyContent: "",
         editMsgReplyR18: false,
-        forwardMessageObj: null as any
+        forwardMessageObj: null as Message | null
     },
     reducers: {
         setDMTarget: (state, action) => {state.dmTarget = action.payload},
@@ -77,24 +78,24 @@ export const useMessageDialogSelector = () => {
 export const useMessageDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setDMTarget: (state: any) => dispatch(setDMTarget(state)),
-        setDeleteMessageID: (state: any) => dispatch(setDeleteMessageID(state)),
-        setDeleteMessageFlag: (state: any) => dispatch(setDeleteMessageFlag(state)),
-        setSoftDeleteMessageID: (state: any) => dispatch(setSoftDeleteMessageID(state)),
-        setSoftDeleteMessageFlag: (state: any) => dispatch(setSoftDeleteMessageFlag(state)),
-        setEditMessageID: (state: any) => dispatch(setEditMessageID(state)),
-        setEditMessageFlag: (state: any) => dispatch(setEditMessageFlag(state)),
-        setEditMessageTitle: (state: any) => dispatch(setEditMessageTitle(state)),
-        setEditMessageContent: (state: any) => dispatch(setEditMessageContent(state)),
-        setEditMessageR18: (state: any) => dispatch(setEditMessageR18(state)),
-        setDeleteMsgReplyID: (state: any) => dispatch(setDeleteMsgReplyID(state)),
-        setDeleteMsgReplyFlag: (state: any) => dispatch(setDeleteMsgReplyFlag(state)),
-        setEditMsgReplyID: (state: any) => dispatch(setEditMsgReplyID(state)),
-        setEditMsgReplyFlag: (state: any) => dispatch(setEditMsgReplyFlag(state)),
-        setEditMsgReplyContent: (state: any) => dispatch(setEditMsgReplyContent(state)),
-        setEditMsgReplyR18: (state: any) => dispatch(setEditMsgReplyR18(state)),
-        setForwardMessageObj: (state: any) => dispatch(setForwardMessageObj(state))
-    }
+        setDMTarget: (state: string | null) => dispatch(setDMTarget(state)),
+        setDeleteMessageID: (state: string | null) => dispatch(setDeleteMessageID(state)),
+        setDeleteMessageFlag: (state: boolean) => dispatch(setDeleteMessageFlag(state)),
+        setSoftDeleteMessageID: (state: string | null) => dispatch(setSoftDeleteMessageID(state)),
+        setSoftDeleteMessageFlag: (state: boolean) => dispatch(setSoftDeleteMessageFlag(state)),
+        setEditMessageID: (state: string | null) => dispatch(setEditMessageID(state)),
+        setEditMessageFlag: (state: boolean) => dispatch(setEditMessageFlag(state)),
+        setEditMessageTitle: (state: string) => dispatch(setEditMessageTitle(state)),
+        setEditMessageContent: (state: string) => dispatch(setEditMessageContent(state)),
+        setEditMessageR18: (state: boolean) => dispatch(setEditMessageR18(state)),
+        setDeleteMsgReplyID: (state: string | null) => dispatch(setDeleteMsgReplyID(state)),
+        setDeleteMsgReplyFlag: (state: boolean) => dispatch(setDeleteMsgReplyFlag(state)),
+        setEditMsgReplyID: (state: string | null) => dispatch(setEditMsgReplyID(state)),
+        setEditMsgReplyFlag: (state: boolean) => dispatch(setEditMsgReplyFlag(state)),
+        setEditMsgReplyContent: (state: string) => dispatch(setEditMsgReplyContent(state)),
+        setEditMsgReplyR18: (state: boolean) => dispatch(setEditMsgReplyR18(state)),
+        setForwardMessageObj: (state: Message | null) => dispatch(setForwardMessageObj(state))
+    }    
 }
 
 export default messageDialogSlice.reducer

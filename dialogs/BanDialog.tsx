@@ -45,6 +45,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     }, [banName])
 
     const ban = async () => {
+        if (!banName) return
         if (!permissions.isMod(session)) return setBanName(null)
         if (days && Number.isNaN(Number(days))) {
             setError(true)

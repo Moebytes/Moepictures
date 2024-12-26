@@ -37,11 +37,11 @@ export const useSessionSelector = () => {
 export const useSessionActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setSession: (state: any) => dispatch(setSession(state)),
-        setSessionFlag: (state: any) => dispatch(setSessionFlag(state)),
-        setUserImg: (state: any) => dispatch(setUserImg(state)),
-        setUserImgPost: (state: any) => dispatch(setUserImgPost(state)),
-        setHasNotification: (state: any) => dispatch(setHasNotification(state))
+        setSession: (state: Session) => dispatch(setSession(state)),
+        setSessionFlag: (state: boolean) => dispatch(setSessionFlag(state)),
+        setUserImg: (state: string) => dispatch(setUserImg(state)),
+        setUserImgPost: (state: string) => dispatch(setUserImgPost(state)),
+        setHasNotification: (state: boolean) => dispatch(setHasNotification(state))
     }
 }
 

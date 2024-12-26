@@ -60,6 +60,8 @@ export interface Post {
     locked: boolean | null
     private: boolean | null
     images: Image[]
+    postCount?: string
+    fake?: boolean
 }
 
 export interface PostCuteness extends Post {
@@ -91,7 +93,6 @@ export interface PostSearch extends Post {
     favorited: boolean
     favgrouped: boolean
     postCount: string
-    fake?: boolean
 }
 
 export interface UnverifiedPost extends Post {
@@ -107,7 +108,6 @@ export interface UnverifiedPost extends Post {
     reason: string | null
     isNote: boolean
     postCount: string
-    fake?: boolean
 }
 
 export interface ChildPost {

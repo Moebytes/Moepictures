@@ -35,6 +35,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     }, [deleteTagID])
 
     const deleteTag = async () => {
+        if (!deleteTagID) return
         if (permissions.isMod(session)) {
             setDeleteTagFlag(true)
         } else {

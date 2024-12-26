@@ -38,6 +38,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
     }, [forwardMessageObj])
 
     const forwardMessage = async () => {
+        if (!forwardMessageObj) return
         let cleanedRecipients = recipients.split(/\s+/g).map((r) => r.trim())
         if (cleanedRecipients.length < 1) {
             setError(true)

@@ -43,6 +43,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
     }, [addGroupPostObj])
 
     const addPost = async () => {
+        if (!addGroupPostObj) return
         if (permissions.isContributor(session)) {
             if (!postID) {
                 setError(true)

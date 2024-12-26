@@ -1,4 +1,4 @@
-import {Post, Image, PostType, PostStyle, PostMirrors, PostSearch, 
+import {Post, Image, PostType, PostStyle, PostMirrors, PostSearch, AliasHistoryType,
 PostRating, Alias, Implication, TagType, Note, AliasHistorySearch} from "./Types"
 
 export type History = 
@@ -8,6 +8,17 @@ export type History =
     | GroupHistory 
     | AliasHistorySearch 
     | SearchHistory
+
+export interface HistoryID {
+    failed: boolean | string
+    historyID: string | null
+}
+
+export interface AliasHistoryID {
+    failed: boolean | string
+    historyID: string | null
+    type: AliasHistoryType
+}
 
 export interface  PostChanges {
     images?: Image[]

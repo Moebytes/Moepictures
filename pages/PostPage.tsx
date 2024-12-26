@@ -304,7 +304,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (historyParam) return
         const updatePost = async () => {
             setLoaded(false)
-            let post = posts.find((p) => p.postID === postID)
+            let post = posts.find((p) => p.postID === postID) as PostSearch | undefined
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (err: any) {

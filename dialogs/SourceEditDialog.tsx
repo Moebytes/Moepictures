@@ -33,6 +33,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateFields = async () => {
+        if (!sourceEditID) return
         setTitle(sourceEditID.post.title || "")
         setEnglishTitle(sourceEditID.post.englishTitle || "")
         setArtist(sourceEditID.post.artist || "")
@@ -73,6 +74,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     }, [sourceEditID])
 
     const sourceEdit = async () => {
+        if (!sourceEditID) return
         if (permissions.isContributor(session)) {
             const data = {
                 postID: sourceEditID.post.postID,

@@ -35,6 +35,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async () => {
+        if (!groupPostID) return
         const groups = await functions.get("/api/groups", {postID: groupPostID}, session, setSessionFlag)
         setGroups(groups)
     }
@@ -66,6 +67,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }, [groupPostID])
 
     const group = async () => {
+        if (!groupPostID) return
         if (permissions.isContributor(session)) {
             if (!name) {
                 setError(true)
@@ -120,6 +122,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
 
     const groupJSX = () => {
         let jsx = [] as React.ReactElement[]
+        if (!groupPostID) return jsx
         for (let i = 0; i < groups.length; i++) {
             const group = groups[i]
             const deleteFromGroup = async () => {

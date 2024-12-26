@@ -33,6 +33,7 @@ import premiumStar from "../assets/icons/premium-star.png"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions} from "../store"
+import {Themes} from "../types/Types"
 import "./styles/navbar.less"
 
 interface Props {
@@ -134,7 +135,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         } else {
             newTheme = "light"
         }
-        setTheme(newTheme)
+        setTheme(newTheme as Themes)
         localStorage.setItem("theme", newTheme)
     }
 

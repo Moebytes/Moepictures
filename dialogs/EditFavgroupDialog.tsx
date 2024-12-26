@@ -42,6 +42,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     }, [editFavGroupObj])
 
     const editFavgroup = async () => {
+        if (!editFavGroupObj) return
         if (!name) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

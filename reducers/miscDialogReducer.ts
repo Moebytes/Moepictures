@@ -8,9 +8,9 @@ const miscDialogSlice = createSlice({
         showDownloadDialog: false,
         showPageDialog: false,
         showDeleteAccountDialog: false,
-        banName: null as any,
-        unbanName: null as any,
-        promoteName: null as any,
+        banName: null as string | null,
+        unbanName: null as string | null,
+        promoteName: null as string | null,
         premiumRequired: false as string | boolean,
         r18Confirmation: false,
         disable2FADialog: false,
@@ -55,16 +55,16 @@ export const useMiscDialogSelector = () => {
 export const useMiscDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setShowDownloadDialog: (state: any) => dispatch(setShowDownloadDialog(state)),
-        setShowPageDialog: (state: any) => dispatch(setShowPageDialog(state)),
-        setShowDeleteAccountDialog: (state: any) => dispatch(setShowDeleteAccountDialog(state)),
-        setBanName: (state: any) => dispatch(setBanName(state)),
-        setUnbanName: (state: any) => dispatch(setUnbanName(state)),
-        setPromoteName: (state: any) => dispatch(setPromoteName(state)),
-        setPremiumRequired: (state: any) => dispatch(setPremiumRequired(state)),
-        setR18Confirmation: (state: any) => dispatch(setR18Confirmation(state)),
-        setDisable2FADialog: (state: any) => dispatch(setDisable2FADialog(state)),
-        setDisable2FAFlag: (state: any) => dispatch(setDisable2FAFlag(state))
+        setShowDownloadDialog: (state: boolean) => dispatch(setShowDownloadDialog(state)),
+        setShowPageDialog: (state: boolean) => dispatch(setShowPageDialog(state)),
+        setShowDeleteAccountDialog: (state: boolean) => dispatch(setShowDeleteAccountDialog(state)),
+        setBanName: (state: string | null) => dispatch(setBanName(state)),
+        setUnbanName: (state: string | null) => dispatch(setUnbanName(state)),
+        setPromoteName: (state: string | null) => dispatch(setPromoteName(state)),
+        setPremiumRequired: (state: string | boolean) => dispatch(setPremiumRequired(state)),
+        setR18Confirmation: (state: boolean) => dispatch(setR18Confirmation(state)),
+        setDisable2FADialog: (state: boolean) => dispatch(setDisable2FADialog(state)),
+        setDisable2FAFlag: (state: boolean) => dispatch(setDisable2FAFlag(state))
     }
 }
 

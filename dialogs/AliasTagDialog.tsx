@@ -35,6 +35,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     }, [aliasTagID])
 
     const aliasTag = async () => {
+        if (!aliasTagID) return
         if (permissions.isMod(session)){
             setAliasTagFlag(true)
         } else {

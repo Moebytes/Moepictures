@@ -1,22 +1,22 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {GroupPosts, Favgroup} from "../types/Types"
+import {GroupPosts, Favgroup, Banner} from "../types/Types"
 
 const activeSlice = createSlice({
     name: "active",
     initialState: {
         activeDropdown: "none",
         filterDropActive: false,
-        activeGroup: null as unknown as GroupPosts,
-        activeFavgroup: null as unknown as Favgroup,
+        activeGroup: null as GroupPosts | null,
+        activeFavgroup: null as Favgroup | null,
         headerText: "",
         sidebarText: "",
         quoteText: "",
         helpTab: "help",
         modState: "posts",
-        actionBanner: null as string | null,
-        newsBanner: null as any
+        actionBanner: "",
+        newsBanner: null as Banner | null
     },
     reducers: {
         setActiveDropdown: (state, action) => {state.activeDropdown = action.payload},
@@ -59,17 +59,17 @@ export const useActiveSelector = () => {
 export const useActiveActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setActiveDropdown: (state: any) => dispatch(setActiveDropdown(state)),
-        setFilterDropActive: (state: any) => dispatch(setFilterDropActive(state)),
+        setActiveDropdown: (state: string) => dispatch(setActiveDropdown(state)),
+        setFilterDropActive: (state: boolean) => dispatch(setFilterDropActive(state)),
         setActiveGroup: (state: GroupPosts | null) => dispatch(setActiveGroup(state)),
         setActiveFavgroup: (state: Favgroup | null) => dispatch(setActiveFavgroup(state)),
-        setHeaderText: (state: any) => dispatch(setHeaderText(state)),
-        setSidebarText: (state: any) => dispatch(setSidebarText(state)),
-        setQuoteText: (state: any) => dispatch(setQuoteText(state)),
-        setHelpTab: (state: any) => dispatch(setHelpTab(state)),
-        setModState: (state: any) => dispatch(setModState(state)),
-        setActionBanner: (state: any) => dispatch(setActionBanner(state)),
-        setNewsBanner: (state: any) => dispatch(setNewsBanner(state))
+        setHeaderText: (state: string) => dispatch(setHeaderText(state)),
+        setSidebarText: (state: string) => dispatch(setSidebarText(state)),
+        setQuoteText: (state: string) => dispatch(setQuoteText(state)),
+        setHelpTab: (state: string) => dispatch(setHelpTab(state)),
+        setModState: (state: string) => dispatch(setModState(state)),
+        setActionBanner: (state: string | null) => dispatch(setActionBanner(state)),
+        setNewsBanner: (state: Banner | null) => dispatch(setNewsBanner(state))
     }
 }
 

@@ -512,7 +512,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         setEditMessageContent(message.content)
         setEditMessageTitle(message.title)
         setEditMessageID(message.messageID)
-        setEditMessageR18(message.r18)
+        setEditMessageR18(message.r18 ?? false)
     }
 
     const deleteMessage = async () => {
@@ -573,7 +573,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (quoteText) {
             const prevText = text.trim() ? `${text.trim()}\n` : ""
             setText(`${prevText}${quoteText.trim()}`)
-            setQuoteText(null)
+            setQuoteText("")
             window.scrollTo(0, document.body.scrollHeight)
         }
     }, [quoteText])

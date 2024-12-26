@@ -1,20 +1,21 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {HistoryID, Note} from "../types/Types"
 
 const noteDialogSlice = createSlice({
     name: "noteDialog",
     initialState: {
-        editNoteID: null as any,
+        editNoteID: null as number | null,
         editNoteFlag: false,
         editNoteText: "",
         editNoteTranscript: "",
         showSaveNoteDialog: false,
-        saveNoteData: null as any,
+        saveNoteData: null as Note[] | null,
         saveNoteOrder: 1,
-        deleteNoteHistoryID: null as any,
+        deleteNoteHistoryID: null as HistoryID | null,
         deleteNoteHistoryFlag: false,
-        revertNoteHistoryID: null as any,
+        revertNoteHistoryID: null as HistoryID | null,
         revertNoteHistoryFlag: false,
         noteOCRDialog: false,
         noteOCRFlag: false
@@ -65,20 +66,20 @@ export const useNoteDialogSelector = () => {
 export const useNoteDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setEditNoteID: (state: any) => dispatch(setEditNoteID(state)),
-        setEditNoteFlag: (state: any) => dispatch(setEditNoteFlag(state)),
-        setEditNoteText: (state: any) => dispatch(setEditNoteText(state)),
-        setEditNoteTranscript: (state: any) => dispatch(setEditNoteTranscript(state)),
-        setShowSaveNoteDialog: (state: any) => dispatch(setShowSaveNoteDialog(state)),
-        setSaveNoteData: (state: any) => dispatch(setSaveNoteData(state)),
-        setSaveNoteOrder: (state: any) => dispatch(setSaveNoteOrder(state)),
-        setDeleteNoteHistoryID: (state: any) => dispatch(setDeleteNoteHistoryID(state)),
-        setDeleteNoteHistoryFlag: (state: any) => dispatch(setDeleteNoteHistoryFlag(state)),
-        setRevertNoteHistoryID: (state: any) => dispatch(setRevertNoteHistoryID(state)),
-        setRevertNoteHistoryFlag: (state: any) => dispatch(setRevertNoteHistoryFlag(state)),
-        setNoteOCRDialog: (state: any) => dispatch(setNoteOCRDialog(state)),
-        setNoteOCRFlag: (state: any) => dispatch(setNoteOCRFlag(state))
-    }
+        setEditNoteID: (state: number | null) => dispatch(setEditNoteID(state)),
+        setEditNoteFlag: (state: boolean) => dispatch(setEditNoteFlag(state)),
+        setEditNoteText: (state: string) => dispatch(setEditNoteText(state)),
+        setEditNoteTranscript: (state: string) => dispatch(setEditNoteTranscript(state)),
+        setShowSaveNoteDialog: (state: boolean) => dispatch(setShowSaveNoteDialog(state)),
+        setSaveNoteData: (state: Note[] | null) => dispatch(setSaveNoteData(state)),
+        setSaveNoteOrder: (state: number) => dispatch(setSaveNoteOrder(state)),
+        setDeleteNoteHistoryID: (state: HistoryID | null) => dispatch(setDeleteNoteHistoryID(state)),
+        setDeleteNoteHistoryFlag: (state: boolean) => dispatch(setDeleteNoteHistoryFlag(state)),
+        setRevertNoteHistoryID: (state: HistoryID | null) => dispatch(setRevertNoteHistoryID(state)),
+        setRevertNoteHistoryFlag: (state: boolean) => dispatch(setRevertNoteHistoryFlag(state)),
+        setNoteOCRDialog: (state: boolean) => dispatch(setNoteOCRDialog(state)),
+        setNoteOCRFlag: (state: boolean) => dispatch(setNoteOCRFlag(state))
+    }    
 }
 
 export default noteDialogSlice.reducer

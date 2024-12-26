@@ -43,6 +43,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
     }, [editGroupObj])
 
     const editGroup = async () => {
+        if (!editGroupObj) return
         if (permissions.isContributor(session)) {
             if (!name) {
                 setError(true)

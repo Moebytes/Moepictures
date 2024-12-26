@@ -505,7 +505,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         setEditThreadContent(thread.content)
         setEditThreadTitle(thread.title)
         setEditThreadID(thread.threadID)
-        setEditThreadR18(thread.r18)
+        setEditThreadR18(thread.r18 ?? false)
     }
 
     const deleteThread = async () => {
@@ -573,7 +573,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (quoteText) {
             const prevText = text.trim() ? `${text.trim()}\n` : ""
             setText(`${prevText}${quoteText.trim()}`)
-            setQuoteText(null)
+            setQuoteText("")
             window.scrollTo(0, document.body.scrollHeight)
         }
     }, [quoteText])

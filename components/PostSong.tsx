@@ -111,6 +111,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (!props.post) return
         if (!functions.isAudio(props.audio)) return
         setAudio(props.audio)
         setAudioPost(props.post)
@@ -218,6 +219,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const seek = (position: number) => {
+        if (!props.post) return
         setAudio(props.audio)
         setAudioPost(props.post)
         setPlayFlag("always")
@@ -229,6 +231,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const updatePlay = () => {
+        if (!props.post) return
         setAudio(props.audio)
         setAudioPost(props.post)
         setPlayFlag("toggle")
@@ -481,8 +484,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                     <div className="relative-ref">
                         <div className="audio-controls" ref={audioControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <p className="audio-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
-                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={dragging ? (dragProgress / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                                <p className="audio-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
+                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={dragging ? ((dragProgress || 0) / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
                                 <p className="audio-control-text">{functions.formatSeconds(duration)}</p>
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

@@ -666,7 +666,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const privatePost = async () => {
-        if (!props.post) return
+        if (!props.post || !props.artists) return
         setPrivatePostObj({postID: props.post.postID, artists: props.artists})
     }
 
@@ -727,6 +727,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerSourceEdit = () => {
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
             tags: props.tags, unverified: props.unverified})
@@ -740,6 +741,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerParent = () => {
+        if (!props.post) return
         setChildPostObj({post: props.post, unverified: props.unverified})
     }
 

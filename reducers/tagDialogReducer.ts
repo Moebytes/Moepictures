@@ -1,27 +1,38 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {AliasHistoryID, HistoryID, TagHistory, Tag, TagType} from "../types/Types"
+
+interface TagObj extends Partial<TagHistory> {
+    tag: string
+    failed?: boolean | string
+}
+
+interface CategorizeTagObj {
+    tag: string
+    type: TagType
+}
 
 const tagDialogSlice = createSlice({
     name: "tagDialog",
     initialState: {
-        deleteTagHistoryID: null as any,
+        deleteTagHistoryID: null as HistoryID | null,
         deleteTagHistoryFlag: false,
-        revertTagHistoryID: null as any,
+        revertTagHistoryID: null as HistoryID | null,
         revertTagHistoryFlag: false,
-        editTagObj: null as any,
+        editTagObj: null as TagObj | null,
         editTagFlag: false,
-        deleteTagID: null as any,
+        deleteTagID: null as string | null,
         deleteTagFlag: false,
-        aliasTagID: null as any,
+        aliasTagID: null as string | null,
         aliasTagFlag: false,
         aliasTagName: "",
-        takedownTag: null as any,
-        categorizeTag: null as any,
+        takedownTag: null as Tag | TagHistory | null,
+        categorizeTag: null as CategorizeTagObj | null,
         showBulkTagEditDialog: false,
-        deleteAliasHistoryID: null as any,
+        deleteAliasHistoryID: null as AliasHistoryID | null,
         deleteAliasHistoryFlag: false,
-        revertAliasHistoryID: null as any,
+        revertAliasHistoryID: null as AliasHistoryID | null,
         revertAliasHistoryFlag: false
     },
     reducers: {
@@ -80,25 +91,25 @@ export const useTagDialogSelector = () => {
 export const useTagDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setDeleteTagHistoryID: (state: any) => dispatch(setDeleteTagHistoryID(state)),
-        setDeleteTagHistoryFlag: (state: any) => dispatch(setDeleteTagHistoryFlag(state)),
-        setRevertTagHistoryID: (state: any) => dispatch(setRevertTagHistoryID(state)),
-        setRevertTagHistoryFlag: (state: any) => dispatch(setRevertTagHistoryFlag(state)),
-        setEditTagObj: (state: any) => dispatch(setEditTagObj(state)),
-        setEditTagFlag: (state: any) => dispatch(setEditTagFlag(state)),
-        setDeleteTagID: (state: any) => dispatch(setDeleteTagID(state)),
-        setDeleteTagFlag: (state: any) => dispatch(setDeleteTagFlag(state)),
-        setAliasTagID: (state: any) => dispatch(setAliasTagID(state)),
-        setAliasTagFlag: (state: any) => dispatch(setAliasTagFlag(state)),
-        setAliasTagName: (state: any) => dispatch(setAliasTagName(state)),
-        setTakedownTag: (state: any) => dispatch(setTakedownTag(state)),
-        setCategorizeTag: (state: any) => dispatch(setCategorizeTag(state)),
-        setShowBulkTagEditDialog: (state: any) => dispatch(setShowBulkTagEditDialog(state)),
-        setDeleteAliasHistoryID: (state: any) => dispatch(setDeleteAliasHistoryID(state)),
-        setDeleteAliasHistoryFlag: (state: any) => dispatch(setDeleteAliasHistoryFlag(state)),
-        setRevertAliasHistoryID: (state: any) => dispatch(setRevertAliasHistoryID(state)),
-        setRevertAliasHistoryFlag: (state: any) => dispatch(setRevertAliasHistoryFlag(state))
-    }
+        setDeleteTagHistoryID: (state: HistoryID | null) => dispatch(setDeleteTagHistoryID(state)),
+        setDeleteTagHistoryFlag: (state: boolean) => dispatch(setDeleteTagHistoryFlag(state)),
+        setRevertTagHistoryID: (state: HistoryID | null) => dispatch(setRevertTagHistoryID(state)),
+        setRevertTagHistoryFlag: (state: boolean) => dispatch(setRevertTagHistoryFlag(state)),
+        setEditTagObj: (state: TagObj | null) => dispatch(setEditTagObj(state)),
+        setEditTagFlag: (state: boolean) => dispatch(setEditTagFlag(state)),
+        setDeleteTagID: (state: string | null) => dispatch(setDeleteTagID(state)),
+        setDeleteTagFlag: (state: boolean) => dispatch(setDeleteTagFlag(state)),
+        setAliasTagID: (state: string | null) => dispatch(setAliasTagID(state)),
+        setAliasTagFlag: (state: boolean) => dispatch(setAliasTagFlag(state)),
+        setAliasTagName: (state: string) => dispatch(setAliasTagName(state)),
+        setTakedownTag: (state: Tag | TagHistory | null) => dispatch(setTakedownTag(state)),
+        setCategorizeTag: (state: CategorizeTagObj | null) => dispatch(setCategorizeTag(state)),
+        setShowBulkTagEditDialog: (state: boolean) => dispatch(setShowBulkTagEditDialog(state)),
+        setDeleteAliasHistoryID: (state: AliasHistoryID | null) => dispatch(setDeleteAliasHistoryID(state)),
+        setDeleteAliasHistoryFlag: (state: boolean) => dispatch(setDeleteAliasHistoryFlag(state)),
+        setRevertAliasHistoryID: (state: AliasHistoryID | null) => dispatch(setRevertAliasHistoryID(state)),
+        setRevertAliasHistoryFlag: (state: boolean) => dispatch(setRevertAliasHistoryFlag(state))
+    }    
 }
 
 export default tagDialogSlice.reducer

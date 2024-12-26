@@ -117,6 +117,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const softDeleteMessage = async () => {
+        if (!softDeleteMessageID) return
         await functions.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
         updateMessages()
     }

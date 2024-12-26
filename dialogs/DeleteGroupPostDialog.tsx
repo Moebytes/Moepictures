@@ -37,6 +37,7 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
     }, [deleteGroupPostObj])
 
     const deleteGroupPost = async () => {
+        if (!deleteGroupPostObj) return
         if (permissions.isContributor(session)) {
             await functions.delete("/api/group/post/delete", {postID: deleteGroupPostObj.postID, name: deleteGroupPostObj.group.name}, session, setSessionFlag)
             setGroupFlag(true)

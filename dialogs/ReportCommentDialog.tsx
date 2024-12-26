@@ -33,6 +33,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
 
 
     const reportComment = async () => {
+        if (!reportCommentID) return
         const badReason = functions.validateReason(reason, i18n)
         if (badReason) {
             setError(true)

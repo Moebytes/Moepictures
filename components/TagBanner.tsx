@@ -115,7 +115,7 @@ const TagBanner: React.FunctionComponent = (props) => {
             visible = functions.removeDuplicates(visiblePosts)
         } else {
             const postOffset = (page - 1) * getPageAmount()
-            visible = posts.slice(postOffset, postOffset + getPageAmount())
+            visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
         }
         return visible
     }

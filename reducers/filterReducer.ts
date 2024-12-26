@@ -45,14 +45,14 @@ export const useFilterSelector = () => {
 export const useFilterActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setBrightness: (state: any) => dispatch(setBrightness(state)),
-        setContrast: (state: any) => dispatch(setContrast(state)),
-        setHue: (state: any) => dispatch(setHue(state)),
-        setSaturation: (state: any) => dispatch(setSaturation(state)),
-        setLightness: (state: any) => dispatch(setLightness(state)),
-        setBlur: (state: any) => dispatch(setBlur(state)),
-        setSharpen: (state: any) => dispatch(setSharpen(state)),
-        setPixelate: (state: any) => dispatch(setPixelate(state))
+        setBrightness: (state: number) => dispatch(setBrightness(state)),
+        setContrast: (state: number) => dispatch(setContrast(state)),
+        setHue: (state: number) => dispatch(setHue(state)),
+        setSaturation: (state: number) => dispatch(setSaturation(state)),
+        setLightness: (state: number) => dispatch(setLightness(state)),
+        setBlur: (state: number) => dispatch(setBlur(state)),
+        setSharpen: (state: number) => dispatch(setSharpen(state)),
+        setPixelate: (state: number) => dispatch(setPixelate(state))
     }
 }
 

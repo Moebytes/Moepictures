@@ -70,6 +70,7 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import checkbox from "../assets/icons/checkbox2.png"
 import checkboxChecked from "../assets/icons/checkbox2-checked.png"
+import {PostType, PostStyle, PostSize, PostSort} from "../types/Types"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
@@ -125,10 +126,10 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         const savedMultiplier = localStorage.getItem("pageMultiplier")
         const savedShowChildren = localStorage.getItem("showChildren")
-        if (savedType) setImageType(savedType)
-        if (savedStyle) setStyleType(savedStyle)
-        if (savedSize) setSizeType(savedSize)
-        if (savedSort) setSortType(savedSort)
+        if (savedType) setImageType(savedType as PostType)
+        if (savedStyle) setStyleType(savedStyle as PostStyle)
+        if (savedSize) setSizeType(savedSize as PostSize)
+        if (savedSort) setSortType(savedSort as PostSort)
         if (savedSortReverse) setSortReverse(savedSortReverse === "true")
         if (savedSquare) setSquare(savedSquare === "true")
         if (savedScroll) setScroll(savedScroll === "true")
@@ -807,7 +808,7 @@ const SortBar: React.FunctionComponent = (props) => {
         setShowBulkDeleteDialog(!showBulkDeleteDialog)
     }
 
-    const changeSortType = (sortType: string) => {
+    const changeSortType = (sortType: PostSort) => {
         if (sortType === "bookmarks") {
             if (!permissions.isPremium(session)) return setPremiumRequired(true)
         }

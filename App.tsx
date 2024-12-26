@@ -64,6 +64,7 @@ import DragAndDrop from "./components/DragAndDrop"
 import AudioPlayer from "./components/AudioPlayer"
 import ActionBanner from "./components/ActionBanner"
 import NewsBanner from "./components/NewsBanner"
+import {PostRating} from "./types/Types"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -105,7 +106,7 @@ const App: React.FunctionComponent = (props) => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
         const savedRating = localStorage.getItem("rating")
-        if (savedRating) setRatingType(savedRating)
+        if (savedRating) setRatingType(savedRating as PostRating)
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
@@ -247,23 +248,6 @@ const App: React.FunctionComponent = (props) => {
     }, [enableDrag, history])
 
     useEffect(() => {
-        if (!theme || theme === "purple") {
-            document.documentElement.style.setProperty("--background", "#09071c")
-            document.documentElement.style.setProperty("--titlebarBG", "#090420")
-            document.documentElement.style.setProperty("--navbarBG", "#0b0322")
-        } else if (theme === "purple-light") {
-            document.documentElement.style.setProperty("--background", "#ffffff")
-            document.documentElement.style.setProperty("--titlebarBG", "#dfdfff")
-            document.documentElement.style.setProperty("--navbarBG", "#dbddff")
-        } else if (theme === "magenta") {
-            document.documentElement.style.setProperty("--background", "#17040e")
-            document.documentElement.style.setProperty("--titlebarBG", "#1c0511")
-            document.documentElement.style.setProperty("--navbarBG", "#1e0514")
-        } else if (theme === "magenta-light") {
-            document.documentElement.style.setProperty("--background", "#ffffff")
-            document.documentElement.style.setProperty("--titlebarBG", "#ffe2f2")
-            document.documentElement.style.setProperty("--navbarBG", "#ffe0f1")
-        }
         functions.changeFavicon(theme)
     }, [theme])
 

@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {PostSearch} from "../types/Types"
 
 const interactionSlice = createSlice({
     name: "interaction",
@@ -8,12 +9,12 @@ const interactionSlice = createSlice({
         enableDrag: false,
         sidebarHover: false,
         mobileScrolling: false,
-        scrollY: null as any,
+        scrollY: 0,
         tooltipX: 0,
         tooltipY: 0,
         tooltipEnabled: false,
-        tooltipPost: null as any,
-        tooltipImg: null as any
+        tooltipPost: null as PostSearch | null,
+        tooltipImg: ""
     },
     reducers: {
         setEnableDrag: (state, action) => {state.enableDrag = action.payload},
@@ -52,15 +53,15 @@ export const useInteractionSelector = () => {
 export const useInteractionActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setEnableDrag: (state: any) => dispatch(setEnableDrag(state)),
-        setSidebarHover: (state: any) => dispatch(setSidebarHover(state)),
-        setMobileScrolling: (state: any) => dispatch(setMobileScrolling(state)),
-        setScrollY: (state: any) => dispatch(setScrollY(state)),
-        setToolTipX: (state: any) => dispatch(setToolTipX(state)),
-        setToolTipY: (state: any) => dispatch(setToolTipY(state)),
-        setToolTipEnabled: (state: any) => dispatch(setToolTipEnabled(state)),
-        setToolTipPost: (state: any) => dispatch(setToolTipPost(state)),
-        setToolTipImg: (state: any) => dispatch(setToolTipImg(state))
+        setEnableDrag: (state: boolean) => dispatch(setEnableDrag(state)),
+        setSidebarHover: (state: boolean) => dispatch(setSidebarHover(state)),
+        setMobileScrolling: (state: boolean) => dispatch(setMobileScrolling(state)),
+        setScrollY: (state: number) => dispatch(setScrollY(state)),
+        setToolTipX: (state: number) => dispatch(setToolTipX(state)),
+        setToolTipY: (state: number) => dispatch(setToolTipY(state)),
+        setToolTipEnabled: (state: boolean) => dispatch(setToolTipEnabled(state)),
+        setToolTipPost: (state: PostSearch) => dispatch(setToolTipPost(state)),
+        setToolTipImg: (state: string) => dispatch(setToolTipImg(state))
     }
 }
 

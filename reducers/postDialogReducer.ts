@@ -1,7 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
+import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
@@ -12,24 +12,34 @@ interface TagEditID {
     tags: MiniTag[]
 }
 
+interface ChildEditID {
+    post: PostSearch | PostHistory | UnverifiedPost, 
+    unverified?: boolean
+}
+
+interface PostObj {
+    postID: string
+    artists: MiniTag[]
+}
+
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
         showDeletePostDialog: false,
         showTakedownPostDialog: false,
-        deletePostHistoryID: null as any,
+        deletePostHistoryID: null as HistoryID | null,
         deletePostHistoryFlag: false,
-        revertPostHistoryID: null as any,
+        revertPostHistoryID: null as HistoryID | null,
         revertPostHistoryFlag: false,
-        lockPostID: null as any,
-        privatePostObj: null as any,
+        lockPostID: null as string | null,
+        privatePostObj: null as PostObj | null,
         tagEditID: null as TagEditID | null,
-        sourceEditID: null as unknown as {unverified: boolean, post: PostSearch},
+        sourceEditID: null as TagEditID | null,
         showBulkTagEditDialog: false,
         showBulkDeleteDialog: false,
         showCompressingDialog: false,
         showUpscalingDialog: false,
-        childPostObj: null as unknown as {unverified: boolean, post: PostSearch}
+        childPostObj: null as ChildEditID | null
     },
     reducers: {
         setShowDeletePostDialog: (state, action) => {state.showDeletePostDialog = action.payload},
@@ -81,22 +91,22 @@ export const usePostDialogSelector = () => {
 export const usePostDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setShowDeletePostDialog: (state: any) => dispatch(setShowDeletePostDialog(state)),
-        setShowTakedownPostDialog: (state: any) => dispatch(setShowTakedownPostDialog(state)),
-        setDeletePostHistoryID: (state: any) => dispatch(setDeletePostHistoryID(state)),
-        setDeletePostHistoryFlag: (state: any) => dispatch(setDeletePostHistoryFlag(state)),
-        setRevertPostHistoryID: (state: any) => dispatch(setRevertPostHistoryID(state)),
-        setRevertPostHistoryFlag: (state: any) => dispatch(setRevertPostHistoryFlag(state)),
-        setLockPostID: (state: any) => dispatch(setLockPostID(state)),
-        setPrivatePostObj: (state: any) => dispatch(setPrivatePostObj(state)),
+        setShowDeletePostDialog: (state: boolean) => dispatch(setShowDeletePostDialog(state)),
+        setShowTakedownPostDialog: (state: boolean) => dispatch(setShowTakedownPostDialog(state)),
+        setDeletePostHistoryID: (state: HistoryID | null) => dispatch(setDeletePostHistoryID(state)),
+        setDeletePostHistoryFlag: (state: boolean) => dispatch(setDeletePostHistoryFlag(state)),
+        setRevertPostHistoryID: (state: HistoryID | null) => dispatch(setRevertPostHistoryID(state)),
+        setRevertPostHistoryFlag: (state: boolean) => dispatch(setRevertPostHistoryFlag(state)),
+        setLockPostID: (state: string | null) => dispatch(setLockPostID(state)),
+        setPrivatePostObj: (state: PostObj | null) => dispatch(setPrivatePostObj(state)),
         setTagEditID: (state: TagEditID | null) => dispatch(setTagEditID(state)),
-        setSourceEditID: (state: any) => dispatch(setSourceEditID(state)),
-        setShowBulkTagEditDialog: (state: any) => dispatch(setShowBulkTagEditDialog(state)),
-        setShowBulkDeleteDialog: (state: any) => dispatch(setShowBulkDeleteDialog(state)),
-        setShowCompressingDialog: (state: any) => dispatch(setShowCompressingDialog(state)),
-        setShowUpscalingDialog: (state: any) => dispatch(setShowUpscalingDialog(state)),
-        setChildPostObj: (state: any) => dispatch(setChildPostObj(state))
-    }
+        setSourceEditID: (state: TagEditID | null) => dispatch(setSourceEditID(state)),
+        setShowBulkTagEditDialog: (state: boolean) => dispatch(setShowBulkTagEditDialog(state)),
+        setShowBulkDeleteDialog: (state: boolean) => dispatch(setShowBulkDeleteDialog(state)),
+        setShowCompressingDialog: (state: boolean) => dispatch(setShowCompressingDialog(state)),
+        setShowUpscalingDialog: (state: boolean) => dispatch(setShowUpscalingDialog(state)),
+        setChildPostObj: (state: ChildEditID | null) => dispatch(setChildPostObj(state))
+    }    
 }
 
 export default postDialogSlice.reducer

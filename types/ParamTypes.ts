@@ -1,3 +1,11 @@
+export type Themes =
+    | "light"
+    | "darl"
+
+export type Languages =
+    | "en"
+    | "ja"
+
 export type PostType =
     | "all"
     | "image"
@@ -141,6 +149,8 @@ export type ImageFormat =
     | "gif" 
     | "webp"
     | "avif"
+    | "jxl"
+    | "svg"
 
 export type Upscaler =
     | "real-cugan" 

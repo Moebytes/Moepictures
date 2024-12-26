@@ -5,12 +5,12 @@ import type {StoreState, StoreDispatch} from "../store"
 const commentDialogSlice = createSlice({
     name: "commentDialog",
     initialState: {
-        deleteCommentID: null as any,
+        deleteCommentID: null as string | null,
         deleteCommentFlag: false,
-        editCommentID: null as any,
+        editCommentID: null as string | null,
         editCommentFlag: false,
         editCommentText: "",
-        reportCommentID: null as any
+        reportCommentID: null as string | null,
     },
     reducers: {
         setDeleteCommentID: (state, action) => {state.deleteCommentID = action.payload},
@@ -42,12 +42,12 @@ export const useCommentDialogSelector = () => {
 export const useCommentDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setDeleteCommentID: (state: any) => dispatch(setDeleteCommentID(state)),
-        setDeleteCommentFlag: (state: any) => dispatch(setDeleteCommentFlag(state)),
-        setEditCommentID: (state: any) => dispatch(setEditCommentID(state)),
-        setEditCommentFlag: (state: any) => dispatch(setEditCommentFlag(state)),
-        setEditCommentText: (state: any) => dispatch(setEditCommentText(state)),
-        setReportCommentID: (state: any) => dispatch(setReportCommentID(state))
+        setDeleteCommentID: (state: string | null) => dispatch(setDeleteCommentID(state)),
+        setDeleteCommentFlag: (state: boolean) => dispatch(setDeleteCommentFlag(state)),
+        setEditCommentID: (state: string | null) => dispatch(setEditCommentID(state)),
+        setEditCommentFlag: (state: boolean) => dispatch(setEditCommentFlag(state)),
+        setEditCommentText: (state: string) => dispatch(setEditCommentText(state)),
+        setReportCommentID: (state: string | null) => dispatch(setReportCommentID(state))
     }
 }
 

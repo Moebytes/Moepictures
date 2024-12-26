@@ -162,7 +162,7 @@ export interface TagEditParams {
     fandom?: string | null
     featured?: string | null
     r18?: boolean
-    reason?: string
+    reason?: string | null
     updater?: string
     updatedDate?: string
     silent?: boolean

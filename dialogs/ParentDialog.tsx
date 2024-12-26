@@ -46,6 +46,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
     }, [childPostObj])
 
     const parent = async () => {
+        if (!childPostObj) return
         if (permissions.isContributor(session)) {
             const data = {
                 postID: childPostObj.post.postID,

@@ -43,6 +43,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }, [editTagObj])
 
     const editTag = async () => {
+        if (!editTagObj) return
         if (permissions.isContributor(session)) {
             setEditTagFlag(true)
         } else {
@@ -86,6 +87,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     const uploadTagImg = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!editTagObj) return
         const file = event.target.files?.[0]
         if (!file) return
         const fileReader = new FileReader()
@@ -139,21 +141,22 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     const tagSocialJSX = () => {
+        if (!editTagObj) return
         let jsx = [] as React.ReactElement[] 
         if (editTagObj.type === "artist") {
             jsx.push(
                 <>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.website}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website!} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.social}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.social} onChange={(event) => setEditTagObj({...editTagObj, social: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.social!} onChange={(event) => setEditTagObj({...editTagObj, social: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.twitter}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter!} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
                 </div>
                 </>
             )
@@ -163,7 +166,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.wiki}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.fandom} onChange={(event) => setEditTagObj({...editTagObj, fandom: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.fandom!} onChange={(event) => setEditTagObj({...editTagObj, fandom: event.target.value})}/>
                 </div>
                 </>
             )
@@ -173,11 +176,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.website}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.website!} onChange={(event) => setEditTagObj({...editTagObj, website: event.target.value})}/>
                 </div>
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.twitter}: </span>
-                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter!} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
                 </div>
                 </>
             )
@@ -230,6 +233,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     const mainJSX = () => {
+        if (!editTagObj) return
         return (
             <>
             <div className="dialog-row">
@@ -248,7 +252,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
                 : null}
                 <span style={{marginLeft: "20px"}} className="dialog-text">{i18n.labels.featured}: </span>
-                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.featured} onChange={(event) => setEditTagObj({...editTagObj, featured: event.target.value})} style={{width: "20%"}}/>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.featured!} onChange={(event) => setEditTagObj({...editTagObj, featured: event.target.value})} style={{width: "20%"}}/>
             </div>
             {editTagObj.image && editTagObj.image !== "delete" ? 
             <div className="dialog-row">
@@ -265,24 +269,24 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <span className="dialog-text">{i18n.sort.aliases}: </span>
             </div>
             <div className="dialog-row">
-                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases?.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.implications}: </span>
             </div>
             <div className="dialog-row">
-                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications?.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
             </div>
             {editTagObj.type !== "artist" ? <>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.pixivTags}: </span>
             </div>
             <div className="dialog-row">
-                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags?.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
             </div></> : null}
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.reason}: </span>
-                <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
+                <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason || ""} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
             </div>
             {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
             <div className="dialog-row">

@@ -22,7 +22,7 @@ import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
-import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost, ImageFormat} from "../types/Types"
 
 interface Props {
     img?: string
@@ -67,7 +67,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const savedDownloadText = localStorage.getItem("downloadText")
         if (savedDownloadText) setDownloadText(savedDownloadText)
         const savedFormat = localStorage.getItem("format")
-        if (savedFormat) setFormat(savedFormat)
+        if (savedFormat) setFormat(savedFormat as ImageFormat)
     }, [])
 
     useEffect(() => {
@@ -266,7 +266,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                 </div> : null}
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID)}
+                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                     <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
@@ -304,7 +304,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
-                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                         <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                     </div> : null}

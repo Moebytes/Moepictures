@@ -489,7 +489,7 @@ export default class SQLTag {
 
     /** Insert implication history */
     public static insertImplicationHistory = async (username: string, source: string, target: string, type: string, 
-        affectedPosts: any, reason?: string) => {
+        affectedPosts: any, reason?: string | null) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "implication history" ("user", "date", "source", "target", "type", "affectedPosts", 

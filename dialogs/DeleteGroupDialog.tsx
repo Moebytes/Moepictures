@@ -35,6 +35,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
     }, [deleteGroupObj])
 
     const deleteGroup = async () => {
+        if (!deleteGroupObj) return
         if (permissions.isMod(session)) {
             await functions.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
             history.push("/groups")

@@ -108,7 +108,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (quoteText) {
             const prevText = text.trim() ? `${text.trim()}\n` : ""
             setText(`${prevText}${quoteText.trim()}`)
-            setQuoteText(null)
+            setQuoteText("")
             window.scrollTo(0, document.body.scrollHeight)
         }
     }, [quoteText])

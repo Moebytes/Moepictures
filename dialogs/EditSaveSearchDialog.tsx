@@ -87,7 +87,7 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
         if (button === "delete") {
             deleteSaveSearch()
         } 
-        setEditSaveSearchName(null)
+        setEditSaveSearchName("")
     }
 
     useEffect(() => {

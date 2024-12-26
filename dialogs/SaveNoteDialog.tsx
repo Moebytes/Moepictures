@@ -40,6 +40,7 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
     }, [showSaveNoteDialog])
 
     const saveNote = async () => {
+        if (!saveNoteData) return
         if (props.unverified) {
             await functions.put("/api/note/save/unverified", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
             return setSubmitted(true)

@@ -1,24 +1,30 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {HistoryID, Favgroup, Group} from "../types/Types"
+
+interface GroupPostObj {
+    postID: string
+    group: Group
+}
 
 const groupDialogSlice = createSlice({
     name: "groupDialog",
     initialState: {
-        favGroupID: null as any,
-        addFavgroupPostObj: null as any,
-        editFavGroupObj: null as any,
-        deleteFavGroupObj: null as any,
+        favGroupID: null as string | null,
+        addFavgroupPostObj: null as Favgroup | null,
+        editFavGroupObj: null as Favgroup | null,
+        deleteFavGroupObj: null as Favgroup | null,
         bulkFavGroupDialog: false,
         bulkGroupDialog: false,
-        groupPostID: null as any,
-        addGroupPostObj: null as any,
-        deleteGroupPostObj: null as any,
-        editGroupObj: null as any,
-        deleteGroupObj: null as any,
-        deleteGroupHistoryID: null as any,
+        groupPostID: null as string | null,
+        addGroupPostObj: null as Group | null,
+        deleteGroupPostObj: null as GroupPostObj | null,
+        editGroupObj: null as Group | null,
+        deleteGroupObj: null as Group | null,
+        deleteGroupHistoryID: null as HistoryID | null,
         deleteGroupHistoryFlag: false,
-        revertGroupHistoryID: null as any,
+        revertGroupHistoryID: null as HistoryID | null,
         revertGroupHistoryFlag: false
     },
     reducers: {
@@ -72,21 +78,21 @@ export const useGroupDialogSelector = () => {
 export const useGroupDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setFavGroupID: (state: any) => dispatch(setFavGroupID(state)),
-        setAddFavgroupPostObj: (state: any) => dispatch(setAddFavgroupPostObj(state)),
-        setEditFavGroupObj: (state: any) => dispatch(setEditFavGroupObj(state)),
-        setDeleteFavGroupObj: (state: any) => dispatch(setDeleteFavGroupObj(state)),
-        setBulkFavGroupDialog: (state: any) => dispatch(setBulkFavGroupDialog(state)),
-        setBulkGroupDialog: (state: any) => dispatch(setBulkGroupDialog(state)),
-        setGroupPostID: (state: any) => dispatch(setGroupPostID(state)),
-        setAddGroupPostObj: (state: any) => dispatch(setAddGroupPostObj(state)),
-        setDeleteGroupPostObj: (state: any) => dispatch(setDeleteGroupPostObj(state)),
-        setEditGroupObj: (state: any) => dispatch(setEditGroupObj(state)),
-        setDeleteGroupObj: (state: any) => dispatch(setDeleteGroupObj(state)),
-        setDeleteGroupHistoryID: (state: any) => dispatch(setDeleteGroupHistoryID(state)),
-        setDeleteGroupHistoryFlag: (state: any) => dispatch(setDeleteGroupHistoryFlag(state)),
-        setRevertGroupHistoryID: (state: any) => dispatch(setRevertGroupHistoryID(state)),
-        setRevertGroupHistoryFlag: (state: any) => dispatch(setRevertGroupHistoryFlag(state))
+        setFavGroupID: (state: string | null) => dispatch(setFavGroupID(state)),
+        setAddFavgroupPostObj: (state: Favgroup | null) => dispatch(setAddFavgroupPostObj(state)),
+        setEditFavGroupObj: (state: Favgroup | null) => dispatch(setEditFavGroupObj(state)),
+        setDeleteFavGroupObj: (state: Favgroup | null) => dispatch(setDeleteFavGroupObj(state)),
+        setBulkFavGroupDialog: (state: boolean) => dispatch(setBulkFavGroupDialog(state)),
+        setBulkGroupDialog: (state: boolean) => dispatch(setBulkGroupDialog(state)),
+        setGroupPostID: (state: string | null) => dispatch(setGroupPostID(state)),
+        setAddGroupPostObj: (state: Group | null) => dispatch(setAddGroupPostObj(state)),
+        setDeleteGroupPostObj: (state: GroupPostObj | null) => dispatch(setDeleteGroupPostObj(state)),
+        setEditGroupObj: (state: Group | null) => dispatch(setEditGroupObj(state)),
+        setDeleteGroupObj: (state: Group | null) => dispatch(setDeleteGroupObj(state)),
+        setDeleteGroupHistoryID: (state: HistoryID | null) => dispatch(setDeleteGroupHistoryID(state)),
+        setDeleteGroupHistoryFlag: (state: boolean) => dispatch(setDeleteGroupHistoryFlag(state)),
+        setRevertGroupHistoryID: (state: HistoryID | null) => dispatch(setRevertGroupHistoryID(state)),
+        setRevertGroupHistoryFlag: (state: boolean) => dispatch(setRevertGroupHistoryFlag(state))
     }
 }
 

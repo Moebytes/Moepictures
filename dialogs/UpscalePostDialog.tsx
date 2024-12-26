@@ -63,7 +63,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             upscalePost()
         }
-        setShowUpscalingDialog(null)
+        setShowUpscalingDialog(false)
     }
 
     if (showUpscalingDialog) {

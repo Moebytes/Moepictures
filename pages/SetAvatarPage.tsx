@@ -10,7 +10,7 @@ useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useIntera
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
-import {TagCategories, PostSearch, GIFFrame} from "../types/Types"
+import {TagCategories, PostSearch, GIFFrame, PostOrdered} from "../types/Types"
 
 interface Props {
     match: {params: {id: string}}
@@ -78,7 +78,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = posts.find((p) => p.postID === postID)
+            let post = posts.find((p) => p.postID === postID) as PostSearch | undefined
             let $401Error = false
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined

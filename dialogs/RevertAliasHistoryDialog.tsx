@@ -37,6 +37,7 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
     }
 
     const getTitle = () => {
+        if (!revertAliasHistoryID) return
         if (revertAliasHistoryID.type === "alias") {
             return i18n.dialogs.revertAliasHistory.undoAliasTitle
         } else if (revertAliasHistoryID.type === "undo alias") {
@@ -48,6 +49,7 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
         }
     }
     const getDescription = () => {
+        if (!revertAliasHistoryID) return
         if (revertAliasHistoryID.type === "alias") {
             return i18n.dialogs.revertAliasHistory.undoAliasHeading
         } else if (revertAliasHistoryID.type === "undo alias") {

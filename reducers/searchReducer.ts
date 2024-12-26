@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch} from "../types/Types"
+import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch, ImageFormat} from "../types/Types"
 
 const searchSlice = createSlice({
     name: "search",
@@ -21,7 +21,7 @@ const searchSlice = createSlice({
         selectionItems: Array.from(new Set<string>()),
         selectionPosts: Object.fromEntries(new Map<string, PostSearch>()),
         pageMultiplier: 1,
-        format: "jpg",
+        format: "jpg" as ImageFormat,
         autoSearch: false,
         saveSearch: false,
         noteMode: false,
@@ -95,28 +95,28 @@ export const useSearchSelector = () => {
 export const useSearchActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setSearch: (state: any) => dispatch(setSearch(state)),
-        setSearchFlag: (state: any) => dispatch(setSearchFlag(state)),
-        setImageType: (state: any) => dispatch(setImageType(state)),
-        setRatingType: (state: any) => dispatch(setRatingType(state)),
-        setStyleType: (state: any) => dispatch(setStyleType(state)),
-        setSizeType: (state: any) => dispatch(setSizeType(state)),
-        setSortType: (state: any) => dispatch(setSortType(state)),
-        setSortReverse: (state: any) => dispatch(setSortReverse(state)),
-        setSquare: (state: any) => dispatch(setSquare(state)),
-        setScroll: (state: any) => dispatch(setScroll(state)),
-        setSelectionMode: (state: any) => dispatch(setSelectionMode(state)),
-        setSelectionItems: (state: any) => dispatch(setSelectionItems(state)),
-        setSelectionPosts: (state: any) => dispatch(setSelectionPosts(state)),
-        setPageMultiplier: (state: any) => dispatch(setPageMultiplier(state)),
-        setFormat: (state: any) => dispatch(setFormat(state)),
-        setAutoSearch: (state: any) => dispatch(setAutoSearch(state)),
-        setSaveSearch: (state: any) => dispatch(setSaveSearch(state)),
-        setNoteMode: (state: any) => dispatch(setNoteMode(state)),
-        setNoteDrawingEnabled: (state: any) => dispatch(setNoteDrawingEnabled(state)),
-        setImageExpand: (state: any) => dispatch(setImageExpand(state)),
-        setShowUpscaled: (state: any) => dispatch(setShowUpscaled(state)),
-        setShowChildren: (state: any) => dispatch(setShowChildren(state))
+        setSearch: (state: string) => dispatch(setSearch(state)),
+        setSearchFlag: (state: boolean) => dispatch(setSearchFlag(state)),
+        setImageType: (state: PostType) => dispatch(setImageType(state)),
+        setRatingType: (state: PostRating) => dispatch(setRatingType(state)),
+        setStyleType: (state: PostStyle) => dispatch(setStyleType(state)),
+        setSizeType: (state: PostSize) => dispatch(setSizeType(state)),
+        setSortType: (state: PostSort) => dispatch(setSortType(state)),
+        setSortReverse: (state: boolean) => dispatch(setSortReverse(state)),
+        setSquare: (state: boolean) => dispatch(setSquare(state)),
+        setScroll: (state: boolean) => dispatch(setScroll(state)),
+        setSelectionMode: (state: boolean) => dispatch(setSelectionMode(state)),
+        setSelectionItems: (state: Set<string>) => dispatch(setSelectionItems(state)),
+        setSelectionPosts: (state: Map<string, PostSearch>) => dispatch(setSelectionPosts(state)),
+        setPageMultiplier: (state: number) => dispatch(setPageMultiplier(state)),
+        setFormat: (state: ImageFormat) => dispatch(setFormat(state)),
+        setAutoSearch: (state: boolean) => dispatch(setAutoSearch(state)),
+        setSaveSearch: (state: boolean) => dispatch(setSaveSearch(state)),
+        setNoteMode: (state: boolean) => dispatch(setNoteMode(state)),
+        setNoteDrawingEnabled: (state: boolean) => dispatch(setNoteDrawingEnabled(state)),
+        setImageExpand: (state: boolean) => dispatch(setImageExpand(state)),
+        setShowUpscaled: (state: boolean) => dispatch(setShowUpscaled(state)),
+        setShowChildren: (state: boolean) => dispatch(setShowChildren(state))
     }
 }
 

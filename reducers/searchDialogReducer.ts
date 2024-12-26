@@ -5,7 +5,7 @@ import type {StoreState, StoreDispatch} from "../store"
 const searchDialogSlice = createSlice({
     name: "searchDialog",
     initialState: {
-        deleteSearchHistoryID: null as any,
+        deleteSearchHistoryID: null as string | null,
         deleteSearchHistoryFlag: false,
         showDeleteAllHistoryDialog: false,
         saveSearchDialog: false,
@@ -49,15 +49,15 @@ export const useSearchDialogSelector = () => {
 export const useSearchDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setDeleteSearchHistoryID: (state: any) => dispatch(setDeleteSearchHistoryID(state)),
-        setDeleteSearchHistoryFlag: (state: any) => dispatch(setDeleteSearchHistoryFlag(state)),
-        setShowDeleteAllHistoryDialog: (state: any) => dispatch(setShowDeleteAllHistoryDialog(state)),
-        setSaveSearchDialog: (state: any) => dispatch(setSaveSearchDialog(state)),
-        setEditSaveSearchName: (state: any) => dispatch(setEditSaveSearchName(state)),
-        setEditSaveSearchKey: (state: any) => dispatch(setEditSaveSearchKey(state)),
-        setEditSaveSearchTags: (state: any) => dispatch(setEditSaveSearchTags(state)),
-        setDeleteAllSaveSearchDialog: (state: any) => dispatch(setDeleteAllSaveSearchDialog(state))
-    }
+        setDeleteSearchHistoryID: (state: string | null) => dispatch(setDeleteSearchHistoryID(state)),
+        setDeleteSearchHistoryFlag: (state: boolean) => dispatch(setDeleteSearchHistoryFlag(state)),
+        setShowDeleteAllHistoryDialog: (state: boolean) => dispatch(setShowDeleteAllHistoryDialog(state)),
+        setSaveSearchDialog: (state: boolean) => dispatch(setSaveSearchDialog(state)),
+        setEditSaveSearchName: (state: string) => dispatch(setEditSaveSearchName(state)),
+        setEditSaveSearchKey: (state: string) => dispatch(setEditSaveSearchKey(state)),
+        setEditSaveSearchTags: (state: string) => dispatch(setEditSaveSearchTags(state)),
+        setDeleteAllSaveSearchDialog: (state: boolean) => dispatch(setDeleteAllSaveSearchDialog(state))
+    }    
 }
 
 export default searchDialogSlice.reducer

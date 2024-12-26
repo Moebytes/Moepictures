@@ -33,6 +33,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     }, [takedownTag])
 
     const takedown = async () => {
+        if (!takedownTag) return
         if (permissions.isMod(session)) {
             await functions.post("/api/tag/takedown", {tag: takedownTag.tag}, session, setSessionFlag)
             history.go(0)
@@ -55,6 +56,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     }
 
     const getTitle = () => {
+        if (!takedownTag) return
         if (takedownTag.banned) {
             return i18n.dialogs.takedownTag.restoreTitle
         } else {
@@ -63,6 +65,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     }
 
     const getPrompt = () => {
+        if (!takedownTag) return
         if (takedownTag.banned) {
             return i18n.dialogs.takedownTag.restoreHeader
         } else {

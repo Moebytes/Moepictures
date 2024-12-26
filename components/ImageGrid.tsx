@@ -145,7 +145,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                     if (!img && counter >= 4) randomPosts()
                 }
             } else {
-                setScrollY(null)
+                setScrollY(0)
             }
             const savedPage = localStorage.getItem("page")
             if (savedPage) setPage(Number(savedPage))
@@ -281,7 +281,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const newVisiblePosts = [] as PostSearch[]
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!posts[currentIndex]) break
-                const post = posts[currentIndex]
+                const post = posts[currentIndex] as PostSearch
                 currentIndex++
                 newVisiblePosts.push(post)
             }
@@ -358,7 +358,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 const max = getPageAmount() - visiblePosts.length 
                 for (let i = 0; i < max; i++) {
                     if (!posts[currentIndex]) return updateOffset()
-                    const post = posts[currentIndex]
+                    const post = posts[currentIndex] as PostSearch
                     currentIndex++
                     newVisiblePosts.push(post)
                 }
@@ -378,7 +378,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 const newVisiblePosts = structuredClone(visiblePosts)
                 for (let i = 0; i < getLoadAmount(); i++) {
                     if (!posts[currentIndex]) return updateOffset()
-                    const post = posts[currentIndex]
+                    const post = posts[currentIndex] as PostSearch
                     currentIndex++
                     newVisiblePosts.push(post)
                 }
@@ -568,7 +568,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             visible = functions.removeDuplicates(visiblePosts)
         } else {
             const postOffset = (page - 1) * getPageAmount()
-            visible = posts.slice(postOffset, postOffset + getPageAmount())
+            visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
         }
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]

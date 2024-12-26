@@ -1,12 +1,13 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {Post} from "../types/Types"
 
 const flagSlice = createSlice({
     name: "flag",
     initialState: {
         randomFlag: false,
-        imageSearchFlag: false,
+        imageSearchFlag: null as Post[] | null,
         headerFlag: false,
         commentSearchFlag: null as string | null,
         noteSearchFlag: null as string | null,

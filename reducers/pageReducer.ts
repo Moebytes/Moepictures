@@ -68,20 +68,20 @@ export const usePageSelector = () => {
 export const usePageActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setPage: (state: any) => dispatch(setPage(state)),
-        setCommentsPage: (state: any) => dispatch(setCommentsPage(state)),
-        setNotesPage: (state: any) => dispatch(setNotesPage(state)),
-        setArtistsPage: (state: any) => dispatch(setArtistsPage(state)),
-        setCharactersPage: (state: any) => dispatch(setCharactersPage(state)),
-        setSeriesPage: (state: any) => dispatch(setSeriesPage(state)),
-        setTagsPage: (state: any) => dispatch(setTagsPage(state)),
-        setForumPage: (state: any) => dispatch(setForumPage(state)),
-        setThreadPage: (state: any) => dispatch(setThreadPage(state)),
-        setMailPage: (state: any) => dispatch(setMailPage(state)),
-        setHistoryPage: (state: any) => dispatch(setHistoryPage(state)),
-        setModPage: (state: any) => dispatch(setModPage(state)),
-        setGroupsPage: (state: any) => dispatch(setGroupsPage(state)),
-        setMessagePage: (state: any) => dispatch(setMessagePage(state))
+        setPage: (state: number) => dispatch(setPage(state)),
+        setCommentsPage: (state: number) => dispatch(setCommentsPage(state)),
+        setNotesPage: (state: number) => dispatch(setNotesPage(state)),
+        setArtistsPage: (state: number) => dispatch(setArtistsPage(state)),
+        setCharactersPage: (state: number) => dispatch(setCharactersPage(state)),
+        setSeriesPage: (state: number) => dispatch(setSeriesPage(state)),
+        setTagsPage: (state: number) => dispatch(setTagsPage(state)),
+        setForumPage: (state: number) => dispatch(setForumPage(state)),
+        setThreadPage: (state: number) => dispatch(setThreadPage(state)),
+        setMailPage: (state: number) => dispatch(setMailPage(state)),
+        setHistoryPage: (state: number) => dispatch(setHistoryPage(state)),
+        setModPage: (state: number) => dispatch(setModPage(state)),
+        setGroupsPage: (state: number) => dispatch(setGroupsPage(state)),
+        setMessagePage: (state: number) => dispatch(setMessagePage(state))
     }
 }
 

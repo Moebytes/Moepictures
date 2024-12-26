@@ -2,14 +2,14 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch, MiniTag, UnverifiedPost} from "../types/Types"
+import {PostSearch, PostOrdered, Post, MiniTag, TagCount, UnverifiedPost} from "../types/Types"
 
 const cacheSlice = createSlice({
     name: "cache",
     initialState: {
-        emojis: [] as {[key: string]: string}[],
-        posts: [] as PostSearch[],
-        tags: [] as MiniTag[],
+        emojis: {} as {[key: string]: string},
+        posts: [] as PostSearch[] | PostOrdered[] | Post[],
+        tags: [] as MiniTag[] | TagCount[],
         visiblePosts: [] as PostSearch[],
         unverifiedPosts: [] as UnverifiedPost[],
         uploadDropFiles: [] as File[],
@@ -41,12 +41,12 @@ export const useCacheSelector = () => {
 export const useCacheActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setEmojis: (state: any) => dispatch(setEmojis(state)),
-        setPosts: (state: any) => {dispatch(setPosts(state))},
-        setTags: (state: any) => dispatch(setTags(state)),
-        setVisiblePosts: (state: any) => dispatch(setVisiblePosts(state)),
-        setUnverifiedPosts: (state: any) => dispatch(setUnverifiedPosts(state)),
-        setUploadDropFiles: (state: any) => dispatch(setUploadDropFiles(state))
+        setEmojis: (state: {[key: string]: string}) => dispatch(setEmojis(state)),
+        setPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => {dispatch(setPosts(state))},
+        setTags: (state: MiniTag[] | TagCount[]) => dispatch(setTags(state)),
+        setVisiblePosts: (state: PostSearch[]) => dispatch(setVisiblePosts(state)),
+        setUnverifiedPosts: (state: UnverifiedPost[]) => dispatch(setUnverifiedPosts(state)),
+        setUploadDropFiles: (state: File[]) => dispatch(setUploadDropFiles(state))
     }
 }
 

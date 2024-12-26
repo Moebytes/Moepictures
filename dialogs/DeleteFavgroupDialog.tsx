@@ -30,6 +30,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     }, [deleteFavGroupObj])
 
     const deleteFavgroup = async () => {
+        if (!deleteFavGroupObj) return
         await functions.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
         setDeleteFavGroupObj(null)
         setSessionFlag(true)

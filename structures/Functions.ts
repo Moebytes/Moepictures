@@ -239,7 +239,7 @@ export default class Functions {
         return `${hoursStr}${minutesStr}:${secondsStr}`
     }
     
-    public static arrayIncludes = (str: string, arr: string[]) => {
+    public static arrayIncludes = (str: string | undefined, arr: string[]) => {
         for (let i = 0; i < arr.length; i++) {
             if (str?.includes(arr[i])) return true
         }
@@ -561,7 +561,7 @@ export default class Functions {
         return null
     }
 
-    public static validateReason = (reason: string, i18n: typeof enLocale) => {
+    public static validateReason = (reason: string | null | undefined, i18n: typeof enLocale) => {
         if (!reason) return i18n.errors.reason.empty
         if (gibberish(reason)) return i18n.errors.reason.gibberish
         return null
@@ -1508,7 +1508,8 @@ export default class Functions {
         return result
     }
 
-    public static parseTags = async (posts: PostFull[] | PostSearch[], session: Session, setSessionFlag: (value: boolean) => void) => {
+    public static parseTags = async (posts: PostFull[] | PostSearch[] | PostOrdered[] | Post[], session: Session, 
+        setSessionFlag: (value: boolean) => void) => {
         let cleanPosts = posts.filter((p) => !(p as PostSearch).fake)
         const postIDs = cleanPosts.map((post) => post.postID)
         let result = await Functions.get("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
@@ -2541,13 +2542,13 @@ export default class Functions {
         return "var(--imageBorder)"
     }
 
-    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: PostSearch[], 
-        setPosts: (state: PostSearch[]) => void) => {
+    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: PostSearch[] | PostOrdered[] | Post[], 
+        setPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => void) => {
         if (!posts?.length) return
         const postIndex = posts.findIndex((p) => p.postID === postID)
         if (postIndex === -1) return
-        posts = structuredClone(posts)
-        posts[postIndex].favorited = favorited
+        posts = structuredClone(posts);
+        (posts[postIndex] as PostSearch).favorited = favorited
         setPosts(posts)
         localStorage.setItem("savedPosts", JSON.stringify(posts))
     }
@@ -3023,7 +3024,7 @@ export default class Functions {
         return buffer
     }
 
-    public static getTagColor = (tag: Tag | TagHistory | MiniTag) => {
+    public static getTagColor = (tag: Tag | TagHistory | MiniTag | TagCount) => {
         if ((tag as Tag).banned) return "strikethrough"
         if ((tag as Tag).r18) return "r18-tag-color"
         if (tag.type === "artist") return "artist-tag-color"

@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {Themes, Languages} from "../types/Types"
 import en from "../assets/locales/en.json"
 import ja from "../assets/locales/ja.json"
 
@@ -9,8 +10,8 @@ const translations: Record<string, typeof en> = {en, ja: ja as any}
 const themeSlice = createSlice({
     name: "theme",
     initialState: {
-        language: "en",
-        theme: "dark",
+        language: "en" as Languages,
+        theme: "dark" as Themes,
         siteHue: 180,
         siteSaturation: 100,
         siteLightness: 50
@@ -41,11 +42,11 @@ export const useThemeSelector = () => {
 export const useThemeActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setTheme: (state: any) => dispatch(setTheme(state)),
-        setSiteHue: (state: any) => dispatch(setSiteHue(state)),
-        setSiteSaturation: (state: any) => dispatch(setSiteSaturation(state)),
-        setSiteLightness: (state: any) => dispatch(setSiteLightness(state)),
-        setLanguage: (state: any) => dispatch(setLanguage(state))
+        setTheme: (state: Themes) => dispatch(setTheme(state)),
+        setSiteHue: (state: number) => dispatch(setSiteHue(state)),
+        setSiteSaturation: (state: number) => dispatch(setSiteSaturation(state)),
+        setSiteLightness: (state: number) => dispatch(setSiteLightness(state)),
+        setLanguage: (state: Languages) => dispatch(setLanguage(state))
     }
 }
 

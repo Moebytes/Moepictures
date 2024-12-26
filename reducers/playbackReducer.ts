@@ -1,12 +1,13 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
+import {UnverifiedPost, PostHistory, PostFull} from "../types/Types"
 
 const playbackSlice = createSlice({
     name: "playback",
     initialState: {
         audio: "",
-        audioPost: null as any,
+        audioPost: null as UnverifiedPost | PostHistory | PostFull | null,
         speed: 1,
         reverse: false,
         pitch: 0,
@@ -18,7 +19,7 @@ const playbackSlice = createSlice({
         seekTo: null as number | null,
         secondsProgress: 0,
         progress: 0,
-        dragProgress: 0,
+        dragProgress: null as number | null,
         dragging: false,
         rewindFlag: false,
         fastForwardFlag: false,
@@ -92,28 +93,28 @@ export const usePlaybackSelector = () => {
 export const usePlaybackActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setAudio: (state: any) => dispatch(setAudio(state)),
-        setAudioPost: (state: any) => dispatch(setAudioPost(state)),
-        setSpeed: (state: any) => dispatch(setSpeed(state)),
-        setReverse: (state: any) => dispatch(setReverse(state)),
-        setPitch: (state: any) => dispatch(setPitch(state)),
-        setVolume: (state: any) => dispatch(setVolume(state)),
-        setPreviousVolume: (state: any) => dispatch(setPreviousVolume(state)),
-        setPaused: (state: any) => dispatch(setPaused(state)),
-        setPreservePitch: (state: any) => dispatch(setPreservePitch(state)),
-        setDuration: (state: any) => dispatch(setDuration(state)),
-        setSeekTo: (state: any) => dispatch(setSeekTo(state)),
-        setSecondsProgress: (state: any) => dispatch(setSecondsProgress(state)),
-        setProgress: (state: any) => dispatch(setProgress(state)),
-        setDragProgress: (state: any) => dispatch(setDragProgress(state)),
-        setDragging: (state: any) => dispatch(setDragging(state)),
-        setRewindFlag: (state: any) => dispatch(setRewindFlag(state)),
-        setFastForwardFlag: (state: any) => dispatch(setFastForwardFlag(state)),
-        setPlayFlag: (state: any) => dispatch(setPlayFlag(state)),
-        setVolumeFlag: (state: any) => dispatch(setVolumeFlag(state)),
-        setMuteFlag: (state: any) => dispatch(setMuteFlag(state)),
-        setResetFlag: (state: any) => dispatch(setResetFlag(state)),
-        setDisableZoom: (state: any) => dispatch(setDisableZoom(state))
+        setAudio: (state: string) => dispatch(setAudio(state)),
+        setAudioPost: (state: UnverifiedPost | PostHistory | PostFull | null) => dispatch(setAudioPost(state)),
+        setSpeed: (state: number) => dispatch(setSpeed(state)),
+        setReverse: (state: boolean) => dispatch(setReverse(state)),
+        setPitch: (state: number) => dispatch(setPitch(state)),
+        setVolume: (state: number) => dispatch(setVolume(state)),
+        setPreviousVolume: (state: number) => dispatch(setPreviousVolume(state)),
+        setPaused: (state: boolean) => dispatch(setPaused(state)),
+        setPreservePitch: (state: boolean) => dispatch(setPreservePitch(state)),
+        setDuration: (state: number) => dispatch(setDuration(state)),
+        setSeekTo: (state: number | null) => dispatch(setSeekTo(state)),
+        setSecondsProgress: (state: number) => dispatch(setSecondsProgress(state)),
+        setProgress: (state: number) => dispatch(setProgress(state)),
+        setDragProgress: (state: number | null) => dispatch(setDragProgress(state)),
+        setDragging: (state: boolean) => dispatch(setDragging(state)),
+        setRewindFlag: (state: boolean) => dispatch(setRewindFlag(state)),
+        setFastForwardFlag: (state: boolean) => dispatch(setFastForwardFlag(state)),
+        setPlayFlag: (state: string | null) => dispatch(setPlayFlag(state)),
+        setVolumeFlag: (state: number | null) => dispatch(setVolumeFlag(state)),
+        setMuteFlag: (state: boolean) => dispatch(setMuteFlag(state)),
+        setResetFlag: (state: boolean) => dispatch(setResetFlag(state)),
+        setDisableZoom: (state: boolean) => dispatch(setDisableZoom(state))
     }
 }
 

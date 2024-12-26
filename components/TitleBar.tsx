@@ -11,7 +11,7 @@ import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
 import privateIcon from "../assets/icons/private.png"
-import {PostFull, PostHistory, UnverifiedPost} from "../types/Types"
+import {PostFull, PostHistory, UnverifiedPost, Themes} from "../types/Types"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -117,7 +117,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme")
-        if (savedTheme) setTheme(savedTheme)
+        if (savedTheme) setTheme(savedTheme as Themes)
         const savedHue = localStorage.getItem("siteHue")
         const savedSaturation = localStorage.getItem("siteSaturation")
         const savedLightness = localStorage.getItem("siteLightness")
@@ -182,7 +182,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             setSearchFlag(true)
             history.push("/posts")
             window.scrollTo(0, 0)
-            setScrollY(null)
+            setScrollY(0)
         } else {
             const saved = visiblePosts
             const savedScrollY = scrollY

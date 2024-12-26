@@ -38,6 +38,7 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
     }
 
     const getTitle = () => {
+        if (!deleteAliasHistoryID) return
         if (deleteAliasHistoryID.type === "alias" || deleteAliasHistoryID.type === "undo alias") {
             return i18n.dialogs.deleteAliasHistory.aliasTitle
         } else if (deleteAliasHistoryID.type === "implication" || deleteAliasHistoryID.type === "undo implication") {

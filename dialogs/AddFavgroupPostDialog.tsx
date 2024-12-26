@@ -41,6 +41,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     }, [addFavgroupPostObj])
 
     const addPost = async () => {
+        if (!addFavgroupPostObj) return
         if (!postID) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

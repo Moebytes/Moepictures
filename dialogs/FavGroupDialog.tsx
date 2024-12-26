@@ -32,6 +32,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     }
 
     const updateFavGroups = async () => {
+        if (!favGroupID) return
         const favgroups = await functions.get("/api/favgroups", {postID: favGroupID}, session, setSessionFlag)
         setFavGroups(favgroups)
         setSessionFlag(true)
@@ -66,6 +67,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     }, [favGroupID])
 
     const addFavGroup = async () => {
+        if (!favGroupID) return
         await functions.post("/api/favgroup/update", {postID: favGroupID, name, isPrivate}, session, setSessionFlag)
         setFavGroupID(null)
         setSessionFlag(true)
@@ -81,6 +83,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
 
     const favgroupJSX = () => {
         let jsx = [] as React.ReactElement[]
+        if (!favGroupID) return jsx
         for (let i = 0; i < favGroups.length; i++) {
             const favgroup = favGroups[i]
             const deleteFromFavGroup = async () => {

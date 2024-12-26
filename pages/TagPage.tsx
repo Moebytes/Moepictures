@@ -234,6 +234,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const editTag = async () => {
+        if (!editTagObj) return
         let image = null as Uint8Array | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
@@ -247,8 +248,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
-            social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, 
-            featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+            social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
+            featured: editTagObj.featured, reason: editTagObj.reason!}, session, setSessionFlag)
             history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {
@@ -281,9 +282,9 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             description: tag.description,
             image: tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null,
             aliases: tag.aliases?.[0] ? tag.aliases.map((a: Alias | string | null) => 
-            typeof a === "string" ? a as string : a?.alias) : [],
+            typeof a === "string" ? a as string : a?.alias || "") : [],
             implications: tag.implications?.[0] ? tag.implications.map((i: Implication | string | null) => 
-            typeof i === "string" ? i : i?.implication) : [],
+            typeof i === "string" ? i : i?.implication || "") : [],
             pixivTags: tag.pixivTags?.[0] ? tag.pixivTags : [],
             type: tag.type,
             social: tag.social,

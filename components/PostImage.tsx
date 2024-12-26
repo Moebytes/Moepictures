@@ -407,7 +407,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             let duration = adjustedData.map((d) => d.delay).reduce((p, c) => p + c) / 1000
             let interval = duration / frames
             let sp = seekTo !== null ? seekTo : secondsProgress
-            if (dragging) sp = dragProgress
+            if (dragging) sp = dragProgress || 0
             let pos = Math.floor(sp / interval)
             if (!adjustedData[pos]) pos = 0
             let frame = adjustedData[pos].frame
@@ -524,11 +524,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             let duration = videoRef.current.duration / speed
             let interval = duration / frames
             let sp = seekTo !== null ? seekTo : secondsProgress
-            if (dragging) sp = dragProgress
+            if (dragging) sp = dragProgress || 0
             let pos = Math.floor(sp / interval)
             if (!adjustedData?.[pos]) pos = 0
             let seekValue = seekTo !== null ? seekTo * speed : null 
-            seekValue = dragging ? dragProgress * speed : seekValue
+            seekValue = dragging ? (dragProgress || 0) * speed : seekValue
             if (seekValue !== null) if (Number.isNaN(seekValue) || !Number.isFinite(seekValue)) seekValue = 0
             if (seekValue) videoRef.current.currentTime = seekValue
             if (reverse && adjustedData) pos = (adjustedData.length - 1) - pos
@@ -1340,7 +1340,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         {duration >= 1 ?
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <p className="video-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
+                            <p className="video-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
                             <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                             <p className="video-control-text">{functions.formatSeconds(duration)}</p>
                         </div> : null}
@@ -1413,7 +1413,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         {duration >= 1 ?
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <p className="gif-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
+                            <p className="gif-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
                             <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                             <p className="gif-control-text">{functions.formatSeconds(duration)}</p>
                         </div> : null}

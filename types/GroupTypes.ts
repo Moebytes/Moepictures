@@ -3,6 +3,7 @@ GroupEditRequest, GroupHistory} from "./Types"
 
 export interface PostOrdered extends Post {
     order: number
+    fake?: boolean
 }
 
 export interface PostSearchOrdered extends PostSearch {

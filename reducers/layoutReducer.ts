@@ -45,14 +45,14 @@ export const useLayoutSelector = () => {
 export const useLayoutActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setMobile: (state: any) => dispatch(setMobile(state)),
-        setTablet: (state: any) => dispatch(setTablet(state)),
-        setRelative: (state: any) => dispatch(setRelative(state)),
-        setHideNavbar: (state: any) => dispatch(setHideNavbar(state)),
-        setHideSidebar: (state: any) => dispatch(setHideSidebar(state)),
-        setHideSortbar: (state: any) => dispatch(setHideSortbar(state)),
-        setHideTitlebar: (state: any) => dispatch(setHideTitlebar(state)),
-        setHideMobileNavbar: (state: any) => dispatch(setHideMobileNavbar(state))
+        setMobile: (state: boolean) => dispatch(setMobile(state)),
+        setTablet: (state: boolean) => dispatch(setTablet(state)),
+        setRelative: (state: boolean) => dispatch(setRelative(state)),
+        setHideNavbar: (state: boolean) => dispatch(setHideNavbar(state)),
+        setHideSidebar: (state: boolean) => dispatch(setHideSidebar(state)),
+        setHideSortbar: (state: boolean) => dispatch(setHideSortbar(state)),
+        setHideTitlebar: (state: boolean) => dispatch(setHideTitlebar(state)),
+        setHideMobileNavbar: (state: boolean) => dispatch(setHideMobileNavbar(state))
     }
 }
 

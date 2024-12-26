@@ -6,21 +6,21 @@ const threadDialogSlice = createSlice({
     name: "threadDialog",
     initialState: {
         showNewThreadDialog: false,
-        deleteThreadID: null as any,
+        deleteThreadID: null as string | null,
         deleteThreadFlag: false,
-        editThreadID: null as any,
+        editThreadID: null as string | null,
         editThreadFlag: false,
         editThreadTitle: "",
         editThreadContent: "",
         editThreadR18: false,
-        deleteReplyID: null as any,
+        deleteReplyID: null as string | null,
         deleteReplyFlag: false,
-        editReplyID: null as any,
+        editReplyID: null as string | null,
         editReplyFlag: false,
         editReplyContent: "",
         editReplyR18: false,
-        reportReplyID: null as any,
-        reportThreadID: null as any
+        reportReplyID: null as string | null,
+        reportThreadID: null as string | null
     },
     reducers: {
         setShowNewThreadDialog: (state, action) => {state.showNewThreadDialog = action.payload},
@@ -74,23 +74,23 @@ export const useThreadDialogSelector = () => {
 export const useThreadDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setShowNewThreadDialog: (state: any) => dispatch(setShowNewThreadDialog(state)),
-        setDeleteThreadID: (state: any) => dispatch(setDeleteThreadID(state)),
-        setDeleteThreadFlag: (state: any) => dispatch(setDeleteThreadFlag(state)),
-        setEditThreadID: (state: any) => dispatch(setEditThreadID(state)),
-        setEditThreadFlag: (state: any) => dispatch(setEditThreadFlag(state)),
-        setEditThreadTitle: (state: any) => dispatch(setEditThreadTitle(state)),
-        setEditThreadContent: (state: any) => dispatch(setEditThreadContent(state)),
-        setEditThreadR18: (state: any) => dispatch(setEditThreadR18(state)),
-        setDeleteReplyID: (state: any) => dispatch(setDeleteReplyID(state)),
-        setDeleteReplyFlag: (state: any) => dispatch(setDeleteReplyFlag(state)),
-        setEditReplyID: (state: any) => dispatch(setEditReplyID(state)),
-        setEditReplyFlag: (state: any) => dispatch(setEditReplyFlag(state)),
-        setEditReplyContent: (state: any) => dispatch(setEditReplyContent(state)),
-        setEditReplyR18: (state: any) => dispatch(setEditReplyR18(state)),
-        setReportReplyID: (state: any) => dispatch(setReportReplyID(state)),
-        setReportThreadID: (state: any) => dispatch(setReportThreadID(state))
-    }
+        setShowNewThreadDialog: (state: boolean) => dispatch(setShowNewThreadDialog(state)),
+        setDeleteThreadID: (state: string | null) => dispatch(setDeleteThreadID(state)),
+        setDeleteThreadFlag: (state: boolean) => dispatch(setDeleteThreadFlag(state)),
+        setEditThreadID: (state: string | null) => dispatch(setEditThreadID(state)),
+        setEditThreadFlag: (state: boolean) => dispatch(setEditThreadFlag(state)),
+        setEditThreadTitle: (state: string) => dispatch(setEditThreadTitle(state)),
+        setEditThreadContent: (state: string) => dispatch(setEditThreadContent(state)),
+        setEditThreadR18: (state: boolean) => dispatch(setEditThreadR18(state)),
+        setDeleteReplyID: (state: string | null) => dispatch(setDeleteReplyID(state)),
+        setDeleteReplyFlag: (state: boolean) => dispatch(setDeleteReplyFlag(state)),
+        setEditReplyID: (state: string | null) => dispatch(setEditReplyID(state)),
+        setEditReplyFlag: (state: boolean) => dispatch(setEditReplyFlag(state)),
+        setEditReplyContent: (state: string) => dispatch(setEditReplyContent(state)),
+        setEditReplyR18: (state: boolean) => dispatch(setEditReplyR18(state)),
+        setReportReplyID: (state: string | null) => dispatch(setReportReplyID(state)),
+        setReportThreadID: (state: string | null) => dispatch(setReportThreadID(state))
+    }    
 }
 
 export default threadDialogSlice.reducer

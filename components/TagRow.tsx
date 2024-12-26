@@ -125,6 +125,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const editTag = async () => {
+        if (!editTagObj) return
         let image = null as Uint8Array | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
@@ -138,7 +139,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
-            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
@@ -167,8 +168,8 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             key: props.tag.tag,
             description: props.tag.description,
             image: props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
-            aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias) : [],
-            implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication) : [],
+            aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias || "") : [],
+            implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication || "s") : [],
             pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
             type: props.tag.type,
             social: props.tag.social,

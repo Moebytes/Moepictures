@@ -301,6 +301,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (editNoteID === null) return
         if (editNoteFlag) {
             editText(editNoteID, editNoteTranscript, editNoteText)
             setEditNoteText("")

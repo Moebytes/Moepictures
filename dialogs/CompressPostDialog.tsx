@@ -67,7 +67,7 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             compressPost()
         }
-        setShowCompressingDialog(null)
+        setShowCompressingDialog(false)
     }
 
     if (showCompressingDialog) {
