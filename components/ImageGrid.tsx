@@ -13,6 +13,12 @@ import permissions from "../structures/Permissions"
 import "./styles/imagegrid.less"
 import {PostSearch} from "../types/Types"
 
+interface Ref {
+    shouldWait: () => Promise<boolean>
+    load: () => Promise<void>
+    update: () => Promise<void>
+}
+
 let interval = null as any
 let reloadedPost = false
 let replace = false
@@ -43,7 +49,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
-    const [postsRef, setPostsRef] = useState([]) as any
+    const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
@@ -126,7 +132,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
             if (!scrollY) {
-                const elements = document.querySelectorAll(".sortbar-text") as any
+                const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
                 const img = document.querySelector(".image")
                 if (!img && !elements?.[0]) {
                     searchPosts()
@@ -227,7 +233,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             searchPosts()
         }
         if (loaded) updateSearch()
-    }, [searchFlag, imageType, sizeType, ratingType, styleType, sortType, sortReverse, scroll, loaded])
+    }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, scroll, loaded])
 
     useEffect(() => {
         if (reloadedPost) return
@@ -272,7 +278,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updatePosts = async () => {
             let currentIndex = 0
-            const newVisiblePosts = [] as any
+            const newVisiblePosts = [] as PostSearch[]
             for (let i = 0; i < getPageAmount(); i++) {
                 if (!posts[currentIndex]) break
                 const post = posts[currentIndex]
@@ -294,6 +300,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [posts, i18n])
 
     const updateOffset = async () => {
+        console.log("here")
         if (noResults) return
         if (ended) return
         let newOffset = offset + limit
@@ -347,7 +354,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!loaded) return
             if (visiblePosts.length < getPageAmount()) {
                 let currentIndex = index
-                const newVisiblePosts = visiblePosts
+                const newVisiblePosts = structuredClone(visiblePosts)
                 const max = getPageAmount() - visiblePosts.length 
                 for (let i = 0; i < max; i++) {
                     if (!posts[currentIndex]) return updateOffset()
@@ -368,7 +375,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!posts[currentIndex]) return updateOffset()
-                const newVisiblePosts = visiblePosts
+                const newVisiblePosts = structuredClone(visiblePosts)
                 for (let i = 0; i < getLoadAmount(); i++) {
                     if (!posts[currentIndex]) return updateOffset()
                     const post = posts[currentIndex]
@@ -406,7 +413,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (posts?.length) {
-            const newPostsRef = posts.map(() => React.createRef()) as any
+            const newPostsRef = posts.map(() => React.createRef<Ref>())
             setPostsRef(newPostsRef)
             const maxPostPage = maxPage()
             if (maxPostPage === 1) return
@@ -418,7 +425,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [posts, page, queryPage, pageMultiplier])
 
     useEffect(() => {
-        let cleanup = null as any
+        let cleanup = null as (() => void) | Promise<void> | void | null
         const loadImages = async () => {
             for (let i = 0; i < postsRef.length; i++) {
                 if (!postsRef[i].current) continue
@@ -437,7 +444,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [visiblePosts, postsRef, session])
 
     useEffect(() => {
-        let cleanup = null as any
+        let cleanup = null as (() => void) | Promise<void> | void | null
         if (reupdateFlag) {
             const updateImages = async () => {
                 for (let i = 0; i < postsRef.length; i++) {
@@ -528,7 +535,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [page])
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -555,7 +562,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const generateImagesJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = [] as PostSearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visiblePosts)
@@ -581,7 +588,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
-                const comicPages = post.type === "comic" ? post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename)) : null
+                const comicPages = post.type === "comic" ? post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename)) : null
                 jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={thumbnail} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }

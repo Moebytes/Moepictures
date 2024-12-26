@@ -17,7 +17,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const getImages = () => {
-        return props.posts.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small"))
+        return props.posts.map((post) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small"))
     }
 
     const click = (img: string, index: number) => {

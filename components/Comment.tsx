@@ -21,10 +21,10 @@ import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comment.less"
-import {Comment} from "../types/Types"
+import {UserComment} from "../types/Types"
 
 interface Props {
-    comment: Comment
+    comment: UserComment
     onDelete?: () => void
     onEdit?: () => void
     onCommentJump?: (commentID: number) => void
@@ -66,7 +66,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: any) => !s.includes(">>>")).join(" ")
+        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
             >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
             > ${cleanComment}

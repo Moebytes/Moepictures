@@ -5,6 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
+import {TagDeleteRequest} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModTagDeletions: React.FunctionComponent = (props) => {
@@ -20,9 +21,9 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([]) as any
+    const [requests, setRequests] = useState([] as TagDeleteRequest[])
     const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [visibleRequests, setVisibleRequests] = useState([] as TagDeleteRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
@@ -44,7 +45,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as any
+        const newVisibleRequests = [] as TagDeleteRequest[]
         for (let i = 0; i < index; i++) {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
@@ -79,7 +80,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleRequests = visibleRequests as any
+            const newVisibleRequests = visibleRequests
             for (let i = 0; i < 10; i++) {
                 if (!requests[currentIndex]) break
                 newVisibleRequests.push(requests[currentIndex])
@@ -107,7 +108,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/tag/delete/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t: any) => !t.fake)
+        const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, requestCount: cleanHistory[0]?.requestCount}), ...result]
@@ -119,14 +120,14 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -138,7 +139,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                const newPosts = visibleRequests
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
@@ -242,7 +243,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -269,10 +270,10 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as TagDeleteRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests) as any
+            visible = functions.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -288,7 +289,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const request = visible[i] as any
+            const request = visible[i]
             if (!request) break
             if (request.fake) continue
             const openTag = (event: React.MouseEvent) => {

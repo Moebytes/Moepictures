@@ -146,3 +146,9 @@ export type Upscaler =
     | "real-cugan" 
     | "real-esrgan" 
     | "waifu2x"
+
+export type CanvasDrawable =
+    | HTMLCanvasElement 
+    | HTMLImageElement 
+    | HTMLVideoElement 
+    | ImageBitmap

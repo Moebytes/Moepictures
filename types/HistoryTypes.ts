@@ -65,14 +65,11 @@ export interface PostHistory {
     changes: PostChanges
     historyCount: string
     fake?: boolean
-    // These don't exist here but are here to avoid errors.
     locked: boolean
     hidden: boolean
     private: boolean
     approver: string
     approveDate: string
-    favoriteCount: string
-    cuteness: string
 }
 
 export interface TagChanges {

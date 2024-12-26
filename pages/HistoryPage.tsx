@@ -577,7 +577,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.postID !== current.postID) previous = null
                 jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={updateHistory} onEdit={updateHistory} exact={commitSearch}/>)
+                    onDelete={updateHistory} onEdit={updateHistory} exact={commitSearch ? true : false}/>)
             }
 
             if (historyTab === "tag") {

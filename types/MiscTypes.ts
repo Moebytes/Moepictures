@@ -2,6 +2,11 @@ import {PixivIllust} from "pixiv.ts"
 import {DeviationRSSExtended} from "deviantart.ts"
 import {Banner} from "./Types"
 
+export interface GIFFrame {
+    frame: HTMLCanvasElement
+    delay: number
+}
+
 export interface SaucenaoResponse {
     header: {
         similarity: string

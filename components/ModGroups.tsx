@@ -6,6 +6,7 @@ import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import tagDiff from "../assets/icons/tagdiff.png"
 import functions from "../structures/Functions"
+import {GroupRequest} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModGroups: React.FunctionComponent = (props) => {
@@ -21,10 +22,10 @@ const ModGroups: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([]) as any
-    const [imagesRef, setImagesRef] = useState([]) as any
+    const [requests, setRequests] = useState([] as GroupRequest[])
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
     const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [visibleRequests, setVisibleRequests] = useState([] as GroupRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
@@ -46,14 +47,14 @@ const ModGroups: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as any
+        const newVisibleRequests = [] as GroupRequest[]
         for (let i = 0; i < index; i++) {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
         setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
-        const newImagesRef = newVisibleRequests.map(() => React.createRef()) as any
-        setImagesRef(newImagesRef) as any
+        const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
+        setImagesRef(newImagesRef)
     }
 
     useEffect(() => {
@@ -83,7 +84,7 @@ const ModGroups: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleRequests = visibleRequests as any
+            const newVisibleRequests = visibleRequests
             for (let i = 0; i < 10; i++) {
                 if (!requests[currentIndex]) break
                 newVisibleRequests.push(requests[currentIndex])
@@ -91,8 +92,8 @@ const ModGroups: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
-            const newImagesRef = newVisibleRequests.map(() => React.createRef()) as any
-            setImagesRef(newImagesRef) as any
+            const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
+            setImagesRef(newImagesRef)
         }
         if (scroll) updateRequests()
     }, [requests, scroll])
@@ -113,7 +114,7 @@ const ModGroups: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/group/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t: any) => !t.fake)
+        const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, requestCount: cleanHistory[0]?.requestCount}), ...result]
@@ -125,14 +126,14 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -145,7 +146,7 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                const newPosts = visibleRequests
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
@@ -153,8 +154,8 @@ const ModGroups: React.FunctionComponent = (props) => {
                 }
                 setIndex(currentIndex)
                 setVisibleRequests(functions.removeDuplicates(newPosts))
-                const newImagesRef = newPosts.map(() => React.createRef()) as any
-                setImagesRef(newImagesRef) as any
+                const newImagesRef = newPosts.map(() => React.createRef<HTMLCanvasElement>())
+                setImagesRef(newImagesRef)
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -191,7 +192,7 @@ const ModGroups: React.FunctionComponent = (props) => {
             const offset = (modPage - 1) * getPageAmount()
             let visibleRequests = requests.slice(offset, offset + getPageAmount())
             setVisibleRequests(visibleRequests)
-            const newImagesRef = visibleRequests.map(() => React.createRef()) as any
+            const newImagesRef = visibleRequests.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
         }
     }, [scroll, modPage, requests])
@@ -284,7 +285,7 @@ const ModGroups: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -311,10 +312,10 @@ const ModGroups: React.FunctionComponent = (props) => {
     }
 
     const generateGroupsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as GroupRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests) as any
+            visible = functions.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -330,14 +331,14 @@ const ModGroups: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const request = visible[i] as any
+            const request = visible[i]
             if (!request) break
             if (request.fake) continue
-            const imgClick = (event: any, middle?: boolean) => {
+            const imgClick = (event: React.MouseEvent, middle?: boolean) => {
                 if (middle) return window.open(`/post/${request.postID}`, "_blank")
                 history.push(`/post/${request.postID}`)
             }
-            const groupClick = (event: any, middle?: boolean) => {
+            const groupClick = (event: React.MouseEvent, middle?: boolean) => {
                 if (!request.exists) return
                 if (middle) return window.open(`/group/${request.slug}`, "_blank")
                 history.push(`/group/${request.slug}`)

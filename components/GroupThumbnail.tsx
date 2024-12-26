@@ -9,7 +9,7 @@ interface Props {
     group?: GroupSearch | GroupPosts
     image?: string
     onClick?: (event: React.MouseEvent) => void
-    style?: any
+    style?: React.CSSProperties
 }
 
 const GroupThumbnail: React.FunctionComponent<Props> = (props) => {

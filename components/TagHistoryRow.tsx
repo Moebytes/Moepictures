@@ -31,7 +31,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
-    exact?: any
+    exact?: boolean
 }
 
 const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -66,14 +66,14 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertTagHistory = async () => {
         if (props.current) return Promise.reject()
-        let image = null as any
+        let image = null as Uint8Array | ["delete"] | null
         if (!props.tagHistory.image) {
             image = ["delete"]
         } else {
             const imageLink = functions.getTagLink(props.tagHistory.type, props.tagHistory.image, props.tagHistory.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
-            image = Object.values(bytes)
+            image = bytes
         }
         await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
@@ -169,7 +169,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const socialJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (props.tagHistory.type === "artist") {
             if (props.tagHistory.website) {
                 jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website!, "_blank")}/>)
@@ -285,13 +285,13 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
-                const aliases = props.tagHistory.aliases.map((a: any) => a.alias ? a.alias.replaceAll("-", " ") : a.replaceAll("-", " "))
+                const aliases = props.tagHistory.aliases.map((a) => a.replaceAll("-", " "))
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}:</span> {aliases.join(", ")}</span>)
             }
         }
         if (!prevHistory || changes.implications) {
             if (props.tagHistory.implications?.[0]) {
-                const implications = props.tagHistory.implications.map((i: any) => i.implication ? i.implication.replaceAll("-", " ") : i.replaceAll("-", " "))
+                const implications = props.tagHistory.implications.map((i) => i.replaceAll("-", " "))
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}:</span> {implications.join(", ")}</span>)
             }
         }

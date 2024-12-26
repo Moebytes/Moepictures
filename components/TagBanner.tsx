@@ -3,6 +3,7 @@ import {useHistory} from "react-router-dom"
 import {useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions, useCacheSelector, usePageSelector} from "../store"
 import functions from "../structures/Functions"
+import {TagCount, PostSearch} from "../types/Types"
 import "./styles/tagbanner.less"
 
 let startX = 0
@@ -18,20 +19,20 @@ const TagBanner: React.FunctionComponent = (props) => {
     const {posts, visiblePosts} = useCacheSelector()
     const {page} = usePageSelector()
     const [dragging, setDragging] = useState(false)
-    const [bannerTags, setBannerTags] = useState([]) as any
+    const [bannerTags, setBannerTags] = useState([] as TagCount[])
     const [trackPad, setTrackPad] = useState(false)
-    const containerRef = useRef(null) as any
+    const containerRef = useRef<HTMLDivElement>(null)
     const [marginLeft, setMarginLeft] = useState(0)
     const history = useHistory()
 
     useEffect(() => {
         containerRef.current?.addEventListener("wheel", handleWheel, {passive: false})
         return () => {
-            containerRef.current?.removeEventListener("wheel", handleWheel, {passive: false})
+            containerRef.current?.removeEventListener("wheel", handleWheel)
         }
     })
 
-    const handleWheel = (event: React.WheelEvent) => {
+    const handleWheel = (event: WheelEvent) => {
         if (!containerRef.current) return
         if (!trackPad) event.preventDefault()
         let marginLeft = parseInt(containerRef.current.style.marginLeft)
@@ -109,7 +110,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     }
 
     const getVisibleSlice = () => {
-        let visible = [] as any
+        let visible = [] as PostSearch[]
         if (scroll) {
             visible = functions.removeDuplicates(visiblePosts)
         } else {
@@ -121,11 +122,11 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const updateBannerTags = async () => {
         const visibleSlice = getVisibleSlice()
-        const visibleTags = await functions.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p: any) => p.postID)}, session, setSessionFlag)
-        const characterTags = [] as any
-        const characterTagsImg = [] as any
-        const seriesTags = [] as any
-        const seriesTagsImg = [] as any
+        const visibleTags = await functions.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p) => p.postID)}, session, setSessionFlag)
+        const characterTags = [] as TagCount[]
+        const characterTagsImg = [] as TagCount[]
+        const seriesTags = [] as TagCount[]
+        const seriesTagsImg = [] as TagCount[]
         for (const tag of visibleTags) {
             if (tag.tag === "original") continue
             if (tag.tag === "no-series") continue
@@ -142,7 +143,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     }, [scroll, visiblePosts, posts, page, sizeType, session])
 
     const bannerTagJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (const bannerTag of bannerTags) {
             const getClass = () => {
                 if (bannerTag.type === "artist") return "tagbanner-artist-tag"

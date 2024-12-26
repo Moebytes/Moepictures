@@ -7,7 +7,7 @@ import arrowRight from "../assets/icons/carousel-right.png"
 import "./styles/carousel.less"
 
 interface Props {
-    set?: (img: string, index: number, newTab: boolean) => any
+    set?: (img: string, index: number, newTab: boolean) => void
     noKey?: boolean
     images: string[]
     height?: number
@@ -34,36 +34,36 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {noteDrawingEnabled} = useSearchSelector()
-    const [lastPos, setLastPos] = useState(null) as any
-    const [dragging, setDragging] = useState(false) as any
-    const [imagesRef, setImagesRef] = useState([]) as any
-    const [lastActive, setLastActive] = useState(null) as any
-    const [active, setActive] = useState(null) as any
+    const [lastPos, setLastPos] = useState(null as number | null)
+    const [dragging, setDragging] = useState(false)
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | HTMLVideoElement>[])
+    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLCanvasElement | HTMLVideoElement> | null)
+    const [active, setActive] = useState(null as React.RefObject<HTMLCanvasElement | HTMLVideoElement> | null)
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
     const [images, setImages] = useState(props.images)
-    const [visibleImages, setVisibleImages] = useState([]) as any
-    const [visibleIndex, setVisibleIndex] = useState(0) as any
-    const [updateImagesFlag, setUpdateImagesFlag] = useState(false) as any
+    const [visibleImages, setVisibleImages] = useState([] as string[])
+    const [visibleIndex, setVisibleIndex] = useState(0)
+    const [updateImagesFlag, setUpdateImagesFlag] = useState(false)
     const [scrollTimeout, setScrollTimeout] = useState(false)
     const [trackPad, setTrackPad] = useState(false)
     const [lastResetFlag, setLastResetFlag] = useState(null)
-    const carouselRef = useRef<any>(null)
-    const sliderRef = useRef<any>(null)
+    const carouselRef = useRef<HTMLDivElement>(null)
+    const sliderRef = useRef<HTMLDivElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     useEffect(() => {
-        const newImagesRef = props.images.slice(0, loadAmount).map(() => React.createRef()) as any
+        const newImagesRef = props.images.slice(0, loadAmount).map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
         setActive(newImagesRef[props.index ? props.index : 0])
         setLastActive(newImagesRef[props.index ? props.index : 0])
         setShowLeftArrow(false)
         setShowRightArrow(false)
         setLastPos(null)
         setDragging(false)
-        setImagesRef(newImagesRef) as any
+        setImagesRef(newImagesRef)
         setVisibleImages([])
         setVisibleIndex(0)
         setImages(props.images)
@@ -84,7 +84,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }, [props.index])
     
     useEffect(() => {
-        let newVisibleImages = [] as any
+        let newVisibleImages = [] as string[]
         let currentIndex = 0
         for (let i = 0; i < loadAmount; i++) {
             if (!props.images[currentIndex]) break
@@ -93,8 +93,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
         setVisibleImages(functions.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
-        const newImagesRef = newVisibleImages.map(() => React.createRef()) as any
-        setImagesRef(newImagesRef) as any
+        const newImagesRef = newVisibleImages.map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
+        setImagesRef(newImagesRef)
     }, [props.images])
 
     useEffect(() => {
@@ -121,8 +121,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 }
                 setVisibleImages(newVisibleImages)
                 setVisibleIndex(currentIndex)
-                const newImagesRef = newVisibleImages.map(() => React.createRef()) as any
-                setImagesRef(newImagesRef) as any
+                const newImagesRef = newVisibleImages.map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
+                setImagesRef(newImagesRef)
                 setTimeout(() => {
                     setLastPos(null)
                 }, 700)
@@ -133,7 +133,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }, [updateImagesFlag, images, visibleImages, visibleIndex, scrollTimeout])
 
-    const handleIntersection = (entries: any) => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         for (let entry of entries) {
             if (entry.intersectionRatio === 1) {
                 if (!sliderRef?.current) return
@@ -148,7 +148,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }
     let entriesSeen = new Set()
-    const handleResize = (entries: any) => {
+    const handleResize = (entries: ResizeObserverEntry[]) => {
         for (let entry of entries) {
             if (!entriesSeen.has(entry.target)) {
                 entriesSeen.add(entry.target)
@@ -158,17 +158,17 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const handleKeydown = (event: any) => {
+    const handleKeydown = (event: KeyboardEvent) => {
         if (props.noKey) return
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
         if (!sliderRef?.current) return
         if ((event.target instanceof HTMLTextAreaElement) || (event.target instanceof HTMLInputElement) 
-        || (event.target.classList.contains("dialog-textarea"))) return
+        || (event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) return
         if (noteDrawingEnabled) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0
-        let index = imagesRef.indexOf(active)
+        let index = imagesRef.indexOf(active!)
         if (event.key === "ArrowLeft") {
             index-- 
             marginLeft += width
@@ -205,7 +205,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
         return () => {
             window.removeEventListener("keydown", handleKeydown)
-            if (sliderRef.current) sliderRef.current.removeEventListener("wheel", handleWheel, {passive: false})
+            if (sliderRef.current) sliderRef.current.removeEventListener("wheel", handleWheel)
             observer.disconnect()
             resizeObserver.disconnect()
         }
@@ -213,14 +213,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         for (let i = 0; i < imagesRef.length; i++) {
-            if (imagesRef[i].current) imagesRef[i].current.style.border = "0"
+            if (imagesRef[i].current?.style) imagesRef[i].current!.style.border = "0"
         }
         if (!active) return
         if (active.current) active.current.style.border = "3px solid var(--text)"
         setLastActive(active)
     }, [active, imagesRef])
 
-    const handleWheel = (event: React.WheelEvent) => {
+    const handleWheel = (event: WheelEvent) => {
         if (!sliderRef.current) return
         if (props.images.length <= 3) return
         if (!trackPad) event.preventDefault()
@@ -338,7 +338,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
-        if (marginLeft > lastPos) setShowRightArrow(true)
+        if (lastPos && marginLeft > lastPos) setShowRightArrow(true)
     }
 
     const arrowLeftClick = () => {
@@ -405,7 +405,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             const imgElement = document.createElement("img")
             imgElement.src = src
             imgElement.onload = () => {
-                if (!ref.current) return
+                if (!ref.current || !(ref.current instanceof HTMLCanvasElement)) return
                 const rendered = functions.render(imgElement, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate)
                 const refCtx = ref.current.getContext("2d")
                 ref.current.width = rendered.width
@@ -420,14 +420,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }, [visibleImages, visibleIndex, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
 
     const generateJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let visible = functions.removeDuplicates(visibleImages)
         for (let i = 0; i < visible.length; i++) {
             const img = visible[i] as string
             if (functions.isVideo(img)) {
-                jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
+                jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i] as any} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else {
-                jsx.push(<canvas key={i} ref={imagesRef[i]} className="carousel-img" onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></canvas>)
+                jsx.push(<canvas key={i} ref={imagesRef[i] as any} className="carousel-img" onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></canvas>)
             }
         }
         return jsx

@@ -101,17 +101,14 @@ const SortBar: React.FunctionComponent = (props) => {
     const [mouseOver, setMouseOver] = useState(false)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
-    const [lastImageType, setLastImageType] = useState(null) as any
-    const [lastRatingType, setLastRatingType] = useState(null) as any
-    const [lastStyleType, setLastStyleType] = useState(null) as any
-    const imageRef = useRef(null) as any
-    const ratingRef = useRef(null) as any
-    const styleRef = useRef(null) as any
-    const sizeRef = useRef(null) as any 
-    const sortRef = useRef(null) as any
-    const filterRef = useRef(null) as any
-    const speedRef = useRef(null) as any
-    const pageMultiplierRef = useRef(null) as any
+    const imageRef = useRef<HTMLDivElement>(null)
+    const ratingRef = useRef<HTMLDivElement>(null)
+    const styleRef = useRef<HTMLDivElement>(null)
+    const sizeRef = useRef<HTMLDivElement>(null)
+    const sortRef = useRef<HTMLDivElement>(null)
+    const filterRef = useRef<HTMLDivElement>(null)
+    const speedRef = useRef<HTMLDivElement>(null)
+    const pageMultiplierRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -779,7 +776,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const bulkDownload = async () => {
         if (selectionMode) {
             if (!selectionItems.size) return
-            let newDownloadIDs = [] as any
+            let newDownloadIDs = [] as string[]
             for (const postID of selectionItems.values()) {
                 newDownloadIDs.push(postID)
             }

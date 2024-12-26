@@ -9,6 +9,7 @@ export interface Report {
     imagePost: string | null
     imageHash: string | null
     reportCount: string
+    fake?: boolean
 }
 
 export interface Ban {

@@ -1,4 +1,4 @@
-class BitCrushProcessor extends AudioWorkletProcessor {
+class BitcrushProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
       return [
           {name: "bitDepth", defaultValue: 32, minValue: 1, maxValue: 32}, 
@@ -40,4 +40,4 @@ class BitCrushProcessor extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("bitcrush-processor", BitCrushProcessor)
+registerProcessor("bitcrush-processor", BitcrushProcessor)

@@ -78,12 +78,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const lightnessRef = useRef<HTMLCanvasElement>(null)
     const ref = useRef<HTMLCanvasElement>(null)
     const audioControls = useRef<HTMLDivElement>(null)
-    const audioSliderRef = useRef<any>(null)
-    const audioSpeedRef = useRef(null) as any
-    const audioPitchRef = useRef(null) as any
-    const audioVolumeRef = useRef(null) as any
-    const audioSpeedSliderRef = useRef<any>(null)
-    const audioVolumeSliderRef = useRef<any>(null)
+    const audioSliderRef = useRef<Slider>(null)
+    const audioSpeedRef = useRef<HTMLImageElement>(null)
+    const audioPitchRef = useRef<HTMLImageElement>(null)
+    const audioVolumeRef = useRef<HTMLImageElement>(null)
+    const audioSpeedSliderRef = useRef<Slider>(null)
+    const audioVolumeSliderRef = useRef<Slider>(null)
     const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
     const [coverImg, setCoverImg] = useState("")
@@ -140,9 +140,10 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const handleKeydown = (event: any) => {
+    const handleKeydown = (event: KeyboardEvent) => {
         const key = event.key
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("dialog-textarea"))) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
+            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
             if (key === "f") {
                 if (!props.noKeydown) fullscreen()
             }
@@ -154,7 +155,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         if (functions.isImage(coverImg)) {
             observer = new ResizeObserver(resizeImageCanvas)
             observer.observe(ref.current!)
@@ -282,7 +283,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const imagePixelate = () => {
         if (!pixelateRef.current || !containerRef.current || !ref.current) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = ref.current.clientWidth 
         const imageHeight = ref.current.clientHeight
         const landscape = imageWidth >= imageHeight

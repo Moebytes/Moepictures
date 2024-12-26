@@ -446,9 +446,9 @@ const GroupsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-row-container" style={{justifyContent: "space-evenly"}}>
+                    <div className="items-row-container" style={{justifyContent: "space-evenly"}}>
                         {generateGroupsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

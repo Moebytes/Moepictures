@@ -1,5 +1,5 @@
 import {PostType, PostRating, PostStyle, PostChanges, MiniTag, PostDeleteRequest, PostHistory,
-ImageFormat, Upscaler, SourceData} from "./Types"
+ImageFormat, Upscaler, SourceData, UserComment} from "./Types"
 
 export interface PostMirrors {
     pixiv?: string
@@ -106,6 +106,8 @@ export interface UnverifiedPost extends Post {
     changes: PostChanges
     reason: string | null
     isNote: boolean
+    postCount: string
+    fake?: boolean
 }
 
 export interface ChildPost {
@@ -168,7 +170,7 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post" ? {params: {postID: string}, response: PostFull | undefined} :
     T extends "/api/posts" ? {params: {postIDs: string[]}, response: PostFull[]} :
     T extends "/api/post/tags" ? {params: {postID: string}, response: MiniTag[]} :
-    T extends "/api/post/comments" ? {params: {postID: string}, response: Comment[]} :
+    T extends "/api/post/comments" ? {params: {postID: string}, response: UserComment[]} :
     T extends "/api/post/children" ? {params: {postID: string}, response: ChildPost[]} :
     T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost | undefined} :
     T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost | undefined} :

@@ -82,7 +82,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         history.push(`/post/${props.comment?.postID}`)
-        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
             > ${cleanComment}

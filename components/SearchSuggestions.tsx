@@ -5,7 +5,7 @@ useSearchSelector, useSearchActions} from "../store"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import {TagType} from "../types/Types"
+import {TagType, TagCount} from "../types/Types"
 
 interface Props {
     active: boolean
@@ -25,7 +25,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {mobile, hideMobileNavbar} = useLayoutSelector()
     const {search, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const [suggestions, setSuggestions] = useState([]) as any
+    const [suggestions, setSuggestions] = useState([] as TagCount[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
     const history = useHistory()
@@ -99,8 +99,6 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const generateSuggestionsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
-            if (!session.username) if (suggestions[i].r18) continue
-            if (!functions.isR18(ratingType)) if (suggestions[i].r18) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)

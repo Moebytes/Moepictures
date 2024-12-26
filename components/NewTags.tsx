@@ -29,7 +29,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
 
     const updateRawNewTags = async () => {
         const tagMap = await functions.tagsCache(session, setSessionFlag)
-        let notExists = [] as any
+        let notExists = [] as string[]
         for (let i = 0; i < props.post.tags.length; i++) {
             const exists = tagMap[props.post.tags[i]]
             if (!exists) notExists.push(props.post.tags[i])
@@ -46,7 +46,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
     }, [props.post, session])
 
     const generateTagsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < newTags.length; i++) {
             jsx.push(
                 <div className="new-tags-container">

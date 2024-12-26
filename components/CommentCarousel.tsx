@@ -17,11 +17,11 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
-    const [images, setImages] = useState([])
+    const [images, setImages] = useState([] as string[])
     const history = useHistory()
 
     const loadImages = async () => {
-        let newImages = [] as any
+        let newImages = [] as string[]
         for (let i = 0; i < props.comments.length; i++) {
             let type = props.comments[i].post.images[0].type
             let img = functions.getThumbnailLink(type, props.comments[i].postID, props.comments[i].post.images[0].order, props.comments[i].post.images[0].filename, "tiny")
@@ -36,7 +36,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     }, [props.comments, session])
 
     const generateJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.comments.length; i++) {
             const imgClick = (event: React.MouseEvent) => {
                 if (event.ctrlKey || event.metaKey || event.button === 1) {

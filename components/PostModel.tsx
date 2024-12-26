@@ -74,12 +74,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLCanvasElement>(null)
     const lightnessRef = useRef<HTMLCanvasElement>(null)
-    const modelSliderRef = useRef<any>(null)
+    const modelSliderRef = useRef<Slider>(null)
     const modelControls = useRef<HTMLDivElement>(null)
-    const modelSpeedRef = useRef(null) as any
-    const modelLightRef = useRef(null) as any
-    const modelMorphRef = useRef(null) as any
-    const [image, setImage] = useState(null) as any
+    const modelSpeedRef = useRef<HTMLImageElement>(null)
+    const modelLightRef = useRef<HTMLImageElement>(null)
+    const modelMorphRef = useRef<HTMLImageElement>(null)
+    const [image, setImage] = useState(null as string | null)
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
@@ -88,15 +88,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [ambient, setAmbient] = useState(0.5)
     const [directionalFront, setDirectionalFront] = useState(0.2)
     const [directionalBack, setDirectionalBack] = useState(0.2)
-    const [lights, setLights] = useState([]) as any
-    const [morphMesh, setMorphMesh] = useState(null) as any
-    const [initMorphTargets, setInitMorphTargets] = useState([]) as any
-    const [morphTargets, setMorphTargets] = useState([]) as any
-    const [model, setModel] = useState(null) as any
-    const [scene, setScene] = useState(null) as any
+    const [lights, setLights] = useState([] as (THREE.DirectionalLight | THREE.AmbientLight)[])
+    const [morphMesh, setMorphMesh] = useState(null as THREE.Mesh | null)
+    const [initMorphTargets, setInitMorphTargets] = useState([] as {name: string, value: number}[])
+    const [morphTargets, setMorphTargets] = useState([] as {name: string, value: number}[])
+    const [model, setModel] = useState(null as THREE.Object3D | null)
+    const [scene, setScene] = useState(null as THREE.Scene | null)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
-    const [objMaterials, setObjMaterials] = useState([]) as any
+    const [objMaterials, setObjMaterials] = useState([] as THREE.Material[])
     const [buttonHover, setButtonHover] = useState(false)
 
     useEffect(() => {
@@ -157,7 +157,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             model = await loader.loadAsync(props.model)
         }
 
-        let objMaterials = [] as any
+        let objMaterials = [] as THREE.Material[]
         if (wireframe) {
             await new Promise<void>((resolve) => {
                 model.traverse((obj: any) => {
@@ -187,8 +187,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setScene(scene)
         setObjMaterials(objMaterials)
 
-        let morphTargets  = [] as any
-        let morphMesh = null as any
+        let morphTargets  = [] as {name: string, value: number}[]
+        let morphMesh = null as THREE.Mesh | null
         model.traverse((mesh) => {
             // @ts-ignore
             if (mesh.isMesh && mesh.morphTargetInfluences?.length) {
@@ -200,7 +200,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                         if (key && mesh.morphTargetDictionary[key] === i) morphTargets.push({name: key, value: mesh.morphTargetInfluences[i]})
                     })
                 }
-                morphMesh = mesh
+                morphMesh = mesh as THREE.Mesh
             }
         })
         setMorphMesh(morphMesh)
@@ -398,10 +398,11 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const handleKeydown = (event: any) => {
+    const handleKeydown = (event: KeyboardEvent) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("dialog-textarea"))) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
+            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
             if (value === "f") {
                 if (!props.noKeydown) fullscreen()
             }
@@ -414,7 +415,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!ref) return
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         observer = new ResizeObserver(resizeImageCanvas)
         observer.observe(ref)
         window.addEventListener("keydown", handleKeydown)
@@ -524,7 +525,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const imagePixelate = () => {
         if (!pixelateRef.current || !containerRef.current || !ref) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = ref.clientWidth 
         const imageHeight = ref.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -701,7 +702,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }
 
     const shapeKeysDropdownJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < morphTargets.length; i++) {
             jsx.push(
                 <div className="model-morph-dropdown-row morph-row">

@@ -70,11 +70,10 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     }, [needsVerification])
 
     const submitCaptcha = async () => {
-        if (!errorRef.current) return
         if (!captchaResponse) {
             setError(true)
-            await functions.timeout(20)
-            errorRef.current.innerText = "Solve the captcha."
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Solve the captcha."
             await functions.timeout(3000)
             return setError(false)
         }
@@ -85,8 +84,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
             history.go(0)
         } catch {
             setError(true)
-            await functions.timeout(20)
-            errorRef.current.innerText = "Captcha error."
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Captcha error."
             await functions.timeout(3000)
             setError(false)
             updateCaptcha()

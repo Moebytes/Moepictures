@@ -35,7 +35,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
 
     const set = (image: string, index: number, newTab: boolean) => {
         if (!session.username) {
-            const filtered = props.artist.posts.filter((p: any) => p.rating === functions.r13())
+            const filtered = props.artist.posts.filter((p) => p.rating === functions.r13())
             const post = filtered[index] 
             if (newTab) {
                 return window.open(`/post/${post.postID}/${post.slug}`, "_blank")
@@ -43,7 +43,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}/${post.slug}`)
             }
         }
-        let filtered = props.artist.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+        let filtered = props.artist.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
@@ -57,11 +57,11 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const getImages = () => {
         let images = [] as string[]
         if (!session.username) {
-            let filtered = props.artist.posts.filter((p: any) => p.rating === functions.r13())
-            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            let filtered = props.artist.posts.filter((p) => p.rating === functions.r13())
+            images = filtered.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         } else {
-            let filtered = props.artist.posts.filter((p: any) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-            images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            let filtered = props.artist.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+            images = filtered.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
         setImages(images)
     }
@@ -71,7 +71,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     }, [props.artist])
 
     const artistSocialJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (props.artist.website) {
             jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website!, "_blank", "noreferrer")}/>)
         }

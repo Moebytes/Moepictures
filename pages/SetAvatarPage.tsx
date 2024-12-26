@@ -10,7 +10,7 @@ useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useIntera
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
-import {TagCategories, PostSearch} from "../types/Types"
+import {TagCategories, PostSearch, GIFFrame} from "../types/Types"
 
 interface Props {
     match: {params: {id: string}}
@@ -191,7 +191,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const url = previewRef.current.toDataURL("image/jpeg")
         let croppedURL = ""
         if (isAnimated && permissions.isPremium(session)) {
-            let gifData = [] as {frame: HTMLCanvasElement, delay: number}[]
+            let gifData = [] as GIFFrame[]
             if (functions.isGIF(image)) {
                 gifData = await functions.extractGIFFrames(image)
             } else if (functions.isWebP(image)) {

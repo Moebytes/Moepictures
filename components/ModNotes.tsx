@@ -5,6 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
+import {UnverifiedNoteSearch, Note} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModNotes: React.FunctionComponent = (props) => {
@@ -20,13 +21,13 @@ const ModNotes: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [unverifiedNotes, setUnverifiedNotes] = useState([]) as any
+    const [unverifiedNotes, setUnverifiedNotes] = useState([] as UnverifiedNoteSearch[])
     const [index, setIndex] = useState(0)
-    const [visibleNotes, setVisibleNotes] = useState([]) as any
+    const [visibleNotes, setVisibleNotes] = useState([] as UnverifiedNoteSearch[])
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [imagesRef, setImagesRef] = useState([]) as any
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
     const history = useHistory()
 
     const getFilter = () => {
@@ -44,7 +45,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleNotes = () => {
-        const newVisibleNotes = [] as any
+        const newVisibleNotes = [] as UnverifiedNoteSearch[]
         for (let i = 0; i < index; i++) {
             if (!unverifiedNotes[i]) break
             newVisibleNotes.push(unverifiedNotes[i])
@@ -57,13 +58,13 @@ const ModNotes: React.FunctionComponent = (props) => {
         updateVisibleNotes()
     }
 
-    const approveNote = async (postID: string, originalID: string, order: number, data: any, username: string) => {
+    const approveNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
 
-    const rejectNote = async (postID: string, originalID: string, order: number, data: any, username: string) => {
+    const rejectNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
@@ -76,7 +77,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleNotes = visibleNotes as any
+            const newVisibleNotes = visibleNotes
             for (let i = 0; i < 10; i++) {
                 if (!unverifiedNotes[currentIndex]) break
                 newVisibleNotes.push(unverifiedNotes[currentIndex])
@@ -84,8 +85,8 @@ const ModNotes: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
-            const newImagesRef = newVisibleNotes.map(() => React.createRef()) as any
-            setImagesRef(newImagesRef) as any
+            const newImagesRef = newVisibleNotes.map(() => React.createRef<HTMLCanvasElement>())
+            setImagesRef(newImagesRef)
         }
         if (scroll) updateRequests()
     }, [unverifiedNotes, scroll])
@@ -106,7 +107,7 @@ const ModNotes: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = unverifiedNotes.filter((t: any) => !t.fake)
+        const cleanHistory = unverifiedNotes.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, noteCount: cleanHistory[0]?.noteCount}), ...result]
@@ -118,14 +119,14 @@ const ModNotes: React.FunctionComponent = (props) => {
             if (padded) {
                 setUnverifiedNotes(result)
             } else {
-                setUnverifiedNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setUnverifiedNotes((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setUnverifiedNotes(result)
                 } else {
-                    setUnverifiedNotes((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setUnverifiedNotes((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -137,7 +138,7 @@ const ModNotes: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!unverifiedNotes[currentIndex]) return updateOffset()
-                const newNotes = visibleNotes as any
+                const newNotes = visibleNotes
                 for (let i = 0; i < 10; i++) {
                     if (!unverifiedNotes[currentIndex]) return updateOffset()
                     newNotes.push(unverifiedNotes[currentIndex])
@@ -241,7 +242,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -267,21 +268,21 @@ const ModNotes: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const noteDataJSX = (noteGroup: any) => {
-        let noteChanges = noteGroup.addedEntries?.length || noteGroup.removedEntries?.length
+    const noteDataJSX = (unverifiedNote: UnverifiedNoteSearch) => {
+        let noteChanges = unverifiedNote.addedEntries?.length || unverifiedNote.removedEntries?.length
         if (!noteChanges) return null
-        const addedJSX = noteGroup.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = noteGroup.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+        const addedJSX = unverifiedNote.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = unverifiedNote.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]
     }
 
     const generateNotesJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as UnverifiedNoteSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleNotes) as any
+            visible = functions.removeDuplicates(visibleNotes)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = unverifiedNotes.slice(offset, offset + getPageAmount())
@@ -297,10 +298,10 @@ const ModNotes: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const noteGroup = visible[i] as any
+            const noteGroup = visible[i]
             if (!noteGroup) break
             if (noteGroup.fake) continue
-            const imgClick = (event?: any, middle?: boolean) => {
+            const imgClick = (event?: React.MouseEvent, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${noteGroup.postID}`, "_blank")
                 history.push(`/unverified/post/${noteGroup.postID}`)
             }

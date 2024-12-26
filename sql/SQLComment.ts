@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Comment, CommentSearch} from "../types/Types"
+import {UserComment, CommentSearch} from "../types/Types"
 
 export default class SQLComment {
     /** Insert comment. */
@@ -41,7 +41,7 @@ export default class SQLComment {
             values: [postID]
         }
         const result = await SQLQuery.run(query)
-        return result as Promise<Comment[]>
+        return result as Promise<UserComment[]>
     }
 
     /** Get user comments. */
@@ -58,7 +58,7 @@ export default class SQLComment {
             values: [username]
         }
         const result = await SQLQuery.run(query)
-        return result as Promise<Comment[]>
+        return result as Promise<UserComment[]>
     }
 
     /** Search comments. */
@@ -155,7 +155,7 @@ export default class SQLComment {
             values: [commentID]
         }
         const result = await SQLQuery.run(query)
-        return result[0] as Promise<Comment | undefined>
+        return result[0] as Promise<UserComment | undefined>
     }
 
     /** Delete comment. */

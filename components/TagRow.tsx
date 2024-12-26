@@ -35,20 +35,20 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, aliasTagID, aliasTagFlag, aliasTagName} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setCategorizeTag, setAliasTagID, setAliasTagFlag, setAliasTagName} = useTagDialogActions()
     const history = useHistory()
-    const scrollRef = useRef(null) as any
+    const scrollRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
         if (!scrollRef.current) return
         let startY = 0
         let scrollTopStart = 0
     
-        const touchStart = (event: React.TouchEvent) => {
+        const touchStart = (event: TouchEvent) => {
             if (!scrollRef.current) return
             startY = event.touches[0].pageY
             scrollTopStart = scrollRef.current.scrollTop
         }
     
-        const touchMove = (event: React.TouchEvent) => {
+        const touchMove = (event: TouchEvent) => {
             if (!scrollRef.current) return
             const touchY = event.touches[0].pageY
             const deltaY = startY - touchY
@@ -85,7 +85,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateAliasesJSX = () => {
-        let jsx = [] as any 
+        let jsx = [] as React.ReactElement[] 
         for (let i = 0; i < props.tag.aliases.length; i++) {
             jsx.push(<span className="tagrow-alias">{props.tag.aliases[i]?.alias.replaceAll("-", " ")}</span>)
         }
@@ -93,7 +93,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateImplicationsJSX = () => {
-        let jsx = [] as any 
+        let jsx = [] as React.ReactElement[]  
         for (let i = 0; i < props.tag.implications.length; i++) {
             jsx.push(<span className="tagrow-alias">{props.tag.implications[i]?.implication.replaceAll("-", " ")}</span>)
         }
@@ -125,19 +125,19 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const editTag = async () => {
-        let image = null as any
+        let image = null as Uint8Array | ["delete"] | null
         if (editTagObj.image) {
             if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
                 const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
-                image = Object.values(bytes)
+                image = bytes
             }
         }
         try {
             await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
-            image, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
+            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
             website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
@@ -167,8 +167,8 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             key: props.tag.tag,
             description: props.tag.description,
             image: props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
-            aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [],
-            implications: props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [],
+            aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias) : [],
+            implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication) : [],
             pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
             type: props.tag.type,
             social: props.tag.social,
@@ -209,7 +209,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const socialJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (props.tag.type === "artist") {
             if (props.tag.website) {
                 jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website!, "_blank", "noreferrer")}/>)

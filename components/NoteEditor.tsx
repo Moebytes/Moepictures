@@ -92,7 +92,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [items, setItems] = useState([] as Note[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [buttonHover, setButtonHover] = useState(false)
-    const filtersRef = useRef(null) as any
+    const filtersRef = useRef<HTMLDivElement>(null)
     const lightnessRef = useRef<HTMLImageElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -237,7 +237,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const imagePixelate = () => {
         if (!pixelateRef.current || !overlayRef.current) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const width = Math.floor(targetWidth*scale)
         const height = Math.floor(targetHeight*scale)
         const landscape = width >= height
@@ -271,7 +271,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const deleteFocused = () => {
         if (!noteDrawingEnabled) return
-        setItems((prev: any) => functions.insertAtIndex(prev, activeIndex, null).filter(Boolean))
+        setItems((prev) => functions.insertAtIndex(prev, activeIndex, null).filter(Boolean))
     }
 
     const editTextDialog = () => {
@@ -288,7 +288,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const editText = (index: number, transcript: string, translation: string, overlay = false) => {
-        setItems((prev: any) => {
+        setItems((prev) => {
             const item = prev[index]
             item.transcript = transcript
             item.translation = translation
@@ -327,7 +327,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.post(`/api/misc/ocr`, bytes, session, setSessionFlag).catch(() => null)
-        if (result?.length) setItems(result.map((item: any) => ({...item, imageHash: targetHash, overlay: false})))
+        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash, overlay: false} as Note)))
     }
 
     useEffect(() => {
@@ -374,10 +374,11 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <ImageLayer src={img}/>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
                         if (!noteDrawingEnabled) return
-                        setItems((prev: any) => {
+                        setItems((prev) => {
                             setID(id + 1)
-                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, imageHeight: targetHeight, imageHash: targetHash, 
-                                transcript: "", translation: "", overlay: false}]
+                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, 
+                                imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: "", 
+                                overlay: false} as Note]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
@@ -390,14 +391,14 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const newX = (x / imageWidth) * targetWidth
                         const newY = (y / imageHeight ) * targetHeight
 
-                        const insertItem = (newRect: any) => {
+                        const insertItem = (newRect: BubbleData) => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev: any) => functions.insertAtIndex(prev, index, {...item, ...newRect}))
+                            setItems((prev) => functions.insertAtIndex(prev, index, {...item, ...newRect}))
                         }
 
                         const deleteItem = () => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev: any) => functions.insertAtIndex(prev, index, null).filter(Boolean))
+                            setItems((prev) => functions.insertAtIndex(prev, index, null).filter(Boolean))
                         }
 
                         const onContextMenu = (event: React.MouseEvent) => {
@@ -416,9 +417,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             setEditNoteID(index)
                         }
 
-                        const onMouseEnter = (event: any) => {
+                        const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
                             if (!item.transcript && !item.translation) return setBubbleToggle(false)
-                            const bounds = event.target.getBoundingClientRect()
+                            const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
                             if (width < 125) width = 125
@@ -428,9 +429,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             setBubbleToggle(true)
                         }
 
-                        const onMouseMove = (event: any) => {
+                        const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
                             if (!item.transcript && !item.translation) return setBubbleToggle(false)
-                            const bounds = event.target.getBoundingClientRect()
+                            const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
                             if (width < 125) width = 125
@@ -456,7 +457,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
                         return (
                             <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
-                            keyboardTransformMultiplier={30} onChange={insertItem} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
+                            keyboardTransformMultiplier={30} onChange={insertItem as any} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
                             extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown}}/>
                         )
                     })}

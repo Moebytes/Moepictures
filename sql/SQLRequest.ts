@@ -6,7 +6,7 @@ TagEditRequest, GroupRequest, GroupEditRequest} from "../types/Types"
 
 export default class SQLRequest {
     /** Insert pending post delete. */
-    public static insertPostDeleteRequest = async (username: string, postID: string, reason: string) => {
+    public static insertPostDeleteRequest = async (username: string, postID: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "delete requests" ("username", "postID", "reason") VALUES ($1, $2, $3) RETURNING "requestID"`,
             rowMode: "array",
@@ -77,7 +77,7 @@ export default class SQLRequest {
     }
 
     /** Insert pending tag delete. */
-    public static insertTagDeleteRequest = async (username: string, tag: string, reason: string) => {
+    public static insertTagDeleteRequest = async (username: string, tag: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "delete requests" ("username", "tag", "reason") VALUES ($1, $2, $3) RETURNING "requestID"`,
             rowMode: "array",
@@ -134,7 +134,7 @@ export default class SQLRequest {
     }
 
     /** Insert alias request. */
-    public static insertAliasRequest = async (username: string, tag: string, aliasTo: string, reason: string) => {
+    public static insertAliasRequest = async (username: string, tag: string, aliasTo: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "alias requests" ("username", "tag", "aliasTo", "reason") VALUES ($1, $2, $3, $4) RETURNING "requestID"`,
             rowMode: "array",
@@ -253,7 +253,7 @@ export default class SQLRequest {
     }
 
     /** Insert group request. */
-    public static insertGroupRequest = async (username: string, slug: string, name: string, postID: string, reason: string) => {
+    public static insertGroupRequest = async (username: string, slug: string, name: string, postID: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "group requests" ("username", "slug", "name", "postID", "reason") 
             VALUES ($1, $2, $3, $4, $5) RETURNING "requestID"`,
@@ -328,7 +328,7 @@ export default class SQLRequest {
     }
 
     /** Insert pending group delete. */
-    public static insertGroupDeleteRequest = async (username: string, slug: string, reason: string) => {
+    public static insertGroupDeleteRequest = async (username: string, slug: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "delete requests" ("username", "group", "reason") VALUES ($1, $2, $3) RETURNING "requestID"`,
             rowMode: "array",
@@ -348,7 +348,7 @@ export default class SQLRequest {
     }
 
     /** Insert pending group delete. */
-    public static insertGroupPostDeleteRequest = async (username: string, slug: string, postID: string, reason: string) => {
+    public static insertGroupPostDeleteRequest = async (username: string, slug: string, postID: string, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "delete requests" ("username", "group", "groupPost", "reason") VALUES ($1, $2, $3, $4) RETURNING "requestID"`,
             rowMode: "array",
@@ -422,7 +422,7 @@ export default class SQLRequest {
 
     /** Insert group edit request. */
     public static insertGroupEditRequest = async (username: string, slug: string, name: string, description: string, addedPosts: string[], 
-        removedPosts: string[], orderChanged: boolean, changes: any, reason: string) => {
+        removedPosts: string[], orderChanged: boolean, changes: any, reason: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "group edit requests" ("username", "group", "name", "description", "addedPosts", 
             "removedPosts", "orderChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "requestID"`,

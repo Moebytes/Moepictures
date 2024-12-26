@@ -17,7 +17,7 @@ const Parent: React.FunctionComponent<Props> = (props) => {
     const image = functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small")
 
     const click = (img: string, index: number) => {
-        history.push(`/post/${post.parentID}/${post.slug}`)
+        history.push(`/post/${post.postID}/${post.slug}`)
     }
 
     return (

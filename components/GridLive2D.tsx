@@ -13,8 +13,6 @@ import privateIcon from "../assets/icons/lock-opt.png"
 import {PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
-let imageTimer = null as any
-let id = null as any
 
 interface Props {
     id: string
@@ -28,8 +26,8 @@ interface Props {
 
 interface Ref {
     shouldWait: () => Promise<boolean>
-    load: () => Promise<any>
-    update: () => Promise<any>
+    load: () => Promise<void>
+    update: () => Promise<void>
 }
 
 const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
@@ -44,7 +42,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
-    const [imageSize, setImageSize] = useState(240) as any
+    const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLCanvasElement>(null)
@@ -59,17 +57,14 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     const [naturalWidth, setNaturalWidth] = useState(0)
     const [naturalHeight, setNaturalHeight] = useState(0)
     const [imageLoaded, setImageLoaded] = useState(false)
-    const [backFrame, setBackFrame] = useState("")
     const [drag, setDrag] = useState(false)
-    const [gifData, setGIFData] = useState(null) as any
-    const [videoData, setVideoData] = useState(null) as any
     const [visible, setVisible] = useState(true)
     const [pageBuffering, setPageBuffering] = useState(true)
-    const [image, setImage] = useState(null) as any
+    const [image, setImage] = useState(null as string | null)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
-    const [model, setModel] = useState(null as any)
-    const imageRef = useRef(null) as any
+    const [model, setModel] = useState(null as Live2DModel | null)
+    const imageRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -93,7 +88,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         props.reupdate?.()
     }, [imageSize])
 
-    const handleIntersection = (entries: any) => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
           setVisible(true)
@@ -269,7 +264,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         const currentRef = rendererRef.current ? rendererRef.current : imageRef.current
         if (!currentRef) return
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         observer = new ResizeObserver(resizePixelateCanvas)
         observer.observe(currentRef)
         return () => {
@@ -409,7 +404,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         const currentRef = rendererRef.current ? rendererRef.current : imageRef.current
         if (!pixelateRef.current || !currentRef) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = currentRef.clientWidth 
         const imageHeight = currentRef.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -584,10 +579,11 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     const drawImage = async () => {
+        if (!image) return
         const currentRef = rendererRef.current ? rendererRef.current : imageRef.current
         if (!currentRef || !overlayRef.current || !lightnessRef.current) return
         const img = document.createElement("img")
-        img.src = image 
+        img.src = image
         img.onload = () => {
             if (!currentRef || !overlayRef.current || !lightnessRef.current) return
             setImageWidth(img.width)

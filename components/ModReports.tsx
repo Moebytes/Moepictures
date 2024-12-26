@@ -8,7 +8,7 @@ import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/modposts.less"
-import {Report} from "../types/Types"
+import {Report, ThreadReply, ThreadUser, UserComment} from "../types/Types"
 
 interface Props {
     request: Report
@@ -21,7 +21,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {emojis} = useCacheSelector()
     const [hover, setHover] = useState(false)
-    const [asset, setAsset] = useState(null) as any
+    const [asset, setAsset] = useState(null as UserComment | ThreadUser | ThreadReply | null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -31,13 +31,13 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const updateAsset = async () => {
         if (props.request.type === "comment") {
             const asset = await functions.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag)
-            setAsset(asset)
+            setAsset(asset as UserComment)
         } else if (props.request.type === "thread") {
             const asset = await functions.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag)
-            setAsset(asset)
+            setAsset(asset as ThreadUser)
         } else if (props.request.type === "reply") {
             const asset = await functions.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag)
-            setAsset(asset)
+            setAsset(asset as ThreadReply)
         }
     }
 
@@ -49,19 +49,19 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         if (!asset) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             if (props.request.type === "comment") {
-                window.open(`/post/${asset.postID}`, "_blank")
+                window.open(`/post/${(asset as UserComment).postID}`, "_blank")
             } else if (props.request.type === "thread") {
-                window.open(`/thread/${asset.threadID}`, "_blank")
+                window.open(`/thread/${(asset as ThreadUser).threadID}`, "_blank")
             } else if (props.request.type === "reply") {
-                window.open(`/thread/${asset.threadID}`, "_blank")
+                window.open(`/thread/${(asset as ThreadReply).threadID}`, "_blank")
             }
         } else {
             if (props.request.type === "comment") {
-                history.push(`/post/${asset.postID}`)
+                history.push(`/post/${(asset as UserComment).postID}`)
             } else if (props.request.type === "thread") {
-                history.push(`/thread/${asset.threadID}`)
+                history.push(`/thread/${(asset as ThreadUser).threadID}`)
             } else if (props.request.type === "reply") {
-                history.push(`/thread/${asset.threadID}`)
+                history.push(`/thread/${(asset as ThreadReply).threadID}`)
             }
         }
     }
@@ -75,7 +75,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             await functions.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         } else if (props.request.type === "reply") {
             if (!asset) return
-            await functions.delete("/api/reply/delete", {threadID: asset.threadID, replyID: props.request.id}, session, setSessionFlag)
+            await functions.delete("/api/reply/delete", {threadID: (asset as ThreadReply).threadID, replyID: props.request.id}, session, setSessionFlag)
             await functions.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         }
         props.updateReports?.()
@@ -95,23 +95,23 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     let img = ""
     let username = ""
     let textType = ""
-    let text = [] as any
+    let text = [] as React.ReactElement[]
     let id = ""
     if (asset) {
         img = asset.image ? functions.getTagLink("pfp", asset.image, asset.imageHash) : favicon
-        username = asset.username ? asset.username : asset.creator
+        username = (asset as UserComment).username ? (asset as UserComment).username : (asset as ThreadUser).creator
         if (props.request.type === "comment") {
             textType = `${i18n.labels.comment}: `
-            text = jsxFunctions.renderCommentText(asset.comment, emojis)
-            id = asset.postID
+            text = jsxFunctions.renderCommentText((asset as UserComment).comment, emojis)
+            id = (asset as UserComment).postID
         } else if (props.request.type === "thread") {
             textType = `${i18n.labels.thread}: `
-            text = jsxFunctions.renderReplyText(asset.title, emojis)
-            id = asset.threadID
+            text = jsxFunctions.renderReplyText((asset as ThreadUser).title, emojis)
+            id = (asset as ThreadUser).threadID
         } else if (props.request.type === "reply") {
             textType = `${i18n.buttons.reply}: `
-            text = jsxFunctions.renderReplyText(asset.content, emojis)
-            id = asset.threadID
+            text = jsxFunctions.renderReplyText((asset as ThreadReply).content, emojis)
+            id = (asset as ThreadReply).threadID
         }
     }
 
@@ -153,9 +153,9 @@ const ModReports: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([]) as any
+    const [requests, setRequests] = useState([] as Report[])
     const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [visibleRequests, setVisibleRequests] = useState([] as Report[])
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
@@ -172,7 +172,7 @@ const ModReports: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as any
+        const newVisibleRequests = [] as Report[]
         for (let i = 0; i < index; i++) {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
@@ -192,7 +192,7 @@ const ModReports: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleRequests = visibleRequests as any
+            const newVisibleRequests = visibleRequests
             for (let i = 0; i < 10; i++) {
                 if (!requests[currentIndex]) break
                 newVisibleRequests.push(requests[currentIndex])
@@ -220,7 +220,7 @@ const ModReports: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t: any) => !t.fake)
+        const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, reportCount: cleanHistory[0]?.reportCount}), ...result]
@@ -232,14 +232,14 @@ const ModReports: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -251,7 +251,7 @@ const ModReports: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                const newPosts = visibleRequests
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
@@ -355,7 +355,7 @@ const ModReports: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -382,10 +382,10 @@ const ModReports: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as Report[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests) as any
+            visible = functions.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -400,7 +400,7 @@ const ModReports: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const request = visible[i] as any
+            const request = visible[i]
             if (!request) break
             if (request.fake) continue
             jsx.push(<ReportRow key={request.id} request={request} updateReports={refreshReports}/>)

@@ -17,7 +17,7 @@ import favicon from "../assets/icons/favicon.png"
 import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
 import lock from "../assets/icons/lock.png"
-import {ThreadSearch} from "../types/Types"
+import {ThreadSearch, PrunedUser} from "../types/Types"
 
 interface Props {
     thread?: ThreadSearch
@@ -31,8 +31,8 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const [creatorData, setCreatorData] = useState({}) as any
-    const [updaterData, setUpdaterData] = useState({}) as any
+    const [creatorData, setCreatorData] = useState({} as PrunedUser)
+    const [updaterData, setUpdaterData] = useState({} as PrunedUser)
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const history = useHistory()
@@ -44,16 +44,16 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const updateUpdater = async () => {
         if (!props.thread) return
         const updater = await functions.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
-        setUpdaterData(updater)
+        if (updater) setUpdaterData(updater)
         setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.thread) return
         const creator = await functions.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
-        setCreatorData(creator)
+        if (creator) setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
-            setUpdaterData(creator)
+            if (creator) setUpdaterData(creator)
             setCreatorDefaultIcon(creator?.image ? false : true)
             setUpdaterDefaultIcon(creator?.image ? false : true)
         } else {

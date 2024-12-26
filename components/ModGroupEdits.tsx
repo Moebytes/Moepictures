@@ -6,6 +6,7 @@ import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import tagDiff from "../assets/icons/tagdiff.png"
 import functions from "../structures/Functions"
+import {Group, GroupEditRequest} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModGroupEdits: React.FunctionComponent = (props) => {
@@ -22,11 +23,11 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([]) as any
-    const [oldGroups, setOldGroups] = useState(new Map())
-    const [showOldGroups, setShowOldGroups] = useState([]) as any
+    const [requests, setRequests] = useState([] as GroupEditRequest[])
+    const [oldGroups, setOldGroups] = useState(new Map<string, Group>())
+    const [showOldGroups, setShowOldGroups] = useState([] as boolean[])
     const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [visibleRequests, setVisibleRequests] = useState([] as GroupEditRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
@@ -41,7 +42,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         const requests = await functions.get("/api/group/edit/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
-        const groups = await functions.get("/api/groups/list", {groups: requests.map((r: any) => r.name)}, session, setSessionFlag)
+        const groups = await functions.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag)
         for (const group of groups) {
             oldGroups.set(group.name, group)
         }
@@ -53,7 +54,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as any
+        const newVisibleRequests = [] as GroupEditRequest[]
         for (let i = 0; i < index; i++) {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
@@ -68,8 +69,8 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const editGroup = async (username: string, slug: string, name: string, description: string, date: string, reason: string) => {
-        await functions.put("/api/group/edit", {username, date, slug, name, description, reason}, session, setSessionFlag)
+    const editGroup = async (username: string, slug: string, name: string, description: string, reason: string | null) => {
+        await functions.put("/api/group/edit", {username, slug, name, description, reason}, session, setSessionFlag)
         await functions.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
@@ -88,7 +89,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleRequests = visibleRequests as any
+            const newVisibleRequests = visibleRequests
             for (let i = 0; i < 10; i++) {
                 if (!requests[currentIndex]) break
                 newVisibleRequests.push(requests[currentIndex])
@@ -116,7 +117,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t: any) => !t.fake)
+        const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, requestCount: cleanHistory[0]?.requestCount}), ...result]
@@ -128,9 +129,9 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
             }
-            const groups = await functions.get("/api/groups/list", {groups: result.map((r: any) => r.name)}, session, setSessionFlag)
+            const groups = await functions.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
             for (const group of groups) {
                 oldGroups.set(group.name, group)
             }
@@ -140,9 +141,9 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
-                const groups = await functions.get("/api/groups/list", {groups: result.map((r: any) => r.name)}, session, setSessionFlag)
+                const groups = await functions.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
                 for (const group of groups) {
                     oldGroups.set(group.name, group)
                 }
@@ -158,7 +159,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                const newPosts = visibleRequests
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
@@ -262,7 +263,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -288,7 +289,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const diffJSX = (oldGroup: any, newGroup: any, showOldGroup: boolean) => {
+    const diffJSX = (oldGroup: Group, newGroup: GroupEditRequest, showOldGroup: boolean) => {
         let jsx = [] as React.ReactElement[]
         let changes = newGroup.changes || {}
         const openGroup = (event: React.MouseEvent) => {
@@ -316,10 +317,10 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }
 
     const generateGroupsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as GroupEditRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests) as any
+            visible = functions.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -335,7 +336,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const request = visible[i] as any
+            const request = visible[i]
             if (!request) break
             if (request.fake) continue
             const oldGroup = oldGroups.get(request.name)
@@ -356,7 +357,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
-                        {diffJSX(oldGroup, request, showOldGroups[i])}
+                        {diffJSX(oldGroup!, request, showOldGroups[i])}
                     </div>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldGroup()}>
@@ -367,7 +368,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editGroup(request.username, request.group, request.name, request.description, request.date, request.reason)}>
+                        <div className="mod-post-options-container" onClick={() => editGroup(request.username, request.group, request.name, request.description, request.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>

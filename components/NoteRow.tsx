@@ -65,7 +65,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const parseText = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (!props.note.notes?.length) {
             return <span className="commentrow-text">No data</span>
         }

@@ -141,7 +141,7 @@ GroupRoutes(app)
 
 const imageLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 1500,
+	max: 2000,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

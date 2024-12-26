@@ -37,7 +37,7 @@ interface Props {
     height?: number
     scale?: number
     noKeydown?: boolean
-    comicPages?: any
+    comicPages?: string[] | null
     order?: number
     noNotes?: boolean
     unverified?: boolean
@@ -67,13 +67,13 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const overlayRef = useRef<HTMLCanvasElement>(null)
     const lightnessRef = useRef<HTMLCanvasElement>(null)
     const live2dControls = useRef<HTMLDivElement>(null)
-    const live2dParameterRef = useRef(null) as any
-    const live2dPartRef = useRef(null) as any
-    const [image, setImage] = useState(null) as any
-    const [model, setModel] = useState(null as unknown as Live2DModel)
-    const [app, setApp] = useState(null as unknown as PIXI.Application)
+    const live2dParameterRef = useRef<HTMLImageElement>(null)
+    const live2dPartRef = useRef<HTMLImageElement>(null)
+    const [image, setImage] = useState(null as string | null)
+    const [model, setModel] = useState(null as Live2DModel | null)
+    const [app, setApp] = useState(null as PIXI.Application | null)
     const [fps, setFPS] = useState(60)
-    const [defaultOpacities, setDefaultOpacities] = useState([]) as any
+    const [defaultOpacities, setDefaultOpacities] = useState([] as number[])
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
@@ -155,7 +155,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         const model = await Live2DModel.from(props.live2d)
         app.stage.addChild(model)
 
-        setModel(model as any)
+        setModel(model)
         setApp(app)
 
         const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
@@ -165,15 +165,15 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
         setTimeout(() => {
             model.autoUpdate = false
-            let coreModel = model.internalModel.coreModel as any
+            let coreModel = model.internalModel.coreModel
             let parts = coreModel.getModel().parts
             setDefaultOpacities(structuredClone(parts.opacities))
         }, 100)
     }
 
     useEffect(() => {
-        setModel(null as any)
-        setApp(null as any)
+        setModel(null)
+        setApp(null)
         loadLive2DModel()
     }, [props.live2d])
 
@@ -283,10 +283,11 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const handleKeydown = (event: any) => {
+    const handleKeydown = (event: KeyboardEvent) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("dialog-textarea"))) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
+            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
             if (value === "f") {
                 if (!props.noKeydown) fullscreen()
             }
@@ -299,7 +300,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!rendererRef.current) return
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         observer = new ResizeObserver(resizeImageCanvas)
         observer.observe(rendererRef.current)
         window.addEventListener("keydown", handleKeydown)
@@ -365,7 +366,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const imagePixelate = () => {
         if (!pixelateRef.current || !containerRef.current || !rendererRef.current) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = rendererRef.current.clientWidth 
         const imageHeight = rendererRef.current.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -572,7 +573,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     const parameterDropdownJSX = () => {
         if (!model) return null
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
 
         let coreModel = model.internalModel.coreModel as any
         let parameters = coreModel.getModel().parameters
@@ -623,7 +624,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     const partDropdownJSX = () => {
         if (!model) return null
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
 
         let coreModel = model.internalModel.coreModel as any
         let parts = coreModel.getModel().parts

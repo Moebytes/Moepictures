@@ -16,7 +16,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {setPosts} = useCacheActions()
-    const [related, setRelated] = useState([]) as any
+    const [related, setRelated] = useState([] as PostSearch[])
     const history = useHistory()
 
     const updateRelated = () => {
@@ -29,7 +29,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
 
     const getImages = () => {
-        return related.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "medium"))
+        return related.map((post) => functions.getThumbnailLink(post.images[0].type, post.postID, 
+        post.images[0].order, post.images[0].filename, "medium"))
     }
 
     const click = (img: string, index: number) => {

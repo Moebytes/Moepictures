@@ -179,7 +179,7 @@ export default class SQLPost {
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
         title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
-        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string, slug?: string, type?: string, 
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: number, 
         reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
         imageChanged?: boolean, changes?: any}) => {

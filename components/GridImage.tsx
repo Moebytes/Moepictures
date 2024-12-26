@@ -8,7 +8,7 @@ import path from "path"
 import functions from "../structures/Functions"
 import privateIcon from "../assets/icons/lock-opt.png"
 import "./styles/gridimage.less"
-import {PostSearch} from "../types/Types"
+import {PostSearch, GIFFrame, CanvasDrawable} from "../types/Types"
 
 let tooltipTimer = null as any
 let id = 0
@@ -21,7 +21,7 @@ interface Props {
     cached: boolean
     width?: number
     height?: number
-    comicPages?: any
+    comicPages?: string[] | null
     post: PostSearch,
     square?: boolean
     marginBottom?: number
@@ -46,7 +46,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
-    const [imageSize, setImageSize] = useState(240) as any
+    const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -63,8 +63,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [imageLoaded, setImageLoaded] = useState(false)
     const [backFrame, setBackFrame] = useState("")
     const [drag, setDrag] = useState(false)
-    const [gifData, setGIFData] = useState(null) as any
-    const [videoData, setVideoData] = useState(null) as any
+    const [gifData, setGIFData] = useState(null as GIFFrame[] | null)
+    const [videoData, setVideoData] = useState(null as ImageBitmap[] | null)
     const [visible, setVisible] = useState(true)
     const [img, setImg] = useState(props.cached ? props.img : "")
     const [decrypted, setDecrypted] = useState(props.cached)
@@ -117,7 +117,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [imageLoaded, reverse, speed, pixelate])
 
-    const handleIntersection = (entries: any) => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
           setVisible(true)
@@ -168,7 +168,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     useEffect(() => {
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         if (functions.isImage(props.img) || functions.isGIF(props.img) || functions.isWebP(props.img)) {
             observer = new ResizeObserver(resizePixelateCanvas)
             observer.observe(ref.current!)
@@ -201,7 +201,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const getVideoData = async () => {
         if (!videoRef.current) return
         if (functions.isVideo(props.img) && !mobile) {
-            let frames = null as any
+            let frames = [] as ImageBitmap[]
             if (functions.isMP4(props.img)) {
                 frames = await functions.extractMP4Frames(props.img)
                 if (!frames) return
@@ -209,17 +209,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 frames = await functions.extractWebMFrames(props.img)
                 if (!frames) return
             }
-            let canvasFrames = [] as any 
-            for (let i = 0; i < frames.length; i++) {
-                const canvas = document.createElement("canvas")
-                const img = frames[i]
-                canvas.width = img.width
-                canvas.height = img.height
-                const ctx = canvas.getContext("bitmaprenderer") as any
-                ctx.transferFromImageBitmap(img)
-                canvasFrames.push(canvas)
-            }
-            setVideoData(canvasFrames)
+            setVideoData(frames)
         }
     }
 
@@ -254,28 +244,28 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 }
                 const pixelateCtx = pixelateCanvas?.getContext("2d")
                 const sharpenOverlay = videoOverlayRef.current
-                let sharpenCtx = sharpenOverlay?.getContext("2d") as any
+                let sharpenCtx = sharpenOverlay?.getContext("2d")!
                 if (sharpenOverlay && videoRef.current) {
                     sharpenOverlay.width = videoRef.current.clientWidth
                     sharpenOverlay.height = videoRef.current.clientHeight
                 }
-                let frame = videoRef.current ? videoRef.current! : ref.current!
+                let frame = videoRef.current ? videoRef.current! : ref.current! as CanvasDrawable
                 let delay = 0
                 let pos = 0
                 if (adjustedData) {
                     const frames = adjustedData.length - 1
                     const duration = videoData ? videoRef.current!.duration :
-                    adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
+                    adjustedData.map((d: GIFFrame | ImageBitmap) => (d as GIFFrame).delay).reduce((p, c) => p + c) / 1000
                     let interval = duration / frames
                     let sp = seekTo !== null ? seekTo : secondsProgress
                     pos = Math.floor(sp / interval)
                     // if (reverse && gifData) pos = (adjustedData.length - 1) - pos
                     if (!adjustedData[pos]) pos = 0
                     if (gifData) {
-                        frame = adjustedData[pos].frame
-                        delay = adjustedData[pos].delay
+                        frame = (adjustedData[pos] as GIFFrame).frame
+                        delay = (adjustedData[pos] as GIFFrame).delay
                     } else if (videoData) {
-                        frame = adjustedData[pos]
+                        frame = adjustedData[pos] as ImageBitmap
                     }
                 }
     
@@ -289,15 +279,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                         if (pos > adjustedData.length - 1) pos = 0
                         if (pos < 0) pos = adjustedData.length - 1
                         if (gifData) {
-                            frame = adjustedData[pos].frame
-                            delay = adjustedData[pos].delay
+                            frame = (adjustedData[pos] as GIFFrame).frame
+                            delay = (adjustedData[pos] as GIFFrame).delay
                             if (delay < 0) delay = 0
                         } else if (videoData) {
-                            frame = adjustedData[pos]
+                            frame = adjustedData[pos] as ImageBitmap
                         }
                         const frames = adjustedData.length - 1
                         const duration = videoData ? videoRef.current!.duration :
-                        adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
+                        adjustedData.map((d: GIFFrame | ImageBitmap) => (d as GIFFrame).delay).reduce((p, c) => p + c) / 1000
                         let interval = duration / frames
                         const secondsProgress = (pos * interval)
                         setSecondsProgress(secondsProgress)
@@ -525,9 +515,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const imagePixelate = () => {
         if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) return
-        if (!pixelateRef.current) return
+        if (!pixelateRef.current || !ref.current) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.clientWidth 
         const imageHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -592,27 +582,30 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         pixelateRef.current.style.transform = "scale(1)"
     }
 
-    const onLoad = (event: any) => {
+    const onLoad = (event: React.SyntheticEvent) => {
         if (functions.isVideo(props.img) && !mobile) {
-            setImageWidth(event.target.clientWidth)
-            setImageHeight(event.target.clientHeight)
-            setNaturalWidth(event.target.videoWidth)
-            setNaturalHeight(event.target.videoHeight)
+            const element = event.target as HTMLVideoElement
+            setImageWidth(element.clientWidth)
+            setImageHeight(element.clientHeight)
+            setNaturalWidth(element.videoWidth)
+            setNaturalHeight(element.videoHeight)
+            element.style.opacity = "1"
         } else {
-            setImageWidth(event.target.width)
-            setImageHeight(event.target.height)
-            setNaturalWidth(event.target.naturalWidth)
-            setNaturalHeight(event.target.naturalHeight)
+            const element = event.target as HTMLImageElement
+            setImageWidth(element.width)
+            setImageHeight(element.height)
+            setNaturalWidth(element.naturalWidth)
+            setNaturalHeight(element.naturalHeight)
+            element.style.opacity = "1"
         }
         setImageLoaded(true)
-        event.target.style.opacity = "1"
     }
 
-    const render = (frame: any, buffer?: boolean) => {
-        const canvas = document.createElement("canvas") as any
+    const render = <T extends boolean>(frame: HTMLImageElement, buffer?: T) => {
+        const canvas = document.createElement("canvas")!
         canvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
         canvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
-        const ctx = canvas.getContext("2d") as any
+        const ctx = canvas.getContext("2d")!
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
@@ -622,7 +615,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             const pixelHeight = frame.clientHeight / pixelate
             pixelateCanvas.width = pixelWidth 
             pixelateCanvas.height = pixelHeight
-            const pixelateCtx = pixelateCanvas.getContext("2d") as any
+            const pixelateCtx = pixelateCanvas.getContext("2d")!
             pixelateCtx.imageSmoothingEnabled = false
             pixelateCtx.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
             ctx.imageSmoothingEnabled = false
@@ -650,14 +643,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             lightnessCtx?.drawImage(frame, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
             ctx.filter = filter
-            ctx.globalAlpha = `${Math.abs((lightness - 100) / 100)}`
+            ctx.globalAlpha = Math.abs((lightness - 100) / 100)
             ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (buffer) {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            return img.data.buffer
+            return img.data.buffer as T extends true ? Buffer : string 
         }
-        return canvas.toDataURL("image/jpeg")
+        return canvas.toDataURL("image/jpeg") as T extends true ? Buffer : string 
     }
 
     const filtersOn = () => {
@@ -680,9 +673,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             if (image) {
                 const decrypted = await functions.decryptItem(image, session)
                 const img = await functions.createImage(decrypted)
-                return render(img)
+                return render(img, false)
             } else {
-                return render(ref.current)
+                return render(ref.current!, false)
             }
         } else {
             if (image) {
@@ -703,7 +696,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         if (gifData || functions.isGIF(props.original) || functions.isVideo(props.original)) {
             functions.download(filename, props.original)
         } else {
-            if (props.comicPages?.length > 1) {
+            if (props.comicPages && props.comicPages.length > 1) {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]

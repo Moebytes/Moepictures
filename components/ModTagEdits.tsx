@@ -6,6 +6,7 @@ import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import tagDiff from "../assets/icons/tagdiff.png"
 import functions from "../structures/Functions"
+import {TagEditRequest, Tag} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModTagEdits: React.FunctionComponent = (props) => {
@@ -22,11 +23,11 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([]) as any
-    const [oldTags, setOldTags] = useState(new Map())
-    const [showOldTags, setShowOldTags] = useState([]) as any
+    const [requests, setRequests] = useState([] as TagEditRequest[])
+    const [oldTags, setOldTags] = useState(new Map<string, Tag>())
+    const [showOldTags, setShowOldTags] = useState([] as boolean[])
     const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [visibleRequests, setVisibleRequests] = useState([] as TagEditRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
@@ -41,7 +42,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         const requests = await functions.get("/api/tag/edit/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
-        const tags = await functions.get("/api/tag/list", {tags: requests.map((r: any) => r.tag)}, session, setSessionFlag)
+        const tags = await functions.get("/api/tag/list", {tags: requests.map((r) => r.tag)}, session, setSessionFlag)
         for (const tag of tags) {
             oldTags.set(tag.tag, tag)
         }
@@ -53,7 +54,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as any
+        const newVisibleRequests = [] as TagEditRequest[]
         for (let i = 0; i < index; i++) {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
@@ -69,7 +70,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], social: string, twitter: string, website: string, fandom: string) => {
-        let bytes = null as any
+        let bytes = null as Uint8Array | ["delete"] | null
         if (image) {
             if (image === "delete") {
                 bytes = ["delete"]
@@ -77,10 +78,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 const parts = image.split("/")
                 const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
                 const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
-                bytes = Object.values(new Uint8Array(arrayBuffer))
+                bytes = new Uint8Array(arrayBuffer)
             }
         }
-        await functions.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, social, twitter, website, fandom}, session, setSessionFlag)
+        await functions.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom}, session, setSessionFlag)
         await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
@@ -99,7 +100,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updateRequests = () => {
             let currentIndex = index
-            const newVisibleRequests = visibleRequests as any
+            const newVisibleRequests = visibleRequests
             for (let i = 0; i < 10; i++) {
                 if (!requests[currentIndex]) break
                 newVisibleRequests.push(requests[currentIndex])
@@ -127,7 +128,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t: any) => !t.fake)
+        const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, requestCount: cleanHistory[0]?.requestCount}), ...result]
@@ -139,9 +140,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
             }
-            const tags = await functions.get("/api/tag/list", {tags: result.map((r: any) => r.tag)}, session, setSessionFlag)
+            const tags = await functions.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
             for (const tag of tags) {
                 oldTags.set(tag.tag, tag)
             }
@@ -151,9 +152,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
-                const tags = await functions.get("/api/tag/list", {tags: result.map((r: any) => r.tag)}, session, setSessionFlag)
+                const tags = await functions.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
                 for (const tag of tags) {
                     oldTags.set(tag.tag, tag)
                 }
@@ -169,7 +170,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                const newPosts = visibleRequests
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
@@ -273,7 +274,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -299,7 +300,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const diffJSX = (oldTag: any, newTag: any, showOldTag: boolean) => {
+    const diffJSX = (oldTag: Tag, newTag: TagEditRequest, showOldTag: boolean) => {
         let jsx = [] as React.ReactElement[]
         let changes = newTag.changes || {}
         const openTag = (event: React.MouseEvent) => {
@@ -334,14 +335,14 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         if (changes.aliases) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">{i18n.labels.oldAliases}: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldAliases}: {oldTag.aliases?.[0] ? oldTag.aliases.map((a) => a?.alias).join(", ") : i18n.labels.none}</span>)
             } else {
                 jsx.push(<span className="mod-post-text">{i18n.labels.newAliases}: {newTag.aliases?.[0] ? newTag.aliases.join(", ") : i18n.labels.none}</span>)
             }
         }
         if (changes.implications) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">{i18n.labels.oldImplications}: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldImplications}: {oldTag.implications?.[0] ? oldTag.implications.map((i) => i?.implication).join(", ") : i18n.labels.none}</span>)
             } else {
                 jsx.push(<span className="mod-post-text">{i18n.labels.newImplications}: {newTag.implications?.[0] ? newTag.implications.join(", ") : i18n.labels.none}</span>)
             }
@@ -355,30 +356,30 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         if (changes.website) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>{i18n.labels.oldWebsite}: {oldTag.website || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website!, "_blank")}>{i18n.labels.oldWebsite}: {oldTag.website || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.website, "_blank")}>{i18n.labels.newWebsite}: {newTag.website}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.website!, "_blank")}>{i18n.labels.newWebsite}: {newTag.website}</span>)
             }
         }
         if (changes.social) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social, "_blank")}>{i18n.labels.oldSocial}: {oldTag.social || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social!, "_blank")}>{i18n.labels.oldSocial}: {oldTag.social || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.social, "_blank")}>{i18n.labels.newSocial}: {newTag.social}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.social!, "_blank")}>{i18n.labels.newSocial}: {newTag.social}</span>)
             }
         }
         if (changes.twitter) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>{i18n.labels.oldTwitter}: {oldTag.twitter || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter!, "_blank")}>{i18n.labels.oldTwitter}: {oldTag.twitter || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.twitter, "_blank")}>{i18n.labels.newTwitter}: {newTag.twitter}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.twitter!, "_blank")}>{i18n.labels.newTwitter}: {newTag.twitter}</span>)
             }
         }
         if (changes.fandom) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>{i18n.labels.oldFandom}: {oldTag.fandom || i18n.labels.none}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom!, "_blank")}>{i18n.labels.oldFandom}: {oldTag.fandom || i18n.labels.none}</span>)
             } else {
-                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom, "_blank")}>{i18n.labels.newFandom}: {newTag.fandom}</span>)
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom!, "_blank")}>{i18n.labels.newFandom}: {newTag.fandom}</span>)
             }
         }
         if (changes.featured) {
@@ -399,10 +400,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as TagEditRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests) as any
+            visible = functions.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -418,7 +419,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const request = visible[i] as any
+            const request = visible[i]
             if (!request) break
             if (request.fake) continue
             const oldTag = oldTags.get(request.tag)
@@ -428,7 +429,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 setShowOldTags(showOldTags)
                 forceUpdate()
             }
-            let parts = request.image?.split("/")
+            let parts = request.image?.split("/") ?? null
             if (request.image === "delete") parts = null
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
             const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image, oldTag.imageHash) : ""
@@ -452,18 +453,19 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
-                        {diffJSX(oldTag, request, showOldTags[i])}
+                        {diffJSX(oldTag!, request, showOldTags[i])}
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>
                             <img className="mod-post-options-img" src={tagDiff} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{showOldTags[i] ? i18n.buttons.new : i18n.buttons.old}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.image)}>
+                        <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.image!)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.social, request.twitter, request.website, request.fandom)}>
+                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, 
+                            request.image!, request.aliases, request.implications, request.social!, request.twitter!, request.website!, request.fandom!)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>

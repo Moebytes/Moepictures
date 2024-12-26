@@ -8,7 +8,7 @@ export default class SQLHistory {
     public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string | null, 
         imageHash: string | null, description: string, aliases: string[], implications: string[], pixivTags: string[], website: string | null, 
         social: string | null, twitter: string | null, fandom: string | null, r18: boolean | null, featured: string | null, imageChanged: boolean, 
-        changes: any, reason?: string}) => {
+        changes: any, reason?: string | null}) => {
         const {username, tag, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
         twitter, fandom, r18, featured, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
@@ -188,11 +188,14 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, postQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*,
+                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
+                JOIN posts ON posts."postID" = "post history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "post history"."historyID"
+                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate"
                 ORDER BY "post history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -207,9 +210,13 @@ export default class SQLHistory {
     public static postHistoryID = async (postID: string | number, historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*
+                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate"
                 FROM "post history"
+                JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
+                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate"
             `),
             values: [postID, historyID]
         }
@@ -221,11 +228,14 @@ export default class SQLHistory {
     public static userPostHistory = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*,
+                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
+                JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
-                GROUP BY "post history"."historyID"
+                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
+                posts.approver, posts."approveDate"
                 ORDER BY "post history"."date" DESC
             `),
             values: [username]
@@ -236,7 +246,7 @@ export default class SQLHistory {
 
     /** Insert note history */
     public static insertNoteHistory = async (options: {postID: string, order: number, updater: string, notes: any, addedEntries: any, 
-        removedEntries: any, reason?: string}) => {
+        removedEntries: any, reason?: string | null}) => {
         const {postID, order, updater, notes, addedEntries, removedEntries, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
@@ -363,7 +373,7 @@ export default class SQLHistory {
     /** Insert group history */
     public static insertGroupHistory = async (options: {username: string, groupID: string, slug: string, name: string, date: string, 
         rating: string, description: string, posts: any, addedPosts: string[], removedPosts: string[], orderChanged: boolean, 
-        changes: any, reason?: string}) => {
+        changes: any, reason?: string | null}) => {
         const {username, groupID, slug, name, date, rating, description, posts, addedPosts, removedPosts, orderChanged, changes, 
         reason} = options
         const query: QueryArrayConfig = {

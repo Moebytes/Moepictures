@@ -22,7 +22,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
-    exact?: any
+    exact?: boolean
 }
 
 const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -210,7 +210,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffText = () => {
         if (!prevHistory) {
             if (props.noteHistory.notes[0].transcript === "No data") return null
-            return props.noteHistory.notes.map((item: any) => `${item.transcript} -> ${item.translation}`)
+            return props.noteHistory.notes.map((item) => `${item.transcript} -> ${item.translation}`)
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return null
@@ -222,7 +222,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const diffJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         const diffs = diffText()
         if (!diffs) return <span className="historyrow-text">{i18n.labels.noData}</span>
         for (let i = 0; i < diffs.length; i++) {

@@ -5,6 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
+import {UnverifiedPost} from "../types/Types"
 import "./styles/modposts.less"
 
 const ModPosts: React.FunctionComponent = (props) => {
@@ -20,14 +21,14 @@ const ModPosts: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
+    const [unverifiedPosts, setUnverifiedPosts] = useState([] as UnverifiedPost[])
     const [index, setIndex] = useState(0)
-    const [visiblePosts, setVisiblePosts] = useState([]) as any
+    const [visiblePosts, setVisiblePosts] = useState([] as UnverifiedPost[])
     const [updateVisiblePostFlag, setUpdateVisiblePostFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [imagesRef, setImagesRef] = useState([]) as any
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
     const history = useHistory()
 
     const getFilter = () => {
@@ -45,14 +46,14 @@ const ModPosts: React.FunctionComponent = (props) => {
     }, [session])
 
     const updateVisiblePosts = () => {
-        const newVisiblePosts = [] as any
+        const newVisiblePosts = [] as UnverifiedPost[]
         for (let i = 0; i < index; i++) {
             if (!unverifiedPosts[i]) break
             newVisiblePosts.push(unverifiedPosts[i])
         }
         setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-        const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
-        setImagesRef(newImagesRef) as any
+        const newImagesRef = newVisiblePosts.map(() => React.createRef<HTMLCanvasElement>())
+        setImagesRef(newImagesRef)
     }
 
     useEffect(() => {
@@ -81,7 +82,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     useEffect(() => {
         const updatePosts = () => {
             let currentIndex = index
-            const newVisiblePosts = visiblePosts as any
+            const newVisiblePosts = visiblePosts
             for (let i = 0; i < 10; i++) {
                 if (!unverifiedPosts[currentIndex]) break
                 newVisiblePosts.push(unverifiedPosts[currentIndex])
@@ -89,8 +90,8 @@ const ModPosts: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
-            setImagesRef(newImagesRef) as any
+            const newImagesRef = newVisiblePosts.map(() => React.createRef<HTMLCanvasElement>())
+            setImagesRef(newImagesRef)
         }
         if (scroll) updatePosts()
     }, [unverifiedPosts, scroll])
@@ -111,7 +112,7 @@ const ModPosts: React.FunctionComponent = (props) => {
         }
         let result = await functions.get("/api/post/list/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
-        const cleanHistory = unverifiedPosts.filter((t: any) => !t.fake)
+        const cleanHistory = unverifiedPosts.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanHistory.length <= newOffset) {
                 result = [...new Array(newOffset).fill({fake: true, postCount: cleanHistory[0]?.postCount}), ...result]
@@ -123,14 +124,14 @@ const ModPosts: React.FunctionComponent = (props) => {
             if (padded) {
                 setUnverifiedPosts(result)
             } else {
-                setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setUnverifiedPosts((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setUnverifiedPosts(result)
                 } else {
-                    setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setUnverifiedPosts((prev) => functions.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -142,7 +143,7 @@ const ModPosts: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!unverifiedPosts[currentIndex]) return updateOffset()
-                const newPosts = visiblePosts as any
+                const newPosts = visiblePosts
                 for (let i = 0; i < 10; i++) {
                     if (!unverifiedPosts[currentIndex]) return updateOffset()
                     newPosts.push(unverifiedPosts[currentIndex])
@@ -246,7 +247,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     }
 
     const generatePageButtonsJSX = () => {
-        const jsx = [] as any
+        const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
         if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
@@ -307,16 +308,16 @@ const ModPosts: React.FunctionComponent = (props) => {
             const offset = (modPage - 1) * getPageAmount()
             let visiblePosts = unverifiedPosts.slice(offset, offset + getPageAmount())
             setVisiblePosts(visiblePosts)
-            const newImagesRef = visiblePosts.map(() => React.createRef()) as any
+            const newImagesRef = visiblePosts.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
         }
     }, [scroll, modPage, unverifiedPosts])
 
     const generatePostsJSX = () => {
-        let jsx = [] as any
-        let visible = [] as any
+        let jsx = [] as React.ReactElement[]
+        let visible = [] as UnverifiedPost[]
         if (scroll) {
-            visible = functions.removeDuplicates(visiblePosts) as any
+            visible = functions.removeDuplicates(visiblePosts)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = unverifiedPosts.slice(offset, offset + getPageAmount())
@@ -332,10 +333,10 @@ const ModPosts: React.FunctionComponent = (props) => {
             )
         }
         for (let i = 0; i < visible.length; i++) {
-            const post = visible[i] as any
+            const post = visible[i]
             if (!post) break
             if (post.fake) continue
-            const imgClick = (event?: any, middle?: boolean) => {
+            const imgClick = (event?: React.MouseEvent, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
                 history.push(`/unverified/post/${post.postID}`)
             }
@@ -360,7 +361,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">{i18n.labels.source}: {post.source ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.similarPosts}: {post.duplicates ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.resolution}: {post.images[0].width}x{post.images[0].height}</span>
-                        <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc: any, obj: any) => acc + obj.size, 0))}</span>
+                        <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc, obj) => acc + obj.size, 0))}</span>
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-text">{i18n.labels.upscaled}: {post.hasUpscaled ? i18n.buttons.yes : i18n.buttons.no}</span>

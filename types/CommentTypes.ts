@@ -1,6 +1,6 @@
 import {UserRole, Post} from "./Types"
 
-export interface Comment {
+export interface UserComment {
     commentID: string
     postID: string
     username: string
@@ -14,7 +14,7 @@ export interface Comment {
     banned: boolean | null
 }
 
-export interface CommentSearch extends Comment {
+export interface CommentSearch extends UserComment {
     post: Post
     commentCount: number
     fake?: boolean
@@ -29,7 +29,7 @@ export interface CommentReportFulfillParams {
 }
 
 export type CommentGetEndpoint<T extends string> = 
-    T extends "/api/comment" ? {params: {commentID: string}, response: Comment | undefined} :
+    T extends "/api/comment" ? {params: {commentID: string}, response: UserComment | undefined} :
     never
 
 export type CommentPostEndpoint<T extends string> = 

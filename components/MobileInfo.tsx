@@ -118,7 +118,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const generateArtistsJSX = () => {
         if (!props.artists) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.artists.length; i++) {
             const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             if (!props.artists[i]) break
@@ -128,7 +128,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const artistSocials = () => {
                 if (!props.artists) return
-                let jsx = [] as any 
+                let jsx = [] as React.ReactElement[] 
                 if (props.artists[i].website) {
                     jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.artists?.[i].website!, "_blank")}/>)
                 }
@@ -163,7 +163,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const generateCharactersJSX = () => {
         if (!props.characters) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.characters.length; i++) {
             const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             if (!props.characters[i]) break
@@ -173,7 +173,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const characterSocials = () => {
                 if (!props.characters) return
-                let jsx = [] as any 
+                let jsx = [] as React.ReactElement[] 
                 if (props.characters[i].fandom) {
                     jsx.push(<img className="mobileinfo-social" src={fandom} onClick={() => window.open(props.characters?.[i].fandom!, "_blank")}/>)
                 }
@@ -198,7 +198,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const generateSeriesJSX = () => {
         if (!props.series) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.series.length; i++) {
             const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             if (!props.series[i]) break
@@ -208,7 +208,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const seriesSocials = () => {
                 if (!props.series) return
-                let jsx = [] as any 
+                let jsx = [] as React.ReactElement[] 
                 if (props.series[i].website) {
                     jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.series?.[i].website!, "_blank")}/>)
                 }
@@ -236,18 +236,18 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const organizeTags = () => {
         if (!props.tags) return [] as MiniTag[]
-        const meta = props.tags.filter((t: any) => t.type === "meta")
-        const appearance = props.tags.filter((t: any) => t.type === "appearance")
-        const outfit = props.tags.filter((t: any) => t.type === "outfit")
-        const accessory = props.tags.filter((t: any) => t.type === "accessory")
-        const action = props.tags.filter((t: any) => t.type === "action")
-        const scenery = props.tags.filter((t: any) => t.type === "scenery")
-        const tags = props.tags.filter((t: any) => t.type === "tag")
+        const meta = props.tags.filter((t) => t.type === "meta")
+        const appearance = props.tags.filter((t) => t.type === "appearance")
+        const outfit = props.tags.filter((t) => t.type === "outfit")
+        const accessory = props.tags.filter((t) => t.type === "accessory")
+        const action = props.tags.filter((t) => t.type === "action")
+        const scenery = props.tags.filter((t) => t.type === "scenery")
+        const tags = props.tags.filter((t) => t.type === "tag")
         return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()]
     }
 
     const generateTagJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         let currentTags = props.tags ? organizeTags() : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
@@ -269,10 +269,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const copyTags = (replaceDash?: boolean, commas?: boolean) => {
         if (!props.artists || !props.characters || !props.series || !props.tags) return
-        const artists = props.artists.map((a: any) => a.tag)
-        const characters = props.characters.map((c: any) => c.tag)
-        const series = props.series.map((s: any) => s.tag)
-        const tags = props.tags.map((t: any) => t.tag)
+        const artists = props.artists.map((a) => a.tag)
+        const characters = props.characters.map((c) => c.tag)
+        const series = props.series.map((s) => s.tag)
+        const tags = props.tags.map((t) => t.tag)
         let combined = [...artists, ...characters, ...series, ...tags]
         if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
         navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
@@ -297,7 +297,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setRandomFlag(true)
     }
 
-    const imageSearch = async (event: any) => {
+    const imageSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
         const result = await functions.imageSearch(file, session, setSessionFlag)
@@ -327,7 +327,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const modNext = () => {
-        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === props.post?.postID)
+        let currentIndex = unverifiedPosts.findIndex((p) => p.postID === props.post?.postID)
         if (currentIndex !== -1) {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
@@ -377,7 +377,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const generateSourceJSX = () => {
         if (!props.post) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (props.post.source) {
             if (props.post.source.includes("pixiv")) {
                 jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.source, "_blank")}/>)
@@ -434,7 +434,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const generateMirrorsJSX = () => {
         if (!props.post) return
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (props.post.mirrors) {
             if (props.post.mirrors.pixiv) {
                 jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.mirrors?.pixiv, "_blank")}/>)

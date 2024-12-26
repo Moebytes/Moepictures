@@ -26,10 +26,10 @@ import crypto from "crypto"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
-import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, 
-CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges,
-PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session,
-UploadTag} from "../types/Types"
+import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
+CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
+PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
+PostHistory} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -89,8 +89,8 @@ export default class Functions {
         if (clientKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
         if (!privateKey) {
             clientKeyLock = true
-            const savedPublicKey = await localforage.getItem("publicKey") as any
-            const savedPrivateKey = await localforage.getItem("privateKey") as any
+            const savedPublicKey = await localforage.getItem("publicKey") as string
+            const savedPrivateKey = await localforage.getItem("privateKey") as string
             if (savedPublicKey && savedPrivateKey) {
                 await Functions.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
                 privateKey = savedPrivateKey
@@ -133,7 +133,7 @@ export default class Functions {
 
     public static post = async <T extends string>(endpoint: T, data: PostEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": session.csrfToken} as any
+        const headers = {"x-csrf-token": session.csrfToken}
         try {
             const response = await axios.post(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
             return response as PostEndpoint<T>["response"]
@@ -144,7 +144,7 @@ export default class Functions {
 
     public static put = async <T extends string>(endpoint: T, data: PutEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": session.csrfToken} as any
+        const headers = {"x-csrf-token": session.csrfToken}
         try {
             const response = await axios.put(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
             return response as PutEndpoint<T>["response"]
@@ -155,7 +155,7 @@ export default class Functions {
 
     public static delete = async <T extends string>(endpoint: T, params: DeleteEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": session.csrfToken} as any
+        const headers = {"x-csrf-token": session.csrfToken}
         try {
             const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
             return response as DeleteEndpoint<T>["response"]
@@ -190,7 +190,7 @@ export default class Functions {
         return Functions.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "")
     }
     
-    public static proxyImage = async (link: string, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static proxyImage = async (link: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         try {
             const images = await Functions.post(`/api/misc/proxy`, {url: encodeURIComponent(link)}, session, setSessionFlag)
             let files = [] as File[]
@@ -226,17 +226,17 @@ export default class Functions {
     }
 
     public static formatSeconds = (duration: number) => {
-        let seconds = Math.floor(duration % 60) as any
-        let minutes = Math.floor((duration / 60) % 60) as any
-        let hours = Math.floor((duration / (60 * 60)) % 24) as any
+        let seconds = Math.floor(duration % 60)
+        let minutes = Math.floor((duration / 60) % 60)
+        let hours = Math.floor((duration / (60 * 60)) % 24)
         if (Number.isNaN(seconds) || seconds < 0) seconds = 0
         if (Number.isNaN(minutes) || minutes < 0) minutes = 0
         if (Number.isNaN(hours) || hours < 0) hours = 0
 
-        hours = (hours === 0) ? "" : ((hours < 10) ? "0" + hours + ":" : hours + ":")
-        minutes = hours && (minutes < 10) ? "0" + minutes : minutes
-        seconds = (seconds < 10) ? "0" + seconds : seconds
-        return `${hours}${minutes}:${seconds}`
+        const hoursStr = (hours === 0) ? "" : ((hours < 10) ? "0" + hours + ":" : hours + ":")
+        const minutesStr = hours && (minutes < 10) ? "0" + minutes : minutes
+        const secondsStr = (seconds < 10) ? "0" + seconds : seconds
+        return `${hoursStr}${minutesStr}:${secondsStr}`
     }
     
     public static arrayIncludes = (str: string, arr: string[]) => {
@@ -473,9 +473,9 @@ export default class Functions {
     }
 
     public static parsePieces = (text: string) => {
-        let segments = [] as any
+        let segments = [] as string[]
         const pieces = text.split(/\n/gm)
-        let intermediate = [] as any
+        let intermediate = [] as string[]
         let codeBlock = false
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i] + "\n"
@@ -579,7 +579,7 @@ export default class Functions {
 
     public static changeFavicon = (url: string) => {
         if (typeof window === "undefined") return
-        let link = document.querySelector(`link[rel~="icon"]`) as any
+        let link = document.querySelector(`link[rel~="icon"]`) as HTMLLinkElement
         if (!link) {
             link = document.createElement("link")
             link.type = "image/x-icon"
@@ -625,7 +625,7 @@ export default class Functions {
 
         window.addEventListener("mouseup", element.mouseUpFunc = (event) => {
             mouseDown = false
-            const timeDiff = (new Date() as any - time)
+            const timeDiff = (new Date().getTime() - time)
             let scrollElement = element
             if (element == document.body) scrollElement = document.documentElement
             let speedY = (scrollElement.scrollTop - lastScrollTop) / timeDiff * 25
@@ -680,8 +680,8 @@ export default class Functions {
         return window.innerHeight + window.scrollY >= scrollHeight - 30
     }
 
-    public static trimCanvas = (canvas: any) => {
-        const context = canvas.getContext("2d");
+    public static trimCanvas = (canvas: HTMLCanvasElement) => {
+        const context = canvas.getContext("2d")!
 
         const topLeft = {
             x: canvas.width,
@@ -791,7 +791,7 @@ export default class Functions {
         })
     }
 
-    public static calcDistance(elementOne: any, elementTwo: any) {
+    public static calcDistance(elementOne: HTMLElement, elementTwo: HTMLElement) {
         let distance = 0
         
         const x1 = elementOne.offsetTop
@@ -808,49 +808,47 @@ export default class Functions {
     }
 
     public static extractMP4Frames = async (videoFile: string) => {
-        let frames = [] as any
+        let frames = [] as ImageBitmap[]
         await new Promise<void>(async (resolve) => {
             let demuxer = new MP4Demuxer(videoFile)
-            let timeout: any 
-            // @ts-ignore
+            let timeout = null as any
             let decoder = new VideoDecoder({
-                output : (frame: any) => {
+                output: async (frame: VideoFrame) => {
                     clearTimeout(timeout)
-                    const bitmap = createImageBitmap(frame)
+                    const bitmap = await createImageBitmap(frame)
                     frames.push(bitmap)
                     frame.close()
                     timeout = setTimeout(() => {
                         resolve()
                     }, 500)
                 },
-                error : (e: any) => console.error(e)
+                error: (e: any) => console.error(e)
             })
             const config = await demuxer.getConfig()
             decoder.configure(config)
-            demuxer.start((chunk: any) => decoder.decode(chunk))
+            demuxer.start((chunk: EncodedVideoChunk) => decoder.decode(chunk))
         })
         return Promise.all(frames)
     }
 
     public static extractWebMFrames = async (videoFile: string, vp9?: boolean) => {
-        let frames = [] as any
+        let frames = [] as ImageBitmap[]
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()
             const arrayBuffer = await fetch(videoFile).then((r) => r.arrayBuffer())
             demuxer.queueData(arrayBuffer)
-            let timeout: any 
-            // @ts-ignore
+            let timeout = null as any
             let decoder = new VideoDecoder({
-                output : (frame: any) => {
+                output: async (frame: VideoFrame) => {
                     clearTimeout(timeout)
-                    const bitmap = createImageBitmap(frame)
+                    const bitmap = await createImageBitmap(frame)
                     frames.push(bitmap)
                     frame.close()
                     timeout = setTimeout(() => {
                         resolve()
                     }, 500)
                 },
-                error : (e: any) => console.error(e)
+                error: (e: any) => console.error(e)
             })
             while (!demuxer.eof) {
                 demuxer.demux()
@@ -887,14 +885,15 @@ export default class Functions {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
-        let result = [] as any
+        let result = [] as GIFFrame[]
         while (true) {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
-                const canvas = document.createElement("canvas") as any
-                const canvasContext = canvas.getContext("2d")
-                canvasContext.drawImage(decoded.image, 0, 0)
-                result.push({frame: await createImageBitmap(decoded.image), delay: decoded.image.duration / 1000.0})
+                const canvas = document.createElement("canvas")
+                const canvasContext = canvas.getContext("2d")!
+                const image = await createImageBitmap(decoded.image)
+                canvasContext.drawImage(image, 0, 0)
+                result.push({frame: canvas, delay: decoded.image.duration / 1000.0})
             } catch {
                 break
             }
@@ -907,12 +906,12 @@ export default class Functions {
         if ("ImageDecoder" in window) {
             return Functions.extractAnimatedWebpFramesNative(webp)
         } else {
-            if (nativeOnly) return null
+            if (nativeOnly) return []
             const buffer = await fetch(webp).then((r) => r.arrayBuffer())
             const xMux = WebPXMux("webpxmux.wasm")
             await xMux.waitRuntime()
             const data = await xMux.decodeFrames(new Uint8Array(buffer))
-            const webpData = [] as any
+            const webpData = [] as GIFFrame[]
             await new Promise<void>((resolve) => {
                 for (let i = 0; i < data.frames.length; i++) {
                     const frame = data.frames[i]
@@ -942,7 +941,7 @@ export default class Functions {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
-        let result = [] as {frame: HTMLCanvasElement, delay: number}[]
+        let result = [] as GIFFrame[]
         while (true) {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
@@ -967,7 +966,7 @@ export default class Functions {
         } else {
             if (nativeOnly) return []
             const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
-            const newGIFData = [] as {frame: HTMLCanvasElement, delay: number}[]
+            const newGIFData = [] as GIFFrame[]
             for (let i = 0; i < frames.length; i++) {
                 newGIFData.push({
                     frame: frames[i].getImage(),
@@ -978,11 +977,11 @@ export default class Functions {
         }
     }
 
-    public static gifSpeed = (data: any[], speed: number) => {
+    public static gifSpeed = (data: GIFFrame[], speed: number) => {
         if (speed === 1) return data 
         const constraint = speed > 1 ? data.length / speed : data.length
         let step = Math.ceil(data.length / constraint)
-        let newData = [] as any 
+        let newData = [] as GIFFrame[] 
         for (let i = 0; i < data.length; i += step) {
             const frame = data[i].frame 
             let delay = data[i].delay 
@@ -992,11 +991,11 @@ export default class Functions {
         return newData
     }
 
-    public static videoSpeed = (data: any[], speed: number) => {
+    public static videoSpeed = (data: ImageBitmap[], speed: number) => {
         if (speed === 1) return data 
         const constraint = speed > 1 ? data.length / speed : data.length
         let step = Math.ceil(data.length / constraint)
-        let newData = [] as any 
+        let newData = [] as ImageBitmap[] 
         for (let i = 0; i < data.length; i += step) {
             const frame = data[i]
             newData.push(frame)
@@ -1023,45 +1022,6 @@ export default class Functions {
       public static linearToDecibels = (value: number) => {
         if (value === 0) return -Infinity
         return 20 * Math.log10(value)
-      }
-
-      public static renderCumulativeFrames = (frameData: any) => {
-        if (frameData.length === 0) {
-          return frameData
-        }
-        const previous = document.createElement("canvas") as any
-        const previousContext = previous.getContext("2d") as any
-        const current = document.createElement("canvas") as any
-        const currentContext = current.getContext("2d") as any
-      
-        const firstFrameCanvas = frameData[0].getImage()
-      
-        previous.width = firstFrameCanvas.width
-        previous.height = firstFrameCanvas.height
-        current.width = firstFrameCanvas.width
-        current.height = firstFrameCanvas.height
-      
-        for (const frame of frameData) {
-          previousContext.clearRect(0, 0, previous.width, previous.height)
-          previousContext.drawImage(current, 0, 0)
-      
-          const canvas = frame.getImage()
-          const context = canvas.getContext("2d")
-          currentContext.drawImage(canvas, 0, 0)
-          context.clearRect(0, 0, canvas.width, canvas.height)
-          context.drawImage(current, 0, 0)
-      
-          const {frameInfo} = frame
-          const {disposal} = frameInfo
-          if (disposal === 2) {
-            currentContext.clearRect(frameInfo.x, frameInfo.y, frameInfo.width, frameInfo.height)
-          } else if (disposal === 3) {
-            currentContext.clearRect(0, 0, current.width, current.height)
-            currentContext.drawImage(previous, 0, 0)
-          }
-          frame.getImage = () => canvas
-        }
-        return frameData
       }
 
     private static parseTransparentColor = (color: string) => {
@@ -1301,7 +1261,7 @@ export default class Functions {
             })
             video.addEventListener("seeked", () => {
                 const canvas = document.createElement("canvas")
-                const ctx = canvas.getContext("2d") as any
+                const ctx = canvas.getContext("2d")!
                 canvas.width = video.videoWidth 
                 canvas.height = video.videoHeight
                 ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -1537,10 +1497,10 @@ export default class Functions {
         return response !== 404
     }
 
-    public static parseTagsSingle = async (post: any, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static parseTagsSingle = async (post: PostSearch, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!post.tags) return Functions.parseTags([post], session, setSessionFlag)
         let tagMap = await Functions.tagsCache(session, setSessionFlag)
-        let result = [] as any
+        let result = [] as Tag[]
         for (let i = 0; i < post.tags.length; i++) {
             const tag = post.tags[i]
             if (tagMap[tag]) result.push(tagMap[tag])
@@ -1548,30 +1508,32 @@ export default class Functions {
         return result
     }
 
-    public static parseTags = async (posts: any, session: any, setSessionFlag: (value: boolean) => void) => {
-        let cleanPosts = posts.filter((p: any) => !p.fake)
-        const postIDs = cleanPosts.map((post: any) => post.postID)
+    public static parseTags = async (posts: PostFull[] | PostSearch[], session: Session, setSessionFlag: (value: boolean) => void) => {
+        let cleanPosts = posts.filter((p) => !(p as PostSearch).fake)
+        const postIDs = cleanPosts.map((post) => post.postID)
         let result = await Functions.get("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
         return result ? result : []
     }
 
-    public static parseTagsUnverified = async (posts: any) => {
-        let result = [] as any
+    public static parseTagsUnverified = async (posts: UnverifiedPost[]) => {
+        let result = [] as TagCount[]
         for (let i = 0; i < posts.length; i++) {
             for (let j = 0; j < posts[i].tags.length; j++) {
-                result.push({tag: posts[i].tags[j], count: 1})
+                result.push({tag: posts[i].tags[j], count: "1", type: "tag", image: "", imageHash: ""})
             }
         }
         return result
     }
 
-    public static tagCategories = async (parsedTags: string[] | TagCount[] | undefined, session: any, setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+    public static tagCategories = async (parsedTags: string[] | TagCount[] | Tag[] | undefined, session: Session, 
+        setSessionFlag: (value: boolean) => void, cache?: boolean) => {
         let artists = [] as MiniTag[] 
         let characters = [] as MiniTag[] 
         let series = [] as MiniTag[] 
         let tags = [] as MiniTag[] 
         if (!parsedTags) return {artists, characters, series, tags}
-        let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", {tags: parsedTags.map((t: any) => t.tag ? t.tag : t)}, session, setSessionFlag)
+        let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", 
+        {tags: parsedTags.map((t: string | TagCount | Tag) => typeof t === "string" ? t : t.tag)}, session, setSessionFlag)
         for (let i = 0; i < parsedTags.length; i++) {
             let tag = parsedTags[i].hasOwnProperty("tag") ? (parsedTags[i] as TagCount).tag : parsedTags[i] as string
             let count = parsedTags[i].hasOwnProperty("count") ? (parsedTags[i] as TagCount).count : 0
@@ -1626,10 +1588,10 @@ export default class Functions {
         return {artists, characters, series, tags}
     }
 
-    public static tagsCache = async (session: any, setSessionFlag: (value: boolean) => void) => {
-        const cache = await localforage.getItem("tags")
+    public static tagsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
+        const cache = await localforage.getItem("tags") as string
         if (cache) {
-            return JSON.parse(cache as any)
+            return JSON.parse(cache) as {[key: string]: Tag}
         } else {
             let tagMap = await Functions.get("/api/tag/map", {tags: []}, session, setSessionFlag)
             localforage.setItem("tags", JSON.stringify(tagMap))
@@ -1637,10 +1599,10 @@ export default class Functions {
         }
     }
 
-    public static emojisCache = async (session: any, setSessionFlag: (value: boolean) => void) => {
-        const cache = await localforage.getItem("emojis")
+    public static emojisCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
+        const cache = await localforage.getItem("emojis") as string
         if (cache) {
-            return JSON.parse(cache as any)
+            return JSON.parse(cache) as {[key: string]: string}
         } else {
             let emojis = await Functions.get("/api/misc/emojis", null, session, setSessionFlag)
             localforage.setItem("emojis", JSON.stringify(emojis))
@@ -1663,13 +1625,13 @@ export default class Functions {
         const canvas = document.createElement("canvas") as HTMLCanvasElement
         canvas.width = img.naturalWidth
         canvas.height = img.naturalHeight
-        const ctx = canvas.getContext("2d") as any
+        const ctx = canvas.getContext("2d")!
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
         return canvas
     }
 
-    public static imageDimensions = async (image: string, session: any) => {
-        return new Promise<any>(async (resolve) => {
+    public static imageDimensions = async (image: string, session: Session) => {
+        return new Promise<{width: number, height: number, size: number}>(async (resolve) => {
             if (Functions.isVideo(image)) {
                 const video = document.createElement("video")
                 video.addEventListener("loadedmetadata", async () => {
@@ -1859,21 +1821,21 @@ export default class Functions {
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const picture = tagInfo.common.picture
         if (picture) {
-            let buffer = new Uint8Array() as any
+            let buffer = new Uint8Array()
             for (let i = 0; i < picture.length; i++) {
-                buffer = Buffer.concat([buffer, picture[i].data])
+                buffer = new Uint8Array(Buffer.concat([buffer, new Uint8Array(picture[i].data)]))
             }
-            return `data:${picture[0].format};base64,${buffer.toString("base64")}`
+            return `data:${picture[0].format};base64,${Buffer.from(buffer).toString("base64")}`
         } else {
             return ""
         }
     }
 
-    public static imageSearch = async (file: File, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static imageSearch = async (file: File, session: Session, setSessionFlag: (value: boolean) => void) => {
         const fileReader = new FileReader()
-        return new Promise<any>((resolve) => {
-            fileReader.onloadend = async (f: any) => {
-                let bytes = new Uint8Array(f.target.result)
+        return new Promise<Post[]>((resolve) => {
+            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
+                let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
                 const result = Functions.bufferFileType(bytes)?.[0] || {}
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
@@ -2040,7 +2002,7 @@ export default class Functions {
         return maxIndex
     }
 
-    public static parseSpaceEnabledSearch = async (query: string, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static parseSpaceEnabledSearch = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
         let savedTags = await Functions.tagsCache(session, setSessionFlag)
@@ -2071,15 +2033,15 @@ export default class Functions {
         }
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
-                for (let savedTag of Object.values(savedTags) as any) {
-                    const exists = savedTag.aliases.find((a: any) => a?.alias === permutations[i][j])
+                for (let savedTag of Object.values(savedTags)) {
+                    const exists = savedTag.aliases.find((a) => a?.alias === permutations[i][j])
                     if (exists) matchesArray[i]++
                 }
             }
         }
         const index = Functions.indexOfMax(matchesArray)
         if (index !== -1 && matchesArray[index] !== 0) {
-            let queries = [] as any 
+            let queries = [] as string[] 
             for (let j = 0; j < permutations[index].length; j++) {
                 queries.push(`${specialFlagsArray[j]}${permutations[index][j]}`)
             }
@@ -2107,7 +2069,7 @@ export default class Functions {
         return tag
     }
 
-    public static insertNodeAtCaret(node: any) {
+    public static insertNodeAtCaret(node: Node) {
         var selection = window.getSelection()!
         if (selection.rangeCount) {
             var range = selection.getRangeAt(0)
@@ -2121,7 +2083,7 @@ export default class Functions {
         }
     }
 
-    public static rangeRect = (range: Range, ref: any) => {
+    public static rangeRect = (range: Range) => {
         let rect = range.getBoundingClientRect()
         if (range.collapsed && rect.top === 0 && rect.left === 0) {
           let node = document.createTextNode("\ufeff")
@@ -2199,11 +2161,12 @@ export default class Functions {
         textarea.focus()
     }
 
-    public static stripTags = (posts: any) => {
+    public static stripTags = <T extends Post[] | PostSearch[] | PostFull[]>(posts: T) => {
         for (let i = 0; i < posts.length; i++) {
+            // @ts-ignore
             delete posts[i].tags
         }
-        return posts
+        return posts as T
     }
 
     public static stripLinks = (text: string) => {
@@ -2224,7 +2187,7 @@ export default class Functions {
         const canvas = document.createElement("canvas") as HTMLCanvasElement
         canvas.width = image.naturalWidth
         canvas.height = image.naturalHeight
-        const ctx = canvas.getContext("2d") as any
+        const ctx = canvas.getContext("2d")!
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
@@ -2234,7 +2197,7 @@ export default class Functions {
             const pixelHeight = image.height / pixelate
             pixelateCanvas.width = pixelWidth 
             pixelateCanvas.height = pixelHeight
-            const pixelateCtx = pixelateCanvas.getContext("2d") as any
+            const pixelateCtx = pixelateCanvas.getContext("2d")!
             pixelateCtx.imageSmoothingEnabled = false
             pixelateCtx.drawImage(image, 0, 0, pixelWidth, pixelHeight)
             ctx.imageSmoothingEnabled = false
@@ -2262,7 +2225,7 @@ export default class Functions {
             lightnessCtx?.drawImage(image, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
             ctx.filter = filter
-            ctx.globalAlpha = `${Math.abs((lightness - 100) / 100)}`
+            ctx.globalAlpha = Math.abs((lightness - 100) / 100)
             ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
         }
         return canvas
@@ -2341,7 +2304,7 @@ export default class Functions {
             if (mirror.includes("sketchfab")) json["sketchfab"] = mirror
             if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror
         }
-        return JSON.stringify(json) as any
+        return JSON.stringify(json)
     }
 
     public static shuffleArray = <T>(array: T[]) => {
@@ -2352,58 +2315,58 @@ export default class Functions {
         return array
     }
 
-    public static insertAtIndex = <T>(array: T[], index: number, item: any) => {
-        return [...array.slice(0, index), item, ...array.slice(index + 1)]
+    public static insertAtIndex = <T>(array: T[], index: number, item: T | null) => {
+        return [...array.slice(0, index), item, ...array.slice(index + 1)].filter(Boolean) as T[]
     }
 
     public static serverPush = (route: string) => {
         window.location.href = route
     }
 
-    public static rgbToHsl = (r: any, g: any, b: any) => {
-        r /= 255;
-        g /= 255;
-        b /= 255;
+    public static rgbToHsl = (r: number, g: number, b: number) => {
+        r /= 255
+        g /= 255
+        b /= 255
         let cmin = Math.min(r,g,b),
             cmax = Math.max(r,g,b),
             delta = cmax - cmin,
             h = 0,
             s = 0,
-            l = 0;
-        if (delta == 0)
-            h = 0;
+            l = 0
+        if (delta == 0) 
+            h = 0
         // Red is max
         else if (cmax == r)
-            h = ((g - b) / delta) % 6;
+            h = ((g - b) / delta) % 6
         // Green is max
         else if (cmax == g)
-            h = (b - r) / delta + 2;
+            h = (b - r) / delta + 2
         // Blue is max
         else
-            h = (r - g) / delta + 4;
-        h = Math.round(h * 60);
+            h = (r - g) / delta + 4
+        h = Math.round(h * 60)
         // Make negative hues positive behind 360°
         if (h < 0)
-            h += 360;
-        l = (cmax + cmin) / 2;
+            h += 360
+        l = (cmax + cmin) / 2
         // Calculate saturation
-        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));   
+        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
         // Multiply l and s by 100
-        s = +(s * 100).toFixed(1);
-        l = +(l * 100).toFixed(1);
+        s = +(s * 100).toFixed(1)
+        l = +(l * 100).toFixed(1)
         return [h, s, l]
     }
 
-    public static hslToRgb(h: any, s: any, l: any) {
+    public static hslToRgb(h: number, s: number, l: number) {
         // Must be fractions of 1
-        s /= 100.0;
-        l /= 100.0;
+        s /= 100.0
+        l /= 100.0
         let c = (1 - Math.abs(2 * l - 1)) * s,
         x = c * (1 - Math.abs((h / 60.0) % 2 - 1)),
         m = l - c/2.0,
         r = 0,
         g = 0,
-        b = 0;
+        b = 0
         if (0 <= h && h < 60) {
             r = c; g = x; b = 0;  
         } else if (60 <= h && h < 120) {
@@ -2417,23 +2380,23 @@ export default class Functions {
         } else if (300 <= h && h < 360) {
             r = c; g = 0; b = x;
         }
-        r = Math.round((r + m) * 255);
-        g = Math.round((g + m) * 255);
-        b = Math.round((b + m) * 255);
+        r = Math.round((r + m) * 255)
+        g = Math.round((g + m) * 255)
+        b = Math.round((b + m) * 255)
         return [r, g, b]
     } 
 
-    public static rgbToHex(r: any, g: any, b: any) {
-        r = r.toString(16)
-        g = g.toString(16)
-        b = b.toString(16)
-        if (r.length == 1)
-          r = "0" + r
-        if (g.length == 1)
-          g = "0" + g
-        if (b.length == 1)
-          b = "0" + b
-        return "#" + r + g + b
+    public static rgbToHex(r: number, g: number, b: number) {
+        let hexR = r.toString(16)
+        let hexG = g.toString(16)
+        let hexB = b.toString(16)
+        if (hexR.length == 1)
+            hexR = "0" + hexR
+        if (hexG.length == 1)
+            hexG = "0" + hexG
+        if (hexB.length == 1)
+            hexB = "0" + hexB
+        return "#" + hexR + hexG + hexB
     }
 
     public static wrap = (num: number, min: number, max: number) => {
@@ -2449,10 +2412,10 @@ export default class Functions {
     }
 
     public static rotateColor = (color: string, hue: number, saturation: number, lightness: number) => {
-        let hsl = [] as any
+        let hsl = [] as number[]
         let a = 1
         if (color.trim().startsWith("#")) {
-            const rgb = hexToRgb(color) as any
+            const rgb = hexToRgb(color) as number[]
             hsl = Functions.rgbToHsl(rgb[0], rgb[1], rgb[2])
         } else {
             const matches = color.match(/\d+(\.\d+)?/g)!
@@ -2566,7 +2529,7 @@ export default class Functions {
         return image
     }
 
-    public static borderColor = (post: any) => {
+    public static borderColor = (post: PostSearch) => {
         if (post.favorited) return "var(--favoriteBorder)"
         if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
@@ -2578,9 +2541,10 @@ export default class Functions {
         return "var(--imageBorder)"
     }
 
-    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: any, setPosts: any) => {
+    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: PostSearch[], 
+        setPosts: (state: PostSearch[]) => void) => {
         if (!posts?.length) return
-        const postIndex = posts.findIndex((p: any) => p.postID === postID)
+        const postIndex = posts.findIndex((p) => p.postID === postID)
         if (postIndex === -1) return
         posts = structuredClone(posts)
         posts[postIndex].favorited = favorited
@@ -2594,20 +2558,26 @@ export default class Functions {
         }, 300)
     }
 
-    public static imagesChanged = async (revertPost: any, currentPost: any, session: any) => {
+    public static imagesChanged = async (revertPost: PostSearch | PostHistory, currentPost: PostSearch | PostHistory, session: Session) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (revertPost.images.length !== currentPost.images.length) return true
         for (let i = 0; i < revertPost.images.length; i++) {
-            let filename = revertPost.images[i]?.filename ? revertPost.images[i].filename : revertPost.images[i]
-            const imgLink = Functions.getImageLink(revertPost.images[i]?.type, revertPost.postID, i+1, filename)
-            let currentFilename = currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i]
-            const currentLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentFilename)
+            const revImage = revertPost.images[i]
+            const currImage = currentPost.images[i]
             
-            let upscaledFilename = revertPost.images[i]?.upscaledFilename ? revertPost.images[i].upscaledFilename : (revertPost.images[i]?.filename ? revertPost.images[i].filename : revertPost.images[i])
-            const upscaledImgLink = Functions.getImageLink(revertPost.images[i]?.type, revertPost.postID, i+1, upscaledFilename)
-            let currentUpscaledFilename = currentPost.images[i]?.upscaledFilename ? currentPost.images[i].upscaledFilename : (currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i])
-            const currentUpscaledLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentUpscaledFilename)
+            let imgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) 
+            : Functions.getImageLink(revImage.type, revertPost.postID, i+1, revImage.filename)
+
+            let currentLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) 
+            : Functions.getImageLink(currImage.type, currentPost.postID, i+1, currImage.filename)
+
+            let upscaledImgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) 
+            : Functions.getImageLink(revImage.type, revertPost.postID, i+1, revImage.upscaledFilename || revImage.filename)
+
+            let currentUpscaledLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) 
+            : Functions.getImageLink(currImage.type, currentPost.postID, i+1, currImage.upscaledFilename || currImage.filename)
+
             
             let imgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let currentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=false`, {"x-force-upscale": "false"})
@@ -2645,7 +2615,7 @@ export default class Functions {
         return false
     }
 
-    public static tagsChanged = (revertPost: any, currentPost: any) => {
+    public static tagsChanged = (revertPost: PostSearch | PostHistory, currentPost: PostSearch | PostHistory) => {
         if (JSON.stringify(revertPost.artists) !== JSON.stringify(currentPost.artists)) return true
         if (JSON.stringify(revertPost.characters) !== JSON.stringify(currentPost.characters)) return true
         if (JSON.stringify(revertPost.series) !== JSON.stringify(currentPost.series)) return true
@@ -2653,7 +2623,7 @@ export default class Functions {
         return false
     }
 
-    public static sourceChanged = (revertPost: any, currentPost: any) => {
+    public static sourceChanged = (revertPost: PostSearch | PostHistory, currentPost: PostSearch | PostHistory) => {
         if (revertPost.title !== currentPost.title) return true
         if (revertPost.englishTitle !== currentPost.englishTitle) return true
         if (revertPost.posted !== currentPost.posted) return true
@@ -2664,14 +2634,17 @@ export default class Functions {
         return false
     }
 
-    public static parseImages = async (post: any, session: any) => {
-        let images = [] as any
-        let upscaledImages = [] as any
+    public static parseImages = async (post: PostSearch | PostHistory, session: Session) => {
+        let images = [] as UploadImage[]
+        let upscaledImages = [] as UploadImage[]
         for (let i = 0; i < post.images.length; i++) {
-            let filename = post.images[i]?.filename ? post.images[i].filename : post.images[i]
-            const imgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, filename)
-            let upscaledFilename = post.images[i]?.upscaledFilename ? post.images[i].upscaledFilename : (post.images[i]?.filename ? post.images[i].filename : post.images[i])
-            const upscaledImgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, upscaledFilename)
+            const image = post.images[i]
+            let imgLink = typeof image === "string" ? Functions.getRawImageLink(image) 
+            : Functions.getImageLink(image.type, post.postID, i+1, image.filename)
+
+            let upscaledImgLink = typeof image === "string" ? Functions.getRawImageLink(image) 
+            : Functions.getImageLink(image.type, post.postID, i+1, image.upscaledFilename || image.filename)
+
             let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let upscaledBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
             if (buffer.byteLength) {
@@ -2679,42 +2652,56 @@ export default class Functions {
                 let link = await Functions.decryptItem(imgLink, session)
                 if (!link.includes(ext)) link += `#${ext}`
                 let thumbnail = ""
-                if (Functions.arrayIncludes(ext, videoExtensions)) {
+                let width = 0
+                let height = 0
+                if (Functions.isLive2D(ext)) {
+                    thumbnail = await Functions.live2dScreenshot(ext)
+                    const dimensions = await Functions.live2dDimensions(ext)
+                    width = dimensions.width
+                    height = dimensions.height
+                } else if (Functions.isVideo(ext)) {
                     thumbnail = await Functions.videoThumbnail(link)
-                } else if (Functions.arrayIncludes(ext, modelExtensions)) {
+                } else if (Functions.isModel(ext)) {
                     thumbnail = await Functions.modelImage(link)
-                } else if (Functions.arrayIncludes(ext, audioExtensions)) {
+                } else if (Functions.isAudio(ext)) {
                     thumbnail = await Functions.songCover(link)
                 }
                 let decrypted = await Functions.decryptBuffer(buffer, imgLink, session)
-                images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
+                images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail, width, height,
+                originalLink: imgLink, bytes: new Uint8Array(decrypted), name: path.basename(imgLink)})
             }
             if (upscaledBuffer.byteLength) {
                 let upscaledExt = path.extname(upscaledImgLink)
                 let upscaledLink = await Functions.decryptItem(upscaledImgLink, session)
                 if (!upscaledLink.includes(upscaledExt)) upscaledLink += `#${upscaledExt}`
                 let thumbnail = ""
-                if (Functions.arrayIncludes(upscaledExt, videoExtensions)) {
+                let width = 0
+                let height = 0
+                if (Functions.isLive2D(upscaledExt)) {
+                    thumbnail = await Functions.live2dScreenshot(upscaledLink)
+                    const dimensions = await Functions.live2dDimensions(upscaledLink)
+                    width = dimensions.width
+                    height = dimensions.height
+                } else if (Functions.isVideo(upscaledExt)) {
                     thumbnail = await Functions.videoThumbnail(upscaledLink)
-                } else if (Functions.arrayIncludes(upscaledExt, modelExtensions)) {
+                } else if (Functions.isModel(upscaledExt)) {
                     thumbnail = await Functions.modelImage(upscaledLink)
-                } else if (Functions.arrayIncludes(upscaledExt, audioExtensions)) {
+                } else if (Functions.isAudio(upscaledExt)) {
                     thumbnail = await Functions.songCover(upscaledLink)
                 }
                 let decrypted = await Functions.decryptBuffer(upscaledBuffer, upscaledImgLink, session)
                 upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), size: decrypted.byteLength, thumbnail,
-                originalLink: upscaledImgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
+                width, height, originalLink: upscaledImgLink, bytes: new Uint8Array(decrypted), name: path.basename(upscaledImgLink)})
             }
         }
         return {images, upscaledImages}
     }
 
-    public static parseNewTags = async (post: any, session: any, setSessionFlag: any) => {
+    public static parseNewTags = async (post: PostSearch | PostHistory, session: Session, setSessionFlag: (value: boolean) => void) => {
         const tags = post.tags
         if (!tags?.[0]) return []
         const tagMap = await Functions.tagsCache(session, setSessionFlag)
-        let notExists = [] as any
+        let notExists = [] as UploadTag[]
         for (let i = 0; i < tags.length; i++) {
             const exists = tagMap[tags[i]]
             if (!exists) notExists.push({tag: tags[i], desc: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
@@ -2834,25 +2821,25 @@ export default class Functions {
     public static parseNoteChanges = (oldNotes: Note[], newNotes:  Note[]) => {
         if (!oldNotes) oldNotes = []
         if (!newNotes) newNotes = []
-        const prevMap = new Map(oldNotes.map((item: any) => [`${item.transcript} -> ${item.translation}`, item]))
-        const newMap = new Map(newNotes.map((item: any) => [`${item.transcript} -> ${item.translation}`, item]))
+        const prevMap = new Map(oldNotes.map((item) => [`${item.transcript} -> ${item.translation}`, item]))
+        const newMap = new Map(newNotes.map((item) => [`${item.transcript} -> ${item.translation}`, item]))
 
         const addedEntries = newNotes
-            .filter((item: any) => !prevMap.has(`${item.transcript} -> ${item.translation}`))
-            .map((item: any) => `${item.transcript} -> ${item.translation}`)
+            .filter((item) => !prevMap.has(`${item.transcript} -> ${item.translation}`))
+            .map((item) => `${item.transcript} -> ${item.translation}`)
 
         const removedEntries = oldNotes
-            .filter((item: any) => !newMap.has(`${item.transcript} -> ${item.translation}`))
-            .map((item: any) => `${item.transcript} -> ${item.translation}`)
+            .filter((item) => !newMap.has(`${item.transcript} -> ${item.translation}`))
+            .map((item) => `${item.transcript} -> ${item.translation}`)
 
         return {addedEntries, removedEntries}
     }
 
     public static replaceLocation = (location: string) => {
-        window.location = `${Functions.getDomain()}${location}` as any
+        window.location = `${Functions.getDomain()}${location}` as (string & Location)
     }
 
-    public static decryptThumb = async (img: string, session: any, cacheKey?: string, forceImage?: boolean) => {
+    public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
@@ -2883,18 +2870,18 @@ export default class Functions {
             return cacheUrl
         }
         let isAnimatedWebP = false
-        let arrayBuffer = null as any
+        let arrayBuffer = null as ArrayBuffer | null
         let decryptedImg = img
         if (Functions.isImage(img)) {
             if (Functions.isWebP(img)) {
-                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
             if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
         }
         const base64 = await Functions.linkToBase64(decryptedImg)
         if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
-            if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer())
+            if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             Functions.setImageCache(cacheKey, cacheUrl)
@@ -2905,7 +2892,7 @@ export default class Functions {
         }
     }
 
-    public static decryptItem = async (img: string, session: any, cacheKey?: string) => {
+    public static decryptItem = async (img: string, session: Session, cacheKey?: string) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
@@ -2916,18 +2903,18 @@ export default class Functions {
             return img
         }
         let isAnimatedWebP = false
-        let arrayBuffer = null as any
+        let arrayBuffer = null as ArrayBuffer | null
         let decrypted = img
         if (Functions.isImage(img)) {
             if (Functions.isWebP(img)) {
-                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
             if (!isAnimatedWebP) decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
         }
         const base64 = await Functions.linkToBase64(decrypted)
         if (Functions.isGIF(img) || isAnimatedWebP) {
-            if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
+            if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             Functions.setImageCache(cacheKey, cacheUrl)
@@ -2938,7 +2925,7 @@ export default class Functions {
         }
     }
 
-    public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: any) => {
+    public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: Session) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || 
@@ -3036,9 +3023,9 @@ export default class Functions {
         return buffer
     }
 
-    public static getTagColor = (tag: any) => {
-        if (tag.banned) return "strikethrough"
-        if (tag.r18) return "r18-tag-color"
+    public static getTagColor = (tag: Tag | TagHistory | MiniTag) => {
+        if ((tag as Tag).banned) return "strikethrough"
+        if ((tag as Tag).r18) return "r18-tag-color"
         if (tag.type === "artist") return "artist-tag-color"
         if (tag.type === "character") return "character-tag-color"
         if (tag.type === "series") return "series-tag-color"

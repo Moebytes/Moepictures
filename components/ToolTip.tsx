@@ -19,6 +19,7 @@ import youtube from "../assets/icons/youtube.png"
 import bandcamp from "../assets/icons/bandcamp.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import tagIcon from "../assets/icons/tag.png"
+import {MiniTag} from "../types/Types"
 
 const ToolTip: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
@@ -28,23 +29,23 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {tooltipX, tooltipY, tooltipEnabled, tooltipPost} = useInteractionSelector()
     const {setEnableDrag, setToolTipEnabled} = useInteractionActions()
-    const [tags, setTags] = useState(null) as any
-    const [artist, setArtist] = useState(null) as any
-    const scrollRef = useRef(null) as any
+    const [tags, setTags] = useState([] as MiniTag[])
+    const [artist, setArtist] = useState(null as MiniTag | null)
+    const scrollRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const updateTags = async () => {
         const result = await functions.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
-        const artists = result.filter((t: any) => t.type === "artist")
-        const characters = result.filter((t: any) => t.type === "character")
-        const series = result.filter((t: any) => t.type === "series")
-        const meta = result.filter((t: any) => t.type === "meta")
-        const appearance = result.filter((t: any) => t.type === "appearance")
-        const outfit = result.filter((t: any) => t.type === "outfit")
-        const accessory = result.filter((t: any) => t.type === "accessory")
-        const action = result.filter((t: any) => t.type === "action")
-        const scenery = result.filter((t: any) => t.type === "scenery")
-        const tags = result.filter((t: any) => t.type === "tag")
+        const artists = result.filter((t) => t.type === "artist")
+        const characters = result.filter((t) => t.type === "character")
+        const series = result.filter((t) => t.type === "series")
+        const meta = result.filter((t) => t.type === "meta")
+        const appearance = result.filter((t) => t.type === "appearance")
+        const outfit = result.filter((t) => t.type === "outfit")
+        const accessory = result.filter((t) => t.type === "accessory")
+        const action = result.filter((t) => t.type === "action")
+        const scenery = result.filter((t) => t.type === "scenery")
+        const tags = result.filter((t) => t.type === "tag")
         setArtist(artists[0])
         setTags([...characters, ...series, ...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()])
     }
@@ -73,11 +74,11 @@ const ToolTip: React.FunctionComponent = (props) => {
             pointerEvents: tooltipEnabled ? "all" : "none",
             left: `${tooltipX}px`, 
             top: `${tooltipY}px`
-        } as any
+        } as React.CSSProperties
     }
 
     const getTagsJSX = () => {
-        let jsxMap = [] as any
+        let jsxMap = [] as React.ReactElement[]
         for (let i = 0; i < tags.length; i++) {
             if (tags[i].type === "artist") {
                 jsxMap.push(<span className="tooltip-tag-clickable">{tags[i].tag}</span>)
@@ -126,7 +127,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getPostLinkJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         if (tooltipPost.source?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
         if (tooltipPost.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
         if (tooltipPost.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
@@ -157,8 +158,8 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const copyTags = (removeDashes?: boolean, commas?: boolean) => {
-        let tagArr = [artist.tag, ...tags.map((t: any) => t.tag)]
-        if (removeDashes) tagArr = tagArr.map((t: any) => t.replaceAll("-", " "))
+        let tagArr = [artist?.tag || "", ...tags.map((t) => t.tag)]
+        if (removeDashes) tagArr = tagArr.map((t) => t.replaceAll("-", " "))
         navigator.clipboard.writeText(commas ? tagArr.join(", ") : tagArr.join(" "))
         //setActionBanner("copy-tags")
     }

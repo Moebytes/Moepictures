@@ -464,7 +464,7 @@ export default class SQLTag {
 
     /** Insert alias history */
     public static insertAliasHistory = async (username: string, source: string, target: string, type: string, 
-        affectedPosts: any, sourceData: any, reason?: string) => {
+        affectedPosts: any, sourceData: any, reason?: string | null) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "alias history" ("user", "date", "source", "target", "type", "affectedPosts", "sourceData", 

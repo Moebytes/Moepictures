@@ -110,7 +110,7 @@ export interface AliasToParams {
     tag: string
     aliasTo: string
     username?: string
-    reason?: string
+    reason?: string | null
 }
 
 export interface TagDeleteRequestFulfillParams {

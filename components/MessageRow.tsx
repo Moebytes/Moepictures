@@ -16,7 +16,7 @@ import read from "../assets/icons/read.png"
 import readLight from "../assets/icons/read-light.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/message.less"
-import {MessageSearch} from "../types/Types"
+import {MessageSearch, PrunedUser} from "../types/Types"
 
 interface Props {
     message?: MessageSearch
@@ -31,8 +31,8 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
     const {setSoftDeleteMessageID} = useMessageDialogActions()
-    const [creatorData, setCreatorData] = useState({}) as any
-    const [recipientData, setRecipientData] = useState({}) as any
+    const [creatorData, setCreatorData] = useState({} as PrunedUser)
+    const [recipientData, setRecipientData] = useState({} as PrunedUser)
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [recipientDefaultIcon, setRecipientDefaultIcon] = useState(false)
     const history = useHistory()
@@ -44,14 +44,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
         const recipient = await functions.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
-        setRecipientData(recipient)
+        if (recipient) setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.message) return
         const creator = await functions.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
-        setCreatorData(creator)
+        if (creator) setCreatorData(creator)
         setCreatorDefaultIcon(creator?.image ? false : true)
     }
 

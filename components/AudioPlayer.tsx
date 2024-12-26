@@ -24,10 +24,10 @@ import silence from "../assets/images/silence.mp3"
 import "./styles/audioplayer.less"
 
 let player: Tone.Player
-let audioNode: any
-let bitcrusherNode: any
-let soundtouchNode: any
-let gainNode: any
+let audioNode: Tone.ToneAudioNode
+let bitcrusherNode: AudioWorkletNode
+let soundtouchNode: AudioWorkletNode
+let gainNode: Tone.Gain
 
 const initialize = async () => {
     player = new Tone.Player(silence).sync().start()
@@ -41,7 +41,7 @@ const initialize = async () => {
     soundtouchNode = context.createAudioWorkletNode("soundtouch-processor")
     audioNode.input = player
     audioNode.output = gainNode.input
-    audioNode.input.chain(soundtouchNode, bitcrusherNode, audioNode.output)
+    audioNode.input.chain(soundtouchNode, bitcrusherNode)
     audioNode.toDestination()
 }
 
@@ -61,12 +61,12 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const audioControls = useRef<HTMLDivElement>(null)
-    const audioSliderRef = useRef<any>(null)
-    const audioSpeedRef = useRef(null) as any
-    const audioPitchRef = useRef(null) as any
-    const audioVolumeRef = useRef(null) as any
-    const audioSpeedSliderRef = useRef<any>(null)
-    const audioVolumeSliderRef = useRef<any>(null)
+    const audioSliderRef = useRef<Slider>(null)
+    const audioSpeedRef = useRef<HTMLImageElement>(null)
+    const audioPitchRef = useRef<HTMLImageElement>(null)
+    const audioVolumeRef = useRef<HTMLImageElement>(null)
+    const audioSpeedSliderRef = useRef<Slider>(null)
+    const audioVolumeSliderRef = useRef<Slider>(null)
     const [init, setInit] = useState(false)
     const [hover, setHover] = useState(false)
     const location = useLocation()
@@ -252,12 +252,13 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const updatePitch = async () => {
         if (!soundtouchNode) return
+        const soundtouchParams = soundtouchNode.parameters as unknown as {get: (key: string) => AudioParam}
         if (pitch === 0) {
             const pitchCorrect = 1 / speed
-            return soundtouchNode.parameters.get("pitch").value = 1 * pitchCorrect
+            return soundtouchParams.get("pitch").value = 1 * pitchCorrect
         }
         const pitchCorrect = 1 / speed
-        soundtouchNode.parameters.get("pitch").value = functions.semitonesToScale(pitch) * pitchCorrect
+        soundtouchParams.get("pitch").value = functions.semitonesToScale(pitch) * pitchCorrect
     }
 
     useEffect(() => {
@@ -266,8 +267,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const bitcrush = async () => {
         if (!bitcrusherNode) return
-        if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
-        bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
+        const bitcrushParams = bitcrusherNode.parameters as unknown as {get: (key: string) => AudioParam}
+        if (pixelate === 1) return bitcrushParams.get("sampleRate").value = 44100
+        bitcrushParams.get("sampleRate").value = Math.ceil(22050 / pixelate)
     }
 
     useEffect(() => {
@@ -344,9 +346,10 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (audioVolumeSliderRef.current) audioVolumeSliderRef.current.resize()
     })
 
-    const handleKeydown = (event: any) => {
+    const handleKeydown = (event: KeyboardEvent) => {
         const key = event.key
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("dialog-textarea"))) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
+            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
             if (key === "Space") {
                 updatePlay()
             }

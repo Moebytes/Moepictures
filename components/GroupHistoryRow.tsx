@@ -52,7 +52,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         const initialImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
         const initialImg = await functions.decryptThumb(initialImgLink, session)
         setImg(initialImg)
-        const index = props.groupHistory.posts.findIndex((p: any) => String(p.postID) === String(targetID))
+        const index = props.groupHistory.posts.findIndex((p) => String(p.postID) === String(targetID))
         setPostIndex(index)
     }
 

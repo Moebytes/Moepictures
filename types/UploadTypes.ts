@@ -77,7 +77,7 @@ export interface UnverifiedEditParams extends Omit<UploadParams, "noImageUpdate"
 export type UploadPostEndpoint<T extends string> = 
     T extends "/api/post/upload" ? {params: UploadParams, response: string} :
     T extends "/api/post/upload/unverified" ? {params: UnverifiedUploadParams, response: string} :
-    T extends "/api/post/approve" ? {params: {postID: string, reason?: string}, response: string} :
+    T extends "/api/post/approve" ? {params: {postID: string, reason?: string | null}, response: string} :
     T extends "/api/post/reject" ? {params: {postID: string}, response: string} :
     never
 

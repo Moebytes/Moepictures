@@ -62,7 +62,7 @@ const lightColorList = {
     "--titlebarText": "#7e66ff",
     "--navbarBG": "#c2c2ff",
     "--navbarText": "#6c47ff",
-    "--sidebarBG": "#cfcfff",
+    "--sidebarBG": "#f7f8ff",
     "--sidebarSearchFocus": "#8581ff",
     "--sidebarSearchBG": "#dbdaff",
     "--tagReadColor": "rgba(154, 87, 255, 0.5)",
@@ -171,7 +171,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         setHideMobileNavbar(!hideMobileNavbar)
     }
 
-    const titleClick = (event: any) => {
+    const titleClick = (event: React.MouseEvent) => {
         if (mobile && (history.location.pathname === "/" || history.location.pathname === "/posts")) if (event.clientY < 180) return
         if (props.reset) {
             setSearch("")

@@ -676,7 +676,7 @@ class SoundTouch {
   }
 }
 
-class SoundTouchWorklet extends AudioWorkletProcessor {
+class SoundtouchProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
         return [
             {name: "rate", defaultValue: 1.0, minValue: 0.25, maxValue: 4.0},
@@ -732,4 +732,4 @@ class SoundTouchWorklet extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("soundtouch-processor", SoundTouchWorklet)
+registerProcessor("soundtouch-processor", SoundtouchProcessor)

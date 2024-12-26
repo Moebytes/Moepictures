@@ -14,21 +14,25 @@ export interface PostDeleteRequest extends DeleteRequest {
     postID: string
     requestCount: string
     post: Post
+    fake?: boolean
 }
 
 export interface TagDeleteRequest extends Tag, DeleteRequest {
     tag: string
     requestCount: string
+    fake?: boolean
 }
 
 export interface GroupDeleteRequest extends Group, DeleteRequest {
     group: string
     post: Post
     requestCount: string
+    fake?: boolean
 }
 
 export interface GroupPostDeleteRequest extends DeleteRequest {
     groupPost: string
+    fake?: boolean
 }
 
 export interface AliasRequest extends Tag {
@@ -38,6 +42,7 @@ export interface AliasRequest extends Tag {
     aliasTo: string
     reason: string | null
     requestCount: string
+    fake?: boolean
 }
 
 export interface TagEditRequest extends Omit<Tag, "aliases" | "implications"> {
@@ -50,6 +55,7 @@ export interface TagEditRequest extends Omit<Tag, "aliases" | "implications"> {
     aliases: string[]
     implications: string[]
     requestCount: string
+    fake?: boolean
 }
 
 export interface GroupRequest {
@@ -62,6 +68,7 @@ export interface GroupRequest {
     exists: boolean
     reason: string | null
     requestCount: string
+    fake?: boolean
 }
 
 export interface GroupEditRequest {
@@ -76,4 +83,5 @@ export interface GroupEditRequest {
     orderChanged: boolean
     changes: GroupChanges
     requestCount: string
+    fake?: boolean
 }

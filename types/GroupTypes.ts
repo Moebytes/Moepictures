@@ -56,7 +56,7 @@ export interface GroupEditParams {
     description: string
     username?: string
     date?: string
-    reason?: string
+    reason?: string | null
     silent?: boolean
 }
 
@@ -76,7 +76,7 @@ export interface GroupPostDeleteParams {
 export interface GroupRequestParams {
     postID: string
     name: string
-    reason: string
+    reason: string | null
 }
 
 export interface GroupRequestFulfillParams {
@@ -88,12 +88,12 @@ export interface GroupRequestFulfillParams {
 
 export interface GroupDeleteRequestParams {
     slug: string
-    reason: string
+    reason: string | null
 }
 
 export interface GroupPostDeleteRequestParams {
     removalItems: {slug: string, postID: string}[]
-    reason: string
+    reason: string | null
 }
 
 export interface GroupDeleteRequestFulfillParams {
@@ -113,7 +113,7 @@ export interface GroupEditRequestParams {
     slug: string
     name: string
     description: string
-    reason: string
+    reason: string | null
 }
 
 export interface GroupEditRequestFulfillParams {

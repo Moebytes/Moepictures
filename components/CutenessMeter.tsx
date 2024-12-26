@@ -23,9 +23,9 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [cuteness, setCuteness] = useState(0)
-    const [averageCuteness, setAverageCuteness] = useState(props.post?.cuteness || 0)
+    const [averageCuteness, setAverageCuteness] = useState((props.post as PostSearch)?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
-    // const sliderRef = useRef<any>(null)
+    // const sliderRef = useRef<Slider>(null)
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
     const getFilter = () => {
@@ -40,7 +40,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
 
     const getCuteness = async () => {
         const cuteness = await functions.get("/api/cuteness", {postID: props.post.postID}, session, setSessionFlag)
-        if (props.post?.cuteness) setAverageCuteness(props.post.cuteness)
+        if ((props.post as PostSearch)?.cuteness) setAverageCuteness((props.post as PostSearch).cuteness)
         if (cuteness?.cuteness) {
             setCuteness(Number(cuteness.cuteness))
             setIsAverage(false)
@@ -79,7 +79,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        // const thumb = document.querySelector(".cuteness-thumb") as any
+        // const thumb = document.querySelector(".cuteness-thumb")
         // if (!thumb) return 
         // thumb.style.backgroundImage = `url(${getImg()})`
         clearTimeout(cutenessTimer)

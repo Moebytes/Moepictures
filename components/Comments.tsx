@@ -17,7 +17,7 @@ import codeblock from "../assets/icons/codeblock.png"
 import Comment from "./Comment"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comments.less"
-import {PostSearch, PostHistory} from "../types/Types"
+import {PostSearch, PostHistory, UserComment} from "../types/Types"
 
 interface Props {
     post: PostSearch | PostHistory
@@ -36,13 +36,13 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const {emojis} = useCacheSelector()
     const [text, setText] = useState("")
     const [error, setError] = useState(false)
-    const [comments, setComments] = useState([]) as any
+    const [comments, setComments] = useState([] as UserComment[])
     const [commentFlag, setCommentFlag] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
-    const errorRef = useRef(null) as any
-    const emojiRef = useRef(null) as any
-    const textRef = useRef(null) as any
+    const errorRef = useRef<HTMLSpanElement>(null)
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -141,14 +141,14 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCommentsJSX = () => {
-        let jsx = [] as any
+        let jsx = [] as React.ReactElement[]
         for (let i = 0; i < comments.length; i++) {
             jsx.push(<Comment key={comments[i].commentID} comment={comments[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         return jsx
     }
 
-    const keyDown = (event: any) => {
+    const keyDown = (event: React.KeyboardEvent) => {
         event.stopPropagation()
     }
 
@@ -175,10 +175,10 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }
 
     const emojiGrid = () => {
-        let rows = [] as any
+        let rows = [] as React.ReactElement[]
         let rowAmount = 7
         for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as any
+            let items = [] as React.ReactElement[]
             for (let j = 0; j < rowAmount; j++) {
                 const k = (i*rowAmount)+j
                 const key = Object.keys(emojis)[k]

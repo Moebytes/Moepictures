@@ -15,7 +15,7 @@ import premiumStar from "../assets/icons/premium-star.png"
 import permissions from "../structures/Permissions"
 import "./styles/historyrow.less"
 import path from "path"
-import {PostHistory} from "../types/Types"
+import {PostHistory, SourceData, TagCategories} from "../types/Types"
 
 interface Props {
     postHistory: PostHistory
@@ -25,7 +25,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
-    exact?: any
+    exact?: boolean
     imageHeight?: number
 }
 
@@ -42,7 +42,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [currentImg, setCurrentImg] = useState("")
     const [imageIndex, setImageIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
-    const [tagCategories, setTagCategories] = useState({} as {artists: any, characters: any, series: any, tags: any})
+    const [tagCategories, setTagCategories] = useState({} as TagCategories)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
     let prevHistory = props.previousHistory || Boolean(props.exact)
@@ -77,7 +77,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory, session)
         const tagsChanged = functions.tagsChanged(props.postHistory, props.currentHistory)
         const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
-        let source = undefined as any
+        let source = null as SourceData | null
         if (imgChanged || srcChanged) {
             source = {
                 title: props.postHistory.title,
@@ -96,13 +96,17 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(props.postHistory, session)
             const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
-            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, rating: props.postHistory.rating, source,
-            style: props.postHistory.style, artists: functions.tagObject(props.postHistory.artists), characters: functions.tagObject(props.postHistory.characters), preserveChildren: Boolean(props.postHistory.parentID),
-            series: functions.tagObject(props.postHistory.series), tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
+
+            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, 
+            type: props.postHistory.type, rating: props.postHistory.rating, source: source!, style: props.postHistory.style, 
+            artists: functions.tagObject(props.postHistory.artists), characters: functions.tagObject(props.postHistory.characters), 
+            preserveChildren: Boolean(props.postHistory.parentID), series: functions.tagObject(props.postHistory.series), 
+            tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, rating: props.postHistory.rating, source,
-            style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, series: props.postHistory.series, 
-            tags: props.postHistory.tags, reason: props.postHistory.reason}, session, setSessionFlag)
+            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
+            rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
+            characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, 
+            reason: props.postHistory.reason}, session, setSessionFlag)
         }
         props.onEdit?.()
     }
@@ -271,7 +275,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const artistsDiff = () => {
         if (!prevHistory) return props.postHistory.artists.join(" ")
         if (!tagCategories.artists) return null
-        const tagCategory = tagCategories.artists.map((t: any) => t.tag)
+        const tagCategory = tagCategories.artists.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) =>  tagCategory.includes(tag))
         const removedTags = props.postHistory.removedTags.filter((tag: string) => tagCategory.includes(tag))
         return calculateDiff(addedTags, removedTags)
@@ -280,7 +284,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const charactersDiff = () => {
         if (!prevHistory) return props.postHistory.characters.join(" ")
         if (!tagCategories.characters) return null
-        const tagCategory = tagCategories.characters.map((t: any) => t.tag)
+        const tagCategory = tagCategories.characters.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
         const removedTags = props.postHistory.removedTags.filter((tag: string) => tagCategory.includes(tag))
         return calculateDiff(addedTags, removedTags)
@@ -289,7 +293,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const seriesDiff = () => {
         if (!prevHistory) return props.postHistory.series.join(" ")
         if (!tagCategories.series) return null
-        const tagCategory = tagCategories.series.map((t: any) => t.tag)
+        const tagCategory = tagCategories.series.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
         const removedTags = props.postHistory.removedTags.filter((tag: string) => tagCategory.includes(tag))
         return calculateDiff(addedTags, removedTags)
@@ -300,7 +304,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const filteredTags = props.postHistory.tags.filter((tag: string) => !removeArr.includes(tag))
         if (!prevHistory) return filteredTags.join(" ")
         if (!tagCategories.tags) return null
-        const tagCategory = tagCategories.tags.map((t: any) => t.tag)
+        const tagCategory = tagCategories.tags.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
         const removedTags = props.postHistory.removedTags.filter((tag: string) => tagCategory.includes(tag))
         return calculateDiff(addedTags, removedTags)

@@ -39,7 +39,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
-    const [imageSize, setImageSize] = useState(240) as any
+    const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -55,7 +55,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [pageBuffering, setPageBuffering] = useState(true)
     const [drag, setDrag] = useState(false)
     const [visible, setVisible] = useState(true)
-    const [image, setImage] = useState(props.cached ? props.img : "") as any
+    const [image, setImage] = useState(props.cached ? props.img : "")
     const [decrypted, setDecrypted] = useState(props.cached)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
@@ -77,7 +77,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }))
 
-    const handleIntersection = (entries: any) => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
           setVisible(true)
@@ -115,7 +115,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     useEffect(() => {
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         if (functions.isImage(props.audio) || functions.isGIF(props.audio) || functions.isWebP(props.audio)) {
             observer = new ResizeObserver(resizePixelateCanvas)
             observer.observe(ref.current!)
@@ -258,9 +258,9 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     const imagePixelate = () => {
-        if (!pixelateRef.current) return
+        if (!pixelateRef.current || !ref.current) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = ref.current!.clientWidth 
         const imageHeight = ref.current!.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -325,67 +325,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         songIconRef.current.style.transform = "scale(1)"
         pixelateRef.current.style.transformOrigin = "none"
         pixelateRef.current.style.transform = "scale(1)"
-    }
-
-    const onLoad = (event: any) => {
-        setImageWidth(event.target.width)
-        setImageHeight(event.target.height)
-        setNaturalWidth(event.target.naturalWidth)
-        setNaturalHeight(event.target.naturalHeight)
-        setImageLoaded(true)
-        event.target.style.opacity = "1"
-    }
-
-    const render = (frame: any, buffer?: boolean) => {
-        const canvas = document.createElement("canvas") as any
-        canvas.width = naturalWidth
-        canvas.height = naturalHeight
-        const ctx = canvas.getContext("2d") as any
-        let newContrast = contrast
-        ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-        ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
-        if (pixelate !== 1) {
-            const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = frame.clientWidth / pixelate 
-            const pixelHeight = frame.clientHeight / pixelate
-            pixelateCanvas.width = pixelWidth 
-            pixelateCanvas.height = pixelHeight
-            const pixelateCtx = pixelateCanvas.getContext("2d") as any
-            pixelateCtx.imageSmoothingEnabled = false
-            pixelateCtx.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
-            ctx.imageSmoothingEnabled = false
-            ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
-        }
-        if (sharpen !== 0) {
-            const sharpnessCanvas = document.createElement("canvas")
-            sharpnessCanvas.width = naturalWidth
-            sharpnessCanvas.height = naturalHeight
-            const sharpnessCtx = sharpnessCanvas.getContext("2d")
-            sharpnessCtx?.drawImage(frame, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
-            const sharpenOpacity = sharpen / 5
-            newContrast += 25 * sharpenOpacity
-            const filter = `blur(4px) invert(1) contrast(75%)`
-            ctx.filter = filter 
-            ctx.globalAlpha = sharpenOpacity
-            ctx.globalCompositeOperation = "overlay"
-            ctx.drawImage(sharpnessCanvas, 0, 0, canvas.width, canvas.height)
-        }
-        if (lightness !== 100) {
-            const lightnessCanvas = document.createElement("canvas")
-            lightnessCanvas.width = naturalWidth
-            lightnessCanvas.height = naturalHeight
-            const lightnessCtx = lightnessCanvas.getContext("2d")
-            lightnessCtx?.drawImage(frame, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
-            const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
-            ctx.filter = filter
-            ctx.globalAlpha = `${Math.abs((lightness - 100) / 100)}`
-            ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
-        }
-        if (buffer) {
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            return img.data.buffer
-        }
-        return canvas.toDataURL("image/jpeg")
     }
 
     useEffect(() => {

@@ -55,8 +55,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const [showFormatDropdown, setShowFormatDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
-    const filterRef = useRef(null) as any
-    const formatRef = useRef(null) as any
+    const filterRef = useRef<HTMLDivElement>(null)
+    const formatRef = useRef<HTMLButtonElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

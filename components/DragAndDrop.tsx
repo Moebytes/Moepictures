@@ -3,6 +3,7 @@ import {useHistory} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
+import {Post} from "../types/Types"
 import "./styles/draganddrop.less"
 
 let showDrag = false
@@ -18,16 +19,16 @@ const DragAndDrop: React.FunctionComponent = (props) => {
     const [uploadHover, setUploadHover] = useState(false)
     const history = useHistory()
 
-    const placebo = (event: any) => {
+    const placebo = (event: DragEvent) => {
         event.preventDefault()
     }
 
-    const dragOver = (event: any) => {
+    const dragOver = (event: DragEvent) => {
         event.preventDefault()
         setVisible(true)
     }
 
-    const dragEnd = (event: any) => {
+    const dragEnd = (event: DragEvent) => {
         event.preventDefault()
         clearTimeout(timeout)
         timeout = setTimeout(() => {
@@ -102,7 +103,7 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         setSearchHover(false)
         setUploadHover(false)
         if (!files?.length) return
-        let result = [] as any
+        let result = [] as Post[]
         for (let i = 0; i < files.length; i++) {
             result.push(...await functions.imageSearch(files[i], session, setSessionFlag))
         }

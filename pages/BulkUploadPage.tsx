@@ -1287,7 +1287,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range, appendTagsRef)
+            const rect = functions.rangeRect(range)
             return rect.left - 10
         }
         return 0
@@ -1298,7 +1298,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range, appendTagsRef)
+            const rect = functions.rangeRect(range)
             return rect.bottom + window.scrollY + 10
         }
         return 0

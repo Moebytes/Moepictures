@@ -9,7 +9,7 @@ import "./styles/gridimage.less"
 import * as THREE from "three"
 import privateIcon from "../assets/icons/lock-opt.png"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
-import {PostSearch} from "../types/Types"
+import {GIFFrame, PostSearch} from "../types/Types"
 
 let tooltipTimer = null as any
 let imageTimer = null as any
@@ -43,7 +43,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
-    const [imageSize, setImageSize] = useState(240) as any
+    const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLCanvasElement>(null)
@@ -60,17 +60,17 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [imageLoaded, setImageLoaded] = useState(false)
     const [backFrame, setBackFrame] = useState("")
     const [drag, setDrag] = useState(false)
-    const [gifData, setGIFData] = useState(null) as any
-    const [videoData, setVideoData] = useState(null) as any
+    const [gifData, setGIFData] = useState(null as GIFFrame[] | null)
+    const [videoData, setVideoData] = useState(null as ImageBitmap | null)
     const [visible, setVisible] = useState(true)
     const [pageBuffering, setPageBuffering] = useState(true)
-    const [image, setImage] = useState(null) as any
+    const [image, setImage] = useState(null as string | null)
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
-    const imageRef = useRef(null) as any
+    const imageRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -94,7 +94,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         props.reupdate?.()
     }, [imageSize])
 
-    const handleIntersection = (entries: any) => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
           setVisible(true)
@@ -273,7 +273,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         const currentRef = ref ? ref : imageRef.current
         if (!currentRef) return
-        let observer = null as any
+        let observer = null as ResizeObserver | null
         observer = new ResizeObserver(resizePixelateCanvas)
         observer.observe(currentRef)
         return () => {
@@ -412,7 +412,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         const currentRef = ref ? ref : imageRef.current
         if (!pixelateRef.current || !currentRef) return
         const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d") as any
+        const ctx = pixelateCanvas.getContext("2d")!
         const imageWidth = currentRef.clientWidth 
         const imageHeight = currentRef.clientHeight
         const landscape = imageWidth >= imageHeight
@@ -587,10 +587,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     const drawImage = async () => {
+        if (!image) return
         const currentRef = ref ? ref : imageRef.current
         if (!currentRef || !overlayRef.current || !lightnessRef.current) return
         const img = document.createElement("img")
-        img.src = image 
+        img.src = image
         img.onload = () => {
             if (!currentRef || !overlayRef.current || !lightnessRef.current) return
             setImageWidth(img.width)

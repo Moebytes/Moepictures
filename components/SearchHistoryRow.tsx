@@ -4,9 +4,8 @@ import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialog
 useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
-import "./styles/historyrow.less"
-import path from "path"
 import {SearchHistory} from "../types/Types"
+import "./styles/historyrow.less"
 
 interface Props {
     history: SearchHistory
