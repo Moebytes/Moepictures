@@ -1,17 +1,15 @@
 import {Express, NextFunction, Request, Response} from "express"
 import sql from "../sql/SQLQuery"
-import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import sharp from "sharp"
 import phash from "sharp-phash"
-import axios from "axios"
+import dist from "sharp-phash/distance"
 import {PostHistory, UploadParams, UploadImage, EditParams, BulkTag, UnverifiedUploadParams,
-UnverifiedEditParams, PostFull, UnverifiedPost} from "../types/Types"
+UnverifiedEditParams, PostFull, UnverifiedPost, ApproveParams, TagHistory} from "../types/Types"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -76,6 +74,68 @@ const validImages = (images: UploadImage[], skipMBCheck?: boolean) => {
     return false
   }
   return true
+}
+
+const updateTagImageHistory = async (targetTag: string, filename: string, newBuffer: Buffer, username: string) => {
+  const tag = await sql.tag.tag(targetTag)
+  if (!tag) return
+  let oldBuffer = null as Buffer | null
+  if (tag.image) {
+    const imgPath = functions.getTagPath("tag", tag.image)
+    oldBuffer = await serverFunctions.getFile(imgPath, false, false)
+    let oldHash = await phash(oldBuffer).then((hash: string) => functions.binaryToHex(hash))
+    let newHash = await phash(newBuffer).then((hash: string) => functions.binaryToHex(hash))
+    if (dist(oldHash, newHash) < 7) return
+  }
+
+  const newHash = serverFunctions.md5(newBuffer)
+
+  const tagHistory = await sql.history.tagHistory(targetTag)
+  const nextKey = await serverFunctions.getNextKey("tag", targetTag, false)
+  if (!tagHistory.length || nextKey === 1) {
+      let vanilla = tag as unknown as TagHistory
+      vanilla.date = tag.createDate 
+      vanilla.user = tag.creator
+      vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
+      vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
+      if (vanilla.image && oldBuffer) {
+            const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
+            await serverFunctions.uploadFile(newImagePath, oldBuffer, false)
+            vanilla.image = newImagePath
+      } else {
+          vanilla.image = null
+      }
+      await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: targetTag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
+          description: vanilla.description, aliases: functions.filterNulls(vanilla.aliases), implications: functions.filterNulls(vanilla.implications), 
+          pixivTags: functions.filterNulls(vanilla.pixivTags), website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, 
+          r18: vanilla.r18, featured: vanilla.featured, imageChanged: false, changes: null})
+      
+      const imagePath = functions.getTagHistoryPath(targetTag, 2, filename)
+      await serverFunctions.uploadFile(imagePath, newBuffer, false)
+
+      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
+      aliases: functions.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.filterNulls(tag.implications).map((i) => i.implication), 
+      pixivTags: functions.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, r18: tag.r18, 
+      featured: tag.featured, imageChanged: true, changes: null, reason: null})
+  } else {
+      const imagePath = functions.getTagHistoryPath(targetTag, nextKey, filename)
+      await serverFunctions.uploadFile(imagePath, newBuffer, false)
+
+      const result = await sql.history.tagHistory(targetTag)
+      if (result.length > 1) {
+          const lastResult = result[result.length - 1]
+          const penultResult = result[result.length - 2]
+          const lastImage = lastResult.image
+          const penultImage = penultResult.image
+          if (penultImage?.startsWith("history/tag") && !lastImage?.startsWith("history/tag")) {
+              await sql.history.updateTagHistory(lastResult.historyID, "image", penultImage)
+          }
+      }
+      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
+      aliases: functions.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.filterNulls(tag.implications).map((i) => i.implication), 
+      pixivTags: functions.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, r18: tag.r18, 
+      featured: tag.featured, imageChanged: true, changes: null, reason: null})
+  }
 }
 
 const CreateRoutes = (app: Express) => {
@@ -280,10 +340,11 @@ const CreateRoutes = (app: Express) => {
           if (!newTags[i].tag) continue
           let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
-          if (newTags[i].image) {
+          if (!noImageUpdate && newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
             const buffer = Buffer.from(Object.values(newTags[i].bytes!))
+            await updateTagImageHistory(newTags[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -294,10 +355,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
           let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
-          if (artists[i].image) {
+          if (!noImageUpdate && artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
             const buffer = Buffer.from(Object.values(artists[i].bytes!))
+            await updateTagImageHistory(artists[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -309,10 +371,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
           let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
-          if (characters[i].image) {
+          if (!noImageUpdate && characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
             const buffer = Buffer.from(Object.values(characters[i].bytes!))
+            await updateTagImageHistory(characters[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -324,10 +387,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
           let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
-          if (series[i].image) {
+          if (!noImageUpdate && series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
             const buffer = Buffer.from(Object.values(series[i].bytes!))
+            await updateTagImageHistory(series[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -596,10 +660,11 @@ const CreateRoutes = (app: Express) => {
           if (!newTags[i].tag) continue
           let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag!]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
-          if (newTags[i].image) {
+          if (!noImageUpdate && newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
             const buffer = Buffer.from(Object.values(newTags[i].bytes!))
+            await updateTagImageHistory(newTags[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -610,10 +675,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
           let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
-          if (artists[i].image) {
+          if (!noImageUpdate && artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
             const buffer = Buffer.from(Object.values(artists[i].bytes!))
+            await updateTagImageHistory(artists[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -624,10 +690,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
           let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
-          if (characters[i].image) {
+          if (!noImageUpdate && characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
             const buffer = Buffer.from(Object.values(characters[i].bytes!))
+            await updateTagImageHistory(characters[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -638,10 +705,11 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
           let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
-          if (series[i].image) {
+          if (!noImageUpdate && series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
             const buffer = Buffer.from(Object.values(series[i].bytes!))
+            await updateTagImageHistory(series[i].tag!, filename, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1386,7 +1454,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, reason} = req.body as {postID: string, reason?: string}
+        let {postID, reason, noImageUpdate} = req.body as ApproveParams
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (!permissions.isMod(req.session)) return res.status(403).end()
@@ -1581,9 +1649,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < tags.length; i++) {
           if (!tags[i].tag) continue
           let bulkObj = {tag: tags[i].tag, type: tagObjectMapping[tags[i].tag]?.type, description: tags[i].description, image: null, imageHash: null} as any
-          if (tags[i].image) {
+          if (!noImageUpdate && tags[i].image) {
             const imagePath = functions.getTagPath("tag", tags[i].image!)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
+            await updateTagImageHistory(tags[i].tag!, tags[i].image!, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = tags[i].image
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1594,9 +1663,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
           let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
-          if (artists[i].image) {
+          if (!noImageUpdate && artists[i].image) {
             const imagePath = functions.getTagPath("artist", artists[i].image!)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
+            await updateTagImageHistory(artists[i].tag!, artists[i].image!, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = artists[i].image
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1607,9 +1677,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
           let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
-          if (characters[i].image) {
+          if (!noImageUpdate && characters[i].image) {
             const imagePath = functions.getTagPath("character", characters[i].image!)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
+            await updateTagImageHistory(characters[i].tag!, characters[i].image!, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = characters[i].image
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1620,9 +1691,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
           let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
-          if (series[i].image) {
+          if (!noImageUpdate && series[i].image) {
             const imagePath = functions.getTagPath("series", series[i].image!)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
+            await updateTagImageHistory(series[i].tag!, series[i].image!, buffer, req.session.username)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = series[i].image
             bulkObj.imageHash = serverFunctions.md5(buffer)
@@ -1642,7 +1714,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         addedTags = functions.removeDuplicates(addedTags).filter(Boolean)
-        await sql.tag.bulkInsertTags(bulkTagUpdate, unverified.uploader)
+        await sql.tag.bulkInsertTags(bulkTagUpdate, unverified.uploader, noImageUpdate ? true : false)
         if (unverified.originalID) await sql.tag.deleteTagMap(unverified.originalID, removedTags)
         await sql.tag.insertTagMap(newPostID, addedTags)
 

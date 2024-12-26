@@ -74,9 +74,11 @@ const BanDialog: React.FunctionComponent = (props) => {
                     buyLink: currentHistory.buyLink,
                     mirrors: currentHistory.mirrors ? Object.values(currentHistory.mirrors).join("\n") : null
                 }
-                await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, rating: currentHistory.rating, source,
-                style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
-                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, session, setSessionFlag)
+                await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
+                rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), 
+                characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
+                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, 
+                noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {
