@@ -119,21 +119,21 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     }, [tagEditID])
 
     const tagEdit = async () => {
-        if (!tagEditID || !errorRef.current) return
+        if (!tagEditID) return
         if (permissions.isContributor(session)) {
             const joined = `${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
-                await functions.timeout(20)
-                errorRef.current.innerText = i18n.pages.upload.invalidCharacters
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = i18n.pages.upload.invalidCharacters
                 setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
             }
             if (joined.includes(",")) {
                 setError(true)
-                await functions.timeout(20)
-                errorRef.current.innerText = i18n.pages.upload.spaceSeparation
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
                 const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setTags(splitTags.join(" "))
                 await functions.timeout(3000)
@@ -143,8 +143,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             if (!permissions.isMod(session)) {
                 if (tagArr.length < 5) {
                     setError(true)
-                    await functions.timeout(20)
-                    errorRef.current.innerText = i18n.pages.upload.tagMinimum
+                    if (!errorRef.current) await functions.timeout(20)
+                    errorRef.current!.innerText = i18n.pages.upload.tagMinimum
                     await functions.timeout(3000)
                     return setError(false)
                 }
@@ -169,16 +169,16 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             const joined = `${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
-                await functions.timeout(20)
-                errorRef.current.innerText = i18n.pages.upload.invalidCharacters
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = i18n.pages.upload.invalidCharacters
                 setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
             }
             if (joined.includes(",")) {
                 setError(true)
-                await functions.timeout(20)
-                errorRef.current.innerText = i18n.pages.upload.spaceSeparation
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
                 await functions.timeout(3000)
                 const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setTags(splitTags.join(" "))
@@ -187,8 +187,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
             if (tagArr.length < 5) {
                 setError(true)
-                await functions.timeout(20)
-                errorRef.current.innerText = i18n.pages.upload.tagMinimum
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = i18n.pages.upload.tagMinimum
                 await functions.timeout(3000)
                 return setError(false)
             }

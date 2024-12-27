@@ -118,6 +118,8 @@ const ThreadRoutes = (app: Express) => {
             await sql.thread.updateThread(threadID, "title", title)
             await sql.thread.updateThread(threadID, "content", content)
             await sql.thread.updateThread(threadID, "r18", r18)
+            await sql.thread.updateThread(threadID, "updater", req.session.username)
+            await sql.thread.updateThread(threadID, "updatedDate", new Date().toISOString())
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -255,6 +257,7 @@ const ThreadRoutes = (app: Express) => {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.thread.updateReply(replyID, "content", content)
+            await sql.thread.updateReply(replyID, "updater", req.session.username)
             await sql.thread.updateReply(replyID, "updatedDate", new Date().toISOString())
             await sql.thread.updateReply(replyID, "r18", r18)
             res.status(200).send("Success")

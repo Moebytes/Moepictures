@@ -61,7 +61,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     }, [showNewThreadDialog])
 
     const newThread = async () => {
-        const badTitle = functions.validateTitle(threadContent, i18n)
+        const badTitle = functions.validateTitle(threadTitle, i18n)
         if (badTitle) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

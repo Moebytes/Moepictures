@@ -76,15 +76,14 @@ export default class SQLQuery {
           redisResult = await redis.get(cacheKey)
           if (redisResult) return (JSON.parse(redisResult))
         } catch (error) {
-          console.error("Redis read error:", error)
+          // ignore
         }
       }
       const pgClient = await pgPool.connect()
       try {
             const result = await pgClient.query(query)
             if (cache && cacheKey) {
-              await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600})
-              .catch((error) => console.error("Redis write error:", error))
+              await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch((error) => null)
             }
             return result.rows as any
         } catch (error) {

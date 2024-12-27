@@ -137,11 +137,15 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                         <img className="reply-options-img" src={quoteOptIcon} style={{filter: getFilter()}}/>
                         <span className="reply-options-text">{i18n.buttons.quote}</span>
                     </div>
-                    {permissions.isMod(session) ? 
+                    {permissions.isMod(session) ? <>
+                    <div className="reply-options-container" onClick={editReplyDialog}>
+                        <img className="reply-options-img" src={editOptIcon} style={{filter: getFilter()}}/>
+                        <span className="reply-options-text">{i18n.buttons.edit}</span>
+                    </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
                         <span className="reply-options-text">{i18n.buttons.delete}</span>
-                    </div> : null}
+                    </div></> : null}
                 </div>
             )
         }

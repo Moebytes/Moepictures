@@ -69,6 +69,7 @@
             "hentai": "Hentai"
         },
         "style": {
+            "allS": "All+S",
             "2d": "2D",
             "3d": "3D",
             "chibi": "Chibi",
@@ -942,7 +943,7 @@
         },
         "newThread": {
             "title": "New Thread",
-            "error": "Bad content or captcha."
+            "error": "Bad content."
         },
         "ocr": {
             "title": "OCR Page",

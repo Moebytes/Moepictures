@@ -86,6 +86,8 @@ const MessageRoutes = (app: Express) => {
             await sql.message.updateMessage(messageID, "title", title)
             await sql.message.updateMessage(messageID, "content", content)
             await sql.message.updateMessage(messageID, "r18", r18)
+            await sql.message.updateMessage(messageID, "updater", req.session.username)
+            await sql.message.updateMessage(messageID, "updatedDate", new Date().toISOString())
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -215,6 +217,7 @@ const MessageRoutes = (app: Express) => {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.message.updateMessageReply(replyID, "content", content)
+            await sql.message.updateMessageReply(replyID, "updater", req.session.username)
             await sql.message.updateMessageReply(replyID, "updatedDate", new Date().toISOString())
             await sql.message.updateMessageReply(replyID, "r18", r18)
             res.status(200).send("Success")

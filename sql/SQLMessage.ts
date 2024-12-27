@@ -170,10 +170,10 @@ export default class SQLMessage {
     public static insertMessageReply = async (messageID: string, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content", "r18") 
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
+            text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updater", "updatedDate", "content", "r18") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "replyID"`,
             rowMode: "array",
-            values: [messageID, creator, now, now, content, r18]
+            values: [messageID, creator, now, creator, now, content, r18]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])

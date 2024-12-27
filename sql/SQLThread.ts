@@ -173,10 +173,10 @@ export default class SQLThread {
     public static insertReply = async (threadID: string, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content", "r18") 
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
+            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updater", "updatedDate", "content", "r18") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "replyID"`,
             rowMode: "array",
-            values: [threadID, creator, now, now, content, r18]
+            values: [threadID, creator, now, creator, now, content, r18]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])

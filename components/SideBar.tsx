@@ -636,8 +636,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const randomSearch = async () => {
-        if (!props.post) return
-        if (history.location.pathname.includes("/post/")) {
+        if (props.post && history.location.pathname.includes("/post/")) {
             const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random"}, session, setSessionFlag)
             history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
         } else {

@@ -25,6 +25,7 @@ export type PostRating =
 
 export type PostStyle =
     | "all"
+    | "all+s"
     | "2d"
     | "3d"
     | "pixel"

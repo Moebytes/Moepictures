@@ -142,11 +142,15 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                         <img className="comment-options-img" src={commentQuote}/>
                         <span className="comment-options-text">{i18n.buttons.quote}</span>
                     </div>
-                    {permissions.isMod(session) ? 
+                    {permissions.isMod(session) ? <>
+                    <div className="comment-options-container" onClick={editCommentDialog}>
+                        <img className="comment-options-img" src={commentEdit}/>
+                        <span className="comment-options-text">{i18n.buttons.edit}</span>
+                    </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
                         <img className="comment-options-img" src={commentDelete}/>
                         <span className="comment-options-text">{i18n.buttons.delete}</span>
-                    </div> : 
+                    </div></> : 
                     <div className="comment-options-container" onClick={reportCommentDialog}>
                         <img className="comment-options-img" src={commentReport}/>
                         <span className="comment-options-text">{i18n.buttons.report}</span>

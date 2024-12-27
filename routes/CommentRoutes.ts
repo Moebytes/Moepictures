@@ -74,8 +74,10 @@ const CommentRoutes = (app: Express) => {
             const badComment = functions.validateComment(comment as string, enLocale)
             if (badComment) return res.status(400).send("Bad comment")
             const com = await sql.comment.comment(commentID)
-            if (com?.username !== req.session.username) return res.status(400).send("You can only edit your own comment")
-            await sql.comment.updateComment(commentID, comment as string)
+            if (com?.username !== req.session.username) {
+                if (!permissions.isMod(req.session)) return res.status(400).send("You can only edit your own comment")
+            }
+            await sql.comment.updateComment(commentID, req.session.username, comment)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

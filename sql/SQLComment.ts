@@ -8,21 +8,21 @@ export default class SQLComment {
     public static insertComment = async (postID: string, username: string, comment: string) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "comments" ("postID", "username", "comment", "postDate", "editedDate") 
-        VALUES ($1, $2, $3, $4, $5) RETURNING "commentID"`,
+        text: /*sql*/`INSERT INTO "comments" ("postID", "username", "postDate", "editor", "editedDate", "comment") 
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING "commentID"`,
         rowMode: "array",
-        values: [postID, username, comment, now, now]
+        values: [postID, username, now, username, now, comment]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
 
     /** Updates a comment. */
-    public static updateComment = async (commentID: string, comment: string) => {
+    public static updateComment = async (commentID: string, username: string, comment: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-            text: /*sql*/`UPDATE "comments" SET "comment" = $1, "editedDate" = $2 WHERE "commentID" = $3`,
-            values: [comment, now, commentID]
+            text: /*sql*/`UPDATE "comments" SET "comment" = $1, "editor" = $2, "editedDate" = $3 WHERE "commentID" = $4`,
+            values: [comment, username, now, commentID]
         }
         await SQLQuery.run(query)
     }

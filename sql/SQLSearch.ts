@@ -33,6 +33,8 @@ export default class SQLSearch {
         if (style === "sketch") styleQuery = `posts.style = 'sketch'`
         if (style === "lineart") styleQuery = `posts.style = 'lineart'`
         if (style === "promo") styleQuery = `posts.style = 'promo'`
+        if (style === "all") styleQuery = `(lower(posts.style) = '2d' OR lower(posts.style) = '3d' 
+        OR posts.style = 'pixel' OR posts.style = 'chibi' OR posts.style = 'daki')`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`

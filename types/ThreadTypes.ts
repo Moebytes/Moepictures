@@ -33,6 +33,7 @@ export interface ThreadReply {
     threadID: string
     creator: string
     createDate: string
+    updater: string
     updatedDate: string
     content: string
     r18: boolean

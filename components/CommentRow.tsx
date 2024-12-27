@@ -154,11 +154,15 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                         <img className="commentrow-options-img" src={commentQuote}/>
                         <span className="commentrow-options-text">{i18n.buttons.quote}</span>
                     </div>
-                    {permissions.isMod(session) ? 
+                    {permissions.isMod(session) ? <>
+                    <div className="commentrow-options-container" onClick={editCommentDialog}>
+                        <img className="commentrow-options-img" src={commentEdit}/>
+                        <span className="commentrow-options-text">{i18n.buttons.edit}</span>
+                    </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
                         <img className="commentrow-options-img" src={commentDelete}/>
                         <span className="commentrow-options-text">{i18n.buttons.delete}</span>
-                    </div> : 
+                    </div></> : 
                     <div className="commentrow-options-container" onClick={reportCommentDialog}>
                         <img className="commentrow-options-img" src={commentReport}/>
                         <span className="commentrow-options-text">{i18n.buttons.report}</span>

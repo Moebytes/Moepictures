@@ -6,6 +6,7 @@ export interface UserComment {
     username: string
     comment: string
     postDate: string
+    editor: string
     editedDate: string | null
     image: string | null
     imagePost: string | null

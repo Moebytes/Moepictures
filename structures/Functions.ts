@@ -3,7 +3,7 @@ import pixels from "image-pixels"
 import path from "path"
 import commonPasswords from "../assets/json/common-passwords.json"
 import bannedUsernames from "../assets/json/banned-usernames.json"
-import profaneWords from "../assets/json/profane-words.json"
+import badWords from "../assets/json/bad-words.json"
 import axios from "axios"
 import {hexToRgb} from "./Color"
 import MP4Demuxer from "./MP4Demuxer"
@@ -434,11 +434,22 @@ export default class Functions {
         return true
     }
 
+    public static isProfane = (text: string) => {
+        const words = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (const word of words) {
+            for (const badWord of badWords) {
+                if (atob(badWord).length <= word.length 
+                && atob(badWord).includes(word.toLowerCase())) return true
+            }
+        }
+        return false
+    }
+
     public static validateUsername = (username: string, i18n: typeof enLocale) => {
         if (!username) return i18n.errors.username.empty
         const alphaNumeric = Functions.alphaNumeric(username)
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return i18n.errors.username.alphanumeric
-        if (profaneWords.map((w) => atob(w)).includes(username.toLowerCase())) return i18n.errors.username.profane
+        if (Functions.isProfane(username)) return i18n.errors.username.profane
         if (bannedUsernames.includes(username.toLowerCase())) return i18n.errors.username.disallowed
         return null
     }
@@ -518,46 +529,34 @@ export default class Functions {
                 if (gibberish(Functions.stripLinks(piece))) return i18n.errors.comment.gibberish
             }
         }
-        const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.comment.profane
-        }
+        if (Functions.isProfane(comment)) return i18n.errors.comment.profane
         return null
     }
 
     public static validateReply = (reply: string, i18n: typeof enLocale) => {
         if (!reply) return i18n.errors.reply.empty
-        const words = reply.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.reply.profane
-        }
+        if (Functions.isProfane(reply)) return i18n.errors.reply.profane
         return null
     }
 
     public static validateMessage = (message: string, i18n: typeof enLocale) => {
         if (!message) return i18n.errors.message.empty
         const words = message.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return i18n.errors.message.profane
-        }
+        if (Functions.isProfane(message)) return i18n.errors.message.profane
         return null
     }
 
     public static validateTitle = (title: string, i18n: typeof enLocale) => {
         if (!title) return i18n.errors.title.empty
         const words = title.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.title.profane
-        }
+        if (Functions.isProfane(title)) return i18n.errors.title.profane
         return null
     }
 
     public static validateThread = (thread: string, i18n: typeof enLocale) => {
         if (!thread) return i18n.errors.thread.empty
         const words = thread.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i])) return i18n.errors.thread.profane
-        }
+        if (Functions.isProfane(thread)) return i18n.errors.thread.profane
         return null
     }
 
@@ -570,10 +569,7 @@ export default class Functions {
     public static validateBio = (bio: string, i18n: typeof enLocale) => {
         if (!bio) return i18n.errors.bio.empty
         if (gibberish(Functions.stripLinks(bio))) return i18n.errors.bio.gibberish
-        const words = bio.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
-        for (let i = 0; i < words.length; i++) {
-            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return i18n.errors.bio.profane
-        }
+        if (Functions.isProfane(bio)) return i18n.errors.bio.profane
         return null
     }
 
@@ -1323,7 +1319,7 @@ export default class Functions {
     }
       
     public static validStyle = (style: PostStyle, all?: boolean) => {
-        if (all) if (style === "all") return true
+        if (all) if (style === "all" || style === "all+s") return true
         if (style === "2d" ||
             style === "3d" ||
             style === "pixel" ||
