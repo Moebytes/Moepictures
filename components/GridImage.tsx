@@ -18,13 +18,15 @@ interface Props {
     id: string
     img: string
     original: string
-    cached: boolean
-    width?: number
-    height?: number
+    cached?: boolean
     comicPages?: string[] | null
     post: PostSearch,
     square?: boolean
     marginBottom?: number
+    marginLeft?: number
+    height?: number
+    borderRadius?: number
+    autoLoad?: boolean
     reupdate?: () => void
 }
 
@@ -92,10 +94,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             }
         },
         load: async () => {
-            if (decrypted) return
-            const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
-            setImg(decryptedImg)
-            setDecrypted(true)
+            loadImage()
         },
         update: async () => {
             if (!gifData) {
@@ -107,6 +106,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             }
         }
     }))
+
+    const loadImage = async () => {
+        if (decrypted) return
+        const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
+        setImg(decryptedImg)
+        setDecrypted(true)
+    }
 
     useEffect(() => {
         if (functions.isVideo(props.img)) {
@@ -159,6 +165,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         cancelAnimation()
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
+        if (props.autoLoad) loadImage()
     }, [props.img])
 
     const resizePixelateCanvas = () => {
@@ -422,23 +429,25 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
             const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
-            containerRef.current.style.width = `${containerWidth}px`
-            containerRef.current.style.height = `${containerWidth}px`
+            containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
+            containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
             const landscape = refWidth <=refHeight
             if (landscape) {
-                currentRef.style.width = `${containerWidth}px`
+                currentRef.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
                 currentRef.style.height = "auto"
             } else {
                 currentRef.style.width = "auto"
-                currentRef.style.height = `${containerWidth}px`
+                currentRef.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             }
         } else {
             containerRef.current.style.width = "max-content"
             containerRef.current.style.height = "max-content"
             currentRef.style.width = "auto"
-            currentRef.style.height = `${imageSize}px`
+            currentRef.style.height = props.height ? `${props.height}px` : `${imageSize}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "10px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
         }
     }
 
@@ -601,18 +610,18 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         setImageLoaded(true)
     }
 
-    const render = <T extends boolean>(frame: HTMLImageElement, buffer?: T) => {
+    const render = <T extends boolean>(frame: HTMLImageElement | HTMLCanvasElement | ImageBitmap, buffer?: T) => {
         const canvas = document.createElement("canvas")!
-        canvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
-        canvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
+        canvas.width = naturalWidth
+        canvas.height = naturalHeight
         const ctx = canvas.getContext("2d")!
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
             const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = frame.clientWidth / pixelate 
-            const pixelHeight = frame.clientHeight / pixelate
+            const pixelWidth = (frame instanceof ImageBitmap ? frame.width : frame.clientWidth) / pixelate 
+            const pixelHeight = (frame instanceof ImageBitmap ? frame.height : frame.clientHeight) / pixelate
             pixelateCanvas.width = pixelWidth 
             pixelateCanvas.height = pixelHeight
             const pixelateCtx = pixelateCanvas.getContext("2d")!
@@ -623,8 +632,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
         if (sharpen !== 0) {
             const sharpnessCanvas = document.createElement("canvas")
-            sharpnessCanvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
-            sharpnessCanvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
+            sharpnessCanvas.width = naturalWidth
+            sharpnessCanvas.height = naturalHeight
             const sharpnessCtx = sharpnessCanvas.getContext("2d")
             sharpnessCtx?.drawImage(frame, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
             const sharpenOpacity = sharpen / 5
@@ -637,8 +646,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
         if (lightness !== 100) {
             const lightnessCanvas = document.createElement("canvas")
-            lightnessCanvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
-            lightnessCanvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
+            lightnessCanvas.width = naturalWidth
+            lightnessCanvas.height = naturalHeight
             const lightnessCtx = lightnessCanvas.getContext("2d")
             lightnessCtx?.drawImage(frame, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
@@ -648,9 +657,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
         if (buffer) {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            return img.data.buffer as T extends true ? Buffer : string 
+            return img.data.buffer as T extends true ? Buffer : string
         }
-        return canvas.toDataURL("image/jpeg") as T extends true ? Buffer : string 
+        return canvas.toDataURL("image/png") as T extends true ? Buffer : string
     }
 
     const filtersOn = () => {
@@ -722,7 +731,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 functions.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
-                let image = await renderImage(props.original.replace(/thumbnail\/\d+\//, ""))
+                let image = await renderImage()
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
                     image = await functions.convertToFormat(image, format)
                 }
@@ -843,7 +852,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} 
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
         onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 

@@ -81,7 +81,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
   if (!tag) return
   let oldBuffer = null as Buffer | null
   if (tag.image) {
-    const imgPath = functions.getTagPath("tag", tag.image)
+    const imgPath = functions.getTagPath(tag.type, tag.image)
     oldBuffer = await serverFunctions.getFile(imgPath, false, false)
     let oldHash = await phash(oldBuffer).then((hash: string) => functions.binaryToHex(hash))
     let newHash = await phash(newBuffer).then((hash: string) => functions.binaryToHex(hash))
@@ -108,7 +108,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
       await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: targetTag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
           description: vanilla.description, aliases: functions.filterNulls(vanilla.aliases), implications: functions.filterNulls(vanilla.implications), 
           pixivTags: functions.filterNulls(vanilla.pixivTags), website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, 
-          r18: vanilla.r18, featured: vanilla.featured, imageChanged: false, changes: null})
+          r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
       
       const imagePath = functions.getTagHistoryPath(targetTag, 2, filename)
       await serverFunctions.uploadFile(imagePath, newBuffer, false)
@@ -116,7 +116,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
       await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
       aliases: functions.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.filterNulls(tag.implications).map((i) => i.implication), 
       pixivTags: functions.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, r18: tag.r18, 
-      featured: tag.featured, imageChanged: true, changes: null, reason: null})
+      featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
   } else {
       const imagePath = functions.getTagHistoryPath(targetTag, nextKey, filename)
       await serverFunctions.uploadFile(imagePath, newBuffer, false)
@@ -134,7 +134,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
       await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
       aliases: functions.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.filterNulls(tag.implications).map((i) => i.implication), 
       pixivTags: functions.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, r18: tag.r18, 
-      featured: tag.featured, imageChanged: true, changes: null, reason: null})
+      featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
   }
 }
 

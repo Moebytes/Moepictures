@@ -63,7 +63,7 @@ const HistoryPage: React.FunctionComponent = () => {
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
     const {scroll} = useSearchSelector()
-    const {setScroll} = useSearchActions()
+    const {setScroll, setSearch, setSearchFlag} = useSearchActions()
     const {historyPage} = usePageSelector()
     const {setHistoryPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
@@ -751,7 +751,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "search") {
             return (
                 <><div className="history-row">
-                    <span className="history-heading">{i18n.history.search}</span>
+                    <span className="history-heading" style={{cursor: "pointer"}} onClick={searchHistoryHeaderClick}>{i18n.history.search}</span>
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -779,6 +779,12 @@ const HistoryPage: React.FunctionComponent = () => {
         } else {
             setPremiumRequired(true)
         }
+    }
+
+    const searchHistoryHeaderClick = () => {
+        history.push("/posts")
+        setSearch(`history:${session.username}`)
+        setSearchFlag(true)
     }
 
     return (

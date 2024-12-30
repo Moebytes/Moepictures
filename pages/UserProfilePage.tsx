@@ -701,21 +701,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <img className="user-icon" src={r18}/>
                         <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}
-                    {counts ? <div className="user-row">
-                    <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
-                    {counts.postEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
-                    : null}
-                    {counts.tagEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.tag.tag} <span className="user-text-alt">{counts.tagEdits}</span></span>
-                    : null}
-                    {counts.noteEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>{i18n.labels.note} <span className="user-text-alt">{counts.noteEdits}</span></span>
-                    : null}
-                    {counts.groupEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.labels.group} <span className="user-text-alt">{counts.groupEdits}</span></span>
-                    : null}
-                    </div> : null}
                     <div onClick={clearPfp} className="user-row">
                         <span className="user-link">{i18n.user.clearPfp}</span>
                     </div>
@@ -745,6 +730,22 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {permissions.isAdmin(session) ? <Link to="/news-banner" className="user-row">
                         <span className="user-link">{i18n.user.newsBanner}</span>
                     </Link> : null}
+                    {counts?.postEdits || counts?.tagEdits || counts?.noteEdits || counts?.groupEdits ? 
+                    <div className="user-row">
+                        <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
+                    {counts.postEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
+                    : null}
+                    {counts.tagEdits > 0 ? 
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>{i18n.tag.tag} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    : null}
+                    {counts.noteEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>{i18n.labels.note} <span className="user-text-alt">{counts.noteEdits}</span></span>
+                    : null}
+                    {counts.groupEdits > 0 ?
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>{i18n.labels.group} <span className="user-text-alt">{counts.groupEdits}</span></span>
+                    : null}
+                    </div> : null}
                     {generateFavgroupsJSX()}
                     {favorites.length ?
                     <div className="user-column">

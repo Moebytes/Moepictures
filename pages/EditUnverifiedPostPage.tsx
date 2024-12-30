@@ -452,6 +452,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceBookmarks("")
         setSourceBuyLink("")
         setRawTags("")
+        setDanbooruLink("")
         setArtists([{}])
         setCharacters([{}])
         setSeries([{}])
@@ -969,6 +970,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/post/edit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
+            functions.clearCache()
             return setSubmitError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.upload.error
@@ -1210,6 +1212,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 const json = await functions.fetch(danLink)
                 tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
                 tagArr.push("autotags")
+                if (upscaledFiles.length) tagArr.push("upscaled")
                 let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
                 let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
 
@@ -1317,6 +1320,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
                 tagArr.push("autotags")
                 tagArr.push("needscheck")
+                if (upscaledFiles.length) tagArr.push("upscaled")
 
                 let seriesArr = [] as string[]
 
@@ -1575,6 +1579,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1583,11 +1592,6 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                     </>
@@ -1617,6 +1621,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1625,11 +1634,6 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                 )

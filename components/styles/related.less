@@ -17,7 +17,6 @@
     font-family: Tahoma, sans-serif;
     font-size: 29px;
     color: var(--text-strong);
-    margin-bottom: 15px;
     //.stroke-black-thin();
 }
 
@@ -43,6 +42,17 @@
     &::after {
         content: "";
         flex: 0 0 45%;
+    }
+}
+
+.related-icon {
+    width: auto;
+    height: 22px;
+    cursor: pointer;
+    margin-left: 10px;
+    filter: brightness(200%) hue-rotate(40deg);
+    &:hover {
+        filter: brightness(250%) hue-rotate(40deg);
     }
 }
 

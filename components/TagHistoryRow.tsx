@@ -77,7 +77,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
-        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, type: props.tagHistory.type}, session, setSessionFlag)
+        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false,
+        featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             history.push(`/tag/history/${props.tagHistory.key}`)
         } else {
@@ -300,8 +301,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
-        if ((!prevHistory && props.tagHistory.featured) || changes.featured) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}:</span> {props.tagHistory.featured}</span>)
+        if ((!prevHistory && props.tagHistory.featuredPost) || changes.featuredPost) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}:</span> {props.tagHistory.featuredPost?.postID}</span>)
         }
         if ((!prevHistory && props.tagHistory.r18) || changes.r18) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)

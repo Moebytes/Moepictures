@@ -7,6 +7,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
+import downloadIcon from "../assets/icons/download.png"
 import xIcon from "../assets/icons/x.png"
 import rightIcon from "../assets/icons/right.png"
 import leftIcon from "../assets/icons/left.png"
@@ -117,6 +118,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [danbooruLink, setDanbooruLink] = useState("")
+    const [hideGuidelines, setHideGuidelines] = useState(false)
     const rawTagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
@@ -149,7 +151,13 @@ const UploadPage: React.FunctionComponent = (props) => {
         setPixelate(1)
 
         parseLinkParam()
+        const savedHideGuidelines = localStorage.getItem("hideGuidelines")
+        if (savedHideGuidelines) setHideGuidelines(savedHideGuidelines === "true")
     }, [])
+
+    useEffect(() => {
+        localStorage.setItem("hideGuidelines", String(hideGuidelines))
+    }, [hideGuidelines])
 
     useEffect(() => {
         document.title = i18n.buttons.upload
@@ -346,6 +354,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSourceBookmarks("")
         setSourceBuyLink("")
         setRawTags("")
+        setDanbooruLink("")
         setArtists([{}])
         setCharacters([{}])
         setSeries([{}])
@@ -1113,6 +1122,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const json = await functions.fetch(danLink)
                 tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
                 tagArr.push("autotags")
+                if (upscaledFiles.length) tagArr.push("upscaled")
                 let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
                 let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
 
@@ -1220,6 +1230,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
                 tagArr.push("autotags")
                 tagArr.push("needscheck")
+                if (upscaledFiles.length) tagArr.push("upscaled")
 
                 let seriesArr = [] as string[]
 
@@ -1479,6 +1490,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1487,11 +1503,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                     </>
@@ -1521,6 +1532,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1529,11 +1545,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                 )
@@ -1593,8 +1604,24 @@ const UploadPage: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="upload">
-                <span className="upload-heading">{i18n.buttons.upload}</span>
-                <div className="upload-guidelines">
+                <div className="upload-container-row" style={{alignItems: "center"}}>
+                    <span className="upload-heading">{i18n.buttons.upload}</span>
+                    <img className="upload-heading-icon" src={hideGuidelines ? downloadIcon : uploadIcon} onClick={() => setHideGuidelines((prev) => !prev)}/>
+                </div>
+                {submitted ?
+                <div className="upload-container">
+                    <div className="upload-container-row">
+                        {permissions.isMod(session) ?
+                        <span className="upload-text-alt">{i18n.pages.upload.submitHeading}</span> :
+                        <span className="upload-text-alt">{i18n.pages.upload.submitHeadingApproval}</span>}
+                    </div> 
+                    <div className="upload-container-row" style={{marginTop: "10px"}}>
+                        <button className="upload-button" onClick={resetAll}>
+                                <span className="upload-button-text">←{i18n.pages.upload.submitMore}</span>
+                        </button>
+                    </div>
+                </div> : <>
+                {!hideGuidelines ? <div className="upload-guidelines">
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line1}<span className="upload-guideline-link" onClick={() => history.push(`/help#uploading`)}>{i18n.pages.upload.guidelines.uploadingGuidelines}</span></span>
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line2}<span className="upload-guideline-link" onClick={() => history.push(`/help#compressing`)}>{i18n.pages.upload.guidelines.compressingGuide}</span></span>
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line3}<span className="upload-guideline-link" onClick={() => history.push(`/help#upscaling`)}>{i18n.pages.upload.guidelines.upscalingGuide}</span></span>
@@ -1619,20 +1646,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     {type === "model" ? <>
                         <span className="upload-guideline">{i18n.pages.upload.guidelines.formats.model.title1}<span className="upload-guideline-alt">{i18n.pages.upload.guidelines.formats.model.header1}</span></span>
                     </> : null}
-                </div>
-                {submitted ?
-                <div className="upload-container">
-                    <div className="upload-container-row">
-                        {permissions.isMod(session) ?
-                        <span className="upload-text-alt">{i18n.pages.upload.submitHeading}</span> :
-                        <span className="upload-text-alt">{i18n.pages.upload.submitHeadingApproval}</span>}
-                    </div> 
-                    <div className="upload-container-row" style={{marginTop: "10px"}}>
-                        <button className="upload-button" onClick={resetAll}>
-                                <span className="upload-button-text">←{i18n.pages.upload.submitMore}</span>
-                        </button>
-                    </div>
-                </div> : <>
+                </div> : null}
                 {uploadError ? <div className="upload-row"><span ref={uploadErrorRef} className="upload-text-alt"></span></div> : null}
                 {mobile ? <>
                 <div className="upload-row">

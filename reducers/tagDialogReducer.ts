@@ -3,8 +3,9 @@ import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
 import {AliasHistoryID, HistoryID, TagHistory, Tag, TagType} from "../types/Types"
 
-interface TagObj extends Partial<TagHistory> {
+interface TagObj extends Partial<Omit<TagHistory, "featuredPost">> {
     tag: string
+    featuredPost?: string | null
     failed?: boolean | string
 }
 

@@ -35,7 +35,7 @@ const PageDialog: React.FunctionComponent = (props) => {
             setPageFlag(Number(pageField))
             setTimeout(() => {
                 setMobileScrolling(false)
-                functions.jumpToTop()
+                // functions.jumpToTop()
             }, 100)
         }
         setShowPageDialog(false)

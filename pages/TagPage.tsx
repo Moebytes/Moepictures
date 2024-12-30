@@ -30,6 +30,9 @@ import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import jsxFunctions from "../structures/JSXFunctions"
+import Related from "../components/Related"
+import ToolTip from "../components/ToolTip"
+import PageDialog from "../dialogs/PageDialog"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../types/Types"
 import "./styles/tagpage.less"
 
@@ -107,17 +110,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
-        if (tag.featured) {
-            const featuredPost = await functions.get("/api/post", {postID: tag.featured},  session, setSessionFlag)
-            if (featuredPost) {
-                const featuredImage = functions.getThumbnailLink(featuredPost.images[0].type, featuredPost.postID, featuredPost.images[0].order, featuredPost.images[0].filename, "massive", mobile)
-                const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
-                if ((!session.username && featuredPost.rating !== functions.r13()) || 
-                    (!session.showR18 && featuredPost.rating !== functions.r18())) {
-                    setFeaturedImage("")
-                } else {
-                    setFeaturedImage(decrypted)
-                }
+        if (tag.featuredPost) {
+            const featuredImage = functions.getThumbnailLink(tag.featuredPost.images[0].type, tag.featuredPost.postID, tag.featuredPost.images[0].order, tag.featuredPost.images[0].filename, "massive", mobile)
+            const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
+            if ((!session.username && tag.featuredPost.rating !== functions.r13()) || 
+                (!session.showR18 && tag.featuredPost.rating !== functions.r18())) {
+                setFeaturedImage("")
+            } else {
+                setFeaturedImage(decrypted)
             }
         } else {
             setFeaturedImage("")
@@ -152,7 +152,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         tagInfo()
         updateRelatedTags()
-        updatePosts()
+        // updatePosts()
     }, [tagName, ratingType, historyID, session])
 
     useEffect(() => {
@@ -249,14 +249,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             await functions.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
-            featured: editTagObj.featured, reason: editTagObj.reason!}, session, setSessionFlag)
+            featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+                r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: editTagObj.tag, failed: true})
@@ -292,7 +292,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             website: tag.website,
             fandom: tag.fandom,
             r18: tag.r18,
-            featured: tag.featured,
+            featuredPost: tag.featuredPost?.postID,
             reason: ""
         })
     }
@@ -443,7 +443,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
-        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, type: tag.type}, session, setSessionFlag)
+        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, type: tag.type, featuredPost: tag.featuredPost?.postID,
+        r18: tag.r18 ?? false}, session, setSessionFlag)
         currentHistory(history.key)
     }
 
@@ -497,9 +498,9 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const featuredClick = (event: React.MouseEvent) => {
         if (!tag) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${tag.featured}`, "_blank")
+            window.open(`/post/${tag.featuredPost?.postID}`, "_blank")
         } else {
-            history.push(`/post/${tag.featured}`)
+            history.push(`/post/${tag.featuredPost?.postID}`)
         }
     }
 
@@ -510,11 +511,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         <DeleteTagDialog/>
         <TakedownTagDialog/>
         <RevertTagHistoryDialog/>
+        <PageDialog/>
         <TitleBar historyID={historyID}/>
         <NavBar/>
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
+                <ToolTip/>
                 {tag ? 
                 <div className="tag-page">
                     {historyID ? getHistoryButtons() : null}
@@ -545,7 +548,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                             {relatedTagJSX()}
                         </div>
                     </div>
-                    {postsJSX()}
+                    <Related tag={tag.tag} count={count}/>
+                    {/* {postsJSX()} */}
                 </div> : null}
                 <Footer/>
             </div>

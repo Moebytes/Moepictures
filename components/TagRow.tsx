@@ -139,13 +139,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
-            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                r18: editTagObj.r18, featured: editTagObj.featured, reason: editTagObj.reason}, session, setSessionFlag)
+                r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: props.tag.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: props.tag.tag, failed: true})
@@ -177,7 +177,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             website: props.tag.website,
             fandom: props.tag.fandom,
             r18: props.tag.r18,
-            featured: props.tag.featured,
+            featuredPost: props.tag.featuredPost?.postID,
             reason: ""
         })
     }

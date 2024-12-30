@@ -436,8 +436,8 @@ export default class SQLPost {
             FROM posts
             JOIN images ON posts."postID" = images."postID"
             JOIN "tag map" ON posts."postID" = "tag map"."postID"
-            FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-            FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+            LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
+            LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
             WHERE posts."postID" = $1
             GROUP BY posts."postID"
             `),
@@ -553,7 +553,7 @@ export default class SQLPost {
                     ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
-                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
                 SELECT "child posts".*, 
@@ -578,7 +578,7 @@ export default class SQLPost {
                     ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
-                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
                 SELECT "unverified child posts".*, 
@@ -603,7 +603,7 @@ export default class SQLPost {
                     ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
-                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
                 SELECT "child posts".*, 
@@ -628,7 +628,7 @@ export default class SQLPost {
                     ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
-                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
                 SELECT "unverified child posts".*, 

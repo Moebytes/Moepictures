@@ -148,12 +148,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
         const savedPaused = localStorage.getItem("paused")
         if (savedPaused) setPaused(savedPaused === "true")
+        const savedImageExpand = localStorage.getItem("imageExpand")
+        if (savedImageExpand) setImageExpand(savedImageExpand === "true")
     }, [])
 
     useEffect(() => {
         localStorage.setItem("disableZoom", String(disableZoom))
         localStorage.setItem("paused", String(paused))
-    }, [disableZoom, paused])
+        localStorage.setItem("imageExpand", String(imageExpand))
+    }, [disableZoom, paused, imageExpand])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

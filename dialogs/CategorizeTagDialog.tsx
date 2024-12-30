@@ -147,7 +147,8 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "220px", height: "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-box" style={{width: "220px", height: "max-content", paddingLeft: "20px", paddingRight: "20px"}} 
+                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
                                 <span className="dialog-title">{i18n.dialogs.categorizeTag.title}</span>
@@ -168,7 +169,8 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{marginTop: "-30px", width: "270px", height: submitted ? "165px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{marginTop: "-30px", width: "270px", height: submitted ? "165px" : "max-content", paddingLeft: "20px", 
+                    paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">{i18n.dialogs.categorizeTag.request}</span>

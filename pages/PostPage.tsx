@@ -30,6 +30,7 @@ import FavgroupDialog from "../dialogs/FavGroupDialog"
 import GroupDialog from "../dialogs/GroupDialog"
 import ParentDialog from "../dialogs/ParentDialog"
 import OCRDialog from "../dialogs/OCRDialog"
+import PageDialog from "../dialogs/PageDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertNoteHistoryDialog from "../dialogs/RevertNoteHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
@@ -40,6 +41,7 @@ import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
+import ToolTip from "../components/ToolTip"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
@@ -48,8 +50,6 @@ useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 import {PostSearch, TagCategories, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../types/Types"
-
-let characterTag = ""
 
 interface Props {
     match: {params: {id: string, slug: string}}
@@ -255,24 +255,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 console.log(err)
             }
         }
-        const updateRelatedPosts = async () => {
-            if (!tagCategories?.characters?.[0]?.tag || !post) return
-            if (tagCategories?.characters?.[0]?.tag !== characterTag) {
-                try {
-                    let relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, rating: functions.isR18(post.rating) ? functions.r18() : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
-                    relatedPosts = relatedPosts.filter((p) => p.postID !== postID)
-                    if (relatedPosts?.length) setRelatedPosts(relatedPosts)
-                    characterTag = tagCategories.characters[0].tag
-                } catch (err) {
-                    console.log(err)
-                }
-            }
-        }
         if (session.showRelated) {
-            setTimeout(() => {
-                updateArtistPosts()
-                updateRelatedPosts()
-            }, 1500)
+            updateArtistPosts()
         }
     }, [session, post, tagCategories])
 
@@ -706,6 +690,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <GroupDialog/>
         <ParentDialog/>
         <OCRDialog/>
+        <PageDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
@@ -724,6 +709,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <SideBar post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
             <SideBar/>}
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
+                <ToolTip/>
                 <div className="post-container">
                     {historyID || noteID ? getHistoryButtons() : null}
                     {/*nsfwChecker() &&*/ images.length > 1 ?
@@ -740,8 +726,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
-                    {relatedPosts.length ? <Related related={relatedPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
+                    {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag}/> : null}
                     <Footer/>
                 </div>
             </div>

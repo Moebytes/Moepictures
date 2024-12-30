@@ -310,7 +310,7 @@ export default class SQLThread {
                 )
                 SELECT (COALESCE("threadCount", 0) + COALESCE("replyCount", 0)) AS postCount
                 FROM "threadCounts"
-                FULL JOIN "replyCounts"
+                LEFT JOIN "replyCounts"
                 ON "threadCounts".creator = "replyCounts".creator
             `),
             rowMode: "array",

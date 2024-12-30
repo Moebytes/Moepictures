@@ -7,19 +7,19 @@ export default class SQLHistory {
     /** Insert tag history */
     public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string | null, 
         imageHash: string | null, description: string, aliases: string[], implications: string[], pixivTags: string[], website: string | null, 
-        social: string | null, twitter: string | null, fandom: string | null, r18: boolean | null, featured: string | null, imageChanged: boolean, 
+        social: string | null, twitter: string | null, fandom: string | null, r18: boolean | null, featuredPost: string | undefined | null, imageChanged: boolean, 
         changes: any, reason?: string | null}) => {
         const {username, tag, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
-        twitter, fandom, r18, featured, imageChanged, changes, reason} = options
+        twitter, fandom, r18, featuredPost, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "imageHash", "description", 
-            "aliases", "implications", "pixivTags", "website", "social", "twitter", "fandom", "r18", "featured", "imageChanged", 
+            "aliases", "implications", "pixivTags", "website", "social", "twitter", "fandom", "r18", "featuredPost", "imageChanged", 
             "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) 
             RETURNING "historyID"`,
             rowMode: "array",
             values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
-            twitter, fandom, r18, featured, imageChanged, changes, reason]
+            twitter, fandom, r18, featuredPost, imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
@@ -69,9 +69,17 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, tagQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                )
                 SELECT "tag history".*,
+                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "tag history"."historyID"
                 ORDER BY "tag history"."date" DESC
@@ -88,10 +96,19 @@ export default class SQLHistory {
     public static tagHistoryID = async (tag: string, historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                )
                 SELECT "tag history".*,
+                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
+                GROUP BY "tag history"."historyID"
             `),
             values: [tag, historyID]
         }
@@ -103,9 +120,17 @@ export default class SQLHistory {
     public static userTagHistory = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                )
                 SELECT "tag history".*,
+                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."user" = $1
                 GROUP BY "tag history"."historyID"
                 ORDER BY "tag history"."date" DESC
@@ -192,7 +217,7 @@ export default class SQLHistory {
                 posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                FULL JOIN posts ON posts."postID" = "post history"."postID"
+                LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
@@ -213,7 +238,7 @@ export default class SQLHistory {
                 SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
                 FROM "post history"
-                FULL JOIN posts ON posts."postID" = "post history"."postID"
+                LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"
@@ -232,7 +257,7 @@ export default class SQLHistory {
                 posts.approver, posts."approveDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                FULL JOIN posts ON posts."postID" = "post history"."postID"
+                LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate"

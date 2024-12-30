@@ -382,11 +382,11 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom!, "_blank")}>{i18n.labels.newFandom}: {newTag.fandom}</span>)
             }
         }
-        if (changes.featured) {
+        if (changes.featuredPost) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className="mod-post-text">{i18n.labels.oldFeatured}: {oldTag.featured}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldFeatured}: {oldTag.featuredPost?.postID}</span>)
             } else {
-                jsx.push(<span className="mod-post-text">{i18n.labels.newFeatured}: {newTag.featured}</span>)
+                jsx.push(<span className="mod-post-text">{i18n.labels.newFeatured}: {newTag.featuredPost?.postID}</span>)
             }
         }
         if (changes.r18) {

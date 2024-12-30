@@ -412,8 +412,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(user.joinDate || ""), i18n)}</span>
                     </div>
-                    {counts ? <div className="user-row">
-                    <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
+                    {counts?.postEdits || counts?.tagEdits || counts?.noteEdits || counts?.groupEdits ? 
+                    <div className="user-row">
+                        <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
                     {counts.postEdits > 0 ? 
                         <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
                     : null}

@@ -16,10 +16,14 @@ interface Props {
     id: string
     img: string
     audio: string
-    cached: boolean
-    width?: number
-    height?: number
+    cached?: boolean
     post: PostSearch
+    square?: boolean
+    marginBottom?: number
+    marginLeft?: number
+    height?: number
+    borderRadius?: number
+    autoLoad?: boolean
     reupdate?: () => void
 }
 
@@ -70,12 +74,16 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             return false
         },
         load: async () => {
-            if (decrypted) return
-            const decryptedImage = await functions.decryptThumb(props.audio, session, `${props.audio}-${sizeType}`)
-            setImage(decryptedImage)
-            setDecrypted(true)
+            loadImage()
         }
     }))
+
+    const loadImage = async () => {
+        if (decrypted) return
+        const decryptedImage = await functions.decryptThumb(props.audio, session, `${props.audio}-${sizeType}`)
+        setImage(decryptedImage)
+        setDecrypted(true)
+    }
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         const entry = entries[0]
@@ -106,6 +114,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         setSecondsProgress(0)
         setSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
+        if (props.autoLoad) loadImage()
     }, [props.audio])
 
     const resizePixelateCanvas = () => {
@@ -165,27 +174,29 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         const currentRef = ref.current!
         const refWidth = ref.current!.width
         const refHeight = ref.current!.height
-        if (square) {
+        if (square || props.square) {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
             const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
-            containerRef.current.style.width = `${containerWidth}px`
-            containerRef.current.style.height = `${containerWidth}px`
-            containerRef.current.style.marginBottom = "3px"
+            containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
+            containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
             const landscape = refWidth <=refHeight
             if (landscape) {
-                currentRef.style.width = `${containerWidth}px`
+                currentRef.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
                 currentRef.style.height = "auto"
             } else {
                 currentRef.style.width = "auto"
-                currentRef.style.height = `${containerWidth}px`
+                currentRef.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             }
         } else {
             containerRef.current.style.width = "max-content"
             containerRef.current.style.height = "max-content"
             currentRef.style.width = "auto"
-            currentRef.style.height = `${imageSize}px`
-            containerRef.current.style.marginBottom = "10px"
+            currentRef.style.height = props.height ? `${props.height}px` : `${imageSize}px`
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "10px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
         }
     }
 
@@ -435,7 +446,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [selectionMode])
 
-    const loadImage = async () => {
+    const drawImage = async () => {
         if (!ref.current || !overlayRef.current || !lightnessRef.current) return
         let src = image
         const img = document.createElement("img")
@@ -456,7 +467,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     useEffect(() => {
-        loadImage()
+        drawImage()
     }, [image])
 
     const songClick = (event: React.MouseEvent) => {
@@ -468,7 +479,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
 
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
         onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={props.post.private ? privateIcon : musicNote} 

@@ -6,7 +6,7 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import path from "path"
-import {TagHistory, Tag, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
+import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
 TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType} from "../types/Types"
 
 const tagLimiter = rateLimit({
@@ -165,7 +165,7 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/edit", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, 
-            website, fandom, r18, featured, reason, updater, updatedDate, silent} = req.body as TagEditParams
+            website, fandom, r18, featuredPost, reason, updater, updatedDate, silent} = req.body as TagEditParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -297,8 +297,8 @@ const TagRoutes = (app: Express) => {
             if (r18 !== undefined) {
                 await sql.tag.updateTag(tag, "r18", r18)
             }
-            if (featured !== undefined) {
-                await sql.tag.updateTag(tag, "featured", featured)
+            if (featuredPost !== undefined) {
+                await sql.tag.updateTag(tag, "featuredPost", featuredPost)
             }
             if (type !== undefined) {
                 await sql.tag.updateTag(tag, "type", type)
@@ -355,7 +355,7 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
                     description: vanilla.description, aliases: functions.filterNulls(vanilla.aliases), implications: functions.filterNulls(vanilla.implications), pixivTags: functions.filterNulls(vanilla.pixivTags), 
-                    website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, r18: vanilla.r18, featured: vanilla.featured, imageChanged: false, changes: null})
+                    website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
@@ -366,7 +366,7 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
-                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, featured: updated.featured,
+                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
             } else {
                 if (image?.[0] && imageFilename) {
@@ -390,7 +390,7 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
-                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, featured: updated.featured,
+                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
             }
             res.status(200).send("Success")
@@ -632,7 +632,7 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/edit/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, website, 
-            fandom, r18, featured, reason} = req.body as TagEditRequestParams
+            fandom, r18, featuredPost, reason} = req.body as TagEditRequestParams
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
@@ -648,7 +648,7 @@ const TagRoutes = (app: Express) => {
             if (website === undefined) website = tagObj.website
             if (fandom === undefined) fandom = tagObj.fandom
             if (r18 === undefined) r18 = tagObj.r18 || false
-            if (featured === undefined) featured = tagObj.featured
+            if (featuredPost === undefined) featuredPost = tagObj.featuredPost?.postID
             let imagePath = tagObj.image
             let imageHash = tagObj.imageHash
             let imageChanged = false
@@ -665,13 +665,15 @@ const TagRoutes = (app: Express) => {
                 }
                 imageChanged = true
             }
+            let featuredObj = null as Post | null
+            if (featuredPost) featuredObj = await sql.post.post(featuredPost) ?? null
             const changes = functions.parseTagChanges(tagObj, {tag: key, type, description, aliases, implications, 
-            pixivTags, website, social, twitter, fandom, r18} as unknown as Tag)
+            pixivTags, website, social, twitter, fandom, featuredObj, r18} as unknown as Tag)
             aliases = aliases?.[0] ? aliases : []
             implications = implications?.[0] ? implications : []
             pixivTags = pixivTags?.[0] ? pixivTags : []
             await sql.request.insertTagEditRequest(req.session.username, tag, key, type, description, imagePath, imageHash, aliases, implications, pixivTags, social, 
-            twitter, website, fandom, r18, featured, imageChanged, changes, reason)
+            twitter, website, fandom, r18, featuredPost, imageChanged, changes, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

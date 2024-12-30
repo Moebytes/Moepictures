@@ -171,6 +171,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         setTimeout(() => {
             setSelectionMode(true)
         }, 200)
+        functions.clearCache()
     }
 
     const click = (button: "accept" | "reject") => {
@@ -309,6 +310,11 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 </div>
                 <div className="dialog-row">
                     {type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                        <img className="quickedit-button-img" src={promo}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
+                    </button> : null}
+                    {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                         <img className="quickedit-button-img" src={sketch}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
@@ -317,11 +323,6 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                         <img className="quickedit-button-img" src={lineart}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
-                    </button> : null}
-                    {type !== "live2d" ? 
-                    <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                        <img className="quickedit-button-img" src={promo}/>
-                        <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
                     </button> : null}
                 </div>
                 </>

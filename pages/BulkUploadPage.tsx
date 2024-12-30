@@ -778,7 +778,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             if (json.rating === "e") rating = "hentai"
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
-            tagArr.push("upscaled")
+            if (upscaledFiles.length) tagArr.push("upscaled")
             let artistStrArr = json.tag_string_artist.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
@@ -884,7 +884,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             tagArr.push("autotags")
             tagArr.push("needscheck")
-            tagArr.push("upscaled")
+            if (upscaledFiles.length) tagArr.push("upscaled")
 
             let seriesArr = [] as string[]
 
@@ -1146,6 +1146,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1154,11 +1159,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                     </>
@@ -1188,6 +1188,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
+                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
+                            <img className="upload-button-img" src={promo}/>
+                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
+                        </button> : null}
+                        {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
@@ -1196,11 +1201,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
-                        </button> : null}
-                        {type !== "live2d" ?
-                        <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
-                            <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                     </div>
                 )

@@ -300,7 +300,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [posts, i18n])
 
     const updateOffset = async () => {
-        console.log("here")
         if (noResults) return
         if (ended) return
         let newOffset = offset + limit
@@ -582,7 +581,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img }model={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "audio") {

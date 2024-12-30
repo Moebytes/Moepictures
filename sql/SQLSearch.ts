@@ -33,8 +33,7 @@ export default class SQLSearch {
         if (style === "sketch") styleQuery = `posts.style = 'sketch'`
         if (style === "lineart") styleQuery = `posts.style = 'lineart'`
         if (style === "promo") styleQuery = `posts.style = 'promo'`
-        if (style === "all") styleQuery = `(lower(posts.style) = '2d' OR lower(posts.style) = '3d' 
-        OR posts.style = 'pixel' OR posts.style = 'chibi' OR posts.style = 'daki')`
+        if (style === "all") styleQuery = `NOT (posts.style = 'sketch' OR posts.style = 'lineart')`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
@@ -189,8 +188,8 @@ export default class SQLSearch {
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
                 ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
-                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
+                LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 LEFT JOIN "child posts" ON posts."postID" = "child posts"."parentID"
                 LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
                 ${username || favgroupOrder ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
@@ -329,6 +328,8 @@ export default class SQLSearch {
 
     /** Get posts. */
     public static posts = async (postIDs?: string[]) => {
+        postIDs = postIDs?.filter(id => String(id) !== "undefined")
+        if (!postIDs?.length) return []
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
@@ -338,8 +339,8 @@ export default class SQLSearch {
             FROM posts
             JOIN images ON posts."postID" = images."postID"
             JOIN "tag map" ON posts."postID" = "tag map"."postID"
-            FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-            FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+            LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
+            LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
             ${postIDs ? "WHERE posts.\"postID\" = ANY ($1)" : ""}
             GROUP BY posts."postID"
             `)
@@ -466,7 +467,7 @@ export default class SQLSearch {
                         ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
-                        FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                        LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                         GROUP BY posts."postID"
                     )
                     SELECT tags.*, json_agg(post_json.*) AS posts,
@@ -548,8 +549,8 @@ export default class SQLSearch {
                     COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
-                    FULL JOIN aliases ON aliases."tag" = tags."tag"
-                    FULL JOIN implications ON implications."tag" = tags."tag"
+                    LEFT JOIN aliases ON aliases."tag" = tags."tag"
+                    LEFT JOIN implications ON implications."tag" = tags."tag"
                     JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                     JOIN posts ON posts."postID" = "tag map"."postID"
                     GROUP BY "tags".tag
@@ -576,8 +577,8 @@ export default class SQLSearch {
                     COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
-                    FULL JOIN aliases ON aliases."tag" = tags."tag"
-                    FULL JOIN implications ON implications."tag" = tags."tag"
+                    LEFT JOIN aliases ON aliases."tag" = tags."tag"
+                    LEFT JOIN implications ON implications."tag" = tags."tag"
                     JOIN "tag map" ON "tag map"."tag" = tags."tag"
                     AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
                     OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%')
@@ -603,7 +604,7 @@ export default class SQLSearch {
         let i = 1
         let searchValue = i
         if (search) {
-            searchQuery = `WHERE lower(groups."name") LIKE '%' || $${searchValue} || '%'`
+            searchQuery = `lower(groups."name") LIKE '%' || $${searchValue} || '%'`
             values.push(search.toLowerCase())
             i++
         }

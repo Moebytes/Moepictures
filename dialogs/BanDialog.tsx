@@ -77,8 +77,8 @@ const BanDialog: React.FunctionComponent = (props) => {
                 await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
                 rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), 
                 characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
-                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, 
-                noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
+                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date,
+                parentID: currentHistory.parentID, noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {
@@ -97,7 +97,8 @@ const BanDialog: React.FunctionComponent = (props) => {
                 }
                 await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image: image!, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
-                website: currentHistory.website, fandom: currentHistory.fandom, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
+                website: currentHistory.website, fandom: currentHistory.fandom, pixivTags: currentHistory.pixivTags, featuredPost: currentHistory.featuredPost?.postID,
+                r18: currentHistory.r18 ?? false, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }
         if (revertData.revertGroupIDs?.length) {

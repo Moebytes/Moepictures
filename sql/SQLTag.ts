@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Tag, BulkTag, TagCount, Implication, Alias, PostTagged, 
+import {Tag, MiniTag, BulkTag, TagCount, Implication, Alias, PostTagged, 
 AliasHistory, ImplicationHistory, AliasHistorySearch} from "../types/Types"
 
 export default class SQLTag {
@@ -27,13 +27,13 @@ export default class SQLTag {
     /** Insert a new tag (all populated fields). */
     public static insertTagFromData = async (data: Tag) => {
         const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, pixivTags, banned, hidden, r18, featured} = data
+            twitter, fandom, pixivTags, banned, hidden, r18, featuredPost} = data
         const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", 
             "updater", "updatedDate", "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18", 
-            "featured") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+            "featuredPost") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
             values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, pixivTags, banned, hidden, r18, featured]
+            twitter, fandom, pixivTags, banned, hidden, r18, featuredPost]
         }
         try {
             await SQLQuery.flushDB()
@@ -207,10 +207,18 @@ export default class SQLTag {
         let whereQuery = tags?.[0] ? `WHERE "tags".tag = ANY ($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications
+                    WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                    )
+                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM tags
-                    FULL JOIN aliases ON aliases."tag" = tags."tag"
-                    FULL JOIN implications ON implications."tag" = tags."tag"
+                    LEFT JOIN post_json ON post_json."postID" = tags."featuredPost"
+                    LEFT JOIN aliases ON aliases."tag" = tags."tag"
+                    LEFT JOIN implications ON implications."tag" = tags."tag"
                     ${whereQuery}
                     GROUP BY "tags".tag
             `)
@@ -225,10 +233,18 @@ export default class SQLTag {
         let whereQuery = tags?.[0] ? `WHERE "unverified tags".tag = ANY ($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT implications.*) AS implications
+                    WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                    )
+                    SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM "unverified tags"
-                    FULL JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
-                    FULL JOIN implications ON implications."tag" = "unverified tags"."tag"
+                    LEFT JOIN post_json ON post_json."postID" = "unverified tags"."featuredPost"
+                    LEFT JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
+                    LEFT JOIN implications ON implications."tag" = "unverified tags"."tag"
                     ${whereQuery}
                     GROUP BY "unverified tags".tag
             `)
@@ -243,10 +259,18 @@ export default class SQLTag {
         if (!tag) return undefined
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications
+                    WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
+                    )
+                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM tags
-                    FULL JOIN aliases ON aliases."tag" = tags."tag"
-                    FULL JOIN implications ON implications."tag" = tags."tag"
+                    LEFT JOIN post_json ON post_json."postID" = tags."featuredPost"
+                    LEFT JOIN aliases ON aliases."tag" = tags."tag"
+                    LEFT JOIN implications ON implications."tag" = tags."tag"
                     WHERE "tags".tag = $1
                     GROUP BY "tags".tag
             `),
@@ -459,7 +483,7 @@ export default class SQLTag {
             values: [pixivTag]
         }
         const result = await SQLQuery.run(query, true)
-        return result[0] as Promise<Tag | undefined>
+        return result[0] as Promise<MiniTag | undefined>
     }
 
     /** Insert alias history */

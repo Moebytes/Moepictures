@@ -1185,8 +1185,12 @@ export default class Functions {
     }
 
     public static getTagPath = (folder: string, filename: string) => {
-        if (folder === "attribute") folder = "tag"
-        return `${folder}/${filename}`
+        let dest = "tag"
+        if (folder === "artist") dest = "artist"
+        if (folder === "character") dest = "character"
+        if (folder === "series") dest = "series"
+        if (folder === "pfp") dest = "pfp"
+        return `${dest}/${filename}`
     }
 
     public static getTagHistoryPath = (tag: string, key: number, filename: string) => {
@@ -1195,16 +1199,24 @@ export default class Functions {
 
     public static getTagLink = (folder: string, filename: string | null, hash: string | null) => {
         if (!filename) return ""
-        if (folder === "attribute") folder = "tag"
+        let dest = "tag"
+        if (folder === "artist") dest = "artist"
+        if (folder === "character") dest = "character"
+        if (folder === "series") dest = "series"
+        if (folder === "pfp") dest = "pfp"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
-        const link = `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
+        const link = `${window.location.protocol}//${window.location.host}/${dest}/${encodeURIComponent(filename)}`
         return hash ? `${link}?hash=${hash}` : link
     }
 
     public static getUnverifiedTagLink = (folder: string, filename: string | null) => {
         if (!filename) return ""
-        if (folder === "attribute") folder = "tag"
-        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${encodeURIComponent(filename)}`
+        let dest = "tag"
+        if (folder === "artist") dest = "artist"
+        if (folder === "character") dest = "character"
+        if (folder === "series") dest = "series"
+        if (folder === "pfp") dest = "pfp"
+        return `${window.location.protocol}//${window.location.host}/unverified/${dest}/${encodeURIComponent(filename)}`
     }
 
     public static formatDate(date: Date, yearFirst?: boolean) {
@@ -1316,6 +1328,10 @@ export default class Functions {
 
     public static r13 = () => {
         return "cute" as PostRating
+    }
+
+    public static isSketch = (styleType: PostStyle) => {
+        return styleType === "sketch" || styleType === "lineart"
     }
       
     public static validStyle = (style: PostStyle, all?: boolean) => {
@@ -2792,8 +2808,8 @@ export default class Functions {
         if (oldTag.fandom !== newTag.fandom) {
             json.fandom = newTag.fandom
         }
-        if (oldTag.featured !== newTag.featured) {
-            json.featured = newTag.featured
+        if (oldTag.featuredPost?.postID !== newTag.featuredPost?.postID) {
+            json.featuredPost = newTag.featuredPost?.postID
         }
         if (Boolean(oldTag.r18) !== Boolean(newTag.r18)) {
             json.r18 = newTag.r18

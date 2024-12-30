@@ -101,12 +101,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             type: props.postHistory.type, rating: props.postHistory.rating, source: source!, style: props.postHistory.style, 
             artists: functions.tagObject(props.postHistory.artists), characters: functions.tagObject(props.postHistory.characters), 
             preserveChildren: Boolean(props.postHistory.parentID), series: functions.tagObject(props.postHistory.series), 
-            noImageUpdate: true, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
+            parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, newTags, 
+            reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
             rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
             characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, 
-            reason: props.postHistory.reason}, session, setSessionFlag)
+            parentID: props.postHistory.parentID, reason: props.postHistory.reason}, session, setSessionFlag)
         }
         props.onEdit?.()
     }

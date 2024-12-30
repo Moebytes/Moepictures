@@ -167,7 +167,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
                 const thumbnail = await functions.videoThumbnail(img)
                 setImg(thumbnail)
             } else {
-                const image = props.note.post.images[0]
+                const image = props.note.post.images[props.note.order - 1]
                 const thumb = functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "medium", mobile)
                 const img = await functions.decryptThumb(thumb, session)
                 setImg(img)

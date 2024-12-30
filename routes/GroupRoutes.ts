@@ -33,12 +33,11 @@ const GroupRoutes = (app: Express) => {
             const slug = functions.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
-            try {
+            const group = await sql.group.group(slug)
+            if (!group) {
                 const groupID = await sql.group.insertGroup(targetUser, name, slug, post.rating)
                 await sql.group.insertGroupPost(String(groupID), postID, 1)
-            } catch {
-                const group = await sql.group.group(slug)
-                if (!group) return res.status(400).send("Invalid group")
+            } else {
                 if (!group.posts?.length) group.posts = [{order: 0}] as any
                 const maxOrder = Math.max(...group.posts.map((post: any) => post.order))
                 if (group.rating !== post.rating) {

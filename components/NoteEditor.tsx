@@ -228,11 +228,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     if (imageExpand) {
-        maxHeight = 1797
+        maxHeight = 4572 //1797
     }
 
     let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
     if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
+    if (targetWidth*scale > maxWidth) scale = maxWidth / targetWidth
 
     const imagePixelate = () => {
         if (!pixelateRef.current || !overlayRef.current) return

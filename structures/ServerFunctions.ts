@@ -454,6 +454,8 @@ export default class ServerFunctions {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
+            const newImage = newImages[i]
+            if (!oldImage || !newImage) continue
             let oldPath = ""
             if (upscaled) {
                 oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
@@ -462,7 +464,6 @@ export default class ServerFunctions {
             }
             const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false) : await ServerFunctions.getUnverifiedFile(oldPath, false) as any
             if (!oldBuffer) continue
-            const newImage = newImages[i]
             let newBuffer = null as Buffer | null
             if ("bytes" in newImage) {
                 newBuffer = Buffer.from(newImage.bytes)
@@ -522,10 +523,11 @@ export default class ServerFunctions {
         let newHashes = [] as {hash: string, order: number}[]
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
+            const newImage = newImages[i]
+            if (!oldImage || !newImage) continue
             let oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             const oldBuffer = unverified ? await ServerFunctions.getUnverifiedFile(oldPath, false)
             : await ServerFunctions.getFile(oldPath, false, r18)
-            const newImage = newImages[i]
             let newBuffer = null as Buffer | null
             if ("bytes" in newImage) {
                 newBuffer = Buffer.from(newImage.bytes)

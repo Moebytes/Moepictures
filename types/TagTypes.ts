@@ -53,7 +53,7 @@ export interface Tag {
     social: string | null
     twitter: string | null
     fandom: string | null
-    featured: string | null
+    featuredPost: Post | null
     hidden: boolean | null
     banned: boolean | null
     aliases: Array<Alias | null>
@@ -160,7 +160,7 @@ export interface TagEditParams {
     social?: string | null
     twitter?: string | null
     fandom?: string | null
-    featured?: string | null
+    featuredPost?: string | null
     r18?: boolean
     reason?: string | null
     updater?: string

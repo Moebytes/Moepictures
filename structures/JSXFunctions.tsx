@@ -278,9 +278,9 @@ export default class JSXFunctions {
 
     public static parseEmails = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
-        const parts = text.split(/(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/g)
+        const parts = text.split(/(\b[A-Za-z0-9._%+-]+[@\uFF20][A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/g)
         parts.forEach((part, index) => {
-            if (part.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/)) {
+            if (part.match(/\b[A-Za-z0-9._%+-]+[@\uFF20][A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/)) {
                 items.push({text: null, jsx: (
                     <span key={index}>
                         <img className="link-favicon" src={email}/>

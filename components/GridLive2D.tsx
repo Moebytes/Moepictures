@@ -18,9 +18,13 @@ interface Props {
     id: string
     img: string
     live2d: string
-    width?: number
-    height?: number
     post: PostSearch
+    square?: boolean
+    marginBottom?: number
+    marginLeft?: number
+    height?: number
+    borderRadius?: number
+    autoLoad?: boolean
     reupdate?: () => void
 }
 
@@ -76,13 +80,17 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             return true
         },
         load: async () => {
-            if (model) return
-            return mobile ? loadImage() : loadModel()
+            load()
         },
         update: async () => {
             return mobile ? loadImage() : loadModel()
         }
     }))
+
+    const load = async () => {
+        if (model) return
+        return mobile ? loadImage() : loadModel()
+    }
 
     useEffect(() => {
         props.reupdate?.()
@@ -252,6 +260,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         setImageLoaded(false)
         setModel(null)
+        if (props.autoLoad) load()
     }, [props.live2d])
 
     const resizePixelateCanvas = () => {
@@ -308,27 +317,29 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         if (!containerRef.current || !currentRef) return
         const refWidth = currentRef.clientWidth
         const refHeight = currentRef.clientHeight
-        if (square) {
+        if (square || props.square) {
             const sidebarWidth = functions.sidebarWidth()
             const width = window.innerWidth - sidebarWidth
             const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
-            containerRef.current.style.width = `${containerWidth}px`
-            containerRef.current.style.height = `${containerWidth}px`
-            containerRef.current.style.marginBottom = "3px"
+            containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
+            containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
             const landscape = refWidth <=refHeight
             if (landscape) {
-                currentRef.style.width = `${containerWidth}px`
+                currentRef.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
                 currentRef.style.height = "auto"
             } else {
                 currentRef.style.width = "auto"
-                currentRef.style.height = `${containerWidth}px`
+                currentRef.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             }
         } else {
             containerRef.current.style.width = "max-content"
             containerRef.current.style.height = "max-content"
             currentRef.style.width = "auto"
-            currentRef.style.height = `${imageSize}px`
-            containerRef.current.style.marginBottom = "10px"
+            currentRef.style.height = props.height ? `${props.height}px` : `${imageSize}px`
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "10px"
+            containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
         }
     }
 
@@ -612,8 +623,9 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     }, [image])
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} 
-        onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
+        borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
+        onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
                 ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}

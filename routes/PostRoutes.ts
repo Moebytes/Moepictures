@@ -64,7 +64,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/posts", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postIDs = req.query.postIDs as string[]
-            if (!postIDs?.filter(id => id !== "undefined").length) return res.status(200).json([])
+            if (!postIDs?.length) return res.status(200).json([])
             if (!permissions.isMod(req.session)) return res.status(403).end()
             let result = await sql.search.posts(postIDs)
             if (!permissions.isMod(req.session)) {

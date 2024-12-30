@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
-    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
+    "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "banned" boolean,
     "hidden" boolean,
     "r18" boolean
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS "unverified tags" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
-    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL
+    "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS "threads" (
@@ -431,7 +431,7 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
-    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
+    "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,
     "reason" text
@@ -532,7 +532,7 @@ CREATE TABLE IF NOT EXISTS "tag history" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
-    "featured" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
+    "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,
     "reason" text

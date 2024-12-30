@@ -18,7 +18,8 @@ const pageSlice = createSlice({
         historyPage: 1,
         modPage: 1,
         groupsPage: 1,
-        messagePage: 1
+        messagePage: 1,
+        relatedPage: 1
     },
     reducers: {
         setPage: (state, action) => {state.page = action.payload},
@@ -34,7 +35,8 @@ const pageSlice = createSlice({
         setHistoryPage: (state, action) => {state.historyPage = action.payload},
         setModPage: (state, action) => {state.modPage = action.payload},
         setGroupsPage: (state, action) => {state.groupsPage = action.payload},
-        setMessagePage: (state, action) => {state.messagePage = action.payload}
+        setMessagePage: (state, action) => {state.messagePage = action.payload},
+        setRelatedPage: (state, action) => {state.relatedPage = action.payload}
     }    
 })
 
@@ -42,7 +44,7 @@ const {
     setPage, setCommentsPage, setNotesPage, setArtistsPage, 
     setCharactersPage, setSeriesPage, setTagsPage, setForumPage, 
     setThreadPage, setMailPage, setHistoryPage, setModPage, 
-    setGroupsPage, setMessagePage
+    setGroupsPage, setMessagePage, setRelatedPage
 } = pageSlice.actions
 
 export const usePageSelector = () => {
@@ -61,7 +63,8 @@ export const usePageSelector = () => {
         historyPage: selector((state) => state.page.historyPage),
         modPage: selector((state) => state.page.modPage),
         groupsPage: selector((state) => state.page.groupsPage),
-        messagePage: selector((state) => state.page.messagePage)
+        messagePage: selector((state) => state.page.messagePage),
+        relatedPage: selector((state) => state.page.relatedPage)
     }
 }
 
@@ -81,7 +84,8 @@ export const usePageActions = () => {
         setHistoryPage: (state: number) => dispatch(setHistoryPage(state)),
         setModPage: (state: number) => dispatch(setModPage(state)),
         setGroupsPage: (state: number) => dispatch(setGroupsPage(state)),
-        setMessagePage: (state: number) => dispatch(setMessagePage(state))
+        setMessagePage: (state: number) => dispatch(setMessagePage(state)),
+        setRelatedPage: (state: number) => dispatch(setRelatedPage(state))
     }
 }
 
