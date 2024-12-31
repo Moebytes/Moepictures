@@ -740,6 +740,44 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/misc/api-key", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            const key = cryptoFunctions.generateAPIKey()
+            const hashedKey = cryptoFunctions.hashAPIKey(key)
+            await sql.token.insertAPIKey(req.session.username, hashedKey)
+            res.status(200).send(key)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/misc/api-key/status", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            const apiKey = await sql.token.apiKeyByUsername(req.session.username)
+            serverFunctions.sendEncrypted(apiKey ? true : false, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.delete("/api/misc/api-key/delete", miscLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            await sql.token.deleteAPIKey(req.session.username)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
     app.post("/api/client-key", miscLimiter, async (req: Request, res: Response) => {
         try {
             const {publicKey} = req.body as {publicKey: string}

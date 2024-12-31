@@ -35,47 +35,53 @@ export const handler = (req: Request, res: Response) => {
 }
 
 export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
-    if (ServerFunctions.validateAPIKey(req)) return next()
+    if (req.session.apiKey) return next()
     if (!ServerFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
     next()
 }
 
 export const apiKeyLogin = async (req: Request, res: Response, next: NextFunction) => {
     if (req.session.username) return next()
-    if (ServerFunctions.validateAPIKey(req)) {
-        const user = await sql.user.user(process.env.API_USERNAME!)
-        if (!user) return next()
-        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-        ip = ip?.toString().replace("::ffff:", "") || ""
-        req.session.$2fa = user.$2fa
-        req.session.email = user.email
-        req.session.emailVerified = user.emailVerified
-        req.session.username = user.username
-        req.session.joinDate = user.joinDate
-        req.session.image = user.image 
-        req.session.bio = user.bio
-        req.session.publicFavorites = user.publicFavorites
-        req.session.image = user.image
-        req.session.imageHash = user.imageHash
-        req.session.imagePost = user.imagePost
-        req.session.role = user.role
-        req.session.banned = user.banned
-        await sql.user.updateUser(user.username, "ip", ip as string)
-        req.session.ip = ip as string
-        const {secret, token} = ServerFunctions.generateCSRF()
-        req.session.csrfSecret = secret
-        req.session.csrfToken = token
-        req.session.showRelated = user.showRelated
-        req.session.showTooltips = user.showTooltips
-        req.session.showTagBanner = user.showTagBanner
-        req.session.downloadPixivID = user.downloadPixivID
-        req.session.autosearchInterval = user.autosearchInterval
-        req.session.upscaledImages = user.upscaledImages
-        req.session.savedSearches = user.savedSearches
-        req.session.showR18 = user.showR18
-        req.session.postCount = user.postCount
-        req.session.premiumExpiration = user.premiumExpiration
-        req.session.banExpiration = user.banExpiration
+    const apiKey = req.headers["x-api-key"] as string
+    if (apiKey) {
+        const hashedKey = cryptoFunctions.hashAPIKey(apiKey)
+        const apiToken = await sql.token.apiKey(hashedKey)
+        if (apiToken) {
+            const user = await sql.user.user(apiToken.username)
+            if (!user) return next()
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            req.session.$2fa = user.$2fa
+            req.session.email = user.email
+            req.session.emailVerified = user.emailVerified
+            req.session.username = user.username
+            req.session.joinDate = user.joinDate
+            req.session.image = user.image 
+            req.session.bio = user.bio
+            req.session.publicFavorites = user.publicFavorites
+            req.session.image = user.image
+            req.session.imageHash = user.imageHash
+            req.session.imagePost = user.imagePost
+            req.session.role = user.role
+            req.session.banned = user.banned
+            await sql.user.updateUser(user.username, "ip", ip as string)
+            req.session.ip = ip as string
+            const {secret, token} = ServerFunctions.generateCSRF()
+            req.session.csrfSecret = secret
+            req.session.csrfToken = token
+            req.session.showRelated = user.showRelated
+            req.session.showTooltips = user.showTooltips
+            req.session.showTagBanner = user.showTagBanner
+            req.session.downloadPixivID = user.downloadPixivID
+            req.session.autosearchInterval = user.autosearchInterval
+            req.session.upscaledImages = user.upscaledImages
+            req.session.savedSearches = user.savedSearches
+            req.session.showR18 = user.showR18
+            req.session.postCount = user.postCount
+            req.session.premiumExpiration = user.premiumExpiration
+            req.session.banExpiration = user.banExpiration
+            req.session.apiKey = true
+        }
     }
     next()
 }
@@ -92,13 +98,8 @@ export default class ServerFunctions {
         return csrf.verify(req.session.csrfSecret!, csrfToken)
     }
 
-    public static validateAPIKey = (req: Request) => {
-        const apiKey = req.headers["x-api-key"] as string
-        return apiKey === process.env.API_KEY
-    }
-
     public static sendEncrypted = (data: any, req: Request, res: Response) => {
-        if (ServerFunctions.validateAPIKey(req)) return res.status(200).send(data)
+        if (req.session.apiKey) return res.status(200).send(data)
         if (!req.session.publicKey) return res.status(401).send("No public key")
         const encrypted = cryptoFunctions.encryptAPI(data, req.session.publicKey)
         return res.status(200).send(encrypted)

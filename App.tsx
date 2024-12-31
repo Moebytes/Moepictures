@@ -64,6 +64,7 @@ import DragAndDrop from "./components/DragAndDrop"
 import AudioPlayer from "./components/AudioPlayer"
 import ActionBanner from "./components/ActionBanner"
 import NewsBanner from "./components/NewsBanner"
+import APIKeyPage from "./pages/APIKeyPage"
 import TagToolTip from "./components/TagToolTip"
 import {PostRating} from "./types/Types"
 import "./index.less"
@@ -341,6 +342,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
                 <Route exact path="/news-banner"><NewsBannerPage/></Route>
                 <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
+                <Route exact path="/api-key"><APIKeyPage/></Route>
                 <Route exact path="/401"><$401Page/></Route>
                 <Route exact path="/403"><$403Page/></Route>
                 <Route path="*"><$404Page/></Route>

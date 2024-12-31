@@ -16,6 +16,12 @@ export interface PasswordToken {
     expires: string
 }
 
+export interface APIKey {
+    username: string
+    createDate: string
+    key: string
+}
+
 export type TokenPostEndpoint<T extends string> = 
     T extends "/api/2fa/create" ? {params: null, response: string} :
     T extends "/api/2fa/qr" ? {params: null, response: string} :

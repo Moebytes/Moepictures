@@ -738,6 +738,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {permissions.isAdmin(session) ? <Link to="/news-banner" className="user-row">
                         <span className="user-link">{i18n.user.newsBanner}</span>
                     </Link> : null}
+                    {permissions.isAdmin(session) ? <Link to="/api-key" className="user-row">
+                        <span className="user-link">{i18n.user.apiKey}</span>
+                    </Link> : null}
                     {counts?.postEdits || counts?.tagEdits || counts?.noteEdits || counts?.groupEdits ? 
                     <div className="user-row">
                         <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>

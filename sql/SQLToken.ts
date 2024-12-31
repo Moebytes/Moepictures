@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {EmailToken, $2FAToken, PasswordToken} from "../types/Types"
+import {EmailToken, $2FAToken, PasswordToken, APIKey} from "../types/Types"
 
 export default class SQLToken {
     /** Insert email token. */
@@ -80,7 +80,7 @@ export default class SQLToken {
 
     /** Insert 2fa token. */
     public static insert2faToken = async (username: string, token: string, qrcode: string) => {
-        let now = new Date() as any
+        let now = new Date()
         now.setHours(now.getHours() + 1)
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "2fa tokens" ("username", "token", "qrcode") VALUES ($1, $2, $3)`,
@@ -153,5 +153,49 @@ export default class SQLToken {
         values: [chargeID, username, email]
         }
         await SQLQuery.run(query)
+    }
+
+    /** Insert api key. */
+    public static insertAPIKey = async (username: string, apiKey: string) => {
+        let now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "api keys" ("username", "createDate", "key") 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ("username")
+                DO UPDATE SET "createDate" = $2, "key" = $3
+            `),
+            values: [username, now, apiKey]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Delete api key. */
+    public static deleteAPIKey = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "api keys" WHERE "username" = $1`,
+            values: [username]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Get api key. */
+    public static apiKey = async (apiKey: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT * FROM "api keys" WHERE "api keys"."key" = $1`,
+            values: [apiKey]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<APIKey | undefined>
+    }
+
+    /** Get api key by username. */
+    public static apiKeyByUsername = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT * FROM "api keys" WHERE "api keys"."username" = $1`,
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<APIKey | undefined>
     }
 }

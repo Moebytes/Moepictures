@@ -1,6 +1,15 @@
 import functions from "./Functions"
 
 export default class Crypto {
+    public static generateAPIKey = (length = 64) => {
+        let apiKey = ""
+        return apiKey
+    }
+
+    public static hashAPIKey = (apiKey: string) => {
+        return apiKey
+    }
+
     public static generateKeys = () => {
         return {publicKey: "", privateKey: ""}
     }

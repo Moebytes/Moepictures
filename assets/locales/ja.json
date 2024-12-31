@@ -274,6 +274,7 @@
         "loginHistory": "ログイン履歴",
         "ipBlacklist": "IPブラックリスト",
         "newsBanner": "ニュースバナー",
+        "apiKey": "APIキー",
         "deleted": "削除された"
     },
     "roles": {
@@ -567,6 +568,14 @@
             "ipAddress": "IPアドレス",
             "blacklist": "ブラックリスト",
             "unblacklist": "ブラックリスト解除"
+        },
+        "apiKey": {
+            "header": "APIキーを生成することで、アカウントで認証されたアクションをプログラムで実行できます。APIキーは決して共有しないでください。x-api-keyヘッダーを付けてリクエストを送信してください。",
+            "keyActive": "キー・アクティブ",
+            "noKey": "キーなし",
+            "displayKey": "APIキーは一度しか表示されません。必ず保存してください！",
+            "deleteKey": "削除キー",
+            "generateKey": "鍵の生成"
         },
         "loginHistory": {
             "heading": "アクティビティに見覚えがない場合は、他のすべてのセッションからログアウトし、パスワードを変更してください！",

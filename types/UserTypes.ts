@@ -56,6 +56,7 @@ export interface ServerSession extends Omit<User, "password"> {
     csrfToken: string
     csrfSecret: string
     publicKey: string
+    apiKey: boolean
 }
 
 export interface LoginHistory {

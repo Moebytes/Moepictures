@@ -273,6 +273,7 @@
         "loginHistory": "Login History",
         "ipBlacklist": "IP Blacklist",
         "newsBanner": "News Banner",
+        "apiKey": "API Key",
         "deleted": "deleted"
     },
     "roles": {
@@ -566,6 +567,14 @@
             "ipAddress": "IP Address",
             "blacklist": "Blacklist",
             "unblacklist": "Unblacklist"
+        },
+        "apiKey": {
+            "header": "Generate an API key to perform authenticated actions with your account programmatically. Never share your API key, it is analogous to your password. Send requests with an x-api-key header.",
+            "keyActive": "Key Active",
+            "noKey": "No Key",
+            "displayKey": "Your API key will only be displayed here once. Make sure you save it!",
+            "deleteKey": "Delete Key",
+            "generateKey": "Generate Key"
         },
         "loginHistory": {
             "heading": "If you don't recognize the activity, logout of all other sessions and change your password!",

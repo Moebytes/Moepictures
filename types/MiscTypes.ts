@@ -119,6 +119,7 @@ export type MiscGetEndpoint<T extends string> =
     T extends "/api/misc/redirect" ? {params: {url: string}, response: string} :
     T extends "/api/misc/emojis" ? {params: null, response: {[key: string]: string}} :
     T extends "/api/misc/banner" ? {params: null, response: Banner | undefined} :
+    T extends "/api/misc/api-key/status" ? {params: null, response: boolean} :
     never
 
 export type MiscPostEndpoint<T extends string> = 
@@ -141,8 +142,10 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/server-key" ? {params: null, response: {publicKey: string}} :
     T extends "/api/misc/blacklistip" ? {params: {ip: string, reason: string}, response: string} :
     T extends "/api/misc/imghash" ? {params: number[], response: string} :
+    T extends "/api/misc/api-key" ? {params: null, response: string} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 
     T extends "/api/misc/unblacklistip" ? {params: {ip: string}, response: string} :
+    T extends "/api/misc/api-key/delete" ? {params: null, response: string} :
     never
