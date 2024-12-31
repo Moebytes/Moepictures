@@ -35,7 +35,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (!tag) return
         setTag(tag)
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 24}, session, setSessionFlag)
+        let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 32}, session, setSessionFlag)
         let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement>}[]
         await Promise.all(posts.map(async (post) => {
             let thumbnail = functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")

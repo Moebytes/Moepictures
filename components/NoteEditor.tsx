@@ -83,7 +83,8 @@ const splitTextIntoLines = (text: string, maxWidth: number, fontSize = 100, spli
 
 const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     const {onMouseEnter, onMouseMove, onMouseLeave, onDoubleClick, onMouseDown, onContextMenu,
-    text, showTranscript, overlay, fontSize, backgroundColor, textColor} = extraShapeProps
+    text, showTranscript, breakWord, overlay, fontSize, backgroundColor, textColor, backgroundAlpha,
+    fontFamily, bold, italic, strokeColor, strokeWidth} = extraShapeProps
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         if (overlay) return ""
@@ -100,26 +101,27 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     const getTextColor = () => {
         return textColor || "#000000"
     }
-    const strokeWidth = Math.ceil(1/scale)
-    const strokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
+    const rectStrokeWidth = Math.ceil(1/scale)
+    const rectStrokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
 
     const maxTextWidth = width - 20
     let lines = [] as string[]
     if (overlay) {
-        lines = splitTextIntoLines(text, maxTextWidth, fontSize, !showTranscript)
+        lines = splitTextIntoLines(text, maxTextWidth, fontSize || 100, breakWord && !showTranscript)
     }
-    const lineHeight = fontSize + 20
+    const lineHeight = (fontSize || 100) + 20
     const totalTextHeight = lines.length * lineHeight
     const textStartY = height / 2 - totalTextHeight / 2 + lineHeight / 2
 
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
-            <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} stroke-width={strokeWidth} 
-            stroke-dasharray={strokeArray} style={{filter: getFilter()}} />
+            <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} stroke-width={rectStrokeWidth} 
+            stroke-dasharray={rectStrokeArray} style={{filter: getFilter()}}/>
             {lines.map((line, index) => (
-                <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize}
-                stroke="" strokeWidth={0} paint-order="stroke">
+                <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize || 100}
+                fontFamily={fontFamily || "Tahoma"} fontWeight={bold ? "bold" : "normal"} fontStyle={italic ? "italic" : "normal"}
+                stroke={strokeColor || "#ffffff"} strokeWidth={strokeWidth ?? 0} paintOrder="stroke">
                     {line}
                 </text>
             ))}
@@ -141,10 +143,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {pasteNoteFlag} = useFlagSelector()
     const {setRedirect, setPasteNoteFlag} = useFlagActions()
     const {editNoteFlag, editNoteID, editNoteText, editNoteTranscript, showSaveNoteDialog, noteOCRDialog, noteOCRFlag,
-    editNoteOverlay, editNoteFontSize, editNoteBackgroundColor, editNoteTextColor} = useNoteDialogSelector()
+    editNoteOverlay, editNoteFontSize, editNoteBackgroundColor, editNoteTextColor, editNoteBackgroundAlpha, editNoteFontFamily,
+    editNoteBold, editNoteItalic, editNoteStrokeColor, editNoteStrokeWidth, editNoteBreakWord} = useNoteDialogSelector()
     const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript, setShowSaveNoteDialog,
     setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag, setEditNoteOverlay, setEditNoteFontSize,
-    setEditNoteBackgroundColor, setEditNoteTextColor} = useNoteDialogActions()
+    setEditNoteBackgroundColor, setEditNoteTextColor, setEditNoteBackgroundAlpha, setEditNoteFontFamily, setEditNoteBold,
+    setEditNoteItalic, setEditNoteStrokeColor, setEditNoteStrokeWidth, setEditNoteBreakWord} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [targetHash, setTargetHash] = useState("")
@@ -161,6 +165,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [bubbleData, setBubbleData] = useState({} as BubbleData)
     const [shiftKey, setShiftKey] = useState(false)
     const [showTranscript, setShowTranscript] = useState(false)
+    const [bubbleWidth, setBubbleWidth] = useState(bubbleData.width)
+    const bubbleRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
     const getFilter = () => {
@@ -203,6 +209,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
         const savedShowTranscript = localStorage.getItem("showTranscript")
         if (savedShowTranscript) setShowTranscript(savedShowTranscript === "true")
+        const savedNoteDrawing = localStorage.getItem("noteDrawingEnabled")
+        if (savedNoteDrawing) setNoteDrawingEnabled(savedNoteDrawing === "true")
         window.addEventListener("keydown", keyDownListener)
         window.addEventListener("keyup", keyUpListener)
         return () => {
@@ -213,7 +221,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         localStorage.setItem("showTranscript", String(showTranscript))
-    }, [showTranscript])
+        localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
+    }, [showTranscript, noteDrawingEnabled])
 
     useEffect(() => {
         const decryptImg = async () => {
@@ -356,26 +365,29 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const editTextDialog = () => {
         if (!noteDrawingEnabled) return
         if (editNoteID === null) {
-            setEditNoteTranscript(items[activeIndex].transcript)
-            setEditNoteText(items[activeIndex].translation)
-            setEditNoteOverlay(items[activeIndex].overlay)
-            setEditNoteFontSize(items[activeIndex].fontSize)
-            setEditNoteBackgroundColor(items[activeIndex].backgroundColor)
-            setEditNoteTextColor(items[activeIndex].textColor)
+            const item = items[activeIndex]
+            setEditNoteTranscript(item.transcript)
+            setEditNoteText(item.translation)
+            setEditNoteOverlay(item.overlay ?? editNoteOverlay)
+            setEditNoteFontSize(item.fontSize ?? editNoteFontSize)
+            setEditNoteBackgroundColor(item.backgroundColor ?? editNoteBackgroundColor)
+            setEditNoteTextColor(item.textColor ?? editNoteTextColor)
+            setEditNoteBackgroundAlpha(item.backgroundAlpha ?? editNoteBackgroundAlpha)
+            setEditNoteFontFamily(item.fontFamily ?? editNoteFontFamily)
+            setEditNoteBold(item.bold ?? editNoteBold)
+            setEditNoteItalic(item.italic ?? editNoteItalic)
+            setEditNoteStrokeColor(item.strokeColor ?? editNoteStrokeColor)
+            setEditNoteStrokeWidth(item.strokeWidth ?? editNoteStrokeWidth)
+            setEditNoteBreakWord(item.breakWord ?? editNoteBreakWord)
             setEditNoteID(activeIndex)
         } else {
-            setEditNoteTranscript("")
-            setEditNoteText("")
-            setEditNoteOverlay(false)
-            setEditNoteFontSize(100)
-            setEditNoteBackgroundColor("#ffffff")
-            setEditNoteTextColor("#000000")
             setEditNoteID(null)
         }
     }
 
     const editText = (index: number, transcript: string, translation: string, overlay=false, fontSize=100,
-        backgroundColor="#ffffff", textColor="#000000") => {
+        backgroundColor="#ffffff", textColor="#000000", backgroundAlpha=100, fontFamily="Tahoma", bold=false,
+        italic=false, strokeColor="#ffffff", strokeWidth=0, breakWord=true) => {
         setItems((prev) => {
             const item = prev[index]
             item.transcript = transcript
@@ -387,6 +399,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             item.fontSize = fontSize
             item.backgroundColor = backgroundColor
             item.textColor = textColor
+            item.backgroundAlpha = backgroundAlpha
+            item.fontFamily = fontFamily
+            item.bold = bold
+            item.italic = italic
+            item.strokeColor = strokeColor
+            item.strokeWidth = strokeWidth
+            item.breakWord = breakWord
             return prev
         })
     }
@@ -395,13 +414,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (editNoteID === null) return
         if (editNoteFlag) {
             editText(editNoteID, editNoteTranscript, editNoteText, editNoteOverlay, editNoteFontSize,
-            editNoteBackgroundColor, editNoteTextColor)
-            setEditNoteText("")
-            setEditNoteTranscript("")
-            setEditNoteOverlay(false)
-            setEditNoteFontSize(100)
-            setEditNoteBackgroundColor("#ffffff")
-            setEditNoteTextColor("#000000")
+            editNoteBackgroundColor, editNoteTextColor, editNoteBackgroundAlpha, editNoteFontFamily,
+            editNoteBold, editNoteItalic, editNoteStrokeColor, editNoteStrokeWidth, editNoteBreakWord)
             setEditNoteFlag(false)
             setEditNoteID(null)
         }
@@ -424,8 +438,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
-        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash, overlay: false,
-        fontSize: 100, backgroundColor: "#ffffff", textColor: "#000000"} as Note)))
+        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash} as Note)))
     }
 
     useEffect(() => {
@@ -451,6 +464,28 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         history.push(`/note/history/${props.post.postID}/${props.order || 1}`)
     }
 
+    useEffect(() => {
+        if (!bubbleToggle || !bubbleRef.current) return
+
+        const bubble = bubbleRef.current
+
+        const updateWidth = () => {
+            const currentWidth = bubble.offsetWidth
+            const requiredWidth = bubble.scrollWidth
+
+            if (requiredWidth > currentWidth && requiredWidth !== bubbleWidth) {
+                setBubbleWidth(requiredWidth)
+            } else if (requiredWidth <= bubbleData.width && bubbleWidth !== bubbleData.width) {
+                setBubbleWidth(bubbleData.width)
+            }
+        }
+
+        const observer = new ResizeObserver(updateWidth)
+        observer.observe(bubble)
+        updateWidth()
+        return () => observer.disconnect()
+    }, [bubbleToggle, bubbleData.width, bubbleWidth])
+
     return (
         <div className="note-editor" style={{display: noteMode ? "flex" : "none"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
@@ -466,7 +501,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter: getFilter()}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
                     <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter: getFilter()}} onClick={() => setNoteMode(false)}/>
                 </div>
-                {bubbleToggle ? <div className="note-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
+                {bubbleToggle ? 
+                <div className="note-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, minHeight: "25px", left: `${bubbleData.x}px`, 
+                    top: `${bubbleData.y}px`, fontFamily: bubbleData.fontFamily || "Tahoma", fontSize: `${(bubbleData.fontSize || 100) / 5}px`,
+                    fontWeight: bubbleData.bold ? "bold" : "normal", fontStyle: bubbleData.italic ? "italic" : "normal"}}>
+                    {getBubbleText()}
+                </div> : null}
                 <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
@@ -477,8 +517,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         setItems((prev) => {
                             setID(id + 1)
                             return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, 
-                                imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: "", 
-                                overlay: false, fontSize: 100, backgroundColor: "#ffffff", textColor: "#000000"} as Note]
+                            imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: ""} as Note]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
@@ -514,10 +553,17 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             if (!noteDrawingEnabled) return
                             setEditNoteTranscript(item.transcript)
                             setEditNoteText(item.translation)
-                            setEditNoteOverlay(item.overlay)
-                            setEditNoteFontSize(item.fontSize)
-                            setEditNoteBackgroundColor(item.backgroundColor)
-                            setEditNoteTextColor(item.textColor)
+                            setEditNoteOverlay(item.overlay ?? editNoteOverlay)
+                            setEditNoteFontSize(item.fontSize ?? editNoteFontSize)
+                            setEditNoteBackgroundColor(item.backgroundColor ?? editNoteBackgroundColor)
+                            setEditNoteTextColor(item.textColor ?? editNoteTextColor)
+                            setEditNoteBackgroundAlpha(item.backgroundAlpha ?? editNoteBackgroundAlpha)
+                            setEditNoteFontFamily(item.fontFamily ?? editNoteFontFamily)
+                            setEditNoteBold(item.bold ?? editNoteBold)
+                            setEditNoteItalic(item.italic ?? editNoteItalic)
+                            setEditNoteStrokeColor(item.strokeColor ?? editNoteStrokeColor)
+                            setEditNoteStrokeWidth(item.strokeWidth ?? editNoteStrokeWidth)
+                            setEditNoteBreakWord(item.breakWord ?? editNoteBreakWord)
                             setEditNoteID(index)
                         }
 
@@ -530,7 +576,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             if (width < 125) width = 125
                             let height = Math.floor(bounds.height / 2)
                             if (height < 25) height = 25
-                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation})
+                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
+                            fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            setBubbleWidth(width)
                             setBubbleToggle(true)
                         }
 
@@ -543,7 +591,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             if (width < 125) width = 125
                             let height = Math.floor(bounds.height / 2)
                             if (height < 25) height = 25
-                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation})
+                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
+                            fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            setBubbleWidth(width)
                         }
 
                         const onMouseLeave = () => {
@@ -567,7 +617,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem as any} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
                             extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown, text, showTranscript, 
-                            overlay: item.overlay, fontSize: item.fontSize, backgroundColor: item.backgroundColor, textColor: item.textColor}}/>
+                            overlay: item.overlay, fontSize: item.fontSize, backgroundColor: item.backgroundColor, textColor: item.textColor,
+                            backgroundAlpha: item.backgroundAlpha, fontFamily: item.fontFamily, bold: item.bold, italic: item.italic, 
+                            strokeColor: item.strokeColor, strokeWidth: item.strokeWidth, breakWord: item.breakWord}}/>
                         )
                     })}
                 </ShapeEditor>

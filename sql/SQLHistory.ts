@@ -270,15 +270,15 @@ export default class SQLHistory {
     }
 
     /** Insert note history */
-    public static insertNoteHistory = async (options: {postID: string, order: number, updater: string, notes: any, addedEntries: any, 
-        removedEntries: any, reason?: string | null}) => {
-        const {postID, order, updater, notes, addedEntries, removedEntries, reason} = options
+    public static insertNoteHistory = async (options: {postID: string, order: number, updater: string, notes: any, styleChanged: boolean,
+        addedEntries: any, removedEntries: any, reason?: string | null}) => {
+        const {postID, order, updater, notes, styleChanged, addedEntries, removedEntries, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO "note history" ("postID", "order", "updater", "updatedDate", "notes", "addedEntries", 
-            "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "historyID"`,
+            text: /*sql*/`INSERT INTO "note history" ("postID", "order", "updater", "updatedDate", "notes", "styleChanged", "addedEntries", 
+            "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "historyID"`,
             rowMode: "array",
-            values: [postID, order, updater, now, notes, addedEntries, removedEntries, reason]
+            values: [postID, order, updater, now, notes, styleChanged, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])

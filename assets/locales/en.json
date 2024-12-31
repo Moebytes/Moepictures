@@ -330,6 +330,7 @@
         "email": "Email",
         "description": "Description",
         "orderUpdated": "Order Updated",
+        "styleUpdated": "Style Updated",
         "imageUpdated": "Image Updated",
         "parentRemoved": "Parent Removed",
         "images": "Images",
@@ -436,7 +437,13 @@
         "overlay": "Overlay",
         "fontSize": "Font Size",
         "backgroundColor": "Background Color",
-        "textColor": "Text Color"
+        "textColor": "Text Color",
+        "fontFamily": "Font Family",
+        "fontStyle": "Font Style",
+        "backgroundAlpha": "Background Alpha",
+        "strokeColor": "Stroke Color",
+        "strokeWidth": "Stroke Width",
+        "breakWord": "Break Word"
     },
     "errors": {
         "$401":"401 error",

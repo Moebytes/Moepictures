@@ -554,7 +554,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             if (!containerRef.current) return
             const rect = containerRef.current.getBoundingClientRect()
             const toolTipWidth = 325
-            const toolTipHeight = 150
+            const toolTipHeight = 175
             const midpoint = (rect.left + rect.right) / 2
             setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
             setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))

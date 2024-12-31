@@ -2832,6 +2832,7 @@ export default class Functions {
     }
 
     public static parseNoteChanges = (oldNotes: Note[], newNotes:  Note[]) => {
+        let styleChanged = false
         if (!oldNotes) oldNotes = []
         if (!newNotes) newNotes = []
         const prevMap = new Map(oldNotes.map((item) => [`${item.transcript} -> ${item.translation}`, item]))
@@ -2845,7 +2846,26 @@ export default class Functions {
             .filter((item) => !newMap.has(`${item.transcript} -> ${item.translation}`))
             .map((item) => `${item.transcript} -> ${item.translation}`)
 
-        return {addedEntries, removedEntries}
+        for (const note of oldNotes) {
+            const match = newNotes.find((item) => item.noteID === note.noteID)
+            if (!match) continue
+            if (note.overlay !== match.overlay || 
+                note.fontFamily !== match.fontFamily || 
+                note.bold !== match.bold || 
+                note.italic !== match.italic || 
+                note.fontSize !== match.fontSize || 
+                note.textColor !== match.textColor || 
+                note.backgroundColor !== match.backgroundColor || 
+                note.backgroundAlpha !== match.backgroundAlpha || 
+                note.strokeColor !== match.strokeColor || 
+                note.strokeWidth !== match.strokeWidth || 
+                note.breakWord !== match.breakWord) {
+                    styleChanged = true
+                    break
+                }
+        }
+
+        return {addedEntries, removedEntries, styleChanged}
     }
 
     public static replaceLocation = (location: string) => {

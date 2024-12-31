@@ -134,6 +134,7 @@ export interface NoteHistory {
     order: number
     notes: Note[]
     reason: string | null
+    styleChanged: boolean
     addedEntries: string[]
     removedEntries: string[]
     historyCount: string

@@ -42,7 +42,8 @@ const NoteRoutes = (app: Express) => {
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                     item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor)
+                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord)
                 }
             } else {
                 let noMatch = [] as Note[]
@@ -54,7 +55,8 @@ const NoteRoutes = (app: Express) => {
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor)
+                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                            match.strokeColor, match.strokeWidth, match.breakWord)
                         } else {
                             noMatch.push(note)
                         }
@@ -66,12 +68,13 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                         item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor)
+                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                        item.strokeColor, item.strokeWidth, item.breakWord)
                     }
                 }
             }
-            const {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
-            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), addedEntries, removedEntries, reason})
+            const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -98,7 +101,8 @@ const NoteRoutes = (app: Express) => {
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                     item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor)
+                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord)
                 }
             } else {
                 let noMatch = [] as Note[]
@@ -110,7 +114,8 @@ const NoteRoutes = (app: Express) => {
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor)
+                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                            match.strokeColor, match.strokeWidth, match.breakWord)
                         } else {
                             noMatch.push(note)
                         }
@@ -122,7 +127,8 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                         item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor)
+                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                        item.strokeColor, item.strokeWidth, item.breakWord)
                     }
                 }
             }
@@ -131,8 +137,8 @@ const NoteRoutes = (app: Express) => {
                 if (silent) return res.status(200).send("Success")
             }
         
-            const {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
-            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
+            const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
+            await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -403,7 +409,8 @@ const NoteRoutes = (app: Express) => {
             for (const item of data) {
                 await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
                 item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize, item.backgroundColor,
-                item.textColor, addedEntries, removedEntries, reason)
+                item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic, item.strokeColor, item.strokeWidth, item.breakWord,
+                addedEntries, removedEntries, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -451,7 +458,8 @@ const NoteRoutes = (app: Express) => {
                 for (const item of data) {
                     await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
                     item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
-                    item.backgroundColor, item.textColor, addedEntries, removedEntries, reason)
+                    item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)
                 }
             } else {
                 let noMatch = [] as Note[]
@@ -463,7 +471,8 @@ const NoteRoutes = (app: Express) => {
                         if (match) {
                             await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
                             match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, match.fontSize,
-                            match.backgroundColor, match.textColor, reason)
+                            match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                            match.strokeColor, match.strokeWidth, match.breakWord, reason)
                         } else {
                             noMatch.push(note)
                         }
@@ -475,7 +484,8 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
                         item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
-                        item.backgroundColor, item.textColor, addedEntries, removedEntries, reason)
+                        item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                        item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)
                     }
                 }
             }
@@ -521,7 +531,8 @@ const NoteRoutes = (app: Express) => {
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                     item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor)
+                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord)
                 }
             } else {
                 let noMatch = [] as Note[]
@@ -533,7 +544,8 @@ const NoteRoutes = (app: Express) => {
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
                             match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor)
+                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                            match.strokeColor, match.strokeWidth, match.breakWord)
                         } else {
                             noMatch.push(note)
                         }
@@ -545,7 +557,8 @@ const NoteRoutes = (app: Express) => {
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
                         item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor)
+                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                        item.strokeColor, item.strokeWidth, item.breakWord)
                     }
                 }
             }

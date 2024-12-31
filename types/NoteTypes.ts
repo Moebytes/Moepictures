@@ -20,6 +20,13 @@ export interface Note {
     fontSize: number
     backgroundColor: string
     textColor: string
+    fontFamily: string
+    backgroundAlpha: number
+    bold: boolean
+    italic: boolean
+    strokeColor: string
+    strokeWidth: number
+    breakWord: boolean
 }
 
 export interface BubbleData {
@@ -29,6 +36,10 @@ export interface BubbleData {
     y: number
     width: number
     height: number
+    fontFamily: string
+    fontSize: number
+    bold: boolean
+    italic: boolean
 }
 
 export interface NoteSearch {

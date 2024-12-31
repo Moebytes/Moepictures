@@ -331,6 +331,7 @@
         "email": "電子メール",
         "description": "説明",
         "orderUpdated": "オーダー更新",
+        "styleUpdated": "スタイル更新",
         "imageUpdated": "画像更新",
         "parentRemoved": "親を削除",
         "images": "画像",
@@ -437,7 +438,13 @@
         "overlay": "オーバーレイ",
         "fontSize": "文字サイズ",
         "backgroundColor": "背景色",
-        "textColor": "テキストの色"
+        "textColor": "テキストの色",
+        "fontFamily": "フォントファミリー",
+        "fontStyle": "フォントスタイル",
+        "backgroundAlpha": "背景 アルファ",
+        "strokeColor": "ストロークの色",
+        "strokeWidth": "ストローク幅",
+        "breakWord": "ブレイクワード"
     },
     "errors": {
         "$401":"401エラー",

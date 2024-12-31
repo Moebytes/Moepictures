@@ -282,7 +282,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                     <div className="post-image-text">{i18n.buttons.download}</div>
                 </div>
-                {props.post?.type === "image" ? 
+                {props.post?.type === "image" || props.post?.type === "comic" ? 
                 <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                 {String(format).toUpperCase()}</button> : null}
                 <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
@@ -317,7 +317,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                         <div className="post-image-text">{i18n.buttons.download}</div>
                     </div>
-                    {props.post?.type === "image" ? 
+                    {props.post?.type === "image" || props.post?.type === "comic" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                     {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

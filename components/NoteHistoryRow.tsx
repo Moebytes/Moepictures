@@ -247,8 +247,9 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
+                        {props.noteHistory.styleChanged ? <span className="historyrow-text-strong">[{i18n.labels.styleUpdated}]</span> : null}
                         {diffJSX()}
-                        {props.noteHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">{i18n.labels.reason}:</span> {props.noteHistory.reason}</span> : null}
+                        {props.noteHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.reason}:</span> {props.noteHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>
