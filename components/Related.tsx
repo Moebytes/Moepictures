@@ -22,6 +22,7 @@ interface Props {
     tag: string
     post?: PostSearch | PostHistory | null
     count?: number
+    fallback?: string[]
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
@@ -43,6 +44,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [offset, setOffset] = useState(0)
     const [index, setIndex] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [searchTerm, setSearchTerm] = useState(props.tag)
     const history = useHistory()
 
     useEffect(() => {
@@ -84,12 +86,36 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
     }, [scroll, relatedPage])*/
 
-    const updateRelated = async () => {
-        if (!props.count && !session.showRelated) return
-        if (!props.tag) return
+    const searchPosts = async () => {
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
         rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+
+        if (result.length < 50 && props.fallback?.[0]) {
+            let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
+            rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+            result.push(...interResult)
+            result = functions.removeDuplicates(result)
+            setSearchTerm(props.fallback[0])
+        }
+
+        if (result.length < 50 && props.fallback?.[1]) {
+            let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
+            rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+            result.push(...interResult)
+            result = functions.removeDuplicates(result)
+            setSearchTerm(props.fallback[1])
+        }
+
+        return result
+    }
+
+    const updateRelated = async () => {
+        if (!props.count && !session.showRelated) return
+        if (!props.tag) return
+        let result = await searchPosts()
         result = result.filter((p) => p.postID !== props.post?.postID)
         setRelatedPage(1)
         setEnded(false)
@@ -136,7 +162,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
+        let result = await functions.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
         rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren, offset: newOffset}, session, setSessionFlag)
 
@@ -318,16 +344,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const images = post.images.map((i) => functions.getThumbnailLink(i.type, post.postID, i.order, i.filename, "medium", mobile))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={30} 
-                marginLeft={5} height={square ? 220 : 250} borderRadius={4} img={images[0]} model={images[0]} post={post}/>)
+                marginLeft={15} height={square ? 220 : 250} borderRadius={4} img={images[0]} model={images[0]} post={post}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={30} 
-                marginLeft={5} height={square ? 220 : 250} borderRadius={4} img={images[0]} live2d={images[0]} post={post}/>)
+                marginLeft={15} height={square ? 220 : 250} borderRadius={4} img={images[0]} live2d={images[0]} post={post}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={30} 
-                marginLeft={5} height={square ? 220 : 250} borderRadius={4} img={images[0]} audio={images[0]} post={post}/>)
+                marginLeft={15} height={square ? 220 : 250} borderRadius={4} img={images[0]} audio={images[0]} post={post}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={30} 
-                marginLeft={5} height={square ? 220 : 250} borderRadius={4} img={images[0]} original={images[0]} post={post}
+                marginLeft={15} height={square ? 220 : 250} borderRadius={4} img={images[0]} original={images[0]} post={post}
                 comicPages={post.type === "comic" ? images : null}/>)
             }
         }
@@ -393,7 +419,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <img className="related-icon" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll}/>
                 <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)}/>
             </div>}
-            <div className="related-container" style={{width: props.count ? "100%" : "97%", justifyContent: "space-evenly"}}>
+            <div className="related-container" style={{width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/> */}
             </div>

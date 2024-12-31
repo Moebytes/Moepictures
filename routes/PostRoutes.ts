@@ -479,10 +479,14 @@ const PostRoutes = (app: Express) => {
                 }
             } 
             if (tagEdit) {
-                if (!artists?.[0]) artists = ["unknown-artist"]
-                if (!series?.[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
-                if (!characters?.[0]) characters = ["unknown-character"]
-                if (!tags?.[0]) tags = ["needs-tags"]
+                if (!functions.cleanArray(artists)[0]) artists = ["unknown-artist"]
+                if (!functions.cleanArray(series)[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
+                if (!functions.cleanArray(characters)[0]) characters = ["unknown-character"]
+                if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+                artists = artists!
+                characters = characters!
+                series = series!
+                tags = tags!
 
                 let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
                 if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
@@ -701,10 +705,14 @@ const PostRoutes = (app: Express) => {
                 parentID = parentPost?.parentID || null
             }
     
-            if (!artists?.[0]) artists = ["unknown-artist"]
-            if (!series?.[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
-            if (!characters?.[0]) characters = ["unknown-character"]
-            if (!tags?.[0]) tags = ["needs-tags"]
+            if (!functions.cleanArray(artists)[0]) artists = ["unknown-artist"]
+            if (!functions.cleanArray(series)[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
+            if (!functions.cleanArray(characters)[0]) characters = ["unknown-character"] 
+            if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+            artists = artists!
+            characters = characters!
+            series = series!
+            tags = tags!
 
             let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
             if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {

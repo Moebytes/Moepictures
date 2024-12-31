@@ -727,7 +727,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
-                    {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag}/> : null}
+                    {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
+                    fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
                     <Footer/>
                 </div>
             </div>

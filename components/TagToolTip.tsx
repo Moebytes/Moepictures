@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, 
-useInteractionActions, useSearchActions} from "../store"
+useInteractionActions, useSearchActions, useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
 import website from "../assets/icons/support.png"
@@ -18,6 +18,7 @@ let changeTimer = null as any
 const TagToolTip: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {selectionMode, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {tagTooltipTag, tagTooltipEnabled, tagTooltipY} = useInteractionSelector()
@@ -34,7 +35,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (!tag) return
         setTag(tag)
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit: 24}, session, setSessionFlag)
+        let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 24}, session, setSessionFlag)
         let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement>}[]
         await Promise.all(posts.map(async (post) => {
             let thumbnail = functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
@@ -176,6 +177,14 @@ const TagToolTip: React.FunctionComponent = (props) => {
             return null
         }
     }
+
+    useEffect(() => {
+        for (let i = 0; i < items.length; i++) {
+            const ref = items[i].ref
+            if (!ref.current) continue
+            ref.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+        }
+    }, [items, brightness, contrast, hue, saturation, blur])
 
     const tagInfo = (event: React.MouseEvent) => {
         if (!tag) return

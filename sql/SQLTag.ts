@@ -440,7 +440,7 @@ export default class SQLTag {
     /** Rename tag map. */
     public static renameTagMap = async (tag: string, newTag: string) => {
         const query: QueryConfig = {
-            text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2 AND NOT EXISTS (SELECT 1 FROM "tag map" WHERE "tag" = $1)`,
+            text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
             values: [newTag, tag]
         }
         await SQLQuery.flushDB()

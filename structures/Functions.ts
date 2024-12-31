@@ -3064,4 +3064,9 @@ export default class Functions {
     public static tagObject = (tags: string[]) => {
         return tags.map((tag) => ({tag})) as UploadTag[]
     }
+
+    public static cleanArray = <T>(arr?: T[]) => {
+        if (!arr) return []
+        return arr.filter(item => item && (typeof item !== "object" || Object.keys(item).length > 0))
+    }
 }

@@ -148,11 +148,11 @@ const CreateRoutes = (app: Express) => {
         if (!permissions.isCurator(req.session)) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
-        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
-        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!tags?.[0]) tags = ["needs-tags"]
-        if (!newTags?.[0]) newTags = []
+        if (!functions.cleanArray(artists)[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!functions.cleanArray(series)[0]?.tag) series = [{tag: "unknown-series"}]
+        if (!functions.cleanArray(characters)[0]?.tag) characters = [{tag: "unknown-character"}]
+        if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+        if (!functions.cleanArray(newTags)[0]) newTags = []
 
         let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
@@ -444,11 +444,11 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
 
-        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
-        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!tags?.[0]) tags = ["needs-tags"]
-        if (!newTags?.[0]) newTags = []
+        if (!functions.cleanArray(artists)[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!functions.cleanArray(series)[0]?.tag) series = [{tag: "unknown-series"}]
+        if (!functions.cleanArray(characters)[0]?.tag) characters = [{tag: "unknown-character"}]
+        if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+        if (!functions.cleanArray(newTags)[0]) newTags = []
 
         let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
@@ -879,11 +879,11 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
-        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
-        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!tags?.[0]) tags = ["needs-tags"]
-        if (!newTags?.[0]) newTags = []
+        if (!functions.cleanArray(artists)[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!functions.cleanArray(series)[0]?.tag) series = [{tag: "unknown-series"}]
+        if (!functions.cleanArray(characters)[0]?.tag) characters = [{tag: "unknown-character"}]
+        if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+        if (!functions.cleanArray(newTags)[0]) newTags = []
 
         let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
@@ -1149,11 +1149,11 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
-        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
-        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!tags?.[0]) tags = ["needs-tags"]
-        if (!newTags?.[0]) newTags = []
+        if (!functions.cleanArray(artists)[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!functions.cleanArray(series)[0]?.tag) series = [{tag: "unknown-series"}]
+        if (!functions.cleanArray(characters)[0]?.tag) characters = [{tag: "unknown-character"}]
+        if (!functions.cleanArray(tags)[0]) tags = ["needs-tags"]
+        if (!functions.cleanArray(newTags)[0]) newTags = []
 
         let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {

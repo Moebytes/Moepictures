@@ -48,9 +48,9 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.note.postID}`, "_blank")
+            window.open(`/post/${props.note.postID}?order=${props.note.order}`, "_blank")
         } else {
-            history.push(`/post/${props.note.postID}`)
+            history.push(`/post/${props.note.postID}?order=${props.note.order}`)
         }
     }
 
