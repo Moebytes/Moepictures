@@ -1,7 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {Post} from "../types/Types"
+import {Post, Note} from "../types/Types"
 
 const flagSlice = createSlice({
     name: "flag",
@@ -26,7 +26,8 @@ const flagSlice = createSlice({
         postFlag: false,
         groupFlag: false,
         messageFlag: false,
-        tagFlag: false as string | boolean
+        tagFlag: false as string | boolean,
+        pasteNoteFlag: null as Note[] | null
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -49,7 +50,8 @@ const flagSlice = createSlice({
         setPostFlag: (state, action) => {state.postFlag = action.payload},
         setGroupFlag: (state, action) => {state.groupFlag = action.payload},
         setMessageFlag: (state, action) => {state.messageFlag = action.payload},
-        setTagFlag: (state, action) => {state.tagFlag = action.payload}
+        setTagFlag: (state, action) => {state.tagFlag = action.payload},
+        setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload}
     }
 })
 
@@ -58,7 +60,8 @@ const {
     setPageFlag, setDownloadIDs, setDownloadFlag, setReloadPostFlag,
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
-    setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag
+    setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
+    setPasteNoteFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -84,35 +87,37 @@ export const useFlagSelector = () => {
         postFlag: selector((state) => state.flag.postFlag),
         groupFlag: selector((state) => state.flag.groupFlag),
         messageFlag: selector((state) => state.flag.messageFlag),
-        tagFlag: selector((state) => state.flag.tagFlag)
+        tagFlag: selector((state) => state.flag.tagFlag),
+        pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag)
     }
 }
 
 export const useFlagActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setRandomFlag: (state: any) => dispatch(setRandomFlag(state)),
-        setImageSearchFlag: (state: any) => dispatch(setImageSearchFlag(state)),
-        setHeaderFlag: (state: any) => dispatch(setHeaderFlag(state)),
-        setCommentSearchFlag: (state: any) => dispatch(setCommentSearchFlag(state)),
-        setNoteSearchFlag: (state: any) => dispatch(setNoteSearchFlag(state)),
-        setThreadSearchFlag: (state: any) => dispatch(setThreadSearchFlag(state)),
-        setMessageSearchFlag: (state: any) => dispatch(setMessageSearchFlag(state)),
-        setGroupSearchFlag: (state: any) => dispatch(setGroupSearchFlag(state)),
-        setPageFlag: (state: any) => dispatch(setPageFlag(state)),
-        setDownloadIDs: (state: any) => dispatch(setDownloadIDs(state)),
-        setPostAmount: (state: any) => dispatch(setPostAmount(state)),
-        setDownloadFlag: (state: any) => dispatch(setDownloadFlag(state)),
-        setReloadPostFlag: (state: any) => dispatch(setReloadPostFlag(state)),
-        setUpdateUserFlag: (state: any) => dispatch(setUpdateUserFlag(state)),
-        setCommentID: (state: any) => dispatch(setCommentID(state)),
-        setCommentJumpFlag: (state: any) => dispatch(setCommentJumpFlag(state)),
-        setRedirect: (state: any) => dispatch(setRedirect(state)),
-        setPostFlag: (state: any) => dispatch(setPostFlag(state)),
-        setGroupFlag: (state: any) => dispatch(setGroupFlag(state)),
-        setMessageFlag: (state: any) => dispatch(setMessageFlag(state)),
-        setTagFlag: (state: any) => dispatch(setTagFlag(state))
-    }
+        setRandomFlag: (state: boolean) => dispatch(setRandomFlag(state)),
+        setImageSearchFlag: (state: Post[] | null) => dispatch(setImageSearchFlag(state)),
+        setHeaderFlag: (state: boolean) => dispatch(setHeaderFlag(state)),
+        setCommentSearchFlag: (state: string | null) => dispatch(setCommentSearchFlag(state)),
+        setNoteSearchFlag: (state: string | null) => dispatch(setNoteSearchFlag(state)),
+        setThreadSearchFlag: (state: string | null) => dispatch(setThreadSearchFlag(state)),
+        setMessageSearchFlag: (state: string | null) => dispatch(setMessageSearchFlag(state)),
+        setGroupSearchFlag: (state: string | null) => dispatch(setGroupSearchFlag(state)),
+        setPageFlag: (state: number | null) => dispatch(setPageFlag(state)),
+        setDownloadIDs: (state: string[]) => dispatch(setDownloadIDs(state)),
+        setPostAmount: (state: number) => dispatch(setPostAmount(state)),
+        setDownloadFlag: (state: boolean) => dispatch(setDownloadFlag(state)),
+        setReloadPostFlag: (state: boolean) => dispatch(setReloadPostFlag(state)),
+        setUpdateUserFlag: (state: boolean) => dispatch(setUpdateUserFlag(state)),
+        setCommentID: (state: number) => dispatch(setCommentID(state)),
+        setCommentJumpFlag: (state: boolean) => dispatch(setCommentJumpFlag(state)),
+        setRedirect: (state: string | null) => dispatch(setRedirect(state)),
+        setPostFlag: (state: boolean) => dispatch(setPostFlag(state)),
+        setGroupFlag: (state: boolean) => dispatch(setGroupFlag(state)),
+        setMessageFlag: (state: boolean) => dispatch(setMessageFlag(state)),
+        setTagFlag: (state: string | boolean) => dispatch(setTagFlag(state)),
+        setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state))
+    }    
 }
 
 export default flagSlice.reducer

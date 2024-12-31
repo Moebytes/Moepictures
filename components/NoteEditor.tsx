@@ -1,9 +1,9 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {ReactElement, useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
-useNoteDialogActions, useInteractionSelector} from "../store"
+useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../store"
 import functions from "../structures/Functions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import noteDelete from "../assets/icons/note-delete.png"
@@ -16,6 +16,8 @@ import noteToggleOn from "../assets/icons/note-toggle-on.png"
 import noteToggleOff from "../assets/icons/note-toggle-off.png"
 import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
+import noteClear from "../assets/icons/note-clear.png"
+import noteCopy from "../assets/icons/note-copy.png"
 import noteOCR from "../assets/icons/note-ocr.png"
 import "./styles/noteeditor.less"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../types/Types"
@@ -51,22 +53,78 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     )
 }
 
+const splitTextIntoLines = (text: string, maxWidth: number, fontSize = 100, splitByWord = true) => {
+    if (!text) return []
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")!
+    context.font = `${fontSize}px sans-serif`
+
+    let lines = [] as string[]
+    let currentLine = ""
+    const segments = splitByWord ? text.split(" ") : text.split("")
+
+    for (let i = 0; i < segments.length; i++) {
+        const testLine = currentLine ? (splitByWord ? `${currentLine} ${segments[i]}` : `${currentLine}${segments[i]}`) : segments[i]
+        const testWidth = context.measureText(testLine).width
+        if (testWidth <= maxWidth) {
+            currentLine = testLine
+        } else {
+            if (currentLine) {
+                lines.push(currentLine)
+            }
+            currentLine = segments[i]
+        }
+    }
+    if (currentLine) {
+        lines.push(currentLine)
+    }
+    return lines
+}
+
 const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
+    const {onMouseEnter, onMouseMove, onMouseLeave, onDoubleClick, onMouseDown, onContextMenu,
+    text, showTranscript, overlay, fontSize, backgroundColor, textColor} = extraShapeProps
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
+        if (overlay) return ""
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
     const getBGColor = () => {
+        if (overlay) return backgroundColor || "#ffffff"
         return "rgba(89, 43, 255, 0.1)"
     }
     const getStrokeColor = () => {
+        if (overlay) return backgroundColor || "#ffffff"
         return "rgba(89, 43, 255, 0.9)"
+    }
+    const getTextColor = () => {
+        return textColor || "#000000"
     }
     const strokeWidth = Math.ceil(1/scale)
     const strokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
-    return (<rect width={width} height={height} fill={getBGColor()}  stroke={getStrokeColor()} stroke-width={strokeWidth} 
-    stroke-dasharray={strokeArray} onMouseEnter={extraShapeProps.onMouseEnter} onMouseMove={extraShapeProps.onMouseMove} onMouseLeave={extraShapeProps.onMouseLeave} style={{filter: getFilter()}}
-    onContextMenu={extraShapeProps.onContextMenu} onDoubleClick={extraShapeProps.onDoubleClick} onMouseDown={extraShapeProps.onMouseDown}/>)
+
+    const maxTextWidth = width - 20
+    let lines = [] as string[]
+    if (overlay) {
+        lines = splitTextIntoLines(text, maxTextWidth, fontSize, !showTranscript)
+    }
+    const lineHeight = fontSize + 20
+    const totalTextHeight = lines.length * lineHeight
+    const textStartY = height / 2 - totalTextHeight / 2 + lineHeight / 2
+
+    return (
+        <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
+        onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
+            <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} stroke-width={strokeWidth} 
+            stroke-dasharray={strokeArray} style={{filter: getFilter()}} />
+            {lines.map((line, index) => (
+                <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize}
+                stroke="" strokeWidth={0} paint-order="stroke">
+                    {line}
+                </text>
+            ))}
+        </svg>
+    )
 })
 
 const NoteEditor: React.FunctionComponent<Props> = (props) => {
@@ -76,14 +134,17 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {setSidebarText} = useActiveActions()
+    const {setSidebarText, setActionBanner} = useActiveActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {noteMode, noteDrawingEnabled, imageExpand} = useSearchSelector()
     const {setNoteMode, setNoteDrawingEnabled} = useSearchActions()
-    const {setRedirect} = useFlagActions()
-    const {editNoteFlag, editNoteID, editNoteText, editNoteTranscript, showSaveNoteDialog, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
+    const {pasteNoteFlag} = useFlagSelector()
+    const {setRedirect, setPasteNoteFlag} = useFlagActions()
+    const {editNoteFlag, editNoteID, editNoteText, editNoteTranscript, showSaveNoteDialog, noteOCRDialog, noteOCRFlag,
+    editNoteOverlay, editNoteFontSize, editNoteBackgroundColor, editNoteTextColor} = useNoteDialogSelector()
     const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript, setShowSaveNoteDialog,
-    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
+    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag, setEditNoteOverlay, setEditNoteFontSize,
+    setEditNoteBackgroundColor, setEditNoteTextColor} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [targetHash, setTargetHash] = useState("")
@@ -270,6 +331,23 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }, 50)
     }, [img, pixelate])
 
+    const clearNotes = () => {
+        if (!noteDrawingEnabled) return
+        setItems([])
+    }
+
+    const copyNotes = () => {
+        navigator.clipboard.writeText(JSON.stringify(items))
+        setActionBanner("copy-notes")
+    }
+
+    useEffect(() => {
+        if (pasteNoteFlag?.length) {
+            setItems(pasteNoteFlag)
+            setPasteNoteFlag(null)
+        }
+    }, [pasteNoteFlag])
+
     const deleteFocused = () => {
         if (!noteDrawingEnabled) return
         setItems((prev) => functions.insertAtIndex(prev, activeIndex, null).filter(Boolean))
@@ -280,15 +358,24 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (editNoteID === null) {
             setEditNoteTranscript(items[activeIndex].transcript)
             setEditNoteText(items[activeIndex].translation)
+            setEditNoteOverlay(items[activeIndex].overlay)
+            setEditNoteFontSize(items[activeIndex].fontSize)
+            setEditNoteBackgroundColor(items[activeIndex].backgroundColor)
+            setEditNoteTextColor(items[activeIndex].textColor)
             setEditNoteID(activeIndex)
         } else {
             setEditNoteTranscript("")
             setEditNoteText("")
+            setEditNoteOverlay(false)
+            setEditNoteFontSize(100)
+            setEditNoteBackgroundColor("#ffffff")
+            setEditNoteTextColor("#000000")
             setEditNoteID(null)
         }
     }
 
-    const editText = (index: number, transcript: string, translation: string, overlay = false) => {
+    const editText = (index: number, transcript: string, translation: string, overlay=false, fontSize=100,
+        backgroundColor="#ffffff", textColor="#000000") => {
         setItems((prev) => {
             const item = prev[index]
             item.transcript = transcript
@@ -297,6 +384,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             item.imageHeight = targetHeight
             item.imageHash = targetHash
             item.overlay = overlay
+            item.fontSize = fontSize
+            item.backgroundColor = backgroundColor
+            item.textColor = textColor
             return prev
         })
     }
@@ -304,9 +394,14 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (editNoteID === null) return
         if (editNoteFlag) {
-            editText(editNoteID, editNoteTranscript, editNoteText)
+            editText(editNoteID, editNoteTranscript, editNoteText, editNoteOverlay, editNoteFontSize,
+            editNoteBackgroundColor, editNoteTextColor)
             setEditNoteText("")
             setEditNoteTranscript("")
+            setEditNoteOverlay(false)
+            setEditNoteFontSize(100)
+            setEditNoteBackgroundColor("#ffffff")
+            setEditNoteTextColor("#000000")
             setEditNoteFlag(false)
             setEditNoteID(null)
         }
@@ -329,7 +424,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
-        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash, overlay: false} as Note)))
+        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash, overlay: false,
+        fontSize: 100, backgroundColor: "#ffffff", textColor: "#000000"} as Note)))
     }
 
     useEffect(() => {
@@ -361,6 +457,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
                     {session.username ? <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
+                    <img draggable={false} className="note-editor-button" src={noteClear} style={{filter: getFilter()}} onClick={() => clearNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter: getFilter()}} onClick={() => copyNotes()}/>
                     <img draggable={false} className="note-editor-button" src={noteSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="note-editor-button" src={noteText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
@@ -380,7 +478,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             setID(id + 1)
                             return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, 
                                 imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: "", 
-                                overlay: false} as Note]
+                                overlay: false, fontSize: 100, backgroundColor: "#ffffff", textColor: "#000000"} as Note]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
@@ -416,10 +514,15 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             if (!noteDrawingEnabled) return
                             setEditNoteTranscript(item.transcript)
                             setEditNoteText(item.translation)
+                            setEditNoteOverlay(item.overlay)
+                            setEditNoteFontSize(item.fontSize)
+                            setEditNoteBackgroundColor(item.backgroundColor)
+                            setEditNoteTextColor(item.textColor)
                             setEditNoteID(index)
                         }
 
                         const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (item.overlay) return
                             if (!item.transcript && !item.translation) return setBubbleToggle(false)
                             const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
@@ -432,6 +535,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (item.overlay) return
                             if (!item.transcript && !item.translation) return setBubbleToggle(false)
                             const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
@@ -457,10 +561,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             }
                         }
 
+                        const text = showTranscript ? item.transcript : item.translation
+
                         return (
                             <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem as any} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
-                            extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown}}/>
+                            extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown, text, showTranscript, 
+                            overlay: item.overlay, fontSize: item.fontSize, backgroundColor: item.backgroundColor, textColor: item.textColor}}/>
                         )
                     })}
                 </ShapeEditor>

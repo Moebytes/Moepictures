@@ -9,7 +9,7 @@ import path from "path"
 import sharp from "sharp"
 import phash from "sharp-phash"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
-import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams} from "../types/Types"
+import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag} from "../types/Types"
 
 const noteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -41,18 +41,20 @@ const NoteRoutes = (app: Express) => {
                 if (!data.length) return res.status(200).send("Success")
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                    item.fontSize, item.backgroundColor, item.textColor)
                 }
             } else {
-                let noMatch = [] as any
+                let noMatch = [] as Note[]
                 for (const note of notes) {
                     if (!data.length) {
                         await sql.note.deleteNote(note.noteID)
                     } else {
-                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        const match = data.find((item) => item.noteID === note.noteID)
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                            match.fontSize, match.backgroundColor, match.textColor)
                         } else {
                             noMatch.push(note)
                         }
@@ -63,7 +65,8 @@ const NoteRoutes = (app: Express) => {
                         await sql.note.deleteNote(item.noteID)
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                        item.fontSize, item.backgroundColor, item.textColor)
                     }
                 }
             }
@@ -94,18 +97,20 @@ const NoteRoutes = (app: Express) => {
                 if (!data.length) return res.status(200).send("Success")
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                    item.fontSize, item.backgroundColor, item.textColor)
                 }
             } else {
-                let noMatch = [] as any
+                let noMatch = [] as Note[]
                 for (const note of notes) {
                     if (!data.length) {
                         await sql.note.deleteNote(note.noteID)
                     } else {
-                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        const match = data.find((item) => item.noteID === note.noteID)
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                            match.fontSize, match.backgroundColor, match.textColor)
                         } else {
                             noMatch.push(note)
                         }
@@ -116,7 +121,8 @@ const NoteRoutes = (app: Express) => {
                         await sql.note.deleteNote(item.noteID)
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                        item.fontSize, item.backgroundColor, item.textColor)
                     }
                 }
             }
@@ -154,17 +160,17 @@ const NoteRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!data) return res.status(400).send("Bad data")
 
-            const originalPostID = postID as any
+            const originalPostID = postID as string
             const post = await sql.post.post(originalPostID)
             if (!post) return res.status(400).send("Invalid post ID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             postID = await sql.post.insertUnverifiedPost()
 
             const categories = await serverFunctions.tagCategories(post.tags)
-            let artists = categories.artists.map((a: any) => a.tag)
-            let characters = categories.characters.map((c: any) => c.tag)
-            let series = categories.series.map((s: any) => s.tag)
-            let tags = categories.tags.map((t: any) => t.tag)
+            let artists = categories.artists.map((a) => a.tag)
+            let characters = categories.characters.map((c) => c.tag)
+            let series = categories.series.map((s) => s.tag)
+            let tags = categories.tags.map((t) => t.tag)
             let type = post.type
             let rating = post.rating
             let style = post.style
@@ -172,7 +178,7 @@ const NoteRoutes = (app: Express) => {
                 title: post.title,
                 englishTitle: post.englishTitle,
                 artist: post.artist,
-                posted: post.posted ? functions.formatDate(new Date(post.posted), true) : null as any,
+                posted: post.posted ? functions.formatDate(new Date(post.posted), true) : null,
                 source: post.source,
                 commentary: post.commentary,
                 englishCommentary: post.englishCommentary,
@@ -208,13 +214,13 @@ const NoteRoutes = (app: Express) => {
                 if (post.images[i].filename) {
                     let ext = path.extname(post.images[i].filename).replace(".", "")
                     filename = post.title ? `${post.title}.${ext}` : 
-                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+                    characters[0] !== "unknown-character" ? `${characters[0]}.${ext}` :
                     `${postID}.${ext}`
                 }
                 if (post.images[i].upscaledFilename) {
                     let upscaledExt = path.extname(post.images[i].upscaledFilename).replace(".", "")
                     upscaledFilename = post.title ? `${post.title}.${upscaledExt}` : 
-                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledExt}` :
+                    characters[0] !== "unknown-character" ? `${characters[0]}.${upscaledExt}` :
                     `${postID}.${upscaledExt}`
                 }
                 let kind = "image" as any
@@ -301,13 +307,13 @@ const NoteRoutes = (app: Express) => {
                 updater: req.session.username
             })
 
-            let tagMap = [] as any
-            let bulkTagUpdate = [] as any
+            let tagMap = [] as string[]
+            let bulkTagUpdate = [] as BulkTag[]
             let tagObjectMapping = await serverFunctions.tagMap()
     
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i]) continue
-                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null, imageHash: null} as any
+                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null, imageHash: null} as BulkTag
                 const existingTag = await sql.tag.tag(artists[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -325,7 +331,7 @@ const NoteRoutes = (app: Express) => {
             
             for (let i = 0; i < characters.length; i++) {
                 if (!characters[i]) continue
-                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null, imageHash: null} as any
+                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null, imageHash: null} as BulkTag
                 const existingTag = await sql.tag.tag(characters[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -343,7 +349,7 @@ const NoteRoutes = (app: Express) => {
 
             for (let i = 0; i < series.length; i++) {
                 if (!series[i]) continue
-                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null, imageHash: null} as any
+                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null, imageHash: null} as BulkTag
                 const existingTag = await sql.tag.tag(series[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -361,7 +367,7 @@ const NoteRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: tagObjectMapping[tags[i]]?.type, description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
+                let bulkObj = {tag: tags[i], type: tagObjectMapping[tags[i]]?.type, description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as BulkTag
                 const existingTag = await sql.tag.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -396,7 +402,8 @@ const NoteRoutes = (app: Express) => {
             let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
             for (const item of data) {
                 await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
-                item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, removedEntries, reason)
+                item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize, item.backgroundColor,
+                item.textColor, addedEntries, removedEntries, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -443,19 +450,20 @@ const NoteRoutes = (app: Express) => {
                 if (!data.length) return res.status(200).send("Success")
                 for (const item of data) {
                     await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, 
-                    removedEntries, reason)
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
+                    item.backgroundColor, item.textColor, addedEntries, removedEntries, reason)
                 }
             } else {
-                let noMatch = [] as any
+                let noMatch = [] as Note[]
                 for (const note of notes) {
                     if (!data.length) {
                         await sql.note.deleteUnverifiedNote(note.noteID)
                     } else {
-                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        const match = data.find((item) => item.noteID === note.noteID)
                         if (match) {
                             await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
-                            match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, reason)
+                            match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, match.fontSize,
+                            match.backgroundColor, match.textColor, reason)
                         } else {
                             noMatch.push(note)
                         }
@@ -466,8 +474,8 @@ const NoteRoutes = (app: Express) => {
                         await sql.note.deleteUnverifiedNote(item.noteID)
                     } else {
                         await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, addedEntries, 
-                        removedEntries, reason)
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
+                        item.backgroundColor, item.textColor, addedEntries, removedEntries, reason)
                     }
                 }
             }
@@ -512,18 +520,20 @@ const NoteRoutes = (app: Express) => {
                 if (!data.length) return res.status(200).send("Success")
                 for (const item of data) {
                     await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                    item.fontSize, item.backgroundColor, item.textColor)
                 }
             } else {
-                let noMatch = [] as any
+                let noMatch = [] as Note[]
                 for (const note of notes) {
                     if (!data.length) {
                         await sql.note.deleteNote(note.noteID)
                     } else {
-                        const match = data.find((item: any) => item.noteID === note.noteID)
+                        const match = data.find((item) => item.noteID === note.noteID)
                         if (match) {
                             await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay)
+                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                            match.fontSize, match.backgroundColor, match.textColor)
                         } else {
                             noMatch.push(note)
                         }
@@ -534,7 +544,8 @@ const NoteRoutes = (app: Express) => {
                         await sql.note.deleteNote(item.noteID)
                     } else {
                         await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay)
+                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                        item.fontSize, item.backgroundColor, item.textColor)
                     }
                 }
             }

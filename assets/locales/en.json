@@ -236,6 +236,7 @@
     "banner": {
         "copiedTags": "Copied Tags!",
         "copiedHash": "Copied Hash!",
+        "copiedNotes": "Copied Notes!",
         "editedTags": "Edited Tags!",
         "editedSource": "Edited Source!",
         "logoutSessions": "Logged out other sessions!",
@@ -431,7 +432,11 @@
         "sendMessage": "Send Message",
         "postID": "Post ID",
         "featured": "Featured Post",
-        "edits": "Edits"
+        "edits": "Edits",
+        "overlay": "Overlay",
+        "fontSize": "Font Size",
+        "backgroundColor": "Background Color",
+        "textColor": "Text Color"
     },
     "errors": {
         "$401":"401 error",

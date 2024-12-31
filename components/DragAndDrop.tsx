@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import {Post} from "../types/Types"
+import {Post, Note} from "../types/Types"
 import "./styles/draganddrop.less"
 
 let showDrag = false
@@ -13,7 +13,7 @@ const DragAndDrop: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setUploadDropFiles} = useCacheActions()
-    const {setImageSearchFlag} = useFlagActions()
+    const {setImageSearchFlag, setPasteNoteFlag} = useFlagActions()
     const [visible, setVisible] = useState(false)
     const [searchHover, setSearchHover] = useState(false)
     const [uploadHover, setUploadHover] = useState(false)
@@ -67,24 +67,45 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         }
     }
 
-    const paste = (event: ClipboardEvent) => {
+    const paste = async (event: ClipboardEvent) => {
         const items = event.clipboardData?.items
         if (!items) return
         const files = [] as File[]
+        let notes = [] as Note[]
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
             if (item.type.startsWith("image")) {
                 const file = item.getAsFile()
                 if (file) files.push(file)
+            } else if (item.type.startsWith("text")) {
+                try {
+                    const text = await new Promise<string>((resolve) => {
+                        item.getAsString((data) => resolve(data))
+                    })
+                    const parsedNotes = JSON.parse(text)
+                    if (parsedNotes?.[0]) {
+                        const note = parsedNotes[0]
+                        if ("x" in note && "y" in note && 
+                            "width" in note && "height" in note) {
+                            notes = parsedNotes
+                        }
+                    }
+                } catch {
+                    // ignore
+                }
             }
         }
-
-        if (history.location.pathname === "/upload" ||
-        history.location.pathname === "/bulk-upload" ||
-        history.location.pathname.includes("edit-post")) {
-            uploadFiles(files)
-        } else {
-            searchFiles(files)
+        if (files.length) {
+            if (history.location.pathname === "/upload" ||
+            history.location.pathname === "/bulk-upload" ||
+            history.location.pathname.includes("edit-post")) {
+                uploadFiles(files)
+            } else {
+                searchFiles(files)
+            }
+        }
+        if (notes.length) {
+            setPasteNoteFlag(notes)
         }
     }
 

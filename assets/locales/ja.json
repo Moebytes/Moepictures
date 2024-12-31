@@ -237,6 +237,7 @@
     "banner": {
         "copiedTags": "コピーされたタグ！",
         "copiedHash": "コピーハッシュ！",
+        "copiedNotes": "コピーノート！",
         "editedTags": "編集済みタグ！",
         "editedSource": "編集元！",
         "logoutSessions": "他のセッションをログアウト！",
@@ -432,7 +433,11 @@
         "sendMessage": "メッセージを送る",
         "postID": "投稿ID",
         "featured": "注目のポスト",
-        "edits": "編集"
+        "edits": "編集",
+        "overlay": "オーバーレイ",
+        "fontSize": "文字サイズ",
+        "backgroundColor": "背景色",
+        "textColor": "テキストの色"
     },
     "errors": {
         "$401":"401エラー",

@@ -4,12 +4,16 @@ import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteD
 import functions from "../structures/Functions"
 import "./styles/editnotedialog.less"
 import Draggable from "react-draggable"
+import checkbox from "../assets/icons/checkbox.png"
+import checkboxChecked from "../assets/icons/checkbox-checked.png"
 
 const EditNoteDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {editNoteID, editNoteText, editNoteTranscript} = useNoteDialogSelector()
-    const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript} = useNoteDialogActions()
+    const {editNoteID, editNoteText, editNoteTranscript, editNoteOverlay, editNoteFontSize,
+    editNoteBackgroundColor, editNoteTextColor} = useNoteDialogSelector()
+    const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript, setEditNoteOverlay,
+    setEditNoteFontSize, setEditNoteBackgroundColor, setEditNoteTextColor} = useNoteDialogActions()
     const history = useHistory()
 
     useEffect(() => {
@@ -32,6 +36,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
         } else {
             setEditNoteText("")
             setEditNoteTranscript("")
+            setEditNoteOverlay(false)
             setEditNoteID(null)
         }
     }
@@ -57,6 +62,24 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                         <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
                             <textarea className="edit-note-textarea" spellCheck={false} value={editNoteText} onChange={(event) => setEditNoteText(event.target.value)}></textarea>
                         </div>
+                        <div className="edit-note-dialog-row-start">
+                            <span className="edit-note-dialog-text">{i18n.labels.overlay}?</span>
+                            <img className="edit-note-checkbox" src={editNoteOverlay ? checkboxChecked : checkbox} onClick={() => setEditNoteOverlay(!editNoteOverlay)}/>
+                        </div>
+                        {editNoteOverlay ? <>
+                            <div className="edit-note-dialog-row-start">
+                                <span className="edit-note-dialog-text">{i18n.labels.fontSize}:</span>
+                                <input className="edit-note-input" type="number" spellCheck={false} value={editNoteFontSize} onChange={(event) => setEditNoteFontSize(Number(event.target.value))}/>
+                            </div>
+                            <div className="edit-note-dialog-row-start">
+                                <span className="edit-note-dialog-text">{i18n.labels.backgroundColor}:</span>
+                                <input className="edit-note-color" type="color" spellCheck={false} value={editNoteBackgroundColor} onChange={(event) => setEditNoteBackgroundColor(event.target.value)}/>
+                            </div>
+                            <div className="edit-note-dialog-row-start">
+                                <span className="edit-note-dialog-text">{i18n.labels.textColor}:</span>
+                                <input className="edit-note-color" type="color" spellCheck={false} value={editNoteTextColor} onChange={(event) => setEditNoteTextColor(event.target.value)}/>
+                            </div>
+                        </> : null}
                         <div className="edit-note-dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>

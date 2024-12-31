@@ -17,6 +17,9 @@ export interface Note {
     imageHeight: number
     imageHash: string
     overlay: boolean
+    fontSize: number
+    backgroundColor: string
+    textColor: string
 }
 
 export interface BubbleData {

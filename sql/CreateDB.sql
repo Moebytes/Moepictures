@@ -329,6 +329,9 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "imageHeight" int,
     "imageHash" text,
     "overlay" boolean,
+    "fontSize" int,
+    "backgroundColor" text,
+    "textColor" text,
     "data" jsonb
 );
 
@@ -349,6 +352,9 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "imageHeight" int,
     "imageHash" text,
     "overlay" boolean,
+    "fontSize" int,
+    "backgroundColor" text,
+    "textColor" text,
     "data" jsonb,
     "addedEntries" text[],
     "removedEntries" text[],

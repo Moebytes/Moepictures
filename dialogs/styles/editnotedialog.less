@@ -17,7 +17,7 @@
     pointer-events: all;
     margin-top: -100px;
     width: 350px;
-    height: 385px;
+    height: max-content;
     border-radius: 7px;
     background-color: var(--tooltipBG);
     padding: 10px;
@@ -57,6 +57,19 @@
     }
 }
 
+.edit-note-dialog-row-start {
+    display: flex;
+    flex-direction: row;
+    margin-top: 5px;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    &:last-child {
+        justify-content: space-evenly;
+        margin-bottom: 5px;
+    }
+}
+
 .edit-note-dialog-title {
     color: var(--text);
     cursor: text;
@@ -78,7 +91,7 @@
     //.stroke-black();
 }
 
-.edit-note-dialog-input {
+.edit-note-input {
     background-color: transparent;
     border: 2px solid var(--inputBorder);
     width: 100px;
@@ -121,4 +134,20 @@
     resize: none;
     font-size: 17px;
     font-weight: normal;
+}
+
+.edit-note-checkbox {
+    width: auto;
+    height: 20px;
+    margin-left: 10px;
+    cursor: pointer;  
+    margin-top: 2px;
+}
+
+.edit-note-color {
+    border: 2px solid black !important;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    margin-top: 2px;
 }
