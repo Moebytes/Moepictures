@@ -121,6 +121,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.showTagTooltips = user.showTagTooltips
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval

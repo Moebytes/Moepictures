@@ -14,7 +14,10 @@ const interactionSlice = createSlice({
         tooltipY: 0,
         tooltipEnabled: false,
         tooltipPost: null as PostSearch | null,
-        tooltipImg: ""
+        tooltipImg: "",
+        tagTooltipY: 0,
+        tagTooltipTag: null as string | null,
+        tagTooltipEnabled: false
     },
     reducers: {
         setEnableDrag: (state, action) => {state.enableDrag = action.payload},
@@ -25,14 +28,18 @@ const interactionSlice = createSlice({
         setToolTipY: (state, action) => {state.tooltipY = action.payload},
         setToolTipEnabled: (state, action) => {state.tooltipEnabled = action.payload},
         setToolTipPost: (state, action) => {state.tooltipPost = action.payload},
-        setToolTipImg: (state, action) => {state.tooltipImg = action.payload}
+        setToolTipImg: (state, action) => {state.tooltipImg = action.payload},
+        setTagToolTipY: (state, action) => {state.tagTooltipY = action.payload},
+        setTagToolTipTag: (state, action) => {state.tagTooltipTag = action.payload},
+        setTagToolTipEnabled: (state, action) => {state.tagTooltipEnabled = action.payload},
     }    
 })
 
 const {
     setEnableDrag, setSidebarHover, setMobileScrolling, setScrollY,
     setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, 
-    setToolTipImg
+    setToolTipImg, setTagToolTipTag, setTagToolTipEnabled,
+    setTagToolTipY
 } = interactionSlice.actions
 
 export const useInteractionSelector = () => {
@@ -46,7 +53,10 @@ export const useInteractionSelector = () => {
         tooltipY: selector((state) => state.interaction.tooltipY),
         tooltipEnabled: selector((state) => state.interaction.tooltipEnabled),
         tooltipPost: selector((state) => state.interaction.tooltipPost),
-        tooltipImg: selector((state) => state.interaction.tooltipImg)
+        tooltipImg: selector((state) => state.interaction.tooltipImg),
+        tagTooltipY: selector((state) => state.interaction.tagTooltipY),
+        tagTooltipTag: selector((state) => state.interaction.tagTooltipTag),
+        tagTooltipEnabled: selector((state) => state.interaction.tagTooltipEnabled)
     }
 }
 
@@ -60,8 +70,11 @@ export const useInteractionActions = () => {
         setToolTipX: (state: number) => dispatch(setToolTipX(state)),
         setToolTipY: (state: number) => dispatch(setToolTipY(state)),
         setToolTipEnabled: (state: boolean) => dispatch(setToolTipEnabled(state)),
-        setToolTipPost: (state: PostSearch) => dispatch(setToolTipPost(state)),
-        setToolTipImg: (state: string) => dispatch(setToolTipImg(state))
+        setToolTipPost: (state: PostSearch | null) => dispatch(setToolTipPost(state)),
+        setToolTipImg: (state: string) => dispatch(setToolTipImg(state)),
+        setTagToolTipY: (state: number) => dispatch(setTagToolTipY(state)),
+        setTagToolTipTag: (state: string | null) => dispatch(setTagToolTipTag(state)),
+        setTagToolTipEnabled: (state: boolean) => dispatch(setTagToolTipEnabled(state))
     }
 }
 

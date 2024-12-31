@@ -64,6 +64,7 @@ import DragAndDrop from "./components/DragAndDrop"
 import AudioPlayer from "./components/AudioPlayer"
 import ActionBanner from "./components/ActionBanner"
 import NewsBanner from "./components/NewsBanner"
+import TagToolTip from "./components/TagToolTip"
 import {PostRating} from "./types/Types"
 import "./index.less"
 
@@ -281,6 +282,7 @@ const App: React.FunctionComponent = (props) => {
             <NewsBanner/>
             <ActionBanner/>
             <PremiumRequiredDialog/>
+            <TagToolTip/>
             <Switch>
                 <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
                 <Route exact path="/profile"><UserProfilePage/></Route>

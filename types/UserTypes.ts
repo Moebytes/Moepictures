@@ -22,6 +22,7 @@ export interface User extends PrunedUser {
     password?: string
     showRelated?: boolean
     showTooltips?: boolean
+    showTagTooltips?: boolean
     showTagBanner?: boolean
     downloadPixivID?: boolean
     autosearchInterval?: number
@@ -197,6 +198,7 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/favoritesprivacy" ? {params: null, response: string} :
     T extends "/api/user/showrelated" ? {params: null, response: string} :
     T extends "/api/user/showtooltips" ? {params: null, response: string} :
+    T extends "/api/user/showtagtooltips" ? {params: null, response: string} :
     T extends "/api/user/showtagbanner" ? {params: null, response: string} :
     T extends "/api/user/downloadpixivid" ? {params: null, response: string} :
     T extends "/api/user/autosearchinterval" ? {params: {interval: number | null}, response: string} :

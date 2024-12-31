@@ -62,9 +62,7 @@ import lockIcon from "../assets/icons/lock-red.png"
 import unlockIcon from "../assets/icons/unlock-red.png"
 import privateIcon from "../assets/icons/private.png"
 import unprivateIcon from "../assets/icons/unprivate.png"
-import pack from "../package.json"
 import functions from "../structures/Functions"
-import TagHover from "./TagHover"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
 import "./styles/sidebar.less"
 
@@ -80,6 +78,7 @@ interface Props {
 }
 
 let interval = null as any
+let tagTooltipTimer = null as any
 let maxHeight1 = 547 // 582
 let maxHeight2 = 625 // 655
 let maxHeight3 = 672 // 698
@@ -92,7 +91,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {posts, unverifiedPosts, tags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {mobileScrolling} = useInteractionSelector()
-    const {setEnableDrag, setSidebarHover} = useInteractionActions()
+    const {setEnableDrag, setSidebarHover, setTagToolTipTag, setTagToolTipEnabled, setTagToolTipY} = useInteractionActions()
     const {sidebarText} = useActiveSelector()
     const {setRandomFlag, setImageSearchFlag} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
@@ -320,6 +319,21 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         } else {
             history.push(`/tag/${tag}`)
         }
+        setTagToolTipEnabled(false)
+    }
+
+    const tagMouseEnter = (event: React.MouseEvent, tag?: string) => {
+        if (!tag) return
+        tagTooltipTimer = setTimeout(() => {
+            setTagToolTipY(event.clientY)
+            setTagToolTipTag(tag)
+            setTagToolTipEnabled(true)
+        }, 200)
+    }
+
+    const tagMouseLeave = () => {
+        if (tagTooltipTimer) clearTimeout(tagTooltipTimer)
+        setTagToolTipEnabled(false)
     }
 
     const generateArtistsJSX = () => {
@@ -358,7 +372,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img className="sidebar-img" src={link}/>
                     </div> : null}
                     <div className="sidebar-row">
-                        <span className="tag-hover">
+                        <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.artists?.[i].tag)}>
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists?.[i].tag)}/>
                             <span className="tag artist-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists?.[i].tag)}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
@@ -396,7 +410,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img className="sidebar-img" src={link}/>
                 </div> : null}
                 <div className="sidebar-row">
-                    <span className="tag-hover">
+                    <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.characters?.[i].tag)}>
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters?.[i].tag)}/>
                         <span className="tag character-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters?.[i].tag)}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
@@ -437,7 +451,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img className="sidebar-img" src={link}/>
                 </div> : null}
                 <div className="sidebar-row">
-                    <span className="tag-hover">
+                    <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.series?.[i].tag)}>
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.series?.[i].tag)}/>
                         <span className="tag series-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series?.[i].tag)}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
@@ -504,7 +518,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <div className="sidebar-row">
-                    <span className="tag-hover">
+                    <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
                         <span className={`tag ${functions.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
@@ -913,7 +927,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         <>
         <SearchSuggestions active={suggestionsActive}/>
         <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideTitlebar ? "sidebar-top" : ""}
-        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setSidebarHover(false)}}>
+        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setSidebarHover(false); tagMouseLeave()}}>
             <div className="sidebar-container">
             <div className="sidebar-content">
                 {sidebarText ?

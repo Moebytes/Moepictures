@@ -279,6 +279,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const showTagTooltips = async () => {
+        await functions.post("/api/user/showtagtooltips", null, session, setSessionFlag)
+        setSessionFlag(true)
+    }
+
     const showTagBanner = async () => {
         await functions.post("/api/user/showtagbanner", null, session, setSessionFlag)
         setSessionFlag(true)
@@ -680,6 +685,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.showTooltips}: <span className="user-text-action" onClick={showTooltips}>{session.showTooltips ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
+                        <span className="user-text">{i18n.user.showTagTooltips}: <span className="user-text-action" onClick={showTagTooltips}>{session.showTagTooltips ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.showTagBanner}: <span className="user-text-action" onClick={showTagBanner}>{session.showTagBanner ? i18n.buttons.yes : i18n.buttons.no}</span></span>

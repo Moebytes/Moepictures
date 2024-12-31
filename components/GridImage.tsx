@@ -433,7 +433,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
             containerRef.current.style.marginLeft = props.marginLeft ? `${props.marginLeft}px` : "0px"
-            const landscape = refWidth <=refHeight
+            const landscape = refWidth <= refHeight
             if (landscape) {
                 currentRef.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
                 currentRef.style.height = "auto"

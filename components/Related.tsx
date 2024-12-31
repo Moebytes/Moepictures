@@ -100,7 +100,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateRelated()
-    }, [props.post, session])
+    }, [props.post, props.tag, session])
 
     const getPageAmount = () => {
         return mobile ? 10 : scroll ? 15 : 20

@@ -1,5 +1,3 @@
--- Tables
-
 CREATE TABLE IF NOT EXISTS "users" (
     "username" text PRIMARY KEY,
     "email" text UNIQUE NOT NULL,
@@ -11,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "publicFavorites" boolean,
     "showRelated" boolean,
     "showTooltips" boolean,
+    "showTagTooltips" boolean,
     "showTagBanner" boolean,
     "downloadPixivID" boolean,
     "autosearchInterval" int,
@@ -640,8 +639,6 @@ CREATE TABLE IF NOT EXISTS "banner" (
     "date" timestamptz
 );
 
--- Indexes
-
 CREATE INDEX IF NOT EXISTS "idx_posts"
     ON "posts" USING btree
     ("postID" DESC NULLS LAST);
@@ -772,8 +769,6 @@ CREATE INDEX IF NOT EXISTS "idx_unverified_notes"
 
 CREATE INDEX IF NOT EXISTS "idx_sessions_expire"
     ON "sessions" ("expires");
-
--- Auto-generated tables
 
 CREATE TABLE IF NOT EXISTS "tag map tags" (
     "postID" bigint PRIMARY KEY REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE CASCADE,

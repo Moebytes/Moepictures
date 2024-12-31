@@ -35,6 +35,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateTags = async () => {
+        if (session?.username && !session?.showTooltips) return
         if (!tooltipPost) return
         const result = await functions.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
         const artists = result.filter((t) => t.type === "artist")

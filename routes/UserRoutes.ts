@@ -75,6 +75,7 @@ const UserRoutes = (app: Express) => {
             delete user.password
             delete user.showRelated
             delete user.showTooltips
+            delete user.showTagTooltips
             delete user.downloadPixivID
             delete user.autosearchInterval
             delete user.showTagBanner
@@ -111,6 +112,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "publicFavorites", true)
                 await sql.user.updateUser(username, "showRelated", true)
                 await sql.user.updateUser(username, "showTooltips", true)
+                await sql.user.updateUser(username, "showTagTooltips", true)
                 await sql.user.updateUser(username, "showTagBanner", true)
                 await sql.user.updateUser(username, "downloadPixivID", false)
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
@@ -184,6 +186,7 @@ const UserRoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.showTagTooltips = user.showTagTooltips
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
@@ -245,6 +248,7 @@ const UserRoutes = (app: Express) => {
                 req.session.role = user.role
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.showTagTooltips = user.showTagTooltips
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
@@ -390,6 +394,21 @@ const UserRoutes = (app: Express) => {
             const newTooltips = !Boolean(user.showTooltips)
             req.session.showTooltips = newTooltips 
             await sql.user.updateUser(req.session.username, "showTooltips", newTooltips)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/showtagtooltips", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newTagTooltips = !Boolean(user.showTagTooltips)
+            req.session.showTagTooltips = newTagTooltips 
+            await sql.user.updateUser(req.session.username, "showTagTooltips", newTagTooltips)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
