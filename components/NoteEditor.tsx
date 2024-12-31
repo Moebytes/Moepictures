@@ -104,20 +104,20 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     const rectStrokeWidth = Math.ceil(1/scale)
     const rectStrokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
 
-    const maxTextWidth = width - 20
+    const maxTextWidth = width - ((fontSize || 100) / 5)
     let lines = [] as string[]
     if (overlay) {
         lines = splitTextIntoLines(text, maxTextWidth, fontSize || 100, breakWord && !showTranscript)
     }
-    const lineHeight = (fontSize || 100) + 20
+    const lineHeight = (fontSize || 100) + ((fontSize || 100) / 5)
     const totalTextHeight = lines.length * lineHeight
     const textStartY = height / 2 - totalTextHeight / 2 + lineHeight / 2
 
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
-            <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} stroke-width={rectStrokeWidth} 
-            stroke-dasharray={rectStrokeArray} style={{filter: getFilter()}}/>
+            <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} strokeWidth={rectStrokeWidth} 
+            strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
             {lines.map((line, index) => (
                 <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize || 100}
                 fontFamily={fontFamily || "Tahoma"} fontWeight={bold ? "bold" : "normal"} fontStyle={italic ? "italic" : "normal"}
@@ -184,7 +184,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         } else {
             notes = await functions.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
         }
-        notes = notes?.filter((n) => n.order === (props.order || 1))
+        notes = notes?.filter((n) => n.order === undefined || n.order === (props.order || 1))
         if (notes?.length) {
             let largestID = notes.reduce((prev, current) => {return Math.max(prev, current.id || 1)}, -Infinity)
             setItems(notes)
@@ -521,7 +521,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
-                        let {id, height, width, x, y, imageWidth, imageHeight} = item
+                        let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth} = item
                         if (!imageWidth) imageWidth = targetWidth
                         if (!imageHeight) imageHeight = targetHeight
 
@@ -529,6 +529,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const newHeight = (height / imageHeight ) * targetHeight
                         const newX = (x / imageWidth) * targetWidth
                         const newY = (y / imageHeight ) * targetHeight
+                        const newFontSize = (fontSize / imageHeight) * targetHeight
+                        const newStrokeWidth = (strokeWidth / imageHeight) * targetHeight
 
                         const insertItem = (newRect: BubbleData) => {
                             if (!noteDrawingEnabled) return
@@ -617,9 +619,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem as any} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
                             extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown, text, showTranscript, 
-                            overlay: item.overlay, fontSize: item.fontSize, backgroundColor: item.backgroundColor, textColor: item.textColor,
+                            overlay: item.overlay, fontSize: newFontSize, backgroundColor: item.backgroundColor, textColor: item.textColor,
                             backgroundAlpha: item.backgroundAlpha, fontFamily: item.fontFamily, bold: item.bold, italic: item.italic, 
-                            strokeColor: item.strokeColor, strokeWidth: item.strokeWidth, breakWord: item.breakWord}}/>
+                            strokeColor: item.strokeColor, strokeWidth: newStrokeWidth, breakWord: item.breakWord}}/>
                         )
                     })}
                 </ShapeEditor>

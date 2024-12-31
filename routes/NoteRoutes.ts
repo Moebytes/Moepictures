@@ -615,7 +615,7 @@ const NoteRoutes = (app: Express) => {
             let result = [] as NoteHistory[]
             if (historyID) {
                 const history = await sql.history.noteHistoryID(postID, historyID)
-                result = [history]
+                if (history) result = [history]
             } else if (username) {
                 result = await sql.history.userNoteHistory(username)
             } else {

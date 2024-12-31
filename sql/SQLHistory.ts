@@ -367,7 +367,7 @@ export default class SQLHistory {
             values: [postID, historyID]
         }
         const result = await SQLQuery.run(query)
-        return result as Promise<NoteHistory>
+        return result[0] as Promise<NoteHistory | undefined>
     }
 
     /** Get user note history */
