@@ -1,0 +1,158 @@
+@import "../../../index.less";
+
+.thread {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+    border: 2px solid var(--inputBG);
+    margin-top: 5px;
+    &:hover {
+        border: 2px solid var(--navbarText);
+    }
+}
+
+.thread-no-hover {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.thread-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.thread-row {
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: max-content;
+    min-width: 200px;
+    height: 100%;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.thread-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.thread-heading {
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    color: var(--tagColor);
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+.thread-title {
+    font-family: Tahoma, sans-serif;
+    color: var(--tagColor);
+    font-size: 17px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%)
+    }
+}
+
+.thread-icon {
+    width: auto;  
+    height: 18px;
+    margin-right: 3px;  
+    margin-top: 3px;
+}
+
+.thread-opt-icon {
+    width: auto;  
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.thread-read {
+    color: var(--tagReadColor);
+}
+
+.thread-img-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-right: 10px;
+}
+
+.thread-img {
+    width: auto;
+    height: 70px;
+}
+.thread-content-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.thread-date-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text-strong);
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.thread-user-img {
+    width: auto;
+    height: 23px;
+    margin-right: 7px;
+}
+
+.thread-user-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--userColor);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.thread-user-normal-text {
+    color: var(--text);
+    margin-right: 7px;
+}
+
+.thread-username-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.thread-user-label {
+    margin-left: 3px;
+    width: auto;
+    height: 20px;
+}
+
+@media screen and (max-width: 500px) {
+    .thread-content-container {
+        flex-direction: column;
+    }
+
+    .thread-row {
+        min-width: 100px;
+    }
+}

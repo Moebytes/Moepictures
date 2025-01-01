@@ -280,7 +280,8 @@ const NoteRoutes = (app: Express) => {
                     hash = await phash(original).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(upscaled).metadata() as {width: number, height: number}
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, upscaled.byteLength)
+                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, 
+                dimensions.width, dimensions.height, buffer.byteLength || null, upscaledBuffer.byteLength || null)
             }
             if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
             if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
@@ -424,7 +425,8 @@ const NoteRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const post = await sql.post.unverifiedPost(postID)
+            if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
             const notes = await sql.note.unverifiedPostNotes(postID)
             serverFunctions.sendEncrypted(notes, req, res)
         } catch (e) {
@@ -439,8 +441,10 @@ const NoteRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
             if (!data) return res.status(400).send("Bad data")
+
+            const post = await sql.post.unverifiedPost(postID)
+            if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
 
             const notes = await sql.note.unverifiedNotes(postID, order)
             let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
@@ -456,7 +460,7 @@ const NoteRoutes = (app: Express) => {
             if (!notes?.[0]) {
                 if (!data.length) return res.status(200).send("Success")
                 for (const item of data) {
-                    await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
+                    await sql.note.insertUnverifiedNote(postID, originalID || null, req.session.username, order, item.transcript, item.translation,
                     item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
                     item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                     item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)
@@ -482,7 +486,7 @@ const NoteRoutes = (app: Express) => {
                     if (item.noteID) {
                         await sql.note.deleteUnverifiedNote(item.noteID)
                     } else {
-                        await sql.note.insertUnverifiedNote(postID, originalID, req.session.username, order, item.transcript, item.translation,
+                        await sql.note.insertUnverifiedNote(postID, originalID || null, req.session.username, order, item.transcript, item.translation,
                         item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
                         item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                         item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)

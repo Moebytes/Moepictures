@@ -158,7 +158,7 @@ export default class SQLSearch {
                 ${includeTags ? `"tag map tags"."tags",` : ""}
                 ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 ${favgroupOrder ? `"favgroup map"."order",` : ""} 
-                MAX(DISTINCT images."size") AS "fileSize",
+                MAX(DISTINCT COALESCE(images."size", 0) + COALESCE(images."upscaledSize", 0)) AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",

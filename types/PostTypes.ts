@@ -28,6 +28,7 @@ export interface Image {
     width: number
     height: number
     size: number
+    upscaledSize: number
     hash: string
 }
 
@@ -180,6 +181,7 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost | undefined} :
     T extends "/api/post/delete/request/list" ? {params: {offset?: number} | null, response: PostDeleteRequest[]} :
     T extends "/api/post/history" ? {params: PostHistoryParams | null, response: PostHistory[]} :
+    T extends "/api/post/pending" ? {params: null, response: UnverifiedPost[]} :
     never
 
 export type PostPostEndpoint<T extends string> = 

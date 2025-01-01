@@ -1,0 +1,55 @@
+@import "../../../index.less";
+
+.artistrow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.artistrow-row {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.artistrow-text-hover {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.artistrow-text {
+    margin-left: 20px;
+    font-family: Tahoma, sans-serif;
+    color: var(--artistTagColor);
+    font-size: 26px;
+    
+}
+
+.artistrow-text-alt {
+    margin-left: 10px;
+    font-family: Tahoma, sans-serif;
+    color: var(--text-strong);
+    font-size: 23px;
+}
+
+.artistrow-img {
+    width: auto;
+    height: 70px;
+}
+
+.artistrow-social {
+    width: auto;
+    height: 23px;
+    margin-left: 7px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}

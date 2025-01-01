@@ -291,7 +291,8 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(upscaledBuffer).metadata()
           }
-          await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, upscaled[i].size)
+          await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
+          dimensions.width, dimensions.height, images[i]?.size || null, upscaledImages[i]?.size || null)
         }
 
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -616,7 +617,8 @@ const CreateRoutes = (app: Express) => {
                 hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                 dimensions = await sharp(upscaledBuffer).metadata()
             }
-            await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, upscaled[i].size)
+            await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
+            dimensions.width, dimensions.height, images[i]?.size || null, upscaledImages[i]?.size || null)
           }
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -1009,7 +1011,8 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = await sharp(upscaledBuffer).metadata()
           }
-          await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, upscaled[i].size)
+          await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
+          dimensions.width, dimensions.height, images[i]?.size || null, upscaledImages[i]?.size || null)
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
         if (images?.length > upscaledImages?.length) hasUpscaled = false
@@ -1208,6 +1211,8 @@ const CreateRoutes = (app: Express) => {
 
         let imgChanged = true
         if (unverifiedID) {
+          if (unverifiedPost.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+
           imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, images, false)
           if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, upscaledImages, true)
           if (imgChanged) {
@@ -1307,7 +1312,8 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(upscaledBuffer).metadata()
             }
-            await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, upscaled[i].size)
+            await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
+            dimensions.width, dimensions.height, images[i]?.size || null, upscaledImages[i]?.size || null)
           }
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -1596,7 +1602,8 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(original).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(upscaled).metadata()
             }
-            await sql.post.insertImage(newPostID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, upscaled.byteLength)
+            await sql.post.insertImage(newPostID, filename, upscaledFilename, type, order, hash, 
+            dimensions.width, dimensions.height, buffer.byteLength || null, upscaledBuffer.byteLength || null)
           }
         }
         if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false

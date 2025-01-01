@@ -443,7 +443,11 @@
         "backgroundAlpha": "Background Alpha",
         "strokeColor": "Stroke Color",
         "strokeWidth": "Stroke Width",
-        "breakWord": "Break Word"
+        "breakWord": "Break Word",
+        "pending": "Pending",
+        "upscaledSize": "Upscaled Size",
+        "fileType": "Filetype",
+        "upscaledFileType": "Upscaled Filetype"
     },
     "errors": {
         "$401":"401 error",

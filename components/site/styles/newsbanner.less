@@ -1,0 +1,39 @@
+@import "../../../index.less";
+
+.news-banner {    
+    position: relative;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 27px;
+    background-color: var(--audioPlayerColor);
+}
+
+.news-banner-text {
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.news-banner-link {
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.news-banner-x {
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 16px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: -3px;
+    cursor: pointer;
+    user-select: none;
+}

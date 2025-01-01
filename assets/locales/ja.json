@@ -444,7 +444,11 @@
         "backgroundAlpha": "背景 アルファ",
         "strokeColor": "ストロークの色",
         "strokeWidth": "ストローク幅",
-        "breakWord": "ブレイクワード"
+        "breakWord": "ブレイクワード",
+        "pending": "申請中",
+        "upscaledSize": "拡大サイズ",
+        "fileType": "ファイルタイプ",
+        "upscaledFileType": "アップスケール・ファイルタイプ"
     },
     "errors": {
         "$401":"401エラー",

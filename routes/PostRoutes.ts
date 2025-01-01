@@ -278,13 +278,13 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
-            let result = await sql.post.unverifiedPost(postID)
-            if (!result) return res.status(400).send("Invalid postID") 
-            if (result.images.length > 1) {
-                result.images = result.images.sort((a: any, b: any) => a.order - b.order)
+            let post = await sql.post.unverifiedPost(postID)
+            if (!post) return res.status(400).send("Invalid postID") 
+            if (post.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+            if (post.images.length > 1) {
+                post.images = post.images.sort((a: any, b: any) => a.order - b.order)
             }
-            serverFunctions.sendEncrypted(result, req, res)
+            serverFunctions.sendEncrypted(post, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -298,6 +298,17 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPosts(Number(offset))
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/post/pending", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const result = await sql.search.unverifiedUserPosts(req.session.username)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -323,8 +334,9 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
             const posts = await sql.post.unverifiedChildPosts(postID)
+            if (!posts.length) return serverFunctions.sendEncrypted([], req, res)
+            if (posts[0]?.post.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
             serverFunctions.sendEncrypted(posts, req, res)
         } catch (e) {
             console.log(e)
@@ -336,8 +348,9 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.unverifiedParent(postID)
+            if (!post) return serverFunctions.sendEncrypted(undefined, req, res)
+            if (post?.post.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
             serverFunctions.sendEncrypted(post, req, res)
         } catch (e) {
             console.log(e)
@@ -410,13 +423,16 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
             if (parentID && Number.isNaN(Number(parentID))) return res.status(400).send("Bad parentID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
+            if (!unverified && !permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!reason) reason = null
 
             const post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+            if (unverified) {
+                if (post.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+            }
 
 
             let addedTags = [] as string[]
@@ -815,7 +831,8 @@ const PostRoutes = (app: Express) => {
                     hash = await phash(original).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(upscaled).metadata() as {width: number, height: number}
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, upscaled.byteLength)
+                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, 
+                dimensions.width, dimensions.height, buffer.byteLength || null, upscaledBuffer.byteLength || null)
             }
             if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
             if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false

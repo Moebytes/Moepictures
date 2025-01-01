@@ -1,0 +1,55 @@
+@import "../../../index.less";
+
+.characterrow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.characterrow-row {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.characterrow-text-hover {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.characterrow-text {
+    margin-left: 20px;
+    font-family: Tahoma, sans-serif;
+    color: var(--characterTagColor);
+    font-size: 26px;
+    
+}
+
+.characterrow-text-alt {
+    margin-left: 10px;
+    font-family: Tahoma, sans-serif;
+    color: var(--text-strong);
+    font-size: 21px;
+}
+
+.characterrow-img {
+    width: auto;
+    height: 70px;
+}
+
+.characterrow-social {
+    width: auto;
+    height: 23px;
+    margin-left: 7px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}

@@ -311,10 +311,16 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!permissions.isMod(req.session)) return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
+      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if (postID) {
+        const post = await sql.post.unverifiedPost(postID)
+        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+      } else {
+        if (!permissions.isMod(req.session)) return res.status(403).end()
+      }
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
         upscaled = req.session.upscaledImages as boolean
@@ -349,11 +355,17 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!permissions.isMod(req.session)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
+      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if (postID) {
+        const post = await sql.post.unverifiedPost(postID)
+        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+      } else {
+        if (!permissions.isMod(req.session)) return res.status(403).end()
+      }
       let body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
       if (!contentLength) {

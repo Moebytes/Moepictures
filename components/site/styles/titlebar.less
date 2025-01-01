@@ -1,0 +1,149 @@
+@import "../../../index.less";
+
+.titlebar {
+    position: sticky;
+    top: 0px;
+    z-index: 2000;
+    display: flex;
+    width: 100%;
+    height: @title-bar-height;
+    background-color: var(--titlebarBG);
+    transition: top 0.1s, background-color 0s;
+}
+
+.hide-titlebar {
+    transition: top 0.7s, background-color 0s;
+    top: -@title-bar-height;
+}
+
+.titlebar-relative {
+    transition: all 0s;
+    position: relative;
+    top: 0;
+}
+
+.titlebar-logo-container {
+    display: flex;
+    justify-content: flex-start;
+    text-decoration: none;
+    cursor: default;
+}
+
+.titlebar-text-container {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+    margin-right: 15px;
+    &:hover {
+        filter: saturate(85%) brightness(150%);
+    }
+}
+
+.titlebar-image-container {
+    display: flex;
+    align-items: center;
+    width: 100px;
+}
+
+.titlebar-hover {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.titlebar-text() {
+    font-family: Tahoma, sans-serif;
+    font-size: 45px;
+    .stroke-black-thin();
+}
+
+.titlebar-text-a {
+    .titlebar-text();
+    color: var(--titleTextA);
+}
+
+.titlebar-text-b {
+    .titlebar-text();
+    color: var(--titleTextB);
+}
+
+.titlebar-img {
+    padding-top: 3px;
+    width: auto;
+    height: 100%;
+}
+
+.titlebar-search-text-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.titlebar-search-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 30px;
+    color: var(--titlebarText);
+    //.stroke-black-thin();
+    &:hover {
+        filter: brightness(140%);
+    }
+}
+
+.titlebar-hamburger-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titlebar-hamburger {
+    width: auto;
+    height: 30px;  
+    margin-left: 20px;
+    &:hover {
+        filter: brightness(150%);
+    }
+}
+
+.titlebar-search-icon {
+    width: auto;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.hide-mobile-titlebar {
+    transition: transform 0.1s background-color 0s;
+    position: sticky;
+    transform: translateY(-@title-bar-height);
+}
+
+@media screen and (max-width: 500px) {
+    .titlebar {
+        justify-content: center;    
+        align-items: center;
+    }
+
+    .titlebar-text-container {
+        margin-left: 10px;
+        margin-right: 5px;
+    }
+
+    .titlebar-text-a {
+        font-size: 45px;
+    }
+    
+    .titlebar-text-b {
+        font-size: 45px;
+    }
+
+    .titlebar-image-container {
+        width: 80px;
+    }
+    
+    .titlebar-img {
+        //margin-top: 7px;
+        height: 65px;
+        width: auto;
+    }
+}

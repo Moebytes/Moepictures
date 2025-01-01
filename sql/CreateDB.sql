@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS "images" (
     "width" int,
     "height" int,
     "size" int,
+    "upscaledSize" int,
     "order" int,
     "hash" text
 );
@@ -117,6 +118,7 @@ CREATE TABLE IF NOT EXISTS "unverified images" (
     "width" int,
     "height" int,
     "size" int,
+    "upscaledSize" int,
     "order" int,
     "hash" text
 );
