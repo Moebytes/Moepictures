@@ -36,7 +36,19 @@ export default class SQLUser {
     }
 
     /** Updates a user */
-    public static updateUser = async (username: string, column: string, value: string | number | boolean | null | string[]) => {
+    public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premiumExpiration" | "banExpiration" | "banned"
+        | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
+        | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
+        | "postCount" | "joinDate", value: string | number | boolean | null | string[]) => {
+
+        let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
+        "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
+        "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
+        "postCount", "joinDate"]
+        
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "users" SET "${column}" = $1 WHERE "username" = $2`,
             values: [value, username]

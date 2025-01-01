@@ -37,7 +37,11 @@ export default class SQLHistory {
     }
 
     /** Update tag history */
-    public static updateTagHistory = async (historyID: string, column: string, value: string | number | boolean) => {
+    public static updateTagHistory = async (historyID: string, column: "image", value: string | number | boolean) => {
+        let whitelist = ["image"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "tag history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]
@@ -179,7 +183,11 @@ export default class SQLHistory {
     }
 
     /** Update post history */
-    public static updatePostHistory = async (historyID: string, column: string, value: string | number | boolean | string[]) => {
+    public static updatePostHistory = async (historyID: string, column: "images", value: string | number | boolean | string[]) => {
+        let whitelist = ["images"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "post history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]

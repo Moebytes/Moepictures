@@ -140,7 +140,12 @@ export default class SQLMessage {
     }
 
     /** Update message */
-    public static updateMessage = async (messageID: string, column: string, value: string | number | boolean) => {
+    public static updateMessage = async (messageID: string, column: "title" | "content" | "r18" | "updater" | "updatedDate"
+        | "read" | "delete", value: string | number | boolean) => {
+        let whitelist = ["title", "content", "r18", "updater", "updatedDate", "read", "delete"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "messages" SET "${column}" = $1 WHERE "messageID" = $2`,
             values: [value, messageID]
@@ -158,7 +163,11 @@ export default class SQLMessage {
     }
 
     /** Update recipient */
-    public static updateRecipient = async (messageID: string, recipient: string, column: string, value: string | number | boolean) => {
+    public static updateRecipient = async (messageID: string, recipient: string, column: "read" | "delete", value: string | number | boolean) => {
+        let whitelist = ["read", "delete"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "message recipients" SET "${column}" = $1 WHERE "messageID" = $2 AND "recipient" = $3`,
             values: [value, messageID, recipient]
@@ -234,7 +243,12 @@ export default class SQLMessage {
     }
 
     /** Update message reply */
-    public static updateMessageReply = async (replyID: string, column: string, value: string | number | boolean) => {
+    public static updateMessageReply = async (replyID: string, column: "content" | "updater" | "updatedDate" | "r18", 
+        value: string | number | boolean) => {
+        let whitelist = ["content", "updater", "updatedDate", "r18"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "message replies" SET "${column}" = $1 WHERE "replyID" = $2`,
             values: [value, replyID]

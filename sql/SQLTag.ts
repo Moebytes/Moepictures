@@ -125,7 +125,14 @@ export default class SQLTag {
     }
 
     /** Update a tag. */
-    public static updateTag = async (tag: string, column: string, value: string | boolean | string[] | null) => {
+    public static updateTag = async (tag: string, column: "tag" | "image" | "description" | "updater" | "updatedDate" 
+        | "type" | "featuredPost" | "r18" | "twitter" | "fandom" | "social" | "website" | "imageHash" | "pixivTags" 
+        | "banned", value: string | boolean | string[] | null) => {
+        let whitelist = ["tag", "image", "description", "updater", "updatedDate", "type", "featuredPost", "r18", "twitter", 
+        "fandom", "social", "website", "imageHash", "pixivTags", "banned"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
         text: /*sql*/`UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
         values: [value, tag]
@@ -133,16 +140,7 @@ export default class SQLTag {
         await SQLQuery.flushDB()
         await SQLQuery.run(query)
     }
-
-    /** Update a tag (unverified). */
-    public static updateUnverifiedTag = async (tag: string, column: string, value: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`UPDATE "unverified tags" SET "${column}" = $1 WHERE "tag" = $2`,
-        values: [value, tag]
-        }
-        await SQLQuery.run(query)
-    }
-
+    
     /** Insert a new tag map. */
     public static insertTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return

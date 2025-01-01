@@ -124,7 +124,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "$2fa", false)
                 await sql.user.updateUser(username, "bio", "This user has not written anything.")
                 await sql.user.updateUser(username, "role", "user")
-                await sql.user.updateUser(username, "ip", ip)
+                await sql.user.updateUser(username, "ips", [ip])
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.user.updateUser(username, "password", passwordHash)
 

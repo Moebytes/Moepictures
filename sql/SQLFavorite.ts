@@ -84,7 +84,12 @@ export default class SQLFavorite {
     }
 
     /** Update favgroup. */
-    public static updateFavGroup = async (username: string, slug: string, column: string, value: string | boolean) => {
+    public static updateFavGroup = async (username: string, slug: string, column: "name" | "slug" | "rating" | "private", 
+        value: string | boolean) => {
+        let whitelist = ["name", "slug", "rating", "private"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE favgroups SET "${column}" = $1 WHERE "username" = $2 AND "slug" = $3`,
             values: [value, username, slug]

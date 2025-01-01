@@ -142,7 +142,11 @@ export default class SQLReport {
     }
 
     /** Update ban */
-    public static updateBan = async (banID: string, column: string, value: string | number | boolean | null) => {
+    public static updateBan = async (banID: string, column: "active", value: string | number | boolean | null) => {
+        let whitelist = ["active"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE bans SET "${column}" = $1 WHERE "banID" = $2`,
             values: [value, banID]

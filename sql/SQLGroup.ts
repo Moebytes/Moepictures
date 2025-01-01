@@ -100,7 +100,12 @@ export default class SQLGroup {
     }
 
     /** Update group. */
-    public static updateGroup = async (groupID: string, column: string, value: string | boolean) => {
+    public static updateGroup = async (groupID: string, column: "updater" | "updatedDate" | "rating", 
+        value: string | boolean) => {
+        let whitelist = ["updater", "updatedDate", "rating"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE groups SET "${column}" = $1 WHERE "groupID" = $2`,
             values: [value, groupID]

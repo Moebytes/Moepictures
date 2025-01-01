@@ -26,7 +26,11 @@ export default class SQLPost {
     }
 
     /** Updates a post */
-    public static updatePost = async (postID: string, column: string, value: string | number | boolean) => {
+    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private", value: string | number | boolean) => {
+        let whitelist = ["type", "hidden", "locked", "private"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
@@ -353,7 +357,11 @@ export default class SQLPost {
     }
 
     /** Updates a post (unverified) */
-    public static updateUnverifiedPost = async (postID: string, column: string, value: string | number | boolean) => {
+    public static updateUnverifiedPost = async (postID: string, column: "hasUpscaled", value: string | number | boolean) => {
+        let whitelist = ["hasUpscaled"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
@@ -389,7 +397,11 @@ export default class SQLPost {
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: string, column: string, value: string | number | boolean) => {
+    public static updateImage = async (imageID: string, column: "hash" | "type", value: string | number | boolean) => {
+        let whitelist = ["hash", "type"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]
@@ -399,7 +411,11 @@ export default class SQLPost {
     }
 
     /** Updates an image (unverified) */
-    public static updateUnverifiedImage = async (imageID: string, column: string, value: string | number | boolean) => {
+    public static updateUnverifiedImage = async (imageID: string, column: "filename", value: string | number | boolean) => {
+        let whitelist = ["filename"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]

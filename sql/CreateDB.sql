@@ -346,8 +346,7 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "backgroundAlpha" int,
     "strokeColor" text,
     "strokeWidth" int,
-    "breakWord" boolean,
-    "data" jsonb
+    "breakWord" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "unverified notes" (
@@ -377,7 +376,6 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "strokeColor" text,
     "strokeWidth" int,
     "breakWord" boolean,
-    "data" jsonb,
     "addedEntries" text[],
     "removedEntries" text[],
     "reason" text

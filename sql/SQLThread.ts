@@ -152,7 +152,12 @@ export default class SQLThread {
     }
 
     /** Update thread */
-    public static updateThread = async (threadID: string, column: string, value: string | number | boolean) => {
+    public static updateThread = async (threadID: string, column: "title" | "content" | "locked" | "sticky" | "updater" 
+        | "updatedDate" | "r18", value: string | number | boolean) => {
+        let whitelist = ["title", "content", "locked", "sticky", "updater", "updatedDate", "r18"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "threads" SET "${column}" = $1 WHERE "threadID" = $2`,
             values: [value, threadID]
@@ -242,7 +247,12 @@ export default class SQLThread {
     }
 
     /** Update reply */
-    public static updateReply = async (replyID: string, column: string, value: string | number | boolean) => {
+    public static updateReply = async (replyID: string, column: "content" | "updater" | "updatedDate" | "r18", 
+        value: string | number | boolean) => {
+        let whitelist = ["content", "updater", "updatedDate", "r18"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "replies" SET "${column}" = $1 WHERE "replyID" = $2`,
             values: [value, replyID]

@@ -44,7 +44,11 @@ export default class SQLNote {
     }
 
     /** Updates a note */
-    public static updateNote = async (noteID: string, column: string, value: string | number | boolean) => {
+    public static updateNote = async (noteID: string, column: "order", value: string | number | boolean) => {
+        let whitelist = ["order"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "notes" SET "${column}" = $1 WHERE "noteID" = $2`,
             values: [value, noteID]
@@ -54,7 +58,11 @@ export default class SQLNote {
     }
 
     /** Updates a note (unverified) */
-    public static updateUnverifiedNote = async (noteID: string, column: string, value: string | number | boolean) => {
+    public static updateUnverifiedNote = async (noteID: string, column: "order", value: string | number | boolean) => {
+        let whitelist = ["order"]
+        if (!whitelist.includes(column)) {
+            return Promise.reject(`Invalid column: ${column}`)
+        }
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified notes" SET "${column}" = $1 WHERE "noteID" = $2`,
             values: [value, noteID]
