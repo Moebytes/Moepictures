@@ -25,6 +25,7 @@ import jxlJS from "../assets/misc/jxl_enc"
 import crypto from "crypto"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
+import tempMails from "../assets/json/temp-email.json"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
@@ -480,6 +481,8 @@ export default class Functions {
         if (!email) return i18n.errors.email.empty
         const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         if (!regex.test(email)) return i18n.errors.email.invalid
+        const domain = email.split("@")[1] || ""
+        if (Functions.arrayIncludes(domain, tempMails)) return i18n.errors.email.invalid
         return null
     }
 

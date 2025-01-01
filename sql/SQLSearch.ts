@@ -468,6 +468,7 @@ export default class SQLSearch {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                        WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
                         GROUP BY posts."postID"
                     )
                     SELECT tags.*, json_agg(post_json.*) AS posts,

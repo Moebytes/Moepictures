@@ -39,6 +39,7 @@ import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
+import torIPs from "./assets/json/tor-ip.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
 import {ServerSession} from "./types/Types"
 const __dirname = path.resolve()
@@ -84,7 +85,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: Number.MAX_SAFE_INTEGER, sameSite: "lax", secure: "auto"},
+  cookie: {maxAge: 100 * 365 * 24 * 60 * 60 * 1000, sameSite: "lax", secure: "auto"},
   rolling: true,
   resave: false,
   saveUninitialized: false
@@ -108,7 +109,7 @@ let blacklist = null as unknown as Set<string>
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!blacklist) {
     const blacklistObj = await sql.report.blacklist()
-    const blacklistSet = new Set<string>()
+    const blacklistSet = new Set(torIPs)
     for (const entry of blacklistObj) {
       blacklistSet.add(entry.ip?.trim())
     }

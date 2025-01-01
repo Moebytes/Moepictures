@@ -7,9 +7,8 @@ import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import {useThemeSelector, useInteractionActions, useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
-import session from "express-session"
 
-const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
+const VerifyLoginSuccessPage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -28,7 +27,7 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.verifyEmailSuccess.pageTitle
+        document.title = i18n.pages.verifyLoginSuccess.pageTitle
     }, [i18n])
 
     useEffect(() => {
@@ -47,12 +46,12 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="sitepage">
-                    <span className="sitepage-title">{i18n.pages.verifyEmailSuccess.title}</span>
+                    <span className="sitepage-title">{i18n.pages.verifyLoginSuccess.title}</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text">{i18n.pages.verifyEmailSuccess.heading}</span>
+                        <span className="sitepage-text">{i18n.pages.verifyLoginSuccess.heading}</span>
                     </div>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
+                        <button className="sitepage-button" onClick={() => history.push("/login")}>{i18n.navbar.login}</button>
                     </div>
                 </div>
                 <Footer/>
@@ -62,4 +61,4 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     )
 }
 
-export default VerifyEmailSuccessPage
+export default VerifyLoginSuccessPage

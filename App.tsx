@@ -30,6 +30,7 @@ import ChangeEmailPage from "./pages/ChangeEmailPage"
 import ChangeEmailSuccessPage from "./pages/ChangeEmailSuccessPage"
 import VerifyEmailPage from "./pages/VerifyEmailPage"
 import VerifyEmailSuccessPage from "./pages/VerifyEmailSuccessPage"
+import VerifyLoginSuccessPage from "./pages/VerifyLoginSuccessPage"
 import ChangePasswordPage from "./pages/ChangePasswordPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
@@ -326,6 +327,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
                 <Route exact path="/verify-email"><VerifyEmailPage/></Route>
                 <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
+                <Route exact path="/verify-login-success"><VerifyLoginSuccessPage/></Route>
                 <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
                 <Route exact path="/reset-password"><ResetPasswordPage/></Route>
                 <Route exact path="/change-password"><ChangePasswordPage/></Route>

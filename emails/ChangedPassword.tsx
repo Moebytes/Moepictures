@@ -58,13 +58,13 @@ interface Props {
     link: string
 }
 
-const ResetPassword = (props: Props) => {
+const ChangedPassword = (props: Props) => {
     const {username, link} = props
 
     return (
         <Html lang="en">
             <Head><style>{style}</style></Head>
-            <Preview>Moepictures Password Reset</Preview>
+            <Preview>Moepictures Password Changed</Preview>
             <Body style={{width: "80%"}}>
                 <Container className="logo-container">
                     <Link href="https://moepictures.moe"><Img className="logo" src="https://i.imgur.com/AJxxfWG.png"/></Link>
@@ -73,9 +73,8 @@ const ResetPassword = (props: Props) => {
                     <Text className="text">
                         Hi {username}, <br/><br/>
             
-                        You recently made a request to reset your password. The link 
-                        below will expire after one hour. *If the link doesn't work, take this email 
-                        out of the spam folder. <br/>
+                        Your password was changed recently as requested. *If you didn't make this request, please 
+                        reset your password immediately.<br/>
                     </Text>
                 </Container>
                 <Container className="button-container">
@@ -88,4 +87,4 @@ const ResetPassword = (props: Props) => {
   )
 }
 
-export default ResetPassword
+export default ChangedPassword

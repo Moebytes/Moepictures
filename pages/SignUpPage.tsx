@@ -90,7 +90,6 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
-        if (!errorRef.current) return
         if (password.trim() !== confirmPassword.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -128,8 +127,8 @@ const SignUpPage: React.FunctionComponent = (props) => {
         }
         if (!captchaResponse) {
             setError(true)
-            await functions.timeout(20)
-            errorRef.current.innerText = i18n.pages.login.captcha
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = i18n.pages.login.captcha
             await functions.timeout(2000)
             return setError(false)
         }

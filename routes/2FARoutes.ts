@@ -114,8 +114,9 @@ const $2FARoutes = (app: Express) => {
                 req.session.imagePost = user.imagePost
                 req.session.role = user.role
                 req.session.banned = user.banned
-                await sql.user.updateUser(user.username, "ip", ip as string)
-                req.session.ip = ip as string
+                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                await sql.user.updateUser(user.username, "ips", ips)
+                req.session.ips = ips
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
                 req.session.csrfToken = token
@@ -131,6 +132,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.postCount = user.postCount
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")
             } else {

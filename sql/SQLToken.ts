@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {EmailToken, $2FAToken, PasswordToken, APIKey} from "../types/Types"
+import {EmailToken, $2FAToken, PasswordToken, IPToken, APIKey} from "../types/Types"
 
 export default class SQLToken {
     /** Insert email token. */
@@ -9,19 +9,13 @@ export default class SQLToken {
         let now = new Date() as any
         now.setHours(now.getHours() + 1)
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "email tokens" ("email", "token", "expires") VALUES ($1, $2, $3)`,
-        values: [email, token, now.toISOString()]
-        }
-        await SQLQuery.run(query)
-    }
-
-    /** Updates email token. */
-    public static updateEmailToken = async (email: string, token: string) => {
-        let now = new Date() as any
-        now.setHours(now.getHours() + 1)
-        const query: QueryConfig = {
-            text: /*sql*/`UPDATE "email tokens" SET "token" = $1, "expires" = $2 WHERE "email" = $3`,
-            values: [token, now.toISOString(), email]
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "email tokens" ("email", "token", "expires")
+                VALUES ($1, $2, $3)
+                ON CONFLICT ("email")
+                DO UPDATE SET "token" = $2, "expires" = $3
+            `),
+            values: [email, token, now.toISOString()]
         }
         await SQLQuery.run(query)
     }
@@ -36,6 +30,21 @@ export default class SQLToken {
             GROUP BY "email tokens"."email"
             `),
             values: [token]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<EmailToken | undefined>
+    }
+
+    /** Get email token by email. */
+    public static emailTokenByEmail = async (email: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "email tokens".*
+            FROM "email tokens"
+            WHERE "email tokens"."email" = $1
+            GROUP BY "email tokens"."email"
+            `),
+            values: [email]
         }
         const result = await SQLQuery.run(query)
         return result[0] as Promise<EmailToken | undefined>
@@ -78,13 +87,16 @@ export default class SQLToken {
         return result[0] as Promise<$2FAToken | undefined>
     }
 
-    /** Insert 2fa token. */
+    /** Insert 2da token. */
     public static insert2faToken = async (username: string, token: string, qrcode: string) => {
-        let now = new Date()
-        now.setHours(now.getHours() + 1)
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "2fa tokens" ("username", "token", "qrcode") VALUES ($1, $2, $3)`,
-        values: [username, token, qrcode]
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "2fa tokens" ("username", "token", "qrcode") 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ("username")
+                DO UPDATE SET "token" = $2, "qrcode" = $3
+            `),
+            values: [username, token, qrcode]
         }
         await SQLQuery.run(query)
     }
@@ -103,8 +115,13 @@ export default class SQLToken {
         let now = new Date() as any
         now.setHours(now.getHours() + 1)
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "password tokens" ("username", "token", "expires") VALUES ($1, $2, $3)`,
-        values: [username, token, now.toISOString()]
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "password tokens" ("username", "token", "expires") 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ("username")
+                DO UPDATE SET "token" = $2, "expires" = $3
+            `),
+            values: [username, token, now.toISOString()]
         }
         await SQLQuery.run(query)
     }
@@ -141,6 +158,61 @@ export default class SQLToken {
     public static deletePasswordToken = async (username: string) => {
         const query: QueryConfig = {
         text: /*sql*/`DELETE FROM "password tokens" WHERE "password tokens"."username" = $1`,
+        values: [username]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Insert ip token. */
+    public static insertIPToken = async (username: string, token: string, ip: string) => {
+        let now = new Date() as any
+        now.setHours(now.getHours() + 1)
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "ip tokens" ("username", "token", "ip", "expires") 
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT ("username")
+                DO UPDATE SET "token" = $2, "ip" = $3, "expires" = $4
+            `),
+            values: [username, token, ip, now.toISOString()]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Get ip token. */
+    public static ipToken = async (token: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "ip tokens".*
+            FROM "ip tokens"
+            WHERE "ip tokens"."token" = $1
+            GROUP BY "ip tokens"."username"
+            `),
+            values: [token]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<IPToken | undefined>
+    }
+
+    /** Get ip token by username. */
+    public static ipTokenByUsername = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "ip tokens".*
+            FROM "ip tokens"
+            WHERE "ip tokens"."username" = $1
+            GROUP BY "ip tokens"."username"
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<IPToken | undefined>
+    }
+
+    /** Delete ip token. */
+    public static deleteIPToken = async (username: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`DELETE FROM "ip tokens" WHERE "ip tokens"."username" = $1`,
         values: [username]
         }
         await SQLQuery.run(query)

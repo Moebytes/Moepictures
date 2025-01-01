@@ -16,6 +16,13 @@ export interface PasswordToken {
     expires: string
 }
 
+export interface IPToken {
+    username: string
+    token: string
+    ip: string
+    expires: string
+}
+
 export interface APIKey {
     username: string
     createDate: string

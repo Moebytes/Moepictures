@@ -18,7 +18,7 @@ export interface User extends PrunedUser {
     email?: string
     emailVerified?: boolean
     $2fa?: boolean
-    ip?: string
+    ips?: string[]
     password?: string
     showRelated?: boolean
     showTooltips?: boolean
@@ -179,6 +179,7 @@ export type UserGetEndpoint<T extends string> =
     T extends "/api/user/session" ? {params: null, response: Session} :
     T extends "/api/user/changeemail" ? {params: {token: string}, response: string} :
     T extends "/api/user/verifyemail" ? {params: {token: string}, response: string} :
+    T extends "/api/user/verifylogin" ? {params: {token: string}, response: string} :
     T extends "/api/user/favorites" ? {params: UserFavoritesParams, response: PostSearch[]} :
     T extends "/api/user/uploads" ? {params: UserFavoritesParams, response: PostSearch[]} :
     T extends "/api/user/favgroups" ? {params: {username: string} | null, response: Favgroup[]} :

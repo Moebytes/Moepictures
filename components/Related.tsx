@@ -113,7 +113,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateRelated = async () => {
-        if (!props.count && !session.showRelated) return
+        if (!props.count && (session.username && !session.showRelated)) return
         if (!props.tag) return
         let result = await searchPosts()
         result = result.filter((p) => p.postID !== props.post?.postID)
@@ -148,7 +148,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }, [scroll, related, session])
 
     const updateOffset = async () => {
-        if (!props.count && !session.showRelated) return
+        if (!props.count && (session.username && !session.showRelated)) return
         if (ended) return
         let newOffset = offset + 100
         let padded = false

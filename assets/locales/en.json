@@ -517,7 +517,8 @@
         "changeEmail": {
             "heading": "A confirmation email will be sent to the new address. Your email will only be changed if you confirm the new one.",
             "submitHeading": "A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.",
-            "error": "Bad email or captcha."
+            "error": "Bad email or captcha.",
+            "alreadySent": "Email already sent, check your email."
         },
         "changeEmailSuccess": {
             "pageTitle": "Change Email Success",
@@ -557,12 +558,18 @@
             "title": "Email Verified",
             "heading": "Thank you, your email address has been verified! You should be able to use your account now."
         },
+        "verifyLoginSuccess": {
+            "pageTitle": "Verify Login Success",
+            "title": "Login Verified",
+            "heading": "New IP location has been verified. You should be able to login into your account now."
+        },
         "login": {
             "signupText": "Don't have an account? Sign up.",
             "forgotText": "Forgot Password?",
             "captcha": "Solve the captcha.",
             "error": "Invalid username, password, or captcha.",
-            "rateLimit": "Too many login attempts, try again later."
+            "rateLimit": "Too many login attempts, try again later.",
+            "newIP": "New IP location detected. Check your email."
         },
         "signup": {
             "title": "Sign Up",

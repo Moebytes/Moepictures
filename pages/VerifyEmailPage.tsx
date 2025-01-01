@@ -100,8 +100,10 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
-        } catch {
-            errorRef.current!.innerText = i18n.pages.changeEmail.error
+        } catch (err: any) {
+            let errMsg = i18n.pages.changeEmail.error
+            if (err.response?.data.includes("Email already sent")) errMsg = i18n.pages.changeEmail.alreadySent
+            errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()

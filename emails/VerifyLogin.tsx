@@ -56,15 +56,17 @@ const style = /*css*/`
 interface Props {
     username: string
     link: string
+    ip: string
+    region: string
 }
 
-const ResetPassword = (props: Props) => {
-    const {username, link} = props
+const VerifyLogin = (props: Props) => {
+    const {username, link, ip, region} = props
 
     return (
         <Html lang="en">
             <Head><style>{style}</style></Head>
-            <Preview>Moepictures Password Reset</Preview>
+            <Preview>Moepictures New Login Location</Preview>
             <Body style={{width: "80%"}}>
                 <Container className="logo-container">
                     <Link href="https://moepictures.moe"><Img className="logo" src="https://i.imgur.com/AJxxfWG.png"/></Link>
@@ -73,14 +75,17 @@ const ResetPassword = (props: Props) => {
                     <Text className="text">
                         Hi {username}, <br/><br/>
             
-                        You recently made a request to reset your password. The link 
-                        below will expire after one hour. *If the link doesn't work, take this email 
-                        out of the spam folder. <br/>
+                        We detected a login into your account from a new IP address. If it was you, follow this link to verify 
+                        logins from this IP. If it wasn't you, we recommend changing your password. *If the link doesn't work, take 
+                        this email out of the spam folder. <br/><br/>
+
+                        IP address: {ip} <br/>
+                        Region: {region}
                     </Text>
                 </Container>
                 <Container className="button-container">
                     <Button className="button" href={link}>
-                        <Text className="button-text">Reset Password</Text>
+                        <Text className="button-text">Verify Login</Text>
                     </Button>
                 </Container>
             </Body>
@@ -88,4 +93,4 @@ const ResetPassword = (props: Props) => {
   )
 }
 
-export default ResetPassword
+export default VerifyLogin

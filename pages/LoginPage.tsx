@@ -86,11 +86,10 @@ const LoginPage: React.FunctionComponent = (props) => {
     }
 
     const login = async () => {
-        if (!errorRef.current) return
         if (!captchaResponse) {
             setError(true)
-            await functions.timeout(20)
-            errorRef.current.innerText = i18n.pages.login.captcha
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = i18n.pages.login.captcha
             await functions.timeout(2000)
             return setError(false)
         }
@@ -114,8 +113,9 @@ const LoginPage: React.FunctionComponent = (props) => {
         } catch (err: any) {
             let errMsg = i18n.pages.login.error
             if (err.response?.data.includes("Too many login attempts")) errMsg = i18n.pages.login.rateLimit
+            if (err.response?.data.includes("new IP login location")) errMsg = i18n.pages.login.newIP
             errorRef.current!.innerText = errMsg
-            await functions.timeout(2000)
+            await functions.timeout(3000)
             setError(false)
             updateCaptcha()
         }

@@ -3,6 +3,8 @@ import functions from "./Functions"
 import VerifyEmail from "../emails/VerifyEmail"
 import ChangeEmail from "../emails/ChangeEmail"
 import ResetPassword from "../emails/ResetPassword"
+import ChangedPassword from "../emails/ChangedPassword"
+import VerifyLogin from "../emails/VerifyLogin"
 import email from "../assets/icons/email.png"
 
 export default class JSXFunctions {
@@ -16,6 +18,14 @@ export default class JSXFunctions {
 
     public static resetPasswordJSX = (username: string, link: string) => {
         return <ResetPassword username={username} link={link}/>
+    }
+
+    public static changedPasswordJSX = (username: string, link: string) => {
+        return <ChangedPassword username={username} link={link}/>
+    }
+
+    public static verifyLoginJSX = (username: string, link: string, ip: string, region: string) => {
+        return <VerifyLogin username={username} link={link} ip={ip} region={region}/>
     }
 
     public static appendChain = (items: {text: any, jsx: any}[], func: (text: string) => {text: any, jsx: any}[]) => {

@@ -68,7 +68,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(200).json(null)
             let user = await sql.user.user(username.trim())
             if (!user) return res.status(200).json(null)
-            delete user.ip
+            delete user.ips
             delete user.$2fa
             delete user.email
             delete user.emailVerified
@@ -130,11 +130,7 @@ const UserRoutes = (app: Express) => {
 
                 const token = crypto.randomBytes(32).toString("hex")
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-                try {
-                    await sql.token.insertEmailToken(email, hashToken)
-                } catch {
-                    await sql.token.updateEmailToken(email, hashToken)
-                }
+                await sql.token.insertEmailToken(email, hashToken)
                 const user = functions.toProperCase(username)
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
                 await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(user, link))
@@ -143,7 +139,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.insertLoginHistory(username, "account created", ip, device, region)
                 return res.status(200).send("Success")
             } catch {
-                return res.status(400).send("Username taken")
+                return res.status(400).send("Username or email taken")
             }
         } catch (e) {
             console.log(e)
@@ -157,15 +153,30 @@ const UserRoutes = (app: Express) => {
             if (!username || !password || !captchaResponse) return res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
             password = password.trim()
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
+            const user = await sql.user.user(username)
+            if (!user) return res.status(400).send("Bad request")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            const user = await sql.user.user(username)
-            if (!user) return res.status(400).send("Bad request")
             const matches = await bcrypt.compare(password, user.password!)
             if (matches) {
+                if (user.ips?.length) {
+                    if (!user.ips.includes(ip)) {
+                        const tokenData = await sql.token.ipTokenByUsername(user.username)
+                        if (tokenData && ip === tokenData.ip && new Date() <= new Date(tokenData.expires)) {
+                            return res.status(403).send("new IP login location")
+                        }
+                        const token = crypto.randomBytes(32).toString("hex")
+                        const hashToken = crypto.createHash("sha256").update(token).digest("hex")
+                        await sql.token.insertIPToken(user.username, hashToken, ip)
+                        const username = functions.toProperCase(user.username)
+                        const link = `${req.protocol}://${req.get("host")}/api/user/verifylogin?token=${token}`
+                        await serverFunctions.email(user.email!, "Moepictures New Login Location", jsxFunctions.verifyLoginJSX(username, link, ip, region))
+                        return res.status(403).send("new IP login location")
+                    }
+                }
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email
                 if (user.$2fa) return res.status(200).send("2fa")
@@ -179,8 +190,9 @@ const UserRoutes = (app: Express) => {
                 req.session.publicFavorites = user.publicFavorites
                 req.session.role = user.role
                 req.session.banned = user.banned
-                await sql.user.updateUser(username, "ip", ip)
-                req.session.ip = ip
+                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                await sql.user.updateUser(user.username, "ips", ips)
+                req.session.ips = ips
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
                 req.session.csrfToken = token
@@ -196,6 +208,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 return res.status(200).send("Success")
             } else {
@@ -287,7 +300,7 @@ const UserRoutes = (app: Express) => {
             const session = structuredClone(req.session)
             delete session.captchaAnswer
             delete session.csrfSecret
-            delete session.ip
+            delete session.ips
             
             serverFunctions.sendEncrypted(session, req, res)
         } catch (e) {
@@ -612,9 +625,37 @@ const UserRoutes = (app: Express) => {
                 const device = functions.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
+                const username = functions.toProperCase(req.session.username)
+                const link = `${req.protocol}://${req.get("host")}/forgot-password`
+                await serverFunctions.email(user.email!, "Moepictures Password Changed", jsxFunctions.changedPasswordJSX(username, link))
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad oldPassword")
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/verifylogin", userLimiter, async (req: Request, res: Response) => {
+        try {
+            let token = req.query.token as string
+            if (!token) return res.status(400).send("Bad token")
+            const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
+            const tokenData = await sql.token.ipToken(hashToken)
+            if (!tokenData) return res.status(400).send("Bad token")
+            const expireDate = new Date(tokenData.expires)
+            const user = await sql.user.user(tokenData.username)
+            if (user && new Date() <= expireDate) {
+                const ips = functions.removeDuplicates([tokenData.ip, ...(user.ips || [])].filter(Boolean))
+                await sql.user.updateUser(user.username, "ips", ips)
+                req.session.ips = ips
+                await sql.token.deleteIPToken(tokenData.username)
+                res.status(200).redirect("/verify-login-success")
+            } else {
+                await sql.token.deleteIPToken(tokenData.username)
+                res.status(400).send("Token expired")
             }
         } catch (e) {
             console.log(e)
@@ -660,13 +701,13 @@ const UserRoutes = (app: Express) => {
             if (badEmail) return res.status(400).send("Bad newEmail")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
+            const tokenData = await sql.token.emailTokenByEmail(newEmail)
+            if (tokenData && new Date() <= new Date(tokenData.expires)) {
+                res.status(400).send("Email already sent")
+            }
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-            try {
-                await sql.token.insertEmailToken(newEmail, hashToken)
-            } catch {
-                await sql.token.updateEmailToken(newEmail, hashToken)
-            }
+            await sql.token.insertEmailToken(newEmail, hashToken)
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
             await serverFunctions.email(newEmail, "Moepictures Email Address Change", jsxFunctions.changeEmailJSX(username, link))
@@ -702,7 +743,7 @@ const UserRoutes = (app: Express) => {
                 res.status(200).redirect("/verify-email-success")
             } else {
                 await sql.token.deleteEmailToken(tokenData.email)
-                res.status(400).send("Bad request")
+                res.status(400).send("Token expired")
             }
         } catch (e) {
             console.log(e)
@@ -719,13 +760,13 @@ const UserRoutes = (app: Express) => {
             if (badEmail) return res.status(400).send("Bad email")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
+            const tokenData = await sql.token.emailTokenByEmail(email)
+            if (tokenData && new Date() <= new Date(tokenData.expires)) {
+                res.status(400).send("Email already sent")
+            }
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-            try {
-                await sql.token.insertEmailToken(email, hashToken)
-            } catch {
-                await sql.token.updateEmailToken(email, hashToken)
-            }
+            await sql.token.insertEmailToken(email, hashToken)
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
             await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
@@ -768,14 +809,13 @@ const UserRoutes = (app: Express) => {
                 await functions.timeout(2000) 
                 return res.status(200).send("Success")
             }
+            const tokenData = await sql.token.passwordToken(user.username)
+            if (tokenData && new Date() <= new Date(tokenData.expires)) {
+                res.status(200).send("Success")
+            }
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken =  await bcrypt.hash(token, 13)
-            try {
-                await sql.token.insertPasswordToken(user.username, hashToken)
-            } catch {
-                await sql.token.deletePasswordToken(user.username)
-                await sql.token.insertPasswordToken(user.username, hashToken)
-            }
+            await sql.token.insertPasswordToken(user.username, hashToken)
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
             await serverFunctions.email(user.email!, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
@@ -1118,7 +1158,7 @@ const UserRoutes = (app: Express) => {
                     revertNoteIDs.add({postID: history.postID, order: history.order})
                 }
             }
-            await sql.report.insertBan(username, user.ip!, req.session.username, reason)
+            await sql.report.insertBan(username, user.ips?.[0] || "", req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
             let banDuration = ""
             if (days) {

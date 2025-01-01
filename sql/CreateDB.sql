@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "username" text PRIMARY KEY,
     "email" text UNIQUE NOT NULL,
     "joinDate" date,
+    "lastLogin" timestamptz,
     "role" text,
     "bio" text,
     "emailVerified" boolean,
@@ -21,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "imageHash" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "postCount" int,
-    "ip" inet,
+    "ips" inet[],
     "banned" boolean,
     "banExpiration" timestamptz,
     "password" text
@@ -300,6 +301,13 @@ CREATE TABLE IF NOT EXISTS "2fa tokens" (
 CREATE TABLE IF NOT EXISTS "password tokens" (
     "username" text PRIMARY KEY REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE CASCADE,
     "token" text,
+    "expires" timestamptz
+);
+
+CREATE TABLE IF NOT EXISTS "ip tokens" (
+    "username" text PRIMARY KEY REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE CASCADE,
+    "token" text,
+    "ip" inet,
     "expires" timestamptz
 );
 

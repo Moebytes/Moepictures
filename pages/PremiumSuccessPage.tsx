@@ -75,7 +75,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                             {i18n.pages.premiumSuccess.lastUntil} {functions.prettyDate(new Date(session.premiumExpiration || ""), i18n)}.
                         </span>
                     </div>
-                    <div className="sitepage-button-container">
+                    <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
                         <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
                     </div></> : null}
                 </div>
