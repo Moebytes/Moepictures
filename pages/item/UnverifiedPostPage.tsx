@@ -15,9 +15,12 @@ import functions from "../../structures/Functions"
 import Carousel from "../../components/site/Carousel"
 import ParentDialog from "../../dialogs/post/ParentDialog"
 import TagEditDialog from "../../dialogs/post/TagEditDialog"
+import DeletePostDialog from "../../dialogs/post/DeletePostDialog"
+import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
 import SourceEditDialog from "../../dialogs/post/SourceEditDialog"
 import UpscalePostDialog from "../../dialogs/post/UpscalePostDialog"
 import CompressPostDialog from "../../dialogs/post/CompressPostDialog"
+import AppealPostDialog from "../../dialogs/post/AppealPostDialog"
 import SaveNoteDialog from "../../dialogs/note/SaveNoteDialog"
 import EditNoteDialog from "../../dialogs/note/EditNoteDialog"
 import Children from "../../components/post/Children"
@@ -124,7 +127,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updatePost = async () => {
             let post = unverifiedPosts.find((p) => p.postID === postID)
-            if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
+            if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => undefined)
             if (post) {
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
@@ -159,7 +162,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updatePost = async () => {
             setPostFlag(false)
-            let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
+            let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => null)
             if (post) {
                 const images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
@@ -271,9 +274,12 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <ParentDialog/>
         <TagEditDialog/>
         <SourceEditDialog/>
+        <UndeletePostDialog/>
+        <AppealPostDialog/>
         {post ? <UpscalePostDialog post={post}/> : null}
         {post ? <CompressPostDialog post={post}/> : null}
         {post ? <SaveNoteDialog post={post} unverified={true}/> : null}
+        {post ? <DeletePostDialog post={post} unverified={true}/> : null}
         <EditNoteDialog/>
         {post ? <TitleBar post={post} unverified={true} goBack={true}/> : <TitleBar goBack={true} unverified={true}/>}
         <NavBar/>

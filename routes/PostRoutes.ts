@@ -136,6 +136,20 @@ const PostRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/post/deleted", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let {query, offset} = req.query as unknown as {query: string, offset: number}
+            if (!offset) offset = 0
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            const result = await sql.search.deletedPosts(query, Number(offset))
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.delete("/api/post/delete", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
@@ -144,15 +158,86 @@ const PostRoutes = (app: Express) => {
             if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
-            let r18 = functions.isR18(post.rating)
-            await sql.post.deletePost(postID)
-            for (let i = 0; i < post.images.length; i++) {
-                const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-                const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
-                await serverFunctions.deleteFile(file, r18)
-                await serverFunctions.deleteFile(upscaledFile, r18)
+
+            if (post.deleted) {
+                await serverFunctions.deletePost(post)
+                return res.status(200).send("Success")
             }
-            await serverFunctions.deleteFolder(`history/post/${postID}`, r18).catch(() => null)
+
+            let deletionDate = new Date()
+            deletionDate.setDate(deletionDate.getDate() + 30)
+            await sql.post.updatePost(post.postID, "deleted", true)
+            await sql.post.updatePost(post.postID, "deletionDate", deletionDate.toISOString())
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/post/emptybin", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+
+            const deletedPosts = await sql.search.deletedPosts()
+            for (const post of deletedPosts) {
+                if (post.deleted) {
+                    await serverFunctions.deletePost(post)
+                }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/post/undelete", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body as {postID: string}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            const post = await sql.post.post(postID).catch(() => null)
+            if (!post) return res.status(200).send("Doesn't exist")
+
+            await sql.post.updatePost(post.postID, "deleted", false)
+            await sql.post.updatePost(post.postID, "deletionDate", null)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/post/delete/unverified", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const postID = req.query.postID as string
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const unverified = await sql.post.unverifiedPost(postID)
+            if (!unverified) return res.status(400).send("Bad postID")
+            if (unverified.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+            await serverFunctions.deleteUnverifiedPost(unverified)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/post/undelete/unverified", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body as {postID: string}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const unverified = await sql.post.unverifiedPost(postID)
+            if (!unverified) return res.status(400).send("Bad postID")
+
+            await sql.post.updateUnverifiedPost(unverified.postID, "deleted", false)
+            await sql.post.updateUnverifiedPost(unverified.postID, "deletionDate", null)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -305,6 +390,20 @@ const PostRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/post/deleted/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let {offset} = req.query as unknown as {offset: number}
+            if (!offset) offset = 0
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const result = await sql.search.deletedUnverifiedPosts(Number(offset))
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/post/pending", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -408,6 +507,29 @@ const PostRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/post/appeal", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID, reason} = req.body as {postID: string, reason: string}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const post = await sql.post.unverifiedPost(postID)
+            if (!post) return res.status(400).send("Bad postID")
+            if (post.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+            if (!post.deleted) return res.status(400).send("Post is still pending")
+            if (post.appealed) return res.status(400).send("Cannot appeal again")
+
+            await sql.post.updateUnverifiedPost(post.postID, "appealed", true)
+            await sql.post.updateUnverifiedPost(post.postID, "appealer", req.session.username)
+            await sql.post.updateUnverifiedPost(post.postID, "appealReason", reason)
+            await sql.post.updateUnverifiedPost(post.postID, "deleted", false)
+            await sql.post.updateUnverifiedPost(post.postID, "deletionDate", null)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
         }
     })
 

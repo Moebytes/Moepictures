@@ -14,6 +14,7 @@ import historyIcon from "../../assets/icons/history.png"
 import tagEdit from "../../assets/icons/tag-outline.png"
 import sourceEdit from "../../assets/icons/history-search.png"
 import deleteIcon from "../../assets/icons/delete.png"
+import undeleteIcon from "../../assets/icons/undelete.png"
 import takedown from "../../assets/icons/takedown.png"
 import restore from "../../assets/icons/restore.png"
 import rejectRed from "../../assets/icons/reject-red.png"
@@ -46,7 +47,9 @@ import lockIcon from "../../assets/icons/lock-red.png"
 import unlockIcon from "../../assets/icons/unlock-red.png"
 import privateIcon from "../../assets/icons/private.png"
 import unprivateIcon from "../../assets/icons/unprivate.png"
+import appealIcon from "../../assets/icons/appeal.png"
 import functions from "../../structures/Functions"
+import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
 import "./styles/mobileinfo.less"
 
@@ -71,7 +74,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
-    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj} = usePostDialogActions()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, 
+    setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj, setUndeletePostID, setAppealPostID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -308,6 +312,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const deletePost = async () => {
         setShowDeletePostDialog(!showDeletePostDialog)
+    }
+
+    const undeletePost = async () => {
+        if (!props.post) return
+        setUndeletePostID({postID: props.post.postID, unverified: props.unverified})
+    }
+
+    const appealPost = async () => {
+        if (!props.post) return
+        setAppealPostID(props.post.postID)
     }
 
     const editPost = async () => {
@@ -588,6 +602,40 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const filetypeJSX = () => {
+        if (props.post && props.unverified) {
+            const image = (props.post as UnverifiedPost).images[(props.order || 1) - 1]
+            const originalSize = image.size ? functions.readableFileSize(image.size) : ""
+            const upscaledSize = image.upscaledSize ? functions.readableFileSize(image.upscaledSize) : ""
+            const originalExt = path.extname(image?.filename || "").replace(".", "")
+            const upscaledExt = path.extname(image?.upscaledFilename || "").replace(".", "")
+            return (
+                <div className="mobileinfo-subcontainer">
+                    {originalSize ? 
+                    <div className="mobileinfo-row">
+                        <span className="tag artist-tag-color">{i18n.labels.size}: </span>
+                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{originalSize}</span>
+                    </div> : null}
+                    {originalExt ? 
+                    <div className="mobileinfo-row">
+                        <span className="tag artist-tag-color">{i18n.labels.fileType}: </span>
+                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{originalExt}</span>
+                    </div> : null}
+                    {upscaledSize ? 
+                    <div className="mobileinfo-row">
+                        <span className="tag artist-tag-color">{i18n.labels.upscaledSize}: </span>
+                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{upscaledSize}</span>
+                    </div> : null}
+                    {upscaledExt ? 
+                    <div className="mobileinfo-row">
+                        <span className="tag artist-tag-color">{i18n.labels.upscaledFileType}: </span>
+                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{upscaledExt}</span>
+                    </div> : null}
+                </div>
+            )
+        }
+    }
+
     const noTagsArtist = () => {
         if (!props.post || !session) return
         if (session.captchaNeeded) {
@@ -608,6 +656,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {copyTagsJSX()}
                 {tagCaptchaJSX()}
+                {filetypeJSX()}
 
                 {props.post && props.artists ? <>
                     <div className="mobileinfo-title-container">
@@ -840,7 +889,21 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-red">{i18n.sidebar.history}</span>
                             </span>
                         </div> : null}
-                        {!props.unverified ?
+                        {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
+                        <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={appealPost}>
+                                <img className="mobileinfo-icon" src={appealIcon}/>
+                                <span className="tag-red">{i18n.buttons.appeal}</span>
+                            </span>
+                        </div> : null}
+                        {permissions.isMod(session) && props.post.deleted ?
+                        <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={undeletePost}>
+                                <img className="mobileinfo-icon" src={undeleteIcon}/>
+                                <span className="tag-red">{i18n.buttons.undelete}</span>
+                            </span>
+                        </div> : null}
+                        {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={deletePost}>
                                 <img className="mobileinfo-icon" src={deleteIcon}/>

@@ -16,6 +16,7 @@ import BuyLink from "../../components/post/BuyLink"
 import functions from "../../structures/Functions"
 import Carousel from "../../components/site/Carousel"
 import DeletePostDialog from "../../dialogs/post/DeletePostDialog"
+import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
 import TakedownPostDialog from "../../dialogs/post/TakedownPostDialog"
 import PrivatePostDialog from "../../dialogs/post/PrivatePostDialog"
 import LockPostDialog from "../../dialogs/post/LockPostDialog"
@@ -696,6 +697,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <ReportCommentDialog/>
         <RevertPostHistoryDialog/>
         <RevertNoteHistoryDialog/>
+        <UndeletePostDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         {post ? <PrivatePostDialog post={post}/> : null}
         {post ? <LockPostDialog post={post}/> : null}

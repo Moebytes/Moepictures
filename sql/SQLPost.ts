@@ -26,8 +26,9 @@ export default class SQLPost {
     }
 
     /** Updates a post */
-    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private", value: string | number | boolean) => {
-        let whitelist = ["type", "hidden", "locked", "private"]
+    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private" | "deleted" 
+        | "deletionDate", value: string | number | boolean | null) => {
+        let whitelist = ["type", "hidden", "locked", "private", "deleted", "deletionDate"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -357,8 +358,9 @@ export default class SQLPost {
     }
 
     /** Updates a post (unverified) */
-    public static updateUnverifiedPost = async (postID: string, column: "hasUpscaled", value: string | number | boolean) => {
-        let whitelist = ["hasUpscaled"]
+    public static updateUnverifiedPost = async (postID: string, column: "hasUpscaled" | "deleted" | "deletionDate" |
+        "appealed" | "appealer" | "appealReason", value: string | number | boolean | null) => {
+        let whitelist = ["hasUpscaled", "deleted", "deletionDate", "appealed", "appealer", "appealReason"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

@@ -880,6 +880,8 @@ const CreateRoutes = (app: Express) => {
 
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
+        const pending = await sql.search.unverifiedUserPosts(req.session.username)
+        if (functions.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return res.status(403).send("Upload limit reached")
 
         if (!functions.cleanArray(artists)[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!functions.cleanArray(series)[0]?.tag) series = [{tag: "unknown-series"}]
@@ -1881,16 +1883,24 @@ const CreateRoutes = (app: Express) => {
         if (!permissions.isMod(req.session)) return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return res.status(400).send("Bad postID")
-        await sql.post.deleteUnverifiedPost(postID)
-        for (let i = 0; i < unverified.images.length; i++) {
-            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
-            await serverFunctions.deleteUnverifiedFile(file)
-            await serverFunctions.deleteUnverifiedFile(upscaledFile)
+
+        if (unverified.deleted) {
+          await serverFunctions.deleteUnverifiedPost(unverified)
+          return res.status(200).send("Success")
         }
 
-        let subject = "Notice: Post has been rejected"
+        if (unverified.appealed) {
+          if (unverified.uploader !== unverified.appealer) {
+            await sql.post.updateUnverifiedPost(unverified.postID, "appealed", false)
+          }
+        }
+        
+        let deletionDate = new Date()
+        deletionDate.setDate(deletionDate.getDate() + 30)
+        await sql.post.updateUnverifiedPost(unverified.postID, "deleted", true)
+        await sql.post.updateUnverifiedPost(unverified.postID, "deletionDate", deletionDate.toISOString())
 
+        let subject = "Notice: Post has been rejected"
         let rejectionText = "A post you submitted has been rejected."
         if (unverified.title) rejectionText = `Post ${unverified.title} ${unverified.source ? `(${unverified.source}) ` : ""}has been rejected.`
         let message = `${rejectionText}\n\nThe most common rejection reason is that the post is not "moe" enough. If you would like to upload something other than cute anime girls, a different imageboard would be better suited!`
@@ -1898,9 +1908,11 @@ const CreateRoutes = (app: Express) => {
         if (unverified.originalID) {
           subject = "Notice: Post edit request has been rejected"
           message = `Post edit request on ${functions.getDomain()}/post/${unverified.originalID} has been rejected.\n\nMake sure you go over the submission guidelines on ${functions.getDomain()}/help#uploading`
+          // Delete post edits immediately
+          await serverFunctions.deleteUnverifiedPost(unverified)
         }
-        // await serverFunctions.systemMessage(unverified.uploader, subject, message)
 
+        // await serverFunctions.systemMessage(unverified.uploader, subject, message)
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)

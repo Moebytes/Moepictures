@@ -50,13 +50,13 @@ export interface Session extends Require<Omit<User, "password" | "ip">> {
     publicKey: string
 }
 
-export interface ServerSession extends Omit<User, "password"> {
-    captchaNeeded: boolean
-    captchaAnswer: string
-    csrfToken: string
-    csrfSecret: string
-    publicKey: string
-    apiKey: boolean
+export interface ServerSession extends Partial<Omit<User, "password">> {
+    captchaNeeded?: boolean
+    captchaAnswer?: string
+    csrfToken?: string
+    csrfSecret?: string
+    publicKey?: string
+    apiKey?: boolean
 }
 
 export interface LoginHistory {

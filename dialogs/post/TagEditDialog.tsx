@@ -359,14 +359,21 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         <img className="quickedit-button-img" src={sketch}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
                     </button> : null}
+                    {!mobile && type !== "live2d" ? 
+                    <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
+                        <img className="quickedit-button-img" src={lineart}/>
+                        <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
+                    </button>
+                    : null}
                 </div>
+                {mobile ?
                 <div className="dialog-row">
                     {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                         <img className="quickedit-button-img" src={lineart}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
                     </button> : null}
-                </div>
+                </div> : null}
                 </>
             )
         }

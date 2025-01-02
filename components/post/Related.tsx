@@ -170,10 +170,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
         const cleanRelated = related.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanRelated.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, commentCount: cleanRelated[0]?.postCount}), ...result]
+                result = [...new Array(newOffset).fill({fake: true, postCount: cleanRelated[0]?.postCount}), ...result]
                 padded = true
             }
         }
+
         if (hasMore) {
             setOffset(newOffset)
             if (padded) {

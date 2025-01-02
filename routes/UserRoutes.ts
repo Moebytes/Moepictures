@@ -900,11 +900,12 @@ const UserRoutes = (app: Express) => {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
                 favorites = await sql.favorite.favorites(req.session.username, Number(limit), Number(offset), "all", rating)
             }
+            favorites = favorites.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
-                favorites = favorites.filter((p: any) => !p.hidden)
+                favorites = favorites.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                favorites = favorites.filter((p: any) => !functions.isR18(p.rating))
+                favorites = favorites.filter((p) => !functions.isR18(p.rating))
             }
             for (let i = favorites.length - 1; i >= 0; i--) {
                 const post = favorites[i]
@@ -933,6 +934,7 @@ const UserRoutes = (app: Express) => {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
                 uploads = await sql.user.uploads(req.session.username, Number(limit), Number(offset), "all", rating)
             }
+            uploads = uploads.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 uploads = uploads.filter((p: any) => !p.hidden)
             }
@@ -962,7 +964,7 @@ const UserRoutes = (app: Express) => {
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(200).send([])
                 favgroups = await sql.favorite.favgroups(username)
-                favgroups = favgroups.filter((f: any) => !f.private)
+                favgroups = favgroups.filter((f) => !f.private)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
                 favgroups = await sql.favorite.favgroups(req.session.username)
@@ -988,6 +990,7 @@ const UserRoutes = (app: Express) => {
             }
             for (let i = comments.length - 1; i >= 0; i--) {
                 const comment = comments[i]
+                if (comment.post.deleted) comments.splice(i, 1)
                 if (!permissions.isMod(req.session)) {
                     if (comment.post.hidden) comments.splice(i, 1)
                 }

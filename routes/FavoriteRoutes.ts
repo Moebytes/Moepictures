@@ -112,8 +112,9 @@ const FavoriteRoutes = (app: Express) => {
             const favgroups = await sql.favorite.postFavgroups(postID, req.session.username)
             for (let i = 0; i < favgroups.length; i++) {
                 const group = favgroups[i]
+                group.posts = group.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
-                    group.posts = group.posts.filter((p: any) => !p?.hidden)
+                    group.posts = group.posts.filter((p) => !p.hidden)
                 }
                 if (!req.session.showR18) {
                     if (functions.isR18(group.rating)) continue
@@ -172,8 +173,9 @@ const FavoriteRoutes = (app: Express) => {
             if (favgroup.private) {
                 if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
             }
+            favgroup.posts = favgroup.posts.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
-                favgroup.posts = favgroup.posts.filter((p: any) => !p?.hidden)
+                favgroup.posts = favgroup.posts.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
                 if (functions.isR18(favgroup.rating)) return res.status(403).end()

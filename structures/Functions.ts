@@ -1966,7 +1966,7 @@ export default class Functions {
         const seconds = Math.floor((date.getTime() - now) / 1000)
     
         const parseTime = (value: number, unit: string) => {
-            return i18n.time.plural ? `${value} ${unit}${value === 1 ? "" : i18n.time.plural}${i18n.time.ago}` : `${value}${unit}${i18n.time.ago}`
+            return i18n.time.plural ? `${value} ${unit}${value === 1 ? "" : i18n.time.plural}` : `${value}${unit}`
         }
     
         const years = seconds / 31536000
@@ -3091,5 +3091,9 @@ export default class Functions {
     public static cleanArray = <T>(arr?: T[]) => {
         if (!arr) return []
         return arr.filter(item => item && (typeof item !== "object" || Object.keys(item).length > 0))
+    }
+
+    public static currentUploads = (pending: UnverifiedPost[] = []) => {
+        return pending.reduce((count, p) => count + (p.deleted ? 0 : 1), 0)
     }
 }

@@ -27,7 +27,8 @@ const flagSlice = createSlice({
         groupFlag: false,
         messageFlag: false,
         tagFlag: false as string | boolean,
-        pasteNoteFlag: null as Note[] | null
+        pasteNoteFlag: null as Note[] | null,
+        historyFlag: false
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -51,7 +52,8 @@ const flagSlice = createSlice({
         setGroupFlag: (state, action) => {state.groupFlag = action.payload},
         setMessageFlag: (state, action) => {state.messageFlag = action.payload},
         setTagFlag: (state, action) => {state.tagFlag = action.payload},
-        setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload}
+        setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload},
+        setHistoryFlag: (state, action) => {state.historyFlag = action.payload}
     }
 })
 
@@ -61,7 +63,7 @@ const {
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
-    setPasteNoteFlag
+    setPasteNoteFlag, setHistoryFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -88,7 +90,8 @@ export const useFlagSelector = () => {
         groupFlag: selector((state) => state.flag.groupFlag),
         messageFlag: selector((state) => state.flag.messageFlag),
         tagFlag: selector((state) => state.flag.tagFlag),
-        pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag)
+        pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag),
+        historyFlag: selector((state) => state.flag.historyFlag)
     }
 }
 
@@ -116,7 +119,8 @@ export const useFlagActions = () => {
         setGroupFlag: (state: boolean) => dispatch(setGroupFlag(state)),
         setMessageFlag: (state: boolean) => dispatch(setMessageFlag(state)),
         setTagFlag: (state: string | boolean) => dispatch(setTagFlag(state)),
-        setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state))
+        setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state)),
+        setHistoryFlag: (state: boolean) => dispatch(setHistoryFlag(state)),
     }    
 }
 

@@ -61,6 +61,8 @@ export interface Post {
     locked: boolean | null
     private: boolean | null
     images: Image[]
+    deleted: boolean | null
+    deletionDate: string | null
     postCount?: string
     fake?: boolean
 }
@@ -108,7 +110,14 @@ export interface UnverifiedPost extends Post {
     changes: PostChanges
     reason: string | null
     isNote: boolean
+    appealed: boolean | null
+    appealer: string | null
+    appealReason: string | null
     postCount: string
+}
+
+export interface DeletedPost extends Post {
+    historyCount: number
 }
 
 export interface ChildPost {
@@ -176,6 +185,8 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost | undefined} :
     T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost | undefined} :
     T extends "/api/post/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
+    T extends "/api/post/deleted" ? {params: {query?: string, offset?: number} | null, response: DeletedPost[]} :
+    T extends "/api/post/deleted/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post-edits/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post/children/unverified" ? {params: {postID: string}, response: ChildPost[]} :
     T extends "/api/post/parent/unverified" ? {params: {postID: string}, response: ChildPost | undefined} :
@@ -193,14 +204,19 @@ export type PostPostEndpoint<T extends string> =
     T extends "/api/post/view" ? {params: {postID: string}, response: string} :
     T extends "/api/post/compress" ? {params: PostCompressParams, response: string} :
     T extends "/api/post/upscale" ? {params: PostUpscaleParams, response: string} :
+    T extends "/api/post/appeal" ? {params: {postID: string, reason: string}, response: string} :
     never
 
 export type PostPutEndpoint<T extends string> = 
     T extends "/api/post/quickedit" ? {params: PostQuickEditParams, response: string} :
     T extends "/api/post/quickedit/unverified" ? {params: PostQuickEditUnverifiedParams, response: string} :
+    T extends "/api/post/undelete" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/undelete/unverified" ? {params: {postID: string}, response: string} :
     never
 
 export type PostDeleteEndpoint<T extends string> = 
     T extends "/api/post/delete" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/delete/unverified" ? {params: {postID: string}, response: string} :
     T extends "/api/post/history/delete" ? {params: {postID: string, historyID: string}, response: string} :
+    T extends "/api/post/emptybin" ? {params: null, response: string} :
     never

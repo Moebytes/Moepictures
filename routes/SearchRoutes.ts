@@ -120,6 +120,7 @@ const SearchRoutes = (app: Express) => {
                 }
                 return p 
             })
+            result = result.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 result = result.filter((p) => !p.hidden)
                 result = functions.stripTags(result)
@@ -186,6 +187,7 @@ const SearchRoutes = (app: Express) => {
             for (let i = 0; i < result.length; i++) {
                 const artist = result[i]
                 artist.posts = functions.stripTags(artist.posts)
+                artist.posts = artist.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     artist.posts = artist.posts.filter((p: any) => !p?.hidden)
                 }
@@ -218,6 +220,7 @@ const SearchRoutes = (app: Express) => {
             for (let i = 0; i < result.length; i++) {
                 const character = result[i]
                 character.posts = functions.stripTags(character.posts)
+                character.posts = character.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     character.posts = character.posts.filter((p: any) => !p?.hidden)
                 }
@@ -250,6 +253,7 @@ const SearchRoutes = (app: Express) => {
             for (let i = 0; i < result.length; i++) {
                 const series = result[i]
                 series.posts = functions.stripTags(series.posts)
+                series.posts = series.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     series.posts = series.posts.filter((p: any) => !p?.hidden)
                 }
@@ -325,6 +329,7 @@ const SearchRoutes = (app: Express) => {
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const comment = result[i]
+                if (comment.post.deleted) result.splice(i, 1)
                 if (!permissions.isMod(req.session)) {
                     if (comment.post.hidden) result.splice(i, 1)
                 }
@@ -369,6 +374,7 @@ const SearchRoutes = (app: Express) => {
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const note = result[i]
+                if (note.post.deleted) result.splice(i, 1)
                 if (!permissions.isMod(req.session)) {
                     if (note.post.hidden) result.splice(i, 1)
                 }

@@ -12,7 +12,7 @@ import CSRF from "csrf"
 import axios from "axios"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
-import {MiniTag, Image, UploadImage, PostFull, PostTagged, Attachment, Note} from "../types/Types"
+import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, UnverifiedPost} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -582,6 +582,28 @@ export default class ServerFunctions {
             } else {
                 await sql.note.deleteNote(deleted.noteID)
             }
+        }
+    }
+
+    public static deletePost = async (post: DeletedPost | PostFull) => {
+        let r18 = functions.isR18(post.rating)
+        await sql.post.deletePost(post.postID)
+        for (let i = 0; i < post.images.length; i++) {
+            const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            await ServerFunctions.deleteFile(file, r18)
+            await ServerFunctions.deleteFile(upscaledFile, r18)
+        }
+        await ServerFunctions.deleteFolder(`history/post/${post.postID}`, r18).catch(() => null)
+    }
+
+    public static deleteUnverifiedPost = async (unverified: UnverifiedPost) => {
+        await sql.post.deleteUnverifiedPost(unverified.postID)
+        for (let i = 0; i < unverified.images.length; i++) {
+            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
+            await ServerFunctions.deleteUnverifiedFile(file)
+            await ServerFunctions.deleteUnverifiedFile(upscaledFile)
         }
     }
 

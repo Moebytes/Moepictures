@@ -701,6 +701,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.user.favoritesPrivacy}: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
                         className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
                     </div>
+                    {Number.isFinite(permissions.getUploadLimit(session)) ? <div className="user-row">
+                        <span className="user-text">{i18n.labels.uploadLimit}: <span className="user-text-action">{functions.currentUploads(pending)} / {permissions.getUploadLimit(session)}</span></span>
+                    </div> : null}
                     <div className="user-row">
                         <span className="user-text">{i18n.user.showRelated}: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>

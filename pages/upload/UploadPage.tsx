@@ -48,7 +48,7 @@ import permissions from "../../structures/Permissions"
 import xButton from "../../assets/icons/x-button-magenta.png"
 import tagConvert from "../../assets/json/tag-convert.json"
 import path from "path"
-import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile} from "../../types/Types"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile, UnverifiedPost} from "../../types/Types"
 import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
@@ -119,6 +119,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [danbooruLink, setDanbooruLink] = useState("")
     const [hideGuidelines, setHideGuidelines] = useState(false)
+    const [pending, setPending] = useState([] as UnverifiedPost[])
     const rawTagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
@@ -171,6 +172,11 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
     }, [mobile])
 
+    const updatePending = async () => {
+        const pending = await functions.get("/api/post/pending", null, session, setSessionFlag)
+        setPending(pending)
+   }
+
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
@@ -178,6 +184,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             history.push("/login")
             setSidebarText("Login required.")
         }
+        updatePending()
     }, [session])
 
     const getSimilar = async () => {
@@ -1595,6 +1602,19 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <span className="upload-ban-text">{i18n.pages.upload.banText}</span>
                 <button className="upload-button" onClick={() => history.goBack()}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
+                        <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
+                </button>
+                </>
+            )
+        }
+
+        if (functions.currentUploads(pending) >= permissions.getUploadLimit(session)) {
+            return (
+                <>
+                <span className="upload-text" style={{marginTop: "10px", 
+                marginLeft: "10px", fontSize: "20px"}}>{i18n.pages.upload.limitReached}</span>
+                <button className="upload-button" onClick={() => history.goBack()}
+                style={{width: "max-content", marginTop: "10px", marginLeft: "10px"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
                 </>

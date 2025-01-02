@@ -24,6 +24,7 @@ import sourceEdit from "../../assets/icons/history-search.png"
 import edit from "../../assets/icons/edit.png"
 import historyIcon from "../../assets/icons/history.png"
 import deleteIcon from "../../assets/icons/delete.png"
+import undeleteIcon from "../../assets/icons/undelete.png"
 import rejectRed from "../../assets/icons/reject-red.png"
 import approveGreen from "../../assets/icons/approve-green.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
@@ -62,6 +63,7 @@ import lockIcon from "../../assets/icons/lock-red.png"
 import unlockIcon from "../../assets/icons/unlock-red.png"
 import privateIcon from "../../assets/icons/private.png"
 import unprivateIcon from "../../assets/icons/unprivate.png"
+import appealIcon from "../../assets/icons/appeal.png"
 import functions from "../../structures/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
@@ -99,7 +101,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
-    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj} = usePostDialogActions()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, 
+    setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj, setUndeletePostID, setAppealPostID} = usePostDialogActions()
     const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
     const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
     const {setActionBanner} = useActiveActions()
@@ -673,6 +676,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setShowDeletePostDialog(!showDeletePostDialog)
     }
 
+    const undeletePost = async () => {
+        if (!props.post) return
+        setUndeletePostID({postID: props.post.postID, unverified: props.unverified})
+    }
+
+    const appealPost = async () => {
+        if (!props.post) return
+        setAppealPostID(props.post.postID)
+    }
+
     const editPost = async () => {
         if (!props.post) return
         if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
@@ -870,15 +883,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <span className="tag artist-tag-color">{i18n.labels.size}: </span>
                         <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{originalSize}</span>
                     </div> : null}
-                    {upscaledSize ? 
-                    <div className="sidebar-row">
-                        <span className="tag artist-tag-color">{i18n.labels.upscaledSize}: </span>
-                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{upscaledSize}</span>
-                    </div> : null}
                     {originalExt ? 
                     <div className="sidebar-row">
                         <span className="tag artist-tag-color">{i18n.labels.fileType}: </span>
                         <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{originalExt}</span>
+                    </div> : null}
+                    {upscaledSize ? 
+                    <div className="sidebar-row">
+                        <span className="tag artist-tag-color">{i18n.labels.upscaledSize}: </span>
+                        <span style={{marginLeft: "7px"}} className="tag artist-tag-color">{upscaledSize}</span>
                     </div> : null}
                     {upscaledExt ? 
                     <div className="sidebar-row">
@@ -1195,7 +1208,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-red">{i18n.buttons.edit}</span>
                             </span>
                         </div>
-                        {permissions.isMod(session) && props.unverified ? <>
+                        {permissions.isMod(session) && props.unverified && !props.post.deleted ? <>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={approvePost}>
                                 <img className="sidebar-icon" src={approveGreen}/>
@@ -1221,7 +1234,21 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-red">{i18n.sidebar.history}</span>
                             </span>
                         </div> : null}
-                        {!props.unverified ?
+                        {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={appealPost}>
+                                <img className="sidebar-icon" src={appealIcon}/>
+                                <span className="tag-red">{i18n.buttons.appeal}</span>
+                            </span>
+                        </div> : null}
+                        {permissions.isMod(session) && props.post.deleted ?
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={undeletePost}>
+                                <img className="sidebar-icon" src={undeleteIcon}/>
+                                <span className="tag-red">{i18n.buttons.undelete}</span>
+                            </span>
+                        </div> : null}
+                        {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>
                                 <img className="sidebar-icon" src={deleteIcon}/>

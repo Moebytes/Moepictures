@@ -1,14 +1,15 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions} from "../../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
-import {PostSearch, PostHistory} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
 
 interface Props {
-    post: PostSearch | PostHistory
+    post: PostSearch | PostHistory | UnverifiedPost
+    unverified?: boolean
 }
 
 const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
@@ -18,6 +19,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {showDeletePostDialog} = usePostDialogSelector()
     const {setShowDeletePostDialog} = usePostDialogActions()
+    const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -40,9 +42,13 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showDeletePostDialog])
 
     const deletePost = async () => {
+        if (props.unverified) {
+            await functions.delete("/api/post/delete/unverified", {postID: props.post.postID}, session, setSessionFlag)
+            return props.post.deleted ? history.push("/posts") : setPostFlag(true)
+        }
         if (permissions.isAdmin(session)) {
             await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
-            history.push("/posts")
+            return props.post.deleted ? history.push("/posts") : setPostFlag(true)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
@@ -90,7 +96,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (permissions.isAdmin(session)) {
+        if (props.unverified || permissions.isAdmin(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
@@ -116,7 +122,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{width: "500px", height: submitted ? "125px" : "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">{i18n.dialogs.deletePost.request}</span>

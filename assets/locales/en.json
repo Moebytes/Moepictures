@@ -183,6 +183,7 @@
         "undo": "Undo",
         "edit": "Edit",
         "delete": "Delete",
+        "undelete": "Undelete",
         "approve": "Approve",
         "reject": "Reject",
         "quote": "Quote",
@@ -212,7 +213,8 @@
         "save": "Save",
         "send": "Send",
         "unban": "Unban",
-        "sendLink": "Send Link"
+        "sendLink": "Send Link",
+        "appeal": "Appeal"
     },
     "history": {
         "post": "Post History",
@@ -220,7 +222,8 @@
         "group": "Group History",
         "note": "Note History",
         "alias": "Alias/Implication History",
-        "search": "Search History"
+        "search": "Search History",
+        "delete": "Recycle Bin"
     },
     "mod": {
         "postEdits": "Post Edits",
@@ -231,7 +234,8 @@
         "groupEdits": "Group Edits",
         "groupDeletions": "Group Deletions",
         "noteEdits": "Note Edits",
-        "reports": "Reports"
+        "reports": "Reports",
+        "rejected": "Rejected"
     },
     "banner": {
         "copiedTags": "Copied Tags!",
@@ -318,7 +322,8 @@
         "created": "Created",
         "edited": "Edited",
         "updated": "Updated",
-        "viewed": "Viewed on"
+        "viewed": "Viewed on",
+        "deleted": "Deleted in"
     },
     "labels": {
         "reason": "Reason",
@@ -447,7 +452,9 @@
         "pending": "Pending",
         "upscaledSize": "Upscaled Size",
         "fileType": "Filetype",
-        "upscaledFileType": "Upscaled Filetype"
+        "upscaledFileType": "Upscaled Filetype",
+        "uploadLimit": "Upload Limit",
+        "appealer": "Appealer"
     },
     "errors": {
         "$401":"401 error",
@@ -709,6 +716,7 @@
             "fetchFromPixiv": "Fetch from Pixiv",
             "fetchFromDanbooru": "Fetch from Danbooru",
             "banText": "You are banned. Cannot upload.",
+            "limitReached": "You reached your upload limit. Cannot upload more. You have to wait for your pending posts to be reviewed.",
             "artistExists": "If the artist tag does not yet exist, please upload an artist image.",
             "characterExists": "If the character tag does not yet exist, please upload a character image.",
             "seriesExists": "If the series tag does not yet exist, please upload a series image.",
@@ -864,7 +872,23 @@
             "title": "Delete Post",
             "request": "Delete Post Request",
             "header": "Are you sure that you want to delete this post?",
-            "reasonHeader": "Why do you want to delete this post? (eg. low quality, AI-generated, or breaks other rule)."
+            "reasonHeader": "Why do you want to delete this post? (eg. duplicate, low quality, AI-generated, or breaks other rule)."
+        },
+        "undeletePost": {
+            "title": "Undelete Post",
+            "header": "Do you want to undelete this post?"
+        },
+        "permaDeletePost": {
+            "title": "Delete Post Permanently",
+            "header": "Are you sure you want to permanently delete this post?"
+        },
+        "permaDeleteAllPost": {
+            "title": "Empty Recycle Bin",
+            "header": "Permanently delete all the posts in the recycle bin? This cannot be undone."
+        },
+        "appealPost": {
+            "title": "Appeal Post",
+            "header": "Appeal this post? You can only do this once, so make sure you fixed any issues."
         },
         "deleteReply": {
             "title": "Delete Reply",

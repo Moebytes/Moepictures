@@ -2,13 +2,13 @@ import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
-import approve from "../../assets/icons/approve.png"
+import restore from "../../assets/icons/revert-purple.png"
 import reject from "../../assets/icons/reject.png"
 import functions from "../../structures/Functions"
 import {UnverifiedPost} from "../../types/Types"
 import "./styles/modposts.less"
 
-const ModPosts: React.FunctionComponent = (props) => {
+const ModRejected: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -36,7 +36,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const posts = await functions.get("/api/post/list/unverified", null, session, setSessionFlag)
+        const posts = await functions.get("/api/post/deleted/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedPosts(posts)
     }
@@ -63,8 +63,8 @@ const ModPosts: React.FunctionComponent = (props) => {
         }
     }, [unverifiedPosts, index, updateVisiblePostFlag])
 
-    const approvePost = async (postID: string) => {
-        await functions.post("/api/post/approve", {postID}, session, setSessionFlag)
+    const restorePost = async (postID: string) => {
+        await functions.put("/api/post/undelete/unverified", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
@@ -110,7 +110,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/post/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedPosts.filter((t) => !t.fake)
         if (!scroll) {
@@ -344,50 +344,39 @@ const ModPosts: React.FunctionComponent = (props) => {
             let canvasImg = functions.isModel(img) || functions.isLive2D(img) || functions.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} key={i}>
-                    <div className="mod-post-text-container">
-                        <div className="mod-post-img-container">
-                            {functions.isVideo(img) ? 
-                            <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                            !canvasImg ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
-                            <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
-                        </div>
+                    <div className="mod-post-img-container">
+                        {functions.isVideo(img) ? 
+                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
+                        !canvasImg ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
+                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
-                    <div className="mod-post-text-container">
-                        {post.appealed ? 
-                        <div className="mod-post-text-container-row" style={{padding: "10px", paddingBottom: "0px"}}>
-                            <span className="mod-post-link" onClick={() => history.push(`/user/${post.appealer}`)}>{i18n.labels.appealer}: {functions.toProperCase(post.appealer || "") || i18n.user.deleted}</span>
-                            <span className="mod-post-text" style={{marginLeft: "10px"}}>{i18n.labels.reason}: {post.appealReason || i18n.labels.none}</span>
-                        </div> : null}
-                        <div className="mod-post-text-container-row">
-                            <div className="mod-post-text-column">
-                                <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
-                                {post.parentID ? <span className="mod-post-link" onClick={() => history.push(`/post/${post.parentID}`)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
-                                <span className="mod-post-text">{i18n.tag.artist}: {functions.toProperCase(post.artist || i18n.labels.none)}</span>
-                                <span className="mod-post-text">{i18n.navbar.tags}: {post.tags?.length}</span>
-                                <span className="mod-post-text">{i18n.labels.newTags}: {post.newTags || 0}</span>
-                            </div>
-                            <div className="mod-post-text-column">
-                                <span className="mod-post-text">{i18n.labels.source}: {post.source ? i18n.buttons.yes : i18n.buttons.no}</span>
-                                <span className="mod-post-text">{i18n.labels.similarPosts}: {post.duplicates ? i18n.buttons.yes : i18n.buttons.no}</span>
-                                <span className="mod-post-text">{i18n.labels.resolution}: {post.images[0].width}x{post.images[0].height}</span>
-                                <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc, obj) => acc + obj.size, 0))}</span>
-                            </div>
-                            <div className="mod-post-text-column">
-                                <span className="mod-post-text">{i18n.labels.upscaled}: {post.hasUpscaled ? i18n.buttons.yes : i18n.buttons.no}</span>
-                                <span className="mod-post-text">{i18n.sidebar.type}: {post.type}</span>
-                                <span className="mod-post-text">{i18n.sidebar.rating}: {post.rating}</span>
-                                <span className="mod-post-text">{i18n.sidebar.style}: {post.style}</span>
-                            </div>
-                        </div>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
+                        {post.parentID ? <span className="mod-post-link" onClick={() => history.push(`/post/${post.parentID}`)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
+                        <span className="mod-post-text">{i18n.tag.artist}: {functions.toProperCase(post.artist || i18n.labels.none)}</span>
+                        <span className="mod-post-text">{i18n.navbar.tags}: {post.tags?.length}</span>
+                        <span className="mod-post-text">{i18n.labels.newTags}: {post.newTags || 0}</span>
+                    </div>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-text">{i18n.labels.source}: {post.source ? i18n.buttons.yes : i18n.buttons.no}</span>
+                        <span className="mod-post-text">{i18n.labels.similarPosts}: {post.duplicates ? i18n.buttons.yes : i18n.buttons.no}</span>
+                        <span className="mod-post-text">{i18n.labels.resolution}: {post.images[0].width}x{post.images[0].height}</span>
+                        <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc, obj) => acc + obj.size, 0))}</span>
+                    </div>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-text">{i18n.labels.upscaled}: {post.hasUpscaled ? i18n.buttons.yes : i18n.buttons.no}</span>
+                        <span className="mod-post-text">{i18n.sidebar.type}: {post.type}</span>
+                        <span className="mod-post-text">{i18n.sidebar.rating}: {post.rating}</span>
+                        <span className="mod-post-text">{i18n.sidebar.style}: {post.style}</span>
                     </div>
                     <div className="mod-post-options">
+                        <div className="mod-post-options-container" onClick={() => restorePost(post.postID)}>
+                            <img className="mod-post-options-img" src={restore} style={{filter: getFilter()}}/>
+                            <span className="mod-post-options-text">{i18n.sidebar.restore}</span>
+                        </div>
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">{i18n.buttons.reject}</span>
-                        </div>
-                        <div className="mod-post-options-container" onClick={() => approvePost(post.postID)}>
-                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
-                            <span className="mod-post-options-text">{i18n.buttons.approve}</span>
+                            <span className="mod-post-options-text">{i18n.buttons.delete}</span>
                         </div>
                     </div>
                 </div>
@@ -415,4 +404,4 @@ const ModPosts: React.FunctionComponent = (props) => {
     )
 }
 
-export default ModPosts
+export default ModRejected

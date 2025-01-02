@@ -20,6 +20,7 @@ import ModGroupEdits from "../../components/mod/ModGroupEdits"
 import ModGroupDeletions from "../../components/mod/ModGroupDeletions"
 import PageDialog from "../../dialogs/misc/PageDialog"
 import ModReports from "../../components/mod/ModReports"
+import ModRejected from "../../components/mod/ModRejected"
 import functions from "../../structures/Functions"
 import modPostUploadIcon from "../../assets/icons/mod-post-upload.png"
 import modPostEditIcon from "../../assets/icons/mod-post-edit.png"
@@ -43,6 +44,8 @@ import modGroupEditActiveIcon from "../../assets/icons/mod-group-edit-active.png
 import modGroupDeleteActiveIcon from "../../assets/icons/mod-group-delete-active.png"
 import modNoteActiveIcon from "../../assets/icons/history-note-active.png"
 import modReportActiveIcon from "../../assets/icons/mod-report-active.png"
+import modRejectedIcon from "../../assets/icons/tag-delete.png"
+import modRejectedActiveIcon from "../../assets/icons/tag-delete-active.png"
 import "./styles/modqueuepage.less"
 
 let replace = false 
@@ -155,6 +158,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "group-deletions") return <ModGroupDeletions/>
         if (modState === "notes") return <ModNotes/>
         if (modState === "reports") return <ModReports/>
+        if (modState === "rejected") return <ModRejected/>
         return null
     }
 
@@ -170,6 +174,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "group-deletions") return i18n.mod.groupDeletions
         if (modState === "notes") return i18n.navbar.notes
         if (modState === "reports") return i18n.mod.reports
+        if (modState === "rejected") return i18n.mod.rejected
         return ""
     }
 
@@ -216,6 +221,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "notes" ? "" : getFilter()}} onClick={() => setModState("notes")}/>
                         <img className="modqueue-icon" src={modState === "reports" ? modReportActiveIcon : modReportIcon} 
                         style={{filter: modState === "reports" ? "" : getFilter()}} onClick={() => setModState("reports")}/>
+                        <img className="modqueue-icon" src={modState === "rejected" ? modRejectedActiveIcon : modRejectedIcon} 
+                        style={{filter: modState === "rejected" ? "" : getFilter()}} onClick={() => setModState("rejected")}/>
                     </div>
                     </> : <>
                     <div className="modqueue-icons">
@@ -243,6 +250,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "notes" ? "" : getFilter()}} onClick={() => setModState("notes")}/>
                         <img className="modqueue-icon" src={modState === "reports" ? modReportActiveIcon : modReportIcon} 
                         style={{filter: modState === "reports" ? "" : getFilter()}} onClick={() => setModState("reports")}/>
+                        <img className="modqueue-icon" src={modState === "rejected" ? modRejectedActiveIcon : modRejectedIcon} 
+                        style={{filter: modState === "rejected" ? "" : getFilter()}} onClick={() => setModState("rejected")}/>
                     </div></>}
                     <div className="modqueue-heading-container">
                         <span className="modqueue-heading">{getText()}</span>

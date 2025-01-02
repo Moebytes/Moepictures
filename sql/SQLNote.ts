@@ -231,7 +231,7 @@ export default class SQLNote {
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
-                        ORDER BY notes."updatedDate" DESC
+                        ORDER BY "unverified notes"."updatedDate" DESC
                     ) AS "row"
                     FROM "unverified notes"
                     LEFT JOIN post_json ON post_json."postID" = "unverified notes"."postID"
@@ -275,7 +275,7 @@ export default class SQLNote {
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
-                        ORDER BY notes."updatedDate" DESC
+                        ORDER BY "unverified notes"."updatedDate" DESC
                     ) AS "row"
                     FROM "unverified notes"
                     LEFT JOIN post_json ON post_json."postID" = "unverified notes"."postID"
@@ -358,7 +358,7 @@ export default class SQLNote {
         let i = 2
         let whereQuery = `WHERE notes."updater" = ANY ($1)`
         if (search) {
-            whereQuery = `WHERE notes.transcript ILIKE '%' || $${i} || '%' OR notes.translation ILIKE '%' || $${i} || '%'`
+            whereQuery += `AND (notes.transcript ILIKE '%' || $${i} || '%' OR notes.translation ILIKE '%' || $${i} || '%')`
             i++
         }
         let sortQuery = ""

@@ -23,6 +23,10 @@ import DeleteAllSearchHistoryDialog from "../../dialogs/user/DeleteAllSearchHist
 import AliasHistoryRow from "../../components/history/AliasHistoryRow"
 import RevertAliasHistoryDialog from "../../dialogs/tag/RevertAliasHistoryDialog"
 import DeleteAliasHistoryDialog from "../../dialogs/tag/DeleteAliasHistoryDialog"
+import DeletedPostRow from "../../components/history/DeletedPostRow"
+import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
+import PermaDeletePostDialog from "../../dialogs/post/PermaDeletePostDialog"
+import PermaDeleteAllPostDialog from "../../dialogs/post/PermaDeleteAllPostDialog"
 import scrollIcon from "../../assets/icons/scroll.png"
 import search from "../../assets/icons/search.png"
 import pageIcon from "../../assets/icons/page.png"
@@ -30,23 +34,25 @@ import PageDialog from "../../dialogs/misc/PageDialog"
 import searchHistoryDelete from "../../assets/icons/delete.png"
 import permissions from "../../structures/Permissions"
 import historyPost from "../../assets/icons/history-post.png"
-import historySearch from "../../assets/icons/history-search.png"
-import historyTag from "../../assets/icons/history-tag.png"
-import historyTranslate from "../../assets/icons/history-note.png"
-import historyGroup from "../../assets/icons/history-group.png"
-import historyAlias from "../../assets/icons/history-alias.png"
 import historyPostActive from "../../assets/icons/history-post-active.png"
+import historySearch from "../../assets/icons/history-search.png"
 import historySearchActive from "../../assets/icons/history-search-active.png"
+import historyTag from "../../assets/icons/history-tag.png"
 import historyTagActive from "../../assets/icons/history-tag-active.png"
-import historyTranslateActive from "../../assets/icons/history-note-active.png"
+import historyNote from "../../assets/icons/history-note.png"
+import historyNoteActive from "../../assets/icons/history-note-active.png"
+import historyGroup from "../../assets/icons/history-group.png"
 import historyGroupActive from "../../assets/icons/history-group-active.png"
+import historyAlias from "../../assets/icons/history-alias.png"
 import historyAliasActive from "../../assets/icons/history-alias-active.png"
+import historyDelete from "../../assets/icons/tag-delete.png"
+import historyDeleteActive from "../../assets/icons/tag-delete-active.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions, useSearchDialogActions,
-useSearchDialogSelector} from "../../store"
-import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch} from "../../types/Types"
+useMiscDialogActions, useSearchDialogActions, useSearchDialogSelector, usePostDialogActions,
+usePostDialogSelector} from "../../store"
+import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch, DeletedPost} from "../../types/Types"
 import "./styles/historypage.less"
 
 let replace = false
@@ -67,10 +73,12 @@ const HistoryPage: React.FunctionComponent = () => {
     const {historyPage} = usePageSelector()
     const {setHistoryPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag, groupSearchFlag} = useFlagSelector()
-    const {setPageFlag, setGroupSearchFlag} = useFlagActions()
+    const {pageFlag, historyFlag} = useFlagSelector()
+    const {setPageFlag, setHistoryFlag} = useFlagActions()
     const {showDeleteAllHistoryDialog} = useSearchDialogSelector()
     const {setShowDeleteAllHistoryDialog} = useSearchDialogActions()
+    const {permaDeleteAllDialog} = usePostDialogSelector()
+    const {setPermaDeleteAllDialog} = usePostDialogActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [index, setIndex] = useState(0)
     const [postStates, setPostStates] = useState([] as PostHistory[])
@@ -79,12 +87,14 @@ const HistoryPage: React.FunctionComponent = () => {
     const [groupStates, setGroupStates] = useState([] as GroupHistory[])
     const [aliasStates, setAliasStates] = useState([] as AliasHistorySearch[])
     const [searchStates, setSearchStates] = useState([] as SearchHistory[])
+    const [deleteStates, setDeleteStates] = useState([] as DeletedPost[])
     const [visibleHistoryPosts, setVisibleHistoryPosts] = useState([] as PostHistory[])
     const [visibleHistoryTags, setVisibleHistoryTags] = useState([] as TagHistory[])
     const [visibleHistoryNotes, setVisibleHistoryNotes] = useState([] as NoteHistory[])
     const [visibleHistoryGroups, setVisibleHistoryGroups] = useState([] as GroupHistory[])
     const [visibleHistoryAliases, setVisibleHistoryAliases] = useState([] as AliasHistorySearch[])
     const [visibleHistorySearch, setVisibleHistorySearch] = useState([] as SearchHistory[])
+    const [visibleHistoryDelete, setVisibleHistoryDelete] = useState([] as DeletedPost[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -164,6 +174,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "search") {
             return searchStates
         }
+        if (historyTab === "delete") {
+            return deleteStates
+        }
         return []
     }
 
@@ -188,6 +201,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "search") {
             setSearchStates(states as SearchHistory[])
         }
+        if (historyTab === "delete") {
+            setDeleteStates(states as DeletedPost[])
+        }
     }
 
     const getVisibleHistory = () => {
@@ -208,6 +224,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "search") {
             return visibleHistorySearch
+        }
+        if (historyTab === "delete") {
+            return visibleHistoryDelete
         }
         return []
     }
@@ -232,6 +251,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "search") {
             setVisibleHistorySearch(visible as SearchHistory[])
+        }
+        if (historyTab === "delete") {
+            setVisibleHistoryDelete(visible as DeletedPost[])
         }
     }
 
@@ -261,6 +283,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "search") {
             result = await functions.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
         }
+        if (historyTab === "delete") {
+            result = await functions.get("/api/post/deleted", {query: searchQuery}, session, setSessionFlag).catch(() => [])
+        }
         setEnded(false)
         setIndex(0)
         setVisibleHistory([])
@@ -276,6 +301,13 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         document.title = i18n.history[historyTab]
     }, [historyTab, i18n])
+
+    useEffect(() => {
+        if (historyFlag) {
+            updateHistory()
+            setHistoryFlag(false)
+        }
+    }, [historyFlag, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -358,6 +390,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "search") {
             result = await functions.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+        }
+        if (historyTab === "delete") {
+            result = await functions.get("/api/post/deleted", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         let hasMore = result?.length >= 100
         const cleanHistory = historyStates.filter((t) => !t.fake)
@@ -630,6 +665,10 @@ const HistoryPage: React.FunctionComponent = () => {
             if (historyTab === "search") {
                 jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={updateHistory}/>)
             }
+
+            if (historyTab === "delete") {
+                jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={updateHistory}/>)
+            }
         }
         if (!scroll) {
             jsx.push(
@@ -771,6 +810,29 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div></>
             )
         }
+        if (historyTab === "delete") {
+            return (
+                <><div className="history-row">
+                    <span className="history-heading">{i18n.history.delete}</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
+                    </div>
+                    <div className="history-item" onClick={() => setPermaDeleteAllDialog(!permaDeleteAllDialog)}>
+                        <img className="history-img" src={searchHistoryDelete}/>
+                        <span className="history-opt-text">{i18n.buttons.deleteAll}</span>
+                    </div>
+                </div></>
+            )
+        }
     }
 
     const searchHistoryClick = () => {
@@ -801,6 +863,9 @@ const HistoryPage: React.FunctionComponent = () => {
         <DeleteAliasHistoryDialog/>
         <DeleteAllSearchHistoryDialog/>
         <DeleteSearchHistoryDialog/>
+        <UndeletePostDialog/>
+        <PermaDeletePostDialog/>
+        <PermaDeleteAllPostDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>
@@ -813,8 +878,9 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-icon" onClick={() => setHistoryTab("post")} src={historyTab === "post" ? historyPostActive : historyPost} style={{filter: historyTab === "post" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? historyTagActive : historyTag} style={{filter: historyTab === "tag" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? historyGroupActive : historyGroup} style={{filter: historyTab === "group" ? "" : getFilter()}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? historyTranslateActive : historyTranslate} style={{filter: historyTab === "note" ? "" : getFilter()}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? historyNoteActive : historyNote} style={{filter: historyTab === "note" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? historyAliasActive : historyAlias} style={{filter: historyTab === "alias" ? "" : getFilter()}}/>
+                        {permissions.isAdmin(session) ? <img className="history-icon" onClick={() => setHistoryTab("delete")} src={historyTab === "delete" ? historyDeleteActive : historyDelete} style={{filter: historyTab === "delete" ? "" : getFilter()}}/> : null}
                     </div>
                     {generateHeaderJSX()}
                     <div className="history-container">

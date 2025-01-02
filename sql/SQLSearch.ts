@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch} from "../types/Types"
+import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch} from "../types/Types"
 
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
@@ -350,6 +350,32 @@ export default class SQLSearch {
         return result as Promise<PostFull[]>
     }
 
+    /** Get deleted posts. */
+    public static deletedPosts = async (search?: string, offset?: number) => {
+        let whereQuery = `posts."deleted" IS TRUE`
+        let i = 1
+        if (search) {
+            whereQuery += `AND (posts.title ILIKE '%' || $${i} || '%' OR posts."englishTitle" ILIKE '%' || $${i} || '%')`
+            i++
+        }
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                COUNT(*) OVER() AS "historyCount"
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                WHERE ${whereQuery}
+                GROUP BY posts."postID"
+                ${offset ? `LIMIT 100 OFFSET $${i}` : ""}
+            `),
+            values: []
+        }
+        if (search) query.values?.push(search.toLowerCase())
+        if (offset) query.values?.push(offset)
+        const result = await SQLQuery.run(query, true)
+        return result as Promise<DeletedPost[]>
+    }
+
     /** Get posts (unverified). */
     public static unverifiedPosts = async (offset?: number) => {
         const query: QueryConfig = {
@@ -360,10 +386,31 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NULL
+            WHERE "unverified posts"."originalID" IS NULL AND "unverified posts"."deleted" IS NOT TRUE
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
+            `)
+        }
+        if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result as Promise<UnverifiedPost[]>
+    }
+
+    /** Get deleted posts (unverified). */
+    public static deletedUnverifiedPosts = async (offset?: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
+            FROM "unverified posts"
+            JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+            JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            WHERE "unverified posts"."deleted" IS TRUE
+            GROUP BY "unverified posts"."postID"
+            ORDER BY "unverified posts"."uploadDate" DESC
+            ${offset ? `LIMIT 100 OFFSET $1` : ""}
             `)
         }
         if (offset) query.values = [offset]
@@ -401,7 +448,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL AND "isNote" IS NULL
+            WHERE "originalID" IS NOT NULL AND "isNote" IS NOT TRUE
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
@@ -422,7 +469,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL AND "isNote" IS NULL AND "unverified posts"."updater" = $1
+            WHERE "originalID" IS NOT NULL AND "isNote" IS NOT TRUE AND "unverified posts"."updater" = $1
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             `),

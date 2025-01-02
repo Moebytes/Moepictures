@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "hidden" boolean,
     "locked" boolean,
     "private" boolean,
+    "deleted" boolean,
+    "deletionDate" timestamptz,
     "hasOriginal" boolean,
     "hasUpscaled" boolean
 );
@@ -89,6 +91,11 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "mirrors" jsonb,
     "thumbnail" text,
     "isNote" boolean,
+    "deleted" boolean,
+    "deletionDate" timestamptz,
+    "appealed" boolean,
+    "appealer" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
+    "appealReason" text,
     "addedTags" text[],
     "removedTags" text[],
     "imageChanged" boolean,

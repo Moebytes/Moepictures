@@ -419,23 +419,6 @@ app.get("/*", async (req: Request, res: Response) => {
   res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 
-const deleteExpiredTokens = async () => {
-  const emailTokens = await sql.token.emailTokens()
-  for (const tokenData of emailTokens) {
-    const expireDate = new Date(tokenData.expires)
-    if (new Date() > expireDate) {
-      await sql.token.deleteEmailToken(tokenData.email)
-    }
-  }
-  const passwordTokens = await sql.token.passwordTokens()
-  for (const tokenData of passwordTokens) {
-    const expireDate = new Date(tokenData.expires)
-    if (new Date() > expireDate) {
-      await sql.token.deletePasswordToken(tokenData.username)
-    }
-  }
-}
-
 const defaultTagInserts = async () => {
   /** Unverified tags */
   await sql.tag.insertUnverifiedTag("unknown-artist", "artist")
@@ -498,9 +481,66 @@ const defaultTagInserts = async () => {
   if (!exists) await sql.tag.updateTag("third-party-source", "description", "The source of the post is a repost (not posted by the original artist).")
 }
 
+const deleteExpiredTokens = async () => {
+  const emailTokens = await sql.token.emailTokens()
+  const now = new Date()
+  for (const tokenData of emailTokens) {
+    const expireDate = new Date(tokenData.expires)
+    if (now > expireDate) {
+      await sql.token.deleteEmailToken(tokenData.email)
+    }
+  }
+  const passwordTokens = await sql.token.passwordTokens()
+  for (const tokenData of passwordTokens) {
+    const expireDate = new Date(tokenData.expires)
+    if (now > expireDate) {
+      await sql.token.deletePasswordToken(tokenData.username)
+    }
+  }
+}
+
+const deleteQueuedPosts = async () => {
+  const deleted = await sql.search.deletedPosts()
+  const now = new Date()
+  for (const post of deleted) {
+    if (!post.deletionDate) continue
+    const deletionDate = new Date(post.deletionDate)
+    if (now > deletionDate) {
+      try {
+        await serverFunctions.deletePost(post)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+  }
+}
+
+const deleteQueuedUnverifiedPosts = async () => {
+  const deletedUnverified = await sql.search.deletedUnverifiedPosts()
+  const now = new Date()
+  for (const unverified of deletedUnverified) {
+    if (!unverified.deletionDate) continue
+    const deletionDate = new Date(unverified.deletionDate)
+    if (now > deletionDate) {
+      try {
+        await serverFunctions.deleteUnverifiedPost(unverified)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+  }
+}
+
+const runDaily = async () => {
+  await deleteExpiredTokens()
+  await deleteQueuedPosts()
+  await deleteQueuedUnverifiedPosts()
+}
+
 const run = async () => {
   await sql.createDB()
-  await deleteExpiredTokens()
+  runDaily()
+  setInterval(runDaily, 24 * 60 * 60 * 1000)
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
 }
 

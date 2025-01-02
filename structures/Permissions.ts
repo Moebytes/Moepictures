@@ -1,15 +1,17 @@
+import {ServerSession, MiniTag} from "../types/Types"
+
 export default class Permissions {
-    public static isAdmin = (session: any) => {
+    public static isAdmin = (session: ServerSession) => {
         return session.role === "admin" ? true : false
     }
 
-    public static isMod = (session: any) => {
+    public static isMod = (session: ServerSession) => {
         if (session.role === "admin") return true 
         if (session.role === "mod") return true 
         return false
     }
 
-    public static isCurator = (session: any) => {
+    public static isCurator = (session: ServerSession) => {
         if (session.role === "admin") return true 
         if (session.role === "mod") return true
         if (session.role === "premium-curator") return true
@@ -17,7 +19,7 @@ export default class Permissions {
         return false
     }
 
-    public static isContributor = (session: any) => {
+    public static isContributor = (session: ServerSession) => {
         if (session.role === "admin") return true 
         if (session.role === "mod") return true
         if (session.role === "premium-curator") return true
@@ -27,7 +29,7 @@ export default class Permissions {
         return false
     }
 
-    public static isPremium = (session: any) => {
+    public static isPremium = (session: ServerSession) => {
         if (session.role === "admin") return true 
         if (session.role === "mod") return true
         if (session.role === "system") return true
@@ -37,15 +39,21 @@ export default class Permissions {
         return false
     }
 
-    public static isSystem = (session: any) => {
+    public static isSystem = (session: ServerSession) => {
         if (session.role === "system") return true
         return false
     }
 
-    public static canPrivate = (session: any, artists: any) => {
+    public static canPrivate = (session: ServerSession, artists?: MiniTag[] | string[]) => {
         if (Permissions.isMod(session)) return true
-        const artistTags = artists.map((a: any) => a.tag ? a.tag : a)
-        if (artistTags.includes(session.username)) return true
+        const artistTags = artists?.map((a: MiniTag | string) => a.hasOwnProperty("tag") ? (a as MiniTag).tag : a) || []
+        if (artistTags.includes(session.username || "")) return true
         return false
+    }
+
+    public static getUploadLimit = (session: ServerSession) => {
+        if (Permissions.isCurator(session)) return Infinity
+        if (Permissions.isContributor(session)) return 50
+        return 25
     }
 }

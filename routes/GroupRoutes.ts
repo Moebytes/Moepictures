@@ -144,8 +144,9 @@ const GroupRoutes = (app: Express) => {
             if (!name) return res.status(400).send("Invalid name")
             const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug) as GroupPosts
+            group.posts = group.posts.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
-                group.posts = group.posts.filter((p: any) => !p?.hidden)
+                group.posts = group.posts.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
                 if (functions.isR18(group.rating)) return res.status(403).end()
@@ -173,8 +174,9 @@ const GroupRoutes = (app: Express) => {
             let newGroups = [] as GroupPosts[]
             for (let i = 0; i < groups.length; i++) {
                 const group = groups[i]
+                group.posts = group.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
-                    group.posts = group.posts.filter((p: any) => !p?.hidden)
+                    group.posts = group.posts.filter((p) => !p.hidden)
                 }
                 if (!req.session.showR18) {
                     if (functions.isR18(group.rating)) continue

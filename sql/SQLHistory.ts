@@ -222,13 +222,13 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate",
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
                 ORDER BY "post history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -244,12 +244,12 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
                 FROM "post history"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
             `),
             values: [postID, historyID]
         }
@@ -262,13 +262,13 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate",
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
                 ORDER BY "post history"."date" DESC
             `),
             values: [username]

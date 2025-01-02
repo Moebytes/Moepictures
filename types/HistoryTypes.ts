@@ -1,4 +1,4 @@
-import {Post, Image, PostType, PostStyle, PostMirrors, PostSearch, AliasHistoryType,
+import {Post, DeletedPost, Image, PostType, PostStyle, PostMirrors, PostSearch, AliasHistoryType,
 PostRating, Alias, Implication, TagType, Note, AliasHistorySearch} from "./Types"
 
 export type History = 
@@ -8,6 +8,7 @@ export type History =
     | GroupHistory 
     | AliasHistorySearch 
     | SearchHistory
+    | DeletedPost
 
 export interface HistoryID {
     failed: boolean | string
@@ -81,6 +82,8 @@ export interface PostHistory {
     private: boolean
     approver: string
     approveDate: string
+    deleted: boolean | null
+    deletionDate: string | null
 }
 
 export interface TagChanges {

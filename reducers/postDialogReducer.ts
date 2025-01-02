@@ -22,6 +22,11 @@ interface PostObj {
     artists: MiniTag[]
 }
 
+interface UndeleteID {
+    postID: string 
+    unverified?: boolean
+}
+
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
@@ -39,7 +44,12 @@ const postDialogSlice = createSlice({
         showBulkDeleteDialog: false,
         showCompressingDialog: false,
         showUpscalingDialog: false,
-        childPostObj: null as ChildEditID | null
+        childPostObj: null as ChildEditID | null,
+        undeletePostID: null as UndeleteID | null,
+        permaDeletePostID: null as string | null,
+        permaDeletePostFlag: false,
+        permaDeleteAllDialog: false,
+        appealPostID: null as string | null
     },
     reducers: {
         setShowDeletePostDialog: (state, action) => {state.showDeletePostDialog = action.payload},
@@ -56,7 +66,12 @@ const postDialogSlice = createSlice({
         setShowBulkDeleteDialog: (state, action) => {state.showBulkDeleteDialog = action.payload},
         setShowCompressingDialog: (state, action) => {state.showCompressingDialog = action.payload},
         setShowUpscalingDialog: (state, action) => {state.showUpscalingDialog = action.payload},
-        setChildPostObj: (state, action) => {state.childPostObj = action.payload}
+        setChildPostObj: (state, action) => {state.childPostObj = action.payload},
+        setUndeletePostID: (state, action) => {state.undeletePostID = action.payload},
+        setPermaDeletePostID: (state, action) => {state.permaDeletePostID = action.payload},
+        setPermaDeletePostFlag: (state, action) => {state.permaDeletePostFlag = action.payload},
+        setPermaDeleteAllDialog: (state, action) => {state.permaDeleteAllDialog = action.payload},
+        setAppealPostID: (state, action) => {state.appealPostID = action.payload}
     }
 })
 
@@ -64,7 +79,8 @@ const {
     setShowDeletePostDialog, setShowTakedownPostDialog, setDeletePostHistoryID,
     setDeletePostHistoryFlag, setRevertPostHistoryID, setRevertPostHistoryFlag, 
     setLockPostID, setPrivatePostObj, setTagEditID, setSourceEditID, setChildPostObj,
-    setShowBulkTagEditDialog, setShowBulkDeleteDialog, setShowCompressingDialog, setShowUpscalingDialog
+    setShowBulkTagEditDialog, setShowBulkDeleteDialog, setShowCompressingDialog, setShowUpscalingDialog,
+    setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, setAppealPostID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
@@ -84,7 +100,12 @@ export const usePostDialogSelector = () => {
         showBulkDeleteDialog: selector((state) => state.postDialog.showBulkDeleteDialog),
         showCompressingDialog: selector((state) => state.postDialog.showCompressingDialog),
         showUpscalingDialog: selector((state) => state.postDialog.showUpscalingDialog),
-        childPostObj: selector((state) => state.postDialog.childPostObj)
+        childPostObj: selector((state) => state.postDialog.childPostObj),
+        undeletePostID: selector((state) => state.postDialog.undeletePostID),
+        permaDeletePostID: selector((state) => state.postDialog.permaDeletePostID),
+        permaDeletePostFlag: selector((state) => state.postDialog.permaDeletePostFlag),
+        permaDeleteAllDialog: selector((state) => state.postDialog.permaDeleteAllDialog),
+        appealPostID: selector((state) => state.postDialog.appealPostID)
     }
 }
 
@@ -105,7 +126,12 @@ export const usePostDialogActions = () => {
         setShowBulkDeleteDialog: (state: boolean) => dispatch(setShowBulkDeleteDialog(state)),
         setShowCompressingDialog: (state: boolean) => dispatch(setShowCompressingDialog(state)),
         setShowUpscalingDialog: (state: boolean) => dispatch(setShowUpscalingDialog(state)),
-        setChildPostObj: (state: ChildEditID | null) => dispatch(setChildPostObj(state))
+        setChildPostObj: (state: ChildEditID | null) => dispatch(setChildPostObj(state)),
+        setUndeletePostID: (state: UndeleteID | null) => dispatch(setUndeletePostID(state)),
+        setPermaDeletePostID: (state: string | null) => dispatch(setPermaDeletePostID(state)),
+        setPermaDeletePostFlag: (state: boolean) => dispatch(setPermaDeletePostFlag(state)),
+        setPermaDeleteAllDialog: (state: boolean) => dispatch(setPermaDeleteAllDialog(state)),
+        setAppealPostID: (state: string | null) => dispatch(setAppealPostID(state))
     }    
 }
 

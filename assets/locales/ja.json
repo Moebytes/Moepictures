@@ -186,6 +186,7 @@
         "reject": "却下",
         "history": "歴史",
         "delete": "削除",
+        "undelete": "削除解除",
         "quote": "引用",
         "report": "レポート",
         "revert": "復帰",
@@ -213,7 +214,8 @@
         "save": "保存",
         "send": "送信",
         "unban": "禁止解除",
-        "sendLink": "リンクを送る"
+        "sendLink": "リンクを送る",
+        "appeal": "アピール"
     },
     "history": {
         "post": "投稿履歴",
@@ -221,7 +223,8 @@
         "group": "グループ史",
         "note": "メモ 歴史",
         "alias": "エイリアス/インプリケーション履歴",
-        "search": "検索履歴"
+        "search": "検索履歴",
+        "delete": "ごみ箱"
     },
     "mod": {
         "postEdits": "編集後記",
@@ -232,7 +235,8 @@
         "groupEdits": "グループ編集",
         "groupDeletions": "グループの削除",
         "noteEdits": "メモ編集",
-        "reports": "レポート"
+        "reports": "レポート",
+        "rejected": "不採用"
     },
     "banner": {
         "copiedTags": "コピーされたタグ！",
@@ -319,7 +323,8 @@
         "created": "作成された：",
         "edited": "編集した：",
         "updated": "更新された：",
-        "viewed": "見たよ："
+        "viewed": "見たよ：",
+        "deleted": "で削除された："
     },
     "labels": {
         "reason": "理由",
@@ -448,7 +453,9 @@
         "pending": "申請中",
         "upscaledSize": "拡大サイズ",
         "fileType": "ファイルタイプ",
-        "upscaledFileType": "アップスケール・ファイルタイプ"
+        "upscaledFileType": "アップスケール・ファイルタイプ",
+        "uploadLimit": "アップロード制限",
+        "appealer": "控訴人"
     },
     "errors": {
         "$401":"401エラー",
@@ -710,6 +717,7 @@
             "fetchFromPixiv": "Pixivからフェッチ",
             "fetchFromDanbooru": "Danbooruからフェッチ",
             "banText": "禁止されています。アップロードできません。",
+            "limitReached": "アップロードの上限に達しました。これ以上アップロードできません。保留中の投稿が確認されるまでお待ちください。",
             "artistExists": "アーティスト・タグがまだ存在しない場合は、アーティスト画像をアップロードしてください。",
             "characterExists": "キャラクタータグがまだ存在しない場合は、キャラクター画像をアップロードしてください。",
             "seriesExists": "シリーズタグがまだ存在しない場合は、シリーズ画像をアップロードしてください。",
@@ -865,7 +873,23 @@
             "title": "投稿を削除する",
             "request": "投稿削除リクエスト",
             "header": "本当にこの投稿を削除したいのですか？",
-            "reasonHeader": "なぜこの投稿を削除したいのですか？ 例：低品質、AIが作成した、または他のルールに違反している）。"
+            "reasonHeader": "なぜこの投稿を削除したいのですか？ 例：重複、低品質、AI生成、その他のルール違反）。"
+        },
+        "undeletePost": {
+            "title": "投稿の削除解除",
+            "header": "この投稿を削除しますか？"
+        },
+        "permaDeletePost": {
+            "title": "投稿を永久に削除する",
+            "header": "本当にこの投稿を永久に削除したいのか？"
+        },
+        "permaDeleteAllPost": {
+            "title": "ごみ箱を空にする",
+            "header": "ごみ箱にあるすべての投稿を永久に削除しますか？これは元に戻せません。"
+        },
+        "appealPost": {
+            "title": "アピールポスト",
+            "header": "この投稿をアピールしますか？これは一度しかできませんので、問題があれば必ず修正してください。"
         },
         "deleteReply": {
             "title": "返信削除",
