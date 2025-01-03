@@ -95,8 +95,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
             rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
-            result.push(...interResult)
-            result = functions.removeDuplicates(result)
+            const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
+            result.push(...filtered)
             setSearchTerm(props.fallback[0])
         }
 
@@ -104,8 +104,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
             rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
-            result.push(...interResult)
-            result = functions.removeDuplicates(result)
+            const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
+            result.push(...filtered)
             setSearchTerm(props.fallback[1])
         }
 
@@ -178,14 +178,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (hasMore) {
             setOffset(newOffset)
             if (padded) {
-                setRelated(result)
+                setRelated(functions.removeDuplicates(result))
             } else {
                 setRelated((prev) => functions.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
-                    setRelated(result)
+                    setRelated(functions.removeDuplicates(result))
                 } else {
                     setRelated((prev) => functions.removeDuplicates([...prev, ...result]))
                 }

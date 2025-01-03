@@ -117,7 +117,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         return () => {
             observer.disconnect()
         }
-    })
+    }, [])
 
     const loadImage = async () => {
         const img = await functions.decryptThumb(props.img, session)

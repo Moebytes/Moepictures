@@ -144,7 +144,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         return () => {
             observer.disconnect()
         }
-    })
+    }, [])
 
     const cancelAnimation = () => {
         clearTimeout(timeout)

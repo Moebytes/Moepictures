@@ -75,7 +75,7 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
         return () => {
             observer.disconnect()
         }
-    })
+    }, [])
 
     const getEmojiMarginRight = () => {
         if (typeof document === "undefined") return "0px"
