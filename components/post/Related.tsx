@@ -337,7 +337,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const getHeight = () => {
-        if (mobile) return square ? 160 : 220
+        if (mobile) return square ? 150 : 210
         return square ? 220 : 250
     }
 

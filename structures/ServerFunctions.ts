@@ -12,7 +12,7 @@ import CSRF from "csrf"
 import axios from "axios"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
-import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, UnverifiedPost} from "../types/Types"
+import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, UnverifiedPost, Tag} from "../types/Types"
 
 const csrf = new CSRF()
 
@@ -605,6 +605,14 @@ export default class ServerFunctions {
             await ServerFunctions.deleteUnverifiedFile(file)
             await ServerFunctions.deleteUnverifiedFile(upscaledFile)
         }
+    }
+
+    public static deleteTag = async (tag: Tag) => {
+        await ServerFunctions.deleteFolder(`history/tag/${tag.tag}`, false).catch(() => null)
+        if (tag.image) {
+            await ServerFunctions.deleteFile(functions.getTagPath(tag.type, tag.image), false).catch(() => null)
+        }
+        await sql.tag.deleteTag(tag.tag)
     }
 
     public static updateImplications = async (posts: PostTagged[], implications: string[]) => {

@@ -13,6 +13,8 @@ let exclude = [/node_modules/, /dist/]
 let webExclude = [...exclude, /server.tsx/, /routes/]
 let nodeExclude = [...exclude, /structures\/BrowserFunctions.tsx/]
 
+// new WebpackObfuscator()
+
 module.exports = [
   {
     target: "web",
@@ -25,7 +27,7 @@ module.exports = [
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
     zlib: require.resolve("browserify-zlib"), url: require.resolve("url/"), os: require.resolve("os/")}},
     performance: {hints: false},
-    optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator(), new MinimizerCSSPlugin()], moduleIds: "named", splitChunks: {chunks(chunk) {return false}}},
+    optimization: {minimize: true, minimizer: [new TerserJSPlugin({extractComments: false}), new MinimizerCSSPlugin()], moduleIds: "named", splitChunks: {chunks(chunk) {return false}}},
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
@@ -74,7 +76,7 @@ module.exports = [
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], 
     fallback: {zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
-    optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator()], moduleIds: "named"},
+    optimization: {minimize: true, minimizer: [new TerserJSPlugin({extractComments: false})], moduleIds: "named"},
     module: {
       rules: [
         {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: nodeExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},

@@ -211,7 +211,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = -150
-        if (mobile) offset += 25
+        if (mobile) offset += 35
         return `${raw + offset}px`
     }
 
@@ -257,7 +257,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
-                    {!session.username ? <div className="post-image-text-small">${i18n.post.prev}</div> : null}
+                    {!session.username ? <div className="post-image-text-small">{i18n.post.prev}</div> : null}
                 </div>
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}

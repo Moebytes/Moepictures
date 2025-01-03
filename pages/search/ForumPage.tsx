@@ -410,7 +410,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const getNewThreadButton = () => {
         if (session.banned) return null
-        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px", justifyContent: "flex-start"}
         if (session.username) {
             return (
                 <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

@@ -805,7 +805,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog(!showDeleteAllHistoryDialog)}>
                         <img className="history-img" src={searchHistoryDelete}/>
-                        <span className="history-opt-text">{i18n.buttons.deleteAll}</span>
+                        {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
             )
@@ -828,7 +828,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     </div>
                     <div className="history-item" onClick={() => setPermaDeleteAllDialog(!permaDeleteAllDialog)}>
                         <img className="history-img" src={searchHistoryDelete}/>
-                        <span className="history-opt-text">{i18n.buttons.deleteAll}</span>
+                        {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
             )

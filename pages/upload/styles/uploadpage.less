@@ -105,6 +105,7 @@
     padding-bottom: 3px;
     cursor: pointer;
     margin-right: 20px;
+    white-space: nowrap;
     &:hover {
         filter: invert(1) hue-rotate(180deg);
     }
@@ -311,6 +312,10 @@
 
 @media screen and (max-width: 500px) {
     .upload-input-wide {
+        width: 100%;
+    }
+
+    .upload-guidelines {
         width: 100%;
     }
 }

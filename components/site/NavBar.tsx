@@ -27,8 +27,10 @@ import darkLight from "../../assets/icons/dark-light.png"
 import permissions from "../../structures/Permissions"
 import functions from "../../structures/Functions"
 import SearchSuggestions from "../tooltip/SearchSuggestions"
-import scrollIcon from "../../assets/icons/scroll.png"
-import pageIcon from "../../assets/icons/page.png"
+import scrollIcon from "../../assets/icons/scroll-mobile.png"
+import pageIconLight from "../../assets/icons/page-mobile-light.png"
+import scrollIconLight from "../../assets/icons/scroll-mobile-light.png"
+import pageIcon from "../../assets/icons/page-mobile.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
@@ -59,10 +61,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const getFilter2 = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 40}%)`
     }
 
     useEffect(() => {
@@ -162,6 +160,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const getCrownIcon = () => {
         if (theme.includes("light")) return crownLight
         return crown
+    }
+
+    const getScrollIcon = () => {
+        if (theme.includes("light")) return scroll ? scrollIconLight : pageIconLight
+        return scroll ? scrollIcon : pageIcon
     }
 
     const logout = async () => {
@@ -316,7 +319,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getDropdownJSX = () => {
-        let style = mobile ? {top: session.username ? "498px" : "468px"} : {top: "40px"}
+        let style = mobile ? {top: "500px"} : {top: "40px"}
+        if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
         return (
             <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">
@@ -388,7 +392,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter2()}}/>
+                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
                 {getDropdownJSX()}
             </div>

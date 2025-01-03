@@ -249,9 +249,10 @@ const MiscRoutes = (app: Express) => {
             }
             try {
                 const illust = await pixiv.illust.get(resolvable) as PixivResponse
-                const html = await axios.get(`https://www.pixiv.net/en/users/${illust.user.id}`).then((r) => r.data)
-                const twitter = html.match(/(?<=twitter\.com\/|x\.com\/)(.*?)(?=[\\"&])/)?.[0]
-                illust.user.twitter = twitter
+                const user = await pixiv.user.webDetail(illust.user.id)
+                const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
+                illust.user.twitter = twitter || ""
+                illust.user.profile_image_urls.medium = user.imageBig
                 serverFunctions.sendEncrypted(illust, req, res)
             } catch (e) {
                 res.status(400).end()

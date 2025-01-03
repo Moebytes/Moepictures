@@ -416,16 +416,20 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
                     {counts.postEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>{i18n.buttons.post} <span className="user-text-alt">{counts.postEdits}</span></span>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>
+                        {i18n.buttons.post} {!mobile ? <span className="user-text-alt">{counts.postEdits}</span> : null}</span>
                     : null}
                     {counts.tagEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>{i18n.tag.tag} <span className="user-text-alt">{counts.tagEdits}</span></span>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>
+                        {i18n.tag.tag} {!mobile ? <span className="user-text-alt">{counts.tagEdits}</span> : null}</span>
                     : null}
                     {counts.noteEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/note/history`)}>{i18n.labels.note} <span className="user-text-alt">{counts.noteEdits}</span></span>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>
+                        {i18n.labels.note} {!mobile ? <span className="user-text-alt">{counts.noteEdits}</span> : null}</span>
                     : null}
                     {counts.groupEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>{i18n.labels.group} <span className="user-text-alt">{counts.groupEdits}</span></span>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>
+                        {i18n.labels.group} {!mobile ? <span className="user-text-alt">{counts.groupEdits}</span> : null}</span>
                     : null}
                     </div> : null}
                     {generateFavgroupsJSX()}

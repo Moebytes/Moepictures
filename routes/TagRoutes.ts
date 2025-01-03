@@ -119,15 +119,11 @@ const TagRoutes = (app: Express) => {
         try {
             const tag = req.query.tag as string
             if (!tag) return res.status(400).send("Invalid tag")
-            const tagExists = await sql.tag.tag(tag.trim())
+            const tagObj = await sql.tag.tag(tag.trim())
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!tagExists) return res.status(400).send("Bad tag")
+            if (!tagObj) return res.status(400).send("Bad tag")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`, false).catch(() => null)
-            if (tagExists.image) {
-                await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image), false).catch(() => null)
-            }
-            await sql.tag.deleteTag(tag.trim())
+            await serverFunctions.deleteTag(tagObj)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -417,7 +413,7 @@ const TagRoutes = (app: Express) => {
             let targetUser = username ? username : req.session.username
             await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
             await sql.tag.renameTagMap(tag, aliasTo)
-            await sql.tag.deleteTag(tag)
+            await serverFunctions.deleteTag(tagObj)
             await sql.tag.bulkInsertAliases(aliasTo, [tag])
             res.status(200).send("Success")
         } catch (e) {

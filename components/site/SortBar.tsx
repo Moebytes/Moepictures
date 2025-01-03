@@ -302,7 +302,7 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getImageMargin = () => {
-        if (mobile) return "72px"
+        if (mobile) return "62px"
         const rect = imageRef.current?.getBoundingClientRect()
         if (!rect) return "290px"
         const raw = rect.x
@@ -372,9 +372,7 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getRatingMargin = () => {
-        if (mobile) {
-            return "130px"
-        }
+        if (mobile) return "115px"
         const rect = ratingRef.current?.getBoundingClientRect()
         if (!rect) return "325px"
         const raw = rect.x
@@ -487,7 +485,7 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getStyleMargin = () => {
-        if (mobile) return "170px"
+        if (mobile) return "150px"
         const rect = styleRef.current?.getBoundingClientRect()
         if (!rect) return "395px"
         const raw = rect.x

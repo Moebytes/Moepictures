@@ -1506,6 +1506,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={sketch}/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                         </button> : null}
+                    </div>
+                    <div className="upload-row">
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                             <img className="upload-button-img" src={lineart}/>
