@@ -428,7 +428,27 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NULL AND "unverified posts"."uploader" = $1
+            WHERE "originalID" IS NULL AND "unverified posts"."uploader" = $1 AND "unverified posts"."deleted" IS NOT TRUE
+            GROUP BY "unverified posts"."postID"
+            ORDER BY "unverified posts"."uploadDate" DESC
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result as Promise<UnverifiedPost[]>
+    }
+
+    /** Get deleted posts by user (unverified). */
+    public static deletedUnverifiedUserPosts = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
+            FROM "unverified posts"
+            JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+            JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            WHERE "originalID" IS NULL AND "unverified posts"."uploader" = $1 AND "unverified posts"."deleted" IS TRUE
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             `),

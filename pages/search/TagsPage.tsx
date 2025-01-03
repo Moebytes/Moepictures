@@ -473,7 +473,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                                 <span className="item-dropdown-text">{i18n.sort.posts}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("image")}>
-                                <span className="item-dropdown-text">{i18n.sortbar.type.image}</span>
+                                <span className="item-dropdown-text">{i18n.sort.image}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("aliases")}>
                                 <span className="item-dropdown-text">{i18n.sort.aliases}</span>

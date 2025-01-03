@@ -93,8 +93,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [tempLink, setTempLink] = useState("")
 
     useEffect(() => {
-        const savedPaused = localStorage.getItem("paused")
-        if (savedPaused) setPaused(savedPaused === "true")
+        setPaused(false)
     }, [])
 
     useEffect(() => {

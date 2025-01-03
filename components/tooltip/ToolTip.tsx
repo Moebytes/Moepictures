@@ -182,8 +182,12 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const searchArtist = () => {
-        setSearch(artist.tag)
-        setSearchFlag(true)
+        if (history.location.pathname === "/" || history.location.pathname === "/posts") {
+            setSearch(artist.tag)
+            setSearchFlag(true)
+        } else {
+            history.push(`/tag/${artist.tag}`)
+        }
     }
  
     return (

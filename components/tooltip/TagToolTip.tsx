@@ -4,7 +4,7 @@ import {useSessionSelector, useSessionActions, useSearchSelector, useInteraction
 useInteractionActions, useSearchActions, useFilterSelector} from "../../store"
 import functions from "../../structures/Functions"
 import jsxFunctions from "../../structures/JSXFunctions"
-import website from "../../assets/icons/support.png"
+import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"

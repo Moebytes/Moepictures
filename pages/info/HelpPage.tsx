@@ -18,6 +18,7 @@ import favgroupsImg from "../../assets/images/favgroups.png"
 import groupsImg from "../../assets/images/groups.png"
 import cutenessMeterImg from "../../assets/images/cutenessmeter.png"
 import notesImg from "../../assets/images/notes.png"
+import overlayNotesImg from "../../assets/images/overlaynotes.png"
 import uploadImg from "../../assets/images/upload.png"
 import taggingImg from "../../assets/images/tagging.png"
 import searchingImg from "../../assets/images/searching.png"
@@ -37,6 +38,7 @@ import musicImg from "../../assets/images/music.png"
 import selfPostImg from "../../assets/images/selfpost.png"
 import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
+import tooltipsImg from "../../assets/images/tooltips.png"
 import functions from "../../structures/Functions"
 import "./styles/helppage.less"
 
@@ -137,7 +139,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[8]}</span>{Object.values(i18n.help.searching.specialSearches.items)[8]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[9]}</span>{Object.values(i18n.help.searching.specialSearches.items)[9]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[10]}</span>{Object.values(i18n.help.searching.specialSearches.items)[10]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[11]}</span>{Object.values(i18n.help.searching.specialSearches.items)[11]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[11]}</span>{Object.values(i18n.help.searching.specialSearches.items)[11]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[12]}</span>{Object.values(i18n.help.searching.specialSearches.items)[12]}<br/><br/>
 
                     {i18n.help.searching.specialUses.header}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[0]}</span>{Object.values(i18n.help.searching.specialUses.items)[0]}<br/>
@@ -234,9 +237,30 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <a className="help-link" onClick={() => openLink("https://github.com/kha-white/manga-ocr")} style={{marginLeft: "10px", marginRight: "10px"}}>Manga OCR</a> 
                     {i18n.help.notes.line5}
                     <a className="help-link" onClick={() => openLink("https://translate.google.com/")} style={{marginLeft: "10px", marginRight: "10px"}}>Google Translate</a> 
-                    {i18n.help.notes.line6}
+                    {i18n.help.notes.line6}<br/><br/>
+                    {i18n.help.notes.line7}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={notesImg}/></div></>
+            )
+        }
+        if (helpTab === "overlay-notes") {
+            return (
+                <><span className="help-heading">{i18n.help.overlayNotes.title}</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {i18n.help.overlayNotes.line1}<br/><br/>
+
+                    {i18n.help.overlayNotes.customization.header}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[0]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[0]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[1]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[1]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[2]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[2]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[3]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[3]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[4]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[4]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[5]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[5]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[6]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[7]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[7]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[8]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[8]}<br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={overlayNotesImg}/></div></>
             )
         }
         if (helpTab === "favorites") {
@@ -332,6 +356,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[7]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[7]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[8]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[8]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[9]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[9]}<br/><br/>
+
+                    {i18n.help.uploading.appeals}<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )
@@ -401,7 +427,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.selfUploads.contactUs}<span style={{marginRight: "10px"}} className="help-alt">moepictures.moe@gmail.com</span> 
                     {i18n.help.selfUploads.changeName}
                 </span>
-                <div className="help-img-container"><img className="help-img" src={selfPostImg}/></div></>
+                </>
             )
         }
         if (helpTab === "upscaling") {
@@ -579,6 +605,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={setAvatarImg}/></div></>
             )
         }
+        if (helpTab === "tooltips") {
+            return (
+                <><span className="help-heading">{i18n.help.tooltips.title}</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {i18n.help.tooltips.line1}<br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={tooltipsImg}/></div></>
+            )
+        }
         if (helpTab === "commenting") {
             return (
                 <><span className="help-heading">{i18n.help.commenting.title}</span>
@@ -741,6 +776,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>{i18n.help.customPlayers.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("music")}>{i18n.help.music.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("notes")}>{i18n.navbar.notes}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("overlay-notes")}>{i18n.help.overlayNotes.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>{i18n.sort.favorites}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>{i18n.help.favoriteGroups.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>{i18n.sort.cuteness}</span>
@@ -757,6 +793,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>{i18n.sort.aliases}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("implications")}>{i18n.labels.implications}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("users")}>{i18n.help.users.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("tooltips")}>{i18n.help.tooltips.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>{i18n.help.commenting.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bans")}>{i18n.help.bans.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>{i18n.help.captcha.title}</span>

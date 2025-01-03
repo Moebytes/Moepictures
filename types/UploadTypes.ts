@@ -15,7 +15,7 @@ export interface SourceData {
 
 export interface UploadTag {
     tag?: string
-    desc?: string
+    description?: string
     image?: string
     ext?: string
     bytes?: number[]

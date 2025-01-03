@@ -193,6 +193,7 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/delete/request/list" ? {params: {offset?: number} | null, response: PostDeleteRequest[]} :
     T extends "/api/post/history" ? {params: PostHistoryParams | null, response: PostHistory[]} :
     T extends "/api/post/pending" ? {params: null, response: UnverifiedPost[]} :
+    T extends "/api/post/rejected" ? {params: null, response: UnverifiedPost[]} :
     never
 
 export type PostPostEndpoint<T extends string> = 

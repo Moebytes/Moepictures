@@ -494,7 +494,7 @@ const SearchRoutes = (app: Express) => {
             let usernames = [] as any 
             let parsedSearch = ""
             for (let i = 0; i < parts.length; i++) {
-                if (parts[i].includes("posts:")) {
+                if (parts[i].includes("threads:")) {
                     const username = parts[i].split(":")[1]
                     usernames.push(username)
                 } else {

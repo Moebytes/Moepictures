@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import groupHistoryRevert from "../../assets/icons/revert.png"
 import groupHistoryDelete from "../../assets/icons/delete.png"
@@ -33,6 +33,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteGroupHistoryID, revertGroupHistoryID, deleteGroupHistoryFlag, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setDeleteGroupHistoryID, setRevertGroupHistoryID, setDeleteGroupHistoryFlag, setRevertGroupHistoryFlag} = useGroupDialogActions()
@@ -275,7 +276,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
             </div> : null}
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {dateTextJSX()}
                         {props.groupHistory.orderChanged ? <span className="historyrow-text-strong">[{i18n.labels.orderUpdated}]</span> : null}
                         {diffJSX()}

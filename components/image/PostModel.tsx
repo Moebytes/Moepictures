@@ -100,8 +100,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [buttonHover, setButtonHover] = useState(false)
 
     useEffect(() => {
-        const savedPaused = localStorage.getItem("paused")
-        if (savedPaused) setPaused(savedPaused === "true")
+        setPaused(false)
     }, [])
 
     useEffect(() => {

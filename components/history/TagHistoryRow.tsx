@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import tagHistoryRevert from "../../assets/icons/revert.png"
 import tagHistoryDelete from "../../assets/icons/delete.png"
@@ -36,6 +36,7 @@ interface Props {
 
 const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
@@ -325,7 +326,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {dateTextJSX()}
                         {props.tagHistory.imageChanged ? <span className="historyrow-text-strong">[{i18n.labels.imageUpdated}]</span> : null}
                         {diffJSX()}

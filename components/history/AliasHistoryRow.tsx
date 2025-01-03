@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
+useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import aliasHistoryUndo from "../../assets/icons/revert.png"
@@ -26,6 +27,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const [userRole, setUserRole] = useState("")
@@ -213,7 +215,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
                     {dateTextJSX()}
                 </div>
             </div>
-            <div className="historyrow-container-row">
+            <div className="historyrow-container-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="historyrow-container-fullwidth">
                     <span className="historyrow-label-text">{getJSX()}</span>
                 </div>

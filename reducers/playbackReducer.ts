@@ -13,7 +13,7 @@ const playbackSlice = createSlice({
         pitch: 0,
         volume: 0.75,
         previousVolume: 0,
-        paused: true,
+        paused: false,
         preservePitch: true,
         duration: 0,
         seekTo: null as number | null,

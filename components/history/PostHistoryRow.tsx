@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import postHistoryRevert from "../../assets/icons/revert.png"
 import postHistoryDelete from "../../assets/icons/delete.png"
@@ -34,6 +34,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deletePostHistoryID, revertPostHistoryID, deletePostHistoryFlag, revertPostHistoryFlag} = usePostDialogSelector()
     const {setDeletePostHistoryID, setRevertPostHistoryID, setDeletePostHistoryFlag, setRevertPostHistoryFlag} = usePostDialogActions()
@@ -409,7 +410,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {dateTextJSX()}
                         {props.postHistory.imageChanged ? <span className="historyrow-text-strong">[{i18n.labels.imageUpdated}]</span> : null}
                         {diffJSX()}

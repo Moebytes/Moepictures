@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import searchHistoryDelete from "../../assets/icons/delete.png"
 import {SearchHistory} from "../../types/Types"
@@ -17,6 +17,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
@@ -106,7 +107,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span className="historyrow-user-text">{i18n.time.viewed} {functions.prettyDate(new Date(props.history.viewDate), i18n)}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.title}:</span> {props.history.post.title || i18n.labels.none}</span>
                         {props.history.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}:</span> {props.history.post.englishTitle}</span> : null}

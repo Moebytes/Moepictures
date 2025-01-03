@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import undeleteIcon from "../../assets/icons/revert.png"
 import deleteIcon from "../../assets/icons/delete.png"
@@ -18,6 +18,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {permaDeletePostID, permaDeletePostFlag} = usePostDialogSelector()
     const {setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag} = usePostDialogActions()
@@ -115,7 +116,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span className="historyrow-user-text" style={{color: "var(--deletedColor)"}}>{i18n.time.deleted} {functions.timeUntil(props.post.deletionDate, i18n)}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.title}:</span> {props.post.title || i18n.labels.none}</span>
                         {props.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}:</span> {props.post.englishTitle}</span> : null}

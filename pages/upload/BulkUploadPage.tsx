@@ -837,7 +837,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
@@ -908,7 +908,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t) => t.tag === notExists[i].tag)

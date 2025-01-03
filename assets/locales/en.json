@@ -127,7 +127,8 @@
         "alphabetic": "Alphabetic",
         "posts": "Posts",
         "aliases": "Aliases",
-        "length": "Length"
+        "length": "Length",
+        "image": "Image"
     },
     "post": {
         "prev": "Prev",
@@ -1138,7 +1139,8 @@
                     "uploads:user": " - Search for uploads of a user.",
                     "history:user": "- Get your search history (only works on yourself!)",
                     "comments:user": " - (Comments page) get all comments by the user.",
-                    "posts:user": " - (Forum page) get all threads the user posted in.",
+                    "notes:user": " - (Notes page) get all notes by the user.",
+                    "threads:user": " - (Forum page) get all threads the user posted in.",
                     "social:link": " - (Tags page) find an artist by their social link."
                 }
             },
@@ -1194,7 +1196,7 @@
         },
         "customPlayers": {
             "title": "Custom Players",
-            "line1": "Moepictures has custom players for animations, videos, music, and 3d models, which allows additionally functionality not available natively such as reverse playback and modification of the playback speed.",
+            "line1": "Moepictures has custom players for animations, videos, music, and 3d models, which allows additional functionality not available natively such as reverse playback and modification of the playback speed.",
             "line2": "The music player also has controls for changing the pitch of the audio. The 3d model player has options to enable wireframe, matcap, and edit shapekeys and lighting."
         },
         "music": {
@@ -1202,16 +1204,35 @@
             "line1": "The music player is available globally (apart from having the per-post player which is also synced). This means that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback, click the stop button on the left of the player or reload the page on a non-music post."
         },
         "notes": {
-            "line1": "Notes can be added to any post and is most often used for soft translations. This is useful so that non-speakers can understand the post's content and any jokes.",
+            "line1": "Notes can be added to any post and is most often used for soft translations. This is useful so that non-native speakers can understand the post's content and any jokes.",
             "line2": "If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese text, you can use",
             "line3": "We have an automatic translation generator for japanese text that uses",
             "line4": "to detect the text bubbles,",
             "line5": "to apply OCR, and",
-            "line6": "for machine translation. This is not meant to be used as is, and you should always clean up the output by fixing text bubble positions and verifying the accuracy of the transcripted and translated texts."
+            "line6": "for machine translation. This is not meant to be used as is, and you should always clean up the output by fixing text bubble positions and verifying the accuracy of the transcripted and translated texts.",
+            "line7": "Notes can be copied from any image and pasted into another image with CTRL/CMD+V. If the post image ordering is changed, we also attempt to automatically reorder notes."
+        },
+        "overlayNotes": {
+            "title": "Overlay Notes",
+            "line1": "Alternatively, notes can be overlayed on top of the image rather than appearing in a text bubble. Overlay notes offer much more customization options compared to regular notes, and allow for faster reading without needing to hover over the text.",
+            "customization": {
+                "header": "The following customization options are available when using overlay notes:",
+                "items": {
+                    "Font Family": " - The font family of the text.",
+                    "Font Style": " - Make the text bold or italicized.",
+                    "Font Size": " - The size of the font.",
+                    "Break Word": " - Break the text every word rather than every character. Japanese text is always broken every character.",
+                    "Text Color": " - The color of the text.",
+                    "Background Color": " - The color of text bubble. Set the same as the background color to hide the original text.",
+                    "Background Alpha": " - The opacity of text bubble. Setting it to 0 will make it fully transparent and only show the text.",
+                    "Stroke Color": " - The color of the stroke around the text.",
+                    "Stroke Width": " - The width of the stroke. Setting it to 0 will not apply a stroke."
+                }
+            }
         },
         "favorites": {
             "line1": "If you like an image, you can add it to your favorites for easier access later on. By default, your favorites are public but they can be made private in your account settings.",
-            "line2": "By setting the post sort to \"favorites\" or \"reverse favorites\", you can quickly view all the posts that you have favorited."
+            "line2": "By setting the post sort to \"favorites\", you can quickly view all the posts that you have favorited."
         },
         "favoriteGroups": {
             "title": "Favorite Groups",
@@ -1223,7 +1244,7 @@
         },
         "uploading": {
             "title": "Uploading",
-            "line1": "Moepictures allows uploading images, comics, animations, videos, music, and 3d models.",
+            "line1": "Moepictures allows uploading images, comics, animations, videos, music, 3d models, and live2d models.",
             "uploadGuidelines": {
                 "header": "Please read carefully through all of the uploading guidelines.",
                 "guide1": "⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles.",
@@ -1255,7 +1276,7 @@
                         "video": " - Long animations that are in video format and may also contain audio.",
                         "audio": " - Music and game soundtracks or other standalone audio.",
                         "live2d": " - A Live2D model, containing its meshes and parameters.",
-                        "model": " - A 3D model, containing polygons and uv mapped textures."
+                        "model": " - A 3D model, containing polygons and textures."
                     }
                 },
                 "rating": {
@@ -1288,14 +1309,15 @@
                     "english title": " - A title english translation, as titles are very commonly in japanese.",
                     "artist": " - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.",
                     "posted": " - The original date the work was posted.",
-                    "link": " - The primary link to the work, preferably where the artist posted it themselves.",
+                    "source": " - The primary link to the work, preferably where the artist posted it themselves.",
                     "bookmarks": " - The amount of pixiv bookmarks or \"likes\" if it's a different site.",
                     "commentary": " - The original description of the work as posted on social media.",
                     "english commentary": " - A commentary english translation, as they are very commonly written in japanese.",
                     "mirrors": " - Reposts of the work posted on different sites. Include the artists own reposts.",
                     "buy link": " - If a paid reward is available, you may post the link to buy here."
                 }
-            }
+            },
+            "appeals": "Appeals - If your post wasn't accepted, you have one chance to fix it up and submit an appeal within 30 days. After 30 days, posts are removed if they weren't accepted."
         },
         "tagging": {
             "title": "Tagging",
@@ -1351,7 +1373,7 @@
             "title": "Self Uploads",
             "line1": "Although the vast majority of posts are reposts, you are also welcomed to post your own art.",
             "shouldTag": "You should tag uploads of your own artwork with ",
-            "line2": "We also require that your artist tag is the same as your username on moepictures. This will let you have access to the additional option to private a post.",
+            "line2": " We also require that your artist tag is the same as your username on moepictures. This will let you have access to the additional option to private a post.",
             "line3": "You may make your own posts private at any time so that they are only visible to yourself and moderators. However do note that we don't allow post deletions even if you uploaded your own post without approval.",
             "contactUs": "If another user has already taken your artist name please contact us at ",
             "changeName": "so that we can attempt to change their name."
@@ -1368,9 +1390,9 @@
             "line2": "You can download the app that we use for compressing here:",
             "recommendedFormats": {
                 "header": "These are the recommended formats for each type of post:",
-                "format1": "Images ⇾ Progressive JPG or WEBP for transparent images. Avoid AVIF for high decoding time and PNG for massive filesizes.",
+                "format1": "Images ⇾ Progressive JPG or WEBP for transparent images. Use AVIF for upscaled images for the lowest filesize. Avoid PNG because the sizes are massive.",
                 "format2": "Animations ⇾ Animated WEBP is preferred over GIF.",
-                "format3": "Videos ⇾ MP4 with H.264 codec, WEBM with VP9 codec, or MP4 with AV1 codec. Avoid H.265 codec for poor browser support.",
+                "format3": "Videos ⇾ MP4 with H.264 codec or WEBM with VP9 codec. Avoid H.265 codec for poor browser support.",
                 "format4": "Music ⇾ MP3 with cover art. Avoid WAV as it doesn't support cover art.",
                 "format5": "3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support.",
                 "format6": "Live2D ⇾ ZIP containing MOC3, JSON files, and textures."
@@ -1393,7 +1415,7 @@
             "line3": "If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these for a better reading experience."
         },
         "childPosts": {
-            "line1": "Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent background. Child posts are also used for all third party edits (modifications to a work not done by the original artist).",
+            "line1": "Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent background. Child posts are also used for all third party edits (modifications to a work not done by the original artist) and wip sketches of the same post.",
             "line2": "Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to the parent post in a separate section.",
             "line3": "Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be related with child posts and not variations. If a parent image containing all the characters doesn't exist, then they should be related using groups instead."
         },
@@ -1427,7 +1449,7 @@
                     "Premium": " - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.",
                     "Contributor": " - Can edit posts and tags without passing through the mod queue. Given to members with a great track record of contributions that we don't want to inhibit with the queue.",
                     "Curator": " - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts that we don't want to inhibit with the queue.",
-                    "Mod": " - Access to the mod queue and can approve uploads/edits/aliasing, can replace images on posts, can change the category of tags, and can ban users.",
+                    "Mod": " - Access to the mod queue and can approve uploads/edits/aliasing, can replace images on posts, and can ban users.",
                     "Admin": " - Access to our most powerful tools such as bulk uploading and bulk tagging. Can permanently delete posts and promote users to a higher level.",
                     "System": " - This is only for our bot account that sends out message notifications."
                 }
@@ -1435,9 +1457,13 @@
             "line1": "Since mods and admins can potentially make very destructive changes to the site, we require them to enable 2FA on their accounts.",
             "avatars": {
                 "title": "Avatars",
-                "line1": "You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an \"anime avatars only\" policy! If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it.",
+                "line1": "You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an \"anime avatars only\" policy. If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it.",
                 "line2": "You can change your avatar by clicking on \"set avatar\" on the sidebar of any post, and you can remove it in your account settings. Please do this on PC, as the mobile touch controls are known to be a bit finicky."
             }
+        },
+        "tooltips": {
+            "title": "Tooltips",
+            "line1": "Posts and tags have their own tooltips when you hover over them. If you don't like the tooltips, you may disable them in your account settings if you register for an account. You may also toggle the displaying of the tag banner and the related posts section in the post page. The site will be a bit faster with these disabled."
         },
         "commenting": {
             "title": "Commenting",

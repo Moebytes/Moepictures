@@ -146,10 +146,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const savedDisableZoom = localStorage.getItem("disableZoom")
         if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
-        const savedPaused = localStorage.getItem("paused")
-        if (savedPaused) setPaused(savedPaused === "true")
         const savedImageExpand = localStorage.getItem("imageExpand")
         if (savedImageExpand) setImageExpand(savedImageExpand === "true")
+        setPaused(false)
     }, [])
 
     useEffect(() => {

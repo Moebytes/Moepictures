@@ -1319,7 +1319,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
@@ -1333,7 +1333,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         for (let i = 0; i < newTags.length; i++) {
             const changeTagDesc = (value: string) => {
-                newTags[i].desc = value 
+                newTags[i].description = value 
                 setNewTags(newTags)
                 forceUpdate()
             }
@@ -1352,7 +1352,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <span className="upload-text">{i18n.labels.description}: </span>
                 </div>
                 <div className="upload-container-row">
-                <textarea className="upload-textarea-small" style={{height: "80px"}} value={newTags[i].desc} onChange={(event) => changeTagDesc(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                <textarea className="upload-textarea-small" style={{height: "80px"}} value={newTags[i].description} onChange={(event) => changeTagDesc(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.optionalTagImage}: </span>
@@ -1957,7 +1957,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
             <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>{i18n.pages.upload.fetchFromDanbooru}</span>
             <span className="upload-text-alt">{i18n.pages.upload.enterTags}
-            <Link className="upload-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link></span>
+            <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link></span>
             <div className="upload-container">
                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
                 <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>

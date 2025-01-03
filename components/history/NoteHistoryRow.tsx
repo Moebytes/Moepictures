@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector,
-useFilterSelector} from "../../store"
+useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import noteHistoryRevert from "../../assets/icons/revert.png"
 import noteHistoryDelete from "../../assets/icons/delete.png"
@@ -30,6 +30,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
@@ -245,7 +246,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
-                    <div className="historyrow-user-container">
+                    <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {dateTextJSX()}
                         {props.noteHistory.styleChanged ? <span className="historyrow-text-strong">[{i18n.labels.styleUpdated}]</span> : null}
                         {diffJSX()}

@@ -2720,7 +2720,7 @@ export default class Functions {
         let notExists = [] as UploadTag[]
         for (let i = 0; i < tags.length; i++) {
             const exists = tagMap[tags[i]]
-            if (!exists) notExists.push({tag: tags[i], desc: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+            if (!exists) notExists.push({tag: tags[i], description: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
         }
         return notExists
     }
@@ -3095,5 +3095,15 @@ export default class Functions {
 
     public static currentUploads = (pending: UnverifiedPost[] = []) => {
         return pending.reduce((count, p) => count + (p.deleted ? 0 : 1), 0)
+    }
+
+    public static invalidTags = (characters: UploadTag[] | string[], series: UploadTag[] | string[], tags: string[]) => {
+        const characterArr = characters.map((c: UploadTag | string) => typeof c === "string" ? c : c.tag)
+        const seriesArr = series.map((s: UploadTag | string) => typeof s === "string" ? s : s.tag)
+        let rawTags = `${characterArr.join(" ")} ${seriesArr.join(" ")} ${tags.join(" ")}`
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+            return "Invalid characters in tags: , _ / \\"
+        }
+        return null
     }
 }

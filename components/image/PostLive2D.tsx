@@ -83,8 +83,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (savedFPS) setFPS(Number(savedFPS))
         const savedDisableZoom = localStorage.getItem("disableZoom")
         if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
-        const savedPaused = localStorage.getItem("paused")
-        if (savedPaused) setPaused(savedPaused === "true")
+        setPaused(false)
     }, [])
 
     useEffect(() => {

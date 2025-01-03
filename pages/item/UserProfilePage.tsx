@@ -83,6 +83,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [pending, setPending] = useState([] as UnverifiedPost[])
     const [pendingImages, setPendingImages] = useState([] as string[])
     const [pendingIndex, setPendingIndex] = useState(0)
+    const [deleted, setDeleted] = useState([] as UnverifiedPost[])
+    const [deletedImages, setDeletedImages] = useState([] as string[])
+    const [deletedIndex, setDeletedIndex] = useState(0)
     const [banReason, setBanReason] = useState("")
     const [bio, setBio] = useState("")
     const [interval, setInterval] = useState("")
@@ -176,6 +179,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
          setPendingImages(images)
     }
 
+    const updateDeleted = async () => {
+        const deleted = await functions.get("/api/post/rejected", null, session, setSessionFlag)
+        const images = deleted.map((p) => functions.getUnverifiedThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        setDeleted(pending)
+        setDeletedImages(images)
+   }
+
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
@@ -194,6 +204,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         updateCounts()
         checkHiddenBanner()
         updatePending()
+        updateDeleted()
         if (session.banned) updateBanReason()
     }, [session, ratingType])
 
@@ -385,6 +396,17 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const setPend = (img: string, index: number, newTab: boolean) => {
         setPendingIndex(index)
         const post = pending[index]
+        if (newTab) {
+            window.open(`/unverified/post/${post.postID}`, "_blank")
+        } else {
+            history.push(`/unverified/post/${post.postID}`)
+        }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+    }
+
+    const setDel = (img: string, index: number, newTab: boolean) => {
+        setDeletedIndex(index)
+        const post = deleted[index]
         if (newTab) {
             window.open(`/unverified/post/${post.postID}`, "_blank")
         } else {
@@ -789,6 +811,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="user-column">
                         <span className="user-title">{i18n.labels.pending} <span className="user-text-alt">{pending[0].postCount}</span></span>
                         <Carousel images={pendingImages} noKey={true} set={setPend} index={pendingIndex} unverified={true}/>
+                    </div> : null}
+                    {deleted.length ?
+                    <div className="user-column">
+                        <span className="user-title">{functions.toProperCase(i18n.user.deleted)} <span className="user-text-alt">{deleted[0].postCount}</span></span>
+                        <Carousel images={deletedImages} noKey={true} set={setDel} index={deletedIndex} unverified={true}/>
                     </div> : null}
                     {generateFavgroupsJSX()}
                     {favorites.length ?
