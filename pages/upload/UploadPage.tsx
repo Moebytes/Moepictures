@@ -641,8 +641,8 @@ const UploadPage: React.FunctionComponent = (props) => {
             forceUpdate()
         }
         const remove = () => {
-            characters.pop()
-            characterInputRefs.pop()
+            if (characters.length > 1) characters.pop()
+            if (characterInputRefs.length > 1) characterInputRefs.pop()
             setCharacters(characters)
             setCharacterInputRefs(characterInputRefs)
             forceUpdate()
@@ -939,9 +939,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     title = illust.title
                     artist = illust.user.name
                     bookmarks = String(illust.total_bookmarks)
-                    const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                    englishTitle = translated[0]
-                    englishCommentary = translated[1]
+                    const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
+                    if (translated) {
+                        englishTitle = translated[0]
+                        englishCommentary = translated[1]
+                    }
                     if (illust.x_restrict !== 0) {
                         if (rating === "cute") setRating("ecchi")
                     }
@@ -950,8 +952,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                     await uploadTagImg(pfp, "artist", artists.length - 1)
                     artists.push({})
                     artistInputRefs.push(React.createRef())
-                    setArtists(artists)
-                    forceUpdate()
                 } catch (e) {
                     console.log(e)
                 }
@@ -1001,9 +1001,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                             title = illust.title
                             artist = illust.user.name
                             bookmarks = String(illust.total_bookmarks)
-                            const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                            englishTitle = translated[0]
-                            englishCommentary = translated[1]
+                            const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
+                            if (translated) {
+                                englishTitle = translated[0]
+                                englishCommentary = translated[1]
+                            }
                             if (illust.x_restrict !== 0) {
                                 setRating("ecchi")
                             } else {
@@ -1014,8 +1016,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                             await uploadTagImg(pfp, "artist", artists.length - 1)
                             artists.push({})
                             artistInputRefs.push(React.createRef())
-                            setArtists(artists)
-                            forceUpdate()
                         } catch (e) {
                             console.log(e)
                         }
@@ -1046,8 +1046,6 @@ const UploadPage: React.FunctionComponent = (props) => {
                             await uploadTagImg(pfp, "artist", artists.length - 1)
                             artists.push({})
                             artistInputRefs.push(React.createRef())
-                            setArtists(artists)
-                            forceUpdate()
                             // setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
                         } catch (e) {
                             console.log(e)
@@ -1091,6 +1089,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 saucenaoErrorRef.current!.innerText = i18n.pages.upload.noResults
                 await functions.timeout(3000)
             }
+            if (artists.length > 1) artists.pop()
+            setArtists(artists)
+            forceUpdate()
             setSaucenaoError(false)
         } catch (e) {
             console.log(e)
@@ -1156,8 +1157,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
                 seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
 
+                let characters = [{}] as UploadTag[]
+                let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
                 for (let i = 0; i < charStrArr.length; i++) {
                     characters[characters.length - 1].tag = charStrArr[i]
+                    characters[characters.length - 1].image = ""
                     const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
                     seriesStrArr.push(seriesName)
                     const tagDetail = await functions.get("/api/tag", {tag: charStrArr[i]}, session, setSessionFlag).catch(() => null)
@@ -1172,14 +1176,20 @@ const UploadPage: React.FunctionComponent = (props) => {
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
-                    setCharacters(characters)
-                    forceUpdate()
                 }
+                if (characters.length > 1) characters.pop()
+                if (characterInputRefs.length > 1) characterInputRefs.pop()
+                setCharacters(characters)
+                setCharacterInputRefs(characterInputRefs)
+                forceUpdate()
 
                 seriesStrArr = functions.removeDuplicates(seriesStrArr)
 
+                let series = [{}] as UploadTag[]
+                let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
                 for (let i = 0; i < seriesStrArr.length; i++) {
                     series[series.length - 1].tag = seriesStrArr[i]
+                    series[series.length - 1].image = ""
                     const tagDetail = await functions.get("/api/tag", {tag: seriesStrArr[i]}, session, setSessionFlag).catch(() => null)
                     if (tagDetail?.image) {
                         const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
@@ -1192,9 +1202,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
-                    setSeries(series)
-                    forceUpdate()
                 }
+                series.pop()
+                seriesInputRefs.pop()
+                setSeries(series)
+                setSeriesInputRefs(seriesInputRefs)
+                forceUpdate()
 
                 setRawTags(tagArr.join(" "))
             } else {
@@ -1248,8 +1261,11 @@ const UploadPage: React.FunctionComponent = (props) => {
 
                 seriesArr = functions.removeDuplicates(seriesArr)
 
+                let characters = [{}] as UploadTag[]
+                let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
                 for (let i = 0; i < characterArr.length; i++) {
                     characters[characters.length - 1].tag = characterArr[i]
+                    characters[characters.length - 1].image = ""
                     const tagDetail = await functions.get("/api/tag", {tag: characterArr[i]}, session, setSessionFlag).catch(() => null)
                     if (tagDetail?.image) {
                         const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
@@ -1262,12 +1278,18 @@ const UploadPage: React.FunctionComponent = (props) => {
                     }
                     characters.push({})
                     characterInputRefs.push(React.createRef())
-                    setCharacters(characters)
-                    forceUpdate()
                 }
+                if (characters.length > 1) characters.pop()
+                if (characterInputRefs.length > 1) characterInputRefs.pop()
+                setCharacters(characters)
+                setCharacterInputRefs(characterInputRefs)
+                forceUpdate()
 
+                let series = [{}] as UploadTag[]
+                let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
                 for (let i = 0; i < seriesArr.length; i++) {
                     series[series.length - 1].tag = seriesArr[i]
+                    series[series.length - 1].image = ""
                     const tagDetail = await functions.get("/api/tag", {tag: seriesArr[i]}, session, setSessionFlag).catch(() => null)
                     if (tagDetail?.image) {
                         const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
@@ -1280,9 +1302,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                     }
                     series.push({})
                     seriesInputRefs.push(React.createRef())
-                    setSeries(series)
-                    forceUpdate()
                 }
+                series.pop()
+                seriesInputRefs.pop()
+                setSeries(series)
+                setSeriesInputRefs(seriesInputRefs)
+                forceUpdate()
 
                 setRawTags(tagArr.join(" "))
             }

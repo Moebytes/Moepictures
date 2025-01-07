@@ -456,7 +456,9 @@
         "fileType": "ファイルタイプ",
         "upscaledFileType": "アップスケール・ファイルタイプ",
         "uploadLimit": "アップロード制限",
-        "appealer": "控訴人"
+        "appealer": "控訴人",
+        "borderRadius": "ボーダー半径",
+        "characterTag": "キャラクタータグ"
     },
     "errors": {
         "$401":"401エラー",

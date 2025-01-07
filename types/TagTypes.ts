@@ -62,7 +62,8 @@ export interface Tag {
     r18: boolean | null
 }
 
-export interface TagSearch extends Tag {
+export interface TagSearch extends Omit<Tag, "featuredPost"> {
+    featuredPost: string | null
     aliasCount: string
     postCount: string
     tagCount: string
@@ -111,6 +112,8 @@ export interface AliasToParams {
     aliasTo: string
     username?: string
     reason?: string | null
+    silent?: boolean
+    skipAliasing?: boolean
 }
 
 export interface TagDeleteRequestFulfillParams {

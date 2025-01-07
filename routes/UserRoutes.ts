@@ -895,10 +895,10 @@ const UserRoutes = (app: Express) => {
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                favorites = await sql.favorite.favorites(username, Number(limit), Number(offset), "all", rating)
+                favorites = await sql.favorite.favorites(username, Number(limit), Number(offset), "all", rating, "all+s", "date", true, req.session.username)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                favorites = await sql.favorite.favorites(req.session.username, Number(limit), Number(offset), "all", rating)
+                favorites = await sql.favorite.favorites(req.session.username, Number(limit), Number(offset), "all", rating, "all+s", "date", true, req.session.username)
             }
             favorites = favorites.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
@@ -929,17 +929,17 @@ const UserRoutes = (app: Express) => {
             if (!limit) limit = 100
             let uploads = [] as PostSearch[]
             if (username) {
-                uploads = await sql.user.uploads(username, Number(limit), Number(offset), "all", rating)
+                uploads = await sql.user.uploads(username, Number(limit), Number(offset), "all", rating, "all+s", "date", true, req.session.username)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                uploads = await sql.user.uploads(req.session.username, Number(limit), Number(offset), "all", rating)
+                uploads = await sql.user.uploads(req.session.username, Number(limit), Number(offset), "all", rating, "all+s", "date", true, req.session.username)
             }
             uploads = uploads.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
-                uploads = uploads.filter((p: any) => !p.hidden)
+                uploads = uploads.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                uploads = uploads.filter((p: any) => !functions.isR18(p.rating))
+                uploads = uploads.filter((p) => !functions.isR18(p.rating))
             }
             for (let i = uploads.length - 1; i >= 0; i--) {
                 const post = uploads[i]

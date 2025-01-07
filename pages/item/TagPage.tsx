@@ -114,7 +114,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             const featuredImage = functions.getThumbnailLink(tag.featuredPost.images[0].type, tag.featuredPost.postID, tag.featuredPost.images[0].order, tag.featuredPost.images[0].filename, "massive", mobile)
             const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
             if ((!session.username && tag.featuredPost.rating !== functions.r13()) || 
-                (!session.showR18 && tag.featuredPost.rating !== functions.r18())) {
+                (!session.showR18 && tag.featuredPost.rating !== functions.r18()) ||
+                tag.featuredPost.deleted) {
                 setFeaturedImage("")
             } else {
                 setFeaturedImage(decrypted)
@@ -250,6 +251,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
             featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
+            console.log(editTagObj)
             history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {

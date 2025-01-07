@@ -146,7 +146,7 @@
     "react-reorder": "^3.0.0-alpha.7",
     "react-router-hash-link": "^2.4.3",
     "react-scan": "^0.0.54",
-    "react-shape-editor": "^4.1.1",
+    "react-shape-editor": "github:Moebits/react-shape-editor",
     "react-simple-star-rating": "github:Moebits/react-simple-star-rating#full-fraction-dist",
     "react-slider": "^1.3.1",
     "react-string-replace": "^0.4.4",

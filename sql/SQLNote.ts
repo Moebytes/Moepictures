@@ -8,19 +8,23 @@ export default class SQLNote {
     public static insertNote = async (postID: string, updater: string, order: number, transcript: string, translation: string,
         x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
-        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean) => {
+        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
+        character: boolean, characterTag: string | null) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "notes" ("postID", "updater", "updatedDate", "order", "transcript", "translation", "x", "y", 
                 "width", "height", "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "backgroundColor", "textColor",
-                "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord") 
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24) 
+                "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord", "rotation", "borderRadius",
+                "character", "characterTag") 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25,
+                $26, $27, $28) 
                 RETURNING "noteID"
             `),
             rowMode: "array",
             values: [postID, updater, now, order, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay,
-            fontSize, backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord]
+            fontSize, backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation,
+            borderRadius, character, characterTag]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -30,15 +34,18 @@ export default class SQLNote {
     public static resaveNote = async (noteID: string, updater: string, transcript: string, translation: string,
         x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
-        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean) => {
+        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
+        character: boolean, characterTag: string | null) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "notes" SET "updater" = $1, "updatedDate" = $2, "transcript" = $3, "translation" = $4, "x" = $5, "y" = $6, 
             "width" = $7, "height" = $8, "imageWidth" = $9, "imageHeight" = $10, "imageHash" = $11, "overlay" = $12, "fontSize" = $13, 
             "backgroundColor" = $14, "textColor" = $15, "fontFamily" = $16, "backgroundAlpha" = $17, "bold" = $18, "italic" = $19, 
-            "strokeColor" = $20, "strokeWidth" = $21, "breakWord" = $22 WHERE "noteID" = $23`,
+            "strokeColor" = $20, "strokeWidth" = $21, "breakWord" = $22, "rotation" = $23, "borderRadius" = $24, "character" = $25,
+            "characterTag" = $26 WHERE "noteID" = $27`,
             values: [updater, now, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay, fontSize,
-            backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, noteID]
+            backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation, 
+            borderRadius, character, characterTag, noteID]
         }
         await SQLQuery.run(query)
     }
@@ -112,24 +119,26 @@ export default class SQLNote {
     }
 
     /** Insert note (unverified). */
-    public static insertUnverifiedNote = async (postID: string, originalID: string, updater: string, order: number, transcript: string, 
+    public static insertUnverifiedNote = async (postID: string, originalID: string | null, updater: string, order: number, transcript: string, 
         translation: string, x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
-        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, addedEntries: any, removedEntries: any, 
-        reason: string) => {
+        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
+        character: boolean, characterTag: string | null, addedEntries: any, removedEntries: any, reason?: string) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "unverified notes" ("postID", "originalID", "updater", "updatedDate", "order", "transcript", "translation", 
                 "x", "y", "width", "height", "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "backgroundColor", "textColor", 
-                "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord", "addedEntries", "removedEntries", "reason") 
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28) 
+                "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord", "rotation", "borderRadius", 
+                "character", "characterTag", "addedEntries", "removedEntries", "reason") 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
+                $29, $30, $31, $32) 
                 RETURNING "noteID"
             `),
             rowMode: "array",
             values: [postID, originalID, updater, now, order, transcript, translation, x, y, width, height, imageWidth, imageHeight, 
             imageHash, overlay, fontSize, backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, 
-            breakWord, addedEntries, removedEntries, reason]
+            breakWord, rotation, borderRadius, character, characterTag, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -139,16 +148,18 @@ export default class SQLNote {
     public static resaveUnverifiedNote = async (noteID: string, transcript: string, translation: string, x: number, 
         y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
-        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, reason: string) => {
+        bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
+        character: boolean, characterTag: string | null, reason?: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified notes" SET "updatedDate" = $1, "transcript" = $2, "translation" = $3, 
             "x" = $4, "y" = $5, "width" = $6, "height" = $7, "imageWidth" = $8, "imageHeight" = $9, 
             "imageHash" = $10, "overlay" = $11, "fontSize" = $12, "backgroundColor" = $13, "textColor" = $14, "fontFamily" = $15,
-            "backgroundAlpha" = $16, "bold" = $17, "italic" = $18, "strokeColor" = $19, "strokeWidth" = $20, "breakWord" = $21, "reason" = $22
-            WHERE "noteID" = $23`,
+            "backgroundAlpha" = $16, "bold" = $17, "italic" = $18, "strokeColor" = $19, "strokeWidth" = $20, "breakWord" = $21, 
+            "rotation" = $22, "borderRadius" = $23, "character" = $24, "characterTag" = $25, "reason" = $26 WHERE "noteID" = $27`,
             values: [now, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay, fontSize,
-            backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, reason, noteID]
+            backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation,
+            borderRadius, character, characterTag, reason, noteID]
         }
         await SQLQuery.run(query)
     }

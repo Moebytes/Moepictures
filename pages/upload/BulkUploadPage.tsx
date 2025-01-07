@@ -581,9 +581,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 title = illust.title
                 artist = illust.user.name
                 bookmarks = String(illust.total_bookmarks)
-                const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                englishTitle = translated[0]
-                englishCommentary = translated[1]
+                const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
+                if (translated) {
+                    englishTitle = translated[0]
+                    englishCommentary = translated[1]
+                }
                 if (illust.x_restrict !== 0) {
                     if (rating === "cute") rating = "ecchi"
                 }
@@ -663,9 +665,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         title = illust.title
                         artist = illust.user.name 
                         bookmarks = String(illust.total_bookmarks)
-                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                        englishTitle = translated[0]
-                        englishCommentary = translated[1]
+                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
+                        if (translated) {
+                            englishTitle = translated[0]
+                            englishCommentary = translated[1]
+                        }
                         if (illust.x_restrict !== 0) {
                             if (rating === "cute") rating = "ecchi"
                         }

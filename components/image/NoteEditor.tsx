@@ -1,4 +1,4 @@
-import React, {ReactElement, useContext, useEffect, useRef, useState} from "react"
+import React, {useReducer, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
@@ -31,6 +31,27 @@ interface Props {
 }
 
 let isAnimatedWebP = false
+
+const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y}) => {
+    const {noteDrawingEnabled} = useSearchSelector()
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+    const getBGColor = () => {
+        return "rgba(89, 43, 255, 0.9)"
+    }
+    const getBGColorInactive = () => {
+        return "rgba(89, 43, 255, 0.3)"
+    }
+    const size = Math.ceil(4 / scale)
+    return (
+        <circle fill={active ? getBGColor() : getBGColorInactive()}
+        stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
+        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} 
+        cx={x} cy={-size*5} r={size} onMouseDown={onMouseDown} onDoubleClick={onDoubleClick}/>
+    )
+}
 
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const {noteDrawingEnabled} = useSearchSelector()
@@ -81,10 +102,9 @@ const splitTextIntoLines = (text: string, maxWidth: number, fontSize = 100, spli
     return lines
 }
 
-const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
-    const {onMouseEnter, onMouseMove, onMouseLeave, onDoubleClick, onMouseDown, onContextMenu,
+const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, onMouseLeave, onDoubleClick, onMouseDown, onContextMenu,
     text, showTranscript, breakWord, overlay, fontSize, backgroundColor, textColor, backgroundAlpha,
-    fontFamily, bold, italic, strokeColor, strokeWidth} = extraShapeProps
+    fontFamily, bold, italic, strokeColor, strokeWidth, borderRadius}) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         if (overlay) return ""
@@ -116,8 +136,8 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
-            <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} strokeWidth={rectStrokeWidth} 
-            strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
+            <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} 
+            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}} rx={borderRadius} ry={borderRadius}/>
             {lines.map((line, index) => (
                 <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize || 100}
                 fontFamily={fontFamily || "Tahoma"} fontWeight={bold ? "bold" : "normal"} fontStyle={italic ? "italic" : "normal"}
@@ -129,7 +149,59 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     )
 })
 
+const EmptyHandle = (props: any) => {
+    return (<></>)
+}
+
+const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
+    const {noteDrawingEnabled} = useSearchSelector()
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+    const getBGColor = () => {
+        return "rgba(0, 0, 0, 0)"
+    }
+    const getBGColorInactive = () => {
+        return "rgba(255, 43, 131, 0.3)"
+    }
+    const size = Math.ceil(7/scale)
+    return (
+        <rect fill={active ? getBGColor() : getBGColorInactive()}
+        width={size} height={size} x={x - size / 2} y={y - size / 2}
+        stroke={active ? "rgba(245, 20, 132, 1)" : "rgba(245, 20, 132, 0.3)"} strokeWidth={1 / scale}
+        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
+    )
+}
+const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, onMouseLeave, 
+    onDoubleClick, onMouseDown, onContextMenu, bubbleToggle}) => {
+    const {noteDrawingEnabled} = useSearchSelector()
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+    const getBGColor = () => {
+        return "rgba(0, 0, 0, 0)"
+    }
+    const getStrokeColor = () => {
+        return noteDrawingEnabled || bubbleToggle ? "rgba(255, 43, 131, 0.9)" : "rgba(0, 0, 0, 0)"
+    }
+
+    const rectStrokeWidth = Math.ceil(1/scale)
+    const rectStrokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
+
+    return (
+        <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} 
+        onMouseLeave={onMouseLeave} onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
+            <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} 
+            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
+        </svg>
+    )
+})
+
 const NoteEditor: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag} = useInteractionSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -142,13 +214,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {setNoteMode, setNoteDrawingEnabled} = useSearchActions()
     const {pasteNoteFlag} = useFlagSelector()
     const {setRedirect, setPasteNoteFlag} = useFlagActions()
-    const {editNoteFlag, editNoteID, editNoteText, editNoteTranscript, showSaveNoteDialog, noteOCRDialog, noteOCRFlag,
-    editNoteOverlay, editNoteFontSize, editNoteBackgroundColor, editNoteTextColor, editNoteBackgroundAlpha, editNoteFontFamily,
-    editNoteBold, editNoteItalic, editNoteStrokeColor, editNoteStrokeWidth, editNoteBreakWord} = useNoteDialogSelector()
-    const {setEditNoteFlag, setEditNoteID, setEditNoteText, setEditNoteTranscript, setShowSaveNoteDialog,
-    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag, setEditNoteOverlay, setEditNoteFontSize,
-    setEditNoteBackgroundColor, setEditNoteTextColor, setEditNoteBackgroundAlpha, setEditNoteFontFamily, setEditNoteBold,
-    setEditNoteItalic, setEditNoteStrokeColor, setEditNoteStrokeWidth, setEditNoteBreakWord} = useNoteDialogActions()
+    const {editNoteFlag, editNoteID, editNoteData, showSaveNoteDialog, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
+    const {setEditNoteFlag, setEditNoteID, setEditNoteData, setShowSaveNoteDialog,
+    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [targetHash, setTargetHash] = useState("")
@@ -366,46 +434,52 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (!noteDrawingEnabled) return
         if (editNoteID === null) {
             const item = items[activeIndex]
-            setEditNoteTranscript(item.transcript)
-            setEditNoteText(item.translation)
-            setEditNoteOverlay(item.overlay ?? editNoteOverlay)
-            setEditNoteFontSize(item.fontSize ?? editNoteFontSize)
-            setEditNoteBackgroundColor(item.backgroundColor ?? editNoteBackgroundColor)
-            setEditNoteTextColor(item.textColor ?? editNoteTextColor)
-            setEditNoteBackgroundAlpha(item.backgroundAlpha ?? editNoteBackgroundAlpha)
-            setEditNoteFontFamily(item.fontFamily ?? editNoteFontFamily)
-            setEditNoteBold(item.bold ?? editNoteBold)
-            setEditNoteItalic(item.italic ?? editNoteItalic)
-            setEditNoteStrokeColor(item.strokeColor ?? editNoteStrokeColor)
-            setEditNoteStrokeWidth(item.strokeWidth ?? editNoteStrokeWidth)
-            setEditNoteBreakWord(item.breakWord ?? editNoteBreakWord)
+            setEditNoteData({
+                translation: item.translation,
+                transcript: item.transcript,
+                overlay: item.overlay ?? editNoteData.overlay,
+                fontSize: item.fontSize ?? editNoteData.fontSize,
+                textColor: item.textColor ?? editNoteData.textColor,
+                backgroundColor: item.backgroundColor ?? editNoteData.backgroundColor,
+                backgroundAlpha: item.backgroundAlpha ?? editNoteData.backgroundAlpha,
+                fontFamily: item.fontFamily ?? editNoteData.fontFamily,
+                bold: item.bold ?? editNoteData.bold,
+                italic: item.italic ?? editNoteData.italic,
+                strokeColor: item.strokeColor ?? editNoteData.strokeColor,
+                strokeWidth: item.strokeWidth ?? editNoteData.strokeWidth,
+                breakWord: item.breakWord ?? editNoteData.breakWord,
+                borderRadius: item.borderRadius ?? editNoteData.borderRadius,
+                character: item.character ?? editNoteData.character,
+                characterTag: item.characterTag ?? editNoteData.characterTag
+            })
             setEditNoteID(activeIndex)
         } else {
             setEditNoteID(null)
         }
     }
 
-    const editText = (index: number, transcript: string, translation: string, overlay=false, fontSize=100,
-        backgroundColor="#ffffff", textColor="#000000", backgroundAlpha=100, fontFamily="Tahoma", bold=false,
-        italic=false, strokeColor="#ffffff", strokeWidth=0, breakWord=true) => {
+    const editText = (index: number) => {
         setItems((prev) => {
             const item = prev[index]
-            item.transcript = transcript
-            item.translation = translation
             item.imageWidth = targetWidth
             item.imageHeight = targetHeight
             item.imageHash = targetHash
-            item.overlay = overlay
-            item.fontSize = fontSize
-            item.backgroundColor = backgroundColor
-            item.textColor = textColor
-            item.backgroundAlpha = backgroundAlpha
-            item.fontFamily = fontFamily
-            item.bold = bold
-            item.italic = italic
-            item.strokeColor = strokeColor
-            item.strokeWidth = strokeWidth
-            item.breakWord = breakWord
+            item.translation = editNoteData.translation
+            item.transcript = editNoteData.transcript
+            item.overlay = editNoteData.overlay
+            item.fontSize = editNoteData.fontSize
+            item.backgroundColor = editNoteData.backgroundColor
+            item.textColor = editNoteData.textColor
+            item.backgroundAlpha = editNoteData.backgroundAlpha
+            item.fontFamily = editNoteData.fontFamily
+            item.bold = editNoteData.bold
+            item.italic = editNoteData.italic
+            item.strokeColor = editNoteData.strokeColor
+            item.strokeWidth = editNoteData.strokeWidth
+            item.breakWord = editNoteData.breakWord
+            item.borderRadius = editNoteData.borderRadius
+            item.character = editNoteData.character
+            item.characterTag = editNoteData.characterTag
             return prev
         })
     }
@@ -413,9 +487,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (editNoteID === null) return
         if (editNoteFlag) {
-            editText(editNoteID, editNoteTranscript, editNoteText, editNoteOverlay, editNoteFontSize,
-            editNoteBackgroundColor, editNoteTextColor, editNoteBackgroundAlpha, editNoteFontFamily,
-            editNoteBold, editNoteItalic, editNoteStrokeColor, editNoteStrokeWidth, editNoteBreakWord)
+            editText(editNoteID)
             setEditNoteFlag(false)
             setEditNoteID(null)
         }
@@ -454,11 +526,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         setNoteOCRDialog(!noteOCRDialog)
     }
 
-    const getBubbleText = () => {
-        if (shiftKey) return showTranscript ? bubbleData.translation : bubbleData.transcript
-        return showTranscript ? bubbleData.transcript : bubbleData.translation
-    }
-
     const showHistory = () => {
         if (!props.post) return
         history.push(`/note/history/${props.post.postID}/${props.order || 1}`)
@@ -480,15 +547,49 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             }
         }
 
+        const scrollHandler = () => {
+            if (bubbleToggle) setBubbleToggle(false)
+        }
+
         const observer = new ResizeObserver(updateWidth)
         observer.observe(bubble)
         updateWidth()
-        return () => observer.disconnect()
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            observer.disconnect()
+            window.removeEventListener("scroll", scrollHandler)
+        }
     }, [bubbleToggle, bubbleData.width, bubbleWidth])
+
+    const getBubbleText = () => {
+        if (shiftKey) return showTranscript ? bubbleData.translation : bubbleData.transcript
+        return showTranscript ? bubbleData.transcript : bubbleData.translation
+    }
+
+    const bubbleJSX = () => {
+        if (bubbleToggle) {
+            if (bubbleData.character) {
+                return (
+                    <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
+                    minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>
+                        {bubbleData.characterTag}
+                    </div>
+                )
+            } else {
+                return (
+                    <div className="note-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, minHeight: "25px", left: `${bubbleData.x}px`, 
+                        top: `${bubbleData.y}px`, fontFamily: bubbleData.fontFamily || "Tahoma", fontSize: `${(bubbleData.fontSize || 100) / 5}px`,
+                        fontWeight: bubbleData.bold ? "bold" : "normal", fontStyle: bubbleData.italic ? "italic" : "normal"}}>
+                        {getBubbleText()}
+                    </div>
+                )
+            }
+        }
+    }
 
     return (
         <div className="note-editor" style={{display: noteMode ? "flex" : "none"}}>
-            <div className="note-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
+            <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
                     {session.username ? <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
@@ -501,12 +602,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter: getFilter()}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
                     <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter: getFilter()}} onClick={() => setNoteMode(false)}/>
                 </div>
-                {bubbleToggle ? 
-                <div className="note-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, minHeight: "25px", left: `${bubbleData.x}px`, 
-                    top: `${bubbleData.y}px`, fontFamily: bubbleData.fontFamily || "Tahoma", fontSize: `${(bubbleData.fontSize || 100) / 5}px`,
-                    fontWeight: bubbleData.bold ? "bold" : "normal", fontStyle: bubbleData.italic ? "italic" : "normal"}}>
-                    {getBubbleText()}
-                </div> : null}
+                {bubbleJSX()}
                 <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
@@ -516,21 +612,24 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         if (!noteDrawingEnabled) return
                         setItems((prev) => {
                             setID(id + 1)
-                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, 
+                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, rotation: 0,
                             imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: ""} as Note]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
-                        let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth} = item
+                        let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth, borderRadius} = item
                         if (!imageWidth) imageWidth = targetWidth
                         if (!imageHeight) imageHeight = targetHeight
 
                         const newWidth = (width / imageWidth) * targetWidth
-                        const newHeight = (height / imageHeight ) * targetHeight
+                        const newHeight = (height / imageHeight) * targetHeight
                         const newX = (x / imageWidth) * targetWidth
                         const newY = (y / imageHeight ) * targetHeight
                         const newFontSize = (fontSize / imageHeight) * targetHeight
                         const newStrokeWidth = (strokeWidth / imageHeight) * targetHeight
+                        const newBorderRadius = (borderRadius / imageHeight) * targetHeight
+                        let rotationSpeed = targetWidth / 2000
+                        if (session.upscaledImages) rotationSpeed *= 10
 
                         const insertItem = (newRect: BubbleData) => {
                             if (!noteDrawingEnabled) return
@@ -545,6 +644,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const onContextMenu = (event: React.MouseEvent) => {
                             event.preventDefault()
                             if (!noteDrawingEnabled) {
+                                if (item.character) return navigator.clipboard.writeText(item.characterTag)
                                 navigator.clipboard.writeText(item.transcript)
                             } else {
                                 deleteItem()
@@ -553,76 +653,118 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
                         const onDoubleClick = () => {
                             if (!noteDrawingEnabled) return
-                            setEditNoteTranscript(item.transcript)
-                            setEditNoteText(item.translation)
-                            setEditNoteOverlay(item.overlay ?? editNoteOverlay)
-                            setEditNoteFontSize(item.fontSize ?? editNoteFontSize)
-                            setEditNoteBackgroundColor(item.backgroundColor ?? editNoteBackgroundColor)
-                            setEditNoteTextColor(item.textColor ?? editNoteTextColor)
-                            setEditNoteBackgroundAlpha(item.backgroundAlpha ?? editNoteBackgroundAlpha)
-                            setEditNoteFontFamily(item.fontFamily ?? editNoteFontFamily)
-                            setEditNoteBold(item.bold ?? editNoteBold)
-                            setEditNoteItalic(item.italic ?? editNoteItalic)
-                            setEditNoteStrokeColor(item.strokeColor ?? editNoteStrokeColor)
-                            setEditNoteStrokeWidth(item.strokeWidth ?? editNoteStrokeWidth)
-                            setEditNoteBreakWord(item.breakWord ?? editNoteBreakWord)
+                            setEditNoteData({
+                                translation: item.translation,
+                                transcript: item.transcript,
+                                overlay: item.overlay ?? editNoteData.overlay,
+                                fontSize: item.fontSize ?? editNoteData.fontSize,
+                                textColor: item.textColor ?? editNoteData.textColor,
+                                backgroundColor: item.backgroundColor ?? editNoteData.backgroundColor,
+                                backgroundAlpha: item.backgroundAlpha ?? editNoteData.backgroundAlpha,
+                                fontFamily: item.fontFamily ?? editNoteData.fontFamily,
+                                bold: item.bold ?? editNoteData.bold,
+                                italic: item.italic ?? editNoteData.italic,
+                                strokeColor: item.strokeColor ?? editNoteData.strokeColor,
+                                strokeWidth: item.strokeWidth ?? editNoteData.strokeWidth,
+                                breakWord: item.breakWord ?? editNoteData.breakWord,
+                                borderRadius: item.borderRadius ?? editNoteData.borderRadius,
+                                character: item.character ?? editNoteData.character,
+                                characterTag: item.characterTag ?? editNoteData.characterTag
+                            })
                             setEditNoteID(index)
                         }
 
                         const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
                             if (item.overlay) return
-                            if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            if (item.character) {
+                                if (!item.characterTag) return setBubbleToggle(false)
+                            } else {
+                                if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            }
                             const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
                             if (width < 125) width = 125
                             let height = Math.floor(bounds.height / 2)
                             if (height < 25) height = 25
-                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
-                            fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            const id = item.id ?? Number(item.noteID)
+                            if (item.character) {
+                                setBubbleData({id, x: bounds.left, y: bounds.top-30, width, height, character: item.character, characterTag: item.characterTag})
+                            } else {
+                                setBubbleData({id, x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
+                                fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            }
                             setBubbleWidth(width)
                             setBubbleToggle(true)
                         }
 
                         const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
                             if (item.overlay) return
-                            if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            if (item.character) {
+                                if (!item.characterTag) return setBubbleToggle(false)
+                            } else {
+                                if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            }
                             const bounds = (event.target as SVGRectElement).getBoundingClientRect()
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
                             if (width < 125) width = 125
                             let height = Math.floor(bounds.height / 2)
                             if (height < 25) height = 25
-                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
-                            fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            const id = item.id ?? Number(item.noteID)
+                            if (item.character) {
+                                setBubbleData({id, x: bounds.left, y: bounds.top-30, width, height, character: item.character, characterTag: item.characterTag})
+                            } else {
+                                setBubbleData({id, x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
+                                fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
+                            }
                             setBubbleWidth(width)
                         }
 
                         const onMouseLeave = () => {
+                            if (item.character && noteDrawingEnabled) return
                             setBubbleToggle(false)
                         }
 
                         const onMouseDown = (event: React.MouseEvent) => {
                             if (!noteDrawingEnabled) {
                                 event.stopPropagation()
-                                if (event.shiftKey) {
-                                    navigator.clipboard.writeText(item.transcript)
+                                if (item.character) {
+                                    navigator.clipboard.writeText(item.characterTag)
                                 } else {
-                                    navigator.clipboard.writeText(item.translation)
+                                    if (event.shiftKey) {
+                                        navigator.clipboard.writeText(item.transcript)
+                                    } else {
+                                        navigator.clipboard.writeText(item.translation)
+                                    }
                                 }
                             }
                         }
 
                         const text = showTranscript ? item.transcript : item.translation
 
-                        return (
-                            <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
-                            keyboardTransformMultiplier={30} onChange={insertItem as any} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
-                            extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown, text, showTranscript, 
-                            overlay: item.overlay, fontSize: newFontSize, backgroundColor: item.backgroundColor, textColor: item.textColor,
-                            backgroundAlpha: item.backgroundAlpha, fontFamily: item.fontFamily, bold: item.bold, italic: item.italic, 
-                            strokeColor: item.strokeColor, strokeWidth: newStrokeWidth, breakWord: item.breakWord}}/>
-                        )
+                        if (item.character) {
+                            return (
+                                <CharacterRectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight}
+                                onFocus={() => setActiveIndex(index)} keyboardTransformMultiplier={30} onChange={insertItem as any} 
+                                onDelete={deleteItem} ResizeHandleComponent={CharacterRectHandle} RotateHandleComponent={EmptyHandle} onContextMenu={onContextMenu} 
+                                onDoubleClick={onDoubleClick} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
+                                onMouseDown={onMouseDown} bubbleToggle={bubbleToggle && (bubbleData.id === (item.id ?? Number(item.noteID)))}
+                                />
+                            )
+                        } else {
+                            return (
+                                <RectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight} rotation={item.rotation}
+                                rotationSpeed={rotationSpeed} onFocus={() => setActiveIndex(index)} keyboardTransformMultiplier={30} onChange={insertItem as any} 
+                                onDelete={deleteItem} ResizeHandleComponent={RectHandle} RotateHandleComponent={CircleHandle} onContextMenu={onContextMenu} 
+                                onDoubleClick={onDoubleClick} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
+                                onMouseDown={onMouseDown} text={text} showTranscript={showTranscript} overlay={item.overlay} fontSize={newFontSize} 
+                                backgroundColor={item.backgroundColor} textColor={item.textColor} backgroundAlpha={item.backgroundAlpha} 
+                                fontFamily={item.fontFamily} bold={item.bold} italic={item.italic} strokeColor={item.strokeColor} strokeWidth={newStrokeWidth} 
+                                breakWord={item.breakWord} borderRadius={newBorderRadius}
+                                />
+                            )
+                        }
                     })}
                 </ShapeEditor>
             </div>

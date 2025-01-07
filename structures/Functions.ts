@@ -196,13 +196,13 @@ export default class Functions {
             const images = await Functions.post(`/api/misc/proxy`, {url: encodeURIComponent(link)}, session, setSessionFlag)
             let files = [] as File[]
             for (let i = 0; i < images.length; i++) {
-                const blob = new Blob([new Uint8Array(images[i])])
+                const blob = new Blob([new Uint8Array(images[i].data)])
                 const file = new File([blob], path.basename(link) + ".png")
                 files.push(file)
             }
             return files
         } catch {
-            const response = await fetch(link).then((r) => r.arrayBuffer())
+            const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link) + ".png")
             return [file]
@@ -2836,18 +2836,19 @@ export default class Functions {
 
     public static parseNoteChanges = (oldNotes: Note[], newNotes:  Note[]) => {
         let styleChanged = false
-        if (!oldNotes) oldNotes = []
-        if (!newNotes) newNotes = []
-        const prevMap = new Map(oldNotes.map((item) => [`${item.transcript} -> ${item.translation}`, item]))
-        const newMap = new Map(newNotes.map((item) => [`${item.transcript} -> ${item.translation}`, item]))
+        if (!oldNotes) oldNotes = [] as Note[]
+        if (!newNotes) newNotes = [] as Note[]
+        const itemKey = (item: Note) => item.character ? `Character -> ${item.character}` : `${item.transcript} -> ${item.translation}`
+        const prevMap = new Map(oldNotes.map((item) => [itemKey(item), item]))
+        const newMap = new Map(newNotes.map((item) => [itemKey(item), item]))
 
         const addedEntries = newNotes
-            .filter((item) => !prevMap.has(`${item.transcript} -> ${item.translation}`))
-            .map((item) => `${item.transcript} -> ${item.translation}`)
+            .filter((item) => !prevMap.has(itemKey(item)))
+            .map((item) => itemKey(item))
 
         const removedEntries = oldNotes
-            .filter((item) => !newMap.has(`${item.transcript} -> ${item.translation}`))
-            .map((item) => `${item.transcript} -> ${item.translation}`)
+            .filter((item) => !newMap.has(itemKey(item)))
+            .map((item) => itemKey(item))
 
         for (const note of oldNotes) {
             const match = newNotes.find((item) => item.noteID === note.noteID)
@@ -2862,6 +2863,7 @@ export default class Functions {
                 note.backgroundAlpha !== match.backgroundAlpha || 
                 note.strokeColor !== match.strokeColor || 
                 note.strokeWidth !== match.strokeWidth || 
+                note.borderRadius !== match.borderRadius || 
                 note.breakWord !== match.breakWord) {
                     styleChanged = true
                     break

@@ -177,7 +177,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             website: props.tag.website,
             fandom: props.tag.fandom,
             r18: props.tag.r18,
-            featuredPost: props.tag.featuredPost?.postID,
+            featuredPost: props.tag.featuredPost,
             reason: ""
         })
     }

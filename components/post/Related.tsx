@@ -14,7 +14,7 @@ import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
 import Carousel from "../site/Carousel"
 import "./styles/related.less"
-import {PostHistory, PostSearch, MiniTag} from "../../types/Types"
+import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
 
 let replace = false
 
@@ -46,6 +46,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const history = useHistory()
+
+    let rating = props.post?.rating || (ratingType === functions.r18() ? functions.r18() : "all")
 
     useEffect(() => {
         const savedScroll = localStorage.getItem("scroll")
@@ -88,12 +90,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     const searchPosts = async () => {
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
-        rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
 
         if (result.length < 50 && props.fallback?.[0]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
-            rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -102,7 +104,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
         if (result.length < 50 && props.fallback?.[1]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
-            rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -163,7 +165,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             }
         }
         let result = await functions.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
-        rating: functions.isR18(props.post?.rating || "all") ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren, offset: newOffset}, session, setSessionFlag)
 
         let hasMore = result?.length >= 100

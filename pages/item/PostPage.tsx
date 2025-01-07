@@ -170,6 +170,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             history.push("/login")
             setSidebarText("Login required.")
         }
+        if (post.deleted && !permissions.isMod(session)) {
+            return functions.replaceLocation("/403")
+        }
         if (functions.isR18(post.rating)) {
             if (!session.showR18) {
                 functions.replaceLocation("/404")

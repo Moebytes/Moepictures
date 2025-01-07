@@ -342,6 +342,7 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "y" double precision,
     "width" double precision,
     "height" double precision,
+    "rotation" double precision,
     "imageWidth" int,
     "imageHeight" int,
     "imageHash" text,
@@ -355,7 +356,10 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "backgroundAlpha" int,
     "strokeColor" text,
     "strokeWidth" int,
-    "breakWord" boolean
+    "breakWord" boolean,
+    "borderRadius" int,
+    "character" boolean,
+    "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS "unverified notes" (
@@ -371,6 +375,7 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "y" double precision,
     "width" double precision,
     "height" double precision,
+    "rotation" double precision,
     "imageWidth" int,
     "imageHeight" int,
     "imageHash" text,
@@ -385,6 +390,9 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "strokeColor" text,
     "strokeWidth" int,
     "breakWord" boolean,
+    "borderRadius" int,
+    "character" boolean,
+    "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL,
     "addedEntries" text[],
     "removedEntries" text[],
     "reason" text

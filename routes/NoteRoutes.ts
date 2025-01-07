@@ -22,6 +22,80 @@ const noteLimiter = rateLimit({
     handler
 })
 
+const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: string, order: number, 
+    username: string, unverified?: boolean, originalID?: string, addedEntries?: string[], 
+    removedEntries?: string[], reason?: string}) => {
+    const {postID, order, username, unverified, originalID, addedEntries, removedEntries, reason} = data
+    if (!oldNotes?.[0]) {
+        if (!newNotes.length) return
+        for (const item of newNotes) {
+            if (unverified) {
+                await sql.note.insertUnverifiedNote(postID, originalID || null, username, order, item.transcript, item.translation,
+                item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
+                addedEntries, removedEntries, reason)
+            } else {
+                await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
+                item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
+            }
+        }
+    } else {
+        let noMatch = [] as Note[]
+        for (const note of oldNotes) {
+            if (!newNotes.length) {
+                if (unverified) {
+                    await sql.note.deleteUnverifiedNote(note.noteID)
+                } else {
+                    await sql.note.deleteNote(note.noteID)
+                }
+            } else {
+                const match = newNotes.find((item) => item.noteID === note.noteID)
+                if (match) {
+                    if (unverified) {
+                        await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x,
+                        match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                        match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                        match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null, 
+                        reason)
+                    } else {
+                        await sql.note.resaveNote(note.noteID, username, match.transcript, match.translation, match.x,
+                        match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                        match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                        match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null)
+                    }
+                } else {
+                    noMatch.push(note)
+                }
+            }
+        }
+        for (const item of noMatch) {
+            if (item.noteID) {
+                if (unverified) {
+                    await sql.note.deleteUnverifiedNote(item.noteID)
+                } else {
+                    await sql.note.deleteNote(item.noteID)
+                }
+            } else {
+                if (unverified) {
+                    await sql.note.insertUnverifiedNote(postID, originalID!, username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
+                    addedEntries, removedEntries, reason)
+                } else {
+                    await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
+                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                    item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
+                }
+            }
+        }
+    }
+}
+
 const NoteRoutes = (app: Express) => {
     app.post("/api/note/save", csrfProtection, noteLimiter, async (req: Request, res: Response) => {
         try {
@@ -38,42 +112,8 @@ const NoteRoutes = (app: Express) => {
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
             const notes = await sql.note.notes(postID, order)
-            if (!notes?.[0]) {
-                if (!data.length) return res.status(200).send("Success")
-                for (const item of data) {
-                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord)
-                }
-            } else {
-                let noMatch = [] as Note[]
-                for (const note of notes) {
-                    if (!data.length) {
-                        await sql.note.deleteNote(note.noteID)
-                    } else {
-                        const match = data.find((item) => item.noteID === note.noteID)
-                        if (match) {
-                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                            match.strokeColor, match.strokeWidth, match.breakWord)
-                        } else {
-                            noMatch.push(note)
-                        }
-                    }
-                }
-                for (const item of noMatch) {
-                    if (item.noteID) {
-                        await sql.note.deleteNote(item.noteID)
-                    } else {
-                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                        item.strokeColor, item.strokeWidth, item.breakWord)
-                    }
-                }
-            }
+            await insertNotes(notes, data, {postID, order, username: req.session.username})
+            if (!data.length) return res.status(200).send("Success")
             const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
             await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason})
             res.status(200).send("Success")
@@ -97,42 +137,7 @@ const NoteRoutes = (app: Express) => {
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
             const notes = await sql.note.notes(postID, order)
-            if (!notes?.[0]) {
-                if (!data.length) return res.status(200).send("Success")
-                for (const item of data) {
-                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord)
-                }
-            } else {
-                let noMatch = [] as Note[]
-                for (const note of notes) {
-                    if (!data.length) {
-                        await sql.note.deleteNote(note.noteID)
-                    } else {
-                        const match = data.find((item) => item.noteID === note.noteID)
-                        if (match) {
-                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                            match.strokeColor, match.strokeWidth, match.breakWord)
-                        } else {
-                            noMatch.push(note)
-                        }
-                    }
-                }
-                for (const item of noMatch) {
-                    if (item.noteID) {
-                        await sql.note.deleteNote(item.noteID)
-                    } else {
-                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                        item.strokeColor, item.strokeWidth, item.breakWord)
-                    }
-                }
-            }
+            await insertNotes(notes, data, {postID, order, username: req.session.username})
 
             if (permissions.isMod(req.session)) {
                 if (silent) return res.status(200).send("Success")
@@ -210,7 +215,7 @@ const NoteRoutes = (app: Express) => {
                 await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
                 item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize, item.backgroundColor,
                 item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic, item.strokeColor, item.strokeWidth, item.breakWord,
-                addedEntries, removedEntries, reason)
+                item.rotation, item.borderRadius, item.character, item.characterTag || null, addedEntries, removedEntries, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -256,42 +261,8 @@ const NoteRoutes = (app: Express) => {
                 }
             }
 
-            if (!notes?.[0]) {
-                if (!data.length) return res.status(200).send("Success")
-                for (const item of data) {
-                    await sql.note.insertUnverifiedNote(postID, originalID || null, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
-                    item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)
-                }
-            } else {
-                let noMatch = [] as Note[]
-                for (const note of notes) {
-                    if (!data.length) {
-                        await sql.note.deleteUnverifiedNote(note.noteID)
-                    } else {
-                        const match = data.find((item) => item.noteID === note.noteID)
-                        if (match) {
-                            await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x, match.y, 
-                            match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay, match.fontSize,
-                            match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                            match.strokeColor, match.strokeWidth, match.breakWord, reason)
-                        } else {
-                            noMatch.push(note)
-                        }
-                    }
-                }
-                for (const item of noMatch) {
-                    if (item.noteID) {
-                        await sql.note.deleteUnverifiedNote(item.noteID)
-                    } else {
-                        await sql.note.insertUnverifiedNote(postID, originalID || null, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize,
-                        item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                        item.strokeColor, item.strokeWidth, item.breakWord, addedEntries, removedEntries, reason)
-                    }
-                }
-            }
+            await insertNotes(notes, data, {unverified: true, postID, order, originalID, addedEntries, 
+            removedEntries, reason, username: req.session.username})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -329,42 +300,7 @@ const NoteRoutes = (app: Express) => {
             }
 
             const notes = await sql.note.notes(originalID, order)
-            if (!notes?.[0]) {
-                if (!data.length) return res.status(200).send("Success")
-                for (const item of data) {
-                    await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord)
-                }
-            } else {
-                let noMatch = [] as Note[]
-                for (const note of notes) {
-                    if (!data.length) {
-                        await sql.note.deleteNote(note.noteID)
-                    } else {
-                        const match = data.find((item) => item.noteID === note.noteID)
-                        if (match) {
-                            await sql.note.resaveNote(note.noteID, req.session.username, match.transcript, match.translation, match.x,
-                            match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                            match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                            match.strokeColor, match.strokeWidth, match.breakWord)
-                        } else {
-                            noMatch.push(note)
-                        }
-                    }
-                }
-                for (const item of noMatch) {
-                    if (item.noteID) {
-                        await sql.note.deleteNote(item.noteID)
-                    } else {
-                        await sql.note.insertNote(postID, req.session.username, order, item.transcript, item.translation,
-                        item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                        item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                        item.strokeColor, item.strokeWidth, item.breakWord)
-                    }
-                }
-            }
+            await insertNotes(notes, data, {postID, order, username})
 
             const unverifiedNotes = await sql.note.unverifiedNotes(postID, order)
             for (const unverifiedNote of unverifiedNotes) {

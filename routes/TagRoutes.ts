@@ -398,7 +398,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/aliasto", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, aliasTo, username, reason} = req.body as AliasToParams
+            let {tag, aliasTo, username, reason, silent, skipAliasing} = req.body as AliasToParams
             tag = tag?.trim()
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
@@ -411,10 +411,10 @@ const TagRoutes = (app: Express) => {
             const posts = await sql.tag.tagPosts(tag)
             const postIDs = posts.map((p) => p.postID)
             let targetUser = username ? username : req.session.username
-            await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
+            if (!silent) await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
             await sql.tag.renameTagMap(tag, aliasTo)
             await serverFunctions.deleteTag(tagObj)
-            await sql.tag.bulkInsertAliases(aliasTo, [tag])
+            if (!skipAliasing) await sql.tag.bulkInsertAliases(aliasTo, [tag])
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

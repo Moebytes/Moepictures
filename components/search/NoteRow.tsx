@@ -70,7 +70,11 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
             return <span className="commentrow-text">No data</span>
         }
         for (const item of props.note.notes) {
-            jsx.push(<span className="commentrow-text">{`${item.transcript} -> ${item.translation}`}</span>)
+            if (item.character) {
+                jsx.push(<span className="commentrow-text">{`${i18n.tag.character} -> ${item.characterTag}`}</span>)
+            } else {
+                jsx.push(<span className="commentrow-text">{`${item.transcript || "N/A"} -> ${item.translation || "N/A"}`}</span>)
+            }
         }
         return jsx
     }

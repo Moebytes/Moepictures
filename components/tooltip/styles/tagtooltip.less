@@ -43,8 +43,11 @@
 .tag-tooltip-text-container {
     display: flex;
     margin-top: 5px;
-    max-height: 150px;
+    max-height: 125px;
+    flex-wrap: wrap;
     overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 5px;
     scrollbar-color: transparent transparent;
     &::-webkit-scrollbar-thumb {
         background-color: transparent;
@@ -59,6 +62,7 @@
     font-size: 15px;
     color: var(--text);  
     white-space: preserve;
+    width: 100%;
 }
 
 .tag-tooltip-social {
@@ -141,7 +145,7 @@
     align-items: center;
     flex-wrap: wrap;
     overflow-y: auto;
-    margin-top: 10px; 
+    margin-top: 0px; 
     scrollbar-color: transparent transparent;
     &::-webkit-scrollbar-thumb {
         background-color: transparent;

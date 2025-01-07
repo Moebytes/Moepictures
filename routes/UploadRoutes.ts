@@ -1154,7 +1154,7 @@ const CreateRoutes = (app: Express) => {
               await sql.note.insertNote(newPostID, unverified.uploader, order, item.transcript, item.translation,
               item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
               item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-              item.strokeColor, item.strokeWidth, item.breakWord)
+              item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
               await sql.note.deleteUnverifiedNote(item.noteID)
           }
         }

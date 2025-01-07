@@ -324,7 +324,7 @@
         "edited": "Edited",
         "updated": "Updated",
         "viewed": "Viewed on",
-        "deleted": "Deleted in"
+        "deleted": "Deleting in"
     },
     "labels": {
         "reason": "Reason",
@@ -455,7 +455,9 @@
         "fileType": "Filetype",
         "upscaledFileType": "Upscaled Filetype",
         "uploadLimit": "Upload Limit",
-        "appealer": "Appealer"
+        "appealer": "Appealer",
+        "borderRadius": "Border Radius",
+        "characterTag": "Character Tag"
     },
     "errors": {
         "$401":"401 error",

@@ -261,6 +261,75 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.tagHistory.user) || i18n.user.deleted}</span>
     }
 
+    const descriptionDiffJSX = () => {
+        let newDescription = props.tagHistory.description || i18n.labels.none
+        if (!prevHistory) return <span className="tag-reg">{newDescription}</span>
+        let oldDescription = props.previousHistory?.description || i18n.labels.none
+    
+        const oldWords = oldDescription.split(/([^\s\n]+|\s+|\n)/g).filter(Boolean)
+        const newWords = newDescription.split(/([^\s\n]+|\s+|\n)/g).filter(Boolean)
+    
+        // Longest Common Subsequence (LCS) algorithm
+        const lcs = (a: string[], b: string[]) => {
+            const dp = Array(a.length + 1)
+                .fill(null)
+                .map(() => Array(b.length + 1).fill(0))
+    
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    if (a[i - 1] === b[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+                    }
+                }
+            }
+    
+            const sequence: [number, number][] = []
+            let i = a.length
+            let j = b.length
+            while (i > 0 && j > 0) {
+                if (a[i - 1] === b[j - 1]) {
+                    sequence.unshift([i - 1, j - 1])
+                    i--
+                    j--
+                } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                    i--
+                } else {
+                    j--
+                }
+            }
+            return sequence
+        }
+    
+        const sequence = lcs(oldWords, newWords)
+        let result: React.ReactElement[] = []
+        let i = 0
+        let j = 0
+        sequence.forEach(([oldIndex, newIndex]) => {
+            while (i < oldIndex) {
+                result.push(<span className="tag-remove-color" key={`remove-${i}`}>{oldWords[i]}</span>)
+                i++
+            }
+            while (j < newIndex) {
+                result.push(<span className="tag-add-color" key={`add-${j}`}>{newWords[j]}</span>)
+                j++
+            }
+            result.push(<span className="tag-reg-color" key={`unchanged-${i}`}>{oldWords[i]}</span>)
+            i++
+            j++
+        })
+        while (i < oldWords.length) {
+            result.push(<span className="tag-remove-color" key={`remove-${i}`}>{oldWords[i]}</span>)
+            i++
+        }
+        while (j < newWords.length) {
+            result.push(<span className="tag-add-color" key={`add-${j}`}>{newWords[j]}</span>)
+            j++
+        }
+        return <span className="tag-reg-color">{result}</span>
+    }
+
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         let changes = props.tagHistory.changes || {}
@@ -271,7 +340,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}:</span> {props.tagHistory.tag}</span>)
         }
         if (!prevHistory || changes.description) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}:</span> {props.tagHistory.description || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text" style={{marginRight: "5px"}}>{i18n.labels.description}:</span>{descriptionDiffJSX()}</span>)
         }
         if ((!prevHistory && props.tagHistory.website) || changes.website) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.website}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website!, "_blank")}>{props.tagHistory.website}</span></span>)

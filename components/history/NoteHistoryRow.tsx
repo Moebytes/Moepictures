@@ -215,8 +215,10 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return null
-        const addedJSX = props.noteHistory.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = props.noteHistory.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+
+        const replaceKey = (i: string) => i.replace("Character", i18n.tag.character)
+        const addedJSX = props.noteHistory.addedEntries.map((i: string) => <span className="tag-add">+{replaceKey(i)}</span>)
+        const removedJSX = props.noteHistory.removedEntries.map((i: string) => <span className="tag-remove">-{replaceKey(i)}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]

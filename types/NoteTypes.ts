@@ -13,6 +13,7 @@ export interface Note {
     y: number
     width: number
     height: number
+    rotation: number
     imageWidth: number
     imageHeight: number
     imageHash: string
@@ -27,19 +28,25 @@ export interface Note {
     strokeColor: string
     strokeWidth: number
     breakWord: boolean
+    borderRadius: number
+    character: boolean
+    characterTag: string
 }
 
 export interface BubbleData {
-    transcript: string
-    translation: string
+    id?: number
     x: number
     y: number
     width: number
     height: number
-    fontFamily: string
-    fontSize: number
-    bold: boolean
-    italic: boolean
+    transcript?: string
+    translation?: string
+    fontFamily?: string
+    fontSize?: number
+    bold?: boolean
+    italic?: boolean
+    character?: boolean
+    characterTag?: string
 }
 
 export interface NoteSearch {
