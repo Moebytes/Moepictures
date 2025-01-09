@@ -13,7 +13,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
-import {NoteHistory} from "../../types/Types"
+import {NoteHistory, Note} from "../../types/Types"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -208,15 +208,20 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(targetUser) || i18n.user.deleted}</span>
     }
 
+    const printNote = (note: Note) => {
+        if (note.character) return `${functions.toProperCase(i18n.tag.character)} -> ${note.characterTag}`
+        return `${note.transcript} -> ${note.translation}`
+    }
+
     const diffText = () => {
         if (!prevHistory) {
             if (props.noteHistory.notes[0].transcript === "No data") return null
-            return props.noteHistory.notes.map((item) => `${item.transcript} -> ${item.translation}`)
+            return props.noteHistory.notes.map((item) => printNote(item))
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return null
 
-        const replaceKey = (i: string) => i.replace("Character", i18n.tag.character)
+        const replaceKey = (i: string) => i.replace("Character", functions.toProperCase(i18n.tag.character))
         const addedJSX = props.noteHistory.addedEntries.map((i: string) => <span className="tag-add">+{replaceKey(i)}</span>)
         const removedJSX = props.noteHistory.removedEntries.map((i: string) => <span className="tag-remove">-{replaceKey(i)}</span>)
 

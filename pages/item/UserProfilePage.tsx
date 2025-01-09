@@ -315,6 +315,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSession({...session, downloadPixivID: !session.downloadPixivID})
     }
 
+    const forceNoteBubbles = async () => {
+        functions.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
+        setSession({...session, forceNoteBubbles: !session.forceNoteBubbles})
+    }
+
     const showR18 = async () => {
         if (session.showR18) {
             functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
@@ -536,13 +541,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (new Date(session.premiumExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text" style={{color: "var(--premiumColor)"}}>{i18n.user.premiumUntil} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}</span>
+                    <span className="user-text" style={{color: "var(--premiumColor)"}}>{i18n.user.premiumUntil} {functions.prettyDate(session.premiumExpiration, i18n)}</span>
                 </div>
             )
         } else if (new Date(session.premiumExpiration) < new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text">{i18n.user.premiumExpired} {functions.prettyDate(new Date(session.premiumExpiration), i18n)}</span>
+                    <span className="user-text">{i18n.user.premiumExpired} {functions.prettyDate(session.premiumExpiration, i18n)}</span>
                 </div>
             )
         }
@@ -710,7 +715,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.labels.email}: {session.email}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(session.joinDate), i18n)}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(session.joinDate, i18n)}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
@@ -740,6 +745,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.downloadPixivID}: <span className="user-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
+                        <span className="user-text">{i18n.user.forceNoteBubbles}: <span className="user-text-action" onClick={forceNoteBubbles}>{session.forceNoteBubbles ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         <img className="user-icon" src={premiumStar}/>

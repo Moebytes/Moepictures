@@ -80,6 +80,7 @@ const UserRoutes = (app: Express) => {
             delete user.autosearchInterval
             delete user.showTagBanner
             delete user.upscaledImages
+            delete user.forceNoteBubbles
             delete user.savedSearches
             delete user.premiumExpiration
             delete user.showR18
@@ -117,6 +118,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "downloadPixivID", false)
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
                 await sql.user.updateUser(username, "upscaledImages", false)
+                await sql.user.updateUser(username, "forceNoteBubbles", false)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
                 await sql.user.updateUser(username, "postCount", 0)
@@ -203,6 +205,7 @@ const UserRoutes = (app: Express) => {
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
+                req.session.forceNoteBubbles = user.forceNoteBubbles
                 req.session.savedSearches = user.savedSearches
                 req.session.postCount = user.postCount
                 req.session.showR18 = user.showR18
@@ -267,6 +270,7 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.postCount = user.postCount
                 req.session.upscaledImages = user.upscaledImages
+                req.session.forceNoteBubbles = user.forceNoteBubbles
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
@@ -491,6 +495,21 @@ const UserRoutes = (app: Express) => {
             const newUpscaledImages = !Boolean(user.upscaledImages)
             req.session.upscaledImages = newUpscaledImages 
             await sql.user.updateUser(req.session.username, "upscaledImages", newUpscaledImages)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/forcenotebubbles", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newForceNoteBubbles = !Boolean(user.forceNoteBubbles)
+            req.session.forceNoteBubbles = newForceNoteBubbles 
+            await sql.user.updateUser(req.session.username, "forceNoteBubbles", newForceNoteBubbles)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

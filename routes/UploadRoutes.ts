@@ -170,14 +170,15 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
   let vanillaBuffers = [] as Buffer[]
   let upscaledVanillaBuffers = [] as Buffer[]
   for (let i = 0; i < post.images.length; i++) {
-    const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-    const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+    const image = post.images[i]
+    const imagePath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
+    const upscaledImagePath = functions.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
     const oldImage = await serverFunctions.getFile(imagePath, false, r18) as Buffer
     const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
     vanillaBuffers.push(oldImage)
     upscaledVanillaBuffers.push(oldUpscaledImage)
     if (imgChanged) {
-      await sql.post.deleteImage(post.images[i].imageID)
+      await sql.post.deleteImage(image.imageID)
       await serverFunctions.deleteFile(imagePath, r18)
       await serverFunctions.deleteFile(upscaledImagePath, r18)
     }
@@ -189,7 +190,6 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
   rating: PostRating, source: SourceData, characters: UploadTag[] | MiniTag[], imgChanged: boolean, unverified?: boolean, unverifiedImages?: boolean,
   thumbnail?: string | null}) => {
   let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages, thumbnail} = data
-  if (type !== "comic") type = "image"
 
   if (images.length !== upscaledImages.length) {
     const maxLength = Math.max(images.length, upscaledImages.length)
@@ -230,28 +230,27 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
     }
     if (upscaledImage) {
       if ("bytes" in upscaledImage) {
-        buffer = Buffer.from(upscaledImage.bytes)
+        upscaledBuffer = Buffer.from(upscaledImage.bytes)
       } else if ("type" in upscaledImage) {
-        const imagePath = functions.getUpscaledImagePath(upscaledImage.type, postID, upscaledImage.order, 
+        const upscaledImagePath = functions.getUpscaledImagePath(upscaledImage.type, postID, upscaledImage.order, 
         upscaledImage.upscaledFilename || upscaledImage.filename)
         if (unverifiedImages) {
-          buffer = await serverFunctions.getUnverifiedFile(imagePath)
+          upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath)
         } else {
-          buffer = await serverFunctions.getFile(imagePath, false, r18)
+          upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18)
         }
       }
     }
     let original = image ? image : upscaledImage
     let upscaled = upscaledImage ? upscaledImage : image
-    let bufferFallback = buffer ? buffer : upscaledBuffer as Buffer
-    let upscaledBufferFallback = upscaledBuffer ? upscaledBuffer : buffer as Buffer
+    let bufferFallback = buffer?.byteLength ? buffer : upscaledBuffer as Buffer
+    let upscaledBufferFallback = upscaledBuffer?.byteLength ? upscaledBuffer : buffer as Buffer
     let ext = ""
     if ("ext" in original) {
       ext = original.ext
     } else if ("filename" in image) {
-      ext = path.extname(image.upscaledFilename || image.filename).replace(".", "")
+      ext = path.extname(image.filename || image.upscaledFilename).replace(".", "")
     }
-    let fileOrder = images.length > 1 ? `${order}` : "1"
     const cleanTitle = functions.cleanTitle(source.title)
     let filename = ""
     let upscaledFilename = ""
@@ -280,14 +279,13 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
     imageFilenames.push(filename)
     upscaledImageFilenames.push(upscaledFilename)
     imageOrders.push(order)
-    let kind = "image" as any
+    let kind = "image"
     if (type === "comic") {
       kind = "comic"
     } else if (functions.isWebP(`.${ext}`)) {
       const animated = functions.isAnimatedWebp(bufferFallback)
       if (animated) {
         kind = "animation"
-        if (type !== "video") type = "animation"
       } else {
         kind = "image"
       }
@@ -295,23 +293,18 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       kind = "image"
     } else if (functions.isGIF(`.${ext}`)) {
       kind = "animation"
-      if (type !== "video") type = "animation"
     } else if (functions.isVideo(`.${ext}`)) {
       kind = "video"
-      type = "video"
     } else if (functions.isAudio(`.${ext}`)) {
       kind = "audio"
-      type = "audio"
     } else if (functions.isModel(`.${ext}`)) {
       kind = "model"
-      type = "model"
     } else if (functions.isLive2D(`.${ext}`)) {
       kind = "live2d"
-      type = "live2d"
     }
     if (imgChanged) {
       if (buffer?.byteLength) {
-        let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+        let imagePath = functions.getImagePath(kind, postID, Number(order), filename)
         if (unverified) {
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
         } else {
@@ -322,7 +315,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       }
 
       if (upscaledBuffer?.byteLength) {
-        let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
+        let imagePath = functions.getUpscaledImagePath(kind, postID, Number(order), upscaledFilename)
         if (unverified) {
           await serverFunctions.uploadUnverifiedFile(imagePath, upscaledBuffer)
         } else {
@@ -335,22 +328,22 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let dimensions = null as any
       let hash = ""
       if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
-          let buffer = null as Buffer | null
+          let thumbBuffer = null as Buffer | null
           if ("thumbnail" in original) {
-            buffer = functions.base64ToBuffer(original.thumbnail)
+            thumbBuffer = functions.base64ToBuffer(original.thumbnail)
           } else if (thumbnail) {
-            buffer = functions.base64ToBuffer(thumbnail)
+            thumbBuffer = functions.base64ToBuffer(thumbnail)
           } else {
-            buffer = bufferFallback
+            thumbBuffer = bufferFallback
           }
-          let upscaledBuffer = null as Buffer | null
+          let thumbUpscaledBuffer = null as Buffer | null
           if ("thumbnail" in upscaled) {
-            upscaledBuffer = functions.base64ToBuffer(upscaled.thumbnail || (original as UploadImage).thumbnail)
+            thumbUpscaledBuffer = functions.base64ToBuffer(upscaled.thumbnail || (original as UploadImage).thumbnail)
           } else {
-            upscaledBuffer = upscaledBufferFallback
+            thumbUpscaledBuffer = upscaledBufferFallback
           }
-          hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-          dimensions = await sharp(upscaledBuffer).metadata()
+          hash = await phash(thumbBuffer).then((hash: string) => functions.binaryToHex(hash))
+          dimensions = await sharp(thumbUpscaledBuffer).metadata()
           if (kind === "live2d") {
             dimensions.width = upscaled.width
             dimensions.height = upscaled.height
@@ -489,13 +482,13 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   for (let i = 0; i < newTags.length; i++) {
     let newTag = newTags[i]
     if (!newTag.tag) continue
-    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag!]?.type, description: null, image: null, imageHash: null} as any
+    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag]?.type, description: null, image: null, imageHash: null} as BulkTag
     if (newTag.description) bulkObj.description = newTag.description
     if (!noImageUpdate && newTag.image) {
       let ext = ""
-      let buffer = Buffer.from("")
+      let buffer = null as Buffer | null
       if ("ext" in newTag && "bytes" in newTag) {
-        ext = newTag.ext!
+        ext = newTag.ext || ""
         buffer = Buffer.from(Object.values(newTag.bytes!))
       } else {
         ext = path.extname(newTag.image || "")
@@ -504,14 +497,16 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
       }
       const filename = `${newTag.tag}.${ext}`
       const imagePath = functions.getTagPath("tag", filename)
-      if (unverified) {
-        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-      } else {
-        await updateTagImageHistory(newTag.tag!, filename, buffer, username)
-        await serverFunctions.uploadFile(imagePath, buffer, false)
+      if (buffer) {
+        if (unverified) {
+          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+        } else {
+          await updateTagImageHistory(newTag.tag!, filename, buffer, username)
+          await serverFunctions.uploadFile(imagePath, buffer, false)
+        }
+        bulkObj.image = filename
+        bulkObj.imageHash = serverFunctions.md5(buffer)
       }
-      bulkObj.image = filename
-      bulkObj.imageHash = serverFunctions.md5(buffer)
     }
     bulkTagUpdate.push(bulkObj)
   }
@@ -519,12 +514,12 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   for (let i = 0; i < artists.length; i++) {
     let artist = artists[i]
     if (!artist.tag) continue
-    let bulkObj = {tag: artist.tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
+    let bulkObj = {tag: artist.tag, type: "artist", description: "Artist.", image: null, imageHash: null} as BulkTag
     if (!noImageUpdate && artist.image) {
       let ext = ""
-      let buffer = Buffer.from("")
+      let buffer = null as Buffer | null
       if ("ext" in artist && "bytes" in artist) {
-        ext = artist.ext!
+        ext = artist.ext || ""
         buffer = Buffer.from(Object.values(artist.bytes!))
       } else {
         ext = path.extname(artist.image || "")
@@ -533,14 +528,16 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
       }
       const filename = `${artist.tag}.${ext}`
       const imagePath = functions.getTagPath("artist", filename)
-      if (unverified) {
-        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-      } else {
-        await updateTagImageHistory(artist.tag!, filename, buffer, username)
-        await serverFunctions.uploadFile(imagePath, buffer, false)
+      if (buffer) {
+        if (unverified) {
+          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+        } else {
+          await updateTagImageHistory(artist.tag!, filename, buffer, username)
+          await serverFunctions.uploadFile(imagePath, buffer, false)
+        }
+        bulkObj.image = filename
+        bulkObj.imageHash = serverFunctions.md5(buffer)
       }
-      bulkObj.image = filename
-      bulkObj.imageHash = serverFunctions.md5(buffer)
     }
     bulkTagUpdate.push(bulkObj)
   }
@@ -548,12 +545,12 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   for (let i = 0; i < characters.length; i++) {
     let character = characters[i]
     if (!character.tag) continue
-    let bulkObj = {tag: character.tag, type: "character", description: "Character.", image: null, imageHash: null} as any
+    let bulkObj = {tag: character.tag, type: "character", description: "Character.", image: null, imageHash: null} as BulkTag
     if (!noImageUpdate && character.image) {
       let ext = ""
-      let buffer = Buffer.from("")
+      let buffer = null as Buffer | null
       if ("ext" in character && "bytes" in character) {
-        ext = character.ext!
+        ext = character.ext || ""
         buffer = Buffer.from(Object.values(character.bytes!))
       } else {
         ext = path.extname(character.image || "")
@@ -562,14 +559,16 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
       }
       const filename = `${character.tag}.${ext}`
       const imagePath = functions.getTagPath("character", filename)
-      if (unverified) {
-        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-      } else {
-        await updateTagImageHistory(character.tag!, filename, buffer, username)
-        await serverFunctions.uploadFile(imagePath, buffer, false)
+      if (buffer) {
+        if (unverified) {
+          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+        } else {
+          await updateTagImageHistory(character.tag!, filename, buffer, username)
+          await serverFunctions.uploadFile(imagePath, buffer, false)
+        }
+        bulkObj.image = filename
+        bulkObj.imageHash = serverFunctions.md5(buffer)
       }
-      bulkObj.image = filename
-      bulkObj.imageHash = serverFunctions.md5(buffer)
     }
     bulkTagUpdate.push(bulkObj)
   }
@@ -577,12 +576,12 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   for (let i = 0; i < series.length; i++) {
     let serie = series[i]
     if (!serie.tag) continue
-    let bulkObj = {tag: serie.tag, type: "series", description: "Series.", image: null, imageHash: null} as any
+    let bulkObj = {tag: serie.tag, type: "series", description: "Series.", image: null, imageHash: null} as BulkTag
     if (!noImageUpdate && serie.image) {
       let ext = ""
-      let buffer = Buffer.from("")
+      let buffer = null as Buffer | null
       if ("ext" in serie && "bytes" in serie) {
-        ext = serie.ext!
+        ext = serie.ext || ""
         buffer = Buffer.from(Object.values(serie.bytes!))
       } else {
         ext = path.extname(serie.image || "")
@@ -591,14 +590,16 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
       }
       const filename = `${serie.tag}.${ext}`
       const imagePath = functions.getTagPath("series", filename)
-      if (unverified) {
-        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-      } else {
-        await updateTagImageHistory(serie.tag!, filename, buffer, username)
-        await serverFunctions.uploadFile(imagePath, buffer, false)
+      if (buffer) {
+        if (unverified) {
+          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+        } else {
+          await updateTagImageHistory(serie.tag!, filename, buffer, username)
+          await serverFunctions.uploadFile(imagePath, buffer, false)
+        }
+        bulkObj.image = filename
+        bulkObj.imageHash = serverFunctions.md5(buffer)
       }
-      bulkObj.image = filename
-      bulkObj.imageHash = serverFunctions.md5(buffer)
     }
     bulkTagUpdate.push(bulkObj)
   }
@@ -817,7 +818,7 @@ const CreateRoutes = (app: Express) => {
         const invalidTags = functions.invalidTags(characters, series, tags)
         if (invalidTags) return res.status(400).send(invalidTags)
         
-        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
+        let skipMBCheck = permissions.isMod(req.session) ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
@@ -865,7 +866,7 @@ const CreateRoutes = (app: Express) => {
         const invalidTags = functions.invalidTags(characters, series, tags)
         if (invalidTags) return res.status(400).send(invalidTags)
 
-        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
+        let skipMBCheck = permissions.isMod(req.session) ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
@@ -950,7 +951,7 @@ const CreateRoutes = (app: Express) => {
           return res.status(400).send(invalidTags)
         }
 
-        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
+        let skipMBCheck = permissions.isMod(req.session) ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
@@ -1000,7 +1001,7 @@ const CreateRoutes = (app: Express) => {
           return res.status(400).send(invalidTags)
         }
 
-        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
+        let skipMBCheck = permissions.isMod(req.session) ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)

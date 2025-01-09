@@ -52,6 +52,7 @@ import link from "../../assets/icons/link-purple.png"
 import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
+import adminLabel from "../../assets/icons/admin-label.png"
 import {ThreadReply, ThreadUser} from "../../types/Types"
 import "./styles/threadpage.less"
 
@@ -644,7 +645,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const viewThreads = () => {
         if (!thread) return
         history.push("/forum")
-        setThreadSearchFlag(`posts:${thread.creator}`)
+        setThreadSearchFlag(`threads:${thread.creator}`)
     }
 
     const getReplyBoxJSX = () => {
@@ -729,7 +730,8 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.timeAgo(thread.createDate, i18n)}</span>
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
-                            <span className="thread-page-mini-link" onClick={viewThreads}>{i18n.sort.posts}: {thread.postCount}</span>
+                            <span className="thread-page-mini-link" onClick={viewThreads}>{thread.postCount} {Number(thread.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
+                            <span className="thread-page-mini-text">{i18n.labels.joined} {functions.prettyDate(thread.joinDate, i18n, true)}</span>
                         </div>
                         <div className="thread-page-text-container">
                             <p className="thread-page-text">{jsxFunctions.renderReplyText(thread.content, emojis)}</p>

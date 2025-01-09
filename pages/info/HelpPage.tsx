@@ -19,6 +19,7 @@ import groupsImg from "../../assets/images/groups.png"
 import cutenessMeterImg from "../../assets/images/cutenessmeter.png"
 import notesImg from "../../assets/images/notes.png"
 import overlayNotesImg from "../../assets/images/overlaynotes.png"
+import characterNotesImg from "../../assets/images/characternotes.png"
 import uploadImg from "../../assets/images/upload.png"
 import taggingImg from "../../assets/images/tagging.png"
 import searchingImg from "../../assets/images/searching.png"
@@ -35,7 +36,6 @@ import languageImg from "../../assets/images/language.png"
 import pixivDownloaderImg from "../../assets/images/pixiv-downloader.png"
 import setAvatarImg from "../../assets/images/set-avatar.png"
 import musicImg from "../../assets/images/music.png"
-import selfPostImg from "../../assets/images/selfpost.png"
 import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
 import tooltipsImg from "../../assets/images/tooltips.png"
@@ -259,8 +259,18 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[6]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[6]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[7]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[7]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[8]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[8]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.overlayNotes.customization.items)[9]}</span>{Object.values(i18n.help.overlayNotes.customization.items)[9]}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={overlayNotesImg}/></div></>
+            )
+        }
+        if (helpTab === "character-notes") {
+            return (
+                <><span className="help-heading">{i18n.help.characterNotes.title}</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {i18n.help.characterNotes.line1}<br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={characterNotesImg}/></div></>
             )
         }
         if (helpTab === "favorites") {
@@ -627,71 +637,71 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.commenting.rules.rule5}<br/><br/>
                     </span>
 
-                    <span className="help-alt">{i18n.help.commenting.moemarkdown.title}</span><br/>
-                    {i18n.help.commenting.moemarkdown.header}<br/><br/>
+                    <span className="help-alt">{i18n.help.commenting.moetext.title}</span><br/>
+                    {i18n.help.commenting.moetext.header}<br/><br/>
 
-                    {i18n.help.commenting.moemarkdown.quotes.title}<br/>
+                    {i18n.help.commenting.moetext.quotes.title}<br/>
                     <span className="help-alt">
-                    {i18n.help.commenting.moemarkdown.quotes.line1}<br/>
-                    {i18n.help.commenting.moemarkdown.quotes.line2}<br/>
+                    {i18n.help.commenting.moetext.quotes.line1}<br/>
+                    {i18n.help.commenting.moetext.quotes.line2}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.highlight.title}
+                    {i18n.help.commenting.moetext.highlight.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.highlight.line1}<br/>
+                    {i18n.help.commenting.moetext.highlight.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.bold.title}
+                    {i18n.help.commenting.moetext.bold.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.bold.line1}<br/>
+                    {i18n.help.commenting.moetext.bold.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.italic.title}
+                    {i18n.help.commenting.moetext.italic.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.italic.line1}<br/>
+                    {i18n.help.commenting.moetext.italic.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.underline.title}
+                    {i18n.help.commenting.moetext.underline.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.underline.line1}<br/>
+                    {i18n.help.commenting.moetext.underline.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.strikethrough.title}
+                    {i18n.help.commenting.moetext.strikethrough.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.strikethrough.line1}<br/>
+                    {i18n.help.commenting.moetext.strikethrough.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.spoiler.title}
+                    {i18n.help.commenting.moetext.spoiler.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.spoiler.line1}<br/>
+                    {i18n.help.commenting.moetext.spoiler.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.dropdown.title}
+                    {i18n.help.commenting.moetext.dropdown.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.dropdown.line1}<br/>
+                    {i18n.help.commenting.moetext.dropdown.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.color.title}
+                    {i18n.help.commenting.moetext.color.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.color.line1}<br/>
+                    {i18n.help.commenting.moetext.color.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.code.title}
+                    {i18n.help.commenting.moetext.code.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.code.line1}<br/>
+                    {i18n.help.commenting.moetext.code.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.mention.title}
+                    {i18n.help.commenting.moetext.mention.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.mention.line1}<br/>
+                    {i18n.help.commenting.moetext.mention.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.emojis.title}
+                    {i18n.help.commenting.moetext.emojis.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moemarkdown.emojis.line1}<br/><br/>
+                    {i18n.help.commenting.moetext.emojis.line1}<br/><br/>
                     </span>
 
-                    {i18n.help.commenting.moemarkdown.images.header}
+                    {i18n.help.commenting.moetext.images.header}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
@@ -777,6 +787,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("music")}>{i18n.help.music.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("notes")}>{i18n.navbar.notes}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("overlay-notes")}>{i18n.help.overlayNotes.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("character-notes")}>{i18n.help.characterNotes.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>{i18n.sort.favorites}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>{i18n.help.favoriteGroups.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>{i18n.sort.cuteness}</span>
@@ -785,7 +796,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>{i18n.help.selfUploads.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>{i18n.help.upscaling.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>{i18n.help.compressing.title}</span>
-                        {/* <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span> */}
+                        <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>{i18n.help.bookmarklet.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("variations")}>{i18n.sort.variations}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>{i18n.post.childPosts}</span>

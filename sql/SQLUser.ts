@@ -39,12 +39,12 @@ export default class SQLUser {
     public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premiumExpiration" | "banExpiration" | "banned"
         | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
-        | "postCount" | "joinDate", value: string | number | boolean | null | string[]) => {
+        | "postCount" | "joinDate" | "forceNoteBubbles", value: string | number | boolean | null | string[]) => {
 
         let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
-        "postCount", "joinDate"]
+        "postCount", "joinDate", "forceNoteBubbles"]
         
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)

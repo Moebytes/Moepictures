@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
-useFlagActions, useInteractionActions} from "../../store"
+useFlagActions, useInteractionActions, useThemeSelector} from "../../store"
 import functions from "../../structures/Functions"
 import "./styles/tooltip.less"
 import pixiv from "../../assets/icons/pixiv.png"
@@ -19,9 +19,29 @@ import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import tagIcon from "../../assets/icons/tag.png"
+import image from "../../assets/icons/image.png"
+import animation from "../../assets/icons/animation.png"
+import video from "../../assets/icons/video.png"
+import comic from "../../assets/icons/comic.png"
+import live2d from "../../assets/icons/live2d.png"
+import model from "../../assets/icons/model.png"
+import audio from "../../assets/icons/audio.png"
+import cute from "../../assets/icons/cute.png"
+import sexy from "../../assets/icons/sexy.png"
+import ecchi from "../../assets/icons/ecchi.png"
+import hentai from "../../assets/icons/hentai.png"
+import $2d from "../../assets/icons/2d.png"
+import $3d from "../../assets/icons/3d.png"
+import pixel from "../../assets/icons/pixel.png"
+import chibi from "../../assets/icons/chibi.png"
+import daki from "../../assets/icons/daki.png"
+import sketch from "../../assets/icons/sketch.png"
+import lineart from "../../assets/icons/lineart.png"
+import promo from "../../assets/icons/promo.png"
 import {MiniTag} from "../../types/Types"
 
 const ToolTip: React.FunctionComponent = (props) => {
+    const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {selectionMode} = useSearchSelector()
@@ -189,6 +209,44 @@ const ToolTip: React.FunctionComponent = (props) => {
             history.push(`/tag/${artist.tag}`)
         }
     }
+
+    const getTypeIcon = () => {
+        if (tooltipPost.type === "image") return image
+        if (tooltipPost.type === "comic") return comic
+        if (tooltipPost.type === "animation") return animation
+        if (tooltipPost.type === "video") return video
+        if (tooltipPost.type === "audio") return audio
+        if (tooltipPost.type === "model") return model
+        if (tooltipPost.type === "live2d") return live2d
+        return image
+    }
+
+    const getRatingIcon = () => {
+        if (tooltipPost.rating === "cute") return cute
+        if (tooltipPost.rating === "sexy") return sexy
+        if (tooltipPost.rating === "ecchi") return ecchi
+        if (tooltipPost.rating === "hentai") return hentai
+        return cute
+    }
+
+    const getStyleIcon = () => {
+        if (tooltipPost.style === "2d") return $2d
+        if (tooltipPost.style === "3d") return $3d
+        if (tooltipPost.style === "chibi") return chibi
+        if (tooltipPost.style === "pixel") return pixel
+        if (tooltipPost.style === "daki") return daki
+        if (tooltipPost.style === "promo") return promo
+        if (tooltipPost.style === "sketch") return sketch
+        if (tooltipPost.style === "lineart") return lineart
+        return $2d
+    }
+
+    const getIconStyle = (icon: string) => {
+        if (icon === "hentai") return {filter: `hue-rotate(-10deg)`}
+        if (icon === "sketch") return {filter: `hue-rotate(125deg)`}
+        if (icon === "lineart") return {filter: `hue-rotate(125deg)`}
+        return {filter: `hue-rotate(60deg)`}
+    }
  
     return (
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
@@ -205,8 +263,13 @@ const ToolTip: React.FunctionComponent = (props) => {
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
-                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle}</span>
-                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.type)}/>{tooltipPost.type}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.rating)}/>{tooltipPost.rating}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.style)}/>{tooltipPost.style}</span>
+                </div>
+                <div className="tooltip-tag-container">
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle || i18n.labels.noTitle}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
                 </div>
                 <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {getTagsJSX()}

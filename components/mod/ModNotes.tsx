@@ -271,8 +271,10 @@ const ModNotes: React.FunctionComponent = (props) => {
     const noteDataJSX = (unverifiedNote: UnverifiedNoteSearch) => {
         let noteChanges = unverifiedNote.addedEntries?.length || unverifiedNote.removedEntries?.length
         if (!noteChanges) return null
-        const addedJSX = unverifiedNote.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
-        const removedJSX = unverifiedNote.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+
+        const replaceKey = (i: string) => i.replace("Character", functions.toProperCase(i18n.tag.character))
+        const addedJSX = unverifiedNote.addedEntries.map((i: string) => <span className="tag-add">+{replaceKey(i)}</span>)
+        const removedJSX = unverifiedNote.removedEntries.map((i: string) => <span className="tag-remove">-{replaceKey(i)}</span>)
 
         if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]

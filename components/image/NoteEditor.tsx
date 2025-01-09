@@ -106,16 +106,17 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     text, showTranscript, breakWord, overlay, fontSize, backgroundColor, textColor, backgroundAlpha,
     fontFamily, bold, italic, strokeColor, strokeWidth, borderRadius}) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {session} = useSessionSelector()
     const getFilter = () => {
-        if (overlay) return ""
+        if (overlay && !session.forceNoteBubbles) return ""
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
     const getBGColor = () => {
-        if (overlay) return backgroundColor || "#ffffff"
+        if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
         return "rgba(89, 43, 255, 0.1)"
     }
     const getStrokeColor = () => {
-        if (overlay) return backgroundColor || "#ffffff"
+        if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
         return "rgba(89, 43, 255, 0.9)"
     }
     const getTextColor = () => {
@@ -126,7 +127,7 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
 
     const maxTextWidth = width - ((fontSize || 100) / 5)
     let lines = [] as string[]
-    if (overlay) {
+    if (overlay && !session.forceNoteBubbles) {
         lines = splitTextIntoLines(text, maxTextWidth, fontSize || 100, breakWord && !showTranscript)
     }
     const lineHeight = (fontSize || 100) + ((fontSize || 100) / 5)
@@ -177,6 +178,7 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
     onDoubleClick, onMouseDown, onContextMenu, bubbleToggle}) => {
     const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const [focus, setFocus] = useState(false)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -185,15 +187,17 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
         return "rgba(0, 0, 0, 0)"
     }
     const getStrokeColor = () => {
-        return noteDrawingEnabled || bubbleToggle ? "rgba(255, 43, 131, 0.9)" : "rgba(0, 0, 0, 0)"
+        let condition = bubbleToggle || (noteDrawingEnabled && focus)
+        return condition ? "rgba(255, 43, 131, 0.9)" : "rgba(0, 0, 0, 0)"
     }
 
     const rectStrokeWidth = Math.ceil(1/scale)
     const rectStrokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
 
     return (
-        <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} 
-        onMouseLeave={onMouseLeave} onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
+        <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
+        onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)} tabIndex={0}>
             <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} 
             strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
         </svg>
@@ -261,6 +265,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         } else {
             setItems([])
             setID(0)
+            setNoteMode(false)
         }
     }
 
@@ -675,7 +680,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
-                            if (item.overlay) return
+                            if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
                                 if (!item.characterTag) return setBubbleToggle(false)
                             } else {
@@ -699,7 +704,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
-                            if (item.overlay) return
+                            if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
                                 if (!item.characterTag) return setBubbleToggle(false)
                             } else {
@@ -722,7 +727,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseLeave = () => {
-                            if (item.character && noteDrawingEnabled) return
                             setBubbleToggle(false)
                         }
 

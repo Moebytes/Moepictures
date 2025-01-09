@@ -599,7 +599,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const generateActiveFavgroupJSX = () => {
         if (activeFavgroup) {
-            if (functions.isR18(activeFavgroup.rating)) if (!functions.isR18(ratingType)) return null
+            if (functions.isR18(activeFavgroup.rating)) if (!session.showR18) return null
             const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
@@ -623,7 +623,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
-            if (functions.isR18(group.rating)) if (!functions.isR18(ratingType)) continue
+            if (functions.isR18(group.rating)) if (!session.showR18) continue
             const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID

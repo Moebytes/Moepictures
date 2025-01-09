@@ -410,7 +410,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                         <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(new Date(user.joinDate || ""), i18n)}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(user.joinDate, i18n)}</span>
                     </div>
                     {counts?.postEdits || counts?.tagEdits || counts?.noteEdits || counts?.groupEdits ? 
                     <div className="user-row">

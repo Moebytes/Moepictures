@@ -22,6 +22,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     padding: 10px;
+    padding-bottom: 5px;
     &:last-child {
         padding-top: 0px;
         margin-bottom: 10px;
@@ -62,6 +63,11 @@
     }
 }
 
+.tooltip-tag-text {
+    .tooltip-tag();
+    color: var(--artistTagColor);
+}
+
 .tooltip-artist-container {
     display: flex;
     flex-direction: row;
@@ -82,4 +88,10 @@
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.tooltip-icon {
+    height: 15px;
+    width: auto;
+    margin-right: 5px;
 }

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "downloadPixivID" boolean,
     "autosearchInterval" int,
     "upscaledImages" boolean,
+    "forceNoteBubbles" boolean,
     "savedSearches" jsonb,
     "showR18" boolean,
     "premiumExpiration" timestamptz,

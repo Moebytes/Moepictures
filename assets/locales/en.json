@@ -267,6 +267,7 @@
         "showTagTooltips": "Show Tag Tooltips",
         "showTagBanner": "Show Tag Banner",
         "downloadPixivID": "Download Pixiv ID",
+        "forceNoteBubbles": "Force Note Bubbles",
         "upscaledImages": "Upscaled Images",
         "autosearchInterval": "Autosearch Interval",
         "showR18": "Show R18",
@@ -331,6 +332,7 @@
         "none": "None",
         "unknown": "Unknown",
         "noDesc": "No description.",
+        "noTitle": "No title",
         "affectedPosts": "Affected Posts",
         "name": "Name",
         "email": "Email",
@@ -457,7 +459,8 @@
         "uploadLimit": "Upload Limit",
         "appealer": "Appealer",
         "borderRadius": "Border Radius",
-        "characterTag": "Character Tag"
+        "characterTag": "Character Tag",
+        "joined": "Joined"
     },
     "errors": {
         "$401":"401 error",
@@ -1216,21 +1219,26 @@
         },
         "overlayNotes": {
             "title": "Overlay Notes",
-            "line1": "Alternatively, notes can be overlayed on top of the image rather than appearing in a text bubble. Overlay notes offer much more customization options compared to regular notes, and allow for faster reading without needing to hover over the text.",
+            "line1": "Alternatively, notes can be overlayed on top of the image rather than appearing in a text bubble. Overlay notes offer much more customization options compared to regular notes, and allow for faster reading without needing to hover over the text. *Make sure that \"Force Note Bubbles\" is turned off for overlay notes to show.",
             "customization": {
                 "header": "The following customization options are available when using overlay notes:",
                 "items": {
                     "Font Family": " - The font family of the text.",
                     "Font Style": " - Make the text bold or italicized.",
                     "Font Size": " - The size of the font.",
-                    "Break Word": " - Break the text every word rather than every character. Japanese text is always broken every character.",
+                    "Break Word": " - Break the text every word rather than every character. (doesn't affect Japanese text).",
                     "Text Color": " - The color of the text.",
                     "Background Color": " - The color of text bubble. Set the same as the background color to hide the original text.",
                     "Background Alpha": " - The opacity of text bubble. Setting it to 0 will make it fully transparent and only show the text.",
                     "Stroke Color": " - The color of the stroke around the text.",
-                    "Stroke Width": " - The width of the stroke. Setting it to 0 will not apply a stroke."
+                    "Stroke Width": " - The width of the stroke. Setting it to 0 will not apply a stroke.",
+                    "Border Radius": " - The border radius of the box. This will add rounded corners."
                 }
             }
+        },
+        "characterNotes": {
+            "title": "Character Notes",
+            "line1": "When an image contains multiple characters, using character notes may be helpful. Character notes allow you to draw a bounding box around the character and link it to their character tag. Character notes are fully transparent and will only show a pop-up of the character's name when you hover over them."
         },
         "favorites": {
             "line1": "If you like an image, you can add it to your favorites for easier access later on. By default, your favorites are public but they can be made private in your account settings.",
@@ -1477,9 +1485,9 @@
                 "rule4": "⇾ No unnecessary rudeness or impoliteness, please be kind.",
                 "rule5": "⇾ No otherwise distasteful/inappropriate comments."
             },
-            "moemarkdown": {
-                "title": "MoeMarkdown",
-                "header": "MoeMarkdown is our markup language to format comments/replies, inspired somewhat by markdown.",
+            "moetext": {
+                "title": "MoeText",
+                "header": "MoeText is our markup language to format comments/replies, inspired somewhat by markdown.",
                 "quotes": {
                     "title": "Quoting:",
                     "line1": ">>>[id] User said:",

@@ -1231,24 +1231,31 @@ export default class Functions {
         return `${month}-${day}-${year}`
     }
 
-    public static prettyDate = (inputDate: Date, i18n: typeof enLocale) => {
+    public static prettyDate = (inputDate: Date | string | null, i18n: typeof enLocale, noDay?: boolean) => {
         const monthNames = [
             i18n.time.january, i18n.time.february, i18n.time.march,
             i18n.time.april, i18n.time.may, i18n.time.june, i18n.time.july,
             i18n.time.august, i18n.time.september, i18n.time.october,
             i18n.time.november, i18n.time.december
         ]
-        const date = new Date(inputDate)
+        const date = new Date(inputDate || "")
         const day = `${date.getDate()}` + i18n.time.dayAppend
         const month = `${monthNames[date.getMonth()]}`
         const year = `${date.getFullYear()}` + i18n.time.yearAppend
+
+        if (noDay) {
+            if (i18n.time.comma) {
+                return `${month} ${year}`
+            } else {
+                return `${year}${month}`
+            }
+        }
 
         if (i18n.time.comma) {
             return `${month} ${day}, ${year}`
         } else {
             return `${year}${month}${day}`
         }
-
     }
 
     public static binaryToHex = (bin: string) => {

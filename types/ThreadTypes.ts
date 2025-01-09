@@ -22,6 +22,7 @@ export interface ThreadUser extends Thread {
     imageHash: string | null
     banned: boolean | null 
     postCount: number
+    joinDate: string
 }
 
 export interface ThreadSearch extends Thread {
@@ -44,6 +45,7 @@ export interface ThreadReply {
     banned: boolean | null
     replyCount: string
     postCount: number
+    joinDate: string
     fake?: boolean
 }
 
