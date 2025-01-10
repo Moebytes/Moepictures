@@ -171,8 +171,9 @@ export default class SQLFavorite {
     }
 
     /** Get favgroup. */
-    public static favgroup = async (username: string, slug: string, type?: string, rating?: string, style?: string, 
-        sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+    public static favgroup = async (username: string, slug: string, type = "", rating = "", style = "", 
+        sort = "", showChildren = true, sessionUsername = "") => {
+        if (!sessionUsername) sessionUsername = username
         const {postJSON, values} = 
         SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
 

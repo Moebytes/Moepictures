@@ -556,7 +556,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../assets/misc/wdtagger.py")
+            const scriptPath = path.join(__dirname, "../../assets/misc/wdtagger.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str) as WDTaggerResponse
@@ -583,7 +583,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../assets/misc/ocr.py")
+            const scriptPath = path.join(__dirname, "../../assets/misc/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str) as OCRResponse[]
@@ -599,7 +599,7 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/emojis", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const dir = path.join(__dirname, "../assets/emojis")
+            const dir = path.join(__dirname, "../../assets/emojis")
             let files = fs.readdirSync(dir)
             let fileData = {} as {[key: string]: string}
             for (const file of files) {

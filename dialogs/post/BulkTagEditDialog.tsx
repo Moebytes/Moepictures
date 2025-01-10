@@ -161,16 +161,16 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
             })
             promiseArray.push(promise)
         }
-        await Promise.all(promiseArray)
-        for (let i = 0; i < promiseArray.length; i++) {
-            const data = await promiseArray[i]
-            functions.put("/api/post/quickedit", data, session, setSessionFlag)
-        }
         setShowBulkTagEditDialog(false)
         setSelectionMode(false)
         setTimeout(() => {
             setSelectionMode(true)
         }, 200)
+        await Promise.all(promiseArray)
+        for (let i = 0; i < promiseArray.length; i++) {
+            const data = await promiseArray[i]
+            functions.put("/api/post/quickedit", data, session, setSessionFlag)
+        }
         functions.clearCache()
     }
 

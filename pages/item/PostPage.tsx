@@ -42,7 +42,6 @@ import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
-import ToolTip from "../../components/tooltip/ToolTip"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
@@ -714,7 +713,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <SideBar post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
             <SideBar/>}
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <ToolTip/>
                 <div className="post-container">
                     {historyID || noteID ? getHistoryButtons() : null}
                     {/*nsfwChecker() &&*/ images.length > 1 ?

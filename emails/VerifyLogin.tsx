@@ -69,7 +69,7 @@ const VerifyLogin = (props: Props) => {
             <Preview>Moepictures New Login Location</Preview>
             <Body style={{width: "80%"}}>
                 <Container className="logo-container">
-                    <Link href="https://moepictures.moe"><Img className="logo" src="https://i.imgur.com/AJxxfWG.png"/></Link>
+                    <Link href="https://moepictures.moe"><Img className="logo" src="https://i.imgur.com/DGvZWgB.png"/></Link>
                 </Container>
                 <Container className="text-container">
                     <Text className="text">

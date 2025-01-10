@@ -732,6 +732,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 window.URL.revokeObjectURL(url)
             } else {
                 let image = await renderImage()
+                console.log(image)
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
                     image = await functions.convertToFormat(image, format)
                 }

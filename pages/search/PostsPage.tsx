@@ -7,7 +7,6 @@ import ImageGrid from "../../components/search/ImageGrid"
 import Footer from "../../components/site/Footer"
 import DownloadDialog from "../../dialogs/misc/DownloadDialog"
 import PageDialog from "../../dialogs/misc/PageDialog"
-import ToolTip from "../../components/tooltip/ToolTip"
 import TagBanner from "../../components/site/TagBanner"
 import BulkGroupDialog from "../../dialogs/group/BulkGroupDialog"
 import BulkFavgroupDialog from "../../dialogs/group/BulkFavgroupDialog"
@@ -118,7 +117,6 @@ const PostsPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <ToolTip/>
                 <SortBar/>
                 {tagBannerJSX()}
                 <ImageGrid/>

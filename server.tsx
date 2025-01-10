@@ -101,8 +101,8 @@ if (process.env.TESTING === "yes") {
 }
 
 app.use(express.static(path.join(__dirname, "./public")))
-app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
-app.use("/assets", express.static(path.join(__dirname, "./assets")))
+app.use("/assets", express.static(path.join(__dirname, "./dist/client/assets")))
+app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
 
 let blacklist = null as unknown as Set<string>
 
@@ -193,7 +193,7 @@ for (let i = 0; i < folders.length; i++) {
         if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
-      res.setHeader("Content-Type", mimeType ?? "")
+      if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
@@ -250,7 +250,7 @@ for (let i = 0; i < folders.length; i++) {
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mimeType = mime.getType(req.path)
-      res.setHeader("Content-Type", mimeType ?? "")
+      if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
@@ -311,7 +311,8 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      const mimeType = mime.getType(req.path)
+      if (mimeType) res.setHeader("Content-Type", mimeType)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -356,7 +357,7 @@ for (let i = 0; i < folders.length; i++) {
   app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mimeType = mime.getType(req.path)
-      res.setHeader("Content-Type", mimeType ?? "")
+      if (mimeType) res.setHeader("Content-Type", mimeType)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -402,21 +403,29 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", async (req: Request, res: Response) => {
-  if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
-    res.redirect(301, `https://moepictures.moe${req.path}`)
+  try {
+    if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
+      res.redirect(301, `https://moepictures.moe${req.path}`)
+    }
+    if (/\.\w+$/.test(req.path)) {
+      return res.status(404).json({message: "Path not found."})
+    }
+    if (!req.session.csrfToken) {
+      const {secret, token} = serverFunctions.generateCSRF()
+      req.session.csrfSecret = secret
+      req.session.csrfToken = token
+    }
+    const mimeType = mime.getType(req.path)
+    if (mimeType) res.setHeader("Content-Type", mimeType)
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
+    const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
+    // @ts-expect-error
+    const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
+    res.status(200).send(document.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
+  } catch {
+    return res.status(500).json({message: "Internal server error."})
   }
-  if (!req.session.csrfToken) {
-    const {secret, token} = serverFunctions.generateCSRF()
-    req.session.csrfSecret = secret
-    req.session.csrfToken = token
-  }
-  res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
-  const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
-  // @ts-ignore
-  const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
-  res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 
 const defaultTagInserts = async () => {

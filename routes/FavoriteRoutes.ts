@@ -168,7 +168,7 @@ const FavoriteRoutes = (app: Express) => {
             const {username, name} = req.query as {username: string, name: string}
             if (!username) return res.status(400).send("Bad username")
             const slug = functions.generateSlug(name)
-            const favgroup = await sql.favorite.favgroup(username, slug)
+            const favgroup = await sql.favorite.favgroup(username, slug, "", "", "", "", true, req.session.username)
             if (!favgroup) return res.status(400).send("Invalid favgroup")
             if (favgroup.private) {
                 if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")

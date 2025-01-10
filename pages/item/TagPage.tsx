@@ -31,7 +31,6 @@ import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import jsxFunctions from "../../structures/JSXFunctions"
 import Related from "../../components/post/Related"
-import ToolTip from "../../components/tooltip/ToolTip"
 import PageDialog from "../../dialogs/misc/PageDialog"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
@@ -519,7 +518,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <ToolTip/>
                 {tag ? 
                 <div className="tag-page">
                     {historyID ? getHistoryButtons() : null}

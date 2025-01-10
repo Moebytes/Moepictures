@@ -108,7 +108,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         let items = [] as GroupItem[]
         for (let i = 0; i < favgroup.posts.length; i++) {
             const post = favgroup.posts[i]
-            if (functions.isR18(post.rating)) if (!functions.isR18(ratingType)) continue
+            if (functions.isR18(post.rating)) if (!session.showR18) continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
             let img = await functions.decryptThumb(imageLink, session)
             items.push({id: post.order, image: img, post})
@@ -166,7 +166,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <img draggable={false} className="group-image" src={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
+                    <img draggable={false} className="group-thumbnail-img-outlined" src={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }

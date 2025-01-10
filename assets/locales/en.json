@@ -1073,8 +1073,8 @@
             "title": "Revert Note History"
         },
         "saveNote": {
-            "title": "Save Note",
-            "request": "Save Note Request",
+            "title": "Save Notes",
+            "request": "Save Notes Request",
             "header": "Do you want to save the note changes made to this post?",
             "submitText": "Your note request was submitted.",
             "banText": "You are banned. Cannot save notes.",

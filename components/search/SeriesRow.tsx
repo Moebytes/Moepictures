@@ -4,7 +4,7 @@ import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheAction
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
-import website from "../../assets/icons/support.png"
+import website from "../../assets/icons/website.png"
 import twitter from "../../assets/icons/twitter.png"
 import permissions from "../../structures/Permissions"
 import "./styles/seriesrow.less"
