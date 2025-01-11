@@ -57,11 +57,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.comment.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${props.comment.imagePost}`)
-        }
+        functions.openPost(props.comment.imagePost, event, history, session, setSessionFlag)
     }
 
     const triggerQuote = () => {

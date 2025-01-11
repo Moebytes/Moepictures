@@ -377,6 +377,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if ((!prevHistory && props.tagHistory.r18) || changes.r18) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
         }
+        if (!jsx.length && !props.tagHistory.imageChanged) {
+            jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)
+        }
         return jsx
     }
 

@@ -233,9 +233,13 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const openPost = (postID: string, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     const postDiff = () => {
-        const addedPostsJSX = props.groupHistory.addedPosts.map((postID: string) => <span className="tag-add-clickable" onClick={() => history.push(`/post/${postID}`)}>+{postID}</span>)
-        const removedPostsJSX = props.groupHistory.removedPosts.map((postID: string) => <span className="tag-remove-clickable" onClick={() => history.push(`/post/${postID}`)}>-{postID}</span>)
+        const addedPostsJSX = props.groupHistory.addedPosts.map((postID: string) => <span className="tag-add-clickable" onClick={(event) => openPost(postID, event)}>+{postID}</span>)
+        const removedPostsJSX = props.groupHistory.removedPosts.map((postID: string) => <span className="tag-remove-clickable" onClick={(event) => openPost(postID, event)}>-{postID}</span>)
         if (![...addedPostsJSX, ...removedPostsJSX].length) return null
         return [...addedPostsJSX, ...removedPostsJSX]
     }
@@ -254,6 +258,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (postDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posts}:</span> {postDiff()}</span>)
             }
+        }
+        if (!jsx.length && !props.groupHistory.orderChanged) {
+            jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)
         }
         return jsx
     }

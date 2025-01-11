@@ -1,6 +1,6 @@
 export type Themes =
     | "light"
-    | "darl"
+    | "dark"
 
 export type Languages =
     | "en"

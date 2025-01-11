@@ -91,11 +91,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${creatorData.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${creatorData.imagePost}`)
-        }
+        functions.openPost(creatorData.imagePost, event, history, session, setSessionFlag)
     }
 
     const getRecipientPFP = () => {
@@ -118,11 +114,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const recipientImgClick = (event: React.MouseEvent) => {
         if (!recipientData?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${recipientData.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${recipientData.imagePost}`)
-        }
+        functions.openPost(recipientData.imagePost, event, history, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {

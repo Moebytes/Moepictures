@@ -209,11 +209,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
     }
 
     const openPost = (event: React.MouseEvent, post: PostSearch) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${post.postID}`, "_blank")
-        } else {
-            history.push(`/post/${post.postID}`)
-        }
+        functions.openPost(post, event, history, session, setSessionFlag)
         setTagToolTipEnabled(false)
     }
 

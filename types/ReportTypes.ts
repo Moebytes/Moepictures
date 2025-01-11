@@ -28,3 +28,10 @@ export interface Blacklist {
     ip: string
     reason: string | null
 }
+
+export interface Redirect {
+    redirectID: string
+    postID: string
+    createDate: string
+    oldSlug: string
+}

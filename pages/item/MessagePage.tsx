@@ -421,11 +421,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!message?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${message.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${message.imagePost}`)
-        }
+        functions.openPost(message.imagePost, event, history, session, setSessionFlag)
     }
 
     const getCreatorJSX = () => {

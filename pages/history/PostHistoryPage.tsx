@@ -15,7 +15,7 @@ import {PostHistory, TagHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {id: string, username?: string}}
+    match: {params: {id?: string, slug?: string, username?: string}}
     all?: boolean
     user?: boolean
 }
@@ -35,14 +35,15 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [visibleRevisions, setVisibleRevisions] = useState([] as PostHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const postID = props.match.params.id
+    const postID = props.match.params.id || ""
+    const slug = props.match.params.slug || ""
     const username = props.match.params.username
     const history = useHistory()
 
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            setRedirect(postID ? `/post/history/${postID}` : "/post/history")
+            setRedirect(postID ? `/post/history/${postID}/${slug}` : "/post/history")
             history.push("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
@@ -75,8 +76,15 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         setRevisions(result)
     }
 
+    const processRedirects = async () => {
+        if (!postID || !session.cookie) return
+        const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.processRedirects(postObject, postID, slug, history, session, setSessionFlag)
+    }
+
     useEffect(() => {
         updateHistory()
+        processRedirects()
     }, [postID, session])
 
     useEffect(() => {

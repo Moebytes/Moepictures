@@ -391,6 +391,8 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
     approveDate = uploadDate ? uploadDate : new Date().toISOString()
   }
 
+  const newSlug = functions.postSlug(source.title, source.englishTitle)
+
   if (unverified) {
     if (duplicates !== undefined) {
       duplicates = duplicates ? true : false
@@ -416,7 +418,7 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
       mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-      slug: functions.postSlug(source.title, source.englishTitle),
+      slug: newSlug,
       uploader,
       uploadDate,
       updater,
@@ -444,7 +446,7 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
       mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-      slug: functions.postSlug(source.title, source.englishTitle),
+      slug: newSlug,
       uploader,
       uploadDate,
       updater,
@@ -456,6 +458,7 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       hidden
     })
   }
+  return {newSlug}
 }
 
 export const insertTags = async (postID: string, data: {tags: string[], artists: UploadTag[] | MiniTag[], username: string,
@@ -902,8 +905,12 @@ const CreateRoutes = (app: Express) => {
 
         let {hasOriginal, hasUpscaled, imageFilenames, upscaledImageFilenames, imageOrders} = 
         await insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged})
-        await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled,
+        let {newSlug} = await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled,
         updater: req.session.username, updatedDate})
+
+        if (post.slug && post.slug !== newSlug) {
+          await sql.report.insertRedirect(postID, post.slug)
+        }
 
         let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, tags, noImageUpdate, 
         post, username: req.session.username})
@@ -1141,9 +1148,15 @@ const CreateRoutes = (app: Express) => {
         upscaledImages: unverified.images, type, rating, source: sourceData,
         thumbnail: unverified.thumbnail, characters, imgChanged})
 
-        await updatePost(newPostID, {artists, type, rating, style, hasOriginal, hasUpscaled,
+        let {newSlug} = await updatePost(newPostID, {artists, type, rating, style, hasOriginal, hasUpscaled,
         source: sourceData, uploader: unverified.uploader, updater: unverified.updater, uploadDate: unverified.uploadDate,
         parentID: unverified.parentID, updatedDate: unverified.updatedDate, approver: req.session.username})
+
+        if (post) {
+          if (post.slug && post.slug !== newSlug) {
+            await sql.report.insertRedirect(newPostID, post.slug)
+          }
+        }
 
         let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: unverified.uploader, noImageUpdate})
 

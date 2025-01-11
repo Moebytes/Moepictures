@@ -63,7 +63,11 @@ const SearchRoutes = (app: Express) => {
                 if (!permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
-            if (query.startsWith("pixiv:") || query.includes("pixiv.net")) {
+            if (query.startsWith("id:")) {
+                const id = query.match(/(\d+)/g)?.[0] || ""
+                const post = await sql.post.post(id)
+                if (post) result = [{...post, postCount: "1"}] as PostSearch[]
+            } else if (query.startsWith("pixiv:") || query.includes("pixiv.net")) {
                 const pixivID = query.match(/(\d+)/g)?.[0] || ""
                 result = await sql.search.searchPixivID(pixivID, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
             } else if (query.startsWith("twitter:") || query.includes("twitter.com") || query.includes("x.com")) {

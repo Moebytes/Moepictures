@@ -91,6 +91,8 @@
     "@napi-rs/canvas": "^0.1.56",
     "@react-email/components": "^0.0.24",
     "@reduxjs/toolkit": "^2.3.0",
+    "@tsparticles/preset-snow": "^3.2.0",
+    "@tsparticles/react": "^3.0.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "audio-encoder": "^1.0.4",
     "aws-sdk": "^2.1120.0",

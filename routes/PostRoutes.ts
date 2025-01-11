@@ -594,6 +594,7 @@ const PostRoutes = (app: Express) => {
             if (source && sourceEdit) {
                 const updatedDate = new Date().toISOString()
 
+                let newSlug = functions.postSlug(source.title, source.englishTitle)
                 if (unverified) {
                     await sql.post.bulkUpdateUnverifiedPost(postID, {
                         title: source.title ? source.title : null,
@@ -606,7 +607,7 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         buyLink: source.buyLink ? source.buyLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-                        slug: functions.postSlug(source.title, source.englishTitle),
+                        slug: newSlug,
                         updatedDate,
                         updater: req.session.username
                     })
@@ -622,10 +623,14 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         buyLink: source.buyLink ? source.buyLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-                        slug: functions.postSlug(source.title, source.englishTitle),
+                        slug: newSlug,
                         updatedDate,
                         updater: req.session.username
                     })
+                }
+
+                if (post.slug && post.slug !== newSlug) {
+                    await sql.report.insertRedirect(postID, post.slug)
                 }
             } 
             if (tagEdit) {
@@ -1125,6 +1130,18 @@ const PostRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/post/redirects", postLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID} = req.query as {postID: string}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            let result = await sql.report.redirects(postID)
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }

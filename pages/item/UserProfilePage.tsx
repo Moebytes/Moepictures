@@ -444,11 +444,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!userImgPost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${userImgPost}`, "_blank")
-        } else {
-            history.push(`/post/${userImgPost}`)
-        }
+        functions.openPost(userImgPost, event, history, session, setSessionFlag)
     }
 
     const generateUsernameJSX = () => {

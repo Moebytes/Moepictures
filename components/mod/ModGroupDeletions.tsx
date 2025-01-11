@@ -342,10 +342,8 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             const request = visible[i]
             if (!request) break
             if (request.fake) continue
-            const imgClick = (event: React.MouseEvent, middle?: boolean) => {
-                if (!request.post) return
-                if (middle) return window.open(`/post/${request.post.postID}`, "_blank")
-                history.push(`/post/${request.post.postID}`)
+            const imgClick = (event: React.MouseEvent) => {
+                functions.openPost(request.post, event, history, session, setSessionFlag)
             }
             const openGroup = (event: React.MouseEvent) => {
                 event.preventDefault()
@@ -361,8 +359,8 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {request.post ? <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
-                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
+                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></video> :
+                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
                     </div> : null}
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>

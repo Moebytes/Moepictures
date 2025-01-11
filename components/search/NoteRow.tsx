@@ -48,20 +48,16 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.note.postID}?order=${props.note.order}`, "_blank")
+            window.open(`/post/${props.note.postID}/${props.note.post.slug}?order=${props.note.order}`, "_blank")
         } else {
-            history.push(`/post/${props.note.postID}?order=${props.note.order}`)
+            history.push(`/post/${props.note.postID}/${props.note.post.slug}?order=${props.note.order}`)
         }
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.note?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.note.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${props.note.imagePost}`)
-        }
+        functions.openPost(props.note.imagePost, event, history, session, setSessionFlag)
     }
 
     const parseText = () => {

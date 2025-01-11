@@ -32,6 +32,9 @@ import pageIconLight from "../../assets/icons/page-mobile-light.png"
 import scrollIconLight from "../../assets/icons/scroll-mobile-light.png"
 import pageIcon from "../../assets/icons/page-mobile.png"
 import premiumStar from "../../assets/icons/premium-star.png"
+import snowflake from "../../assets/icons/snowflake.png"
+import snowflakeLight from "../../assets/icons/snowflake-light.png"
+import snowflakeOn from "../../assets/icons/snowflake-on.png"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions} from "../../store"
@@ -44,8 +47,8 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, siteHue, siteSaturation, siteLightness, language, i18n} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {theme, particles, siteHue, siteSaturation, siteLightness, language, i18n} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles} = useThemeActions()
     const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {search, scroll} = useSearchSelector()
@@ -160,6 +163,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const getCrownIcon = () => {
         if (theme.includes("light")) return crownLight
         return crown
+    }
+
+    const getSnowflakeIcon = () => {
+        if (particles) return snowflakeOn
+        if (theme.includes("light")) return snowflakeLight
+        return snowflake
     }
 
     const getScrollIcon = () => {
@@ -388,6 +397,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="mobile-nav-color-container">
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={() => setParticles(!particles)} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
@@ -459,6 +469,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    <img className="nav-color" src={getSnowflakeIcon()} onClick={() => setParticles(!particles)} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}

@@ -161,11 +161,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})
                 }
                 if (reorderState) return
-                if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/post/${item.post.postID}/${item.post.slug}`, "_blank")
-                } else {
-                    history.push(`/post/${item.post.postID}/${item.post.slug}`)
-                }
+                functions.openPost(item.post, event, history, session, setSessionFlag)
                 setPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)

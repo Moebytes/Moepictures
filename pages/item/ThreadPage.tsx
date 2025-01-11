@@ -405,11 +405,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!thread?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${thread.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${thread.imagePost}`)
-        }
+        functions.openPost(thread.imagePost, event, history, session, setSessionFlag)
     }
 
     const getCreatorJSX = () => {

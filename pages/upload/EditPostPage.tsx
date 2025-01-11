@@ -57,7 +57,7 @@ let saucenaoTimeout = false
 let tagsTimer = null as any
 
 interface Props {
-    match: {params: {id: string}}
+    match: {params: {id: string, slug: string}}
 }
 
 const EditPostPage: React.FunctionComponent<Props> = (props) => {
@@ -109,6 +109,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [characters, setCharacters] = useState([{}] as UploadTag[])
     const [series, setSeries] = useState([{}] as UploadTag[])
     const [newTags, setNewTags] = useState([] as UploadTag[])
+    const [post, setPost] = useState(null as PostFull | null)
     const [rawTags, setRawTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [artistActive, setArtistActive] = useState([] as boolean[])
@@ -127,7 +128,13 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [needsPermission, setNeedsPermission] = useState(false)
     const [postLocked, setPostLocked] = useState(false)
     const postID = props.match.params.id
+    const slug = props.match.params.slug
     const history = useHistory()
+
+    useEffect(() => {
+        if (!session.cookie) return
+        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+    }, [post, session])
 
     const updateFields = async () => {
         let post = null as PostFull | null
@@ -137,6 +144,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (String(e).includes("401")) return
         }
         if (!post) return functions.replaceLocation("/404")
+        setPost(post)
         setPostLocked(post.locked ?? false)
         setType(post.type)
         setRating(post.rating)
@@ -276,7 +284,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            setRedirect(`/edit-post/${postID}`)
+            setRedirect(`/edit-post/${postID}/${slug}`)
             history.push("/login")
             setSidebarText("Login required.")
         }
@@ -1753,6 +1761,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             )
         }
 
+        const openPost = async (event: React.MouseEvent) => {
+            functions.openPost(postID, event, history, session, setSessionFlag)
+        }
+
         return (
             <>
             <div className="upload">
@@ -1765,7 +1777,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span>}
                     </div> 
                     <div className="upload-container-row" style={{marginTop: "10px"}}>
-                        <button className="upload-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>
+                        <button className="upload-button" onClick={(event) => {openPost(event); setPostFlag(true)}}>
                                 <span className="upload-button-text">←{i18n.buttons.back}</span>
                         </button>
                     </div>
@@ -2068,7 +2080,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             <div className="upload-center-row">
                 {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
                 <div className="upload-submit-button-container">
-                    <button className="upload-button" onClick={() => history.push(`/post/${postID}`)}>
+                    <button className="upload-button" onClick={(event) => openPost(event)}>
                             <span className="upload-button-submit-text">{i18n.buttons.cancel}</span>
                     </button>
                     <button className="upload-button" onClick={() => submit()}>

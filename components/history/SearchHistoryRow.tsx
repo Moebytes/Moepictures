@@ -65,11 +65,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.history.postID}`, "_blank")
-        } else {
-            history.push(`/post/${props.history.postID}`)
-        }
+        functions.openPost(props.history.post, event, history, session, setSessionFlag)
     }
 
     const updateImg = async (event: React.MouseEvent) => {

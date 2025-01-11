@@ -201,11 +201,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!user?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${user.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${user.imagePost}`)
-        }
+        functions.openPost(user.imagePost, event, history, session, setSessionFlag)
     }
 
     const viewFavorites = () => {

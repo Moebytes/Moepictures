@@ -91,16 +91,16 @@ export default class Functions {
         if (clientKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
         if (!privateKey) {
             clientKeyLock = true
-            const savedPublicKey = sessionStorage.getItem("publicKey") as string
-            const savedPrivateKey = sessionStorage.getItem("privateKey") as string
+            const savedPublicKey = await localforage.getItem("publicKey") as string
+            const savedPrivateKey = await localforage.getItem("privateKey") as string
             if (savedPublicKey && savedPrivateKey) {
                 await Functions.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
                 privateKey = savedPrivateKey
             } else {
                 const keys = cryptoFunctions.generateKeys()
                 await Functions.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
-                sessionStorage.setItem("publicKey", keys.publicKey)
-                sessionStorage.setItem("privateKey", keys.privateKey)
+                await localforage.setItem("publicKey", keys.publicKey)
+                await localforage.setItem("privateKey", keys.privateKey)
                 privateKey = keys.privateKey
             }
         }
@@ -2899,7 +2899,6 @@ export default class Functions {
     }
 
     public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
-        if (permissions.noEncryption(session)) return img
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
@@ -2929,6 +2928,7 @@ export default class Functions {
             Functions.setImageCache(cacheKey, cacheUrl)
             return cacheUrl
         }
+        if (permissions.noEncryption(session)) return img
         let isAnimatedWebP = false
         let arrayBuffer = null as ArrayBuffer | null
         let decryptedImg = img
@@ -3131,5 +3131,41 @@ export default class Functions {
             return "Invalid characters in tags: , _ / \\"
         }
         return null
+    }
+
+    public static openPost = async (postResolvable: Post | PostHistory | string | null, event: React.MouseEvent, history: any, 
+        session: Session, setSessionFlag: (value: boolean) => void, historyIndex = "") => {
+        if (!postResolvable) return
+        let post = postResolvable as Post | undefined
+        if (typeof postResolvable === "string") post = await Functions.get("/api/post", {postID: postResolvable as string}, session, setSessionFlag)
+        if (!post) return
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${post.postID}/${post.slug}${historyIndex}`, "_blank")
+        } else {
+            history.push(`/post/${post.postID}/${post.slug}${historyIndex}`)
+        }
+    }
+
+    public static processRedirects = async (post: PostFull | PostSearch | PostHistory | null, postID: string, slug: string, history: any, 
+        session: Session, setSessionFlag: (value: boolean) => void) => {
+        if (!post || postID !== post.postID) return
+        slug = decodeURIComponent(slug).trim()
+        if (slug !== post.slug) {
+            if (!permissions.isMod(session)) {
+                const redirects = await Functions.get("/api/post/redirects", {postID}, session, setSessionFlag)
+                for (const redirect of redirects) {
+                    if (redirect.oldSlug === slug) {
+                        const searchParams = new URLSearchParams(window.location.search)
+                        const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
+                        return history.replace(`${newPath}?${searchParams}`)
+                    }
+                }
+                Functions.replaceLocation("/404")
+            } else {
+                const searchParams = new URLSearchParams(window.location.search)
+                const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
+                history.replace(`${newPath}?${searchParams}`)
+            }
+        }
     }
 }

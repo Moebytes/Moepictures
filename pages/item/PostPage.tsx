@@ -89,7 +89,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [groups, setGroups] = useState([] as GroupPosts[])
     const history = useHistory()
     const location = useLocation()
-    const postID = props?.match.params.id
+    const postID = props.match.params.id
     const slug = props.match.params.slug
 
     useEffect(() => {
@@ -129,11 +129,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [location])
 
     useEffect(() => {
-        if (!post) return
-        const searchParams = new URLSearchParams(window.location.search)
-        const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
-        history.replace(`${newPath}?${searchParams}`)
-    }, [post])
+        if (!session.cookie) return
+        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+    }, [post, session])
 
     useEffect(() => {
         localStorage.setItem("order", String(order))
@@ -163,7 +161,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (!session.cookie || !post) return
         if (post.postID !== postID) return
         if (!session.username) {
-            setRedirect(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
+            setRedirect(`/post/${postID}/${slug}`)
         }
         if (!session.username && post.rating !== functions.r13()) {
             history.push("/login")
@@ -558,7 +556,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHistoryID(null)
         setNoteID(null)
         setPostFlag(true)
-        history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
+        history.push(`/post/${postID}/${slug}`)
     }
 
     const getHistoryButtons = () => {
@@ -581,7 +579,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         return (
             <div className="history-button-container">
-                <button className="history-button" onClick={() => history.push(`/post/history/${postID}`)}>
+                <button className="history-button" onClick={() => history.push(`/post/history/${postID}/${slug}`)}>
                     <img src={historyIcon}/>
                     <span>History</span>
                 </button>
@@ -602,7 +600,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
-                history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
+                history.push(`/post/${postID}/${slug}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
             }
             return (
@@ -626,7 +624,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
-                history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
+                history.push(`/post/${postID}/${slug}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(group.posts)
                 setTimeout(() => {

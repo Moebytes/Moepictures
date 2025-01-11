@@ -56,11 +56,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.reply?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.reply.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${props.reply.imagePost}`)
-        }
+        functions.openPost(props.reply.imagePost, event, history, session, setSessionFlag)
     }
 
     const triggerQuote = () => {

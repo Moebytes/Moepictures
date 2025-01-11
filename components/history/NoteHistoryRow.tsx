@@ -135,11 +135,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?note=${props.noteHistory.historyID}&order=${props.noteHistory.order}`
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.noteHistory.postID}${historyIndex}`, "_blank")
-        } else {
-            history.push(`/post/${props.noteHistory.postID}${historyIndex}`)
-        }
+        functions.openPost(props.noteHistory.post, event, history, session, setSessionFlag, historyIndex)
     }
 
     const userClick = (event: React.MouseEvent) => {
@@ -215,26 +211,28 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const diffText = () => {
         if (!prevHistory) {
-            if (props.noteHistory.notes[0].transcript === "No data") return null
+            if (props.noteHistory.notes[0].transcript === "No data") return []
             return props.noteHistory.notes.map((item) => printNote(item))
         }
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
-        if (!noteChanges) return null
+        if (!noteChanges) return []
 
         const replaceKey = (i: string) => i.replace("Character", functions.toProperCase(i18n.tag.character))
         const addedJSX = props.noteHistory.addedEntries.map((i: string) => <span className="tag-add">+{replaceKey(i)}</span>)
         const removedJSX = props.noteHistory.removedEntries.map((i: string) => <span className="tag-remove">-{replaceKey(i)}</span>)
 
-        if (![...addedJSX, ...removedJSX].length) return null
+        if (![...addedJSX, ...removedJSX].length) return []
         return [...addedJSX, ...removedJSX]
     }
 
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         const diffs = diffText()
-        if (!diffs) return <span className="historyrow-text">{i18n.labels.noData}</span>
         for (let i = 0; i < diffs.length; i++) {
             jsx.push(<span className="historyrow-text">{diffs[i]}</span>)
+        }
+        if (!jsx.length && !props.noteHistory.styleChanged) {
+            jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)
         }
         return jsx
     }

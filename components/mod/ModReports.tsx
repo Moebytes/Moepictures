@@ -45,11 +45,15 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         updateAsset()
     }, [session])
 
+    const openPost = (postID: string, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     const imgClick = (event: React.MouseEvent) => {
         if (!asset) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             if (props.request.type === "comment") {
-                window.open(`/post/${(asset as UserComment).postID}`, "_blank")
+                openPost((asset as UserComment).postID, event)
             } else if (props.request.type === "thread") {
                 window.open(`/thread/${(asset as ThreadUser).threadID}`, "_blank")
             } else if (props.request.type === "reply") {
@@ -57,7 +61,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (props.request.type === "comment") {
-                history.push(`/post/${(asset as UserComment).postID}`)
+                openPost((asset as UserComment).postID, event)
             } else if (props.request.type === "thread") {
                 history.push(`/thread/${(asset as ThreadUser).threadID}`)
             } else if (props.request.type === "reply") {

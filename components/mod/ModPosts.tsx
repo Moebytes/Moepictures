@@ -313,6 +313,10 @@ const ModPosts: React.FunctionComponent = (props) => {
         }
     }, [scroll, modPage, unverifiedPosts])
 
+    const openPost = (postID: string | null, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     const generatePostsJSX = () => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as UnverifiedPost[]
@@ -361,7 +365,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <div className="mod-post-text-container-row">
                             <div className="mod-post-text-column">
                                 <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
-                                {post.parentID ? <span className="mod-post-link" onClick={() => history.push(`/post/${post.parentID}`)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
+                                {post.parentID ? <span className="mod-post-link" onClick={(event) => openPost(post.parentID, event)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
                                 <span className="mod-post-text">{i18n.tag.artist}: {functions.toProperCase(post.artist || i18n.labels.none)}</span>
                                 <span className="mod-post-text">{i18n.navbar.tags}: {post.tags?.length}</span>
                                 <span className="mod-post-text">{i18n.labels.newTags}: {post.newTags || 0}</span>

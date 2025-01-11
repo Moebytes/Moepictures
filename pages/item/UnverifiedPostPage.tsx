@@ -219,7 +219,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const originalPostJSX = () => {
         if (post?.originalID) {
             const click = (img: string, index: number) => {
-                history.push(`/post/${post.originalID}`)
+                history.push(`/post/${post.originalID}/${post.slug}`)
             }
             return (
                 <div className="parent">

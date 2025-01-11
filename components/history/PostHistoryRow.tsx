@@ -183,11 +183,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?history=${props.postHistory.historyID}`
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.postHistory.postID}${historyIndex}`, "_blank")
-        } else {
-            history.push(`/post/${props.postHistory.postID}${historyIndex}`)
-        }
+        functions.openPost(props.postHistory, event, history, session, setSessionFlag, historyIndex)
     }
 
     const userClick = (event: React.MouseEvent) => {
@@ -321,6 +317,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         })
     }
 
+    const openPost = (postID: string | null, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         let changes = props.postHistory.changes || {}
@@ -332,7 +332,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.images}:</span> {props.postHistory.images.length}</span>)
         }
         if ((!prevHistory && props.postHistory.parentID) || changes.parentID) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}:</span> <span className="historyrow-label-link" onClick={() => history.push(`/post/${props.postHistory.parentID}`)}>{props.postHistory.parentID}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}:</span> <span className="historyrow-label-link" onClick={(event) => openPost(props.postHistory.parentID, event)}>{props.postHistory.parentID}</span></span>)
         }
         if (!prevHistory || changes.type) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}:</span> {functions.toProperCase(props.postHistory.type)}</span>)
@@ -392,6 +392,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (!prevHistory || changes.englishCommentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishCommentary}:</span> {props.postHistory.englishCommentary || i18n.labels.none}</span>)
+        }
+        if (!jsx.length && !props.postHistory.imageChanged) {
+            jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)
         }
         return jsx
     }

@@ -1134,6 +1134,7 @@
             "specialSearches": {
                 "header": "Special searches:",
                 "items": {
+                    "id:id": " - Search for post matching this post id (if it exists).",
                     "pixiv:id": " - Search for post matching the pixiv id (if it exists).",
                     "twitter:id": " - Search for post matching the twitter id (if it exists).",
                     "source:link": " - Search all post links and mirrors for the specified link.",

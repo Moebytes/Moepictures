@@ -74,11 +74,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.post.postID}`, "_blank")
-        } else {
-            history.push(`/post/${props.post.postID}`)
-        }
+        functions.openPost(props.post, event, history, session, setSessionFlag)
     }
 
     const updateImg = async (event: React.MouseEvent) => {

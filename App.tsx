@@ -68,6 +68,7 @@ import ActionBanner from "./components/site/ActionBanner"
 import NewsBanner from "./components/site/NewsBanner"
 import TagToolTip from "./components/tooltip/TagToolTip"
 import ToolTip from "./components/tooltip/ToolTip"
+import ParticleEffect from "./components/site/ParticleEffect"
 import {PostRating} from "./types/Types"
 import "./index.less"
 
@@ -281,6 +282,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <ParticleEffect/>
             <DragAndDrop/>
             <NewsBanner/>
             <ActionBanner/>
@@ -311,14 +313,14 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
                 <Route exact path="/note/history/:id/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
-                <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                <Route exact path="/post/history/:id/:slug" render={(props) => <PostHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
                 <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                 <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
                 <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
-                <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
+                <Route exact path="/edit-post/:id/:slug" render={(props) => <EditPostPage {...props}/>}></Route>
                 <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
-                <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
+                <Route exact path="/set-avatar/:id/:slug" render={(props) => <SetAvatarPage {...props}/>}></Route>
                 <Route exact path="/help"><HelpPage/></Route>
                 <Route exact path="/forum"><ForumPage/></Route>
                 <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>

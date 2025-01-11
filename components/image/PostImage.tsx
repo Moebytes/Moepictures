@@ -1267,7 +1267,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const toggleUpscale = async () => {
         if (!props.post) return
         if (!session.username) {
-            setRedirect(`/post/${props.post.postID}`)
+            setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
             history.push("/login")
             return setSidebarText(i18n.sidebar.loginRequired)
         }

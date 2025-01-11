@@ -97,11 +97,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${creatorData.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${creatorData.imagePost}`)
-        }
+        functions.openPost(creatorData.imagePost, event, history, session, setSessionFlag)
     }
 
     const getUpdaterPFP = () => {
@@ -124,11 +120,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const updaterImgClick = (event: React.MouseEvent) => {
         if (!updaterData?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${updaterData.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${updaterData.imagePost}`)
-        }
+        functions.openPost(updaterData.imagePost, event, history, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {

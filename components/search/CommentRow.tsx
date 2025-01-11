@@ -59,20 +59,16 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.comment.postID}`, "_blank")
+            window.open(`/post/${props.comment.postID}/${props.comment.post.slug}`, "_blank")
         } else {
-            history.push(`/post/${props.comment.postID}`)
+            history.push(`/post/${props.comment.postID}/${props.comment.post.slug}`)
         }
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.comment.imagePost}`, "_blank")
-        } else {
-            history.push(`/post/${props.comment.imagePost}`)
-        }
+        functions.openPost(props.comment.imagePost, event, history, session, setSessionFlag)
     }
 
     const goToComment = (commentID: string) => {
@@ -81,7 +77,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        history.push(`/post/${props.comment?.postID}`)
+        history.push(`/post/${props.comment?.postID}/${props.comment.post.slug}`)
         const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
@@ -259,7 +255,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const commentJump = () => {
         setCommentID(Number(props.comment?.commentID))
         setCommentJumpFlag(true)
-        history.push(`/post/${props.comment?.postID}?comment=${props.comment?.commentID}`)
+        history.push(`/post/${props.comment?.postID}/${props.comment.post.slug}?comment=${props.comment?.commentID}`)
     }
 
     useEffect(() => {

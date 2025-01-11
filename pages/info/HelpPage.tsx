@@ -140,7 +140,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[9]}</span>{Object.values(i18n.help.searching.specialSearches.items)[9]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[10]}</span>{Object.values(i18n.help.searching.specialSearches.items)[10]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[11]}</span>{Object.values(i18n.help.searching.specialSearches.items)[11]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[12]}</span>{Object.values(i18n.help.searching.specialSearches.items)[12]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[12]}</span>{Object.values(i18n.help.searching.specialSearches.items)[12]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialSearches.items)[13]}</span>{Object.values(i18n.help.searching.specialSearches.items)[13]}<br/><br/>
 
                     {i18n.help.searching.specialUses.header}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[0]}</span>{Object.values(i18n.help.searching.specialUses.items)[0]}<br/>

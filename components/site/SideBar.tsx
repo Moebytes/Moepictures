@@ -109,6 +109,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setGroupPostID} = useGroupDialogActions()
     const [maxHeight, setMaxHeight] = useState(maxHeight1)
     const [uploaderImage, setUploaderImage] = useState("")
+    const [uploaderImagePost, setUploaderImagePost] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
@@ -138,6 +139,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (props.post) {
             const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
             setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
+            setUploaderImagePost(uploader?.imagePost || "")
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
@@ -689,7 +691,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const editPost = async () => {
         if (!props.post) return
         if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
-        history.push(`/edit-post/${props.post.postID}`)
+        history.push(`/edit-post/${props.post.postID}/${props.post.slug}`)
     }
 
     const privatePost = async () => {
@@ -737,13 +739,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const triggerSetAvatar = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/set-avatar/${props.post.postID}`)
+        history.push(`/set-avatar/${props.post.postID}/${props.post.slug}`)
     }
 
     const postHistory = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/post/history/${props.post.postID}`)
+        history.push(`/post/history/${props.post.postID}/${props.post.slug}`)
     }
     
     const triggerTagEdit = () => {
@@ -948,6 +950,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return `${maxHeight}px`
     }
 
+    const openPost = async (postID: string, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     if (mobile) return (
         <>
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
@@ -1082,7 +1088,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="sidebar-title">{i18n.sidebar.details}</span>
                         </div>
                         <div className="sidebar-row">
-                            <img className="sidebar-img" src={uploaderImage}/>
+                            <img className="sidebar-img" src={uploaderImage} onClick={(event) => openPost(uploaderImagePost, event)}/>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.uploader}:</span>

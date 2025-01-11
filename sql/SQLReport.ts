@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Report, Ban, Blacklist} from "../types/Types"
+import {Report, Ban, Blacklist, Redirect} from "../types/Types"
 
 export default class SQLReport {
     /** Insert comment report. */
@@ -199,5 +199,33 @@ export default class SQLReport {
             text: /*sql*/`SELECT * FROM blacklist`
         }
         return SQLQuery.run(query) as Promise<Blacklist[]>
+    }
+
+    /** Insert redirect */
+    public static insertRedirect = async (postID: string, oldSlug: string) => {
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO redirects ("postID", "createDate", "oldSlug") VALUES ($1, $2, $3)`,
+            values: [postID, now, oldSlug]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Delete redirect */
+    public static deleteRedirect = async (redirectID: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM redirects WHERE redirects."redirectID" = $1`,
+            values: [redirectID]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Get redirects */
+    public static redirects = async (postID: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT * FROM redirects WHERE redirects."postID" = $1`,
+            values: [postID]
+        }
+        return SQLQuery.run(query) as Promise<Redirect[]>
     }
 }

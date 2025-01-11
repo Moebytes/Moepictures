@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useThemeSelector, useSessionSelector, useLayoutSelector, useCacheSelector} from "../../store"
+import {useThemeSelector, useSessionSelector, useLayoutSelector, useCacheSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import cryptoFunctions from "../../structures/CryptoFunctions"
 import jsxFunctions from "../../structures/JSXFunctions"
@@ -15,6 +15,7 @@ interface Props {
 const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
     const [images, setImages] = useState([] as string[])
@@ -39,11 +40,8 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.comments.length; i++) {
             const imgClick = (event: React.MouseEvent) => {
-                if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/post/${props.comments[i].postID}`, "_blank")
-                } else {
-                    history.push(`/post/${props.comments[i].postID}`)
-                }
+                const comment = props.comments[i]
+                functions.openPost(comment.post, event, history, session, setSessionFlag)
             }
             const img = images[i] ? images[i] : ""
             jsx.push(

@@ -350,6 +350,10 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         })
     }
 
+    const openPost = (postID: string | null, event: React.MouseEvent) => {
+        functions.openPost(postID, event, history, session, setSessionFlag)
+    }
+
     const diffJSX = (originalPost: UnverifiedPost, newPost: UnverifiedPost) => {
         let jsx = [] as React.ReactElement[]
         if (!originalPost) return []
@@ -359,7 +363,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.images}:</span> {newPost.images.length}</span>)
         }
         if (changes.parentID !== undefined) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.parentID}:</span> <span className="mod-post-link" onClick={() => newPost.parentID ? history.push(`/post/${newPost.parentID}`) : null}>{newPost.parentID || i18n.labels.removed}</span></span>)
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.parentID}:</span> <span className="mod-post-link" onClick={(event) => openPost(newPost.parentID, event)}>{newPost.parentID || i18n.labels.removed}</span></span>)
         }
         if (changes.type) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sidebar.type}:</span> {functions.toProperCase(newPost.type)}</span>)

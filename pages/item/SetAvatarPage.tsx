@@ -13,7 +13,7 @@ import "./styles/setavatarpage.less"
 import {TagCategories, PostSearch, GIFFrame, PostOrdered} from "../../types/Types"
 
 interface Props {
-    match: {params: {id: string}}
+    match: {params: {id: string, slug: string}}
 }
 
 const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
@@ -40,6 +40,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const previewRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
     const postID = props.match.params.id
+    const slug = props.match.params.slug
 
     useEffect(() => {
         setHideNavbar(false)
@@ -67,13 +68,14 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie || !post) return
         if (!session.username && post.rating !== functions.r13()) {
-            setRedirect(`/set-avatar/${postID}`)
+            setRedirect(`/set-avatar/${postID}/${slug}`)
             history.push("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (functions.isR18(post.rating)) {
             functions.replaceLocation("/403")
         }
+        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
     }, [session, post])
 
     useEffect(() => {
@@ -226,6 +228,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
       
 
     const setAvatar = async () => {
+        if (!post) return
         const croppedURL = await getCroppedURL()
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
@@ -233,7 +236,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         await functions.post("/api/user/pfp", {postID, bytes: Object.values(bytes)}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
-        history.push(`/post/${postID}`)
+        history.push(`/post/${post.postID}/${post.slug}`)
     }
 
     const download = async () => {
@@ -264,6 +267,11 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         checkImage()
     }, [image])
 
+    const openPost = async (event: React.MouseEvent) => {
+        functions.openPost(post, event, history, session, setSessionFlag)
+    }
+
+
     return (
         <>
         <TitleBar goBack={true}/>
@@ -284,7 +292,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                             <div className="set-avatar-preview-container">
                                 <canvas className="set-avatar-preview" ref={previewRef}></canvas>
                                 <div className="set-avatar-button-container">
-                                    <button className="set-avatar-button" onClick={() => history.push(`/post/${postID}`)}>{i18n.buttons.cancel}</button>
+                                    <button className="set-avatar-button" onClick={(event) => openPost(event)}>{i18n.buttons.cancel}</button>
                                     <button className="set-avatar-button" onClick={() => setAvatar()}>{i18n.sidebar.setAvatar}</button>
                                 </div>
                                 <div className="set-avatar-button-container">

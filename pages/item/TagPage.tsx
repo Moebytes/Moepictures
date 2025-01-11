@@ -497,12 +497,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const featuredClick = (event: React.MouseEvent) => {
-        if (!tag) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${tag.featuredPost?.postID}`, "_blank")
-        } else {
-            history.push(`/post/${tag.featuredPost?.postID}`)
-        }
+        if (!tag || !tag.featuredPost) return
+        functions.openPost(tag.featuredPost.postID, event, history, session, setSessionFlag)
     }
 
     return (

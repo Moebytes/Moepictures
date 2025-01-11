@@ -1,5 +1,5 @@
 import {PostType, PostRating, PostStyle, PostChanges, MiniTag, PostDeleteRequest, PostHistory,
-ImageFormat, Upscaler, SourceData, UserComment} from "./Types"
+ImageFormat, Upscaler, SourceData, UserComment, Redirect} from "./Types"
 
 export interface PostMirrors {
     pixiv?: string
@@ -194,6 +194,7 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/history" ? {params: PostHistoryParams | null, response: PostHistory[]} :
     T extends "/api/post/pending" ? {params: null, response: UnverifiedPost[]} :
     T extends "/api/post/rejected" ? {params: null, response: UnverifiedPost[]} :
+    T extends "/api/post/redirects" ? {params: {postID: string}, response: Redirect[]} :
     never
 
 export type PostPostEndpoint<T extends string> = 
