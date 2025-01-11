@@ -6,6 +6,7 @@ import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
+import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
@@ -101,8 +102,9 @@ export default class ServerFunctions {
 
     public static sendEncrypted = (data: any, req: Request, res: Response) => {
         if (req.session.apiKey) return res.status(200).send(data)
+        if (permissions.noEncryption(req.session)) return res.status(200).send(data)
         if (!req.session.publicKey) return res.status(401).send("No public key")
-        const encrypted = cryptoFunctions.encryptAPI(data, req.session.publicKey)
+        const encrypted = cryptoFunctions.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)
     }
 

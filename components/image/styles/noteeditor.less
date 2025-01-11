@@ -1,7 +1,9 @@
 @import "../../../index.less";
 
 .note-editor {
-    position: relative;
+    position: absolute;
+    top: 0px;
+    z-index: 1100;
     display: none;
     flex-direction: column;
     justify-content: center;
@@ -9,6 +11,7 @@
     width: 100%;
     margin-top: 20px;
     margin-bottom: 20px;
+    pointer-events: auto;
 }
 
 .note-editor-filters {

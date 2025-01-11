@@ -157,6 +157,17 @@ const EmptyHandle = (props: any) => {
 const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const [visible, setVisible] = useState(false)
+    const [init, setInit] = useState(false)
+
+    useEffect(() => {
+        if (init) {
+            setVisible(active && noteDrawingEnabled)
+        } else {
+            setInit(true)
+        }
+    }, [active, noteDrawingEnabled])
+
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -171,7 +182,7 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
         stroke={active ? "rgba(245, 20, 132, 1)" : "rgba(245, 20, 132, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
+        style={{cursor, opacity:visible ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
     )
 }
 const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, onMouseLeave, 
@@ -306,14 +317,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
                 isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
             }
-            const base64 = await functions.linkToBase64(url)
-            const img = await functions.createImage(base64)
+            const img = await functions.createImage(url)
             if (functions.isGIF(props.img) || isAnimatedWebP) {
                 setImg(props.img)
                 setTargetWidth(img.width)
                 setTargetHeight(img.height)
             } else {
-                setImg(base64)
+                setImg(url)
                 setTargetWidth(img.width)
                 setTargetHeight(img.height)
             }
@@ -371,7 +381,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     if (imageExpand) {
-        maxHeight = 4572 //1797
+        maxHeight = 3740
     }
 
     let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
@@ -612,7 +622,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
                 <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale}>
-                    <ImageLayer src={img}/>
+                    {/* <ImageLayer src={img}/> */}
                     <DrawLayer onAddShape={({x, y, width, height}) => {
                         if (!noteDrawingEnabled) return
                         setItems((prev) => {

@@ -574,7 +574,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (post.fake) continue
             // if (!showChildren) if (post.parentID) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
-            const image = post.images[0]
+            const image = post.images?.[0]
             if (!image) continue
             const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
             let img = functions.getImageCache(`${thumbnail}-${sizeType}`)

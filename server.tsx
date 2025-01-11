@@ -225,7 +225,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = cryptoFunctions.encrypt(body, req.session.publicKey)
+        body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
         // contentLength = body.length
       }
       if (req.headers.range) {
@@ -286,7 +286,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = cryptoFunctions.encrypt(body, req.session.publicKey!)
+        body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
         // contentLength = body.length
       }
       if (req.headers.range) {

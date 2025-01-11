@@ -401,9 +401,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const adjustedData = functions.gifSpeed(gifData, speed)
             const gifCanvas = gifRef.current
             gifCanvas.style.opacity = "1"
-            ref.current.style.opacity = "0"
             gifCanvas.width = ref.current.clientWidth
             gifCanvas.height = ref.current.clientHeight
+            console.log({width: ref.current.clientWidth, height: ref.current.clientHeight})
             const ctx = gifCanvas.getContext("2d")!
             const frames = adjustedData.length - 1
             let duration = adjustedData.map((d) => d.delay).reduce((p, c) => p + c) / 1000
@@ -1313,7 +1313,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             {!props.noNotes ? <NoteEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
-            <div className="post-image-box" ref={containerRef} style={{display: noteMode && !props.noNotes ? "none" : "flex"}}>
+            <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}

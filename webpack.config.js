@@ -9,11 +9,14 @@ const nodeExternals = require("webpack-node-externals")
 const webpack = require("webpack")
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
+const dotenv = require("dotenv")
 let exclude = [/node_modules/, /dist/]
 let webExclude = [...exclude, /server.tsx/, /routes/]
 let nodeExclude = [...exclude, /structures\/BrowserFunctions.tsx/]
 
+dotenv.config()
 let minimize = process.env.TESTING === "no"
+let obfuscator = process.env.OBFUSCATE === "yes" ? [new WebpackObfuscator()] : []
 
 module.exports = [
   {
@@ -27,7 +30,7 @@ module.exports = [
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
     zlib: require.resolve("browserify-zlib"), url: require.resolve("url/"), os: require.resolve("os/")}},
     performance: {hints: false},
-    optimization: {minimize, minimizer: [new TerserJSPlugin({extractComments: false}), new MinimizerCSSPlugin(), new WebpackObfuscator()], moduleIds: "named", splitChunks: {chunks(chunk) {return false}}},
+    optimization: {minimize, minimizer: [new TerserJSPlugin({extractComments: false}), new MinimizerCSSPlugin(), ...obfuscator], moduleIds: "named", splitChunks: {chunks(chunk) {return false}}},
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
@@ -76,7 +79,7 @@ module.exports = [
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], 
     fallback: {zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
-    optimization: {minimize, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator()], moduleIds: "named"},
+    optimization: {minimize, minimizer: [new TerserJSPlugin({extractComments: false}), ...obfuscator], moduleIds: "named"},
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},

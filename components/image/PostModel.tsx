@@ -728,7 +728,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
             {!props.noNotes ? <NoteEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
-            <div className="post-model-box" ref={containerRef} style={{display: noteMode ? "none" : "flex"}}>
+            <div className="post-model-box" ref={containerRef}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}

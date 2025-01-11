@@ -13,6 +13,7 @@ import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
 import cryptoFunctions from "./CryptoFunctions"
+import permissions from "./Permissions"
 import localforage from "localforage"
 import mm from "music-metadata"
 import * as THREE from "three"
@@ -90,16 +91,16 @@ export default class Functions {
         if (clientKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
         if (!privateKey) {
             clientKeyLock = true
-            const savedPublicKey = await localforage.getItem("publicKey") as string
-            const savedPrivateKey = await localforage.getItem("privateKey") as string
+            const savedPublicKey = sessionStorage.getItem("publicKey") as string
+            const savedPrivateKey = sessionStorage.getItem("privateKey") as string
             if (savedPublicKey && savedPrivateKey) {
                 await Functions.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
                 privateKey = savedPrivateKey
             } else {
                 const keys = cryptoFunctions.generateKeys()
                 await Functions.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
-                await localforage.setItem("publicKey", keys.publicKey)
-                await localforage.setItem("privateKey", keys.privateKey)
+                sessionStorage.setItem("publicKey", keys.publicKey)
+                sessionStorage.setItem("privateKey", keys.privateKey)
                 privateKey = keys.privateKey
             }
         }
@@ -115,6 +116,17 @@ export default class Functions {
         }
     }
 
+    public static arrayBufferToJSON = (arrayBuffer: ArrayBuffer) => {
+        if (!arrayBuffer.byteLength) return undefined
+        const text = new TextDecoder("utf-8").decode(arrayBuffer)
+        try {
+            const json = JSON.parse(text)
+            return json
+        } catch {
+            return null
+        }
+    }
+
     public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
         if (!privateKey) await Functions.updateClientKeys(session)
@@ -122,7 +134,9 @@ export default class Functions {
         const headers = {"x-csrf-token": session.csrfToken}
         try {
             const response = await axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
-            let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey)?.toString()
+            const json = Functions.arrayBufferToJSON(response)
+            if (json !== null) return json as GetEndpoint<T>["response"]
+            let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey, session)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
@@ -2609,19 +2623,19 @@ export default class Functions {
 
             if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(imgBuffer)
-                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer, privateKey, serverPublicKey)
+                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer, privateKey, serverPublicKey, session)
             }
             if (currentBuffer.byteLength && Functions.isImage(currentLink)) {
                 const isAnimated = Functions.isAnimatedWebp(currentBuffer)
-                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer, privateKey, serverPublicKey)
+                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledImgBuffer.byteLength && Functions.isImage(upscaledImgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledImgBuffer)
-                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey)
+                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentUpscaledLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledCurrentBuffer)
-                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey)
+                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session)
             }
 
             if (imgBuffer.byteLength) {
@@ -2885,6 +2899,7 @@ export default class Functions {
     }
 
     public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
+        if (permissions.noEncryption(session)) return img
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
@@ -2922,7 +2937,7 @@ export default class Functions {
                 arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
-            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
+            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
         }
         const base64 = await Functions.linkToBase64(decryptedImg)
         if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
@@ -2938,6 +2953,7 @@ export default class Functions {
     }
 
     public static decryptItem = async (img: string, session: Session, cacheKey?: string) => {
+        if (permissions.noEncryption(session)) return img
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
@@ -2955,7 +2971,7 @@ export default class Functions {
                 arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
-            if (!isAnimatedWebP) decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
+            if (!isAnimatedWebP) decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
         }
         const base64 = await Functions.linkToBase64(decrypted)
         if (Functions.isGIF(img) || isAnimatedWebP) {
@@ -2971,6 +2987,7 @@ export default class Functions {
     }
 
     public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: Session) => {
+        if (permissions.noEncryption(session)) return buffer
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || 
@@ -2983,7 +3000,7 @@ export default class Functions {
             if (Functions.isWebP(imageLink)) {
                 isAnimatedWebP = Functions.isAnimatedWebp(buffer)
             }
-            if (!isAnimatedWebP) decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey)
+            if (!isAnimatedWebP) decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
         }
         return decrypted
     }

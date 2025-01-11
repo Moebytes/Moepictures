@@ -268,7 +268,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 return (
                     <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
                         <img className="sortbar-img" src={audio} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">{i18n.sortbar.type.live2d}</span>
+                        <span className="sortbar-text">{i18n.sortbar.type.audio}</span>
                     </div>
                 )
         } else {

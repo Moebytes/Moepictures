@@ -461,7 +461,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
             {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
-            <div className="post-song-box" ref={containerRef} style={{display: noteMode ? "none" : "flex"}}>
+            <div className="post-song-box" ref={containerRef}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}

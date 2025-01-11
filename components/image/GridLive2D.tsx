@@ -568,14 +568,12 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                if (!imageLoaded) return "none"
                 return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                if (!imageLoaded) return "none"
                 return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
             }
         }
@@ -623,7 +621,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     }, [image])
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
+        <div style={{opacity: visible && rendererRef.current?.width ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
         borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
         onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>

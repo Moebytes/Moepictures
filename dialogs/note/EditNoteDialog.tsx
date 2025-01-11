@@ -141,10 +141,10 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="edit-note-dialog-row-start">
                 <span className="edit-note-dialog-text">{i18n.labels.overlay}?</span>
-                <img className="edit-note-checkbox" src={editNoteData.overlay ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, overlay: !editNoteData.overlay})}/>
+                <img className="edit-note-checkbox" src={editNoteData.overlay ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, overlay: !editNoteData.overlay})} style={{filter: getFilter()}}/>
                 {editNoteData.overlay ? <>
                 <span style={{marginLeft: "10px"}} className="edit-note-dialog-text">Break Word?</span>
-                <img className="edit-note-checkbox" src={editNoteData.breakWord ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, breakWord: !editNoteData.breakWord})}/>
+                <img className="edit-note-checkbox" src={editNoteData.breakWord ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, breakWord: !editNoteData.breakWord})} style={{filter: getFilter()}}/>
                 </> : null}
             </div>
             {editNoteData.overlay ? <>
@@ -190,7 +190,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                         {!editNoteData.overlay ?
                         <div className="edit-note-dialog-row-start">
                             <span className="edit-note-dialog-text">{i18n.tag.character}?</span>
-                            <img className="edit-note-checkbox" src={editNoteData.character ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})}/>
+                            <img className="edit-note-checkbox" src={editNoteData.character ? checkboxChecked : checkbox} onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})} style={{filter: getFilter()}}/>
                         </div> : null}
                         <div className="edit-note-dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

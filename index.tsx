@@ -6,7 +6,7 @@ import store from "./store"
 import App from "./App"
 import pace from "pace-js"
 
-pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
+//pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
 hydrateRoot(document.getElementById("root")!, <Router><Provider store={store}><App/></Provider></Router>)
 
 if (process.env.SCAN === "yes") {

@@ -6,33 +6,29 @@ export default class Permissions {
     }
 
     public static isMod = (session: ServerSession) => {
-        if (session.role === "admin") return true 
+        if (Permissions.isAdmin(session)) return true
         if (session.role === "mod") return true 
         return false
     }
 
     public static isCurator = (session: ServerSession) => {
-        if (session.role === "admin") return true 
-        if (session.role === "mod") return true
+        if (Permissions.isMod(session)) return true
         if (session.role === "premium-curator") return true
         if (session.role === "curator") return true
         return false
     }
 
     public static isContributor = (session: ServerSession) => {
-        if (session.role === "admin") return true 
-        if (session.role === "mod") return true
-        if (session.role === "premium-curator") return true
-        if (session.role === "curator") return true
+        if (Permissions.isMod(session)) return true
+        if (Permissions.isCurator(session)) return true
         if (session.role === "premium-contributor") return true
         if (session.role === "contributor") return true
         return false
     }
 
     public static isPremium = (session: ServerSession) => {
-        if (session.role === "admin") return true 
-        if (session.role === "mod") return true
-        if (session.role === "system") return true
+        if (Permissions.isMod(session)) return true 
+        if (Permissions.isSystem(session)) return true
         if (session.role === "premium-curator") return true
         if (session.role === "premium-contributor") return true
         if (session.role === "premium") return true
@@ -55,5 +51,10 @@ export default class Permissions {
         if (Permissions.isCurator(session)) return Infinity
         if (Permissions.isContributor(session)) return 50
         return 25
+    }
+
+    public static noEncryption = (session: ServerSession) => {
+        if (Permissions.isMod(session)) return true
+        return false
     }
 }
