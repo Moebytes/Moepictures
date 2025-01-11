@@ -357,19 +357,21 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (post.fake) continue
             if (!session.username) if (post.rating !== functions.r13()) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
-            const images = post.images.map((i) => functions.getThumbnailLink(i.type, post.postID, i.order, i.filename, "medium", mobile))
+            const image = post.images[0]
+            const thumb = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "medium", mobile)
+            const images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={images[0]} model={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} model={images[0]} post={post}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={images[0]} live2d={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} live2d={images[0]} post={post}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={images[0]} audio={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} audio={images[0]} post={post}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={images[0]} original={images[0]} post={post}
+                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} original={images[0]} post={post}
                 comicPages={post.type === "comic" ? images : null}/>)
             }
         }

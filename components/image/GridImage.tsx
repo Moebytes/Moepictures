@@ -690,8 +690,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             if (image) {
                 return functions.decryptItem(image, session)
             } else {
-                let image = props.original.replace(/thumbnail\/\d+\//, "")
-                return functions.decryptItem(image, session)
+                return functions.decryptItem(props.original, session)
             }
 
         }

@@ -188,12 +188,12 @@ for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     let url = req.url.replace(/\?.*$/, "")
     const mimeType = mime.getType(req.path)
+    if (mimeType) res.setHeader("Content-Type", mimeType)
     try {
       if (folders[i] === "tag") {
         if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
-      if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))

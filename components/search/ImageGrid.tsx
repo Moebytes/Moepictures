@@ -577,18 +577,19 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const image = post.images?.[0]
             if (!image) continue
             const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
+            const original = functions.getImageLink(image.type, post.postID, image.order, session.upscaledImages ? image.upscaledFilename || image.filename : image.filename)
             let img = functions.getImageCache(`${thumbnail}-${sizeType}`)
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename)) : null
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={thumbnail} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }
         if (!jsx.length && noResults) {
