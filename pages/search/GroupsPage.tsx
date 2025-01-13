@@ -15,8 +15,6 @@ useMiscDialogActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import {GroupSearch, GroupSort} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -412,8 +410,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

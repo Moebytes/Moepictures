@@ -17,6 +17,8 @@ import "./styles/related.less"
 import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
 
 let replace = false
+let relatedTimer = null as any
+let delay = 2000
 
 interface Props {
     tag: string
@@ -52,41 +54,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
-        /*
-        const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("relatedPage")
-            if (savedPage) setRelatedPage(Number(savedPage))
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setRelatedPage(Number(pageParam))
-            }
-        }
-        const updateStateChange = () => {
-            replace = true
-            const pageParam = new URLSearchParams(window.location.search).get("page")
-            if (pageParam) setRelatedPage(Number(pageParam))
-        }
-        window.addEventListener("load", onDOMLoaded)
-        window.addEventListener("popstate", updateStateChange)
-        window.addEventListener("pushstate", updateStateChange)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-            window.removeEventListener("popstate", updateStateChange)
-            window.removeEventListener("pushstate", updateStateChange)
-        }*/
     }, [])
-    /*
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (!scroll) searchParams.set("page", String(relatedPage || ""))
-        if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
-            replace = false
-        } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
-        }
-    }, [scroll, relatedPage])*/
 
     const searchPosts = async () => {
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
@@ -124,10 +92,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
         setIndex(0)
         setVisibleRelated([])
         setRelated(result)
+        delay = 0
     }
 
     useEffect(() => {
-        updateRelated()
+        clearTimeout(relatedTimer)
+        relatedTimer = setTimeout(() => {
+            updateRelated()
+        }, delay)
     }, [props.post, props.tag, session])
 
     const getPageAmount = () => {
@@ -203,7 +175,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 if (!related[currentIndex]) return updateOffset()
                 const newVisibleRelated = visibleRelated
                 for (let i = 0; i < 15; i++) {
-                    if (!related[currentIndex]) return updateOffset()
+                    if (!related[currentIndex]) break
                     newVisibleRelated.push(related[currentIndex])
                     currentIndex++
                 }

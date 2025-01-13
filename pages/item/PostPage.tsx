@@ -15,26 +15,6 @@ import Commentary from "../../components/post/Commentary"
 import BuyLink from "../../components/post/BuyLink"
 import functions from "../../structures/Functions"
 import Carousel from "../../components/site/Carousel"
-import DeletePostDialog from "../../dialogs/post/DeletePostDialog"
-import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
-import TakedownPostDialog from "../../dialogs/post/TakedownPostDialog"
-import PrivatePostDialog from "../../dialogs/post/PrivatePostDialog"
-import LockPostDialog from "../../dialogs/post/LockPostDialog"
-import DeleteCommentDialog from "../../dialogs/comment/DeleteCommentDialog"
-import EditCommentDialog from "../../dialogs/comment/EditCommentDialog"
-import EditNoteDialog from "../../dialogs/note/EditNoteDialog"
-import SaveNoteDialog from "../../dialogs/note/SaveNoteDialog"
-import ReportCommentDialog from "../../dialogs/comment/ReportCommentDialog"
-import TagEditDialog from "../../dialogs/post/TagEditDialog"
-import SourceEditDialog from "../../dialogs/post/SourceEditDialog"
-import FavgroupDialog from "../../dialogs/group/FavGroupDialog"
-import GroupDialog from "../../dialogs/group/GroupDialog"
-import ParentDialog from "../../dialogs/post/ParentDialog"
-import OCRDialog from "../../dialogs/note/OCRDialog"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import RevertPostHistoryDialog from "../../dialogs/post/RevertPostHistoryDialog"
-import RevertNoteHistoryDialog from "../../dialogs/note/RevertNoteHistoryDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import Parent from "../../components/post/Parent"
 import Children from "../../components/post/Children"
 import ArtistWorks from "../../components/post/ArtistWorks"
@@ -684,26 +664,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     
     return (
         <>
-        <CaptchaDialog/>
-        <TagEditDialog/>
-        <SourceEditDialog/>
-        <FavgroupDialog/>
-        <GroupDialog/>
-        <ParentDialog/>
-        <OCRDialog/>
-        <PageDialog/>
-        <EditCommentDialog/>
-        <DeleteCommentDialog/>
-        <ReportCommentDialog/>
-        <RevertPostHistoryDialog/>
-        <RevertNoteHistoryDialog/>
-        <UndeletePostDialog/>
-        {post ? <DeletePostDialog post={post}/> : null}
-        {post ? <PrivatePostDialog post={post}/> : null}
-        {post ? <LockPostDialog post={post}/> : null}
-        {post ? <TakedownPostDialog post={post}/> : null}
-        {post ? <SaveNoteDialog post={post}/> : null}
-        <EditNoteDialog/>
         <TitleBar post={post} goBack={true} historyID={historyID} noteID={noteID}/>
         <NavBar goBack={true}/>
         <div className="body">

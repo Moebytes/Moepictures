@@ -12,7 +12,6 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions, useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import jsxFunctions from "../../structures/JSXFunctions"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -25,11 +24,6 @@ import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import forwardOptIcon from "../../assets/icons/forward-opt.png"
-import DeleteMessageDialog from "../../dialogs/message/DeleteMessageDialog"
-import EditMessageDialog from "../../dialogs/message/EditMessageDialog"
-import DeleteMessageReplyDialog from "../../dialogs/message/DeleteMessageReplyDialog"
-import EditMessageReplyDialog from "../../dialogs/message/EditMessageReplyDialog"
-import ForwardMessageDialog from "../../dialogs/message/ForwardMessageDialog"
 import favicon from "../../assets/icons/favicon.png"
 import emojiSelect from "../../assets/icons/emoji-select.png"
 import lewdIcon from "../../assets/icons/lewd.png"
@@ -545,16 +539,13 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const getOptionsJSX = () => {
         if (!message) return
-        let jsx = [] as React.ReactElement[]
         if (message.role !== "system" && session.username && !session.banned) {
-            jsx.push(
-                <>
+            return (
                 <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
-                </>
             )
         }
         if (session.username === message.creator || permissions.isMod(session)) {
-            jsx.push(
+            return(
                 <>
                 <img draggable={false} className="thread-page-opt-icon" src={forwardOptIcon} onClick={forwardMessageDialog} style={{filter: getFilter()}}/>
                 <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>
@@ -562,7 +553,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         }
-        return jsx
     }
 
     useEffect(() => {
@@ -627,7 +617,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
                 )
             }
-            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
+            if (items.length) rows.push(<div key={i} className="emoji-row">{items}</div>)
         }
         return (
             <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
@@ -691,12 +681,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <EditMessageDialog/> 
-        <DeleteMessageDialog/> 
-        <EditMessageReplyDialog/>
-        <DeleteMessageReplyDialog/>
-        <ForwardMessageDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

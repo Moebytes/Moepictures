@@ -9,10 +9,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
-import EditTagDialog from "../../dialogs/tag/EditTagDialog"
-import CategorizeTagDialog from "../../dialogs/tag/CategorizeTagDialog"
-import DeleteTagDialog from "../../dialogs/tag/DeleteTagDialog"
-import TakedownTagDialog from "../../dialogs/tag/TakedownTagDialog"
 import takedown from "../../assets/icons/takedown.png"
 import tagHistory from "../../assets/icons/tag-history.png"
 import tagCategorize from "../../assets/icons/tag-category.png"
@@ -26,12 +22,10 @@ import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
 import Carousel from "../../components/site/Carousel"
-import RevertTagHistoryDialog from "../../dialogs/tag/RevertTagHistoryDialog"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import jsxFunctions from "../../structures/JSXFunctions"
 import Related from "../../components/post/Related"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
 
@@ -503,12 +497,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <CategorizeTagDialog/>
-        <EditTagDialog/>
-        <DeleteTagDialog/>
-        <TakedownTagDialog/>
-        <RevertTagHistoryDialog/>
-        <PageDialog/>
         <TitleBar historyID={historyID}/>
         <NavBar/>
         <div className="body">

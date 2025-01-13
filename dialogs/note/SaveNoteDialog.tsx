@@ -8,16 +8,11 @@ import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory | UnverifiedPost
-    unverified?: boolean
-}
-
-const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
+const SaveNoteDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {showSaveNoteDialog, saveNoteData, saveNoteOrder} = useNoteDialogSelector()
-    const {setShowSaveNoteDialog, setSaveNoteData} = useNoteDialogActions()
+    const {saveNoteID, saveNoteData, saveNoteOrder} = useNoteDialogSelector()
+    const {setSaveNoteID, setSaveNoteData} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
@@ -31,22 +26,22 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (showSaveNoteDialog) {
+        if (saveNoteID) {
             document.body.style.pointerEvents = "none"
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showSaveNoteDialog])
+    }, [saveNoteID])
 
     const saveNote = async () => {
-        if (!saveNoteData) return
-        if (props.unverified) {
-            await functions.put("/api/note/save/unverified", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+        if (!saveNoteID || !saveNoteData) return
+        if (saveNoteID.unverified) {
+            await functions.put("/api/note/save/unverified", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
             return setSubmitted(true)
         } else {
             if (permissions.isContributor(session)) {
-                await functions.post("/api/note/save", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                await functions.post("/api/note/save", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } else {
                 const badReason = functions.validateReason(reason, i18n)
@@ -57,7 +52,7 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
                     await functions.timeout(2000)
                     setError(false)
                 }
-                functions.post("/api/note/save/request", {postID: props.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                functions.post("/api/note/save/request", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             }
         }
@@ -68,20 +63,20 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
             saveNote()
         }
         if (!keep) {
-            setShowSaveNoteDialog(false)
+            setSaveNoteID(null)
             setSaveNoteData(null)
             setReason("")
         }
     }
 
     const close = () => {
-        setShowSaveNoteDialog(false)
+        setSaveNoteID(null)
         setSaveNoteData(null)
         setSubmitted(false)
         setReason("")
     }
 
-    if (showSaveNoteDialog) {
+    if (saveNoteID) {
         if (session.banned) {
             return (
                 <div className="dialog">
@@ -100,7 +95,7 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (props.post.locked && !permissions.isMod(session)) {
+        if (saveNoteID.post.locked && !permissions.isMod(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
@@ -118,7 +113,7 @@ const SaveNoteDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (props.unverified || permissions.isContributor(session)) {
+        if (saveNoteID.unverified || permissions.isContributor(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

@@ -1,7 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {HistoryID, Note} from "../types/Types"
+import {HistoryID, Note, PostFull, PostHistory, UnverifiedPost} from "../types/Types"
 
 export const defaultNoteData = {
     transcript: "",
@@ -22,13 +22,18 @@ export const defaultNoteData = {
     characterTag: ""
 }
 
+interface SaveNoteID {
+    post: PostFull | PostHistory | UnverifiedPost
+    unverified?: boolean
+}
+
 const noteDialogSlice = createSlice({
     name: "noteDialog",
     initialState: {
         editNoteID: null as number | null,
         editNoteFlag: false,
         editNoteData: defaultNoteData,
-        showSaveNoteDialog: false,
+        saveNoteID: null as SaveNoteID | null,
         saveNoteData: null as Note[] | null,
         saveNoteOrder: 1,
         deleteNoteHistoryID: null as HistoryID | null,
@@ -42,7 +47,7 @@ const noteDialogSlice = createSlice({
         setEditNoteID: (state, action) => {state.editNoteID = action.payload},
         setEditNoteFlag: (state, action) => {state.editNoteFlag = action.payload},
         setEditNoteData: (state, action) => {state.editNoteData = action.payload},
-        setShowSaveNoteDialog: (state, action) => {state.showSaveNoteDialog = action.payload},
+        setSaveNoteID: (state, action) => {state.saveNoteID = action.payload},
         setSaveNoteData: (state, action) => {state.saveNoteData = action.payload},
         setSaveNoteOrder: (state, action) => {state.saveNoteOrder = action.payload},
         setDeleteNoteHistoryID: (state, action) => {state.deleteNoteHistoryID = action.payload},
@@ -56,7 +61,7 @@ const noteDialogSlice = createSlice({
 
 const {
     setEditNoteID, setEditNoteFlag, setEditNoteData, 
-    setShowSaveNoteDialog, setSaveNoteData, setSaveNoteOrder,
+    setSaveNoteID, setSaveNoteData, setSaveNoteOrder,
     setDeleteNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryID,
     setRevertNoteHistoryFlag, setNoteOCRDialog, setNoteOCRFlag
 } = noteDialogSlice.actions
@@ -67,7 +72,7 @@ export const useNoteDialogSelector = () => {
         editNoteID: selector((state) => state.noteDialog.editNoteID),
         editNoteFlag: selector((state) => state.noteDialog.editNoteFlag),
         editNoteData: selector((state) => state.noteDialog.editNoteData),
-        showSaveNoteDialog: selector((state) => state.noteDialog.showSaveNoteDialog),
+        saveNoteID: selector((state) => state.noteDialog.saveNoteID),
         saveNoteData: selector((state) => state.noteDialog.saveNoteData),
         saveNoteOrder: selector((state) => state.noteDialog.saveNoteOrder),
         deleteNoteHistoryID: selector((state) => state.noteDialog.deleteNoteHistoryID),
@@ -85,7 +90,7 @@ export const useNoteDialogActions = () => {
         setEditNoteID: (state: number | null) => dispatch(setEditNoteID(state)),
         setEditNoteFlag: (state: boolean) => dispatch(setEditNoteFlag(state)),
         setEditNoteData: (state: typeof defaultNoteData) => dispatch(setEditNoteData(state)),
-        setShowSaveNoteDialog: (state: boolean) => dispatch(setShowSaveNoteDialog(state)),
+        setSaveNoteID: (state: SaveNoteID | null) => dispatch(setSaveNoteID(state)),
         setSaveNoteData: (state: Note[] | null) => dispatch(setSaveNoteData(state)),
         setSaveNoteOrder: (state: number) => dispatch(setSaveNoteOrder(state)),
         setDeleteNoteHistoryID: (state: HistoryID | null) => dispatch(setDeleteNoteHistoryID(state)),

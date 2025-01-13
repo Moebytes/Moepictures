@@ -12,13 +12,13 @@ interface TagEditID {
     tags: MiniTag[]
 }
 
-interface ChildEditID {
+interface PostEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
     unverified?: boolean
 }
 
-interface PostObj {
-    postID: string
+interface PrivateID {
+    post: PostSearch | PostHistory | UnverifiedPost
     artists: MiniTag[]
 }
 
@@ -30,21 +30,21 @@ interface UndeleteID {
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
-        showDeletePostDialog: false,
-        showTakedownPostDialog: false,
+        deletePostID: null as PostEditID | null,
+        takedownPostID: null as PostEditID | null,
         deletePostHistoryID: null as HistoryID | null,
         deletePostHistoryFlag: false,
         revertPostHistoryID: null as HistoryID | null,
         revertPostHistoryFlag: false,
-        lockPostID: null as string | null,
-        privatePostObj: null as PostObj | null,
+        lockPostID: null as PostEditID | null,
+        privatePostID: null as PrivateID | null,
         tagEditID: null as TagEditID | null,
         sourceEditID: null as TagEditID | null,
         showBulkTagEditDialog: false,
         showBulkDeleteDialog: false,
-        showCompressingDialog: false,
-        showUpscalingDialog: false,
-        childPostObj: null as ChildEditID | null,
+        compressPostID: null as PostEditID | null,
+        upscalePostID: null as PostEditID | null,
+        childPostObj: null as PostEditID | null,
         undeletePostID: null as UndeleteID | null,
         permaDeletePostID: null as string | null,
         permaDeletePostFlag: false,
@@ -52,20 +52,20 @@ const postDialogSlice = createSlice({
         appealPostID: null as string | null
     },
     reducers: {
-        setShowDeletePostDialog: (state, action) => {state.showDeletePostDialog = action.payload},
-        setShowTakedownPostDialog: (state, action) => {state.showTakedownPostDialog = action.payload},
+        setDeletePostID: (state, action) => {state.deletePostID = action.payload},
+        setTakedownPostID: (state, action) => {state.takedownPostID = action.payload},
         setDeletePostHistoryID: (state, action) => {state.deletePostHistoryID = action.payload},
         setDeletePostHistoryFlag: (state, action) => {state.deletePostHistoryFlag = action.payload},
         setRevertPostHistoryID: (state, action) => {state.revertPostHistoryID = action.payload},
         setRevertPostHistoryFlag: (state, action) => {state.revertPostHistoryFlag = action.payload},
         setLockPostID: (state, action) => {state.lockPostID = action.payload},
-        setPrivatePostObj: (state, action) => {state.privatePostObj = action.payload},
+        setPrivatePostID: (state, action) => {state.privatePostID = action.payload},
         setTagEditID: (state, action) => {state.tagEditID = action.payload},
         setSourceEditID: (state, action) => {state.sourceEditID = action.payload},
         setShowBulkTagEditDialog: (state, action) => {state.showBulkTagEditDialog = action.payload},
         setShowBulkDeleteDialog: (state, action) => {state.showBulkDeleteDialog = action.payload},
-        setShowCompressingDialog: (state, action) => {state.showCompressingDialog = action.payload},
-        setShowUpscalingDialog: (state, action) => {state.showUpscalingDialog = action.payload},
+        setCompressPostID: (state, action) => {state.compressPostID = action.payload},
+        setUpscalePostID: (state, action) => {state.upscalePostID = action.payload},
         setChildPostObj: (state, action) => {state.childPostObj = action.payload},
         setUndeletePostID: (state, action) => {state.undeletePostID = action.payload},
         setPermaDeletePostID: (state, action) => {state.permaDeletePostID = action.payload},
@@ -76,30 +76,30 @@ const postDialogSlice = createSlice({
 })
 
 const {
-    setShowDeletePostDialog, setShowTakedownPostDialog, setDeletePostHistoryID,
+    setDeletePostID, setTakedownPostID, setDeletePostHistoryID,
     setDeletePostHistoryFlag, setRevertPostHistoryID, setRevertPostHistoryFlag, 
-    setLockPostID, setPrivatePostObj, setTagEditID, setSourceEditID, setChildPostObj,
-    setShowBulkTagEditDialog, setShowBulkDeleteDialog, setShowCompressingDialog, setShowUpscalingDialog,
+    setLockPostID, setPrivatePostID, setTagEditID, setSourceEditID, setChildPostObj,
+    setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
     setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, setAppealPostID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
     return {
-        showDeletePostDialog: selector((state) => state.postDialog.showDeletePostDialog),
-        showTakedownPostDialog: selector((state) => state.postDialog.showTakedownPostDialog),
+        deletePostID: selector((state) => state.postDialog.deletePostID),
+        takedownPostID: selector((state) => state.postDialog.takedownPostID),
         deletePostHistoryID: selector((state) => state.postDialog.deletePostHistoryID),
         deletePostHistoryFlag: selector((state) => state.postDialog.deletePostHistoryFlag),
         revertPostHistoryID: selector((state) => state.postDialog.revertPostHistoryID),
         revertPostHistoryFlag: selector((state) => state.postDialog.revertPostHistoryFlag),
         lockPostID: selector((state) => state.postDialog.lockPostID),
-        privatePostObj: selector((state) => state.postDialog.privatePostObj),
+        privatePostID: selector((state) => state.postDialog.privatePostID),
         tagEditID: selector((state) => state.postDialog.tagEditID),
         sourceEditID: selector((state) => state.postDialog.sourceEditID),
         showBulkTagEditDialog: selector((state) => state.postDialog.showBulkTagEditDialog),
         showBulkDeleteDialog: selector((state) => state.postDialog.showBulkDeleteDialog),
-        showCompressingDialog: selector((state) => state.postDialog.showCompressingDialog),
-        showUpscalingDialog: selector((state) => state.postDialog.showUpscalingDialog),
+        compressPostID: selector((state) => state.postDialog.compressPostID),
+        upscalePostID: selector((state) => state.postDialog.upscalePostID),
         childPostObj: selector((state) => state.postDialog.childPostObj),
         undeletePostID: selector((state) => state.postDialog.undeletePostID),
         permaDeletePostID: selector((state) => state.postDialog.permaDeletePostID),
@@ -112,21 +112,21 @@ export const usePostDialogSelector = () => {
 export const usePostDialogActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
-        setShowDeletePostDialog: (state: boolean) => dispatch(setShowDeletePostDialog(state)),
-        setShowTakedownPostDialog: (state: boolean) => dispatch(setShowTakedownPostDialog(state)),
+        setDeletePostID: (state: PostEditID | null) => dispatch(setDeletePostID(state)),
+        setTakedownPostID: (state: PostEditID | null) => dispatch(setTakedownPostID(state)),
         setDeletePostHistoryID: (state: HistoryID | null) => dispatch(setDeletePostHistoryID(state)),
         setDeletePostHistoryFlag: (state: boolean) => dispatch(setDeletePostHistoryFlag(state)),
         setRevertPostHistoryID: (state: HistoryID | null) => dispatch(setRevertPostHistoryID(state)),
         setRevertPostHistoryFlag: (state: boolean) => dispatch(setRevertPostHistoryFlag(state)),
-        setLockPostID: (state: string | null) => dispatch(setLockPostID(state)),
-        setPrivatePostObj: (state: PostObj | null) => dispatch(setPrivatePostObj(state)),
+        setLockPostID: (state: PostEditID | null) => dispatch(setLockPostID(state)),
+        setPrivatePostID: (state: PrivateID | null) => dispatch(setPrivatePostID(state)),
         setTagEditID: (state: TagEditID | null) => dispatch(setTagEditID(state)),
         setSourceEditID: (state: TagEditID | null) => dispatch(setSourceEditID(state)),
         setShowBulkTagEditDialog: (state: boolean) => dispatch(setShowBulkTagEditDialog(state)),
         setShowBulkDeleteDialog: (state: boolean) => dispatch(setShowBulkDeleteDialog(state)),
-        setShowCompressingDialog: (state: boolean) => dispatch(setShowCompressingDialog(state)),
-        setShowUpscalingDialog: (state: boolean) => dispatch(setShowUpscalingDialog(state)),
-        setChildPostObj: (state: ChildEditID | null) => dispatch(setChildPostObj(state)),
+        setCompressPostID: (state: PostEditID | null) => dispatch(setCompressPostID(state)),
+        setUpscalePostID: (state: PostEditID | null) => dispatch(setUpscalePostID(state)),
+        setChildPostObj: (state: PostEditID | null) => dispatch(setChildPostObj(state)),
         setUndeletePostID: (state: UndeleteID | null) => dispatch(setUndeletePostID(state)),
         setPermaDeletePostID: (state: string | null) => dispatch(setPermaDeletePostID(state)),
         setPermaDeletePostFlag: (state: boolean) => dispatch(setPermaDeletePostFlag(state)),

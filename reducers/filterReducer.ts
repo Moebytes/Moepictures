@@ -12,7 +12,8 @@ const filterSlice = createSlice({
         lightness: 100,
         blur: 0,
         sharpen: 0,
-        pixelate: 1
+        pixelate: 1,
+        splatter: 0
     },
     reducers: {
         setBrightness: (state, action) => {state.brightness = action.payload},
@@ -22,11 +23,13 @@ const filterSlice = createSlice({
         setLightness: (state, action) => {state.lightness = action.payload},
         setBlur: (state, action) => {state.blur = action.payload},
         setSharpen: (state, action) => {state.sharpen = action.payload},
-        setPixelate: (state, action) => {state.pixelate = action.payload}
+        setPixelate: (state, action) => {state.pixelate = action.payload},
+        setSplatter: (state, action) => {state.splatter = action.payload},
     }    
 })
 
-const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = filterSlice.actions
+const {setBrightness, setContrast, setHue, setSaturation, setLightness, 
+    setBlur, setSharpen, setPixelate, setSplatter} = filterSlice.actions
 
 export const useFilterSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
@@ -38,7 +41,8 @@ export const useFilterSelector = () => {
         lightness: selector((state) => state.filter.lightness),
         blur: selector((state) => state.filter.blur),
         sharpen: selector((state) => state.filter.sharpen),
-        pixelate: selector((state) => state.filter.pixelate)
+        pixelate: selector((state) => state.filter.pixelate),
+        splatter: selector((state) => state.filter.splatter)
     }
 }
 
@@ -52,7 +56,8 @@ export const useFilterActions = () => {
         setLightness: (state: number) => dispatch(setLightness(state)),
         setBlur: (state: number) => dispatch(setBlur(state)),
         setSharpen: (state: number) => dispatch(setSharpen(state)),
-        setPixelate: (state: number) => dispatch(setPixelate(state))
+        setPixelate: (state: number) => dispatch(setPixelate(state)),
+        setSplatter: (state: number) => dispatch(setSplatter(state))
     }
 }
 

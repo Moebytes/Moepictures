@@ -48,6 +48,7 @@ import blurIcon from "../../assets/icons/blur.png"
 import sharpenIcon from "../../assets/icons/sharpen.png"
 import squareIcon from "../../assets/icons/square.png"
 import pixelateIcon from "../../assets/icons/pixelate.png"
+import splatterIcon from "../../assets/icons/splatter.png"
 import speedIcon from "../../assets/icons/speed.png"
 import reverseIcon from "../../assets/icons/reverse.png"
 import scrollIcon from "../../assets/icons/scroll.png"
@@ -83,8 +84,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {activeDropdown, filterDropActive} = useActiveSelector()
     const {setActiveDropdown, setFilterDropActive} = useActiveActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
     const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
@@ -136,23 +137,6 @@ const SortBar: React.FunctionComponent = (props) => {
         if (savedScroll) setScroll(savedScroll === "true")
         if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
         if (savedShowChildren) setShowChildren(savedShowChildren === "true")
-
-        const savedBrightness = localStorage.getItem("brightness")
-        const savedContrast = localStorage.getItem("contrast")
-        const savedHue = localStorage.getItem("hue")
-        const savedSaturation = localStorage.getItem("saturation")
-        const savedLightness = localStorage.getItem("lightness")
-        const savedBlur = localStorage.getItem("blur")
-        const savedSharpen = localStorage.getItem("sharpen")
-        const savedPixelate = localStorage.getItem("pixelate")
-        if (savedBrightness) setBrightness(Number(savedBrightness))
-        if (savedContrast) setContrast(Number(savedContrast))
-        if (savedHue) setHue(Number(savedHue))
-        if (savedSaturation) setSaturation(Number(savedSaturation))
-        if (savedLightness) setLightness(Number(savedLightness))
-        if (savedBlur) setBlur(Number(savedBlur))
-        if (savedSharpen) setSharpen(Number(savedSharpen))
-        if (savedPixelate) setPixelate(Number(savedPixelate))
     }, [])
 
     useEffect(() => {
@@ -625,7 +609,8 @@ const SortBar: React.FunctionComponent = (props) => {
         localStorage.setItem("blur", String(blur))
         localStorage.setItem("sharpen", String(sharpen))
         localStorage.setItem("pixelate", String(pixelate))
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+        localStorage.setItem("splatter", String(splatter))
+    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
 
     const resetFilters = () => {
         setBrightness(100)
@@ -636,6 +621,7 @@ const SortBar: React.FunctionComponent = (props) => {
         setBlur(0)
         setSharpen(0)
         setPixelate(1)
+        setSplatter(0)
     }
 
     const toggleSquare = () => {
@@ -1210,6 +1196,12 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.filters.pixelate}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
                 </div>
+                {session.showR18 ? 
+                <div className="sortbar-dropdown-row filters-row">
+                    <img className="sortbar-dropdown-img" src={splatterIcon} style={{filter: getFilter()}}/>
+                    <span className="sortbar-dropdown-text">{i18n.filters.splatter}</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
+                </div> : null}
                 <div className="sortbar-dropdown-row filters-row">
                     <button className="filters-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
                 </div>

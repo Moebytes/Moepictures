@@ -11,8 +11,6 @@ import sortRev from "../../assets/icons/sort-reverse.png"
 import CharacterRow from "../../components/search/CharacterRow"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -404,8 +402,6 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -441,9 +437,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateCharactersJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

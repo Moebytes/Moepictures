@@ -9,9 +9,6 @@ import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
 import CommentRow from "../../components/search/CommentRow"
-import DeleteCommentDialog from "../../dialogs/comment/DeleteCommentDialog"
-import EditCommentDialog from "../../dialogs/comment/EditCommentDialog"
-import ReportCommentDialog from "../../dialogs/comment/ReportCommentDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -19,8 +16,6 @@ useMiscDialogActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import "./styles/itemspage.less"
 import {CommentSearch, CommentSort} from "../../types/Types"
 
@@ -451,11 +446,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <EditCommentDialog/>
-        <DeleteCommentDialog/>
-        <ReportCommentDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -485,9 +475,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateCommentsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

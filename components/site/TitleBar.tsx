@@ -6,7 +6,7 @@ import favicon3 from "../../assets/icons/favicon3.png"
 import favicon4 from "../../assets/icons/favicon4.png"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
-useCacheActions, useFlagSelector, useActiveActions, useFlagActions} from "../../store"
+useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions} from "../../store"
 import functions from "../../structures/Functions"
 import hamburger from "../../assets/icons/hamburger.png"
 import lockIcon from "../../assets/icons/lock-red.png"
@@ -104,6 +104,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const {mobile, relative, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setRelative, setHideTitlebar} = useLayoutActions()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {search, ratingType, autoSearch} = useSearchSelector()
     const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
     const {scrollY, mobileScrolling} = useInteractionSelector()
@@ -119,12 +120,31 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme")
         if (savedTheme) setTheme(savedTheme as Themes)
-        const savedHue = localStorage.getItem("siteHue")
-        const savedSaturation = localStorage.getItem("siteSaturation")
-        const savedLightness = localStorage.getItem("siteLightness")
-        if (savedHue) setSiteHue(Number(savedHue))
-        if (savedSaturation) setSiteSaturation(Number(savedSaturation))
-        if (savedLightness) setSiteLightness(Number(savedLightness))
+        const savedSiteHue = localStorage.getItem("siteHue")
+        const savedSiteSaturation = localStorage.getItem("siteSaturation")
+        const savedSiteLightness = localStorage.getItem("siteLightness")
+        if (savedSiteHue) setSiteHue(Number(savedSiteHue))
+        if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
+        if (savedSiteLightness) setSiteLightness(Number(savedSiteLightness))
+
+        const savedBrightness = localStorage.getItem("brightness")
+        const savedContrast = localStorage.getItem("contrast")
+        const savedHue = localStorage.getItem("hue")
+        const savedSaturation = localStorage.getItem("saturation")
+        const savedLightness = localStorage.getItem("lightness")
+        const savedBlur = localStorage.getItem("blur")
+        const savedSharpen = localStorage.getItem("sharpen")
+        const savedPixelate = localStorage.getItem("pixelate")
+        const savedSplatter = localStorage.getItem("splatter")
+        if (savedBrightness) setBrightness(Number(savedBrightness))
+        if (savedContrast) setContrast(Number(savedContrast))
+        if (savedHue) setHue(Number(savedHue))
+        if (savedSaturation) setSaturation(Number(savedSaturation))
+        if (savedLightness) setLightness(Number(savedLightness))
+        if (savedBlur) setBlur(Number(savedBlur))
+        if (savedSharpen) setSharpen(Number(savedSharpen))
+        if (savedPixelate) setPixelate(Number(savedPixelate))
+        if (savedSplatter) setSplatter(Number(savedSplatter))
     }, [])
 
     useEffect(() => {

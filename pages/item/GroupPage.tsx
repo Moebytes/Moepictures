@@ -8,10 +8,6 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import AddGroupPostDialog from "../../dialogs/group/AddGroupPostDialog"
-import DeleteGroupPostDialog from "../../dialogs/group/DeleteGroupPostDialog"
-import EditGroupDialog from "../../dialogs/group/EditGroupDialog"
-import DeleteGroupDialog from "../../dialogs/group/DeleteGroupDialog"
 import functions from "../../structures/Functions"
 import cryptoFunctions from "../../structures/CryptoFunctions"
 import permissions from "../../structures/Permissions"
@@ -25,7 +21,6 @@ import groupCancel from "../../assets/icons/group-cancel.png"
 import groupCancelActive from "../../assets/icons/group-cancel-active.png"
 import groupAccept from "../../assets/icons/group-accept.png"
 import Reorder from "react-reorder"
-import RevertGroupHistoryDialog from "../../dialogs/group/RevertGroupHistoryDialog"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import jsxFunctions from "../../structures/JSXFunctions"
@@ -295,11 +290,6 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <AddGroupPostDialog/>
-        <DeleteGroupPostDialog/>
-        <EditGroupDialog/>
-        <DeleteGroupDialog/>
-        <RevertGroupHistoryDialog/>
         <TitleBar historyID={historyID}/>
         <NavBar/>
         <div className="body">

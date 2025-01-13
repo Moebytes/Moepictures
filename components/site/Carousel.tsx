@@ -25,6 +25,7 @@ let lastDeltaY = 0
 let effectTimer = null as any
 
 const loadAmount = 10
+let placeholder = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -33,16 +34,21 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {noteDrawingEnabled} = useSearchSelector()
     const [lastPos, setLastPos] = useState(null as number | null)
     const [dragging, setDragging] = useState(false)
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | HTMLVideoElement>[])
-    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLCanvasElement | HTMLVideoElement> | null)
-    const [active, setActive] = useState(null as React.RefObject<HTMLCanvasElement | HTMLVideoElement> | null)
+    const [imageRefs, setImageRefs] = useState([] as React.RefObject<HTMLImageElement | HTMLVideoElement>[])
+    const [imageFilterRefs, setImageFilterRefs] = useState([] as React.RefObject<HTMLDivElement>[])
+    const [pixelateRefs, setPixelateRefs] = useState([] as React.RefObject<HTMLCanvasElement>[])
+    const [effectRefs, setEffectRefs] = useState([] as React.RefObject<HTMLCanvasElement>[])
+    const [sharpenRefs, setSharpenRefs] = useState([] as React.RefObject<HTMLImageElement>[])
+    const [lightnessRefs, setLightnessRefs] = useState([] as React.RefObject<HTMLImageElement>[])
+    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLDivElement> | null)
+    const [active, setActive] = useState(null as React.RefObject<HTMLDivElement> | null)
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
-    const [images, setImages] = useState(props.images)
+    const [images, setImages] = useState([] as string[])
     const [visibleImages, setVisibleImages] = useState([] as string[])
     const [visibleIndex, setVisibleIndex] = useState(0)
     const [updateImagesFlag, setUpdateImagesFlag] = useState(false)
@@ -56,57 +62,74 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
+    const updateRefs = (amount: number) => {
+        const newImageRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement | HTMLVideoElement>())
+        setImageRefs(newImageRefs)
+        const newImageFilterRefs = Array.from({length: amount}, () => React.createRef<HTMLDivElement>())
+        setImageFilterRefs(newImageFilterRefs)
+        const newPixelateRefs = Array.from({length: amount}, () => React.createRef<HTMLCanvasElement>())
+        setPixelateRefs(newPixelateRefs)
+        const newEffectRefs = Array.from({length: amount}, () => React.createRef<HTMLCanvasElement>())
+        setEffectRefs(newEffectRefs)
+        const newSharpenRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement>())
+        setSharpenRefs(newSharpenRefs)
+        const newLightnessRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement>())
+        setLightnessRefs(newLightnessRefs)
+        return newImageFilterRefs
+    }
+
+    const getCombinedImages = () => {
+        return functions.removeDuplicates([...props.images, ...(props.appendImages || [])])
+    }
+
     useEffect(() => {
-        const newImagesRef = props.images.slice(0, loadAmount).map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
-        setActive(newImagesRef[props.index ? props.index : 0])
-        setLastActive(newImagesRef[props.index ? props.index : 0])
+        const newRefs = updateRefs(props.images.slice(0, loadAmount).length)
+        setActive(newRefs[props.index ? props.index : 0])
+        setLastActive(newRefs[props.index ? props.index : 0])
         setShowLeftArrow(false)
         setShowRightArrow(false)
         setLastPos(null)
         setDragging(false)
-        setImagesRef(newImagesRef)
         setVisibleImages([])
         setVisibleIndex(0)
-        setImages(props.images)
         if (sliderRef?.current) {
             sliderRef.current.style.marginLeft = `0px`
         }
-        const base64Images = async () => {
-            const base64Images = await Promise.all(props.images.map((image) => functions.linkToBase64(image)))
-            setImages(base64Images)
-        }
-        // base64Images()
     }, [props.images])
 
     useEffect(() => {
-        if (props.index !== undefined) {
-            setActive(imagesRef[props.index])
+        const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
+        const decryptImages = async (images: string[]) => {
+            const decrypted = await Promise.all(images.map((image) => functions.decryptThumb(image, session)))
+            return decrypted
         }
-    }, [props.index])
+        const newImages = visibleImages.slice(startIndex)
+        decryptImages(newImages).then(() => setImages((prev) => [...prev, ...newImages]))
+    }, [visibleImages, visibleIndex])
     
     useEffect(() => {
+        const images = getCombinedImages()
         let newVisibleImages = [] as string[]
         let currentIndex = 0
         for (let i = 0; i < loadAmount; i++) {
-            if (!props.images[currentIndex]) break
-            newVisibleImages.push(props.images[currentIndex])
+            if (!images[currentIndex]) break
+            newVisibleImages.push(images[currentIndex])
             currentIndex++
         }
         setVisibleImages(functions.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
-        const newImagesRef = newVisibleImages.map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
-        setImagesRef(newImagesRef)
-    }, [props.images])
+        updateRefs(newVisibleImages.length)
+    }, [props.images, props.appendImages])
 
     useEffect(() => {
-        if (props.appendImages) {
-            const newImages = [...images, ...props.appendImages]
-            setImages(functions.removeDuplicates(newImages))
+        if (props.index !== undefined) {
+            setActive(imageFilterRefs[props.index])
         }
-    }, [props.appendImages])
+    }, [props.index])
 
     useEffect(() => {
         if (updateImagesFlag) {
+            const images = getCombinedImages()
             if (scrollTimeout) return setUpdateImagesFlag(false)
             setScrollTimeout(true)
             setTimeout(() => {
@@ -122,8 +145,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 }
                 setVisibleImages(newVisibleImages)
                 setVisibleIndex(currentIndex)
-                const newImagesRef = newVisibleImages.map(() => React.createRef<HTMLCanvasElement | HTMLVideoElement>())
-                setImagesRef(newImagesRef)
+                updateRefs(newVisibleImages.length)
                 setTimeout(() => {
                     setLastPos(null)
                 }, 700)
@@ -132,7 +154,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             }
             setUpdateImagesFlag(false)
         }
-    }, [updateImagesFlag, images, visibleImages, visibleIndex, scrollTimeout])
+    }, [updateImagesFlag, props.images, props.appendImages, visibleImages, visibleIndex, scrollTimeout])
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         for (let entry of entries) {
@@ -169,7 +191,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0
-        let index = imagesRef.indexOf(active!)
+        let index = imageFilterRefs.indexOf(active!)
         if (event.key === "ArrowLeft") {
             index-- 
             marginLeft += width
@@ -178,13 +200,13 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             marginLeft -= width
         } 
         if (index < 0) index = 0
-        if (index > imagesRef.length - 1) index = imagesRef.length - 1
+        if (index > imageFilterRefs.length - 1) index = imageFilterRefs.length - 1
         if (props.set) props.set(props.images[index], index, false)
-        setActive(imagesRef[index])
+        setActive(imageFilterRefs[index])
 
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
-        if (index < 5 || index > imagesRef.length - 6) return
+        if (index < 5 || index > imageFilterRefs.length - 6) return
         sliderRef.current.style.transition = "margin-left 0.75s"
         sliderRef.current.style.marginLeft = `${marginLeft}px`
         setTimeout(() => {
@@ -199,7 +221,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (sliderRef.current) sliderRef.current.addEventListener("wheel", handleWheel, {passive: false})
         const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "20px", threshold: 1})
         const resizeObserver = new ResizeObserver(handleResize)
-        const element = imagesRef[imagesRef.length - 1]?.current
+        const element = imageFilterRefs[imageFilterRefs.length - 1]?.current
         if (element) {
             observer.observe(element)
             resizeObserver.observe(element)
@@ -210,16 +232,16 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             observer.disconnect()
             resizeObserver.disconnect()
         }
-    })
+    }, [imageFilterRefs])
 
     useEffect(() => {
-        for (let i = 0; i < imagesRef.length; i++) {
-            if (imagesRef[i].current?.style) imagesRef[i].current!.style.border = "0"
+        for (let i = 0; i < imageFilterRefs.length; i++) {
+            if (imageFilterRefs[i].current?.style) imageFilterRefs[i].current!.style.border = "0"
         }
         if (!active) return
         if (active.current) active.current.style.border = "3px solid var(--text)"
         setLastActive(active)
-    }, [active, imagesRef])
+    }, [active, imageFilterRefs])
 
     const handleWheel = (event: WheelEvent) => {
         if (!sliderRef.current) return
@@ -374,64 +396,157 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }, 1000)
     }
 
-    const filtersOn = () => {
-        if ((brightness !== 100) ||
-            (contrast !== 100) ||
-            (hue !== 180) ||
-            (saturation !== 100) ||
-            (lightness !== 100) ||
-            (blur !== 0) ||
-            (sharpen !== 0) ||
-            (pixelate !== 1)) {
-                return true 
+    useEffect(() => {
+        for (let i = 0; i < imageFilterRefs.length; i++) {
+            const element = imageFilterRefs[i].current
+            const sharpenOverlay = sharpenRefs[i].current
+            const lightnessOverlay = lightnessRefs[i].current
+            let image = images[i]
+            let newContrast = contrast
+            if (!element || !image || !sharpenOverlay || !lightnessOverlay) return
+            if (sharpen !== 0) {
+                const sharpenOpacity = sharpen / 5
+                newContrast += 25 * sharpenOpacity
+                sharpenOverlay.style.backgroundImage = `url(${image})`
+                sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
+                sharpenOverlay.style.mixBlendMode = "overlay"
+                sharpenOverlay.style.opacity = `${sharpenOpacity}`
             } else {
-                return false
+                sharpenOverlay.style.backgroundImage = "none"
+                sharpenOverlay.style.filter = "none"
+                sharpenOverlay.style.mixBlendMode = "normal"
+                sharpenOverlay.style.opacity = "0"
             }
+            if (lightness !== 100) {
+                const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
+                lightnessOverlay.style.filter = filter
+                lightnessOverlay.style.opacity = `${Math.abs((lightness - 100) / 100)}`
+            } else {
+                lightnessOverlay.style.filter = "none"
+                lightnessOverlay.style.opacity = "0"
+            }
+            element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+        }
+    }, [imageFilterRefs, brightness, contrast, hue, saturation, lightness, blur, sharpen])
+
+    const imagePixelate = () => {
+        for (let i = 0; i < pixelateRefs.length; i++) {
+            const pixelateRef = pixelateRefs[i]
+            const imageRef = imageRefs[i]
+            if (!pixelateRef.current || !imageRef.current) return
+            const pixelateCanvas = pixelateRef.current
+            const ctx = pixelateCanvas.getContext("2d")!
+            const imageWidth = imageRef.current.clientWidth 
+            const imageHeight = imageRef.current.clientHeight
+            const landscape = imageWidth >= imageHeight
+            ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
+            pixelateCanvas.width = imageWidth
+            pixelateCanvas.height = imageHeight
+            const pixelWidth = imageWidth / pixelate 
+            const pixelHeight = imageHeight / pixelate
+            if (pixelate !== 1) {
+                ctx.drawImage(imageRef.current, 0, 0, pixelWidth, pixelHeight)
+                if (landscape) {
+                    pixelateCanvas.style.width = `${imageWidth * pixelate}px`
+                    pixelateCanvas.style.height = "auto"
+                } else {
+                    pixelateCanvas.style.width = "auto"
+                    pixelateCanvas.style.height = `${imageHeight * pixelate}px`
+                }
+                pixelateCanvas.style.opacity = "1"
+            } else {
+                pixelateCanvas.style.width = "none"
+                pixelateCanvas.style.height = "none"
+                pixelateCanvas.style.opacity = "0"
+            }
+        }
     }
 
-    const loadImages = async () => {
-        if (!imagesRef?.length) return
-        if (filtersOn() && effectTimer) return
-        effectTimer = setTimeout(() => {
-            effectTimer = null
-            forceUpdate()
-        }, 500)
-        const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
-        for (let i = startIndex; i < imagesRef.length; i++) {
-            const ref = imagesRef[i]
-            if (!ref.current) continue
-            let src = visibleImages[i] 
-            if (functions.isVideo(src)) continue
-            if (!props.unverified) {
-                src = await functions.decryptThumb(visibleImages[i], session)
-            }
-            const imgElement = document.createElement("img")
-            imgElement.src = src
-            imgElement.onload = () => {
-                if (!ref.current || !(ref.current instanceof HTMLCanvasElement)) return
-                const rendered = functions.render(imgElement, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate)
-                const refCtx = ref.current.getContext("2d")
-                ref.current.width = rendered.width
-                ref.current.height = rendered.height
-                refCtx?.drawImage(rendered, 0, 0, rendered.width, rendered.height)
+    const splatterEffect = () => {
+        for (let i = 0; i < effectRefs.length; i++) {
+            const effectRef = effectRefs[i]
+            const imageRef = imageRefs[i]
+            if (!effectRef.current || !imageRef.current) return
+            if (splatter !== 0) {
+                effectRef.current.style.opacity = "1"
+                effectRef.current.width = imageRef.current.width
+                effectRef.current.height = imageRef.current.height
+                const ctx = effectRef.current.getContext("2d")!
+
+                ctx.drawImage(imageRef.current, 0, 0, effectRef.current.width, effectRef.current.height)
+    
+                const lineAmount = splatter * 3
+                const minOpacity = 0.1
+                const maxOpacity = 0.2
+                const minLineWidth = 1
+                const maxLineWidth = 3
+                const minLineLength = 50
+                const maxLineLength = 70
+                const maxAngle = 180
+    
+                const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
+                const blendModes = ["lighter"] as GlobalCompositeOperation[]
+                for (let i = 0; i < lineCount; i++) {
+                    const startX = Math.random() * effectRef.current.width
+                    const startY = Math.random() * effectRef.current.height
+                    const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
+    
+                    const radians = (Math.PI / 180) * maxAngle
+                    let angle1 = Math.random() * radians - radians / 2
+                    let angle2 = Math.random() * radians - radians / 2
+    
+                    const controlX1 = startX + length * Math.cos(angle1)
+                    const controlY1 = startY + length * Math.sin(angle1)
+                    const controlX2 = startX + length * Math.cos(angle2)
+                    const controlY2 = startY + length * Math.sin(angle2)
+                    const endX = startX + length * Math.cos((angle1 + angle2) / 2)
+                    const endY = startY + length * Math.sin((angle1 + angle2) / 2)
+    
+                    const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
+                    const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
+                    const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
+    
+                    ctx.globalAlpha = opacity
+                    ctx.globalCompositeOperation = blendMode
+                    ctx.strokeStyle = "#ffffff"
+                    ctx.lineWidth = lineWidth
+                    ctx.beginPath()
+                    ctx.moveTo(startX, startY)
+                    ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
+                    ctx.stroke()
+                }
+                ctx.globalAlpha = 1
+                ctx.globalCompositeOperation = "source-over"
+            } else {
+                effectRef.current.style.opacity = "0"
             }
         }
     }
 
     useEffect(() => {
-        loadImages()
-    }, [visibleImages, visibleIndex, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
+        imagePixelate()
+    }, [pixelateRefs, pixelate])
+
+    useEffect(() => {
+        splatterEffect()
+    }, [effectRefs, splatter])
 
     const generateJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.removeDuplicates(visibleImages)
+        let visible = functions.removeDuplicates(images)
         for (let i = 0; i < visible.length; i++) {
             const img = visible[i] as string
-            if (functions.isVideo(img)) {
-                jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i] as any} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
-            } else {
-                jsx.push(<canvas key={i} ref={imagesRef[i] as any} className="carousel-img" onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></canvas>)
-            }
+            jsx.push(
+                <div key={i} className="carousel-img-filters" ref={imageFilterRefs[i]} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imageFilterRefs[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imageFilterRefs[i])}}>
+                    <img draggable={false} ref={lightnessRefs[i]} className="carousel-lightness-overlay" src={img}/>
+                    <img draggable={false} ref={sharpenRefs[i]} className="carousel-sharpen-overlay" src={img}/>
+                    <canvas draggable={false} ref={effectRefs[i]} className="carousel-effect-canvas"></canvas>
+                    <canvas draggable={false} ref={pixelateRefs[i]} className="carousel-pixelate-canvas"></canvas>
+                    {functions.isVideo(img) ? 
+                    <video draggable={false} autoPlay muted loop disablePictureInPicture ref={imageRefs[i] as any} className="carousel-img" src={img} style={props.height ? {height: `${props.height}px`} : {}}></video> :
+                    <img draggable={false} ref={imageRefs[i] as any} className="carousel-img" src={img} style={props.height ? {height: `${props.height}px`} : {}}/>}
+                </div>
+            )
         }
         return jsx
     }
@@ -442,11 +557,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="carousel" ref={carouselRef} style={{maxWidth, marginTop, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
-            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
-            <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} 
+            onClick={arrowLeftClick} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)}/>
+            <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} 
+            onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
-            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={arrowRight} style={{filter: getFilter()}} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
+            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={arrowRight} style={{filter: getFilter()}} 
+            onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
         </div>
     )
 }

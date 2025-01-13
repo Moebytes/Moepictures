@@ -6,8 +6,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import PostHistoryRow from "../../components/history/PostHistoryRow"
-import RevertPostHistoryDialog from "../../dialogs/post/RevertPostHistoryDialog"
-import DeletePostHistoryDialog from "../../dialogs/post/DeletePostHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
 import permissions from "../../structures/Permissions"
@@ -184,8 +182,6 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <RevertPostHistoryDialog/>
-        <DeletePostHistoryDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -6,8 +6,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import GroupHistoryRow from "../../components/history/GroupHistoryRow"
-import RevertGroupHistoryDialog from "../../dialogs/group/RevertGroupHistoryDialog"
-import DeleteGroupHistoryDialog from "../../dialogs/group/DeleteGroupHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
 import permissions from "../../structures/Permissions"
@@ -169,8 +167,6 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <RevertGroupHistoryDialog/>
-        <DeleteGroupHistoryDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

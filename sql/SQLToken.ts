@@ -212,10 +212,23 @@ export default class SQLToken {
     /** Delete ip token. */
     public static deleteIPToken = async (username: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "ip tokens" WHERE "ip tokens"."username" = $1`,
-        values: [username]
+            text: /*sql*/`DELETE FROM "ip tokens" WHERE "ip tokens"."username" = $1`,
+            values: [username]
         }
         await SQLQuery.run(query)
+    }
+
+    /** Get ip tokens. */
+    public static ipTokens = async () => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "ip tokens".*
+                FROM "ip tokens"
+                GROUP BY "ip tokens"."username"
+            `)
+        }
+        const result = await SQLQuery.run(query)
+        return result as Promise<IPToken[]>
     }
 
     /** Insert payment. */

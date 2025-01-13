@@ -19,9 +19,6 @@ import SQLThread from "./SQLThread"
 import SQLMessage from "./SQLMessage"
 import SQLGroup from "./SQLGroup"
 
-const redis = Redis.createClient({
-  url: process.env.REDIS_URL
-})
 const jsonStringIDs = (json: string) => {
   const transformed = json.replace(/"(\w*ID)": (\d+)/g, (match, key, value) => `"${key}":"${value}"`)
   return JSON.parse(transformed)
@@ -41,6 +38,10 @@ const pgPool = functions.isLocalHost() ? new Pool({
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: Number(process.env.PG_PORT)
+})
+
+const redis = Redis.createClient({
+  url: process.env.REDIS_URL
 })
 
 if (process.env.REDIS === "on") redis.connect()
@@ -74,24 +75,24 @@ export default class SQLQuery {
         try {
           cacheKey = generateCacheKey(query)
           redisResult = await redis.get(cacheKey)
-          if (redisResult) return (JSON.parse(redisResult))
+          if (redisResult) return JSON.parse(redisResult)
         } catch (error) {
           // ignore
         }
       }
       const pgClient = await pgPool.connect()
       try {
-            const result = await pgClient.query(query)
-            if (cache && cacheKey) {
-              await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch((error) => null)
-            }
-            return result.rows as any
-        } catch (error) {
-            console.log(query)
-            return Promise.reject(error)
-        } finally {
-            pgClient.release(true)
-        }
+          const result = await pgClient.query(query)
+          if (cache && cacheKey) {
+            await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch((error) => null)
+          }
+          return result.rows as any
+      } catch (error) {
+          console.log(query)
+          return Promise.reject(error)
+      } finally {
+          pgClient.release(true)
+      }
   }
 
   /** Create the Database. */
@@ -100,7 +101,7 @@ export default class SQLQuery {
   }
 
   /** Flush redis db */
-  public static flushDB = async (): Promise<void> => {
+  public static flushDB = async () => {
     await redis.flushDb().catch(() => null)
   }
 }

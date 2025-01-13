@@ -11,22 +11,18 @@ import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
-import {PostSearch, PostHistory, UnverifiedPost, ImageFormat} from "../../types/Types"
+import {ImageFormat} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory | UnverifiedPost
-}
-
-const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
+const CompressPostDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {showCompressingDialog} = usePostDialogSelector()
-    const {setShowCompressingDialog} = usePostDialogActions()
+    const {compressPostID} = usePostDialogSelector()
+    const {setCompressPostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [quality, setQuality] = useState("95")
-    const [format, setFormat] = useState(props.post.type === "animation" ? "webp" : "jpg" as ImageFormat)
+    const [format, setFormat] = useState("jpg" as ImageFormat)
     const [maxDimension, setMaxDimension] = useState("2000")
     const [maxUpscaledDimension, setMaxUpscaledDimension] = useState("8000")
     const [original, setOriginal] = useState(true)
@@ -44,19 +40,21 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (showCompressingDialog) {
+        if (compressPostID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
+            setFormat(compressPostID.post.type === "animation" ? "webp" : "jpg" as ImageFormat)
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showCompressingDialog])
+    }, [compressPostID])
 
     const compressPost = async () => {
+        if (!compressPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/compress",  {postID: props.post.postID, 
+            await functions.post("/api/post/compress",  {postID: compressPostID.post.postID, 
             quality: functions.safeNumber(quality) || 95, format, maxDimension: functions.safeNumber(maxDimension) || 2000, 
             maxUpscaledDimension: functions.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
             setPostFlag(true)
@@ -67,10 +65,10 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             compressPost()
         }
-        setShowCompressingDialog(false)
+        setCompressPostID(null)
     }
 
-    if (showCompressingDialog) {
+    if (compressPostID) {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
@@ -85,12 +83,12 @@ const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={quality} onChange={(event) => setQuality(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
-                                {props.post.type === "image" || props.post.type === "comic" ? <>
+                                {compressPostID.post.type === "image" || compressPostID.post.type === "comic" ? <>
                                 <img className="dialog-checkbox" src={format === "jpg" ? radioButtonChecked : radioButton} onClick={() => setFormat("jpg")} style={{marginRight: "10px", filter: getFilter()}}/>
                                 <span className="dialog-text">jpg</span>
                                 <img className="dialog-checkbox" src={format === "png" ? radioButtonChecked : radioButton} onClick={() => setFormat("png")} style={{marginRight: "10px", filter: getFilter()}}/>
                                 <span className="dialog-text">png</span></> : null}
-                                {props.post.type === "animation" ? <>
+                                {compressPostID.post.type === "animation" ? <>
                                 <img className="dialog-checkbox" src={format === "gif" ? radioButtonChecked : radioButton} onClick={() => setFormat("gif")} style={{marginRight: "10px", filter: getFilter()}}/>
                                 <span className="dialog-text">gif</span></> : null}
                                 <img className="dialog-checkbox" src={format === "webp" ? radioButtonChecked : radioButton} onClick={() => setFormat("webp")} style={{marginRight: "10px", filter: getFilter()}}/>

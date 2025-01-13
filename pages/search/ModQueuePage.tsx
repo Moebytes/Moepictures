@@ -18,7 +18,6 @@ import ModNotes from "../../components/mod/ModNotes"
 import ModGroups from "../../components/mod/ModGroups"
 import ModGroupEdits from "../../components/mod/ModGroupEdits"
 import ModGroupDeletions from "../../components/mod/ModGroupDeletions"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import ModReports from "../../components/mod/ModReports"
 import ModRejected from "../../components/mod/ModRejected"
 import functions from "../../structures/Functions"
@@ -182,7 +181,6 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

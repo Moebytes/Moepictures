@@ -103,6 +103,7 @@
         "blur": "Blur",
         "sharpen": "Sharpen",
         "pixelate": "Pixelate",
+        "splatter": "Splatter",
         "reset": "Reset"
     },
     "sort": {
@@ -460,7 +461,8 @@
         "appealer": "Appealer",
         "borderRadius": "Border Radius",
         "characterTag": "Character Tag",
-        "joined": "Joined"
+        "joined": "Joined",
+        "speed": "Speed"
     },
     "errors": {
         "$401":"401 error",

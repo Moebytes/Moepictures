@@ -8,15 +8,12 @@ import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory
-}
 
-const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
+const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {showTakedownPostDialog} = usePostDialogSelector()
-    const {setShowTakedownPostDialog} = usePostDialogActions()
+    const {takedownPostID} = usePostDialogSelector()
+    const {setTakedownPostID} = usePostDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setPostFlag} = useFlagActions()
@@ -29,7 +26,7 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (showTakedownPostDialog) {
+        if (takedownPostID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -37,11 +34,12 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showTakedownPostDialog])
+    }, [takedownPostID])
 
     const takedownPost = async () => {
+        if (!takedownPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/takedown",  {postID: props.post.postID}, session, setSessionFlag)
+            await functions.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
             setPostFlag(true)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
@@ -53,17 +51,17 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             takedownPost()
         }
-        if (!keep) setShowTakedownPostDialog(false)
+        if (!keep) setTakedownPostID(null)
     }
 
     const close = () => {
-        setShowTakedownPostDialog(false)
+        setTakedownPostID(null)
         setSubmitted(false)
         setReason("")
     }
 
     const getTitle = () => {
-        if (props.post.hidden) {
+        if (takedownPostID?.post.hidden) {
             return i18n.dialogs.takedownPost.restoreTitle
         } else {
             return i18n.dialogs.takedownPost.title
@@ -71,14 +69,14 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     const getPrompt = () => {
-        if (props.post.hidden) {
+        if (takedownPostID?.post.hidden) {
             return i18n.dialogs.takedownPost.restoreHeader
         } else {
             return i18n.dialogs.takedownPost.header
         }
     }
 
-    if (showTakedownPostDialog) {
+    if (takedownPostID) {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">

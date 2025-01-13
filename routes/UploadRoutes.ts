@@ -478,14 +478,14 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
 
   if (unverified) {
     for (let i = 0; i < addedTags.length; i++) {
-      bulkTagUpdate.push({tag: addedTags[i], type: tagObjectMapping[addedTags[i]]?.type, description: null, image: null, imageHash: null})
+      bulkTagUpdate.push({tag: addedTags[i], type: tagObjectMapping[addedTags[i]]?.type || "tag", description: null, image: null, imageHash: null})
     }
   }
 
   for (let i = 0; i < newTags.length; i++) {
     let newTag = newTags[i]
     if (!newTag.tag) continue
-    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag]?.type, description: null, image: null, imageHash: null} as BulkTag
+    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag]?.type || "tag", description: null, image: null, imageHash: null} as BulkTag
     if (newTag.description) bulkObj.description = newTag.description
     if (!noImageUpdate && newTag.image) {
       let ext = ""
@@ -613,7 +613,7 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
       for (const i of implications) {
         if (!oldTagsSet.has(i.implication)) addedTags.push(i.implication)
         const tag = await sql.tag.tag(i.implication)
-        bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, 
+        bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type || "tag", 
         description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
       }
     }

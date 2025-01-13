@@ -7,15 +7,12 @@ import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory
-}
 
-const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
+const PrivatePostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {privatePostObj} = usePostDialogSelector()
-    const {setPrivatePostObj} = usePostDialogActions()
+    const {privatePostID} = usePostDialogSelector()
+    const {setPrivatePostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -28,7 +25,7 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (privatePostObj) {
+        if (privatePostID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -36,12 +33,12 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [privatePostObj])
+    }, [privatePostID])
 
     const privatePost = async () => {
-        if (!privatePostObj) return
-        if (permissions.canPrivate(session, privatePostObj.artists)) {
-            await functions.post("/api/post/private",  {postID: props.post.postID}, session, setSessionFlag)
+        if (!privatePostID) return
+        if (permissions.canPrivate(session, privatePostID.artists)) {
+            await functions.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
             setPostFlag(true)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
@@ -53,11 +50,11 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             privatePost()
         }
-        setPrivatePostObj(null)
+        setPrivatePostID(null)
     }
 
     const getTitle = () => {
-        if (props.post.private) {
+        if (privatePostID?.post.private) {
             return i18n.dialogs.privatePost.unprivateTitle
         } else {
             return i18n.dialogs.privatePost.title
@@ -65,15 +62,15 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     const getPrompt = () => {
-        if (props.post.private) {
+        if (privatePostID?.post.private) {
             return i18n.dialogs.privatePost.unprivateHeader
         } else {
             return i18n.dialogs.privatePost.header
         }
     }
 
-    if (privatePostObj) {
-        if (permissions.canPrivate(session, privatePostObj.artists)) {
+    if (privatePostID) {
+        if (permissions.canPrivate(session, privatePostID.artists)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

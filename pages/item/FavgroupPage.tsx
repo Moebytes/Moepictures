@@ -7,9 +7,6 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import AddFavgroupPostDialog from "../../dialogs/group/AddFavgroupPostDialog"
-import EditFavgroupDialog from "../../dialogs/group/EditFavgroupDialog"
-import DeleteFavgroupDialog from "../../dialogs/group/DeleteFavgroupDialog"
 import functions from "../../structures/Functions"
 import cryptoFunctions from "../../structures/CryptoFunctions"
 import permissions from "../../structures/Permissions"
@@ -237,9 +234,6 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <AddFavgroupPostDialog/>
-        <EditFavgroupDialog/>
-        <DeleteFavgroupDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

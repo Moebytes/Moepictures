@@ -4,7 +4,6 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import Footer from "../../components/site/Footer"
 import SideBar from "../../components/site/SideBar"
-import Disable2FADialog from "../../dialogs/user/Disable2FADialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -121,7 +120,6 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <Disable2FADialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

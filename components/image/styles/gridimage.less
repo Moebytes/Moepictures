@@ -1,5 +1,3 @@
-@import "../../../index.less";
-
 .image-box {
     position: relative;
     justify-content: center;
@@ -63,8 +61,20 @@
     cursor: pointer;
 }
 
-.sharpen-overlay {
+.effect-canvas {
     z-index: 601;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.sharpen-overlay {
+    z-index: 602;
     position: absolute;
     top: 0;
     left: 0;
@@ -79,7 +89,7 @@
 }
 
 .lightness-overlay {
-    z-index: 602;
+    z-index: 603;
     position: absolute;
     top: 0;
     left: 0;

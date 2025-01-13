@@ -6,31 +6,15 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import PostHistoryRow from "../../components/history/PostHistoryRow"
-import RevertPostHistoryDialog from "../../dialogs/post/RevertPostHistoryDialog"
-import DeletePostHistoryDialog from "../../dialogs/post/DeletePostHistoryDialog"
 import TagHistoryRow from "../../components/history/TagHistoryRow"
-import RevertTagHistoryDialog from "../../dialogs/tag/RevertTagHistoryDialog"
-import DeleteTagHistoryDialog from "../../dialogs/tag/DeleteTagHistoryDialog"
 import NoteHistoryRow from "../../components/history/NoteHistoryRow"
-import RevertNoteHistoryDialog from "../../dialogs/note/RevertNoteHistoryDialog"
-import DeleteNoteHistoryDialog from "../../dialogs/note/DeleteNoteHistoryDialog"
 import GroupHistoryRow from "../../components/history/GroupHistoryRow"
-import RevertGroupHistoryDialog from "../../dialogs/group/RevertGroupHistoryDialog"
-import DeleteGroupHistoryDialog from "../../dialogs/group/DeleteGroupHistoryDialog"
 import SearchHistoryRow from "../../components/history/SearchHistoryRow"
-import DeleteSearchHistoryDialog from "../../dialogs/user/DeleteSearchHistoryDialog"
-import DeleteAllSearchHistoryDialog from "../../dialogs/user/DeleteAllSearchHistoryDialog"
 import AliasHistoryRow from "../../components/history/AliasHistoryRow"
-import RevertAliasHistoryDialog from "../../dialogs/tag/RevertAliasHistoryDialog"
-import DeleteAliasHistoryDialog from "../../dialogs/tag/DeleteAliasHistoryDialog"
 import DeletedPostRow from "../../components/history/DeletedPostRow"
-import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
-import PermaDeletePostDialog from "../../dialogs/post/PermaDeletePostDialog"
-import PermaDeleteAllPostDialog from "../../dialogs/post/PermaDeleteAllPostDialog"
 import scrollIcon from "../../assets/icons/scroll.png"
 import search from "../../assets/icons/search.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import searchHistoryDelete from "../../assets/icons/delete.png"
 import permissions from "../../structures/Permissions"
 import historyPost from "../../assets/icons/history-post.png"
@@ -851,22 +835,6 @@ const HistoryPage: React.FunctionComponent = () => {
 
     return (
         <>
-        <RevertPostHistoryDialog/>
-        <DeletePostHistoryDialog/>
-        <RevertTagHistoryDialog/>
-        <DeleteTagHistoryDialog/>
-        <RevertNoteHistoryDialog/>
-        <DeleteNoteHistoryDialog/>
-        <RevertGroupHistoryDialog/>
-        <DeleteGroupHistoryDialog/>
-        <RevertAliasHistoryDialog/>
-        <DeleteAliasHistoryDialog/>
-        <DeleteAllSearchHistoryDialog/>
-        <DeleteSearchHistoryDialog/>
-        <UndeletePostDialog/>
-        <PermaDeletePostDialog/>
-        <PermaDeleteAllPostDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

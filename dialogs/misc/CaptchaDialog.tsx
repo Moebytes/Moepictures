@@ -5,11 +5,7 @@ import functions from "../../structures/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 
-interface Props {
-    forceCaptcha?: boolean
-}
-
-const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
+const CaptchaDialog: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setSessionFlag} = useSessionActions()
@@ -47,10 +43,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!props.forceCaptcha) {
-            let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha")
-            if (ignoreCaptcha === "true") return setNeedsVerification(false)
-        }
+        let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha")
+        if (ignoreCaptcha === "true") return setNeedsVerification(false)
         if (session.captchaNeeded) {
             if (!needsVerification) setNeedsVerification(true)
         } else {

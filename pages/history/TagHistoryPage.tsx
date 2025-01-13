@@ -6,8 +6,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import TagHistoryRow from "../../components/history/TagHistoryRow"
-import RevertTagHistoryDialog from "../../dialogs/tag/RevertTagHistoryDialog"
-import DeleteTagHistoryDialog from "../../dialogs/tag/DeleteTagHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
 import permissions from "../../structures/Permissions"
@@ -177,8 +175,6 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <RevertTagHistoryDialog/>
-        <DeleteTagHistoryDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

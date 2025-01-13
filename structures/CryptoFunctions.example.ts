@@ -24,7 +24,7 @@ export default class Crypto {
         return buffer
     }
 
-    public static decrypt = (buffer: ArrayBuffer | Buffer, privateKey: string, serverPublicKey: string, session: ServerSession) => {
+    public static decrypt = (buffer: ArrayBuffer, privateKey: string, serverPublicKey: string, session: ServerSession) => {
         return buffer
     }
 

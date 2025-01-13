@@ -77,7 +77,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }, [tooltipPost, session])
 
     useEffect(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = 0
+       if (scrollRef.current) scrollRef.current.scrollTop = 0
     }, [tags])
 
     useEffect(() => {
@@ -103,25 +103,25 @@ const ToolTip: React.FunctionComponent = (props) => {
         let jsxMap = [] as React.ReactElement[]
         for (let i = 0; i < tags.length; i++) {
             if (tags[i].type === "artist") {
-                jsxMap.push(<span className="tooltip-tag-clickable">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag-clickable">{tags[i].tag}</span>)
             } else if (tags[i].type === "character") {
-                jsxMap.push(<span className="tooltip-tag character-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag character-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "series") {
-                jsxMap.push(<span className="tooltip-tag series-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag series-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "meta") {
-                jsxMap.push(<span className="tooltip-tag meta-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag meta-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "appearance") {
-                jsxMap.push(<span className="tooltip-tag appearance-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag appearance-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "outfit") {
-                jsxMap.push(<span className="tooltip-tag outfit-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag outfit-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "accessory") {
-                jsxMap.push(<span className="tooltip-tag accessory-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag accessory-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "action") {
-                jsxMap.push(<span className="tooltip-tag action-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag action-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "scenery") {
-                jsxMap.push(<span className="tooltip-tag scenery-tag-color">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag scenery-tag-color">{tags[i].tag}</span>)
             } else {
-                jsxMap.push(<span className="tooltip-tag">{tags[i].tag}</span>)
+                jsxMap.push(<span key={i} className="tooltip-tag">{tags[i].tag}</span>)
             }
         }
         return jsxMap
@@ -154,31 +154,31 @@ const ToolTip: React.FunctionComponent = (props) => {
     const getPostLinkJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!tooltipPost) return jsx
-        if (tooltipPost.source?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("twitter") || tooltipPost.source?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("youtube")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("bandcamp")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("pixiv")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("soundcloud")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("sketchfab")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("twitter") || tooltipPost.source?.includes("x.com")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("deviantart")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("artstation")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("danbooru")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("yande.re")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("youtube")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
+        if (tooltipPost.source?.includes("bandcamp")) jsx.push(<img key="source" className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
         if (tooltipPost.mirrors) {
-            if (tooltipPost.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors?.pixiv, "_blank")}/>)
-            if (tooltipPost.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.mirrors?.soundcloud, "_blank")}/>)
-            if (tooltipPost.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.mirrors?.sketchfab, "_blank")}/>)
-            if (tooltipPost.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors?.twitter, "_blank")}/>)
-            if (tooltipPost.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.mirrors?.deviantart, "_blank")}/>)
-            if (tooltipPost.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.mirrors?.artstation, "_blank")}/>)
-            if (tooltipPost.mirrors.danbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.mirrors?.danbooru, "_blank")}/>)
-            if (tooltipPost.mirrors.gelbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(tooltipPost.mirrors?.gelbooru, "_blank")}/>)
-            if (tooltipPost.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors?.safebooru, "_blank")}/>)
-            if (tooltipPost.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors?.yandere, "_blank")}/>)
-            if (tooltipPost.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors?.konachan, "_blank")}/>)
-            if (tooltipPost.mirrors.zerochan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(tooltipPost.mirrors?.zerochan, "_blank")}/>)
-            if (tooltipPost.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors?.youtube, "_blank")}/>)
-            if (tooltipPost.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors?.bandcamp, "_blank")}/>)
+            if (tooltipPost.mirrors.pixiv) jsx.push(<img key="pixiv" className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors?.pixiv, "_blank")}/>)
+            if (tooltipPost.mirrors.soundcloud) jsx.push(<img key="soundcloud"className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.mirrors?.soundcloud, "_blank")}/>)
+            if (tooltipPost.mirrors.sketchfab) jsx.push(<img key="sketchfab" className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.mirrors?.sketchfab, "_blank")}/>)
+            if (tooltipPost.mirrors.twitter) jsx.push(<img key="twitter" className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors?.twitter, "_blank")}/>)
+            if (tooltipPost.mirrors.deviantart) jsx.push(<img key="deviantart" className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.mirrors?.deviantart, "_blank")}/>)
+            if (tooltipPost.mirrors.artstation) jsx.push(<img key="artstation" className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.mirrors?.artstation, "_blank")}/>)
+            if (tooltipPost.mirrors.danbooru) jsx.push(<img key="danbooru" className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.mirrors?.danbooru, "_blank")}/>)
+            if (tooltipPost.mirrors.gelbooru) jsx.push(<img key="gelbooru" className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(tooltipPost.mirrors?.gelbooru, "_blank")}/>)
+            if (tooltipPost.mirrors.safebooru) jsx.push(<img key="safebooru" className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors?.safebooru, "_blank")}/>)
+            if (tooltipPost.mirrors.yandere) jsx.push(<img key="yandere" className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors?.yandere, "_blank")}/>)
+            if (tooltipPost.mirrors.konachan) jsx.push(<img key="konachan" className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors?.konachan, "_blank")}/>)
+            if (tooltipPost.mirrors.zerochan) jsx.push(<img key="zerochan" className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(tooltipPost.mirrors?.zerochan, "_blank")}/>)
+            if (tooltipPost.mirrors.youtube) jsx.push(<img key="youtube" className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors?.youtube, "_blank")}/>)
+            if (tooltipPost.mirrors.bandcamp) jsx.push(<img key="bandcamp" className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors?.bandcamp, "_blank")}/>)
         }
         return jsx
     }

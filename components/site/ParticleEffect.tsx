@@ -1,19 +1,30 @@
 import React, {useEffect, useState, useMemo} from "react"
 import {useThemeSelector, useThemeActions} from "../../store"
+import {loadSnowPreset} from "@tsparticles/preset-snow"
+import {loadAll} from "@tsparticles/all"
 
 const ParticleEffect: React.FunctionComponent = (props) => {
-    const {theme, siteHue, particles} = useThemeSelector()
-    const {setParticles} = useThemeActions()
+    const {theme, siteHue, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
+    const {setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const [jsx, setJSX] = useState(null as React.ReactElement | null)
 
     useEffect(() => {
         const savedParticles = localStorage.getItem("particles")
         if (savedParticles) setParticles(savedParticles === "true")
+        const savedParticleAmount = localStorage.getItem("particleAmount")
+        if (savedParticleAmount) setParticleAmount(Number(savedParticleAmount))
+        const savedParticleSize = localStorage.getItem("particleSize")
+        if (savedParticleSize) setParticleSize(Number(savedParticleSize))
+        const savedParticleSpeed = localStorage.getItem("particleSpeed")
+        if (savedParticleSpeed) setParticleSpeed(Number(savedParticleSpeed))
     }, [])
 
     useEffect(() => {
         localStorage.setItem("particles", String(particles))
-    }, [particles])
+        localStorage.setItem("particleAmount", String(particleAmount))
+        localStorage.setItem("particleSize", String(particleSize))
+        localStorage.setItem("particleSpeed", String(particleSpeed))
+    }, [particles, particleAmount, particleSize, particleSpeed])
 
     const computedColor = () => {
         if (theme === "dark") return "#ffffff"
@@ -22,24 +33,33 @@ const ParticleEffect: React.FunctionComponent = (props) => {
 
     const loadParticles = async () => {
         const {Particles, initParticlesEngine} = await import("@tsparticles/react")
-        const {loadSnowPreset} = await import("@tsparticles/preset-snow")
         initParticlesEngine(async (engine) => {
+            await loadAll(engine)
             await loadSnowPreset(engine)
             setJSX(
                 <Particles id="particles" options={{
                     preset: "snow",
                     background: {opacity: 0},
                     fullScreen: {enable: true, zIndex: 9999},
-                    reduceDuplicates: true,
-                    fpsLimit: 30,
                     particles: {
-                        number: {value: 25},
+                        number: {value: particleAmount},
                         color: {value: computedColor()},
-                        size: {value: {min: 1, max: 2}},
+                        size: {value: {min: particleSize, max: particleSize + 2}},
                         opacity: {value: {min: 0.3, max: 0.7}},
+                        shape: {
+                            type: "character",
+                            options: {
+                                character: {
+                                    value: "❄",
+                                    font: "Verdana",
+                                    style: "",
+                                    weight: "400"
+                                }
+                            }
+                        },
                         move: {
                             enable: true,
-                            speed: 2,
+                            speed: particleSpeed,
                             direction: "bottom",
                             straight: true
                         },
@@ -63,7 +83,7 @@ const ParticleEffect: React.FunctionComponent = (props) => {
         } else {
             setJSX(null)
         }
-    }, [particles, theme, siteHue])
+    }, [particles, particleAmount, particleSize, particleSpeed, theme, siteHue])
 
     return jsx
 }

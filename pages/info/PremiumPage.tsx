@@ -6,7 +6,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import premiumStar from "../../assets/icons/premium-star.png"
 import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
@@ -236,7 +235,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

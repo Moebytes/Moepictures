@@ -47,8 +47,8 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, particles, siteHue, siteSaturation, siteLightness, language, i18n} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles} = useThemeActions()
+    const {theme, i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {search, scroll} = useSearchSelector()
@@ -59,7 +59,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("60px")
-    const [activeDropdown, setActiveDropdown] = useState(false)
+    const [activeColorDropdown, setActiveColorDropdown] = useState(false)
+    const [activeParticleDropdown, setActiveParticleDropdown] = useState(false)
     const history = useHistory()
 
     const getFilter = () => {
@@ -126,7 +127,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [hideTitlebar])
 
     const colorChange = () => {
-        setActiveDropdown(!activeDropdown)
+        setActiveParticleDropdown(false)
+        setActiveColorDropdown(!activeColorDropdown)
+    }
+
+    const particleChange = () => {
+        setActiveColorDropdown(false)
+        setActiveParticleDropdown(!activeParticleDropdown)
     }
 
     const lightChange = () => {
@@ -327,11 +334,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setSiteLightness(50)
     }
 
-    const getDropdownJSX = () => {
+    const getColorDropdownJSX = () => {
         let style = mobile ? {top: "500px"} : {top: "40px"}
         if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
         return (
-            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
+            <div className={`title-dropdown ${activeColorDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">
                     <span className="title-dropdown-text">{i18n.filters.hue}</span>
                     <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={272} step={1} value={siteHue}/>
@@ -346,6 +353,37 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="title-dropdown-row">
                     <button className="title-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
+                </div>
+            </div>
+        )
+    }
+
+    const resetParticles = () => {
+        setParticleAmount(25)
+        setParticleSize(3)
+        setParticleSpeed(2)
+    }
+
+    const getParticleDropdownJSX = () => {
+        let style = mobile ? {top: "500px"} : {top: "40px"}
+        if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
+        return (
+            <div className={`title-dropdown ${activeParticleDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">{i18n.labels.amount}</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setParticleAmount(value)} min={10} max={100} step={1} value={particleAmount}/>
+                </div>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">{i18n.labels.size}</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setParticleSize(value)} min={1} max={10} step={1} value={particleSize}/>
+                </div>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">{i18n.labels.speed}</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setParticleSpeed(value)} min={1} max={10} step={1} value={particleSpeed}/>
+                </div>
+                <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
+                    <button className="title-dropdown-button" onClick={() => resetParticles()}>{i18n.filters.reset}</button>
+                    <button style={particles ? {backgroundColor: "#f536ac"} : {backgroundColor: "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>{particles ? i18n.buttons.disable : i18n.buttons.enable}</button>
                 </div>
             </div>
         )
@@ -397,14 +435,15 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="mobile-nav-color-container">
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={() => setParticles(!particles)} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
-                {getDropdownJSX()}
+                {getColorDropdownJSX()}
+                {getParticleDropdownJSX()}
             </div>
         )
     } else {
@@ -469,13 +508,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
-                    <img className="nav-color" src={getSnowflakeIcon()} onClick={() => setParticles(!particles)} style={{filter: getFilter()}}/>
+                    <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
-                {getDropdownJSX()}
+                {getColorDropdownJSX()}
+                {getParticleDropdownJSX()}
             </div>
             </>
         )

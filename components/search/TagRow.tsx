@@ -243,13 +243,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <tr className="tagrow">
+        <div className="tagrow">
             {props.tag.image ?
-            <td className="tagrow-img-container">
+            <div className="tagrow-img-container">
                 <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash)}/>
-            </td> : null}
+            </div> : null}
             <div className="tagrow-content-container">
-                <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
+                <div className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
                         <span className={`tagrow-tag ${functions.getTagColor(props.tag)}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
@@ -265,10 +265,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                         <span className="tagrow-alias-header">{i18n.labels.implies}: </span>
                         {generateImplicationsJSX()}
                     </div> : null}
-                </td>
-                <td className="tagrow-description">
+                </div>
+                <div className="tagrow-description">
                     <span className="tagrow-desc-text" ref={scrollRef}>{props.tag.description || i18n.labels.none}</span>
-                </td>
+                </div>
             </div>
             {session.username ?
             <div className="tag-buttons">
@@ -278,7 +278,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>
                 <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>
             </div> : null}
-        </tr>
+        </div>
     )
 }
 

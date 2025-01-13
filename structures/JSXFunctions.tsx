@@ -239,7 +239,7 @@ export default class JSXFunctions {
         parts.forEach((part, index) => {
             if (part.match(/(:[^\s]+:)/g)) {
                 let key = part.split(":")[1]
-                items.push({text: null, jsx:<img key={index} src={emojis[key]} className="emoji"/>})
+                items.push({text: null, jsx:<img key={index} src={emojis[key]} title={`:${key}:`} className="emoji"/>})
             } else {
                 items.push({text: part, jsx: null})
             }
@@ -352,8 +352,8 @@ export default class JSXFunctions {
         }[type]
         if (type === "message") type = "reply"
         const pieces = functions.parsePieces(text)
-        let jsx = [] as any
-        if (r18) jsx.push(<span className={`${type}-text`} style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
+        let jsx = [] as React.ReactElement[]
+        if (r18) jsx.push(<span key={-1} className={`${type}-text`} style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.startsWith(">")) {
@@ -368,13 +368,13 @@ export default class JSXFunctions {
                 }
                 const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
                 jsx.push(
-                    <div className={`${type}-quote-container`}>
+                    <div key={i} className={`${type}-quote-container`}>
                         {userPart ? <span className={`${type}-quote-user`} onClick={() => clickFunc?.(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
                         <span className={`${type}-quote-text`}>{renderFunction?.(text, emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className={`${type}-text`}>{renderFunction?.(piece, emojis)}</span>)
+                jsx.push(<span key={i} className={`${type}-text`}>{renderFunction?.(piece, emojis)}</span>)
             }
         }
         return jsx

@@ -10,15 +10,8 @@ import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
 import type from "../../assets/icons/all.png"
 import TagRow from "../../components/search/TagRow"
-import AliasTagDialog from "../../dialogs/tag/AliasTagDialog"
-import EditTagDialog from "../../dialogs/tag/EditTagDialog"
-import DeleteTagDialog from "../../dialogs/tag/DeleteTagDialog"
-import CategorizeTagDialog from "../../dialogs/tag/CategorizeTagDialog"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import permissions from "../../structures/Permissions"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -432,12 +425,6 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <AliasTagDialog/>
-        <CategorizeTagDialog/>
-        <EditTagDialog/>
-        <DeleteTagDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -520,9 +507,9 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-container" style={{marginTop: "15px"}}>
+                    <div className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

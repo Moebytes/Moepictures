@@ -63,13 +63,14 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const parseText = () => {
         let jsx = [] as React.ReactElement[]
         if (!props.note.notes?.length) {
-            return <span className="commentrow-text">No data</span>
+            return <span key={0} className="commentrow-text">No data</span>
         }
-        for (const item of props.note.notes) {
+        for (let i = 0; i < props.note.notes.length; i++) {
+            const item = props.note.notes[i]
             if (item.character) {
-                jsx.push(<span className="commentrow-text">{`${i18n.tag.character} -> ${item.characterTag}`}</span>)
+                jsx.push(<span key={i} className="commentrow-text">{`${i18n.tag.character} -> ${item.characterTag}`}</span>)
             } else {
-                jsx.push(<span className="commentrow-text">{`${item.transcript || "N/A"} -> ${item.translation || "N/A"}`}</span>)
+                jsx.push(<span key={i} className="commentrow-text">{`${item.transcript || "N/A"} -> ${item.translation || "N/A"}`}</span>)
             }
         }
         return jsx

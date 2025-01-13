@@ -68,30 +68,30 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (!tag) return jsx
         if (tag.type === "artist") {
             if (tag.website) {
-                jsx.push(<img className="tag-tooltip-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="website" className="tag-tooltip-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
             }
             if (tag.social?.includes("pixiv.net")) {
-                jsx.push(<img className="tag-tooltip-social" src={pixiv} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="social" className="tag-tooltip-social" src={pixiv} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="tag-tooltip-social" src={soundcloud} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="social" className="tag-tooltip-social" src={soundcloud} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="tag-tooltip-social" src={sketchfab} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="social" className="tag-tooltip-social" src={sketchfab} onClick={() => window.open(tag.social!, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-tooltip-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="twitter" className="tag-tooltip-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "character") {
             if (tag.fandom) {
-                jsx.push(<img className="tag-tooltip-social" src={fandom} onClick={() => window.open(tag.fandom!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="fandom" className="tag-tooltip-social" src={fandom} onClick={() => window.open(tag.fandom!, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "series") {
             if (tag.website) {
-                jsx.push(<img className="tag-tooltip-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="website" className="tag-tooltip-social" src={website} onClick={() => window.open(tag.website!, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-tooltip-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
+                jsx.push(<img key="twitter" className="tag-tooltip-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
             }
         }
         return jsx
@@ -102,7 +102,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (!tag) return jsx
         if (tag.pixivTags?.[0]) {
             for (let i = 0; i < tag.pixivTags.slice(0, 5).length; i++) {
-                jsx.push(<button className="tag-tooltip-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/tags/${tag.pixivTags?.[i]}/artworks`, "_blank", "noreferrer")}>{tag.pixivTags[i]}</button>)
+                jsx.push(<button key={i} className="tag-tooltip-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/tags/${tag.pixivTags?.[i]}/artworks`, "_blank", "noreferrer")}>{tag.pixivTags[i]}</button>)
             }
         }
         if (jsx.length) {
@@ -120,7 +120,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
                 const item = tag.aliases[i]
                 let alias = typeof item === "string" ? item : item?.alias 
                 if (!alias) continue
-                jsx.push(<button className="tag-tooltip-alias-button" onClick={(event) => searchTag(event, alias)}>{alias.replaceAll("-", " ")}</button>)
+                jsx.push(<button key={i} className="tag-tooltip-alias-button" onClick={(event) => searchTag(event, alias)}>{alias.replaceAll("-", " ")}</button>)
             }
         }
         if (jsx.length) {
@@ -165,7 +165,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
             for (let i = 0; i < items.length; i++) {
                 const item = items[i]
                 jsx.push(
-                    <div className="tag-tooltip-image-box" onMouseMove={(event) => imageAnimation(event, item.ref)} onMouseLeave={() => cancelImageAnimation(item.ref)}>
+                    <div key={i} className="tag-tooltip-image-box" onMouseMove={(event) => imageAnimation(event, item.ref)} onMouseLeave={() => cancelImageAnimation(item.ref)}>
                         <img className="tag-tooltip-image" ref={item.ref} onClick={(event) => openPost(event, item.post)} src={item.image} onLoad={() => onImageLoad(item.ref)}/>
                     </div>
                 )

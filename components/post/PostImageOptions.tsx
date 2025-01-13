@@ -19,6 +19,7 @@ import lightnessIcon from "../../assets/icons/lightness.png"
 import blurIcon from "../../assets/icons/blur.png"
 import sharpenIcon from "../../assets/icons/sharpen.png"
 import pixelateIcon from "../../assets/icons/pixelate.png"
+import splatterIcon from "../../assets/icons/splatter.png"
 import nextIcon from "../../assets/icons/next.png"
 import prevIcon from "../../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
@@ -43,8 +44,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {noteMode, format} = useSearchSelector()
     const {setFormat} = useSearchActions()
     const {posts} = useCacheSelector()
@@ -129,7 +130,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("blur", String(blur))
         localStorage.setItem("sharpen", String(sharpen))
         localStorage.setItem("pixelate", String(pixelate))
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+        localStorage.setItem("splatter", String(splatter))
+    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
 
     const getStar = () => {
         if (favorited) {
@@ -156,6 +158,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         setBlur(0)
         setSharpen(0)
         setPixelate(1)
+        setSplatter(0)
     }
 
     const getFilterMarginRight = () => {
@@ -182,6 +185,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const raw = bodyRect.bottom - rect.bottom
         let offset = -250
         if (mobile) offset += 20
+        if (session.showR18) offset -= 35
         return `${raw + offset}px`
     }
 
@@ -381,6 +385,11 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <span className="post-dropdown-text">{i18n.filters.pixelate}</span>
                     <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
                 </div>
+                {session.showR18 ? <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={splatterIcon} style={{filter: getFilter()}}/>
+                    <span className="post-dropdown-text">{i18n.filters.splatter}</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
+                </div> : null}
                 <div className="post-dropdown-row filters-row">
                     <button className="filters-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
                 </div>

@@ -16,8 +16,6 @@ useMiscDialogActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import "./styles/itemspage.less"
 import {NoteSearch, CommentSort} from "../../types/Types"
 
@@ -409,8 +407,6 @@ const NotesPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -440,9 +436,9 @@ const NotesPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateNotesJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

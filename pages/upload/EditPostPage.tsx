@@ -37,7 +37,6 @@ import PostImage from "../../components/image/PostImage"
 import PostModel from "../../components/image/PostModel"
 import PostLive2D from "../../components/image/PostLive2D"
 import PostSong from "../../components/image/PostSong"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
@@ -2097,7 +2096,6 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <CaptchaDialog forceCaptcha={true}/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -13,16 +13,6 @@ import Commentary from "../../components/post/Commentary"
 import BuyLink from "../../components/post/BuyLink"
 import functions from "../../structures/Functions"
 import Carousel from "../../components/site/Carousel"
-import ParentDialog from "../../dialogs/post/ParentDialog"
-import TagEditDialog from "../../dialogs/post/TagEditDialog"
-import DeletePostDialog from "../../dialogs/post/DeletePostDialog"
-import UndeletePostDialog from "../../dialogs/post/UndeletePostDialog"
-import SourceEditDialog from "../../dialogs/post/SourceEditDialog"
-import UpscalePostDialog from "../../dialogs/post/UpscalePostDialog"
-import CompressPostDialog from "../../dialogs/post/CompressPostDialog"
-import AppealPostDialog from "../../dialogs/post/AppealPostDialog"
-import SaveNoteDialog from "../../dialogs/note/SaveNoteDialog"
-import EditNoteDialog from "../../dialogs/note/EditNoteDialog"
 import Children from "../../components/post/Children"
 import Parent from "../../components/post/Parent"
 import NewTags from "../../components/post/NewTags"
@@ -271,17 +261,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <ParentDialog/>
-        <TagEditDialog/>
-        <SourceEditDialog/>
-        <UndeletePostDialog/>
-        <AppealPostDialog/>
-        {post ? <UpscalePostDialog post={post}/> : null}
-        {post ? <CompressPostDialog post={post}/> : null}
-        {post ? <SaveNoteDialog post={post} unverified={true}/> : null}
-        {post ? <DeletePostDialog post={post} unverified={true}/> : null}
-        <EditNoteDialog/>
-        {post ? <TitleBar post={post} unverified={true} goBack={true}/> : <TitleBar goBack={true} unverified={true}/>}
+        <TitleBar post={post} unverified={true} goBack={true}/>
         <NavBar/>
         <div className="body">
             {post && tagCategories ? 

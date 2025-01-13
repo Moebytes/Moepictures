@@ -711,7 +711,7 @@ const PostRoutes = (app: Express) => {
                 for (let i = 0; i < tags.length; i++) {
                     if (!tags[i]) continue
                     if (addedTags.includes(tags[i])) {
-                        let bulkObj = {tag: tags[i], type: tagObjectMapping[tags[i]]?.type, description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
+                        let bulkObj = {tag: tags[i], type: tagObjectMapping[tags[i]]?.type || "tag", description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
                         bulkTagUpdate.push(bulkObj)
                     }
                 }
@@ -722,7 +722,7 @@ const PostRoutes = (app: Express) => {
                         for (const i of implications) {
                             if (!oldTagsSet.has(i.implication)) addedTags.push(i.implication)
                             const tag = await sql.tag.tag(i.implication)
-                            bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+                            bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type || "tag", description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                         }
                     }
                 }

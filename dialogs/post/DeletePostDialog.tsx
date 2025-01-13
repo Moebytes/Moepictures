@@ -7,18 +7,14 @@ import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory | UnverifiedPost
-    unverified?: boolean
-}
 
-const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
+const DeletePostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {showDeletePostDialog} = usePostDialogSelector()
-    const {setShowDeletePostDialog} = usePostDialogActions()
+    const {deletePostID} = usePostDialogSelector()
+    const {setDeletePostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
@@ -31,7 +27,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (showDeletePostDialog) {
+        if (deletePostID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -39,16 +35,17 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showDeletePostDialog])
+    }, [deletePostID])
 
     const deletePost = async () => {
-        if (props.unverified) {
-            await functions.delete("/api/post/delete/unverified", {postID: props.post.postID}, session, setSessionFlag)
-            return props.post.deleted ? history.push("/posts") : setPostFlag(true)
+        if (!deletePostID) return
+        if (deletePostID.unverified) {
+            await functions.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            return deletePostID.post.deleted ? history.push("/posts") : setPostFlag(true)
         }
         if (permissions.isAdmin(session)) {
-            await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
-            return props.post.deleted ? history.push("/posts") : setPostFlag(true)
+            await functions.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            return deletePostID.post.deleted ? history.push("/posts") : setPostFlag(true)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {
@@ -59,7 +56,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/post/delete/request", {postID: props.post.postID, reason}, session, setSessionFlag)
+            await functions.post("/api/post/delete/request", {postID: deletePostID.post.postID, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -68,16 +65,16 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             deletePost()
         }
-        if (!keep) setShowDeletePostDialog(false)
+        if (!keep) setDeletePostID(null)
     }
 
     const close = () => {
-        setShowDeletePostDialog(false)
+        setDeletePostID(null)
         setSubmitted(false)
         setReason("")
     }
 
-    if (showDeletePostDialog) {
+    if (deletePostID) {
         if (session.banned) {
             return (
                 <div className="dialog">
@@ -96,7 +93,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (props.unverified || permissions.isAdmin(session)) {
+        if (deletePostID.unverified || permissions.isAdmin(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

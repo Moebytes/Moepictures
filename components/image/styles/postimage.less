@@ -190,8 +190,22 @@
     opacity: 0;
 }
 
-.post-sharpen-overlay {
+.post-effect-canvas {
     z-index: 801;
+    position: absolute;
+    margin: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    opacity: 0;
+}
+
+.post-sharpen-overlay {
+    z-index: 802;
     position: absolute;
     margin: auto;
     margin-top: 0px;
@@ -208,7 +222,7 @@
 }
 
 .post-lightness-overlay {
-    z-index: 802;
+    z-index: 803;
     position: absolute;
     margin: auto;
     margin-top: 0px;

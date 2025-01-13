@@ -61,7 +61,7 @@ import NewsBannerPage from "./pages/settings/NewsBannerPage"
 import APIKeyPage from "./pages/settings/APIKeyPage"
 import PremiumPage from "./pages/info/PremiumPage"
 import PremiumSuccessPage from "./pages/settings/PremiumSuccessPage"
-import PremiumRequiredDialog from "./dialogs/misc/PremiumRequiredDialog"
+import Dialogs from "./dialogs/Dialogs"
 import DragAndDrop from "./components/site/DragAndDrop"
 import AudioPlayer from "./components/site/AudioPlayer"
 import ActionBanner from "./components/site/ActionBanner"
@@ -286,7 +286,7 @@ const App: React.FunctionComponent = (props) => {
             <DragAndDrop/>
             <NewsBanner/>
             <ActionBanner/>
-            <PremiumRequiredDialog/>
+            <Dialogs/>
             <TagToolTip/>
             <ToolTip/>
             <Switch>

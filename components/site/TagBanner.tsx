@@ -160,7 +160,7 @@ const TagBanner: React.FunctionComponent = (props) => {
                 history.push(`/tag/${bannerTag.tag}`)
             }
             jsx.push(
-                <div className="tagbanner-box">
+                <div className="tagbanner-box" key={bannerTag.tag}>
                     {bannerTag.image ? <img className="tagbanner-img" src={functions.getTagLink(bannerTag.type, bannerTag.image, bannerTag.imageHash)}/> : null}
                     <span className="tagbanner-tag" onClick={tagClick} onContextMenu={tagPage}>{bannerTag.tag}</span>
                 </div>

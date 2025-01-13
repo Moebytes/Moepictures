@@ -13,9 +13,6 @@ useCacheSelector, useCacheActions, useInteractionActions, useMiscDialogSelector}
 import functions from "../../structures/Functions"
 import Carousel from "../../components/site/Carousel"
 import CommentCarousel from "../../components/site/CommentCarousel"
-import DeleteAccountDialog from "../../dialogs/user/DeleteAccountDialog"
-import DeleteFavgroupDialog from "../../dialogs/group/DeleteFavgroupDialog"
-import R18Dialog from "../../dialogs/misc/R18Dialog"
 import adminLabel from "../../assets/icons/admin-label.png"
 import modLabel from "../../assets/icons/mod-label.png"
 import systemLabel from "../../assets/icons/system-label.png"
@@ -685,9 +682,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DeleteFavgroupDialog/>
-        <DeleteAccountDialog/>
-        <R18Dialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

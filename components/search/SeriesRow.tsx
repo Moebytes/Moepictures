@@ -71,10 +71,10 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const seriesSocialJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (props.series.website) {
-            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.series.website!, "_blank", "noreferrer")}/>)
+            jsx.push(<img key="website" className="artistrow-social" src={website} onClick={() => window.open(props.series.website!, "_blank", "noreferrer")}/>)
         }
         if (props.series.twitter) {
-            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter!, "_blank", "noreferrer")}/>)
+            jsx.push(<img key="twitter" className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter!, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

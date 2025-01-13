@@ -108,8 +108,12 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (quoteText) {
             const prevText = text.trim() ? `${text.trim()}\n` : ""
             setText(`${prevText}${quoteText.trim()}`)
-            setQuoteText("")
-            window.scrollTo(0, document.body.scrollHeight)
+            setQuoteText("") 
+            let element = document.querySelector(".comments-textarea")
+            if (!element) return
+            const position = element.getBoundingClientRect()
+            const elementTop = position.top + window.scrollY
+            window.scrollTo(0, elementTop - (window.innerHeight / 3))
         }
     }, [quoteText])
 

@@ -36,7 +36,6 @@ import languageImg from "../../assets/images/language.png"
 import pixivDownloaderImg from "../../assets/images/pixiv-downloader.png"
 import setAvatarImg from "../../assets/images/set-avatar.png"
 import musicImg from "../../assets/images/music.png"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
 import tooltipsImg from "../../assets/images/tooltips.png"
 import functions from "../../structures/Functions"
@@ -772,7 +771,6 @@ const HelpPage: React.FunctionComponent = (props) => {
     
     return (
         <>
-        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -40,7 +40,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {secondsProgress, reverse, speed, seekTo} = usePlaybackSelector()
     const {setSecondsProgress, setReverse, setSeekTo} = usePlaybackActions()
     const {sizeType, square, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
@@ -51,6 +51,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
+    const effectRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
     const lightnessRef = useRef<HTMLImageElement>(null)
     const ref = useRef<HTMLImageElement>(null)
@@ -169,9 +170,11 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [props.img])
 
     const resizePixelateCanvas = () => {
-        if (!pixelateRef.current || !ref.current) return
+        if (!pixelateRef.current || !effectRef.current || !ref.current) return
         pixelateRef.current.width = ref.current.clientWidth
         pixelateRef.current.height = ref.current.clientHeight
+        effectRef.current.width = ref.current.clientWidth
+        effectRef.current.height = ref.current.clientHeight
     }
 
     useEffect(() => {
@@ -383,16 +386,20 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const resizeOverlay = () => {
         if (functions.isVideo(props.img) && !mobile) {
-            if (!videoRef.current || !videoOverlayRef.current || !pixelateRef.current) return
+            if (!videoRef.current || !videoOverlayRef.current || !pixelateRef.current || !effectRef.current) return
             if (videoRef.current.clientWidth === 0) return
             videoOverlayRef.current.width = videoRef.current.clientWidth
             videoOverlayRef.current.height = videoRef.current.clientHeight
             pixelateRef.current.width = videoRef.current.clientWidth
             pixelateRef.current.height = videoRef.current.clientHeight
+            effectRef.current.width = videoRef.current.clientWidth
+            effectRef.current.height = videoRef.current.clientHeight
         } else {
-            if (!ref.current || !pixelateRef.current) return 
+            if (!ref.current || !pixelateRef.current || !effectRef.current) return 
             pixelateRef.current.width = ref.current.width
             pixelateRef.current.height = ref.current.height
+            effectRef.current.width = ref.current.width
+            effectRef.current.height = ref.current.height
         }
     }
 
@@ -552,20 +559,80 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }
 
+    const splatterEffect = () => {
+        if (!effectRef.current || !ref.current) return
+        if (splatter !== 0) {
+            effectRef.current.style.opacity = "1"
+            effectRef.current.width = ref.current.width
+            effectRef.current.height = ref.current.height
+            const ctx = effectRef.current.getContext("2d")!
+            
+            ctx.drawImage(ref.current, 0, 0, effectRef.current.width, effectRef.current.height)
+
+            const lineAmount = splatter * 4
+            const minOpacity = 0.1
+            const maxOpacity = 0.2
+            const minLineWidth = 1
+            const maxLineWidth = 3
+            const minLineLength = 50
+            const maxLineLength = 70
+            const maxAngle = 180
+
+            const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
+            const blendModes = ["lighter"] as GlobalCompositeOperation[]
+            for (let i = 0; i < lineCount; i++) {
+                const startX = Math.random() * effectRef.current.width
+                const startY = Math.random() * effectRef.current.height
+                const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
+
+                const radians = (Math.PI / 180) * maxAngle
+                let angle1 = Math.random() * radians - radians / 2
+                let angle2 = Math.random() * radians - radians / 2
+
+                const controlX1 = startX + length * Math.cos(angle1)
+                const controlY1 = startY + length * Math.sin(angle1)
+                const controlX2 = startX + length * Math.cos(angle2)
+                const controlY2 = startY + length * Math.sin(angle2)
+                const endX = startX + length * Math.cos((angle1 + angle2) / 2)
+                const endY = startY + length * Math.sin((angle1 + angle2) / 2)
+
+                const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
+                const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
+                const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
+
+                ctx.globalAlpha = opacity
+                ctx.globalCompositeOperation = blendMode
+                ctx.strokeStyle = "#ffffff"
+                ctx.lineWidth = lineWidth
+                ctx.beginPath()
+                ctx.moveTo(startX, startY)
+                ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
+                ctx.stroke()
+            }
+            ctx.globalAlpha = 1
+            ctx.globalCompositeOperation = "source-over"
+        } else {
+            effectRef.current.style.opacity = "0"
+        }
+    }
+
     useEffect(() => {
         setTimeout(() => {
             imagePixelate()
+            splatterEffect()
         }, 50)
     }, [imageLoaded])
 
     useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
+        imagePixelate()
     }, [pixelate, square, imageSize])
 
+    useEffect(() => {
+        splatterEffect()
+    }, [splatter])
+
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
-        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current) return
+        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !effectRef.current) return
         const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         const rect = currentRef.getBoundingClientRect()
         const width = rect?.width
@@ -579,16 +646,20 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         lightnessRef.current.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(1.02)`
         pixelateRef.current.style.transformOrigin = "top left"
         pixelateRef.current.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(1.02)`
+        effectRef.current.style.transformOrigin = "top left"
+        effectRef.current.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(1.02)`
     }
 
     const cancelImageAnimation = () => {
-        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current) return
+        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !effectRef.current) return
         const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         currentRef.style.transform = "scale(1)"
         overlayRef.current.style.transform = "scale(1)"
         lightnessRef.current.style.transform = "scale(1)"
         pixelateRef.current.style.transformOrigin = "none"
         pixelateRef.current.style.transform = "scale(1)"
+        effectRef.current.style.transformOrigin = "none"
+        effectRef.current.style.transform = "scale(1)"
     }
 
     const onLoad = (event: React.SyntheticEvent) => {
@@ -861,6 +932,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>
                 {functions.isVideo(props.img) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
+                <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={img} onLoadedData={(event) => onLoad(event)}></video></> :

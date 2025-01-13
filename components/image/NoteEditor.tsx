@@ -229,8 +229,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {setNoteMode, setNoteDrawingEnabled} = useSearchActions()
     const {pasteNoteFlag} = useFlagSelector()
     const {setRedirect, setPasteNoteFlag} = useFlagActions()
-    const {editNoteFlag, editNoteID, editNoteData, showSaveNoteDialog, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
-    const {setEditNoteFlag, setEditNoteID, setEditNoteData, setShowSaveNoteDialog,
+    const {editNoteFlag, editNoteID, editNoteData, saveNoteID, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
+    const {setEditNoteFlag, setEditNoteID, setEditNoteData, setSaveNoteID,
     setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
@@ -517,7 +517,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
         setSaveNoteOrder(props.order || 1)
         setSaveNoteData(items)
-        setShowSaveNoteDialog(!showSaveNoteDialog)
+        setSaveNoteID({post: props.post, unverified: props.unverified})
     }
 
     const ocrPage = async () => {

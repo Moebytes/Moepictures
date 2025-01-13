@@ -73,9 +73,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {setRandomFlag, setImageSearchFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
-    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, 
-    setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj, setUndeletePostID, setAppealPostID} = usePostDialogActions()
+    const {upscalePostID, compressPostID, deletePostID, takedownPostID} = usePostDialogSelector()
+    const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
+    setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -313,7 +313,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const deletePost = async () => {
-        setShowDeletePostDialog(!showDeletePostDialog)
+        if (!props.post) return
+        setDeletePostID({post: props.post, unverified: props.unverified})
     }
 
     const undeletePost = async () => {
@@ -334,12 +335,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const privatePost = async () => {
         if (!props.post || !props.artists) return
-        setPrivatePostObj({postID: props.post.postID, artists: props.artists})
+        setPrivatePostID({post: props.post, artists: props.artists})
     }
 
     const lockPost = async () => {
         if (!props.post) return
-        setLockPostID(props.post.postID)
+        setLockPostID({post: props.post, unverified: props.unverified})
     }
 
     const modNext = () => {
@@ -355,11 +356,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const upscalingDialog = () => {
-        setShowUpscalingDialog(!showUpscalingDialog)
+        if (!props.post) return
+        setUpscalePostID({post: props.post, unverified: props.unverified})
     }
 
     const compressingDialog = () => {
-        setShowCompressingDialog(!showCompressingDialog)
+        if (!props.post) return
+        setCompressPostID({post: props.post, unverified: props.unverified})
     }
 
     const approvePost = async () => {
@@ -448,7 +451,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 {jsx}
             </div>
         )
-        return null
     }
 
     const generateMirrorsJSX = () => {
@@ -527,7 +529,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerTakedown = () => {
-        setShowTakedownPostDialog(!showTakedownPostDialog)
+        if (!props.post) return
+        setTakedownPostID({post: props.post, unverified: props.unverified})
     }
 
     const postHistory = () => {

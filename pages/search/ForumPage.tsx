@@ -9,7 +9,6 @@ import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
 import ThreadRow from "../../components/search/ThreadRow"
-import NewThreadDialog from "../../dialogs/thread/NewThreadDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -17,8 +16,6 @@ useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector} from "../
 import permissions from "../../structures/Permissions"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import "./styles/itemspage.less"
 import {ThreadSearch, CommentSort} from "../../types/Types"
 
@@ -422,9 +419,6 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <NewThreadDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -456,9 +450,9 @@ const ForumPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <div className="item-row">{getNewThreadButton()}</div> : null}
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateThreadsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

@@ -15,11 +15,9 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions,
 useMessageDialogSelector,
 useMessageDialogActions} from "../../store"
-import SoftDeleteMessageDialog from "../../dialogs/message/SoftDeleteMessageDialog"
 import permissions from "../../structures/Permissions"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import "./styles/itemspage.less"
@@ -468,8 +466,6 @@ const MailPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <SoftDeleteMessageDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -505,9 +501,9 @@ const MailPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <>{getReadButtons()}</> : null}
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateMessagesJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

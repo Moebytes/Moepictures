@@ -83,7 +83,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSession, setSessionFlag} = useSessionActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {disableZoom, secondsProgress, progress, dragProgress, reverse, speed, preservePitch, volume, previousVolume, 
     paused, duration, dragging, seekTo} = usePlaybackSelector()
     const {setDisableZoom, setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPreservePitch, setVolume, 
@@ -99,6 +99,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
+    const effectRef = useRef<HTMLCanvasElement>(null)
     const dummyRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
     const lightnessRef = useRef<HTMLImageElement>(null)
@@ -134,6 +135,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [videoData, setVideoData] = useState(null as ImageBitmap[] | null)
     const [backFrame, setBackFrame] = useState("")
     const [zoom, setZoom] = useState(1)
+    const [fullscreen, setFullscreen] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
@@ -224,9 +226,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     })
 
     const resizeImageCanvas = () => {
-        if (!pixelateRef.current || !ref.current) return
+        if (!pixelateRef.current || !effectRef.current || !ref.current) return
         pixelateRef.current.width = ref.current.clientWidth
         pixelateRef.current.height = ref.current.clientHeight
+        effectRef.current.width = ref.current.clientWidth
+        effectRef.current.height = ref.current.clientHeight
     }
 
     const resizeGIFCanvas = () => {
@@ -255,7 +259,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const exitFullScreen = async () => {
         // @ts-ignore
         if (!document.fullscreenElement && !document.webkitIsFullScreen) {
-            await fullscreen(true)
+            await toggleFullscreen(true)
             resizeImageCanvas()
             resizeGIFCanvas()
             resizeVideoCanvas()
@@ -269,7 +273,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
             !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
             if (value === "f") {
-                if (!props.noKeydown) fullscreen()
+                if (!props.noKeydown) toggleFullscreen()
             }
             if (value === "t") {
                 setNoteMode(!noteMode)
@@ -836,14 +840,73 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         setTimeout(() => {
             imagePixelate()
-        }, 50)
-    }, [imageLoaded])
+            splatterEffect()
+        }, 800)
+    }, [imageLoaded, imageExpand, fullscreen])
 
     useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
+        imagePixelate()
     }, [pixelate])
+
+    const splatterEffect = () => {
+        if (!effectRef.current || !ref.current) return
+        if (splatter !== 0) {
+            effectRef.current.style.opacity = "1"
+            effectRef.current.width = ref.current.width
+            effectRef.current.height = ref.current.height
+            const ctx = effectRef.current.getContext("2d")!
+
+            ctx.drawImage(ref.current, 0, 0, effectRef.current.width, effectRef.current.height)
+
+            const lineAmount = splatter * 30 * (imageExpand ? 2 : 1)
+            const minOpacity = 0.1
+            const maxOpacity = 0.2
+            const minLineWidth = 1
+            const maxLineWidth = 7
+            const minLineLength = 50
+            const maxLineLength = 70
+            const maxAngle = 180
+
+            const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
+            const blendModes = ["lighter"] as GlobalCompositeOperation[]
+            for (let i = 0; i < lineCount; i++) {
+                const startX = Math.random() * effectRef.current.width
+                const startY = Math.random() * effectRef.current.height
+                const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
+
+                const radians = (Math.PI / 180) * maxAngle
+                let angle1 = Math.random() * radians - radians / 2
+                let angle2 = Math.random() * radians - radians / 2
+
+                const controlX1 = startX + length * Math.cos(angle1)
+                const controlY1 = startY + length * Math.sin(angle1)
+                const controlX2 = startX + length * Math.cos(angle2)
+                const controlY2 = startY + length * Math.sin(angle2)
+                const endX = startX + length * Math.cos((angle1 + angle2) / 2)
+                const endY = startY + length * Math.sin((angle1 + angle2) / 2)
+
+                const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
+                const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
+                const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
+
+                ctx.globalAlpha = opacity
+                ctx.globalCompositeOperation = blendMode
+                ctx.strokeStyle = "#ffffff"
+                ctx.lineWidth = lineWidth
+                ctx.beginPath()
+                ctx.moveTo(startX, startY)
+                ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
+                ctx.stroke()
+            }
+            ctx.globalAlpha = 1
+            ctx.globalCompositeOperation = "source-over"
+        } else {
+            effectRef.current.style.opacity = "0"
+        }
+    }
+    useEffect(() => {
+        splatterEffect()
+    }, [splatter, imageExpand])
 
     const onLoad = (event: React.SyntheticEvent) => {
         if (functions.isVideo(props.img)) {
@@ -1161,7 +1224,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }, 300)
     }
 
-    const fullscreen = async (exit?: boolean) => {
+    const toggleFullscreen = async (exit?: boolean) => {
         // @ts-ignore
         if (document.fullscreenElement || document.webkitIsFullScreen || exit) {
             try {
@@ -1198,6 +1261,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     resizeVideoCanvas()
                 }
             }, 100)
+            setFullscreen(false)
         } else {
             try {
                 await fullscreenRef.current?.requestFullscreen?.()
@@ -1233,6 +1297,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     resizeVideoCanvas()
                 }
             }, 100)
+            setFullscreen(true)
         }
     }
 
@@ -1361,7 +1426,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                 <img draggable={false} className="video-control-img" src={videoClearIcon} onClick={reset}/>
                             </div>  
                             <div className="video-control-row-container">
-                                <img draggable={false} className="video-control-img" src={videoFullscreenIcon} onClick={() => fullscreen()}/>
+                                <img draggable={false} className="video-control-img" src={videoFullscreenIcon} onClick={() => toggleFullscreen()}/>
                             </div> 
                             <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
                                 <img draggable={false} className="video-control-img" ref={videoVolumeRef} src={getVideoVolumeIcon()} onClick={mute}/>
@@ -1433,7 +1498,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                 <img draggable={false} className="gif-control-img" src={gifClearIcon} onClick={reset}/>
                             </div> 
                             <div className="gif-control-row-container">
-                                <img draggable={false} className="gif-control-img" src={gifFullscreenIcon} onClick={() => fullscreen()}/>
+                                <img draggable={false} className="gif-control-img" src={gifFullscreenIcon} onClick={() => toggleFullscreen()}/>
                             </div> 
                         </div>
                         <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getGIFSpeedMarginRight(), marginTop: "-240px"}}
@@ -1483,7 +1548,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                     <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => fullscreen()} src={imageFullscreenIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={imageFullscreenIcon}/>
                                 </div> 
                             </div>
                         </div>
@@ -1494,6 +1559,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img}/>
                             <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>
+                            <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
                             <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>

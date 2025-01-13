@@ -11,8 +11,6 @@ import sortRev from "../../assets/icons/sort-reverse.png"
 import ArtistRow from "../../components/search/ArtistRow"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
-import PageDialog from "../../dialogs/misc/PageDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -402,8 +400,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -439,9 +435,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    <table className="items-container">
+                    <div className="items-container">
                         {generateArtistsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

@@ -7,11 +7,7 @@ import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory
-}
-
-const LockPostDialog: React.FunctionComponent<Props> = (props) => {
+const LockPostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {lockPostID} = usePostDialogSelector()
@@ -39,8 +35,9 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
     }, [lockPostID])
 
     const lockPost = async () => {
+        if (!lockPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/lock",  {postID: props.post.postID}, session, setSessionFlag)
+            await functions.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
             setPostFlag(true)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
@@ -56,7 +53,7 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     const getTitle = () => {
-        if (props.post.locked) {
+        if (lockPostID?.post.locked) {
             return i18n.sidebar.unlockPost
         } else {
             return i18n.dialogs.lockPost.title
@@ -64,7 +61,7 @@ const LockPostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     const getPrompt = () => {
-        if (props.post.locked) {
+        if (lockPostID?.post.locked) {
             return i18n.dialogs.lockPost.unlockHeader
         } else {
             return i18n.dialogs.lockPost.header

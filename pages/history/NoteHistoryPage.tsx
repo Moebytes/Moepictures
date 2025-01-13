@@ -6,8 +6,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
 import NoteHistoryRow from "../../components/history/NoteHistoryRow"
-import RevertNoteHistoryDialog from "../../dialogs/note/RevertNoteHistoryDialog"
-import DeleteNoteHistoryDialog from "../../dialogs/note/DeleteNoteHistoryDialog"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
 import permissions from "../../structures/Permissions"
@@ -157,8 +155,6 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <RevertNoteHistoryDialog/>
-        <DeleteNoteHistoryDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

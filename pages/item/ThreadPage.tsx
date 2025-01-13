@@ -12,7 +12,6 @@ useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlag
 useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import jsxFunctions from "../../structures/JSXFunctions"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -31,12 +30,6 @@ import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import reportOptIcon from "../../assets/icons/report-opt.png"
-import EditThreadDialog from "../../dialogs/thread/EditThreadDialog"
-import DeleteThreadDialog from "../../dialogs/thread/DeleteThreadDialog"
-import ReportThreadDialog from "../../dialogs/thread/ReportThreadDialog"
-import DeleteReplyDialog from "../../dialogs/thread/DeleteReplyDialog"
-import EditReplyDialog from "../../dialogs/thread/EditReplyDialog"
-import ReportReplyDialog from "../../dialogs/thread/ReportReplyDialog"
 import emojiSelect from "../../assets/icons/emoji-select.png"
 import favicon from "../../assets/icons/favicon.png"
 import lewdIcon from "../../assets/icons/lewd.png"
@@ -698,13 +691,6 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <EditThreadDialog/>
-        <DeleteThreadDialog/> 
-        <ReportThreadDialog/>
-        <EditReplyDialog/>
-        <DeleteReplyDialog/>
-        <ReportReplyDialog/>
-        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

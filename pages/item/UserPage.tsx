@@ -25,10 +25,6 @@ import banIcon from "../../assets/icons/ban.png"
 import unbanIcon from "../../assets/icons/unban.png"
 import promoteIcon from "../../assets/icons/promote.png"
 import dmIcon from "../../assets/icons/dm.png"
-import BanDialog from "../../dialogs/user/BanDialog"
-import SendMessageDialog from "../../dialogs/message/SendMessageDialog"
-import UnbanDialog from "../../dialogs/user/UnbanDialog"
-import PromoteDialog from "../../dialogs/user/PromoteDialog"
 import jsxFunctions from "../../structures/JSXFunctions"
 import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch} from "../../types/Types"
 import "./styles/userpage.less"
@@ -383,10 +379,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <SendMessageDialog/>
-        <BanDialog/>
-        <UnbanDialog/>
-        <PromoteDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

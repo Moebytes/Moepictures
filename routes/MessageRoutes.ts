@@ -9,7 +9,6 @@ import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {MessageCreateParams, MessageEditParams, MessageReplyParams, MessageReplyEditParams,
 MessageForwardParams} from "../types/Types"
-import { String } from "aws-sdk/clients/acm"
 
 const messageLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -97,7 +96,7 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/message", messageLimiter, async (req: Request, res: Response) => {
         try {
-            const messageID = req.query.messageID as String
+            const messageID = req.query.messageID as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Bad messageID")

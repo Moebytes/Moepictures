@@ -5,17 +5,7 @@ import SideBar from "../../components/site/SideBar"
 import SortBar from "../../components/site/SortBar"
 import ImageGrid from "../../components/search/ImageGrid"
 import Footer from "../../components/site/Footer"
-import DownloadDialog from "../../dialogs/misc/DownloadDialog"
-import PageDialog from "../../dialogs/misc/PageDialog"
 import TagBanner from "../../components/site/TagBanner"
-import BulkGroupDialog from "../../dialogs/group/BulkGroupDialog"
-import BulkFavgroupDialog from "../../dialogs/group/BulkFavgroupDialog"
-import BulkTagEditDialog from "../../dialogs/post/BulkTagEditDialog"
-import BulkDeleteDialog from "../../dialogs/post/BulkDeleteDialog"
-import CaptchaDialog from "../../dialogs/misc/CaptchaDialog"
-import SaveSearchDialog from "../../dialogs/user/SaveSearchDialog"
-import EditSaveSearchDialog from "../../dialogs/user/EditSaveSearchDialog"
-import DeleteAllSaveSearchDialog from "../../dialogs/user/DeleteAllSaveSearchDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useLayoutSelector, useSearchActions} from "../../store"
 
@@ -102,16 +92,6 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <CaptchaDialog/>
-        <BulkTagEditDialog/>
-        <BulkDeleteDialog/>
-        <BulkGroupDialog/>
-        <BulkFavgroupDialog/>
-        <SaveSearchDialog/>
-        <EditSaveSearchDialog/>
-        <DeleteAllSaveSearchDialog/>
-        <PageDialog/>
-        <DownloadDialog/>
         <TitleBar reset={true}/>
         <NavBar/>
         <div className="body">

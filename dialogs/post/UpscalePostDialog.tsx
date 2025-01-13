@@ -13,15 +13,11 @@ import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import {PostSearch, PostHistory, UnverifiedPost, Upscaler} from "../../types/Types"
 
-interface Props {
-    post: PostSearch | PostHistory | UnverifiedPost
-}
-
-const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
+const UpscalePostDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {showUpscalingDialog} = usePostDialogSelector()
-    const {setShowUpscalingDialog} = usePostDialogActions()
+    const {upscalePostID} = usePostDialogSelector()
+    const {setUpscalePostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -40,7 +36,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (showUpscalingDialog) {
+        if (upscalePostID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -48,11 +44,12 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showUpscalingDialog])
+    }, [upscalePostID])
 
     const upscalePost = async () => {
+        if (!upscalePostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/upscale",  {postID: props.post.postID, upscaler, 
+            await functions.post("/api/post/upscale",  {postID: upscalePostID.post.postID, upscaler, 
             scaleFactor: functions.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
             setPostFlag(true)
             history.go(0)
@@ -63,10 +60,10 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
         if (button === "accept") {
             upscalePost()
         }
-        setShowUpscalingDialog(false)
+        setUpscalePostID(null)
     }
 
-    if (showUpscalingDialog) {
+    if (upscalePostID) {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
@@ -89,7 +86,7 @@ const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={scaleFactor} onChange={(event) => setScaleFactor(event.target.value)} style={{width: "30%"}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
-                                <span className="dialog-text">{i18n.labels.compressTo} {props.post.type === "animation" ? "WebP" : "JPG"}</span>
+                                <span className="dialog-text">{i18n.labels.compressTo} {upscalePostID.post.type === "animation" ? "WebP" : "JPG"}</span>
                                 <img className="dialog-checkbox" src={compressJPG ? checkboxChecked : checkbox} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
                             </div>
                             <div className="dialog-row">

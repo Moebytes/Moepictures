@@ -103,6 +103,7 @@
         "blur": "ブラー",
         "sharpen": "研ぐ",
         "pixelate": "ピクセルレート",
+        "splatter": "スプラッター",
         "reset": "リセット"
     },
     "sort": {
@@ -461,7 +462,8 @@
         "appealer": "控訴人",
         "borderRadius": "ボーダー半径",
         "characterTag": "キャラクタータグ",
-        "joined": "参加"
+        "joined": "参加",
+        "speed": "スピード"
     },
     "errors": {
         "$401":"401エラー",

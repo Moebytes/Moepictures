@@ -530,7 +530,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.artistTag}: </span>
-                    <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
+                    <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} 
+                    onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} 
+                    onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.artistImage}: </span>
