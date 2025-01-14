@@ -255,7 +255,6 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         setBackFrame("")
         setSecondsProgress(0)
         setProgress(0)
-        setDuration(0)
         setSeekTo(null)
         if (props.autoLoad) load()
     }, [props.model])

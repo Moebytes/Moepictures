@@ -18,7 +18,7 @@ import audioVolumeIcon from "../../assets/icons/audio-volume.png"
 import audioVolumeLowIcon from "../../assets/icons/audio-volume-low.png"
 import audioVolumeMuteIcon from "../../assets/icons/audio-volume-mute.png"
 import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import reverseSearchIcon from "../../assets/icons/reverse-search.png"
+import audioReverseSearchIcon from "../../assets/icons/reverse-search.png"
 import google from "../../assets/icons/google-purple.png"
 import bing from "../../assets/icons/bing-purple.png"
 import yandex from "../../assets/icons/yandex-purple.png"
@@ -58,11 +58,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {audio, audioPost, rewindFlag, fastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, secondsProgress, progress, 
-    dragProgress, reverse, speed, pitch, volume, previousVolume, paused, duration, dragging, seekTo} = usePlaybackSelector()
-    const {setAudio, setAudioPost, setRewindFlag, setFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
-    setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPitch, setVolume, setPreviousVolume, setPaused, 
-    setDuration, setDragging, setSeekTo} = usePlaybackActions()
+    const {audioSecondsProgress, audioProgress, audioDragProgress, audioReverse, audioVolume, audioPaused, audioDuration, audioDragging} = usePlaybackSelector()
+    const {setAudio, setAudioPost, setAudioRewindFlag, setAudioFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
+    setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, setAudioReverse, setAudioSpeed, setPitch, setAudioPaused, setAudioDragging, setAudioSeekTo} = usePlaybackActions()
     const {noteMode, imageExpand} = useSearchSelector()
     const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
@@ -93,12 +91,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [tempLink, setTempLink] = useState("")
 
     useEffect(() => {
-        setPaused(false)
+        setAudioPaused(false)
     }, [])
 
     useEffect(() => {
-        localStorage.setItem("paused", String(paused))
-    }, [paused])
+        localStorage.setItem("paused", String(audioPaused))
+    }, [audioPaused])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -172,12 +170,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        if (!dragging && dragProgress !== null) {
-            setSecondsProgress(dragProgress)
-            setProgress((dragProgress / duration) * 100)
-            setDragProgress(null)
+        if (!audioDragging && audioDragProgress !== null) {
+            setAudioSecondsProgress(audioDragProgress)
+            setAudioProgress((audioDragProgress / audioDuration) * 100)
+            setAudioDragProgress(null)
         }
-    }, [dragging, dragProgress, duration])
+    }, [audioDragging, audioDragProgress, audioDuration])
 
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
@@ -208,12 +206,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const updateProgressText = (value: number) => {
         let percent = value / 100
-        if (reverse === true) {
-            const secondsProgress = (1-percent) * duration
-            setDragProgress(duration - secondsProgress)
+        if (audioReverse === true) {
+            const secondsProgress = (1-percent) * audioDuration
+            setAudioDragProgress(audioDuration - secondsProgress)
         } else {
-            const secondsProgress = percent * duration
-            setDragProgress(secondsProgress)
+            const secondsProgress = percent * audioDuration
+            setAudioDragProgress(secondsProgress)
         }
     }
 
@@ -222,11 +220,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setAudio(props.audio)
         setAudioPost(props.post)
         setPlayFlag("always")
-        let secondsProgress = reverse ? ((100 - position) / 100) * duration : (position / 100) * duration
-        let progress = reverse ? 100 - position : position
-        setProgress(progress)
-        setDragging(false)
-        setSeekTo(secondsProgress)
+        let secondsProgress = audioReverse ? ((100 - position) / 100) * audioDuration : (position / 100) * audioDuration
+        let progress = audioReverse ? 100 - position : position
+        setAudioProgress(progress)
+        setAudioDragging(false)
+        setAudioSeekTo(secondsProgress)
     }
 
     const updatePlay = () => {
@@ -237,8 +235,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const changeReverse = (value?: boolean) => {
-        const val = value !== undefined ? value : !reverse
-        setReverse(val)
+        const val = value !== undefined ? value : !audioReverse
+        setAudioReverse(val)
     }
 
     const updateMute = () => {
@@ -355,14 +353,14 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [showPitchDropdown, showSpeedDropdown])
 
     const getAudioPlayIcon = () => {
-        if (paused) return audioPlayIcon
+        if (audioPaused) return audioPlayIcon
         return audioPauseIcon
     }
 
     const getAudioVolumeIcon = () => {
-        if (volume > 0.5) {
+        if (audioVolume > 0.5) {
             return audioVolumeIcon
-        } else if (volume > 0) {
+        } else if (audioVolume > 0) {
             return audioVolumeLowIcon
         } else {
             return audioVolumeMuteIcon
@@ -439,7 +437,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [coverImg])
 
-    const reverseSearch = async (service: string) => {
+    const audioReverseSearch = async (service: string) => {
         if (!coverImg) return
         const baseMap = {
             "google": "https://lens.google.com/uploadbyurl?url=",
@@ -460,16 +458,16 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            {/* {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null} */}
             <div className="post-song-box" ref={containerRef}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
-                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => audioReverseSearch("google")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => audioReverseSearch("bing")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => audioReverseSearch("yandex")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => audioReverseSearch("saucenao")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => audioReverseSearch("ascii2d")}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={audioReverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>
@@ -481,11 +479,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">
-                        <div className="audio-controls" ref={audioControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                        <div className="audio-controls" ref={audioControls} onMouseUp={() => setAudioDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <p className="audio-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
-                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={dragging ? ((dragProgress || 0) / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                                <p className="audio-control-text">{functions.formatSeconds(duration)}</p>
+                                <p className="audio-control-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                                <p className="audio-control-text">{functions.formatSeconds(audioDuration)}</p>
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
@@ -493,10 +491,10 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                                     <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
                                     <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => setShowPitchDropdown((prev) => !prev)}/>
                                 </div> 
-                                <div className="audio-ontrol-row-container">
-                                    <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => setRewindFlag(true)}/>
+                                <div className="audio-control-row-container">
+                                    <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => setAudioRewindFlag(true)}/>
                                     <img draggable={false} className="audio-control-img" onClick={() => updatePlay()} src={getAudioPlayIcon()}/>
-                                    <img draggable={false} className="audio-control-img" src={audioFastforwardIcon} onClick={() => setFastForwardFlag(true)}/>
+                                    <img draggable={false} className="audio-control-img" src={audioFastforwardIcon} onClick={() => setAudioFastForwardFlag(true)}/>
                                 </div>    
                                 <div className="audio-control-row-container">
                                     <img draggable={false} className="audio-control-img" src={audioClearIcon} onClick={() => setResetFlag(true)}/>
@@ -511,32 +509,32 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-240px"}}
                             onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 {/* <Slider ref={audioSpeedSliderRef} invert orientation="vertical" className="audio-speed-slider" trackClassName="audio-speed-slider-track" thumbClassName="audio-speed-slider-thumb"
-                                value={speed} min={0.5} max={4} step={0.5} onChange={(value) => setSpeed(value)}/> */}
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                                value={speed} min={0.5} max={4} step={0.5} onChange={(value) => setAudioSpeed(value)}/> */}
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">4x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(2); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">2x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.75); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">1.75x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.5); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">1.5x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.25); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">1.25x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">1x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.75); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">0.75x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.5); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">0.5x</span>
                                 </div>
-                                <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">0.25x</span>
                                 </div>
                             </div>
@@ -573,7 +571,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             <div className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-110px"}}
                             onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                                 <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-volume-slider" trackClassName="audio-volume-slider-track" thumbClassName="audio-volume-slider-thumb"
-                                value={volume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
+                                value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
                             </div>
                         </div>
                         <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>

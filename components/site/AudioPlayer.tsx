@@ -41,7 +41,7 @@ const initialize = async () => {
     soundtouchNode = context.createAudioWorkletNode("soundtouch-processor")
     audioNode.input = player
     audioNode.output = gainNode.input
-    audioNode.input.chain(soundtouchNode, bitcrusherNode)
+    audioNode.input.chain(soundtouchNode, bitcrusherNode, audioNode.output)
     audioNode.toDestination()
 }
 
@@ -52,11 +52,11 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {pixelate} = useFilterSelector()
-    const {audio, audioPost, rewindFlag, fastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, secondsProgress, progress, 
-    dragProgress, reverse, speed, pitch, volume, previousVolume, paused, duration, dragging, seekTo} = usePlaybackSelector()
-    const {setAudio, setAudioPost, setRewindFlag, setFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
-    setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPitch, setVolume, setPreviousVolume, setPaused, 
-    setDuration, setDragging, setSeekTo} = usePlaybackActions()
+    const {audio, audioPost, audioRewindFlag, audioFastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, audioSecondsProgress, audioProgress, 
+    audioDragProgress, audioReverse, audioSpeed, pitch, audioVolume, audioPreviousVolume, audioPaused, audioDuration, audioDragging, audioSeekTo} = usePlaybackSelector()
+    const {setAudio, setAudioPost, setAudioRewindFlag, setAudioFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
+    setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, setAudioReverse, setAudioSpeed, setPitch, setAudioVolume, setAudioPreviousVolume, setAudioPaused, 
+    setAudioDuration, setAudioDragging, setAudioSeekTo} = usePlaybackActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -94,31 +94,31 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        setSecondsProgress(0)
-        setProgress(0)
-        setDragProgress(0)
-        setDuration(0)
-        setDragging(false)
-        setSeekTo(null)
+        setAudioSecondsProgress(0)
+        setAudioProgress(0)
+        setAudioDragProgress(0)
+        setAudioDuration(0)
+        setAudioDragging(false)
+        setAudioSeekTo(null)
         setInit(false)
         loadAudio()
     }, [audio])
 
     useEffect(() => {
         const id = window.setInterval(() => {
-            if (!duration) return
-            let percent = (Tone.getTransport().seconds / duration)
+            if (!audioDuration) return
+            let percent = (Tone.getTransport().seconds / audioDuration)
             if (!Number.isFinite(percent)) return
-            if (!dragging) {
-                if (reverse) {
-                    setProgress((1-percent) * 100)
-                    setSecondsProgress(duration - Tone.getTransport().seconds)
+            if (!audioDragging) {
+                if (audioReverse) {
+                    setAudioProgress((1-percent) * 100)
+                    setAudioSecondsProgress(audioDuration - Tone.getTransport().seconds)
                 } else {
-                    setProgress(percent * 100)
-                    setSecondsProgress(Tone.getTransport().seconds)
+                    setAudioProgress(percent * 100)
+                    setAudioSecondsProgress(Tone.getTransport().seconds)
                 }
             }
-            if (Tone.getTransport().seconds > duration) {
+            if (Tone.getTransport().seconds > audioDuration) {
                 Tone.getTransport().seconds = 0
                 stop()
                 updatePlay(true)
@@ -127,32 +127,32 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         return () => {
             window.clearInterval(id)
         }
-    }, [dragging, reverse, duration])
+    }, [audioDragging, audioReverse, audioDuration])
 
     const refreshState = () => {
-        updateReverse(reverse)
+        updateReverse(audioReverse)
         updateSpeed()
         updatePitch()
     }
 
     const updateDuration = () => {
-        setDuration(player.buffer.duration / player.playbackRate)
+        setAudioDuration(player.buffer.duration / player.playbackRate)
     }
 
     const updatePlay = async (alwaysPlay?: boolean) => {
         if (!init) await loadAudio()
         await Tone.start()
         // Tone.getTransport().loop = true
-        if (paused || alwaysPlay) {
+        if (audioPaused || alwaysPlay) {
             Tone.getTransport().start()
-            setPaused(false)
+            setAudioPaused(false)
         } else {
             Tone.getTransport().pause()
-            setPaused(true)
+            setAudioPaused(true)
         }
-        if (duration > 10) {
+        if (audioDuration > 10) {
             Tone.getTransport().loopStart = 0
-            Tone.getTransport().loopEnd = duration
+            Tone.getTransport().loopEnd = audioDuration
             Tone.getTransport().loop = true
         }
     }
@@ -176,12 +176,12 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (Number.isFinite(Tone.getDestination().volume.value)) {
             Tone.getDestination().volume.value = functions.linearToDecibels(0)
             Tone.getDestination().mute = true
-            setVolume(0)
+            setAudioVolume(0)
         } else {
-            const newVol = previousVolume ? previousVolume : 1
+            const newVol = audioPreviousVolume ? audioPreviousVolume : 1
             Tone.getDestination().volume.value = functions.linearToDecibels(functions.logSlider(newVol))
             Tone.getDestination().mute = false
-            setVolume(newVol)
+            setAudioVolume(newVol)
         }
         setShowVolumeSlider((prev) => !prev)
     }
@@ -203,8 +203,8 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         } else {
             Tone.getDestination().mute = true
         }
-        setVolume(value)
-        setPreviousVolume(value)
+        setAudioVolume(value)
+        setAudioPreviousVolume(value)
     }
 
     useEffect(() => {
@@ -215,55 +215,55 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }, [volumeFlag])
 
     const updateSpeed = async () => {
-        if (!duration) return
-        player.playbackRate = speed
-        let percent = Tone.getTransport().seconds / duration
-        setDuration(player.buffer.duration / speed)
-        let val = percent * duration
+        if (!audioDuration) return
+        player.playbackRate = audioSpeed
+        let percent = Tone.getTransport().seconds / audioDuration
+        setAudioDuration(player.buffer.duration / audioSpeed)
+        let val = percent * audioDuration
         if (val < 0) val = 0
-        if (val > duration - 1) val = duration - 1
+        if (val > audioDuration - 1) val = audioDuration - 1
         Tone.getTransport().seconds = val
     }
 
     useEffect(() => {
         updateSpeed()
-    }, [speed])
+    }, [audioSpeed])
 
     const updateReverse = async (value?: boolean) => {
-        if (!duration) return
-        let percent = Tone.getTransport().seconds / duration
-        let val = (1-percent) * duration
+        if (!audioDuration) return
+        let percent = Tone.getTransport().seconds / audioDuration
+        let val = (1-percent) * audioDuration
         if (val < 0) val = 0
-        if (val > duration - 1) val = duration - 1
-        if (value === false || !reverse) {
+        if (val > audioDuration - 1) val = audioDuration - 1
+        if (value === false || !audioReverse) {
             Tone.getTransport().seconds = val
             player.reverse = false
         } else {
             Tone.getTransport().seconds = val
             player.reverse = true
         }
-        let secondsProgress = player.reverse ? (duration / 100) * (100 - progress) : (duration / 100) * progress
-        setSeekTo(secondsProgress)
+        let secondsProgress = player.reverse ? (audioDuration / 100) * (100 - audioProgress) : (audioDuration / 100) * audioProgress
+        setAudioSeekTo(secondsProgress)
     }
 
     useEffect(() => {
-        updateReverse(reverse)
-    }, [reverse])
+        updateReverse(audioReverse)
+    }, [audioReverse])
 
     const updatePitch = async () => {
         if (!soundtouchNode) return
         const soundtouchParams = soundtouchNode.parameters as unknown as {get: (key: string) => AudioParam}
         if (pitch === 0) {
-            const pitchCorrect = 1 / speed
+            const pitchCorrect = 1 / audioSpeed
             return soundtouchParams.get("pitch").value = 1 * pitchCorrect
         }
-        const pitchCorrect = 1 / speed
+        const pitchCorrect = 1 / audioSpeed
         soundtouchParams.get("pitch").value = functions.semitonesToScale(pitch) * pitchCorrect
     }
 
     useEffect(() => {
         updatePitch()
-    }, [pitch, speed])
+    }, [pitch, audioSpeed])
 
     const bitcrush = async () => {
         if (!bitcrusherNode) return
@@ -311,14 +311,14 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
 
     const getAudioPlayIcon = () => {
-        if (paused) return playerPlay
+        if (audioPaused) return playerPlay
         return playerPause
     }
 
     const getAudioVolumeIcon = () => {
-        if (volume > 0.5) {
+        if (audioVolume > 0.5) {
             return playerVolume
-        } else if (volume > 0) {
+        } else if (audioVolume > 0) {
             return playerVolumeLow
         } else {
             return playerVolumeMute
@@ -326,12 +326,12 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
 
     const getAudioReverseIcon = () => {
-        if (reverse) return playerReverseActive
+        if (audioReverse) return playerReverseActive
         return playerReverse
     }
 
     const getAudioSpeedIcon = () => {
-        if (speed === 1) return playerSpeed
+        if (audioSpeed === 1) return playerSpeed
         return playerSpeedActive
     }
 
@@ -364,12 +364,12 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        if (!dragging && dragProgress !== null) {
-            setSecondsProgress(dragProgress)
-            setProgress((dragProgress / duration) * 100)
-            setDragProgress(null)
+        if (!audioDragging && audioDragProgress !== null) {
+            setAudioSecondsProgress(audioDragProgress)
+            setAudioProgress((audioDragProgress / audioDuration) * 100)
+            setAudioDragProgress(null)
        }
-    }, [dragging, dragProgress, duration])
+    }, [audioDragging, audioDragProgress, audioDuration])
 
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
@@ -403,86 +403,86 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const updateProgressText = (value: number) => {
         let percent = value / 100
-        if (reverse === true) {
-            const secondsProgress = (1-percent) * duration
-            setDragProgress(duration - secondsProgress)
+        if (audioReverse === true) {
+            const secondsProgress = (1-percent) * audioDuration
+            setAudioDragProgress(audioDuration - secondsProgress)
         } else {
-            const secondsProgress = percent * duration
-            setDragProgress(secondsProgress)
+            const secondsProgress = percent * audioDuration
+            setAudioDragProgress(secondsProgress)
         }
     }
 
     useEffect(() => {
-        const seekToPosition = async () => {
-            if (!seekTo) return
-            let progress = (100 / duration) * seekTo
-            if (reverse) progress = 100 - progress
-            Tone.getTransport().seconds = seekTo
-            setProgress(progress)
-            setSecondsProgress(seekTo)
-            setSeekTo(null)
+        const audioSeekToPosition = async () => {
+            if (!audioSeekTo) return
+            let audioProgress = (100 / audioDuration) * audioSeekTo
+            if (audioReverse) audioProgress = 100 - audioProgress
+            Tone.getTransport().seconds = audioSeekTo
+            setAudioProgress(audioProgress)
+            setAudioSecondsProgress(audioSeekTo)
+            setAudioSeekTo(null)
         }
-        if (seekTo) seekToPosition()
-    }, [seekTo, reverse])
+        if (audioSeekTo) audioSeekToPosition()
+    }, [audioSeekTo, audioReverse])
 
     const seek = (position: number) => {
         updatePlay(true)
-        let secondsProgress = reverse ? ((100 - position) / 100) * duration : (position / 100) * duration
-        let progress = reverse ? 100 - position : position
-        setProgress(progress)
-        setDragging(false)
-        setSeekTo(secondsProgress)
+        let secondsProgress = audioReverse ? ((100 - position) / 100) * audioDuration : (position / 100) * audioDuration
+        let audioProgress = audioReverse ? 100 - position : position
+        setAudioProgress(audioProgress)
+        setAudioDragging(false)
+        setAudioSeekTo(secondsProgress)
     }
 
     const changeReverse = (value?: boolean) => {
-        const val = value !== undefined ? value : !reverse 
-        setReverse(val)
+        const val = value !== undefined ? value : !audioReverse 
+        setAudioReverse(val)
     }
 
     const rewind = (value?: number) => {
-        if (!value) value = Math.floor(duration / 10)
+        if (!value) value = Math.floor(audioDuration / 10)
         const current = Tone.getTransport().seconds
         let seconds = current - value
-        if (reverse) seconds = current + value
+        if (audioReverse) seconds = current + value
         if (seconds < 0) seconds = 0
-        if (seconds > duration) seconds = duration
-        setSeekTo(seconds)
+        if (seconds > audioDuration) seconds = audioDuration
+        setAudioSeekTo(seconds)
     }
 
     useEffect(() => {
-        if (rewindFlag) {
+        if (audioRewindFlag) {
             rewind()
-            setRewindFlag(false)
+            setAudioRewindFlag(false)
         }
-    }, [rewindFlag])
+    }, [audioRewindFlag])
 
     const fastforward = (value?: number) => {
-        if (!value) value = Math.floor(duration / 10)
+        if (!value) value = Math.floor(audioDuration / 10)
         const current = Tone.getTransport().seconds
         let seconds = current + value
-        if (reverse) seconds = current - value
+        if (audioReverse) seconds = current - value
         if (seconds < 0) seconds = 0
-        if (seconds > duration) seconds = duration
-        setSeekTo(seconds)
+        if (seconds > audioDuration) seconds = audioDuration
+        setAudioSeekTo(seconds)
     }
 
     useEffect(() => {
-        if (fastForwardFlag) {
+        if (audioFastForwardFlag) {
             fastforward()
-            setFastForwardFlag(false)
+            setAudioFastForwardFlag(false)
         }
-    }, [fastForwardFlag])
+    }, [audioFastForwardFlag])
 
     const reset = () => {
         changeReverse(false)
-        setSpeed(1)
+        setAudioSpeed(1)
         setPitch(0)
-        setPaused(false)
+        setAudioPaused(false)
         setShowSpeedDropdown(false)
         setShowPitchDropdown(false)
         stop()
         updatePlay(true)
-        setSeekTo(0)
+        setAudioSeekTo(0)
     }
 
     useEffect(() => {
@@ -494,7 +494,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const quit = () => {
         stop()
-        setPaused(true)
+        setAudioPaused(true)
         setAudio("")
         setAudioPost(null)
         setInit(false)
@@ -505,9 +505,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             return (
                 <div className="audio-player-row">
                     <div className="audio-player-container" style={{width: "100%"}}>
-                        <p className="audio-player-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
-                        <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={dragging ? ((dragProgress || 0) / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                        <p className="audio-player-text">{functions.formatSeconds(duration)}</p>
+                        <p className="audio-player-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                        <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                        <p className="audio-player-text">{functions.formatSeconds(audioDuration)}</p>
                     </div>
                     <div className="audio-player-container">
                         <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>
@@ -533,9 +533,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <img draggable={false} style={{filter: getFilter(), marginRight: "10px"}} className="audio-player-icon-small" src={playerFastforward} onClick={() => fastforward()}/>
                 </div>
                 <div className="audio-player-container" style={{width: "100%"}}>
-                    <p className="audio-player-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
-                    <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={dragging ? ((dragProgress || 0) / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                    <p className="audio-player-text">{functions.formatSeconds(duration)}</p>
+                    <p className="audio-player-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                    <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                    <p className="audio-player-text">{functions.formatSeconds(audioDuration)}</p>
                 </div>
                 <div className="audio-player-container">
                     <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>
@@ -555,38 +555,38 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     if (audio) {
         return (
-            <div className="audio-player" style={{height: getHeight()}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setDragging(false)}>
+            <div className="audio-player" style={{height: getHeight()}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setAudioDragging(false)}>
                 {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
                 </div> : null}
                 {playerJSX()}
                 <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-370px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">4x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(2); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">2x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(1.75); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">1.75x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(1.5); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">1.5x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(1.25); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">1.25x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(1); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">1x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(0.75); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">0.75x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(0.5); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">0.5x</span>
                     </div>
-                    <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                    <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">0.25x</span>
                     </div>
                 </div>
@@ -623,7 +623,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                 <div className={`audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-player-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-270px"}}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-player-volume-slider" trackClassName="audio-player-volume-slider-track" thumbClassName="audio-player-volume-slider-thumb"
-                    value={volume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
+                    value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
                 </div>
             </div>
         )

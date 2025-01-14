@@ -187,7 +187,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setSecondsProgress(0)
         setProgress(0)
         setDragProgress(0)
-        setDuration(0)
         setZoom(1)
         setDragging(false)
         setSeekTo(null)
@@ -407,7 +406,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             gifCanvas.style.opacity = "1"
             gifCanvas.width = ref.current.clientWidth
             gifCanvas.height = ref.current.clientHeight
-            console.log({width: ref.current.clientWidth, height: ref.current.clientHeight})
             const ctx = gifCanvas.getContext("2d")!
             const frames = adjustedData.length - 1
             let duration = adjustedData.map((d) => d.delay).reduce((p, c) => p + c) / 1000
@@ -480,6 +478,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
     }, [gifData, reverse, seekTo, pixelate, paused, speed, dragging, dragProgress])
 
+    
     useEffect(() => {
         if (!dragging && dragProgress !== null) {
             setSecondsProgress(dragProgress)

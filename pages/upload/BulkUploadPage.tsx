@@ -253,11 +253,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     let dimensions = await functions.live2dDimensions(link)
                     width = dimensions.width
                     height = dimensions.height
-                } else if (functions.isVideo(acceptedArray[i].ext)) {
+                } else if (functions.isVideo(link)) {
                     thumbnail = await functions.videoThumbnail(link)
-                } else if (functions.isModel(acceptedArray[i].ext)) {
+                } else if (functions.isModel(link)) {
                     thumbnail = await functions.modelImage(link)
-                } else if (functions.isAudio(acceptedArray[i].ext)) {
+                } else if (functions.isAudio(link)) {
                     thumbnail = await functions.songCover(link)
                 }
                 urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail, width, height,

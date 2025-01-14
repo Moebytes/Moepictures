@@ -335,7 +335,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setSecondsProgress(0)
         setProgress(0)
         setDragProgress(0)
-        setDuration(0)
         setDragging(false)
         setSeekTo(null)
         if (ref) ref.style.opacity = "1"

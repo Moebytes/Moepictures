@@ -37,7 +37,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
-    const {setAudio, setAudioPost, setPlayFlag, setSecondsProgress, setReverse, setSeekTo} = usePlaybackActions()
+    const {setAudio, setAudioPost, setPlayFlag, setAudioSecondsProgress, setAudioReverse, setAudioSeekTo} = usePlaybackActions()
     const {sizeType, square, scroll, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
     const {setSelectionItems, setSelectionPosts} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
@@ -110,9 +110,9 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         setImageLoaded(false)
-        setReverse(false)
-        setSecondsProgress(0)
-        setSeekTo(null)
+        setAudioReverse(false)
+        setAudioSecondsProgress(0)
+        setAudioSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
         if (props.autoLoad) loadImage()
     }, [props.audio])

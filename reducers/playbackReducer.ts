@@ -27,7 +27,20 @@ const playbackSlice = createSlice({
         volumeFlag: null as number | null,
         muteFlag: false,
         resetFlag: false,
-        disableZoom: true
+        disableZoom: true,
+        audioSpeed: 1,
+        audioReverse: false,
+        audioSecondsProgress: 0,
+        audioProgress: 0,
+        audioDragProgress: null as number | null,
+        audioVolume: 0.75,
+        audioPreviousVolume: 0,
+        audioPaused: false,
+        audioDuration: 0,
+        audioSeekTo: null as number | null,
+        audioDragging: false,
+        audioRewindFlag: false,
+        audioFastForwardFlag: false
     },
     reducers: {
         setAudio: (state, action) => {state.audio = action.payload},
@@ -51,7 +64,20 @@ const playbackSlice = createSlice({
         setVolumeFlag: (state, action) => {state.volumeFlag = action.payload},
         setMuteFlag: (state, action) => {state.muteFlag = action.payload},
         setResetFlag: (state, action) => {state.resetFlag = action.payload},
-        setDisableZoom: (state, action) => {state.disableZoom = action.payload}
+        setDisableZoom: (state, action) => {state.disableZoom = action.payload},
+        setAudioSpeed: (state, action) => {state.audioSpeed = action.payload},
+        setAudioReverse: (state, action) => {state.audioReverse = action.payload},
+        setAudioSecondsProgress: (state, action) => {state.audioSecondsProgress = action.payload},
+        setAudioProgress: (state, action) => {state.audioProgress = action.payload},
+        setAudioDragProgress: (state, action) => {state.audioDragProgress = action.payload},
+        setAudioVolume: (state, action) => {state.audioVolume = action.payload},
+        setAudioPreviousVolume: (state, action) => {state.audioPreviousVolume = action.payload},
+        setAudioPaused: (state, action) => {state.audioPaused = action.payload},
+        setAudioDuration: (state, action) => {state.audioDuration = action.payload},
+        setAudioSeekTo: (state, action) => {state.audioSeekTo = action.payload},
+        setAudioDragging: (state, action) => {state.audioDragging = action.payload},
+        setAudioRewindFlag: (state, action) => {state.audioRewindFlag = action.payload},
+        setAudioFastForwardFlag: (state, action) => {state.audioFastForwardFlag = action.payload}
     }
 })
 
@@ -59,7 +85,10 @@ const {
     setAudio, setAudioPost, setSpeed, setReverse, setPitch, setVolume, setPreviousVolume, 
     setPaused, setPreservePitch, setDuration, setSeekTo, setSecondsProgress, setProgress,
     setDragProgress, setDragging, setRewindFlag, setFastForwardFlag, setPlayFlag, 
-    setVolumeFlag, setMuteFlag, setResetFlag, setDisableZoom
+    setVolumeFlag, setMuteFlag, setResetFlag, setDisableZoom, setAudioSpeed, 
+    setAudioReverse, setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, 
+    setAudioVolume, setAudioPreviousVolume, setAudioPaused, setAudioDuration, 
+    setAudioSeekTo, setAudioDragging, setAudioRewindFlag, setAudioFastForwardFlag
 } = playbackSlice.actions
 
 export const usePlaybackSelector = () => {
@@ -86,7 +115,20 @@ export const usePlaybackSelector = () => {
         volumeFlag: selector((state) => state.playback.volumeFlag),
         muteFlag: selector((state) => state.playback.muteFlag),
         resetFlag: selector((state) => state.playback.resetFlag),
-        disableZoom: selector((state) => state.playback.disableZoom)
+        disableZoom: selector((state) => state.playback.disableZoom),
+        audioSpeed: selector((state) => state.playback.audioSpeed),
+        audioReverse: selector((state) => state.playback.audioReverse),
+        audioSecondsProgress: selector((state) => state.playback.audioSecondsProgress),
+        audioProgress: selector((state) => state.playback.audioProgress),
+        audioDragProgress: selector((state) => state.playback.audioDragProgress),
+        audioVolume: selector((state) => state.playback.audioVolume),
+        audioPreviousVolume: selector((state) => state.playback.audioPreviousVolume),
+        audioPaused: selector((state) => state.playback.audioPaused),
+        audioDuration: selector((state) => state.playback.audioDuration),
+        audioSeekTo: selector((state) => state.playback.audioSeekTo),
+        audioDragging: selector((state) => state.playback.audioDragging),
+        audioRewindFlag: selector((state) => state.playback.audioRewindFlag),
+        audioFastForwardFlag: selector((state) => state.playback.audioFastForwardFlag)
     }
 }
 
@@ -114,7 +156,20 @@ export const usePlaybackActions = () => {
         setVolumeFlag: (state: number | null) => dispatch(setVolumeFlag(state)),
         setMuteFlag: (state: boolean) => dispatch(setMuteFlag(state)),
         setResetFlag: (state: boolean) => dispatch(setResetFlag(state)),
-        setDisableZoom: (state: boolean) => dispatch(setDisableZoom(state))
+        setDisableZoom: (state: boolean) => dispatch(setDisableZoom(state)),
+        setAudioSpeed: (state: number) => dispatch(setAudioSpeed(state)),
+        setAudioReverse: (state: boolean) => dispatch(setAudioReverse(state)),
+        setAudioSecondsProgress: (state: number) => dispatch(setAudioSecondsProgress(state)),
+        setAudioProgress: (state: number) => dispatch(setAudioProgress(state)),
+        setAudioDragProgress: (state: number | null) => dispatch(setAudioDragProgress(state)),
+        setAudioVolume: (state: number) => dispatch(setAudioVolume(state)),
+        setAudioPreviousVolume: (state: number) => dispatch(setAudioPreviousVolume(state)),
+        setAudioPaused: (state: boolean) => dispatch(setAudioPaused(state)),
+        setAudioDuration: (state: number) => dispatch(setAudioDuration(state)),
+        setAudioSeekTo: (state: number | null) => dispatch(setAudioSeekTo(state)),
+        setAudioDragging: (state: boolean) => dispatch(setAudioDragging(state)),
+        setAudioRewindFlag: (state: boolean) => dispatch(setAudioRewindFlag(state)),
+        setAudioFastForwardFlag: (state: boolean) => dispatch(setAudioFastForwardFlag(state))
     }
 }
 
