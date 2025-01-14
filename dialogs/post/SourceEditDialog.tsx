@@ -5,6 +5,7 @@ useFlagActions, useActiveActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
+import {UploadImage} from "../../types/Types"
 import "../dialog.less"
 
 const SourceEditDialog: React.FunctionComponent = (props) => {
@@ -40,7 +41,6 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setCommentary(sourceEditID.post.commentary || "")
         setEnglishCommentary(sourceEditID.post.englishCommentary || "")
         setMirrors(sourceEditID.post.mirrors ? Object.values(sourceEditID.post.mirrors).join("\n") : "")
-        setEnglishTitle(sourceEditID.post.englishTitle || "")
         if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
         setSource(sourceEditID.post.source || "")
         setBookmarks(String(sourceEditID.post.bookmarks) || "")
@@ -50,12 +50,14 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const reset = () => {
         setTitle("")
         setEnglishTitle("")
+        setArtist("")
         setCommentary("")
         setEnglishCommentary("")
-        setArtist("")
-        setSource("")
-        setPosted("")
         setMirrors("")
+        setPosted("")
+        setSource("")
+        setBookmarks("")
+        setBuyLink("")
     }
 
     useEffect(() => {
@@ -132,6 +134,55 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
         }
+    }
+
+    const sourceLookup = async () => {
+        if (!sourceEditID) return
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = i18n.buttons.fetching
+        try {
+            let image = sourceEditID.post.images[sourceEditID.order - 1]
+            if (typeof image === "string") throw new Error("History state")
+            let link = functions.getImageLink(image.type, image.postID, image.order, image.filename)
+            let response = await fetch(`${link}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let current = null as UploadImage | null
+            if (response.byteLength) {
+                const decrypted = await functions.decryptBuffer(response, link, session)
+                const bytes = new Uint8Array(decrypted)
+                const result = functions.bufferFileType(bytes)?.[0] || {}
+                const pixivID = sourceEditID.post.source?.match(/\d+/)?.[0] || "image"
+                const ext = result.typename === "mkv" ? "webm" : result.typename
+                current = {
+                    link,
+                    ext,
+                    originalLink: link,
+                    bytes: Object.values(bytes),
+                    size: decrypted.byteLength,
+                    width: image.width,
+                    height: image.height,
+                    thumbnail: "",
+                    name: `${pixivID}.${ext}`
+                }
+            }
+            if (!current) throw new Error("Bad image")
+            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating: functions.r13()}, session, setSessionFlag)
+
+            setTitle(sourceLookup.source.title)
+            setEnglishTitle(sourceLookup.source.englishTitle)
+            setArtist(sourceLookup.source.artist)
+            setCommentary(sourceLookup.source.commentary)
+            setEnglishCommentary(sourceLookup.source.englishCommentary)
+            setMirrors(sourceLookup.source.mirrors)
+            setPosted(functions.formatDate(new Date(sourceLookup.source.posted), true))
+            setSource(sourceLookup.source.source)
+            setBookmarks(sourceLookup.source.bookmarks)
+        } catch (e) {
+            console.log(e)
+            errorRef.current!.innerText = i18n.pages.upload.nothingFound
+            await functions.timeout(3000)
+        }
+        return setError(false)
     }
 
     const click = (button: "accept" | "reject") => {
@@ -253,8 +304,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
-                            <div className="dialog-row">
+                            <div className="dialog-row" style={{marginLeft: "0px"}}>
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => sourceLookup()} style={{backgroundColor: "var(--buttonBG)", marginLeft: "-5px"}} className="dialog-button">{i18n.buttons.fetch}</button>
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
@@ -283,8 +335,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                         </> : <>
                         {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="dialog-row">
+                        <div className="dialog-row" style={{marginLeft: "0px"}}>
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => sourceLookup()} style={{backgroundColor: "var(--buttonBG)", marginLeft: "-5px"}} className="dialog-button">{i18n.buttons.fetch}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submit}</button>
                         </div>
                         </>}

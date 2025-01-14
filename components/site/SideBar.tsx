@@ -754,14 +754,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified})
+            tags: props.tags, unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerSourceEdit = () => {
-        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags || !props.order) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified})
+            tags: props.tags, unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerAddNote = () => {

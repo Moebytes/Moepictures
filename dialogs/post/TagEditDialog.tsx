@@ -26,8 +26,8 @@ import model from "../../assets/icons/model.png"
 import live2d from "../../assets/icons/live2d.png"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
+import {PostType, PostRating, PostStyle, UploadImage} from "../../types/Types"
 import "../dialog.less"
-import {PostType, PostRating, PostStyle} from "../../types/Types"
 
 const TagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -215,6 +215,61 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             setSubmitted(true)
             functions.clearCache()
         }
+    }
+
+    const tagLookup = async () => {
+        if (!tagEditID) return
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = i18n.buttons.fetching
+        try {
+            let image = tagEditID.post.images[tagEditID.order - 1]
+            if (typeof image === "string") throw new Error("History state")
+            let link = functions.getImageLink(image.type, image.postID, image.order, image.filename)
+            let response = await fetch(`${link}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let current = null as UploadImage | null
+            if (response.byteLength) {
+                const decrypted = await functions.decryptBuffer(response, link, session)
+                const bytes = new Uint8Array(decrypted)
+                const result = functions.bufferFileType(bytes)?.[0] || {}
+                const pixivID = tagEditID.post.source?.match(/\d+/)?.[0] || "image"
+                const ext = result.typename === "mkv" ? "webm" : result.typename
+                current = {
+                    link,
+                    ext,
+                    originalLink: link,
+                    bytes: Object.values(bytes),
+                    size: decrypted.byteLength,
+                    width: image.width,
+                    height: image.height,
+                    thumbnail: "",
+                    name: `${pixivID}.${ext}`
+                }
+            }
+            if (!current) throw new Error("Bad image")
+            let hasUpscaled = image.upscaledFilename ? true : false
+            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
+            const tagMap = await functions.tagsCache(session, setSessionFlag)
+
+            let artistArr = sourceLookup.artists.length ? sourceLookup.artists : tagLookup.artists
+            const newArtists = artistArr?.map((a) => a.tag) || []
+            const newCharacters = tagLookup.characters.map((c) => c.tag)
+            const newSeries = tagLookup.series.map((s) => s.tag)
+            const newMeta = tagLookup.tags.filter((t) => tagMap[t]?.type === "meta")
+            const newTags = tagLookup.tags.filter((t) => !newMeta.includes(t))
+
+            setArtists(newArtists.join(" "))
+            setCharacters(newCharacters.join(" "))
+            setSeries(newSeries.join(" "))
+            setMetaTags(newMeta.join(" "))
+            setTags(newTags.join(" "))
+        } catch (e) {
+            console.log(e)
+            errorRef.current!.innerText = i18n.pages.upload.nothingFound
+            await functions.timeout(3000)
+        }
+        return setError(false)
     }
 
     const click = (button: "accept" | "reject") => {
@@ -536,7 +591,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} click={handleTagClick} type="tag"/>
                 <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
             </div>
@@ -592,8 +647,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
-                            <div className="dialog-row">
+                            <div className="dialog-row" style={{marginLeft: "0px"}}>
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                                <button onClick={() => tagLookup()} style={{backgroundColor: "var(--buttonBG)", marginLeft: "-5px"}} className="dialog-button">{i18n.buttons.fetch}</button>
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
@@ -622,8 +678,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         </> : <>
                         {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="dialog-row">
+                        <div className="dialog-row" style={{marginLeft: "0px"}}>
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
+                            <button onClick={() => tagLookup()} style={{backgroundColor: "var(--buttonBG)", marginLeft: "-5px"}} className="dialog-button">{i18n.buttons.fetch}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div>
                         </>}

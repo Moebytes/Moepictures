@@ -71,6 +71,8 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const live2dPartRef = useRef<HTMLImageElement>(null)
     const [image, setImage] = useState(null as string | null)
     const [model, setModel] = useState(null as Live2DModel | null)
+    const [modelWidth, setModelWidth] = useState(0)
+    const [modelHeight, setModelHeight] = useState(0)
     const [app, setApp] = useState(null as PIXI.Application | null)
     const [fps, setFPS] = useState(60)
     const [defaultOpacities, setDefaultOpacities] = useState([] as number[])
@@ -156,6 +158,8 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
         setModel(model)
         setApp(app)
+        setModelWidth(model.internalModel.width)
+        setModelHeight(model.internalModel.height)
 
         const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
         model.transform.scale.set(initialScale)
@@ -669,7 +673,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.live2d} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.live2d} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={modelWidth} imageHeight={modelHeight}/> : null}
             <div className="post-model-box" ref={containerRef}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>

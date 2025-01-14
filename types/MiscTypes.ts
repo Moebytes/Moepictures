@@ -1,6 +1,6 @@
 import {PixivIllust} from "pixiv.ts"
 import {DeviationRSSExtended} from "deviantart.ts"
-import {Banner} from "./Types"
+import {Banner, PostRating, PostStyle, PostType, UploadImage, UploadTag} from "./Types"
 
 export interface GIFFrame {
     frame: HTMLCanvasElement
@@ -112,6 +112,49 @@ export interface CoinbaseEvent {
     }
 }
 
+export interface SourceLookupParams {
+    current: UploadImage
+    rating: PostRating
+}
+
+export interface SourceLookup {
+    rating: PostRating
+    artists: UploadTag[]
+    danbooruLink: string
+    artistIcon: string
+    source: {
+        title: string
+        englishTitle: string
+        artist: string
+        source: string
+        commentary: string
+        englishCommentary: string
+        bookmarks: string
+        posted: string
+        mirrors: string
+    }
+}
+
+export interface TagLookupParams {
+    current: UploadImage
+    type: PostType
+    rating: PostRating
+    style: PostStyle
+    hasUpscaled: boolean
+}
+
+export interface TagLookup {
+    type: PostType
+    rating: PostRating
+    style: PostStyle
+    artists: UploadTag[]
+    characters: UploadTag[]
+    series: UploadTag[]
+    tags: string[]
+    newTags: UploadTag[]
+    danbooruLink: string
+}
+
 export type MiscGetEndpoint<T extends string> = 
     T extends "/api/misc/captcha/create" ? {params: {color: string}, response: string} :
     T extends "/api/misc/pixiv" ? {params: {url: string}, response: PixivResponse} :
@@ -143,6 +186,8 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/blacklistip" ? {params: {ip: string, reason: string}, response: string} :
     T extends "/api/misc/imghash" ? {params: number[], response: string} :
     T extends "/api/misc/api-key" ? {params: null, response: string} :
+    T extends "/api/misc/sourcelookup" ? {params: SourceLookupParams, response: SourceLookup} :
+    T extends "/api/misc/taglookup" ? {params: TagLookupParams, response: TagLookup} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 

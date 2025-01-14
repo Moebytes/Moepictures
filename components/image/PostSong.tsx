@@ -68,6 +68,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
+    const [imageWidth, setImageWidth] = useState(0)
+    const [imageHeight, setImageHeight] = useState(0)
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -430,6 +432,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             dummyRef.current.height = img.height
             dummyCtx?.drawImage(img, 0, 0, img.width, img.height)
             ref.current.style.display = "flex"
+            setImageWidth(img.naturalWidth)
+            setImageHeight(img.naturalHeight)
         }
     }
 
@@ -458,7 +462,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {/* {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null} */}
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={imageWidth} imageHeight={imageHeight}/> : null}
             <div className="post-song-box" ref={containerRef}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>

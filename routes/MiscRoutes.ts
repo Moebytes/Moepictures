@@ -2,12 +2,9 @@ import {Express, NextFunction, Request, Response} from "express"
 import axios from "axios"
 import FormData from "form-data"
 import path from "path"
-import Pixiv, { PixivIllust } from "pixiv.ts"
+import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
 import snoowrap from "snoowrap"
-import googleTranslate from "@vitalets/google-translate-api"
-import Kuroshiro from "kuroshiro"
-import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
@@ -15,7 +12,6 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structu
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import phash from "sharp-phash"
-import dist from "sharp-phash/distance"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
 import crypto from "crypto"
@@ -24,8 +20,7 @@ import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
-import {SaucenaoResponse, PixivResponse, ContactParams, Attachment, CopyrightParams, WDTaggerResponse, OCRResponse,
-CoinbaseEvent} from "../types/Types"
+import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(dotline)
 
@@ -106,19 +101,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return res.status(400).send("Image data must be provided")
-            const form = new FormData()
-            form.append("db", "999")
-            form.append("api_key", process.env.SAUCENAO_KEY)
-            form.append("output_type", 2)
-            const inputType = functions.bufferFileType(req.body)?.[0]
-            form.append("file", Buffer.from(req.body, "binary"), {
-                filename: `file.${inputType.extension}`,
-                contentType: inputType.mime
-            })
-            let result = await axios.post("https://saucenao.com/search.php", form, {headers: form.getHeaders()})
-            .then((r) => r.data.results) as SaucenaoResponse[]
-            result = result.sort((a, b) => Number(b.header.similarity) - Number(a.header.similarity))
-            result = result.filter((r) => Number(r.header.similarity) > 70)
+            let result = await serverFunctions.saucenaoLookup(req.body)
             res.status(200).json(result)
         } catch {
             res.status(400).end()
@@ -126,85 +109,10 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const {bytes, pixivID} = req.body as {bytes: Uint8Array, pixivID: string}
         try {
-            const handleFallback = async () => {
-                if (!pixivID) return res.status(400).send("No pixivID")
-                const getDanbooruLink = async (pixivID: number) => {
-                    const req = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}&z=5`).then((r) => r.data)
-                    if (!req[0]) return {danbooru: "", url: ""}
-                    return {danbooru: `https://danbooru.donmai.us/posts/${req[0].id}`, md5: req[0].md5}
-                }
-                const getGelbooruLink = async (md5: string) => {
-                    const req = await axios.get(`https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
-                    return req.post?.[0] ? `https://gelbooru.com/index.php?page=post&s=view&id=${req.post[0].id}` : ""
-                }
-                const getSafebooruLink = async (md5: string) => {
-                    const req = await axios.get(`https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
-                    return req[0] ? `https://safebooru.org/index.php?page=post&s=view&id=${req[0].id}` : ""
-                }
-                const getYandereLink = async (md5: string) => {
-                    const req = await axios.get(`https://yande.re/post.json?tags=md5%3A${md5}`).then((r) => r.data)
-                    return req[0] ? `https://yande.re/post/show/${req[0].id}` : ""
-                }
-                const getKonachanLink = async (md5: string) => {
-                    const req = await axios.get(`https://konachan.net/post.json?tags=md5%3A${md5}`).then((r) => r.data)
-                    return req[0] ? `https://konachan.net/post/show/${req[0].id}` : ""
-                }
-                const {danbooru, md5} = await getDanbooruLink(Number(pixivID)).catch(() => ({danbooru: "", md5: ""}))
-                const gelbooru = await getGelbooruLink(md5).catch(() => "")
-                const safebooru = await getSafebooruLink(md5).catch(() => "")
-                const yandere = await getYandereLink(md5).catch(() => "")
-                const konachan = await getKonachanLink(md5).catch(() => "")
-                let mirrors = [] as string[]
-                if (danbooru) mirrors.push(danbooru)
-                if (gelbooru) mirrors.push(gelbooru)
-                if (safebooru) mirrors.push(safebooru)
-                if (yandere) mirrors.push(yandere)
-                if (konachan) mirrors.push(konachan)
-                res.status(200).json(mirrors)
-            }
-            if (!bytes) return res.status(400).send("Image bytes must be provided")
-            const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
-            const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
-            const cookie = html.headers["set-cookie"]?.[0] || ""
-            const oldBuffer = Buffer.from(bytes)
-            const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
-            const form = new FormData()
-            form.append("authenticity_token", csrfToken)
-            form.append("search[file]", oldBuffer, {filename: "image.png"})
-            const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
-            if (result[0]?.score < 70) return res.status(200).send([])
-            const original = result[0].post.file_url
-            if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return handleFallback()
-            const buffer = await fetch(original).then((r) => r.arrayBuffer())
-            const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
-            if (dist(hash, oldHash) < 7) {
-                const mediaId = result[0].post.media_asset.id
-                const html = await axios.get(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.data)
-                const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm)
-                let mirrors = [] as string[]
-                let danbooruLink = `https://danbooru.donmai.us/posts/${result[0].post.id}`
-                mirrors.push(danbooruLink)
-                for (let link of links) {
-                    link = link.replaceAll("&amp;", "&")
-                    if (link.includes("twitter") || link.includes("x.com")) {
-                        const id = link.match(/(?<=status\/).*?(?=$)/)?.[0]
-                        mirrors.push(`https://twitter.com/i/web/status/${id}`)
-                    }
-                    if (link.includes("gelbooru")) {
-                        const redirect = await axios.get(link)
-                        mirrors.push(redirect.request.res.responseUrl)
-                    }
-                    if (link.includes("safebooru")) mirrors.push(link)
-                    if (link.includes("yande.re")) mirrors.push(link)
-                    if (link.includes("konachan")) mirrors.push(link)
-                    if (link.includes("zerochan")) mirrors.push(link)
-                }
-                res.status(200).send(mirrors)
-            } else {
-                res.status(200).send([])
-            }
+            const {bytes, pixivID} = req.body as {bytes: number[], pixivID: string}
+            const mirrors = await serverFunctions.booruLinks(bytes, pixivID)
+            res.status(200).send(mirrors)
         } catch {
             res.status(400).end()
         }
@@ -213,25 +121,8 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return res.status(400).send("Image data must be provided")
-            const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
-            const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
-            const cookie = html.headers["set-cookie"]?.[0] || ""
-            const oldBuffer = Buffer.from(req.body, "binary")
-            const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
-            const form = new FormData()
-            form.append("authenticity_token", csrfToken)
-            form.append("search[file]", oldBuffer, {filename: "image.png"})
-            const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
-            if (result[0]?.score < 70) return res.status(200).send("")
-            const original = result[0].post.file_url
-            if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return res.status(200).send("")
-            const buffer = await fetch(original).then((r) => r.arrayBuffer())
-            const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
-            if (dist(hash, oldHash) < 7) {
-                res.status(200).send(`https://danbooru.donmai.us/posts/${result[0].post.id}.json`)
-            } else {
-                res.status(200).send("")
-            }
+            const result = await serverFunctions.revdanbooru(req.body)
+            res.status(200).send(result)
         } catch (e) {
             console.log(e)
             res.status(400).end()
@@ -242,17 +133,8 @@ const MiscRoutes = (app: Express) => {
         const link = req.query.url as string
         if (!link) return res.status(400).send("No url")
         if (link.includes("pixiv.net") || link.includes("pximg.net")) {
-            let resolvable = link as string | number
-            if (link.includes("pximg.net")) {
-                const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
-                resolvable = Number(id)
-            }
             try {
-                const illust = await pixiv.illust.get(resolvable) as PixivResponse
-                const user = await pixiv.user.webDetail(illust.user.id)
-                const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
-                illust.user.twitter = twitter || ""
-                illust.user.profile_image_urls.medium = user.imageBig
+                const illust = await serverFunctions.getPixivIllust(link)
                 serverFunctions.sendEncrypted(illust, req, res)
             } catch (e) {
                 res.status(400).end()
@@ -267,8 +149,7 @@ const MiscRoutes = (app: Express) => {
         if (!link) return res.status(400).send("No url")
         if (link.includes("deviantart.com")) {
             try {
-                const deviationRSS = await deviantart.rss.get(link)
-                const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
+                const deviation = await serverFunctions.getDeviantartDeviation(link)
                 serverFunctions.sendEncrypted(deviation, req, res)
             } catch (e) {
                 res.status(400).end()
@@ -429,7 +310,7 @@ const MiscRoutes = (app: Express) => {
         const link = req.query.url as string
         if (!link) return res.status(400).send("No url")
         try {
-            const response = await axios.head(link).then((r) => r.request.res.responseUrl)
+            const response = await serverFunctions.followRedirect(link)
             serverFunctions.sendEncrypted(response, req, res)
         } catch {
             res.status(400).end()
@@ -437,30 +318,16 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const translate = async (text: string) => {
-            try {
-                const translated = await googleTranslate(text, {from: "ja", to: "en"})
-                return translated.text
-            } catch {
-                return text
-            }
-        }
         const words = req.body as string[]
         if (!words?.[0]) return res.status(400).send("No words")
-        let translated = await Promise.all(words.map((w) => translate(w)))
+        let translated = await serverFunctions.translate(words)
         res.status(200).send(translated)
     })
 
     app.post("/api/misc/romajinize", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const kuroshiro = new Kuroshiro()
-        await kuroshiro.init(new KuromojiAnalyzer())
-        const romajinize = async (text: string) => {
-            const result = await kuroshiro.convert(text, {mode: "spaced", to: "romaji"})
-            return result.replace(/<\/?[^>]+(>|$)/g, "")
-        }
         const words = req.body as string[]
         if (!words?.[0]) return res.status(400).send("No words")
-        let romajinized = await Promise.all(words.map((w) => romajinize(w)))
+        let romajinized = await serverFunctions.romajinize(words)
         res.status(200).send(romajinized)
     })
 
@@ -549,18 +416,7 @@ const MiscRoutes = (app: Express) => {
             if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
             if (!req.body) return res.status(400).send("Image data must be provided")
             processingQueue.add(ip)
-            const buffer = Buffer.from(req.body, "binary") as any
-            const folder = path.join(__dirname, "./dump")
-            if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
-
-            const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
-            const imagePath = path.join(folder, filename)
-            fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../../assets/misc/wdtagger.py")
-            let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
-            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-            const json = JSON.parse(str) as WDTaggerResponse
-            fs.unlinkSync(imagePath)
+            const json = await serverFunctions.wdtagger(req.body)
             processingQueue.delete(ip)
             res.status(200).json(json)
         } catch (e) {
@@ -796,6 +652,40 @@ const MiscRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/sourcelookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+        ip = ip?.toString().replace("::ffff:", "") || ""
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const {current, rating} = req.body as SourceLookupParams
+            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
+            processingQueue.add(ip)
+            const sourceLookup = await serverFunctions.sourceLookup(current, rating)
+            processingQueue.delete(ip)
+            res.status(200).json(sourceLookup)
+        } catch {
+            if (ip) processingQueue.delete(ip)
+            res.status(400).end()
+        }
+    })
+
+    app.post("/api/misc/taglookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+        ip = ip?.toString().replace("::ffff:", "") || ""
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams
+            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
+            processingQueue.add(ip)
+            const tagLookup = await serverFunctions.tagLookup(current, type, rating, style, hasUpscaled)
+            processingQueue.delete(ip)
+            res.status(200).json(tagLookup)
+        } catch {
+            if (ip) processingQueue.delete(ip)
+            res.status(400).end()
         }
     })
 }

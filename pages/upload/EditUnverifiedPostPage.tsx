@@ -991,186 +991,35 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSaucenaoError(false)
         }
-        const currentFiles = getCurrentFiles()
-        let current = currentFiles[currentIndex]
-        let bytes = [] as number[]
-        if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
-        } else {
-            bytes = current.bytes
-        }
-        let source = ""
-        let artist = ""
-        let title = ""
-        let englishTitle = ""
-        let commentary = ""
-        let englishCommentary = ""
-        let date = ""
-        let bookmarks = ""
-        let mirrors = [] as string[]
-        saucenaoTimeout = true
         try {
-            let basename = path.basename(current.name, path.extname(current.name)).trim()
-            if (/^\d+(?=$|_p)/.test(basename)) {
-                const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
-                source = `https://www.pixiv.net/artworks/${pixivID}`
-                const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
-                if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
-                try {
-                    const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
-                    commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                    date = functions.formatDate(new Date(illust.create_date), true)
-                    source = illust.url!
-                    title = illust.title
-                    artist = illust.user.name
-                    bookmarks = String(illust.total_bookmarks)
-                    const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
-                    if (translated) {
-                        englishTitle = translated[0]
-                        englishCommentary = translated[1]
-                    }
-                    if (illust.x_restrict !== 0) {
-                        if (rating === "cute") setRating("ecchi")
-                    }
-                    const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
-                    artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
+            saucenaoTimeout = true
+            const currentFiles = getCurrentFiles()
+            let current = currentFiles[currentIndex]
+            
+            const pixivID = post?.source?.match(/\d+/)?.[0] || path.basename(current.name, path.extname(current.name))
+            current.name = `${pixivID}${path.extname(current.name)}`
+
+            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            if (sourceLookup.danbooruLink) setDanbooruLink(sourceLookup.danbooruLink)
+            if (sourceLookup.artists[0]?.tag) {
+                artists[artists.length - 1].tag = sourceLookup.artists[0].tag
+                if (sourceLookup.artistIcon) {
+                    const pfp = await functions.proxyImage(sourceLookup.artistIcon, session, setSessionFlag).then((r) => r[0])
                     await uploadTagImg(pfp, "artist", artists.length - 1)
-                    artists.push({})
-                    artistInputRefs.push(React.createRef())
-                } catch (e) {
-                    console.log(e)
                 }
-                mirrors = await functions.post("/api/misc/boorulinks", {bytes, pixivID}, session, setSessionFlag)
-            } else {
-                let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
-                if (results.length) {
-                    const pixiv = results.filter((r) => r.header.index_id === 5)
-                    const twitter = results.filter((r) => r.header.index_id === 41)
-                    const artstation = results.filter((r) => r.header.index_id === 39)
-                    const deviantart = results.filter((r) => r.header.index_id === 34)
-                    const danbooru = results.filter((r) => r.header.index_id === 9)
-                    const gelbooru = results.filter((r) => r.header.index_id === 25)
-                    const konachan = results.filter((r) => r.header.index_id === 26)
-                    const yandere = results.filter((r) => r.header.index_id === 12)
-                    const anime = results.filter((r) => r.header.index_id === 21)
-                    if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
-                    if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
-                    if (deviantart.length) {
-                        let redirectedLink = ""
-                        try {
-                            redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
-                        } catch {
-                            // ignore
-                        }
-                        mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
-                    }
-                    if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
-                    if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
-                    if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
-                    if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
-                    if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
-                    if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
-                    if (pixiv.length) {
-                        source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
-                        if (!danbooru.length) {
-                            const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
-                            if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
-                        }
-                        artist = pixiv[0].data.author_name || ""
-                        title = pixiv[0].data.title || ""
-                        try {
-                            const illust = await functions.get(`/api/misc/pixiv`, {url: source}, session, setSessionFlag)
-                            commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                            date = functions.formatDate(new Date(illust.create_date), true)
-                            source = illust.url!
-                            title = illust.title
-                            artist = illust.user.name
-                            bookmarks = String(illust.total_bookmarks)
-                            const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag).catch(() => null)
-                            if (translated) {
-                                englishTitle = translated[0]
-                                englishCommentary = translated[1]
-                            }
-                            if (illust.x_restrict !== 0) {
-                                setRating("ecchi")
-                            } else {
-                                setRating("cute")
-                            }
-                            const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
-                            artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
-                            await uploadTagImg(pfp, "artist", artists.length - 1)
-                            artists.push({})
-                            artistInputRefs.push(React.createRef())
-                        } catch (e) {
-                            console.log(e)
-                        }
-                    } else if (deviantart.length) {
-                        let redirectedLink = ""
-                        try {
-                            redirectedLink = await functions.get(`/api/misc/redirect`, {url: deviantart[0].data.ext_urls[0]}, session, setSessionFlag)
-                        } catch {
-                            // ignore
-                        }
-                        source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
-                        artist = deviantart[0].data.member_name || ""
-                        title = deviantart[0].data.title || ""
-                        try {
-                            const deviation = await functions.get(`/api/misc/deviantart`, {url: source}, session, setSessionFlag)
-                            title = deviation.title
-                            artist = deviation.author.user.username
-                            source = deviation.url
-                            commentary = deviation.description
-                            date = functions.formatDate(new Date(deviation.date), true)
-                            if (deviation.rating === "adult") {
-                                setRating("ecchi")
-                            } else {
-                                setRating("cute")
-                            }
-                            const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag).then((r) => r[0])
-                            artists[artists.length - 1].tag = artist
-                            await uploadTagImg(pfp, "artist", artists.length - 1)
-                            artists.push({})
-                            artistInputRefs.push(React.createRef())
-                            // setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
-                        } catch (e) {
-                            console.log(e)
-                        } 
-                    } else if (anime.length) {
-                        title = anime[0].data.source || ""
-                        source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
-                    } else if (twitter.length) {
-                        source = twitter[0].data.ext_urls[0]
-                        artist = twitter[0].data.twitter_user_handle || ""
-                    } else if (danbooru.length) {
-                        source = danbooru[0].data.ext_urls[0]
-                        artist = danbooru[0].data.creator || ""
-                        title = danbooru[0].data.characters || ""
-                    } else if (gelbooru.length) {
-                        source = gelbooru[0].data.ext_urls[0]
-                        artist = gelbooru[0].data.creator || ""
-                        title = gelbooru[0].data.characters || ""
-                    } else if (yandere.length) {
-                        source = yandere[0].data.ext_urls[0]
-                        artist = yandere[0].data.creator || ""
-                        title = yandere[0].data.characters || ""
-                    } else if (konachan.length) {
-                        source = konachan[0].data.ext_urls[0]
-                        artist = konachan[0].data.creator || ""
-                        title = konachan[0].data.characters || ""
-                    }
-                }
+                artists.push({})
+                artistInputRefs.push(React.createRef())
             }
-            setSourceTitle(title)
-            setSourceEnglishTitle(englishTitle)
-            setSourceArtist(artist)
-            setSourceLink(source)
-            setSourceCommentary(commentary)
-            setSourceEnglishCommentary(englishCommentary)
-            setSourceBookmarks(bookmarks)
-            setSourceDate(date)
-            mirrors = functions.removeItem(mirrors, source)
-            setSourceMirrors(mirrors.join("\n"))
-            if (!title && !artist && !source) {
+            setSourceTitle(sourceLookup.source.title)
+            setSourceEnglishTitle(sourceLookup.source.englishTitle)
+            setSourceArtist(sourceLookup.source.artist)
+            setSourceLink(sourceLookup.source.source)
+            setSourceCommentary(sourceLookup.source.commentary)
+            setSourceEnglishCommentary(sourceLookup.source.englishCommentary)
+            setSourceBookmarks(sourceLookup.source.bookmarks)
+            setSourceDate(sourceLookup.source.posted)
+            setSourceMirrors(sourceLookup.source.mirrors)
+            if (!sourceLookup.source.title && !sourceLookup.source.artist && !sourceLookup.source.source) {
                 saucenaoErrorRef.current!.innerText = i18n.pages.upload.noResults
                 await functions.timeout(3000)
             }
@@ -1193,209 +1042,64 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setDanbooruError(true)
         if (!danbooruErrorRef.current) await functions.timeout(20)
         danbooruErrorRef.current!.innerText = i18n.buttons.fetching
-        let tagArr = [] as string[]
-
-        let blockedTags = tagConvert.blockedTags
-        let tagReplaceMap = tagConvert.tagReplaceMap
-
-        const currentFiles = getCurrentFiles()
-        let current = currentFiles[currentIndex]
-        let bytes = [] as number[]
-        if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
-        } else {
-            bytes = current.bytes
-        }
-
         try {
-            let danLink = danbooruLink
-            if (!danLink) danLink = await functions.post(`/api/misc/revdanbooru`, bytes, session, setSessionFlag)
-            if (danLink) {
-                setDanbooruLink(danLink)
-                const json = await functions.fetch(danLink)
-                tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-                tagArr.push("autotags")
-                if (upscaledFiles.length) tagArr.push("upscaled")
-                let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-                let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            const currentFiles = getCurrentFiles()
+            let current = currentFiles[currentIndex]
+            let hasUpscaled = upscaledFiles.length ? true : false
+            const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
-                if (tagArr.includes("chibi")) setStyle("chibi")
-                if (tagArr.includes("pixel-art")) setStyle("pixel")
-                if (tagArr.includes("dakimakura")) setStyle("daki")
-                if (tagArr.includes("sketch")) setStyle("sketch")
-                if (tagArr.includes("lineart")) setStyle("lineart")
-                if (tagArr.includes("ad")) setStyle("promo")
-                if (tagArr.includes("comic")) setType("comic")
-
-                tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
-                for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                    const key = Object.keys(tagReplaceMap)[i]
-                    const value = Object.values(tagReplaceMap)[i]
-                    tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
+            let characters = [{}] as UploadTag[]
+            let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            for (let i = 0; i < tagLookup.characters.length; i++) {
+                if (!tagLookup.characters[i]?.tag) continue
+                characters[characters.length - 1].tag = tagLookup.characters[i].tag
+                characters[characters.length - 1].image = ""
+                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
+                if (tagDetail?.image) {
+                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                    const bytes = new Uint8Array(arrayBuffer)
+                    const ext = path.extname(tagLink).replace(".", "")
+                    characters[characters.length - 1].image = tagLink
+                    characters[characters.length - 1].ext = ext
+                    characters[characters.length - 1].bytes = Object.values(bytes)
                 }
-                tagArr = tagArr.filter((tag: string) => tag.length >= 3)
-
-                for (let i = 0; i < blockedTags.length; i++) {
-                    tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
-                }
-
-                charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
-                seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
-
-                let characters = [{}] as UploadTag[]
-                let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
-                for (let i = 0; i < charStrArr.length; i++) {
-                    characters[characters.length - 1].tag = charStrArr[i]
-                    characters[characters.length - 1].image = ""
-                    const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
-                    seriesStrArr.push(seriesName)
-                    const tagDetail = await functions.get("/api/tag", {tag: charStrArr[i]}, session, setSessionFlag).catch(() => null)
-                    if (tagDetail?.image) {
-                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
-                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
-                        const bytes = new Uint8Array(arrayBuffer)
-                        const ext = path.extname(tagLink).replace(".", "")
-                        characters[characters.length - 1].image = tagLink
-                        characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
-                    }
-                    characters.push({})
-                    characterInputRefs.push(React.createRef())
-                }
-                if (characters.length > 1) characters.pop()
-                if (characterInputRefs.length > 1) characterInputRefs.pop()
-                setCharacters(characters)
-                setCharacterInputRefs(characterInputRefs)
-                forceUpdate()
-
-                seriesStrArr = functions.removeDuplicates(seriesStrArr)
-
-                let series = [{}] as UploadTag[]
-                let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
-                for (let i = 0; i < seriesStrArr.length; i++) {
-                    series[series.length - 1].tag = seriesStrArr[i]
-                    series[series.length - 1].image = ""
-                    const tagDetail = await functions.get("/api/tag", {tag: seriesStrArr[i]}, session, setSessionFlag).catch(() => null)
-                    if (tagDetail?.image) {
-                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
-                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
-                        const bytes = new Uint8Array(arrayBuffer)
-                        const ext = path.extname(tagLink).replace(".", "")
-                        series[series.length - 1].image = tagLink
-                        series[series.length - 1].ext = ext
-                        series[series.length - 1].bytes = Object.values(bytes)
-                    }
-                    series.push({})
-                    seriesInputRefs.push(React.createRef())
-                }
-                series.pop()
-                seriesInputRefs.pop()
-                setSeries(series)
-                setSeriesInputRefs(seriesInputRefs)
-                forceUpdate()
-
-                setRawTags(tagArr.join(" "))
-            } else {
-                let result = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
-                if (!result) return
-
-                let tagArr = result.tags
-                let characterArr = result.characters
-
-                if (tagArr.includes("chibi")) setStyle("chibi")
-                if (tagArr.includes("pixel-art")) setStyle("pixel")
-                if (tagArr.includes("dakimakura")) setStyle("daki")
-                if (tagArr.includes("sketch")) setStyle("sketch")
-                if (tagArr.includes("lineart")) setStyle("lineart")
-                if (tagArr.includes("ad")) setStyle("promo")
-                if (tagArr.includes("comic")) setType("comic")
-
-                tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
-                for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                    const key = Object.keys(tagReplaceMap)[i]
-                    const value = Object.values(tagReplaceMap)[i]
-                    tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
-                }
-                for (let i = 0; i < blockedTags.length; i++) {
-                    tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
-                }
-                tagArr = tagArr.filter((tag: string) => tag.length >= 3)
-
-                characterArr = characterArr.map((tag: string) => functions.cleanTag(tag))
-                for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                    const key = Object.keys(tagReplaceMap)[i]
-                    const value = Object.values(tagReplaceMap)[i]
-                    characterArr = characterArr.map((tag: string) => tag.replaceAll(key, value))
-                }
-                for (let i = 0; i < blockedTags.length; i++) {
-                    characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
-                }
-                characterArr = characterArr.filter((tag: string) => tag.length >= 3)
-
-
-                tagArr.push("autotags")
-                tagArr.push("needscheck")
-                if (upscaledFiles.length) tagArr.push("upscaled")
-
-                let seriesArr = [] as string[]
-
-                for (let i = 0; i < characterArr.length; i++) {
-                    const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "") || ""
-                    seriesArr.push(seriesName)
-                }
-
-                seriesArr = functions.removeDuplicates(seriesArr)
-
-                let characters = [{}] as UploadTag[]
-                let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
-                for (let i = 0; i < characterArr.length; i++) {
-                    characters[characters.length - 1].tag = characterArr[i]
-                    characters[characters.length - 1].image = ""
-                    const tagDetail = await functions.get("/api/tag", {tag: characterArr[i]}, session, setSessionFlag).catch(() => null)
-                    if (tagDetail?.image) {
-                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
-                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
-                        const bytes = new Uint8Array(arrayBuffer)
-                        const ext = path.extname(tagLink).replace(".", "")
-                        characters[characters.length - 1].image = tagLink
-                        characters[characters.length - 1].ext = ext
-                        characters[characters.length - 1].bytes = Object.values(bytes)
-                    }
-                    characters.push({})
-                    characterInputRefs.push(React.createRef())
-                }
-                if (characters.length > 1) characters.pop()
-                if (characterInputRefs.length > 1) characterInputRefs.pop()
-                setCharacters(characters)
-                setCharacterInputRefs(characterInputRefs)
-                forceUpdate()
-
-                let series = [{}] as UploadTag[]
-                let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
-                for (let i = 0; i < seriesArr.length; i++) {
-                    series[series.length - 1].tag = seriesArr[i]
-                    series[series.length - 1].image = ""
-                    const tagDetail = await functions.get("/api/tag", {tag: seriesArr[i]}, session, setSessionFlag).catch(() => null)
-                    if (tagDetail?.image) {
-                        const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
-                        const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
-                        const bytes = new Uint8Array(arrayBuffer)
-                        const ext = path.extname(tagLink).replace(".", "")
-                        series[series.length - 1].image = tagLink
-                        series[series.length - 1].ext = ext
-                        series[series.length - 1].bytes = Object.values(bytes)
-                    }
-                    series.push({})
-                    seriesInputRefs.push(React.createRef())
-                }
-                series.pop()
-                seriesInputRefs.pop()
-                setSeries(series)
-                setSeriesInputRefs(seriesInputRefs)
-                forceUpdate()
-
-                setRawTags(tagArr.join(" "))
+                characters.push({})
+                characterInputRefs.push(React.createRef())
             }
+            if (characters.length > 1) characters.pop()
+            if (characterInputRefs.length > 1) characterInputRefs.pop()
+            setCharacters(characters)
+            setCharacterInputRefs(characterInputRefs)
+            forceUpdate()
+
+            let series = [{}] as UploadTag[]
+            let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            for (let i = 0; i < tagLookup.series.length; i++) {
+                if (!tagLookup.series[i]?.tag) continue
+                series[series.length - 1].tag = tagLookup.series[i].tag
+                series[series.length - 1].image = ""
+                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
+                if (tagDetail?.image) {
+                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+                    const bytes = new Uint8Array(arrayBuffer)
+                    const ext = path.extname(tagLink).replace(".", "")
+                    series[series.length - 1].image = tagLink
+                    series[series.length - 1].ext = ext
+                    series[series.length - 1].bytes = Object.values(bytes)
+                }
+                series.push({})
+                seriesInputRefs.push(React.createRef())
+            }
+            series.pop()
+            seriesInputRefs.pop()
+            setSeries(series)
+            setSeriesInputRefs(seriesInputRefs)
+            forceUpdate()
+
+            setRawTags(tagLookup.tags.join(" "))
             setDanbooruError(false)
         } catch (e) {
             console.log(e)

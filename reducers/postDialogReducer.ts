@@ -5,6 +5,7 @@ import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../ty
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
+    order: number,
     unverified?: boolean, 
     artists: MiniTag[], 
     characters: MiniTag[], 

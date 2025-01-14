@@ -93,6 +93,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [initMorphTargets, setInitMorphTargets] = useState([] as {name: string, value: number}[])
     const [morphTargets, setMorphTargets] = useState([] as {name: string, value: number}[])
     const [model, setModel] = useState(null as THREE.Object3D | null)
+    const [modelWidth, setModelWidth] = useState(0)
+    const [modelHeight, setModelHeight] = useState(0)
     const [scene, setScene] = useState(null as THREE.Scene | null)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
@@ -185,6 +187,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setModel(model)
         setScene(scene)
         setObjMaterials(objMaterials)
+        setModelWidth(width)
+        setModelHeight(height)
 
         let morphTargets  = [] as {name: string, value: number}[]
         let morphMesh = null as THREE.Mesh | null
@@ -301,6 +305,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 camera.updateProjectionMatrix()
                 renderer.setSize(width, height)
             }
+            setModelWidth(width)
+            setModelHeight(height)
         })
     }
 
@@ -726,7 +732,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={modelWidth} imageHeight={modelHeight}/> : null}
             <div className="post-model-box" ref={containerRef}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>

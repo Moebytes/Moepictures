@@ -28,6 +28,8 @@ interface Props {
     order?: number
     unverified?: boolean
     noteID?: string | null
+    imageWidth: number
+    imageHeight: number
 }
 
 let isAnimatedWebP = false
@@ -137,7 +139,7 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
 
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
-        onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown}>
+        onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} style={{pointerEvents: "all"}}>
             <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} 
             strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}} rx={borderRadius} ry={borderRadius}/>
             {lines.map((line, index) => (
@@ -209,7 +211,7 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} onFocus={() => setFocus(true)}
-        onBlur={() => setFocus(false)} tabIndex={0}>
+        onBlur={() => setFocus(false)} tabIndex={0} style={{pointerEvents: "all"}}>
             <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} 
             strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
         </svg>
@@ -233,8 +235,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {editNoteFlag, editNoteID, editNoteData, saveNoteID, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
     const {setEditNoteFlag, setEditNoteID, setEditNoteData, setSaveNoteID,
     setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
-    const [targetWidth, setTargetWidth] = useState(0)
-    const [targetHeight, setTargetHeight] = useState(0)
     const [targetHash, setTargetHash] = useState("")
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
@@ -310,24 +310,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }, [showTranscript, noteDrawingEnabled])
 
     useEffect(() => {
-        const decryptImg = async () => {
+        const getHash = async () => {
             if (!props.post) return
-            let url = await functions.decryptThumb(props.img, session, props.img, true)
-            isAnimatedWebP = false
-            if (functions.isWebP(props.img)) {
-                const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
-            }
-            const img = await functions.createImage(url)
-            if (functions.isGIF(props.img) || isAnimatedWebP) {
-                setImg(props.img)
-                setTargetWidth(img.width)
-                setTargetHeight(img.height)
-            } else {
-                setImg(url)
-                setTargetWidth(img.width)
-                setTargetHeight(img.height)
-            }
             const currentImg = props.post.images[(props.order || 1) - 1]
             if (typeof currentImg === "string") {
                 const imgLink = functions.getRawThumbnailLink(currentImg, "massive")
@@ -339,40 +323,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 setTargetHash(currentImg.hash)
             }
         }
-        decryptImg()
-    }, [props.img, session])
-
-    useEffect(() => {
-        if (!filtersRef.current) return
-        const element = filtersRef.current
-        let newContrast = contrast
-        const image = img
-        const sharpenOverlay = overlayRef.current
-        const lightnessOverlay = lightnessRef.current
-        if (!image || !sharpenOverlay || !lightnessOverlay) return
-        if (sharpen !== 0) {
-            const sharpenOpacity = sharpen / 5
-            newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image})`
-            sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
-            sharpenOverlay.style.mixBlendMode = "overlay"
-            sharpenOverlay.style.opacity = `${sharpenOpacity}`
-        } else {
-            sharpenOverlay.style.backgroundImage = "none"
-            sharpenOverlay.style.filter = "none"
-            sharpenOverlay.style.mixBlendMode = "normal"
-            sharpenOverlay.style.opacity = "0"
-        }
-        if (lightness !== 100) {
-            const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
-            lightnessOverlay.style.filter = filter
-            lightnessOverlay.style.opacity = `${Math.abs((lightness - 100) / 100)}`
-        } else {
-            lightnessOverlay.style.filter = "none"
-            lightnessOverlay.style.opacity = "0"
-        }
-        element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
+        getHash()
+    }, [props.post, props.order, session])
 
     let maxWidth = 1000
     let maxHeight = 1000
@@ -385,44 +337,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         maxHeight = 3740
     }
 
+    let targetWidth = props.imageWidth
+    let targetHeight = props.imageHeight
+
     let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
     if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
     if (targetWidth*scale > maxWidth) scale = maxWidth / targetWidth
-
-    const imagePixelate = () => {
-        if (!pixelateRef.current || !overlayRef.current) return
-        const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d")!
-        const width = Math.floor(targetWidth*scale)
-        const height = Math.floor(targetHeight*scale)
-        const landscape = width >= height
-        ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = width
-        pixelateCanvas.height = height
-        const pixelWidth = width / pixelate 
-        const pixelHeight = height / pixelate
-        if (pixelate !== 1) {
-            ctx.drawImage(overlayRef.current, 0, 0, pixelWidth, pixelHeight)
-            if (landscape) {
-                pixelateCanvas.style.width = `${width * pixelate}px`
-                pixelateCanvas.style.height = "auto"
-            } else {
-                pixelateCanvas.style.width = "auto"
-                pixelateCanvas.style.height = `${height * pixelate}px`
-            }
-            pixelateCanvas.style.opacity = "1"
-        } else {
-            pixelateCanvas.style.width = "none"
-            pixelateCanvas.style.height = "none"
-            pixelateCanvas.style.opacity = "0"
-        }
-    }
-
-    useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
-    }, [img, pixelate])
 
     const clearNotes = () => {
         if (!noteDrawingEnabled) return
@@ -603,6 +523,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    if (!targetWidth || !targetHeight) return null
+
     return (
         <div className="note-editor" style={{display: noteMode ? "flex" : "none"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
@@ -619,11 +541,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter: getFilter()}} onClick={() => setNoteMode(false)}/>
                 </div>
                 {bubbleJSX()}
-                <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
-                <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
-                <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
-                <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale}>
-                    {/* <ImageLayer src={img}/> */}
+                <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}}>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
                         if (!noteDrawingEnabled) return
                         setItems((prev) => {

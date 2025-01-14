@@ -2,6 +2,7 @@ import nodemailer from "nodemailer"
 import {Request, Response, NextFunction} from "express"
 import path from "path"
 import fs from "fs"
+import FormData from "form-data"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
@@ -11,11 +12,24 @@ import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
 import axios from "axios"
+import sharp from "sharp"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
-import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, UnverifiedPost, Tag} from "../types/Types"
+import child_process from "child_process"
+import util from "util"
+import Pixiv from "pixiv.ts"
+import DeviantArt from "deviantart.ts"
+import googleTranslate from "@vitalets/google-translate-api"
+import Kuroshiro from "kuroshiro"
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
+import tagConvert from "../assets/json/tag-convert.json"
+import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, PostType, PostStyle,
+UnverifiedPost, Tag, PostRating, UploadTag, PixivResponse, SaucenaoResponse, WDTaggerResponse} from "../types/Types"
 
 const csrf = new CSRF()
+const exec = util.promisify(child_process.exec)
+const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -680,6 +694,579 @@ export default class ServerFunctions {
         let region = ipInfo?.regionName || "unknown"
         if (ip === "127.0.0.1" || ip.startsWith("192.168.68")) region = "localhost"
         return region
+    }
+
+    public static getPixivIllust = async (link: string) => {
+        let resolvable = link as string | number
+        if (link.includes("pximg.net")) {
+            const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
+            resolvable = Number(id)
+        }
+        const illust = await pixiv.illust.get(resolvable) as PixivResponse
+        const user = await pixiv.user.webDetail(illust.user.id)
+        const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
+        illust.user.twitter = twitter || ""
+        illust.user.profile_image_urls.medium = user.imageBig
+        return illust
+    }
+
+    public static getDeviantartDeviation = async (link: string) => {
+        const deviationRSS = await deviantart.rss.get(link)
+        const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
+        return deviation
+    }
+
+    public static translate = async (words: string[]) => {
+        const translate = async (text: string) => {
+            try {
+                const translated = await googleTranslate(text, {from: "ja", to: "en"})
+                return translated.text
+            } catch {
+                return text
+            }
+        }
+        let translated = await Promise.all(words.map((w) => translate(w)))
+        return translated
+    }
+
+    public static romajinize = async (words: string[]) => {
+        const kuroshiro = new Kuroshiro()
+        await kuroshiro.init(new KuromojiAnalyzer())
+        const romajinize = async (text: string) => {
+            const result = await kuroshiro.convert(text, {mode: "spaced", to: "romaji"})
+            return result.replace(/<\/?[^>]+(>|$)/g, "")
+        }
+        let romajinized = await Promise.all(words.map((w) => romajinize(w)))
+        return romajinized as string[]
+    }
+
+    public static followRedirect = async (link: string) => {
+        const redirect = await axios.head(link).then((r) => r.request.res.responseUrl)
+        return redirect as string
+    }
+
+    public static saucenaoLookup = async (bytes: number[]) => {
+        const form = new FormData()
+        form.append("db", "999")
+        form.append("api_key", process.env.SAUCENAO_KEY)
+        form.append("output_type", 2)
+        const inputType = functions.bufferFileType(bytes)?.[0]
+        form.append("file", Buffer.from(bytes), {
+            filename: `file.${inputType.extension}`,
+            contentType: inputType.mime
+        })
+        let result = await axios.post("https://saucenao.com/search.php", form, {headers: form.getHeaders()})
+        .then((r) => r.data.results) as SaucenaoResponse[]
+        result = result.sort((a, b) => Number(b.header.similarity) - Number(a.header.similarity))
+        result = result.filter((r) => Number(r.header.similarity) > 70)
+        return result
+    }
+
+    public static squareCrop = async (buffer: Buffer) => {
+        const metadata = await sharp(buffer).metadata()
+        const size = Math.min(metadata.width!, metadata.height!)
+        const centerPosition = Math.max(0, Math.floor((metadata.width! - size) / 2))
+        return sharp(buffer).extract({width: size, height: size, left: centerPosition, top: 0}).toBuffer()
+    }
+
+    public static booruLinks = async (bytes: number[], pixivID: string) => {
+        const handleFallback = async () => {
+            if (!pixivID) return Promise.reject("No pixivID")
+            const getDanbooruLink = async (pixivID: number) => {
+                const req = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}&z=5`).then((r) => r.data)
+                if (!req[0]) return {danbooru: "", url: ""}
+                return {danbooru: `https://danbooru.donmai.us/posts/${req[0].id}`, md5: req[0].md5}
+            }
+            const getGelbooruLink = async (md5: string) => {
+                const req = await axios.get(`https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
+                return req.post?.[0] ? `https://gelbooru.com/index.php?page=post&s=view&id=${req.post[0].id}` : ""
+            }
+            const getSafebooruLink = async (md5: string) => {
+                const req = await axios.get(`https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
+                return req[0] ? `https://safebooru.org/index.php?page=post&s=view&id=${req[0].id}` : ""
+            }
+            const getYandereLink = async (md5: string) => {
+                const req = await axios.get(`https://yande.re/post.json?tags=md5%3A${md5}`).then((r) => r.data)
+                return req[0] ? `https://yande.re/post/show/${req[0].id}` : ""
+            }
+            const getKonachanLink = async (md5: string) => {
+                const req = await axios.get(`https://konachan.net/post.json?tags=md5%3A${md5}`).then((r) => r.data)
+                return req[0] ? `https://konachan.net/post/show/${req[0].id}` : ""
+            }
+            const {danbooru, md5} = await getDanbooruLink(Number(pixivID)).catch(() => ({danbooru: "", md5: ""}))
+            const gelbooru = await getGelbooruLink(md5).catch(() => "")
+            const safebooru = await getSafebooruLink(md5).catch(() => "")
+            const yandere = await getYandereLink(md5).catch(() => "")
+            const konachan = await getKonachanLink(md5).catch(() => "")
+            let mirrors = [] as string[]
+            if (danbooru) mirrors.push(danbooru)
+            if (gelbooru) mirrors.push(gelbooru)
+            if (safebooru) mirrors.push(safebooru)
+            if (yandere) mirrors.push(yandere)
+            if (konachan) mirrors.push(konachan)
+            return mirrors
+        }
+        if (!bytes) return Promise.reject("Image bytes must be provided")
+        const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
+        const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
+        const cookie = html.headers["set-cookie"]?.[0] || ""
+        const oldBuffer = Buffer.from(bytes)
+        const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
+        const form = new FormData()
+        form.append("authenticity_token", csrfToken)
+        form.append("search[file]", oldBuffer, {filename: "image.png"})
+        const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
+        if (result[0]?.score < 70) return []
+        const original = result[0].post.file_url
+        if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return handleFallback()
+        const buffer = await fetch(original).then((r) => r.arrayBuffer())
+        const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
+        if (dist(hash, oldHash) < 7) {
+            const mediaId = result[0].post.media_asset.id
+            const html = await axios.get(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.data)
+            const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm)
+            let mirrors = [] as string[]
+            let danbooruLink = `https://danbooru.donmai.us/posts/${result[0].post.id}`
+            mirrors.push(danbooruLink)
+            for (let link of links) {
+                link = link.replaceAll("&amp;", "&")
+                if (link.includes("twitter") || link.includes("x.com")) {
+                    const id = link.match(/(?<=status\/).*?(?=$)/)?.[0]
+                    mirrors.push(`https://twitter.com/i/web/status/${id}`)
+                }
+                if (link.includes("gelbooru")) {
+                    const redirect = await axios.get(link)
+                    mirrors.push(redirect.request.res.responseUrl)
+                }
+                if (link.includes("safebooru")) mirrors.push(link)
+                if (link.includes("yande.re")) mirrors.push(link)
+                if (link.includes("konachan")) mirrors.push(link)
+                if (link.includes("zerochan")) mirrors.push(link)
+            }
+            return mirrors
+        } else {
+            return []
+        }
+    }
+
+    public static sourceLookup = async (current: UploadImage, rating: PostRating) => {
+        let bytes = [] as number[]
+        if (current.thumbnail) {
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
+        } else {
+            bytes = current.bytes
+        }
+        let source = ""
+        let artist = ""
+        let title = ""
+        let englishTitle = ""
+        let commentary = ""
+        let englishCommentary = ""
+        let posted = ""
+        let bookmarks = ""
+        let danbooruLink = ""
+        let artistIcon = ""
+        let artists = [{}] as UploadTag[]
+        let mirrors = [] as string[]
+
+        let basename = path.basename(current.name, path.extname(current.name)).trim()
+        if (/^\d+(?=$|_p)/.test(basename)) {
+            const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
+            source = `https://www.pixiv.net/artworks/${pixivID}`
+            const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+            if (result.length) {
+                danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                if (result[0].rating === "q") rating = functions.r17()
+                if (result[0].rating === "e") rating = functions.r18()
+            }
+            try {
+                const illust = await ServerFunctions.getPixivIllust(source)
+                commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                posted = functions.formatDate(new Date(illust.create_date), true)
+                source = illust.url!
+                title = illust.title
+                artist = illust.user.name
+                bookmarks = String(illust.total_bookmarks)
+                const translated = await ServerFunctions.translate([title, commentary])
+                if (translated) {
+                    englishTitle = translated[0]
+                    englishCommentary = translated[1]
+                }
+                if (illust.x_restrict !== 0) {
+                    if (rating === functions.r13()) rating = functions.r17()
+                }
+                artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
+                artistIcon = illust.user.profile_image_urls.medium
+                artists.push({})
+            } catch (e) {
+                console.log(e)
+            }
+            mirrors = await ServerFunctions.booruLinks(bytes, pixivID)
+            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+            return {
+                rating,
+                artists,
+                danbooruLink,
+                source: {
+                    title,
+                    englishTitle,
+                    artist,
+                    source,
+                    commentary,
+                    englishCommentary,
+                    bookmarks,
+                    posted,
+                    mirrors: mirrorStr
+                }
+            }
+        } else {
+            let results = await ServerFunctions.saucenaoLookup(bytes)
+            if (results.length) {
+                const pixiv = results.filter((r) => r.header.index_id === 5)
+                const twitter = results.filter((r) => r.header.index_id === 41)
+                const artstation = results.filter((r) => r.header.index_id === 39)
+                const deviantart = results.filter((r) => r.header.index_id === 34)
+                const danbooru = results.filter((r) => r.header.index_id === 9)
+                const gelbooru = results.filter((r) => r.header.index_id === 25)
+                const konachan = results.filter((r) => r.header.index_id === 26)
+                const yandere = results.filter((r) => r.header.index_id === 12)
+                const anime = results.filter((r) => r.header.index_id === 21)
+                if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
+                if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
+                if (deviantart.length) {
+                    let redirectedLink = ""
+                    try {
+                        redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
+                    } catch {
+                        // ignore
+                    }
+                    mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
+                }
+                if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
+                if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
+                if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
+                if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
+                if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
+                if (danbooru.length) danbooruLink = `https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`
+                if (pixiv.length) {
+                    source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
+                    if (!danbooru.length) {
+                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
+                        if (result.length) {
+                            danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                            if (result[0].rating === "q") rating = functions.r17()
+                            if (result[0].rating === "e") rating = functions.r18()
+                        }
+                    }
+                    artist = pixiv[0].data.author_name || ""
+                    title = pixiv[0].data.title || ""
+                    try {
+                        const illust = await ServerFunctions.getPixivIllust(source)
+                        commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                        posted = functions.formatDate(new Date(illust.create_date), true)
+                        source = illust.url!
+                        title = illust.title
+                        artist = illust.user.name 
+                        bookmarks = String(illust.total_bookmarks)
+                        const translated = await ServerFunctions.translate([title, commentary])
+                        if (translated) {
+                            englishTitle = translated[0]
+                            englishCommentary = translated[1]
+                        }
+                        if (illust.x_restrict !== 0) {
+                            if (rating === functions.r13()) rating = functions.r17()
+                        }
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
+                        artistIcon = illust.user.profile_image_urls.medium
+                        artists.push({})
+                    } catch (e) {
+                        console.log(e)
+                    }
+                } else if (deviantart.length) {
+                    let redirectedLink = ""
+                    try {
+                        redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
+                    } catch {
+                        // ignore
+                    }
+                    source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
+                    artist = deviantart[0].data.member_name || ""
+                    title = deviantart[0].data.title || ""
+                    try {
+                        const deviation = await ServerFunctions.getDeviantartDeviation(source)
+                        title = deviation.title
+                        artist = deviation.author.user.username
+                        source = deviation.url
+                        commentary = deviation.description
+                        posted = functions.formatDate(new Date(deviation.date), true)
+                        if (deviation.rating === "adult") {
+                            if (rating === functions.r13()) rating = functions.r17()
+                        }
+                        artists[artists.length - 1].tag = artist
+                        artistIcon = deviation.author.user.usericon
+                        artists.push({})
+                    } catch (e) {
+                        console.log(e)
+                    } 
+                } else if (anime.length) {
+                    title = anime[0].data.source || ""
+                    source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
+                } else if (twitter.length) {
+                    source = twitter[0].data.ext_urls[0]
+                    artist = twitter[0].data.twitter_user_handle || ""
+                } else if (danbooru.length) {
+                    source = danbooru[0].data.ext_urls[0]
+                    artist = danbooru[0].data.creator || ""
+                    title = danbooru[0].data.characters || ""
+                } else if (gelbooru.length) {
+                    source = gelbooru[0].data.ext_urls[0]
+                    artist = gelbooru[0].data.creator || ""
+                    title = gelbooru[0].data.characters || ""
+                } else if (yandere.length) {
+                    source = yandere[0].data.ext_urls[0]
+                    artist = yandere[0].data.creator || ""
+                    title = yandere[0].data.characters || ""
+                } else if (konachan.length) {
+                    source = konachan[0].data.ext_urls[0]
+                    artist = konachan[0].data.creator || ""
+                    title = konachan[0].data.characters || ""
+                }
+            }
+            mirrors = functions.removeItem(mirrors, source)
+            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+            return {
+                rating,
+                artists,
+                danbooruLink,
+                artistIcon,
+                source: {
+                    title,
+                    englishTitle,
+                    artist,
+                    source,
+                    commentary,
+                    englishCommentary,
+                    bookmarks,
+                    posted,
+                    mirrors: mirrorStr
+                }
+            }
+        }
+    }
+
+    public static revdanbooru = async (bytes: number[]) => {
+        const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
+        const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
+        const cookie = html.headers["set-cookie"]?.[0] || ""
+        const oldBuffer = Buffer.from(bytes)
+        const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
+        const form = new FormData()
+        form.append("authenticity_token", csrfToken)
+        form.append("search[file]", oldBuffer, {filename: "image.png"})
+        const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
+        if (result[0]?.score < 70) return ""
+        const original = result[0].post.file_url
+        if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return ""
+        const buffer = await fetch(original).then((r) => r.arrayBuffer())
+        const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
+        if (dist(hash, oldHash) < 7) {
+            return `https://danbooru.donmai.us/posts/${result[0].post.id}.json`
+        } else {
+            return ""
+        }
+    }
+
+    public static wdtagger = async (bytes: number[]) => {
+        const buffer = Buffer.from(bytes)
+        const folder = path.join(__dirname, "./dump")
+        if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+
+        const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
+        const imagePath = path.join(folder, filename)
+        fs.writeFileSync(imagePath, buffer)
+        const scriptPath = path.join(__dirname, "../../assets/misc/wdtagger.py")
+        let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
+        const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+        const json = JSON.parse(str) as WDTaggerResponse
+        fs.unlinkSync(imagePath)
+        return json
+    }
+
+    public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
+        let tagArr = [] as string[]
+        let blockedTags = tagConvert.blockedTags
+        let tagReplaceMap = tagConvert.tagReplaceMap
+        let artists = [{}] as UploadTag[]
+        let characters = [{}] as UploadTag[]
+        let series = [{}] as UploadTag[]
+        let tags = [] as string[]
+        let newTags = [] as UploadTag[]
+        const tagMap = await ServerFunctions.tagMap()
+
+        let bytes = [] as number[]
+        if (current.thumbnail) {
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
+        } else {
+            bytes = current.bytes
+        }
+
+        let danbooruLink = await ServerFunctions.revdanbooru(bytes)
+
+        if (danbooruLink) {
+            const json = await functions.fetch(danbooruLink)
+            if (json.rating === "q") rating = functions.r17()
+            if (json.rating === "e") rating = functions.r18()
+            tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            tagArr.push("autotags")
+            if (hasUpscaled) tagArr.push("upscaled")
+            let artistStrArr = json.tag_string_artist.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            if (seriesStrArr?.includes("original")) {
+                charStrArr = ["original"]
+                seriesStrArr = ["no-series"]
+            }
+
+            if (tagArr.includes("chibi")) style = "chibi"
+            if (tagArr.includes("pixel-art")) style = "pixel"
+            if (tagArr.includes("dakimakura")) style = "daki"
+            if (tagArr.includes("sketch")) style = "sketch"
+            if (tagArr.includes("lineart")) style = "lineart"
+            if (tagArr.includes("ad")) style = "promo"
+            if (tagArr.includes("comic")) {
+                if (type === "image") type = "comic"
+            }
+
+            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+
+            for (let i = 0; i < blockedTags.length; i++) {
+                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+
+            artistStrArr = artistStrArr.map((tag: string) => functions.cleanTag(tag))
+            charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
+            seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
+
+            for (let i = 0; i < artistStrArr.length; i++) {
+                artists[artists.length - 1].tag = artistStrArr[i]
+                artists.push({})
+            }
+
+            for (let i = 0; i < charStrArr.length; i++) {
+                characters[characters.length - 1].tag = charStrArr[i]
+                const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                seriesStrArr.push(seriesName)
+                characters.push({})
+            }
+
+            seriesStrArr = functions.removeDuplicates(seriesStrArr)
+
+            for (let i = 0; i < seriesStrArr.length; i++) {
+                series[series.length - 1].tag = seriesStrArr[i]
+                series.push({})
+            }
+
+            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+
+            let notExists = [] as UploadTag[]
+            for (let i = 0; i < tags.length; i++) {
+                const exists = tagMap[tags[i]]
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+            }
+            for (let i = 0; i < notExists.length; i++) {
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
+                if (index !== -1) notExists[i] = newTags[index]
+            }
+            newTags = notExists
+        } else {
+            let result = await ServerFunctions.wdtagger(bytes)
+
+            let tagArr = result.tags
+            let characterArr = result.characters
+
+            if (tagArr.includes("chibi")) style = "chibi"
+            if (tagArr.includes("pixel-art")) style = "pixel"
+            if (tagArr.includes("dakimakura")) style = "daki"
+            if (tagArr.includes("sketch")) style = "sketch"
+            if (tagArr.includes("lineart")) style = "lineart"
+            if (tagArr.includes("ad")) style = "promo"
+            if (tagArr.includes("comic")) {
+                if (type === "image") type = "comic"
+            }
+
+            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            for (let i = 0; i < blockedTags.length; i++) {
+                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+
+            characterArr = characterArr.map((tag: string) => functions.cleanTag(tag))
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                characterArr = characterArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            for (let i = 0; i < blockedTags.length; i++) {
+                characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
+
+            tagArr.push("autotags")
+            tagArr.push("needscheck")
+            if (hasUpscaled) tagArr.push("upscaled")
+
+            let seriesArr = [] as string[]
+
+            for (let i = 0; i < characterArr.length; i++) {
+                const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "") || ""
+                seriesArr.push(seriesName)
+            }
+
+            seriesArr = functions.removeDuplicates(seriesArr)
+
+            for (let i = 0; i < characterArr.length; i++) {
+                characters[characters.length - 1].tag = characterArr[i]
+                characters.push({})
+            }
+
+            for (let i = 0; i < seriesArr.length; i++) {
+                series[series.length - 1].tag = seriesArr[i]
+                series.push({})
+            }
+            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            let notExists = [] as UploadTag[]
+            for (let i = 0; i < tags.length; i++) {
+                const exists = tagMap[tags[i]]
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+            }
+            for (let i = 0; i < notExists.length; i++) {
+                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
+                if (index !== -1) notExists[i] = newTags[index]
+            }
+            newTags = notExists
+        }
+        return {
+            type,
+            rating,
+            style,
+            artists,
+            characters,
+            series,
+            tags,
+            newTags,
+            danbooruLink
+        }
     }
 
     private static removeLocalDirectory = (dir: string) => {

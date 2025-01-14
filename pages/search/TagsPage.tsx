@@ -442,8 +442,8 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (session.username) {
             return (
                 <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <button className="item-button" onClick={() => massImplyDialog()}>{i18n.buttons.massImply}</button>
-                </div> 
+                    <button className="item-button" onClick={() => massImplyDialog()}>{i18n.dialogs.massImply.title}</button>
+                </div>
             )
         }
     }

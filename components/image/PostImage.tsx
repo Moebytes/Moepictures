@@ -1377,7 +1377,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} noteID={props.noteID}/> : null}
+            {!props.noNotes ? <NoteEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight}/> : null}
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
@@ -1554,8 +1554,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </>
                         : null}
-                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={8} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
-                        zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
+                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={8} onZoomStop={(ref) => setZoom(ref.state.scale)} 
+                        wheel={{step: 0.1, touchPadDisabled: true}} zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} 
+                        doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img}/>
                             <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>
