@@ -42,6 +42,7 @@ import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost} from ".
 import "./styles/userpage.less"
 
 let intervalTimer = null as any
+let blacklistTimer = null as any
 let limit = 25
 
 const UserProfilePage: React.FunctionComponent = (props) => {
@@ -86,6 +87,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [banReason, setBanReason] = useState("")
     const [bio, setBio] = useState("")
     const [interval, setInterval] = useState("")
+    const [blacklist, setBlacklist] = useState("")
     const [init, setInit] = useState(true)
     const [bannerHidden, setBannerHidden] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
@@ -222,6 +224,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             setBio(session.bio)
             if (init) {
+                setBlacklist(session.blacklist)
                 setInterval(Math.floor(Number(session.autosearchInterval || 3000) / 1000).toString())
                 setInit(false)
             }
@@ -324,6 +327,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const globalMusicPlayer = async () => {
+        await functions.post("/api/user/globalmusicplayer", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
+    }
+
     const showR18 = async () => {
         if (session.showR18) {
             await functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
@@ -355,6 +364,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
         autosearchInterval()
     }, [interval])
+
+    useEffect(() => {
+        const updateBlacklist = async () => {
+            clearTimeout(blacklistTimer) 
+            blacklistTimer = setTimeout(() => {
+                functions.clearResponseCacheKey("/api/user/session")
+                functions.post("/api/user/blacklist", {blacklist}, session, setSessionFlag)
+                .then(() => setSessionFlag(true))
+            }, 1000)
+        }
+        updateBlacklist()
+    }, [blacklist])
 
     const changeBio = async () => {
         const badBio = functions.validateBio(bio, i18n)
@@ -753,6 +774,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.user.forceNoteBubbles}: <span className="user-text-action" onClick={forceNoteBubbles}>{session.forceNoteBubbles ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
+                        <span className="user-text">{i18n.user.globalMusicPlayer}: <span className="user-text-action" onClick={globalMusicPlayer}>{session.globalMusicPlayer ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
                         <img className="user-icon" src={premiumStar}/>
                         <span style={{color: "var(--premiumColor)"}} className="user-text">{i18n.user.upscaledImages}: <span style={{color: "var(--premiumColor)"}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
@@ -844,6 +868,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-title" onClick={viewComments}>{i18n.navbar.comments} <span className="user-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
+                    <div className="user-column">
+                        <span className="user-text" style={{fontSize: "22px", color: "var(--text-strong)"}}>Blacklist Tags</span>
+                        <textarea style={{height: "150px", width: "60%", fontSize: "20px", color: "var(--text-strong)"}} className="user-textarea" 
+                        spellCheck={false} value={blacklist} onChange={(event) => setBlacklist(event.target.value)}
+                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    </div>
                     <div className="user-row">
                         <img className="user-icon" src={danger}/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>

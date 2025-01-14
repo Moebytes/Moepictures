@@ -63,6 +63,10 @@ const SearchRoutes = (app: Express) => {
                 if (!permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
+            if (req.session.blacklist) {
+                const negated = functions.negateBlacklist(req.session.blacklist)
+                tags.unshift(...negated)
+            }
             if (query.startsWith("id:")) {
                 const id = query.match(/(\d+)/g)?.[0] || ""
                 const post = await sql.post.post(id)

@@ -3207,4 +3207,23 @@ export default class Functions {
             }
         }
     }
+
+    public static negateBlacklist = (blacklist: string) => {
+        const blacklistArr = blacklist.split(/ +/g).slice(0, 10)
+        let newBlacklist = [] as string[]
+        for (const item of blacklistArr) {
+            if (!item) continue
+            if (item.startsWith("*")) continue
+            if (item.startsWith("+-")) {
+                newBlacklist.push(`+${item}`)
+            } else if (item.startsWith("+")) {
+                newBlacklist.push(`+-${item}`)
+            } else if (item.startsWith("-")) {
+                newBlacklist.push(item)
+            } else {
+                newBlacklist.push(`-${item}`)
+            }
+        }
+        return newBlacklist
+    }
 }

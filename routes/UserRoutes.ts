@@ -81,7 +81,9 @@ const UserRoutes = (app: Express) => {
             delete user.showTagBanner
             delete user.upscaledImages
             delete user.forceNoteBubbles
+            delete user.globalMusicPlayer
             delete user.savedSearches
+            delete user.blacklist
             delete user.premiumExpiration
             delete user.showR18
             serverFunctions.sendEncrypted(user, req, res)
@@ -119,8 +121,10 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
                 await sql.user.updateUser(username, "upscaledImages", false)
                 await sql.user.updateUser(username, "forceNoteBubbles", false)
+                await sql.user.updateUser(username, "globalMusicPlayer", true)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
+                await sql.user.updateUser(username, "blacklist", "")
                 await sql.user.updateUser(username, "postCount", 0)
                 await sql.user.updateUser(username, "emailVerified", false)
                 await sql.user.updateUser(username, "$2fa", false)
@@ -206,7 +210,9 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
+                req.session.globalMusicPlayer = user.globalMusicPlayer
                 req.session.savedSearches = user.savedSearches
+                req.session.blacklist = user.blacklist
                 req.session.postCount = user.postCount
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
@@ -271,7 +277,9 @@ const UserRoutes = (app: Express) => {
                 req.session.postCount = user.postCount
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
+                req.session.globalMusicPlayer = user.globalMusicPlayer
                 req.session.savedSearches = user.savedSearches
+                req.session.blacklist = user.blacklist
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
@@ -517,6 +525,21 @@ const UserRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/user/globalmusicplayer", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newGlobalMusicPlayer = !Boolean(user.globalMusicPlayer)
+            req.session.globalMusicPlayer = newGlobalMusicPlayer 
+            await sql.user.updateUser(req.session.username, "globalMusicPlayer", newGlobalMusicPlayer)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.post("/api/user/savesearch", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {name, tags} = req.body as SaveSearchParams
@@ -567,6 +590,21 @@ const UserRoutes = (app: Express) => {
             delete savedSearches[name]
             req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/blacklist", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {blacklist} = req.body as {blacklist: string}
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            req.session.blacklist = blacklist
+            await sql.user.updateUser(req.session.username, "blacklist", blacklist)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

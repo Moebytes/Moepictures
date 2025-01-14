@@ -28,7 +28,9 @@ export interface User extends PrunedUser {
     autosearchInterval?: number
     upscaledImages?: boolean
     forceNoteBubbles?: boolean
+    globalMusicPlayer?: boolean
     savedSearches?: {[key: string]: string} | null
+    blacklist?: string
     showR18?: boolean
     premiumExpiration?: string | null
 }
@@ -207,7 +209,9 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/autosearchinterval" ? {params: {interval: number | null}, response: string} :
     T extends "/api/user/upscaledimages" ? {params: {reset: boolean} | null, response: string} :
     T extends "/api/user/forcenotebubbles" ? {params: null, response: string} :
+    T extends "/api/user/globalmusicplayer" ? {params: null, response: string} :
     T extends "/api/user/savesearch" ? {params: SaveSearchParams, response: string} :
+    T extends "/api/user/blacklist" ? {params: {blacklist: string}, response: string} :
     T extends "/api/user/r18" ? {params: {r18?: boolean}, response: string} :
     T extends "/api/user/changebio" ? {params: {bio: string}, response: string} :
     T extends "/api/user/changeusername" ? {params: ChangeUsernameParams, response: string} :

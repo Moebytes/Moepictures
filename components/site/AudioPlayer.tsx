@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useLocation, useHistory} from "react-router-dom"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector} from "../../store"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Slider from "react-slider"
 import musicplaying from "../../assets/icons/musicplaying.gif"
@@ -50,6 +50,7 @@ if (typeof window !== "undefined") initialize()
 const AudioPlayer: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const {pixelate} = useFilterSelector()
     const {audio, audioPost, audioRewindFlag, audioFastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, audioSecondsProgress, audioProgress, 
@@ -552,6 +553,8 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (mobile) return audioPost ? "160px" : "120px"
         return audioPost ? "140px" : "100px"
     }
+
+    if (session.username && !session.globalMusicPlayer) return null
 
     if (audio) {
         return (
