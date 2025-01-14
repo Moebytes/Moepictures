@@ -14,6 +14,7 @@ const flagSlice = createSlice({
         threadSearchFlag: null as string | null,
         messageSearchFlag: null as string | null,
         groupSearchFlag: null as string | null,
+        tagSearchFlag: null as string | null,
         pageFlag: null as number | null,
         downloadIDs: [] as string[],
         postAmount: 0,
@@ -39,6 +40,7 @@ const flagSlice = createSlice({
         setThreadSearchFlag: (state, action) => {state.threadSearchFlag = action.payload},
         setMessageSearchFlag: (state, action) => {state.messageSearchFlag = action.payload},
         setGroupSearchFlag: (state, action) => {state.groupSearchFlag = action.payload},
+        setTagSearchFlag: (state, action) => {state.tagSearchFlag = action.payload},
         setPageFlag: (state, action) => {state.pageFlag = action.payload},
         setDownloadIDs: (state, action) => {state.downloadIDs = action.payload},
         setPostAmount: (state, action) => {state.postAmount = action.payload},
@@ -63,7 +65,7 @@ const {
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
-    setPasteNoteFlag, setHistoryFlag
+    setPasteNoteFlag, setHistoryFlag, setTagSearchFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -77,6 +79,7 @@ export const useFlagSelector = () => {
         threadSearchFlag: selector((state) => state.flag.threadSearchFlag),
         messageSearchFlag: selector((state) => state.flag.messageSearchFlag),
         groupSearchFlag: selector((state) => state.flag.groupSearchFlag),
+        tagSearchFlag: selector((state) => state.flag.tagSearchFlag),
         pageFlag: selector((state) => state.flag.pageFlag),
         downloadIDs: selector((state) => state.flag.downloadIDs),
         postAmount: selector((state) => state.flag.postAmount),
@@ -106,6 +109,7 @@ export const useFlagActions = () => {
         setThreadSearchFlag: (state: string | null) => dispatch(setThreadSearchFlag(state)),
         setMessageSearchFlag: (state: string | null) => dispatch(setMessageSearchFlag(state)),
         setGroupSearchFlag: (state: string | null) => dispatch(setGroupSearchFlag(state)),
+        setTagSearchFlag: (state: string | null) => dispatch(setTagSearchFlag(state)),
         setPageFlag: (state: number | null) => dispatch(setPageFlag(state)),
         setDownloadIDs: (state: string[]) => dispatch(setDownloadIDs(state)),
         setPostAmount: (state: number) => dispatch(setPostAmount(state)),

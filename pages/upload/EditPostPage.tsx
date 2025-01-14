@@ -1918,6 +1918,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={audio}/>
                     <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
+                <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
+                    <img className="upload-button-img" src={live2d}/>
+                    <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
+                </button>
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="upload-button-img" src={model}/>
                     <span className="upload-button-text">{i18n.sortbar.type.model}</span>

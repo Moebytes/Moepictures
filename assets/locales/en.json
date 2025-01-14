@@ -1,6 +1,7 @@
 {
     "title": "Moepictures: Moe Anime Pictures ♥",
     "period": ".",
+    "email": "moepictures.moe@gmail.com",
     "navbar": {
         "login": "Login",
         "comments": "Comments",
@@ -216,7 +217,9 @@
         "send": "Send",
         "unban": "Unban",
         "sendLink": "Send Link",
-        "appeal": "Appeal"
+        "appeal": "Appeal",
+        "untranslated": "Untranslated",
+        "massImply": "Mass Imply"
     },
     "history": {
         "post": "Post History",
@@ -1111,6 +1114,12 @@
         },
         "tagEdit": {
             "request": "Tag Edit Request"
+        },
+        "massImply": {
+            "title": "Mass Imply",
+            "header": "Mass imply tags containing this string. Only tags of the same category are affected.",
+            "wildcard": "Wildcard",
+            "implyTo": "Imply To"
         }
     },
     "help": {
@@ -1164,12 +1173,10 @@
                     "no character": " - no character or not applicable.",
                     "no series": " - not part of any series or not applicable.",
                     "needs tags": " - current post tags are insufficient.",
-                    "text": " - the post contains text.",
                     "transparent": " - the post has transparency.",
                     "translated": " - the post has complete translations.",
                     "untranslated": " - the post is untranslated.",
                     "partially translated": " - the post is only partially translated.",
-                    "check translation": " - needs re-checking of the translations.",
                     "no audio": " - the post is a video with no audio.",
                     "with audio": " - the post is a video that has audio.",
                     "multiple artists": " - the post has multiple artists.",
@@ -1204,8 +1211,8 @@
         },
         "customPlayers": {
             "title": "Custom Players",
-            "line1": "Moepictures has custom players for animations, videos, music, and 3d models, which allows additional functionality not available natively such as reverse playback and modification of the playback speed.",
-            "line2": "The music player also has controls for changing the pitch of the audio. The 3d model player has options to enable wireframe, matcap, and edit shapekeys and lighting."
+            "line1": "Moepictures has custom players for animations, videos, music, 3d models, and live2d models, which allow additional functionality not available natively such as reverse playback and modification of the playback speed.",
+            "line2": "The music player also has controls for changing the pitch of the audio. The 3d model player has options to enable wireframe, matcap, and edit shapekeys and lighting. The live2d player has controls for the parameters and parts."
         },
         "music": {
             "title": "Music",
@@ -1260,12 +1267,12 @@
             "line1": "Moepictures allows uploading images, comics, animations, videos, music, 3d models, and live2d models.",
             "uploadGuidelines": {
                 "header": "Please read carefully through all of the uploading guidelines.",
-                "guide1": "⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles.",
-                "guide2": "⇾ The main subject must be a female character. Male characters are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
-                "guide3": "⇾ It should be moe/cute! This is the primary focus of the site.",
+                "guide1": "⇾ Must be drawn in the anime art style. No photographs or art drawn in other styles.*",
+                "guide2": "⇾ The main subject must be a girl. Boys are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
+                "guide3": "⇾ It should be moe/cute, as this is the primary focus of our site.",
                 "guide4": "⇾ No duplicates are allowed. Variations of the same image should be added to the original post.",
                 "guide5": "⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much.",
-                "guide6": "⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes.",
+                "guide6": "⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes.*",
                 "guide7": "⇾ The perspective, proportions, and anatomy shouldn't look weird.",
                 "guide8": "⇾ Animations shouldn't look too stuttery.",
                 "guide9": "⇾ All posts require the source link from where it was obtained from.",
@@ -1273,10 +1280,16 @@
                 "guide11": "⇾ For images, adding an upscaled version is required.",
                 "guide12": "⇾ Resolution: Keep original images under 2000x2000px and upscaled images under 8000x8000px.",
                 "guide13": "⇾ (Music only) The audio file must have a song cover in its metadata.",
-                "guide14": "⇾ Compress / re-encode files (maintaining high quality) to be storage efficient.",
+                "guide14": "⇾ Compress / re-encode files (maintaining high quality) to be storage efficient.*",
                 "guide15": "⇾ No hentai. We only allow light nudity and suggestiveness.",
                 "guide16": "⇾ No AI-generated works. We only want art created by passionate humans.",
                 "guide17": "⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!"
+            },
+            "moreNotes": {
+                "header": "More notes:",
+                "note1": "*Under no circumstances should you ever upload photographs, 3D-renders, or photo-realism resembling real people! If you have to question it, it probably is too realistic.",
+                "note2": "*Good quality sketches and lineart that don't technically meet our guidelines may still be uploaded under the sketch/lineart categories. They are only available if you filter for the All+S (All+Sketches), sketch or lineart styles.",
+                "note3": "*Original images are often badly optimized and will load slowly. If you compress correctly, there should not be any artifacts. If you want high quality lossless PNG's, you are better off getting them directly from the artist."
             },
             "categorization": {
                 "header": "Please classify uploads into the appropriate category. We have three levels of categorization:",
@@ -1347,7 +1360,7 @@
                 "guide8": "⇾ Body Parts (small-breasts, long-legs, etc).",
                 "guide9": "⇾ Objects (coffee, umbrella, flower, etc).",
                 "guide10": "⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc).",
-                "guide11": "⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc)."
+                "guide11": "⇾ Special Tags (transparent, translated, no-audio, with-audio, etc)."
             },
             "line2": "If the post was already tagged on a different site you may copy over the tags and fix them up. There's no need to fully re-invent the wheel.",
             "categories": {
@@ -1373,11 +1386,11 @@
                     "Social": " - The primary social media account of the artist where they upload their works, depending on the type of artist this is usually pixiv/soundcloud/sketchfab.",
                     "Twitter": " - Their twitter/x account, as the majority of people also have one. We also prefer to use their twitter username as their tag name.",
                     "Fandom": " - For character tags, this can be a link to the fandom wiki of the character (or any other wiki).",
-                    "Image": " - A tag image, usually profile picture of the artist or logo of the series. Please provide one for artist, characters, and series.",
+                    "Image": " - A tag image, usually profile picture of the artist or logo of the series. Please provide one for artist, characters, and series tags.",
                     "Description": " - A longer description of the tag, going into more detail about what its about. Very useful for tags that are not very self-explanatory.",
                     "Aliases": " - Aliases are alternate names that will resolve to this tag. They do not have to be romanized, unlike tags.",
                     "Implications": " - Implications are \"parent\" tags automatically added when this tag is added to a post.",
-                    "Pixiv Tags": " - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in japanese."
+                    "Pixiv Tags": " - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in Japanese."
                 }
             }
             
@@ -1387,7 +1400,7 @@
             "line1": "Although the vast majority of posts are reposts, you are also welcomed to post your own art.",
             "shouldTag": "You should tag uploads of your own artwork with ",
             "line2": " We also require that your artist tag is the same as your username on moepictures. This will let you have access to the additional option to private a post.",
-            "line3": "You may make your own posts private at any time so that they are only visible to yourself and moderators. However do note that we don't allow post deletions even if you uploaded your own post without approval.",
+            "line3": "You may make your own posts private at any time so that they are only visible to yourself and moderators. However, do note that if you want to delete your post you still have to submit a regular deletion request.",
             "contactUs": "If another user has already taken your artist name please contact us at ",
             "changeName": "so that we can attempt to change their name."
         },
@@ -1440,7 +1453,7 @@
             "line3": ", eg. Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original untranslated name in the group description."
         },
         "aliases": {
-            "line1": "A tag can have multiple aliases that point to the same result. This is to facilitate better searching for synonyms like \"with audio\" and \"has audio\". Unlike tags, aliases can include non-ASCII characters so it's possible to add an alias in Japanese in order to enable Japanese searching. But on that note, you can also search for tags with their japanese pixiv tags if they were filled in.",
+            "line1": "A tag can have multiple aliases that point to the same result. This is to facilitate better searching for synonyms like \"with audio\" and \"has audio\". Unlike tags, aliases can include non-ASCII characters so it's possible to add an alias in Japanese in order to enable Japanese searching. (Although on that note, you can also search for tags with their Japanese pixiv tags if they were filled in).",
             "aliasingTo": {
                 "title": "Aliasing To",
                 "line1": "Aliases do not have to be an existing tag, but if you want to alias an already existing tag to another tag we call this \"aliasing to\". Since aliasing to is a more powerful action, they will have to get reviewed and approved by mods.",
@@ -1470,7 +1483,7 @@
             "line1": "Since mods and admins can potentially make very destructive changes to the site, we require them to enable 2FA on their accounts.",
             "avatars": {
                 "title": "Avatars",
-                "line1": "You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an \"anime avatars only\" policy. If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it.",
+                "line1": "You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an \"anime avatars only\" policy. If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it!",
                 "line2": "You can change your avatar by clicking on \"set avatar\" on the sidebar of any post, and you can remove it in your account settings. Please do this on PC, as the mobile touch controls are known to be a bit finicky."
             }
         },
@@ -1554,7 +1567,7 @@
                 "action2": "⇾ Spam uploading meme or very low quality posts.",
                 "action3": "⇾ Vandalizing posts, tags, or notes."
             },
-            "line2": "We also don't allow profane or inappropriate usernames. We will inquire you to change your username to something more appropriate, otherwise you might also get banned if there is no response."
+            "line2": "We don't allow profane or inappropriate usernames. We will inquire you to change your username to something more appropriate, otherwise you might also get banned if there is no response."
         },
         "captcha": {
             "title": "Captcha",
@@ -1573,7 +1586,7 @@
             "line1": "If your work is up on Moepictures then it means that we love your work and we always make sure to source posts back to you.",
             "submitForm": "With that said, we respect your rights and if you don't want your work to be here anymore, you may submit a copyright removal form at ",
             "copyrightForm": "Copyright Form",
-            "emailUs": " or email us at moepictures.moe@gmail.com.",
+            "emailUs": " or email us at ",
             "line2": "After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded."
         }
     },
@@ -1692,7 +1705,7 @@
                 "title": "Collected information",
                 "header": "We collect information provided directly to us, which includes:",
                 "accountInfo": "Account information",
-                "accountInfoLine": " - We need to store your username, email, password, bio, ip address, and any account preferences you set.",
+                "accountInfoLine": " - We need to store your username, email, password, bio, ip address, and any account preferences you set. We only store a securely hashed password.",
                 "contentSubmitted": "Content you submit",
                 "contentSubmittedLine": " - We need to store any content that you submit which may include submitted text, images, gifs, videos, posts and comments. ",
                 "actionsTaken": "Actions you take",

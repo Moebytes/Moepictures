@@ -439,7 +439,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const translate = async (text: string) => {
             try {
-                const translated = await googleTranslate(text, {from: "ja", to:"en"})
+                const translated = await googleTranslate(text, {from: "ja", to: "en"})
                 return translated.text
             } catch {
                 return text

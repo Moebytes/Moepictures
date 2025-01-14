@@ -599,4 +599,20 @@ export default class SQLTag {
         const result = await SQLQuery.run(query, true)
         return result as Promise<AliasHistorySearch[]>
     }
+
+    /** Get tags matching wildcard */
+    public static wildcardTags = async (wildcard: string, type: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT tags.*, json_agg(DISTINCT implications.*) AS implications
+                FROM tags
+                LEFT JOIN implications ON implications."tag" = tags."tag"
+                WHERE tags.tag ILIKE '%' || $1 || '%' AND tags.type = $2
+                GROUP BY tags.tag
+            `),
+            values: [wildcard, type]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result as Promise<Omit<Tag, "aliases" | "featuredPost">[]>
+    }
 }

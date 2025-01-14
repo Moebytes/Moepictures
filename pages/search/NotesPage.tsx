@@ -33,7 +33,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
     const {scroll} = useSearchSelector()
-    const {setScroll} = useSearchActions()
+    const {setScroll, setSearch, setSearchFlag} = useSearchActions()
     const {notesPage} = usePageSelector()
     const {setNotesPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
@@ -405,6 +405,24 @@ const NotesPage: React.FunctionComponent = (props) => {
         setScroll(newValue)
     }
 
+    const searchUntranslated = () => {
+        setSearch("+untranslated +partially-translated")
+        setSearchFlag(true)
+        history.push("/posts")
+    }
+
+    const getUntranslatedButton = () => {
+        if (session.banned) return null
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px", justifyContent: "flex-start"}
+        if (session.username) {
+            return (
+                <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <button className="item-button" onClick={() => searchUntranslated()}>{i18n.buttons.untranslated}</button>
+                </div> 
+            )
+        }
+    }
+
     return (
         <>
         <TitleBar/>
@@ -421,6 +439,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                                 <img src={search}/>
                             </button>
                         </div>
+                        {!mobile ? getUntranslatedButton() : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
@@ -436,6 +455,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {mobile ? <div className="item-row">{getUntranslatedButton()}</div> : null}
                     <div className="items-container">
                         {generateNotesJSX()}
                     </div>

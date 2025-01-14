@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, 
+import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, useFlagSelector,
 useInteractionActions, useActiveSelector, useActiveActions, useCacheSelector, useCacheActions, useSearchSelector, useSearchActions} from "./store"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
@@ -87,6 +87,7 @@ const App: React.FunctionComponent = (props) => {
     const {setActiveDropdown, setActiveGroup, setActiveFavgroup} = useActiveActions()
     const {session, sessionFlag} = useSessionSelector()
     const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
+    const {postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag} = useFlagSelector()
     const {posts} = useCacheSelector()
     const {setEmojis} = useCacheActions()
     const {selectionMode} = useSearchSelector()
@@ -279,6 +280,12 @@ const App: React.FunctionComponent = (props) => {
             window.removeEventListener("resize", resize)
         }
     }, [])
+
+    useEffect(() => {
+        if (postFlag || tagFlag || groupFlag || messageFlag || historyFlag || updateUserFlag || sessionFlag) {
+            functions.clearResponseCache()
+        }
+    }, [postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag, sessionFlag])
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>

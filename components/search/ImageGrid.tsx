@@ -11,7 +11,7 @@ import noresults from "../../assets/images/noresults.png"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import "./styles/imagegrid.less"
-import {PostSearch} from "../../types/Types"
+import {PostSearch, Post} from "../../types/Types"
 
 interface Ref {
     shouldWait: () => Promise<boolean>
@@ -22,6 +22,7 @@ interface Ref {
 let interval = null as any
 let reloadedPost = false
 let replace = false
+let manualHistoryChange = false
 
 let limit = 100
 
@@ -155,10 +156,30 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 setPage(Number(pageParam))
             }
         }
-        const updateStateChange = () => {
+        const updateStateChange = (event: Event) => {
             replace = true
+            const queryParam = new URLSearchParams(window.location.search).get("query")
             const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (queryParam) {
+                setSearch(queryParam)
+                setSearchFlag(true)
+            }
             if (pageParam) setPageFlag(Number(pageParam))
+            if (event.type === "popstate") {
+                if (manualHistoryChange) {
+                    manualHistoryChange = false
+                    return
+                }
+                manualHistoryChange = true
+                window.history.go(-1)
+            } else if (event.type === "pushstate") {
+                if (manualHistoryChange) {
+                    manualHistoryChange = false
+                    return
+                }
+                manualHistoryChange = true
+                window.history.go(2)
+            }
         }
         window.addEventListener("load", onDOMLoaded)
         window.addEventListener("popstate", updateStateChange)
@@ -393,9 +414,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
         ratingType, styleType, sortType, sortReverse, pageMultiplier, showChildren])
 
     useEffect(() => {
+        if (manualHistoryChange) return
         const searchParams = new URLSearchParams(window.location.search)
         if (search) searchParams.set("query", search)
         if (!scroll) searchParams.set("page", String(page))
+        if (!searchParams.toString()) return
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false

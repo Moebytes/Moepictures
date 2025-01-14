@@ -420,4 +420,14 @@ export default class SQLNote {
         const result = await SQLQuery.run(query)
         return result as Promise<NoteSearch[]>
     }
+
+    /** Rename character notes. */
+    public static renameCharacterNotes = async (tag: string, newTag: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "notes" SET "characterTag" = $1 WHERE "characterTag" = $2`,
+            values: [newTag, tag]
+        }
+        await SQLQuery.flushDB()
+        await SQLQuery.run(query)
+    }
 }

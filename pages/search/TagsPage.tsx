@@ -5,6 +5,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../structures/Functions"
+import permissions from "../../structures/Permissions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -15,7 +16,7 @@ import pageIcon from "../../assets/icons/page.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions} from "../../store"
+useMiscDialogActions, useTagDialogActions} from "../../store"
 import "./styles/itemspage.less"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
 
@@ -38,8 +39,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {tagsPage} = usePageSelector()
     const {setTagsPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
+    const {setMassImplyDialog} = useTagDialogActions()
+    const {pageFlag, tagSearchFlag} = useFlagSelector()
+    const {setPageFlag, setTagSearchFlag} = useFlagActions()
     const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all" as TagType)
@@ -111,6 +113,13 @@ const TagsPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         updateTags()
     }, [])
+
+    useEffect(() => {
+        if (tagSearchFlag !== null) {
+            updateTags(tagSearchFlag)
+            setTagSearchFlag(null)
+        }
+    }, [tagSearchFlag])
 
     useEffect(() => {
         document.title = i18n.navbar.tags
@@ -423,6 +432,22 @@ const TagsPage: React.FunctionComponent = (props) => {
         setScroll(newValue)
     }
 
+    const massImplyDialog = () => {
+        setMassImplyDialog(true)
+    }
+
+    const getMassImplyButton = () => {
+        if (session.banned) return null
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px", justifyContent: "flex-start"}
+        if (session.username) {
+            return (
+                <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <button className="item-button" onClick={() => massImplyDialog()}>{i18n.buttons.massImply}</button>
+                </div> 
+            )
+        }
+    }
+
     return (
         <>
         <TitleBar/>
@@ -440,6 +465,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                                 <img src={search}/>
                             </button>
                         </div>
+                        {!mobile && permissions.isAdmin(session) ? getMassImplyButton() : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
@@ -507,6 +533,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {mobile && permissions.isAdmin(session) ? <div className="item-row">{getMassImplyButton()}</div> : null}
                     <div className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
                     </div>

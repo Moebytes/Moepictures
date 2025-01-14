@@ -86,6 +86,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.username) return 
         const checkMail = async () => {
+            functions.clearResponseCacheKey("/api/user/checkmail")
             const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }

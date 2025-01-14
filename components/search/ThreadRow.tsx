@@ -279,6 +279,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const toggleRead = async () => {
         if (!props.thread) return
+        functions.clearResponseCacheKey("/api/search/threads")
         await functions.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
         props.onEdit?.()
     }

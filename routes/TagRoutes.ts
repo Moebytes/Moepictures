@@ -413,6 +413,7 @@ const TagRoutes = (app: Express) => {
             let targetUser = username ? username : req.session.username
             if (!silent) await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
             await sql.tag.renameTagMap(tag, aliasTo)
+            await sql.note.renameCharacterNotes(tag, aliasTo)
             await serverFunctions.deleteTag(tagObj)
             if (!skipAliasing) await sql.tag.bulkInsertAliases(aliasTo, [tag])
             res.status(200).send("Success")
@@ -445,6 +446,7 @@ const TagRoutes = (app: Express) => {
                 await sql.tag.deleteTagMap(postID, [aliasTo])
                 await sql.tag.insertTagMap(postID, [tag])
             }
+            await sql.note.renameCharacterNotes(aliasTo, tag)
             await sql.tag.insertAliasHistory(req.session.username, tag, aliasTo, "undo alias", affectedPosts, sourceData)
             res.status(200).send("Success")
         } catch (e) {
@@ -788,6 +790,39 @@ const TagRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/tag/massimply", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {wildcard, implyTo} = req.body as {wildcard: string, implyTo: string}
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!wildcard || !implyTo) return res.status(400).send("Bad wildcard or implyTo")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            const implyTag = await sql.tag.tag(implyTo)
+            if (!implyTag) return res.status(400).send("Bad implyTo")
+            const tags = await sql.tag.wildcardTags(wildcard.replaceAll("*", ""), implyTag.type)
+
+            for (const tag of tags) {
+                const oldImplications = tag.implications?.filter(Boolean).map((i: any) => i.implication) || []
+                if (oldImplications.includes(implyTag.tag)) continue
+                const toAdd = [implyTag.tag]
+
+                const posts = await sql.tag.tagPosts(tag.tag)
+                const postIDs = posts.map((p) => p.postID)
+
+                await sql.tag.bulkInsertImplications(tag.tag, toAdd)
+
+                for (const implication of toAdd) {
+                    await sql.tag.insertImplicationHistory(req.session.username, tag.tag, implication, "implication", postIDs, null)
+                }
+                serverFunctions.updateImplications(posts, toAdd)
+            }
+
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
         }
     })
 }

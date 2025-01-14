@@ -133,6 +133,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateRead = async () => {
+            functions.clearResponseCacheKey("/api/search/threads")
             await functions.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
         }
         updateRead()
@@ -464,11 +465,13 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateSticky = async () => {
+        functions.clearResponseCacheKey("/api/thread")
         await functions.post("/api/thread/sticky", {threadID}, session, setSessionFlag)
         updateThread()
     }
 
     const updateLocked = async () => {
+        functions.clearResponseCacheKey("/api/thread")
         await functions.post("/api/thread/lock", {threadID}, session, setSessionFlag)
         updateThread()
     }

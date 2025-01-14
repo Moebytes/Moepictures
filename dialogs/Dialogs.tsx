@@ -55,6 +55,7 @@ import DeleteAliasHistoryDialog from "./tag/DeleteAliasHistoryDialog"
 import DeleteTagDialog from "./tag/DeleteTagDialog"
 import DeleteTagHistoryDialog from "./tag/DeleteTagHistoryDialog"
 import EditTagDialog from "./tag/EditTagDialog"
+import MassImplyDialog from "./tag/MassImplyDialog"
 import RevertAliasHistoryDialog from "./tag/RevertAliasHistoryDialog"
 import RevertTagHistoryDialog from "./tag/RevertTagHistoryDialog"
 import TakedownTagDialog from "./tag/TakedownTagDialog"
@@ -136,6 +137,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <DeleteTagDialog/>
         <DeleteTagHistoryDialog/>
         <EditTagDialog/>
+        <MassImplyDialog/>
         <RevertAliasHistoryDialog/>
         <RevertTagHistoryDialog/>
         <TakedownTagDialog/>

@@ -151,53 +151,53 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const mainJSX = () => {
         return (
             <>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.title}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.englishTitle}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={englishTitle} onChange={(event) => setEnglishTitle(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.tag.artist}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.sort.posted}: </span>
                 <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.source}: </span>
                 <input className="dialog-input" type="text" spellCheck={false} value={source} onChange={(event) => setSource(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.sort.bookmarks}: </span>
                 <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={bookmarks} onChange={(event) => setBookmarks(event.target.value)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.commentary}: </span>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.englishCommentary}: </span>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={englishCommentary} onChange={(event) => setEnglishCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.mirrors}: </span>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.buyLink}: </span>
                 <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={buyLink} onChange={(event) => setBuyLink(event.target.value)}/>
             </div>
-            <div className="dialog-row">
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
             </div>

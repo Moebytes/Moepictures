@@ -31,7 +31,7 @@ import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
-PostHistory} from "../types/Types"
+PostHistory, PostSearchParams} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -46,6 +46,8 @@ const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 const live2dExtensions = [".zip"]
 
 let cachedImages = new Map<string, string>()
+let cachedResponses = new Map<string, {data: any, expires: number}>()
+let cacheDuration = 60000
 
 let privateKey = ""
 let clientKeyLock = false
@@ -53,16 +55,35 @@ let serverPublicKey = ""
 let serverKeyLock = false
 
 export default class Functions {
-    public static getImageCache = (img: string) => {
-        return cachedImages.get(img) || ""
-    }
-
-    public static setImageCache = (img: string, decrypted: string) => {
-        cachedImages.set(img, decrypted)
+    public static getImageCache = (cacheKey: string) => {
+        return cachedImages.get(cacheKey) || ""
     }
 
     public static clearImageCache = () => {
         cachedImages.clear()
+    }
+
+    public static responseCached = <T extends string>(endpoint: T, params: GetEndpoint<T>["params"]) => {
+        let cacheKey = `${endpoint}_${JSON.stringify(params)}`
+        if ((params as PostSearchParams)?.sort !== "random") {
+            const cachedResponse = cachedResponses.get(cacheKey)
+            if (cachedResponse && Date.now() < cachedResponse.expires) {
+                return true
+            }
+        }
+        return false
+    }
+
+    public static clearResponseCache = () => {
+        cachedResponses.clear()
+    }
+
+    public static clearResponseCacheKey = (endpoint: string) => {
+        cachedResponses.forEach((value, key) => {
+            if (key.startsWith(endpoint)) {
+                cachedResponses.delete(key)
+            }
+        })
     }
 
     public static fetch = async (link: string, headers?: any) => {
@@ -132,14 +153,32 @@ export default class Functions {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         const headers = {"x-csrf-token": session.csrfToken}
+
+
+        let cacheKey = `${endpoint}_${JSON.stringify(params)}`
+        if ((params as PostSearchParams)?.sort !== "random") {
+            let cachedResponse = cachedResponses.get(cacheKey)
+            if (cachedResponse) {
+                await Functions.timeout(30)
+                cachedResponse = cachedResponses.get(cacheKey)
+            }
+            if (cachedResponse && Date.now() < cachedResponse.expires) {
+                return cachedResponse.data as GetEndpoint<T>["response"]
+            }
+        }
+
         try {
             const response = await axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
             const json = Functions.arrayBufferToJSON(response)
-            if (json !== null) return json as GetEndpoint<T>["response"]
+            if (json !== null) {
+                cachedResponses.set(cacheKey, {data: json, expires: Date.now() + cacheDuration})
+                return json as GetEndpoint<T>["response"]
+            }
             let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey, session)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
+            cachedResponses.set(cacheKey, {data: decrypted, expires: Date.now() + cacheDuration})
             return decrypted as GetEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
@@ -184,7 +223,7 @@ export default class Functions {
         return /constructor/i.test(window.HTMLElement) || (function (p) {return p.toString() === "[object SafariRemoteNotification]" })(!window["safari"] || (typeof safari !== "undefined" && safari.pushNotification))
     }
 
-    public static decodeEntities(encodedString: string) {
+    public static decodeEntities = (encodedString: string) => {
         const regex = /&(nbsp|amp|quot|lt|gt);/g
         const translate = {
             nbsp: " ",
@@ -202,7 +241,7 @@ export default class Functions {
     }
 
     public static cleanHTML = (str: string) => {
-        return Functions.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "")
+        return Functions.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "").replace(/\r?\n|\r/g, "")
     }
     
     public static proxyImage = async (link: string, session: Session, setSessionFlag: (value: boolean) => void) => {
@@ -2859,7 +2898,7 @@ export default class Functions {
         let styleChanged = false
         if (!oldNotes) oldNotes = [] as Note[]
         if (!newNotes) newNotes = [] as Note[]
-        const itemKey = (item: Note) => item.character ? `Character -> ${item.character}` : `${item.transcript} -> ${item.translation}`
+        const itemKey = (item: Note) => item.character ? `Character -> ${item.characterTag}` : `${item.transcript} -> ${item.translation}`
         const prevMap = new Map(oldNotes.map((item) => [itemKey(item), item]))
         const newMap = new Map(newNotes.map((item) => [itemKey(item), item]))
 
@@ -2902,30 +2941,30 @@ export default class Functions {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
-        const cached = Functions.getImageCache(cacheKey)
+        const cached = cachedImages.get(cacheKey)
         if (cached) return cached
         if (Functions.isLive2D(img)) {
             const url = await Functions.live2dScreenshot(img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (Functions.isModel(img)) {
             const url = await Functions.modelImage(img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (Functions.isAudio(img)) {
             const url = await Functions.songCover(img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (forceImage && Functions.isVideo(img)) {
             const url = await Functions.videoThumbnail(img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (permissions.noEncryption(session)) return img
@@ -2944,10 +2983,10 @@ export default class Functions {
             if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         } else {
-            if (base64) Functions.setImageCache(cacheKey, base64)
+            if (base64) cachedImages.set(cacheKey, base64)
             return base64
         }
     }
@@ -2957,7 +2996,7 @@ export default class Functions {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
-        const cached = Functions.getImageCache(cacheKey)
+        const cached = cachedImages.get(cacheKey)
         if (cached) return cached
         if (Functions.isModel(img) || Functions.isAudio(img) || 
             Functions.isVideo(img) || Functions.isLive2D(img)) {
@@ -2978,10 +3017,10 @@ export default class Functions {
             if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
-            Functions.setImageCache(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         } else {
-            if (base64) Functions.setImageCache(cacheKey, base64)
+            if (base64) cachedImages.set(cacheKey, base64)
             return base64
         }
     }

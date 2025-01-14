@@ -125,14 +125,15 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     const rectStrokeWidth = Math.ceil(1/scale)
     const rectStrokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
 
-    const maxTextWidth = width - ((fontSize || 100) / 5)
+    let padding = ((fontSize || 100) / 5)
+    const maxTextWidth = width - padding
     let lines = [] as string[]
     if (overlay && !session.forceNoteBubbles) {
         lines = splitTextIntoLines(text, maxTextWidth, fontSize || 100, breakWord && !showTranscript)
     }
-    const lineHeight = (fontSize || 100) + ((fontSize || 100) / 5)
+    const lineHeight = (fontSize || 100) + padding
     const totalTextHeight = lines.length * lineHeight
-    const textStartY = height / 2 - totalTextHeight / 2 + lineHeight / 2
+    const textStartY = (height - totalTextHeight) / 2 + lineHeight - padding
 
     return (
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 

@@ -101,7 +101,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             <div className="edit-note-dialog-row">
                 <span className="edit-note-dialog-text">{i18n.labels.characterTag}</span>
             </div>
-            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
+            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(editNoteData.characterTag)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <textarea className="edit-note-textarea character-tag-color" spellCheck={false} value={editNoteData.characterTag} onChange={(event) => setEditNoteData({...editNoteData, characterTag: event.target.value?.trim()})}
                 onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}></textarea>
@@ -117,13 +117,13 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             <div className="edit-note-dialog-row">
                 <span className="edit-note-dialog-text">{i18n.labels.transcription}</span>
             </div>
-            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
+            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <textarea className="edit-note-textarea" spellCheck={false} value={editNoteData.transcript} onChange={(event) => setEditNoteData({...editNoteData, transcript: event.target.value})}></textarea>
             </div>
             <div className="edit-note-dialog-row">
                 <span className="edit-note-dialog-text">{i18n.labels.translation}</span>
             </div>
-            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)}>
+            <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <textarea className="edit-note-textarea" spellCheck={false} value={editNoteData.translation} onChange={(event) => setEditNoteData({...editNoteData, translation: event.target.value})}></textarea>
             </div>
             <div className="edit-note-dialog-row-start">

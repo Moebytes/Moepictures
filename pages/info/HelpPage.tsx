@@ -162,9 +162,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[16]}</span>{Object.values(i18n.help.searching.specialUses.items)[16]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[17]}</span>{Object.values(i18n.help.searching.specialUses.items)[17]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[18]}</span>{Object.values(i18n.help.searching.specialUses.items)[18]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[19]}</span>{Object.values(i18n.help.searching.specialUses.items)[19]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[20]}</span>{Object.values(i18n.help.searching.specialUses.items)[20]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[21]}</span>{Object.values(i18n.help.searching.specialUses.items)[21]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.searching.specialUses.items)[19]}</span>{Object.values(i18n.help.searching.specialUses.items)[19]}<br/><br/>
 
                     {i18n.help.searching.borderColors.header}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.searching.borderColors.items)[0]}</span>{Object.values(i18n.help.searching.borderColors.items)[0]}<br/>
@@ -328,6 +326,12 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.uploading.uploadGuidelines.guide16}<br/>
                     {i18n.help.uploading.uploadGuidelines.guide17}<br/><br/>
                     </span>
+
+
+                    {i18n.help.uploading.moreNotes.header}<br/>
+                    <span style={{color: "var(--text-strong)"}}>{i18n.help.uploading.moreNotes.note1}</span><br/>
+                    {i18n.help.uploading.moreNotes.note2}<br/>
+                    {i18n.help.uploading.moreNotes.note3}<br/><br/>
 
                     {i18n.help.uploading.categorization.header}<br/>
                     <span className="help-alt">{i18n.sidebar.type}</span>{i18n.help.uploading.categorization.type.line1}<br/>
@@ -759,7 +763,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     {i18n.help.copyrightRemoval.submitForm}
                     <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.getDomain()}/copyright-removal`}</a>
-                    {i18n.help.copyrightRemoval.emailUs}<br/><br/>
+                    {i18n.help.copyrightRemoval.emailUs}<span style={{color: "var(--text-alt)"}}>{i18n.email}{i18n.period}</span><br/><br/>
 
                     {i18n.help.copyrightRemoval.line2}<br/><br/>
 

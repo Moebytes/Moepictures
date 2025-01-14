@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector, 
-useSearchSelector, useFilterSelector} from "../../store"
+useSearchSelector, useFilterSelector, useFlagSelector} from "../../store"
 import functions from "../../structures/Functions"
 import arrowLeft from "../../assets/icons/carousel-left.png"
 import arrowRight from "../../assets/icons/carousel-right.png"
@@ -22,10 +22,8 @@ interface Props {
 let startX = 0
 let deltaCounter = 0
 let lastDeltaY = 0
-let effectTimer = null as any
 
 const loadAmount = 10
-let placeholder = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -36,6 +34,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {noteDrawingEnabled} = useSearchSelector()
+    const {postFlag} = useFlagSelector()
     const [lastPos, setLastPos] = useState(null as number | null)
     const [dragging, setDragging] = useState(false)
     const [imageRefs, setImageRefs] = useState([] as React.RefObject<HTMLImageElement | HTMLVideoElement>[])
@@ -98,14 +97,18 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }, [props.images])
 
     useEffect(() => {
-        const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
-        const decryptImages = async (images: string[]) => {
-            const decrypted = await Promise.all(images.map((image) => functions.decryptThumb(image, session)))
-            return decrypted
+        const decryptImages = async () => {
+            const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
+            const newImages = visibleImages.slice(startIndex)
+            let decrypted = await Promise.all(newImages.map((image) => functions.decryptThumb(image, session, `carousel-${image}`)))
+            if (startIndex === 0) {
+                setImages(decrypted)
+            } else {
+                setImages((prev) => [...prev, ...decrypted])
+            }
         }
-        const newImages = visibleImages.slice(startIndex)
-        decryptImages(newImages).then(() => setImages((prev) => [...prev, ...newImages]))
-    }, [visibleImages, visibleIndex])
+        decryptImages()
+    }, [visibleImages, visibleIndex, session])
     
     useEffect(() => {
         const images = getCombinedImages()

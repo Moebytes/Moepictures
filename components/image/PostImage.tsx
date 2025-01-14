@@ -1338,7 +1338,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
         if (permissions.isPremium(session)) {
             await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
-            setSession({...session, upscaledImages: !session.upscaledImages})
+            functions.clearResponseCacheKey("/api/user/session")
+            setSessionFlag(true)
         } else {
             setPremiumRequired(true)
         }

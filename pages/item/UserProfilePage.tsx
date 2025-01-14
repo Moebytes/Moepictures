@@ -283,44 +283,52 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const favoritesPrivacy = async () => {
-        functions.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
-        setSession({...session, publicFavorites: !session.publicFavorites})
+        await functions.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const showRelated = async () => {
-        functions.post("/api/user/showrelated", null, session, setSessionFlag)
-        setSession({...session, showRelated: !session.showRelated})
+        await functions.post("/api/user/showrelated", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const showTooltips = async () => {
-        functions.post("/api/user/showtooltips", null, session, setSessionFlag)
-        setSession({...session, showTooltips: !session.showTooltips})
+        await functions.post("/api/user/showtooltips", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const showTagTooltips = async () => {
-        functions.post("/api/user/showtagtooltips", null, session, setSessionFlag)
-        setSession({...session, showTagTooltips: !session.showTagTooltips})
+        await functions.post("/api/user/showtagtooltips", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const showTagBanner = async () => {
-        functions.post("/api/user/showtagbanner", null, session, setSessionFlag)
-        setSession({...session, showTagBanner: !session.showTagBanner})
+        await functions.post("/api/user/showtagbanner", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const downloadPixivID = async () => {
-        functions.post("/api/user/downloadpixivid", null, session, setSessionFlag)
-        setSession({...session, downloadPixivID: !session.downloadPixivID})
+        await functions.post("/api/user/downloadpixivid", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const forceNoteBubbles = async () => {
-        functions.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
-        setSession({...session, forceNoteBubbles: !session.forceNoteBubbles})
+        await functions.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
     }
 
     const showR18 = async () => {
         if (session.showR18) {
-            functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
-            setSession({...session, showR18: false})
+            await functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
+            functions.clearResponseCacheKey("/api/user/session")
+            setSessionFlag(true)
         } else {
             setR18Confirmation(true)
         }
@@ -328,8 +336,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const upscaledImages = async () => {
         if (permissions.isPremium(session)) {
-            functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
-            setSession({...session, upscaledImages: !session.upscaledImages})
+            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            functions.clearResponseCacheKey("/api/user/session")
+            setSessionFlag(true)
         } else {
             setPremiumRequired(true)
         }
@@ -339,6 +348,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const autosearchInterval = async () => {
             clearTimeout(intervalTimer) 
             intervalTimer = setTimeout(() => {
+                functions.clearResponseCacheKey("/api/user/session")
                 functions.post("/api/user/autosearchinterval", {interval: functions.safeNumber(interval)}, session, setSessionFlag)
                 .then(() => setSessionFlag(true))
             }, 1000)
@@ -361,6 +371,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.post("/api/user/changebio", {bio}, session, setSessionFlag)
+            functions.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
             setError(false)
             setShowBioInput(false)
@@ -520,12 +531,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const clearPfp = async () => {
         await functions.delete("/api/user/pfp", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
         setUserImg("")
         setSessionFlag(true)
     }
 
     const showBanner = async () => {
         localStorage.removeItem("bannerHideDate")
+        functions.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
