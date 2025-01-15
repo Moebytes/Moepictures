@@ -26,6 +26,7 @@ import CaptchaDialog from "./misc/CaptchaDialog"
 import DownloadDialog from "./misc/DownloadDialog"
 import PageDialog from "./misc/PageDialog"
 import PremiumRequiredDialog from "./misc/PremiumRequiredDialog"
+import QRCodeDialog from "./misc/QRCodeDialog"
 import R18Dialog from "./misc/R18Dialog"
 import DeleteNoteHistoryDialog from "./note/DeleteNoteHistoryDialog"
 import EditNoteDialog from "./note/EditNoteDialog"
@@ -108,6 +109,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <DownloadDialog/>
         <PageDialog/>
         <PremiumRequiredDialog/>
+        <QRCodeDialog/>
         <R18Dialog/>
         <DeleteNoteHistoryDialog/>
         <EditNoteDialog/>

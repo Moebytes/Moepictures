@@ -467,7 +467,8 @@
         "borderRadius": "ボーダー半径",
         "characterTag": "キャラクタータグ",
         "joined": "参加",
-        "speed": "スピード"
+        "speed": "スピード",
+        "dimensions": "寸法"
     },
     "errors": {
         "$401":"401エラー",
@@ -1122,6 +1123,9 @@
             "header": "この文字列を含むタグを一括インプリメントする。同じカテゴリのタグのみが影響を受けます。",
             "wildcard": "ワイルドカード",
             "implyTo": "を意味する"
+        },
+        "qrcode": {
+            "title": "QRコード"
         }
     },
     "help": {

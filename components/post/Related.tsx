@@ -57,6 +57,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     const searchPosts = async () => {
+        // These posts won't have related for performance
+        if (props.post?.type === "model" || props.post?.type === "live2d") return []
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
         rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
@@ -124,6 +126,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (!props.count && (session.username && !session.showRelated)) return
         if (ended) return
+        if (props.post?.type === "model" || props.post?.type === "live2d") return
         let newOffset = offset + 100
         let padded = false
         if (!scroll) {

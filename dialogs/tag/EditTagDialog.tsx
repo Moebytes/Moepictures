@@ -45,6 +45,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const editTag = async () => {
         if (!editTagObj) return
         if (permissions.isContributor(session)) {
+            functions.clearResponseCacheKey("/api/search/tags")
             setEditTagFlag(true)
         } else {
             const badReason = functions.validateReason(editTagObj.reason, i18n)

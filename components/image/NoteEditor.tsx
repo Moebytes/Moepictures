@@ -164,11 +164,13 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const [init, setInit] = useState(false)
 
     useEffect(() => {
-        if (init) {
-            setVisible(active && noteDrawingEnabled)
-        } else {
-            setInit(true)
-        }
+        setTimeout(() => {
+            if (init) {
+                setVisible(active && noteDrawingEnabled)
+            } else {
+                setInit(true)
+            }
+        }, 100)
     }, [active, noteDrawingEnabled])
 
     const getFilter = () => {

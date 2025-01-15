@@ -644,7 +644,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong post={post} audio={image} order={order} next={next} previous={previous} noteID={noteID}/>
+                <PostSong post={post} audio={image} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
                 <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -655,7 +655,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <>
-                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} noteID={noteID}/>
+                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
                 <PostImageOptions post={post} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )

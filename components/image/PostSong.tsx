@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
-useSessionActions} from "../../store"
+useSessionActions, useMiscDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../../assets/icons/audio-reverse.png"
@@ -18,19 +18,25 @@ import audioVolumeIcon from "../../assets/icons/audio-volume.png"
 import audioVolumeLowIcon from "../../assets/icons/audio-volume-low.png"
 import audioVolumeMuteIcon from "../../assets/icons/audio-volume-mute.png"
 import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import audioReverseSearchIcon from "../../assets/icons/reverse-search.png"
+import reverseSearchIcon from "../../assets/icons/reverse-search.png"
+import shareIcon from "../../assets/icons/share.png"
 import google from "../../assets/icons/google-purple.png"
 import bing from "../../assets/icons/bing-purple.png"
 import yandex from "../../assets/icons/yandex-purple.png"
 import saucenao from "../../assets/icons/saucenao-purple.png"
 import ascii2d from "../../assets/icons/ascii2d-purple.png"
+import twitter from "../../assets/icons/twitter-purple.png"
+import reddit from "../../assets/icons/reddit-purple.png"
+import pinterest from "../../assets/icons/pinterest-purple.png"
+import qrcode from "../../assets/icons/qrcode.png"
 import expand from "../../assets/icons/expand.png"
 import contract from "../../assets/icons/contract.png"
 import NoteEditor from "./NoteEditor"
 import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
 import path from "path"
-import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import QRCode from "qrcode"
+import {PostFull, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
 import "./styles/postsong.less"
 
 interface Props {
@@ -48,6 +54,7 @@ interface Props {
     previous?: () => void
     next?: () => void
     noteID?: string | null
+    artists?: MiniTag[]
 }
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
@@ -65,6 +72,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setQRCodeImage} = useMiscDialogActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -90,7 +98,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [showReverseIcons, setShowReverseIcons] = useState(false)
+    const [showShareIcons, setShowShareIcons] = useState(false)
     const [tempLink, setTempLink] = useState("")
+    const [audioTempLink, setAudioTempLink] = useState("")
 
     useEffect(() => {
         setAudioPaused(false)
@@ -116,7 +126,10 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setAudioPost(props.post)
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
-        if (props.audio) setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
+        if (props.audio) {
+            setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
+            setAudioTempLink("")
+        }
     }, [props.audio])
 
     useEffect(() => {
@@ -441,7 +454,42 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [coverImg])
 
-    const audioReverseSearch = async (service: string) => {
+    const generateTempLink = async (audio?: boolean) => {
+        const arrayBuffer = await fetch(audio ? props.audio : coverImg).then((r) => r.arrayBuffer())
+        let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        if (audio) {
+            setAudioTempLink(url)
+        } else {
+            localStorage.setItem("reverseSearchLink", url)
+            setTempLink(url)
+        }
+        return url
+    }
+
+    const generateQRCode = async () => {
+        let img = audioTempLink
+        if (!tempLink) img = await generateTempLink(true)
+        QRCode.toDataURL(img, {margin: 0}, (err, url) => {
+            setQRCodeImage(url)
+        })
+    }
+
+    const sharePost = async (site: string) => {
+        if (!props.post || !props.artists) return
+        let url = `${window.location.origin}${window.location.pathname}`
+        let text = `${props.post.englishTitle || props.post.title} by ${props.artists[0].tag}\n\n`
+        if (site === "pinterest") {
+            let img = tempLink
+            if (!tempLink) img = await generateTempLink()
+            window.open(`http://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${img}&description=${encodeURIComponent(text)}`, "_blank")
+        } else if (site === "twitter") {
+            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank")
+        } else if (site === "reddit") {
+            window.open(`https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text.trim())}`, "_blank")
+        }
+    }
+
+    const reverseSearch = async (service: string) => {
         if (!coverImg) return
         const baseMap = {
             "google": "https://lens.google.com/uploadbyurl?url=",
@@ -451,12 +499,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             "ascii2d": "https://ascii2d.net/search/url/"
         }
         let url = tempLink
-        if (!tempLink) {
-            const arrayBuffer = await fetch(coverImg).then((r) => r.arrayBuffer())
-            url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
-            localStorage.setItem("reverseSearchLink", url)
-            setTempLink(url)
-        }
+        if (!tempLink) url = await generateTempLink()
         window.open(baseMap[service] + encodeURIComponent(url), "_blank", "noreferrer")
     }
 
@@ -465,13 +508,18 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             {!props.noNotes ? <NoteEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={imageWidth} imageHeight={imageHeight}/> : null}
             <div className="post-song-box" ref={containerRef}>
                 <div className="post-song-filters" ref={fullscreenRef}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => audioReverseSearch("google")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => audioReverseSearch("bing")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => audioReverseSearch("yandex")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => audioReverseSearch("saucenao")}/> : null}
-                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => audioReverseSearch("ascii2d")}/> : null}
-                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={audioReverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false); setShowShareIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter: getFilter()}} onClick={() => generateQRCode()}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={pinterest} style={{filter: getFilter()}} onClick={() => sharePost("pinterest")}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={twitter} style={{filter: getFilter()}} onClick={() => sharePost("twitter")}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={reddit} style={{filter: getFilter()}} onClick={() => sharePost("reddit")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
+                        {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} onClick={() => setShowShareIcons((prev: boolean) => !prev)}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>

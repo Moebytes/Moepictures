@@ -466,7 +466,8 @@
         "borderRadius": "Border Radius",
         "characterTag": "Character Tag",
         "joined": "Joined",
-        "speed": "Speed"
+        "speed": "Speed",
+        "dimensions": "Dimensions"
     },
     "errors": {
         "$401":"401 error",
@@ -1121,6 +1122,9 @@
             "header": "Mass imply tags containing this string. Only tags of the same category are affected.",
             "wildcard": "Wildcard",
             "implyTo": "Imply To"
+        },
+        "qrcode": {
+            "title": "QR Code"
         }
     },
     "help": {

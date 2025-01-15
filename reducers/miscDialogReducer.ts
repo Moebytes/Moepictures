@@ -14,7 +14,8 @@ const miscDialogSlice = createSlice({
         premiumRequired: false as string | boolean,
         r18Confirmation: false,
         disable2FADialog: false,
-        disable2FAFlag: false
+        disable2FAFlag: false,
+        qrcodeImage: ""
     },
     reducers: {
         setShowDownloadDialog: (state, action) => {state.showDownloadDialog = action.payload},
@@ -26,14 +27,16 @@ const miscDialogSlice = createSlice({
         setPremiumRequired: (state, action) => {state.premiumRequired = action.payload},
         setR18Confirmation: (state, action) => {state.r18Confirmation = action.payload},
         setDisable2FADialog: (state, action) => {state.disable2FADialog = action.payload},
-        setDisable2FAFlag: (state, action) => {state.disable2FAFlag = action.payload}
+        setDisable2FAFlag: (state, action) => {state.disable2FAFlag = action.payload},
+        setQRCodeImage: (state, action) => {state.qrcodeImage = action.payload}
     }
 })
 
 const {
     setShowDownloadDialog, setShowPageDialog, setShowDeleteAccountDialog,
     setBanName, setUnbanName, setPromoteName, setPremiumRequired,
-    setR18Confirmation, setDisable2FADialog, setDisable2FAFlag
+    setR18Confirmation, setDisable2FADialog, setDisable2FAFlag,
+    setQRCodeImage
 } = miscDialogSlice.actions
 
 export const useMiscDialogSelector = () => {
@@ -48,7 +51,8 @@ export const useMiscDialogSelector = () => {
         premiumRequired: selector((state) => state.miscDialog.premiumRequired),
         r18Confirmation: selector((state) => state.miscDialog.r18Confirmation),
         disable2FADialog: selector((state) => state.miscDialog.disable2FADialog),
-        disable2FAFlag: selector((state) => state.miscDialog.disable2FAFlag)
+        disable2FAFlag: selector((state) => state.miscDialog.disable2FAFlag),
+        qrcodeImage: selector((state) => state.miscDialog.qrcodeImage)
     }
 }
 
@@ -64,7 +68,8 @@ export const useMiscDialogActions = () => {
         setPremiumRequired: (state: string | boolean) => dispatch(setPremiumRequired(state)),
         setR18Confirmation: (state: boolean) => dispatch(setR18Confirmation(state)),
         setDisable2FADialog: (state: boolean) => dispatch(setDisable2FADialog(state)),
-        setDisable2FAFlag: (state: boolean) => dispatch(setDisable2FAFlag(state))
+        setDisable2FAFlag: (state: boolean) => dispatch(setDisable2FAFlag(state)),
+        setQRCodeImage: (state: string) => dispatch(setQRCodeImage(state))
     }
 }
 

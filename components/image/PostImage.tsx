@@ -37,22 +37,28 @@ import imageFullscreenIcon from "../../assets/icons/image-fullscreen.png"
 import noteToggleOn from "../../assets/icons/note-toggle-on.png"
 import waifu2xIcon from "../../assets/icons/waifu2x.png"
 import reverseSearchIcon from "../../assets/icons/reverse-search.png"
+import shareIcon from "../../assets/icons/share.png"
 import google from "../../assets/icons/google-purple.png"
 import bing from "../../assets/icons/bing-purple.png"
 import yandex from "../../assets/icons/yandex-purple.png"
 import saucenao from "../../assets/icons/saucenao-purple.png"
 import ascii2d from "../../assets/icons/ascii2d-purple.png"
+import twitter from "../../assets/icons/twitter-purple.png"
+import reddit from "../../assets/icons/reddit-purple.png"
+import pinterest from "../../assets/icons/pinterest-purple.png"
+import qrcode from "../../assets/icons/qrcode.png"
 import expand from "../../assets/icons/expand.png"
 import contract from "../../assets/icons/contract.png"
 import NoteEditor from "./NoteEditor"
 import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
 import JSZip from "jszip"
+import QRCode from "qrcode"
 import {TransformWrapper, TransformComponent, ReactZoomPanPinchRef} from "react-zoom-pan-pinch"
 import path from "path"
 import mime from "mime-types"
 import "./styles/postimage.less"
-import {GIFFrame, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -70,6 +76,7 @@ interface Props {
     previous?: () => void
     next?: () => void
     noteID?: string | null
+    artists?: MiniTag[]
 }
 
 let timeout = null as any
@@ -93,7 +100,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {setSidebarText} = useActiveActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs, setRedirect} = useFlagActions()
-    const {setPremiumRequired} = useMiscDialogActions()
+    const {setPremiumRequired, setQRCodeImage} = useMiscDialogActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -141,6 +148,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [showReverseIcons, setShowReverseIcons] = useState(false)
+    const [showShareIcons, setShowShareIcons] = useState(false)
     const [tempLink, setTempLink] = useState("")
     const [img, setImg] = useState("")
     const history = useHistory()
@@ -1348,6 +1356,46 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (mobile) setImageExpand(false)
     }, [mobile])
 
+    const generateTempLink = async () => {
+        if (!props.post) return ""
+        const image = props.post.images[(props.order || 1) - 1]
+        let img = ""
+        if (typeof image === "string") {
+            img = functions.getRawImageLink(image)
+        } else {
+            img = functions.getImageLink(image.type, props.post.postID, image.order, image.filename)
+        }
+        let response = await fetch(`${img}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+        const arrayBuffer = await functions.decryptBuffer(response, img, session)
+        let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        localStorage.setItem("reverseSearchLink", url)
+        setTempLink(url)
+        return url
+    }
+
+    const generateQRCode = async () => {
+        let img = tempLink
+        if (!tempLink) img = await generateTempLink()
+        QRCode.toDataURL(img, {margin: 0}, (err, url) => {
+            setQRCodeImage(url)
+        })
+    }
+
+    const sharePost = async (site: string) => {
+        if (!props.post || !props.artists) return
+        let url = `${window.location.origin}${window.location.pathname}`
+        let text = `${props.post.englishTitle} (${props.post.title}) by ${props.artists[0].tag} (${props.post.artist})\n\n`
+        if (site === "pinterest") {
+            let img = tempLink
+            if (!tempLink) img = await generateTempLink()
+            window.open(`http://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${img}&description=${encodeURIComponent(text)}`, "_blank")
+        } else if (site === "twitter") {
+            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank")
+        } else if (site === "reddit") {
+            window.open(`https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text.trim())}`, "_blank")
+        }
+    }
+
     const reverseSearch = async (service: string) => {
         if (!props.post) return
         const baseMap = {
@@ -1357,22 +1405,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             "saucenao": "https://saucenao.com/search.php?url=",
             "ascii2d": "https://ascii2d.net/search/url/"
         }
-        let url = tempLink
-        if (!tempLink) {
-            const image = props.post.images[(props.order || 1) - 1]
-            let thumbnail = ""
-            if (typeof image === "string") {
-                thumbnail = functions.getRawThumbnailLink(image, "massive", mobile)
-            } else {
-                thumbnail = functions.getThumbnailLink(image.type, props.post.postID, image.order, image.filename, "massive")
-            }
-            const decryptedImage = await functions.decryptThumb(thumbnail, session, `reverse-${thumbnail}`, true)
-            const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
-            url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
-            localStorage.setItem("reverseSearchLink", url)
-            setTempLink(url)
-        }
-        window.open(baseMap[service] + encodeURIComponent(url), "_blank", "noreferrer")
+        let img = tempLink
+        if (!tempLink) img = await generateTempLink()
+        window.open(baseMap[service] + encodeURIComponent(img), "_blank", "noreferrer")
     }
 
     return (
@@ -1380,12 +1415,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             {!props.noNotes ? <NoteEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight}/> : null}
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false); setShowShareIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter: getFilter()}} onClick={() => generateQRCode()}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={pinterest} style={{filter: getFilter()}} onClick={() => sharePost("pinterest")}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={twitter} style={{filter: getFilter()}} onClick={() => sharePost("twitter")}/> : null}
+                        {showShareIcons ? <img draggable={false} className="post-image-top-button" src={reddit} style={{filter: getFilter()}} onClick={() => sharePost("reddit")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/> : null}
                         {showReverseIcons ? <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/> : null}
+                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} onClick={() => setShowShareIcons((prev: boolean) => !prev)}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} onClick={() => setShowReverseIcons((prev: boolean) => !prev)}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
                         {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}

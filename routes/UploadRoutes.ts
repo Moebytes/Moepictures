@@ -326,6 +326,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       }
   
       let dimensions = null as any
+      let upscaledDimensions = null as any
       let hash = ""
       if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
           let thumbBuffer = null as Buffer | null
@@ -343,21 +344,25 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
             thumbUpscaledBuffer = upscaledBufferFallback
           }
           hash = await phash(thumbBuffer).then((hash: string) => functions.binaryToHex(hash))
-          dimensions = await sharp(thumbUpscaledBuffer).metadata()
+          if (buffer?.byteLength) dimensions = await sharp(thumbBuffer).metadata()
+          if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(thumbUpscaledBuffer).metadata()
           if (kind === "live2d") {
             dimensions.width = upscaled.width
             dimensions.height = upscaled.height
           }
       } else {
           hash = await phash(bufferFallback).then((hash: string) => functions.binaryToHex(hash))
-          dimensions = await sharp(upscaledBufferFallback).metadata()
+          if (buffer?.byteLength) dimensions = await sharp(buffer).metadata()
+          if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(upscaledBuffer).metadata()
       }
       if (unverified) {
         await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions.width, dimensions.height, buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
+        dimensions.width, dimensions.height, upscaledDimensions.width, upscaledDimensions.height, 
+        buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
       } else {
         await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions.width, dimensions.height, buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
+        dimensions.width, dimensions.height, upscaledDimensions.width, upscaledDimensions.height, 
+        buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
       }
     }
   }

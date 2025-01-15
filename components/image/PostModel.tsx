@@ -709,25 +709,41 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < morphTargets.length; i++) {
             jsx.push(
-                <div className="model-morph-dropdown-row morph-row">
+                <div className="model-dropdown-row model-row">
                     {/* <img className="morph-dropdown-img" src={getAmbientIcon()}/> */}
-                    <span className="morph-dropdown-text">{morphTargets[i].name}</span>
-                    <Slider className="morph-slider" trackClassName="morph-slider-track" thumbClassName="morph-slider-thumb" onChange={(value) => updateMorphTargets(value, i)} min={0} max={1} step={0.05} value={morphTargets[i].value}/>
+                    <span className="model-dropdown-text">{morphTargets[i].name}</span>
+                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => updateMorphTargets(value, i)} min={0} max={1} step={0.05} value={morphTargets[i].value}/>
                 </div>
             )
         }
 
         return (
-            <div className={`model-morph-dropdown ${showMorphDropdown ? "" : "hide-morph-dropdown"}`}
+            <div className={`model-dropdown ${showMorphDropdown ? "" : "hide-model-dropdown"}`}
             style={{marginRight: getModelMorphMarginRight(), top: `-300px`}}>
-                <div className="model-morph-dropdown-container">
+                <div className="model-dropdown-container">
                     {jsx}
-                    <div className="model-morph-dropdown-row morph-row">
-                        <button className="morph-button" onClick={() => resetMorphTargets()}>Reset</button>
+                    <div className="model-dropdown-row model-row">
+                        <button className="model-button" onClick={() => resetMorphTargets()}>Reset</button>
                     </div>
                 </div>
             </div>
         )
+    }
+
+    const toggleDropdown = (type: string) => {
+        if (type === "morph") {
+            setShowLightDropdown(false)
+            setShowSpeedDropdown(false)
+            setShowMorphDropdown((prev) => !prev)
+        } else if (type === "light") {
+            setShowMorphDropdown(false)
+            setShowSpeedDropdown(false)
+            setShowLightDropdown((prev) => !prev)
+        } else if (type === "speed") {
+            setShowMorphDropdown(false)
+            setShowLightDropdown(false)
+            setShowSpeedDropdown((prev) => !prev)
+        }
     }
 
     return (
@@ -755,23 +771,23 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                             <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 {animations ? <>
                                 <div className="model-control-row-container">
-                                    <img draggable={false} className="model-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
-                                    <img draggable={false} className="model-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
+                                    <img draggable={false} className="image-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => toggleDropdown("speed")}/>
                                 </div> 
                                 <div className="model-control-row-container">
-                                    <img draggable={false} className="model-control-img" src={modelClearIcon} onClick={reset}/>
+                                    <img draggable={false} className="image-control-img" src={modelClearIcon} onClick={reset}/>
                                     {/* <img className="control-img" src={modelRewindIcon}/> */}
-                                    <img draggable={false} className="model-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
                                     {/* <img className="control-img" src={modelFastforwardIcon}/> */}
                                 </div></> : null}
                                 <div className="model-control-row-container">
-                                    <img draggable={false} className="model-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
-                                    <img draggable={false} className="model-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
-                                    <img draggable={false} className="model-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => setShowMorphDropdown((prev) => !prev)}/>
-                                    <img draggable={false} className="model-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => setShowLightDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
+                                    <img draggable={false} className="image-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => toggleDropdown("morph")}/>
+                                    <img draggable={false} className="image-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => toggleDropdown("light")}/>
                                 </div> 
                                 <div className="model-control-row-container">
-                                    <img draggable={false} className="model-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
+                                    <img draggable={false} className="image-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
                                 </div> 
                             </div>
                             <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getModelSpeedMarginRight(), marginTop: "-240px"}}
@@ -807,25 +823,25 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                 </div>
                             </div>
                             {shapeKeysDropdownJSX()}
-                            <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`}
-                            style={{marginRight: getModelLightMarginRight(), top: `-120px`}}>
-                                <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={ambientLightIcon} style={{filter: getFilter()}}/>
-                                    <span className="light-dropdown-text">Ambient</span>
-                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
+                            <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
+                            style={{marginRight: getModelLightMarginRight(), top: `-140px`}}>
+                                <div className="model-dropdown-row model-row">
+                                    <img draggable={false} className="model-dropdown-img" src={ambientLightIcon}/>
+                                    <span className="model-dropdown-text">Ambient</span>
+                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
                                 </div>
-                                <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={directionalLightIcon} style={{filter: getFilter()}}/>
-                                    <span className="light-dropdown-text">Directional Front</span>
-                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
+                                <div className="model-dropdown-row model-row">
+                                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
+                                    <span className="model-dropdown-text">Directional Front</span>
+                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
                                 </div>
-                                <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={directionalLightIcon} style={{filter: getFilter()}}/>
-                                    <span className="light-dropdown-text">Directional Back</span>
-                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
+                                <div className="model-dropdown-row model-row">
+                                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
+                                    <span className="model-dropdown-text">Directional Back</span>
+                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
                                 </div>
-                                <div className="model-light-dropdown-row lights-row">
-                                    <button className="lights-button" onClick={() => resetLights()}>Reset</button>
+                                <div className="model-dropdown-row model-row">
+                                    <button className="model-button" onClick={() => resetLights()}>Reset</button>
                                 </div>
                             </div>
                         </div>

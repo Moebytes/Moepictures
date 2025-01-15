@@ -27,6 +27,8 @@ export interface Image {
     upscaledFilename: string
     width: number
     height: number
+    upscaledWidth: number
+    upscaledHeight: number
     size: number
     upscaledSize: number
     hash: string
