@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
-useFlagSelector, useFlagActions} from "../../store"
+useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import pageIcon from "../../assets/icons/page.png"
@@ -30,7 +30,8 @@ interface Props {
 const Related: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
-    const {setPosts} = useCacheActions()
+    const {related} = useCacheSelector()
+    const {setPosts, setRelated} = useCacheActions()
     const {ratingType, square, showChildren, scroll} = useSearchSelector()
     const {setSearch, setSearchFlag, setScroll, setSquare} = useSearchActions()
     const {session} = useSessionSelector()
@@ -40,21 +41,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
     const {setShowPageDialog} = useMiscDialogActions()
-    const [related, setRelated] = useState([] as PostSearch[])
     const [visibleRelated, setVisibleRelated] = useState([] as PostSearch[])
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [index, setIndex] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [init, setInit] = useState(true)
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const history = useHistory()
 
     let rating = props.post?.rating || (ratingType === functions.r18() ? functions.r18() : "all")
-
-    useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-    }, [])
 
     const searchPosts = async () => {
         // These posts won't have related for performance
@@ -85,6 +81,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateRelated = async () => {
+        if (init && related.length) {
+            return setInit(false)
+        }
         if (!props.count && (session.username && !session.showRelated)) return
         if (!props.tag) return
         let result = await searchPosts()
@@ -157,14 +156,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (padded) {
                 setRelated(functions.removeDuplicates(result))
             } else {
-                setRelated((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRelated(functions.removeDuplicates([...related, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRelated(functions.removeDuplicates(result))
                 } else {
-                    setRelated((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRelated(functions.removeDuplicates([...related, ...result]))
                 }
             }
             setEnded(true)
@@ -367,7 +366,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

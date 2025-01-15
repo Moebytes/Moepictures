@@ -99,13 +99,9 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const replyParam = new URLSearchParams(window.location.search).get("reply")
         const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("threadPage")
-            if (savedPage && Number(savedPage) > 0) setThreadPage(Number(savedPage))
             if (pageParam && Number(pageParam) > 0) {
                 setQueryPage(Number(pageParam))
                 setThreadPage(Number(pageParam))
@@ -282,10 +278,6 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             setPageFlag(null)
         }
     }, [pageFlag])
-
-    useEffect(() => {
-        localStorage.setItem("threadPage", String(threadPage || ""))
-    }, [threadPage])
 
     const maxPage = () => {
         if (!replies?.length) return 1

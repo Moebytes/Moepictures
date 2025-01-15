@@ -15,21 +15,6 @@ const Footer: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
 
-    useEffect(() => {
-        const savedLanguage = localStorage.getItem("language")
-        const browserLang = window.navigator.language.split("-")[0]
-        const langPref = savedLanguage || browserLang
-        if (langPref === "ja") {
-            setLanguage("ja")
-        } else {
-            setLanguage("en")
-        }
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("language", language)
-    }, [language])
-
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }

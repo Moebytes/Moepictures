@@ -55,13 +55,9 @@ const NotesPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("notesPage")
-            if (savedPage) setNotesPage(Number(savedPage))
             if (queryParam) setNoteSearchFlag(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -283,10 +279,6 @@ const NotesPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("notesPage", String(notesPage || ""))
-    }, [notesPage])
-
     const maxPage = () => {
         if (!notes?.length) return 1
         if (Number.isNaN(Number(notes[0]?.noteCount))) return 10000
@@ -401,7 +393,6 @@ const NotesPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

@@ -153,16 +153,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         updateUserImg()
         const savedUploaderImage = localStorage.getItem("uploaderImage")
         if (savedUploaderImage) setUploaderImage(savedUploaderImage)
-        const savedSaveSearch = localStorage.getItem("saveSearch")
-        if (savedSaveSearch) setSaveSearch(savedSaveSearch === "true")
     }, [session])
 
     useEffect(() => {
         functions.linkToBase64(uploaderImage).then((uploaderImage) => {
             localStorage.setItem("uploaderImage", uploaderImage)
         })
-        localStorage.setItem("saveSearch", String(saveSearch))
-    }, [uploaderImage, saveSearch])
+    }, [uploaderImage])
 
     useEffect(() => {
         updateUserImg()

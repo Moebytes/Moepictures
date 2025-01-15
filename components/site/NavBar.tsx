@@ -145,7 +145,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             newTheme = "light"
         }
         setTheme(newTheme as Themes)
-        localStorage.setItem("theme", newTheme)
     }
 
     const getEyedropperIcon = () => {
@@ -392,7 +391,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

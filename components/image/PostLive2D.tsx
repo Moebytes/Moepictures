@@ -83,16 +83,12 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const savedFPS = localStorage.getItem("live2dFPS")
         if (savedFPS) setFPS(Number(savedFPS))
-        const savedDisableZoom = localStorage.getItem("disableZoom")
-        if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
         setPaused(false)
     }, [])
 
     useEffect(() => {
         localStorage.setItem("live2dFPS", String(fps))
-        localStorage.setItem("disableZoom", String(disableZoom))
-        localStorage.setItem("paused", String(paused))
-    }, [fps, disableZoom, paused])
+    }, [fps])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

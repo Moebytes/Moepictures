@@ -55,14 +55,10 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const commentParam = new URLSearchParams(window.location.search).get("comment")
         const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("commentsPage")
-            if (savedPage) setCommentsPage(Number(savedPage))
             if (queryParam) setCommentSearchFlag(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -322,10 +318,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("commentsPage", String(commentsPage || ""))
-    }, [commentsPage])
-
     const maxPage = () => {
         if (!comments?.length) return 1
         if (Number.isNaN(Number(comments[0]?.commentCount))) return 10000
@@ -440,7 +432,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

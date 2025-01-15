@@ -26,16 +26,6 @@ const PostsPage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        const savedTitlebar = localStorage.getItem("titlebar")
-        if (savedTitlebar === "false") {
-            setHideTitlebar(true)
-            setHideNavbar(true)
-        }
-        const savedSidebar = localStorage.getItem("sidebar")
-        if (savedSidebar === "true") setHideSidebar(true)
-        const savedSquare = localStorage.getItem("square")
-        if (savedSquare === "true") setSquare(true)
-
         return () => {
             setMobileScrolling(false)
         }

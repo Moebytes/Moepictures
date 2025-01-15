@@ -67,13 +67,10 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         getFavorite()
         const savedDownloadText = localStorage.getItem("downloadText")
         if (savedDownloadText) setDownloadText(savedDownloadText)
-        const savedFormat = localStorage.getItem("format")
-        if (savedFormat) setFormat(savedFormat as ImageFormat)
     }, [])
 
     useEffect(() => {
         localStorage.setItem("downloadText", downloadText)
-        localStorage.setItem("format", format)
     }, [downloadText, format])
 
     useEffect(() => {
@@ -120,18 +117,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         getFavorite()
         getFavgroup()
     }, [props.post, session])
-
-    useEffect(() => {
-        localStorage.setItem("brightness", String(brightness))
-        localStorage.setItem("contrast", String(contrast))
-        localStorage.setItem("hue", String(hue))
-        localStorage.setItem("saturation", String(saturation))
-        localStorage.setItem("lightness", String(lightness))
-        localStorage.setItem("blur", String(blur))
-        localStorage.setItem("sharpen", String(sharpen))
-        localStorage.setItem("pixelate", String(pixelate))
-        localStorage.setItem("splatter", String(splatter))
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
 
     const getStar = () => {
         if (favorited) {

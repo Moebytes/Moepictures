@@ -57,13 +57,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("charactersPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setCharactersPage(Number(savedPage))
             if (queryParam) updateCharacters(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -277,10 +273,6 @@ const CharactersPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("charactersPage", String(charactersPage || ""))
-    }, [charactersPage])
-
     const maxPage = () => {
         if (!characters?.length) return 1
         if (Number.isNaN(Number(characters[0]?.tagCount))) return 10000
@@ -396,7 +388,6 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

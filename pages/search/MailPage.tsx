@@ -59,15 +59,11 @@ const MailPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const savedHideSystem = localStorage.getItem("hideSystem")
         if (savedHideSystem) setHideSystem(savedHideSystem === "true")
-        const savedPage = localStorage.getItem("mailPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setMailPage(Number(savedPage))
             if (queryParam) updateMessages(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -318,10 +314,6 @@ const MailPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("mailPage", String(mailPage || ""))
-    }, [mailPage])
-
     const maxPage = () => {
         if (!messages?.length) return 1
         if (Number.isNaN(Number(messages[0]?.messageCount))) return 10000
@@ -434,7 +426,6 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

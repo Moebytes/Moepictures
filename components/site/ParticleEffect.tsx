@@ -1,30 +1,11 @@
 import React, {useEffect, useState, useMemo} from "react"
-import {useThemeSelector, useThemeActions} from "../../store"
+import {useThemeSelector} from "../../store"
 import {loadSnowPreset} from "@tsparticles/preset-snow"
 import {loadAll} from "@tsparticles/all"
 
 const ParticleEffect: React.FunctionComponent = (props) => {
     const {theme, siteHue, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
-    const {setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const [jsx, setJSX] = useState(null as React.ReactElement | null)
-
-    useEffect(() => {
-        const savedParticles = localStorage.getItem("particles")
-        if (savedParticles) setParticles(savedParticles === "true")
-        const savedParticleAmount = localStorage.getItem("particleAmount")
-        if (savedParticleAmount) setParticleAmount(Number(savedParticleAmount))
-        const savedParticleSize = localStorage.getItem("particleSize")
-        if (savedParticleSize) setParticleSize(Number(savedParticleSize))
-        const savedParticleSpeed = localStorage.getItem("particleSpeed")
-        if (savedParticleSpeed) setParticleSpeed(Number(savedParticleSpeed))
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("particles", String(particles))
-        localStorage.setItem("particleAmount", String(particleAmount))
-        localStorage.setItem("particleSize", String(particleSize))
-        localStorage.setItem("particleSpeed", String(particleSpeed))
-    }, [particles, particleAmount, particleSize, particleSpeed])
 
     const computedColor = () => {
         if (theme === "dark") return "#ffffff"

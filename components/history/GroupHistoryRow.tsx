@@ -249,14 +249,14 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         let changes = props.groupHistory.changes || {}
         let postChanges = props.groupHistory.addedPosts?.length || props.groupHistory.removedPosts?.length
         if (!prevHistory || changes.name) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}:</span> {props.groupHistory.name}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}: </span>{props.groupHistory.name}</span>)
         }
         if (!prevHistory || changes.description) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}:</span> {props.groupHistory.description || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}: </span>{props.groupHistory.description || i18n.labels.none}</span>)
         }
         if (postChanges) {
             if (postDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posts}:</span> {postDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posts}: </span>{postDiff()}</span>)
             }
         }
         if (!jsx.length && !props.groupHistory.orderChanged) {

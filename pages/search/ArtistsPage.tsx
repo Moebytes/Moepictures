@@ -57,13 +57,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("artistsPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setArtistsPage(Number(savedPage))
             if (queryParam) updateArtists(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -276,10 +272,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("artistsPage", String(artistsPage || ""))
-    }, [artistsPage])
-
     const maxPage = () => {
         if (!artists?.length) return 1
         if (Number.isNaN(Number(artists[0]?.tagCount))) return 10000
@@ -394,7 +386,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

@@ -67,7 +67,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {showUpscaled} = useSearchSelector()
     const {setShowUpscaled} = useSearchActions()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen} = useFilterActions()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen, setSplatter} = useFilterActions()
     const {uploadDropFiles} = useCacheSelector()
     const {setUploadDropFiles} = useCacheActions()
     const [displayImage, setDisplayImage] = useState(false)
@@ -150,6 +150,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setBlur(0)
         setSharpen(0)
         setPixelate(1)
+        setSplatter(0)
 
         parseLinkParam()
         const savedHideGuidelines = localStorage.getItem("hideGuidelines")

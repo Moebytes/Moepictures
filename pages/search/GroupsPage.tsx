@@ -54,13 +54,9 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("groupsPage")
-            if (savedPage) setGroupsPage(Number(savedPage))
             if (queryParam) setGroupSearchFlag(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -284,10 +280,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("groupsPage", String(groupsPage || ""))
-    }, [groupsPage])
-
     const maxPage = () => {
         if (!groups?.length) return 1
         if (Number.isNaN(Number(groups[0]?.groupCount))) return 10000
@@ -404,7 +396,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

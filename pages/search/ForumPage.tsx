@@ -53,13 +53,9 @@ const ForumPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("forumPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setForumPage(Number(savedPage))
             if (queryParam) updateThreads(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -281,10 +277,6 @@ const ForumPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("forumPage", String(forumPage || ""))
-    }, [forumPage])
-
     const maxPage = () => {
         if (!threads?.length) return 1
         if (Number.isNaN(Number(threads[0]?.threadCount))) return 10000
@@ -401,7 +393,6 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

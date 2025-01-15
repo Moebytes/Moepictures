@@ -57,13 +57,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("seriesPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setSeriesPage(Number(savedPage))
             if (queryParam) updateSeries(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -277,10 +273,6 @@ const SeriesPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("seriesPage", String(seriesPage || ""))
-    }, [seriesPage])
-
     const maxPage = () => {
         if (!series?.length) return 1
         if (Number.isNaN(Number(series[0]?.tagCount))) return 10000
@@ -396,7 +388,6 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

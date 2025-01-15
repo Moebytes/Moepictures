@@ -102,14 +102,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [tempLink, setTempLink] = useState("")
     const [audioTempLink, setAudioTempLink] = useState("")
 
-    useEffect(() => {
-        setAudioPaused(false)
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("paused", String(audioPaused))
-    }, [audioPaused])
-
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }

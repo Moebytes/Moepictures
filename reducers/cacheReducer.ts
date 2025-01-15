@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch, PostOrdered, Post, MiniTag, TagCount, UnverifiedPost} from "../types/Types"
+import {PostSearch, PostOrdered, Post, PostHistory, MiniTag, TagCount, TagCategories, UnverifiedPost} from "../types/Types"
 
 const cacheSlice = createSlice({
     name: "cache",
@@ -13,6 +13,12 @@ const cacheSlice = createSlice({
         visiblePosts: [] as PostSearch[],
         unverifiedPosts: [] as UnverifiedPost[],
         uploadDropFiles: [] as File[],
+        bannerTags: [] as TagCount[],
+        post: null as PostSearch | PostHistory | null,
+        tagCategories: null as TagCategories | null,
+        order: 1,
+        related: [] as PostSearch[],
+        image: ""
     },
     reducers: {
         setEmojis: (state, action) => {state.emojis = action.payload},
@@ -20,11 +26,20 @@ const cacheSlice = createSlice({
         setTags: (state, action) => {state.tags = action.payload},
         setVisiblePosts: (state, action) => {state.visiblePosts = action.payload},
         setUnverifiedPosts: (state, action) => {state.unverifiedPosts = action.payload},
-        setUploadDropFiles: (state, action) => {state.uploadDropFiles = action.payload}
+        setUploadDropFiles: (state, action) => {state.uploadDropFiles = action.payload},
+        setBannerTags: (state, action) => {state.bannerTags = action.payload},
+        setPost: (state, action) => {state.post = action.payload},
+        setTagCategories: (state, action) => {state.tagCategories = action.payload},
+        setOrder: (state, action) => {state.order = action.payload},
+        setRelated: (state, action) => {state.related = action.payload},
+        setImage: (state, action) => {state.image = action.payload}
     }    
 })
 
-const {setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles} = cacheSlice.actions
+const {
+    setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles,
+    setBannerTags, setPost, setTagCategories, setOrder, setRelated, setImage
+} = cacheSlice.actions
 
 export const useCacheSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
@@ -34,7 +49,13 @@ export const useCacheSelector = () => {
         tags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tags)),
         visiblePosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.visiblePosts)),
         unverifiedPosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.unverifiedPosts)),
-        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles))
+        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles)),
+        bannerTags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.bannerTags)),
+        post: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.post)),
+        tagCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)),
+        order: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.order)),
+        related: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.related)),
+        image: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.image))
     }
 }
 
@@ -42,11 +63,17 @@ export const useCacheActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
         setEmojis: (state: {[key: string]: string}) => dispatch(setEmojis(state)),
-        setPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => {dispatch(setPosts(state))},
+        setPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => dispatch(setPosts(state)),
         setTags: (state: MiniTag[] | TagCount[]) => dispatch(setTags(state)),
         setVisiblePosts: (state: PostSearch[]) => dispatch(setVisiblePosts(state)),
         setUnverifiedPosts: (state: UnverifiedPost[]) => dispatch(setUnverifiedPosts(state)),
-        setUploadDropFiles: (state: File[]) => dispatch(setUploadDropFiles(state))
+        setUploadDropFiles: (state: File[]) => dispatch(setUploadDropFiles(state)),
+        setBannerTags: (state: TagCount[]) => dispatch(setBannerTags(state)),
+        setPost: (state: PostSearch | PostHistory | null) => dispatch(setPost(state)),
+        setTagCategories: (state: TagCategories | null) => dispatch(setTagCategories(state)),
+        setOrder: (state: number) => dispatch(setOrder(state)),
+        setRelated: (state: PostSearch[]) => dispatch(setRelated(state)),
+        setImage: (state: string) => dispatch(setImage(state))
     }
 }
 

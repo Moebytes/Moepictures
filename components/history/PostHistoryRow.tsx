@@ -329,69 +329,69 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text-strong">[{i18n.labels.parentRemoved}]</span>)
         }
         if ((!prevHistory && props.postHistory.images.length > 1) || changes.images) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.images}:</span> {props.postHistory.images.length}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.images}: </span>{props.postHistory.images.length}</span>)
         }
         if ((!prevHistory && props.postHistory.parentID) || changes.parentID) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}:</span> <span className="historyrow-label-link" onClick={(event) => openPost(props.postHistory.parentID, event)}>{props.postHistory.parentID}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}: </span><span className="historyrow-label-link" onClick={(event) => openPost(props.postHistory.parentID, event)}>{props.postHistory.parentID}</span></span>)
         }
         if (!prevHistory || changes.type) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}:</span> {functions.toProperCase(props.postHistory.type)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}: </span>{functions.toProperCase(props.postHistory.type)}</span>)
         }
         if (!prevHistory || changes.rating) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}:</span> {functions.toProperCase(props.postHistory.rating)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}: </span>{functions.toProperCase(props.postHistory.rating)}</span>)
         }
         if (!prevHistory || changes.style) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}:</span> {functions.toProperCase(props.postHistory.style)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}: </span>{functions.toProperCase(props.postHistory.style)}</span>)
         }
         if (!prevHistory || tagChanges) {
             if (artistsDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.artists}:</span> {artistsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.artists}: </span>{artistsDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (charactersDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.characters}:</span> {charactersDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.characters}: </span>{charactersDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (seriesDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.series}:</span> {seriesDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.series}: </span>{seriesDiff()}</span>)
             }
         }
         if (!prevHistory || tagChanges) {
             if (tagsDiff()) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.tags}:</span> {tagsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.tags}: </span>{tagsDiff()}</span>)
             }
         }
         if (!prevHistory || changes.title) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.title}:</span> {props.postHistory.title || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.title}: </span>{props.postHistory.title || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.englishTitle) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishTitle}:</span> {props.postHistory.englishTitle || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishTitle}: </span>{props.postHistory.englishTitle || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.artist) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}:</span> {props.postHistory.artist || i18n.labels.unknown}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}: </span>{props.postHistory.artist || i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.posted) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}:</span> {props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}: </span>{props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.source) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.getSiteName(props.postHistory.source, i18n)}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.getSiteName(props.postHistory.source, i18n)}</span></span>)
         }
         if (!prevHistory || changes.mirrors) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}:</span> {printMirrors()}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}: </span>{printMirrors()}</span>)
         }
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}:</span> {props.postHistory.bookmarks || "?"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}: </span>{props.postHistory.bookmarks || "?"}</span>)
         }
         if ((!prevHistory && props.postHistory.buyLink) || changes.buyLink) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}:</span> {props.postHistory.buyLink || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}: </span>{props.postHistory.buyLink || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.commentary) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}:</span> {props.postHistory.commentary || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}: </span>{props.postHistory.commentary || i18n.labels.none}</span>)
         }
         if (!prevHistory || changes.englishCommentary) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishCommentary}:</span> {props.postHistory.englishCommentary || i18n.labels.none}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishCommentary}: </span>{props.postHistory.englishCommentary || i18n.labels.none}</span>)
         }
         if (!jsx.length && !props.postHistory.imageChanged) {
             jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)

@@ -104,6 +104,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email
                 req.session.emailVerified = user.emailVerified
+                req.session.cookieConsent = user.cookieConsent
                 req.session.username = user.username
                 req.session.joinDate = user.joinDate
                 req.session.image = user.image 

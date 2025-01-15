@@ -66,10 +66,11 @@ import DragAndDrop from "./components/site/DragAndDrop"
 import AudioPlayer from "./components/site/AudioPlayer"
 import ActionBanner from "./components/site/ActionBanner"
 import NewsBanner from "./components/site/NewsBanner"
+import CookieBanner from "./components/site/CookieBanner"
 import TagToolTip from "./components/tooltip/TagToolTip"
 import ToolTip from "./components/tooltip/ToolTip"
 import ParticleEffect from "./components/site/ParticleEffect"
-import {PostRating} from "./types/Types"
+import LocalStorage from "./LocalStorage"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -111,8 +112,6 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
-        const savedRating = localStorage.getItem("rating")
-        if (savedRating) setRatingType(savedRating as PostRating)
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
@@ -293,7 +292,9 @@ const App: React.FunctionComponent = (props) => {
             <DragAndDrop/>
             <NewsBanner/>
             <ActionBanner/>
+            <CookieBanner/>
             <Dialogs/>
+            <LocalStorage/>
             <TagToolTip/>
             <ToolTip/>
             <Switch>

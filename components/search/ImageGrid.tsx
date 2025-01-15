@@ -23,6 +23,7 @@ let interval = null as any
 let reloadedPost = false
 let replace = false
 let manualHistoryChange = false
+let loadingTimer = null as any
 
 let limit = 100
 
@@ -53,6 +54,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
+    const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
+    const [init, setInit] = useState(true)
     const history = useHistory()
     const location = useLocation()
 
@@ -105,6 +108,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setPosts(result)
         setIsRandomSearch(false)
         setUpdatePostFlag(true)
+        if (!loaded) setLoaded(true)
         if (!result.length) setNoResults(true)
         if (!search) {
             document.title = i18n.title
@@ -124,32 +128,28 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        if (!loaded) setLoaded(true)
-        if (searchFlag) searchPosts()
         if (!scroll) updateOffset()
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = async () => {
-            const savedPosts = localStorage.getItem("savedPosts")
-            if (savedPosts) setPosts(JSON.parse(savedPosts))
-            if (!scrollY) {
-                const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
-                const img = document.querySelector(".image")
-                if (!img && !elements?.[0]) {
-                    searchPosts()
-                } else {
-                    let counter = 0
-                    for (let i = 0; i < elements.length; i++) {
-                        if (elements[i]?.innerText?.toLowerCase() === "all") counter++
-                        if (elements[i]?.innerText?.toLowerCase() === "random") counter++
+            setTimeout(() => {
+                if (!scrollY) {
+                    const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
+                    const img = document.querySelector(".image")
+                    if (!img && !elements?.[0]) {
+                        searchPosts()
+                    } else {
+                        let counter = 0
+                        for (let i = 0; i < elements.length; i++) {
+                            if (elements[i]?.innerText?.toLowerCase() === "all") counter++
+                            if (elements[i]?.innerText?.toLowerCase() === "random") counter++
+                        }
+                        if (!img && counter >= 4) randomPosts()
                     }
-                    if (!img && counter >= 4) randomPosts()
+                } else {
+                    setScrollY(0)
                 }
-            } else {
-                setScrollY(0)
-            }
-            const savedPage = localStorage.getItem("page")
-            if (savedPage) setPage(Number(savedPage))
+            }, 2000)
             if (queryParam) searchPosts(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -249,11 +249,29 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }, 500)
             return
         }
+        const checkLoaded = () => {
+            if (searchFlag !== initData.searchFlag ||
+                imageType !== initData.imageType ||
+                ratingType !== initData.ratingType ||
+                styleType !== initData.styleType || 
+                sortType !== initData.sortType ||
+                sortReverse !== initData.sortReverse) {
+                    if (init) {
+                        return setInit(false)
+                    } else {
+                        updateSearch()
+                    }
+                }
+        }
         const updateSearch = async () => {
             setPage(1)
             searchPosts()
         }
-        if (loaded) updateSearch()
+        if (loaded) {
+            updateSearch()
+        } else {
+            checkLoaded()
+        }
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, scroll, loaded])
 
     useEffect(() => {
@@ -317,7 +335,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         let resultCount = Number(posts[0]?.postCount)
         if (Number.isNaN(resultCount)) resultCount = posts.length
         setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
-        localStorage.setItem("savedPosts", JSON.stringify(posts))
     }, [posts, i18n])
 
     const updateOffset = async () => {
@@ -551,10 +568,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setPageFlag(null)
         }
     }, [pageFlag])
-
-    useEffect(() => {
-        localStorage.setItem("page", String(page))
-    }, [page])
 
     const generatePageButtonsJSX = () => {
         const jsx = [] as React.ReactElement[]

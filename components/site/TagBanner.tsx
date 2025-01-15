@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useLayoutSelector, useSessionSelector, useSessionActions, 
-useSearchSelector, useSearchActions, useCacheSelector, usePageSelector} from "../../store"
+useSearchSelector, useSearchActions, useCacheSelector, usePageSelector,
+useCacheActions} from "../../store"
 import functions from "../../structures/Functions"
 import {TagCount, PostSearch} from "../../types/Types"
 import "./styles/tagbanner.less"
@@ -9,6 +10,7 @@ import "./styles/tagbanner.less"
 let startX = 0
 let deltaCounter = 0
 let lastDeltaY = 0
+let timer = null as any
 
 const TagBanner: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
@@ -16,10 +18,10 @@ const TagBanner: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {sizeType, scroll} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {posts, visiblePosts} = useCacheSelector()
+    const {bannerTags, posts, visiblePosts} = useCacheSelector()
+    const {setBannerTags} = useCacheActions()
     const {page} = usePageSelector()
     const [dragging, setDragging] = useState(false)
-    const [bannerTags, setBannerTags] = useState([] as TagCount[])
     const [trackPad, setTrackPad] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const [marginLeft, setMarginLeft] = useState(0)
@@ -139,7 +141,10 @@ const TagBanner: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        updateBannerTags()
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+            updateBannerTags()
+        }, 1000)
     }, [scroll, visiblePosts, posts, page, sizeType, session])
 
     const bannerTagJSX = () => {

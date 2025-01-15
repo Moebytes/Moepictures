@@ -18,7 +18,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
-    const {setPosts} = useCacheActions()
+    const {setPosts, setImage} = useCacheActions()
     const [images, setImages] = useState([] as string[])
     const history = useHistory()
 
@@ -32,6 +32,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const set = (image: string, index: number, newTab: boolean) => {
+        setImage("")
         if (!session.username) {
             let filtered = props.series.posts.filter((p) => p.rating === functions.r13())
             const post = filtered[index] 

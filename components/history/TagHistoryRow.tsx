@@ -334,48 +334,48 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let changes = props.tagHistory.changes || {}
         if (changes.type) {
-            jsx.push(<span className="historyrow-text"><span className={`historyrow-label-text ${functions.getTagColor(props.tagHistory)}`}>{i18n.labels.category}:</span> {props.tagHistory.type}</span>)
+            jsx.push(<span className="historyrow-text"><span className={`historyrow-label-text ${functions.getTagColor(props.tagHistory)}`}>{i18n.labels.category}: </span>{props.tagHistory.type}</span>)
         }
         if (!prevHistory || changes.tag) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}:</span> {props.tagHistory.tag}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}: </span>{props.tagHistory.tag}</span>)
         }
         if (!prevHistory || changes.description) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text" style={{marginRight: "5px"}}>{i18n.labels.description}:</span>{descriptionDiffJSX()}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text" style={{marginRight: "5px"}}>{i18n.labels.description}: </span>{descriptionDiffJSX()}</span>)
         }
         if ((!prevHistory && props.tagHistory.website) || changes.website) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.website}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website!, "_blank")}>{props.tagHistory.website}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.website}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website!, "_blank")}>{props.tagHistory.website}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.social) || changes.social) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.social}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social!, "_blank")}>{props.tagHistory.social}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.social}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social!, "_blank")}>{props.tagHistory.social}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.twitter) || changes.twitter) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.twitter}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter!, "_blank")}>{props.tagHistory.twitter}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.twitter}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter!, "_blank")}>{props.tagHistory.twitter}</span></span>)
         }
         if ((!prevHistory && props.tagHistory.fandom) || changes.fandom) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.fandom}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom!, "_blank")}>{props.tagHistory.fandom}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.fandom}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom!, "_blank")}>{props.tagHistory.fandom}</span></span>)
         }
         if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
                 const aliases = props.tagHistory.aliases.map((a) => a.replaceAll("-", " "))
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}:</span> {aliases.join(", ")}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}: </span>{aliases.join(", ")}</span>)
             }
         }
         if (!prevHistory || changes.implications) {
             if (props.tagHistory.implications?.[0]) {
                 const implications = props.tagHistory.implications.map((i) => i.replaceAll("-", " "))
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}:</span> {implications.join(", ")}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}: </span>{implications.join(", ")}</span>)
             }
         }
         if (!prevHistory || changes.pixivTags) {
             if (props.tagHistory.pixivTags?.[0]) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}: </span>{props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
         if ((!prevHistory && props.tagHistory.featuredPost) || changes.featuredPost) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}:</span> {props.tagHistory.featuredPost?.postID}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}: </span>{props.tagHistory.featuredPost?.postID}</span>)
         }
         if ((!prevHistory && props.tagHistory.r18) || changes.r18) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18: </span>{props.tagHistory.r18 ? i18n.buttons.yes : i18n.buttons.no}</span>)
         }
         if (!jsx.length && !props.tagHistory.imageChanged) {
             jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)

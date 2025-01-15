@@ -101,14 +101,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [objMaterials, setObjMaterials] = useState([] as THREE.Material[])
     const [buttonHover, setButtonHover] = useState(false)
 
-    useEffect(() => {
-        setPaused(false)
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("paused", String(paused))
-    }, [paused])
-
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }

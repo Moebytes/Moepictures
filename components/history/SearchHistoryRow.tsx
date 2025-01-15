@@ -105,12 +105,12 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span className="historyrow-user-text">{i18n.time.viewed} {functions.prettyDate(props.history.viewDate, i18n)}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.title}:</span> {props.history.post.title || i18n.labels.none}</span>
-                        {props.history.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}:</span> {props.history.post.englishTitle}</span> : null}
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}:</span> {props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.tag.artist}:</span> {props.history.post.artist ? props.history.post.artist : i18n.labels.unknown}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.source}:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.source, "_blank")}>{functions.getSiteName(props.history.post.source, i18n)}</span></span>
-                        {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.mirrors}:</span> {printMirrors()}</span> : null}
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.title}: </span>{props.history.post.title || i18n.labels.none}</span>
+                        {props.history.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}: </span>{props.history.post.englishTitle}</span> : null}
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}: </span>{props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.tag.artist}: </span>{props.history.post.artist ? props.history.post.artist : i18n.labels.unknown}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.history.post.source, "_blank")}>{functions.getSiteName(props.history.post.source, i18n)}</span></span>
+                        {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.mirrors}: </span>{printMirrors()}</span> : null}
                     </div>
                 </div>
             </div>

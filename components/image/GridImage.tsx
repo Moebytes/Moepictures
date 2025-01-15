@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../../assets/icons/loading.gif"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import JSZip from "jszip"
 import path from "path"
@@ -48,6 +48,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setImage} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -865,6 +866,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    setImage("")
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }

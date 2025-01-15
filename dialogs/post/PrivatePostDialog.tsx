@@ -42,7 +42,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
             setPostFlag(true)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
-            localStorage.removeItem("savedTags")
+            localStorage.removeItem("savedTagCategories")
         }
     }
 

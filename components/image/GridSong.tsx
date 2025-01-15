@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../../assets/icons/loading.gif"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions,
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../../store"
 import path from "path"
 import functions from "../../structures/Functions"
@@ -43,6 +43,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setImage} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -59,7 +60,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [pageBuffering, setPageBuffering] = useState(true)
     const [drag, setDrag] = useState(false)
     const [visible, setVisible] = useState(true)
-    const [image, setImage] = useState(props.cached ? props.img : "")
+    const [coverart, setCoverArt] = useState(props.cached ? props.img : "")
     const [decrypted, setDecrypted] = useState(props.cached)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
@@ -81,7 +82,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const loadImage = async () => {
         if (decrypted) return
         const decryptedImage = await functions.decryptThumb(props.audio, session, `${props.audio}-${sizeType}`)
-        setImage(decryptedImage)
+        setCoverArt(decryptedImage)
         setDecrypted(true)
     }
 
@@ -243,11 +244,11 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         let newContrast = contrast
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
-        if (!image || !sharpenOverlay || !lightnessOverlay) return
+        if (!coverart || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image})`
+            sharpenOverlay.style.backgroundImage = `url(${coverart})`
             sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
             sharpenOverlay.style.mixBlendMode = "overlay"
             sharpenOverlay.style.opacity = `${sharpenOpacity}`
@@ -389,6 +390,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    setImage("")
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
@@ -446,7 +448,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
 
     const drawImage = async () => {
         if (!ref.current || !overlayRef.current || !lightnessRef.current) return
-        let src = image
+        let src = coverart
         const img = document.createElement("img")
         img.src = src 
         img.onload = () => {
@@ -466,7 +468,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         drawImage()
-    }, [image])
+    }, [coverart])
 
     const songClick = (event: React.MouseEvent) => {
         if (session.username && !session.globalMusicPlayer) return
@@ -483,8 +485,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={props.post.private ? privateIcon : musicNote} 
                 ref={songIconRef} onClick={songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/>
-                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={image}/>
-                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={image}/>
+                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={coverart}/>
+                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={coverart}/>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 <canvas draggable={false} className="image" ref={ref}></canvas>
             </div>

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "role" text,
     "bio" text,
     "emailVerified" boolean,
+    "cookieConsent" boolean,
     "$2fa" boolean,
     "publicFavorites" boolean,
     "showRelated" boolean,

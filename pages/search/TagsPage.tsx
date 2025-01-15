@@ -57,13 +57,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("tagsPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
-            if (savedPage) setTagsPage(Number(savedPage))
             if (queryParam) updateTags(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
@@ -283,10 +279,6 @@ const TagsPage: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
-    useEffect(() => {
-        localStorage.setItem("tagsPage", String(tagsPage || ""))
-    }, [tagsPage])
-
     const maxPage = () => {
         if (!tags?.length) return 1
         if (Number.isNaN(Number(tags[0]?.tagCount))) return 10000
@@ -428,7 +420,6 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

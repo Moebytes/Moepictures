@@ -46,8 +46,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
     const {setRatingType} = useSearchActions()
-    const {posts} = useCacheSelector()
-    const {setPosts, setTags} = useCacheActions()
+    const {posts, post, tagCategories, order, image} = useCacheSelector()
+    const {setPosts, setTags, setPost, setTagCategories, setOrder, setImage} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setReloadPostFlag, setRedirect, setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const {revertPostHistoryID, revertPostHistoryFlag} = usePostDialogSelector()
@@ -59,11 +59,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [artistPosts, setArtistPosts] = useState([] as PostSearch[])
     const [relatedPosts, setRelatedPosts] = useState([] as PostSearch[])
     const [parentPost, setParentPost] = useState(null as ChildPost | null)
-    const [image, setImage] = useState("")
-    const [post, setPost] = useState(null as PostSearch | PostHistory | null)
     const [loaded, setLoaded] = useState(false)
-    const [tagCategories, setTagCategories] = useState(null as TagCategories | null)
-    const [order, setOrder] = useState(1)
     const [historyID, setHistoryID] = useState(null as string | null)
     const [noteID, setNoteID] = useState(null as string | null)
     const [groups, setGroups] = useState([] as GroupPosts[])
@@ -86,26 +82,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setNoteID(noteParam)
         const orderParam = new URLSearchParams(window.location.search).get("order")
         if (orderParam) setOrder(Number(orderParam))
-        const onDOMLoaded = () => {
-            if (!historyParam) {
-                const savedPost = localStorage.getItem("savedPost")
-                const savedTags = localStorage.getItem("savedTags")
-                if (savedPost) setPost(JSON.parse(savedPost))
-                if (savedTags) setTagCategories(JSON.parse(savedTags))
-                if (!posts?.length) {
-                    const savedPosts = localStorage.getItem("savedPosts")
-                    if (savedPosts) setPosts(JSON.parse(savedPosts))
-                }
-            }
-            setTimeout(() => {
-                const savedOrder = localStorage.getItem("order")
-                if (savedOrder) setOrder(Number(savedOrder))
-            }, 200)
-        }
-        window.addEventListener("load", onDOMLoaded)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-        }
     }, [location])
 
     useEffect(() => {
@@ -114,7 +90,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [post, session])
 
     useEffect(() => {
-        localStorage.setItem("order", String(order))
         let orderParam = new URLSearchParams(window.location.search).get("order")
         if (!orderParam) orderParam = "1"
         setTimeout(() => {
@@ -293,8 +268,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         return
                     }
                 }
-                localStorage.setItem("savedPost", JSON.stringify(post))
-                localStorage.setItem("savedTags", JSON.stringify(categories))
                 setSessionFlag(true)
             } else {
                 functions.replaceLocation("/404")
@@ -361,8 +334,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
-                localStorage.setItem("savedPost", JSON.stringify(post))
-                localStorage.setItem("savedTags", JSON.stringify(categories))
                 setSessionFlag(true)
             } else {
                 functions.replaceLocation("/404")

@@ -94,10 +94,6 @@ const HistoryPage: React.FunctionComponent = () => {
         const pageParam = new URLSearchParams(window.location.search).get("page")
         if (pageParam) setQueryPage(Number(pageParam))
         const onDOMLoaded = () => {
-            const savedScroll = localStorage.getItem("scroll")
-            if (savedScroll) setScroll(savedScroll === "true")
-            const savedPage = localStorage.getItem("historyPage")
-            if (savedPage) setHistoryPage(Number(savedPage))
             const savedTab = localStorage.getItem("historyTab")
             if (savedTab) setHistoryTab(savedTab)
             setTimeout(() => {
@@ -503,9 +499,8 @@ const HistoryPage: React.FunctionComponent = () => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("historyPage", String(historyPage || ""))
         localStorage.setItem("historyTab", String(historyTab))
-    }, [historyPage, historyTab])
+    }, [historyTab])
 
     const maxPage = () => {
         if (!historyStates?.length) return 1
@@ -671,7 +666,6 @@ const HistoryPage: React.FunctionComponent = () => {
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

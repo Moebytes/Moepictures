@@ -296,8 +296,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
         const savedShowTranscript = localStorage.getItem("showTranscript")
         if (savedShowTranscript) setShowTranscript(savedShowTranscript === "true")
-        const savedNoteDrawing = localStorage.getItem("noteDrawingEnabled")
-        if (savedNoteDrawing) setNoteDrawingEnabled(savedNoteDrawing === "true")
         window.addEventListener("keydown", keyDownListener)
         window.addEventListener("keyup", keyUpListener)
         return () => {
@@ -308,8 +306,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         localStorage.setItem("showTranscript", String(showTranscript))
-        localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
-    }, [showTranscript, noteDrawingEnabled])
+    }, [showTranscript])
 
     useEffect(() => {
         const getHash = async () => {

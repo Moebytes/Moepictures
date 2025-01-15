@@ -118,33 +118,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme")
-        if (savedTheme) setTheme(savedTheme as Themes)
-        const savedSiteHue = localStorage.getItem("siteHue")
-        const savedSiteSaturation = localStorage.getItem("siteSaturation")
-        const savedSiteLightness = localStorage.getItem("siteLightness")
-        if (savedSiteHue) setSiteHue(Number(savedSiteHue))
-        if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
-        if (savedSiteLightness) setSiteLightness(Number(savedSiteLightness))
-
-        const savedBrightness = localStorage.getItem("brightness")
-        const savedContrast = localStorage.getItem("contrast")
-        const savedHue = localStorage.getItem("hue")
-        const savedSaturation = localStorage.getItem("saturation")
-        const savedLightness = localStorage.getItem("lightness")
-        const savedBlur = localStorage.getItem("blur")
-        const savedSharpen = localStorage.getItem("sharpen")
-        const savedPixelate = localStorage.getItem("pixelate")
-        const savedSplatter = localStorage.getItem("splatter")
-        if (savedBrightness) setBrightness(Number(savedBrightness))
-        if (savedContrast) setContrast(Number(savedContrast))
-        if (savedHue) setHue(Number(savedHue))
-        if (savedSaturation) setSaturation(Number(savedSaturation))
-        if (savedLightness) setLightness(Number(savedLightness))
-        if (savedBlur) setBlur(Number(savedBlur))
-        if (savedSharpen) setSharpen(Number(savedSharpen))
-        if (savedPixelate) setPixelate(Number(savedPixelate))
-        if (savedSplatter) setSplatter(Number(savedSplatter))
     }, [])
 
     useEffect(() => {
@@ -166,9 +139,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
             }
         }
-        localStorage.setItem("siteHue", String(siteHue))
-        localStorage.setItem("siteSaturation", String(siteSaturation))
-        localStorage.setItem("siteLightness", String(siteLightness))
     }, [theme, siteHue, siteSaturation, siteLightness])
 
     useEffect(() => {

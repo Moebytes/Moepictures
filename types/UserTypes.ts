@@ -17,6 +17,7 @@ export interface PrunedUser {
 export interface User extends PrunedUser {
     email?: string
     emailVerified?: boolean
+    cookieConsent?: boolean | null
     $2fa?: boolean
     ips?: string[]
     password?: string
@@ -223,6 +224,7 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/ban" ? {params: BanParams, response: BanResponse} :
     T extends "/api/user/unban" ? {params: {username: string}, response: string} :
     T extends "/api/user/promote" ? {params: {username: string, role: UserRole}, response: string} :
+    T extends "/api/user/cookieconsent" ? {params: {consent: boolean | null}, response: string} :
     never
 
 export type UserPutEndpoint<T extends string> = 

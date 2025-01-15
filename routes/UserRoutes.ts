@@ -72,6 +72,7 @@ const UserRoutes = (app: Express) => {
             delete user.$2fa
             delete user.email
             delete user.emailVerified
+            delete user.cookieConsent
             delete user.password
             delete user.showRelated
             delete user.showTooltips
@@ -127,6 +128,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "blacklist", "")
                 await sql.user.updateUser(username, "postCount", 0)
                 await sql.user.updateUser(username, "emailVerified", false)
+                await sql.user.updateUser(username, "cookieConsent", req.session.cookieConsent)
                 await sql.user.updateUser(username, "$2fa", false)
                 await sql.user.updateUser(username, "bio", "This user has not written anything.")
                 await sql.user.updateUser(username, "role", "user")
@@ -187,6 +189,7 @@ const UserRoutes = (app: Express) => {
                 req.session.email = user.email
                 if (user.$2fa) return res.status(200).send("2fa")
                 req.session.emailVerified = user.emailVerified
+                req.session.cookieConsent = user.cookieConsent
                 req.session.username = user.username
                 req.session.joinDate = user.joinDate
                 req.session.image = user.image
@@ -261,6 +264,7 @@ const UserRoutes = (app: Express) => {
                 req.session.banned = user.banned
                 req.session.email = user.email
                 req.session.emailVerified = user.emailVerified
+                req.session.cookieConsent = user.cookieConsent
                 req.session.image = user.image
                 req.session.imageHash = user.imageHash
                 req.session.imagePost = user.imagePost
@@ -1408,6 +1412,20 @@ const UserRoutes = (app: Express) => {
                 groupEdits: Number(groupHistory[0]?.historyCount || 0)
             } as EditCounts
             serverFunctions.sendEncrypted(json, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/cookieconsent", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {consent} = req.body as {consent: boolean | null}
+            req.session.cookieConsent = consent
+            if (req.session.username) {
+                await sql.user.updateUser(req.session.username, "cookieConsent", consent)
+            }
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

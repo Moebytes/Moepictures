@@ -92,13 +92,9 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const replyParam = new URLSearchParams(window.location.search).get("reply")
         const onDOMLoaded = () => {
-            const savedPage = localStorage.getItem("messagePage")
-            if (savedPage && Number(savedPage) > 0) setMessagePage(Number(savedPage))
             if (pageParam && Number(pageParam) > 0) {
                 setQueryPage(Number(pageParam))
                 setMessagePage(Number(pageParam))
@@ -300,10 +296,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             setPageFlag(null)
         }
     }, [pageFlag])
-
-    useEffect(() => {
-        localStorage.setItem("messagePage", String(messagePage || ""))
-    }, [messagePage])
 
     const maxPage = () => {
         if (!replies?.length) return 1
@@ -679,6 +671,25 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const recipientsJSX = () => {
+        if (!message) return null
+        const recipientsArr = message.recipients.map((r) => r === null ? "deleted" : r).join(", ").split(" ")
+        const viewUser = (user: string, event: React.MouseEvent) => {
+            if (event.ctrlKey || event.metaKey || event.button === 1) {
+                window.open(`/user/${user}`, "_blank")
+            } else {
+                history.push(`/user/${user}`)
+            }
+        }
+        return (
+            <span className="thread-page-info">
+                <span className="thread-page-info-link" onClick={(event) => viewUser(message.creator, event)}>{message.creator}</span>
+                <span> {"->"} </span>
+                {recipientsArr.map((r) => <span className="thread-page-info-link" onClick={(event) => viewUser(r, event)}>{r} </span>)}
+            </span>
+        )
+    }
+
     return (
         <>
         <TitleBar/>
@@ -696,7 +707,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                         {getOptionsJSX()}
                     </div>
                     <div className="thread-page-title-container">
-                        <span className="thread-page-info">{`${message.creator} -> ${message.recipients.map((r) => r === null ? "deleted" : r).join(", ")}`}</span>
+                        {recipientsJSX()}
                     </div>
                     <div className="thread-page-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="thread-page-user-container">

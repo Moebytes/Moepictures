@@ -75,10 +75,6 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         const onDOMLoaded = () => {
             const savedState = localStorage.getItem("modState")
             if (savedState) setModState(savedState)
-            const savedScroll = localStorage.getItem("scroll")
-            if (savedScroll) setScroll(savedScroll === "true")
-            const savedPage = localStorage.getItem("modPage")
-            if (savedPage) setModPage(Number(savedPage))
             setTimeout(() => {
                 if (pageParam) setModPage(Number(pageParam))
             }, 200)
@@ -104,8 +100,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         localStorage.setItem("modState", modState)
-        localStorage.setItem("modPage", String(modPage))
-    }, [modState, modPage])
+    }, [modState])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)

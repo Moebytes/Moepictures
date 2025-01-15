@@ -119,27 +119,6 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        const savedType = localStorage.getItem("type")
-        const savedStyle = localStorage.getItem("style")
-        const savedSize = localStorage.getItem("size")
-        const savedSort = localStorage.getItem("sort")
-        const savedSortReverse = localStorage.getItem("sortReverse")
-        const savedSquare = localStorage.getItem("square")
-        const savedScroll = localStorage.getItem("scroll")
-        const savedMultiplier = localStorage.getItem("pageMultiplier")
-        const savedShowChildren = localStorage.getItem("showChildren")
-        if (savedType) setImageType(savedType as PostType)
-        if (savedStyle) setStyleType(savedStyle as PostStyle)
-        if (savedSize) setSizeType(savedSize as PostSize)
-        if (savedSort) setSortType(savedSort as PostSort)
-        if (savedSortReverse) setSortReverse(savedSortReverse === "true")
-        if (savedSquare) setSquare(savedSquare === "true")
-        if (savedScroll) setScroll(savedScroll === "true")
-        if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
-        if (savedShowChildren) setShowChildren(savedShowChildren === "true")
-    }, [])
-
-    useEffect(() => {
         const clickHandler = () => {
             if (activeDropdown !== "filters") {
                 if (filterDropActive) setFilterDropActive(false)
@@ -182,26 +161,14 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }, [hideTitlebar])
 
-    useEffect(() => {
-        localStorage.setItem("type", imageType)
-        localStorage.setItem("rating", ratingType)
-        localStorage.setItem("style", styleType)
-        localStorage.setItem("size", sizeType)
-        localStorage.setItem("sort", sortType)
-        localStorage.setItem("sortReverse", String(sortReverse))
-        localStorage.setItem("pageMultiplier", String(pageMultiplier))
-    }, [imageType, ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier])
-
     const hideTheSidebar = () => {
         const newValue = !hideSidebar
-        localStorage.setItem("sidebar", `${newValue}`)
         setHideSidebar(newValue)
     }
 
     const hideTheTitlebar = () => {
         let newValue = !hideTitlebar
         setHideNavbar(newValue)
-        localStorage.setItem("titlebar", `${!newValue}`)
         setHideTitlebar(newValue)
     }
 
@@ -600,18 +567,6 @@ const SortBar: React.FunctionComponent = (props) => {
         setFilterDropActive(newValue === "page-multiplier")
     }
 
-    useEffect(() => {
-        localStorage.setItem("brightness", String(brightness))
-        localStorage.setItem("contrast", String(contrast))
-        localStorage.setItem("hue", String(hue))
-        localStorage.setItem("saturation", String(saturation))
-        localStorage.setItem("lightness", String(lightness))
-        localStorage.setItem("blur", String(blur))
-        localStorage.setItem("sharpen", String(sharpen))
-        localStorage.setItem("pixelate", String(pixelate))
-        localStorage.setItem("splatter", String(splatter))
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
-
     const resetFilters = () => {
         setBrightness(100)
         setContrast(100)
@@ -626,19 +581,16 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const toggleSquare = () => {
         const newValue = !square
-        localStorage.setItem("square", `${newValue}`)
         setSquare(newValue)
     }
 
     const toggleShowChildren = () => {
         const newValue = !showChildren
-        localStorage.setItem("showChildren", `${newValue}`)
         setShowChildren(newValue)
     }
 
     const toggleScroll = () => {
         const newValue = !scroll
-        localStorage.setItem("scroll", `${newValue}`)
         setScroll(newValue)
     }
 

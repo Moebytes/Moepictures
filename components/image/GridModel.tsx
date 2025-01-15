@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../../assets/icons/loading.gif"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import path from "path"
 import functions from "../../structures/Functions"
@@ -47,6 +47,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setImage} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -68,7 +69,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [videoData, setVideoData] = useState(null as ImageBitmap | null)
     const [visible, setVisible] = useState(true)
     const [pageBuffering, setPageBuffering] = useState(true)
-    const [image, setImage] = useState(null as string | null)
+    const [screenshot, setScreenshot] = useState(null as string | null)
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
@@ -127,7 +128,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
 
     const loadImage = async () => {
         const img = await functions.decryptThumb(props.img, session)
-        setImage(img)
+        setScreenshot(img)
     }
 
     const loadModel = async () => {
@@ -199,7 +200,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             if (imageTimer) return 
             imageTimer = setTimeout(() => {
                 renderer.setClearColor(0x000000, 1)
-                setImage(renderer.domElement.toDataURL())
+                setScreenshot(renderer.domElement.toDataURL())
                 renderer.setClearColor(0x000000, 0)
                 imageTimer = null
             }, 100)
@@ -236,9 +237,9 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 setProgress((secondsProgress / duration) * 100)
             }
             renderer.render(scene, camera)
-            if (!image) {
+            if (!screenshot) {
                 renderer.setClearColor(0x000000, 1)
-                setImage(renderer.domElement.toDataURL())
+                setScreenshot(renderer.domElement.toDataURL())
                 renderer.setClearColor(0x000000, 0)
             }
         }
@@ -393,11 +394,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         let newContrast = contrast
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
-        if (!image || !sharpenOverlay || !lightnessOverlay) return
+        if (!screenshot || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image})`
+            sharpenOverlay.style.backgroundImage = `url(${screenshot})`
             sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
             sharpenOverlay.style.mixBlendMode = "overlay"
             sharpenOverlay.style.opacity = `${sharpenOpacity}`
@@ -416,7 +417,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             lightnessOverlay.style.opacity = "0"
         }
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [image, brightness, contrast, hue, saturation, lightness, blur, sharpen])
+    }, [screenshot, brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     const imagePixelate = () => {
         const currentRef = ref ? ref : imageRef.current
@@ -458,7 +459,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         setTimeout(() => {
             imagePixelate()
         }, 50)
-    }, [pixelate, square, imageSize, image, ref])
+    }, [pixelate, square, imageSize, screenshot, ref])
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
         const currentRef = ref ? ref : imageRef.current
@@ -539,6 +540,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    setImage("")
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
@@ -595,11 +597,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     const drawImage = async () => {
-        if (!image) return
+        if (!screenshot) return
         const currentRef = ref ? ref : imageRef.current
         if (!currentRef || !overlayRef.current || !lightnessRef.current) return
         const img = document.createElement("img")
-        img.src = image
+        img.src = screenshot
         img.onload = () => {
             if (!currentRef || !overlayRef.current || !lightnessRef.current) return
             setImageWidth(img.width)
@@ -625,7 +627,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         drawImage()
-    }, [image])
+    }, [screenshot])
 
     return (
         <div style={{opacity: visible && ref?.width ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
