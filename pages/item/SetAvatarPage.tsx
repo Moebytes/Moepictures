@@ -186,10 +186,11 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         let croppedURL = ""
         if (isAnimated && permissions.isPremium(session)) {
             let gifData = [] as GIFFrame[]
+            const arrayBuffer = await fetch(image).then((r) => r.arrayBuffer())
             if (functions.isGIF(image)) {
-                gifData = await functions.extractGIFFrames(image)
+                gifData = await functions.extractGIFFrames(arrayBuffer)
             } else if (functions.isWebP(image)) {
-                gifData = await functions.extractAnimatedWebpFrames(image)
+                gifData = await functions.extractAnimatedWebpFrames(arrayBuffer)
             }
             let frameArray = [] as Buffer[] 
             let delayArray = [] as number[]

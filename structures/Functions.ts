@@ -932,8 +932,7 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractAnimatedWebpFramesNative = async (webp: string) => {
-        const data = await fetch(webp).then((r) => r.arrayBuffer())
+    public static extractAnimatedWebpFramesNative = async (data: ArrayBuffer) => {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
@@ -942,6 +941,8 @@ export default class Functions {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
                 const canvas = document.createElement("canvas")
+                canvas.width = decoded.image.codedWidth
+                canvas.height = decoded.image.codedHeight
                 const canvasContext = canvas.getContext("2d")!
                 const image = await createImageBitmap(decoded.image)
                 canvasContext.drawImage(image, 0, 0)
@@ -954,15 +955,14 @@ export default class Functions {
         return result
     }
 
-    public static extractAnimatedWebpFrames = async (webp: string, nativeOnly?: boolean) => {
+    public static extractAnimatedWebpFrames = async (webpBuffer: ArrayBuffer, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
-            return Functions.extractAnimatedWebpFramesNative(webp)
+            return Functions.extractAnimatedWebpFramesNative(webpBuffer)
         } else {
             if (nativeOnly) return []
-            const buffer = await fetch(webp).then((r) => r.arrayBuffer())
             const xMux = WebPXMux("webpxmux.wasm")
             await xMux.waitRuntime()
-            const data = await xMux.decodeFrames(new Uint8Array(buffer))
+            const data = await xMux.decodeFrames(new Uint8Array(webpBuffer))
             const webpData = [] as GIFFrame[]
             await new Promise<void>((resolve) => {
                 for (let i = 0; i < data.frames.length; i++) {
@@ -988,8 +988,7 @@ export default class Functions {
         }
     }
 
-    public static extractGIFFramesNative = async (gif: string) => {
-        const data = await fetch(gif).then((r) => r.arrayBuffer())
+    public static extractGIFFramesNative = async (data: ArrayBuffer) => {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
@@ -998,8 +997,8 @@ export default class Functions {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
                 const canvas = document.createElement("canvas")
-                canvas.width = decoded.codedWidth 
-                canvas.height = decoded.codedHeight
+                canvas.width = decoded.image.codedWidth
+                canvas.height = decoded.image.codedHeight
                 const canvasContext = canvas.getContext("2d")!
                 const image = await createImageBitmap(decoded.image)
                 canvasContext.drawImage(image, 0, 0)
@@ -1012,12 +1011,14 @@ export default class Functions {
         return result
     }
 
-    public static extractGIFFrames = async (gif: string, nativeOnly?: boolean) => {
+    public static extractGIFFrames = async (gifBuffer: ArrayBuffer, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
-            return Functions.extractGIFFramesNative(gif)
+            return Functions.extractGIFFramesNative(gifBuffer)
         } else {
             if (nativeOnly) return []
-            const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
+            const blob = new Blob([new Uint8Array(gifBuffer)])
+            const url = URL.createObjectURL(blob)
+            const frames = await gifFrames({url, frames: "all", outputType: "canvas"})
             const newGIFData = [] as GIFFrame[]
             for (let i = 0; i < frames.length; i++) {
                 newGIFData.push({
@@ -1025,6 +1026,7 @@ export default class Functions {
                     delay: frames[i].frameInfo.delay * 10
                 })
             }
+            URL.revokeObjectURL(url)
             return newGIFData
         }
     }

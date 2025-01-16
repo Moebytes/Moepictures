@@ -307,7 +307,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const parseGIF = async () => {
             const start = new Date()
-            const frames = await functions.extractGIFFrames(props.img)
+            const arrayBuffer = await getCurrentBuffer()
+            const frames = await functions.extractGIFFrames(arrayBuffer)
             setGIFData(frames)
             const end = new Date()
             const seconds = (end.getTime() - start.getTime()) / 1000
@@ -315,10 +316,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
         const parseAnimatedWebP = async () => {
             const start = new Date()
-            const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-            const animated = functions.isAnimatedWebp(arraybuffer)
+            const arrayBuffer = await getCurrentBuffer()
+            const animated = functions.isAnimatedWebp(arrayBuffer)
             if (!animated) return 
-            const frames = await functions.extractAnimatedWebpFrames(props.img)
+            const frames = await functions.extractAnimatedWebpFrames(arrayBuffer)
             setGIFData(frames)
             const end = new Date()
             const seconds = (end.getTime() - start.getTime()) / 1000
@@ -400,6 +401,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             gifCanvas.style.opacity = "1"
             gifCanvas.width = ref.current.clientWidth
             gifCanvas.height = ref.current.clientHeight
+            ref.current.style.opacity = "0"
             const ctx = gifCanvas.getContext("2d")!
             const frames = adjustedData.length - 1
             let duration = adjustedData.map((d) => d.delay).reduce((p, c) => p + c) / 1000
@@ -1262,8 +1264,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (mobile) setImageExpand(false)
     }, [mobile])
 
-    const generateTempLink = async () => {
-        if (!props.post) return ""
+    const getCurrentBuffer = async (forceOriginal?: boolean) => {
+        if (!props.post) return new ArrayBuffer(0)
         const image = props.post.images[(props.order || 1) - 1]
         let img = ""
         if (typeof image === "string") {
@@ -1271,7 +1273,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         } else {
             img = functions.getImageLink(image.type, props.post.postID, image.order, image.filename)
         }
-        let response = await fetch(`${img}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+        if (forceOriginal) {
+            return fetch(`${img}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+        } else {
+            return fetch(img).then((r) => r.arrayBuffer())
+        }
+    }
+
+    const generateTempLink = async () => {
+        const response = await getCurrentBuffer(true)
         const arrayBuffer = await functions.decryptBuffer(response, img, session)
         let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
         localStorage.setItem("reverseSearchLink", url)

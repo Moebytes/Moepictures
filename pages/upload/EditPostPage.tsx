@@ -480,7 +480,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     let url = URL.createObjectURL(file)
                     let croppedURL = ""
                     if (gif) {
-                        const gifData = await functions.extractGIFFrames(url)
+                        const gifData = await functions.extractGIFFrames(bytes.buffer)
                         let frameArray = [] as Buffer[] 
                         let delayArray = [] as number[]
                         for (let i = 0; i < gifData.length; i++) {

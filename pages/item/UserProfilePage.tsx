@@ -255,7 +255,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         const url = URL.createObjectURL(file)
                         let croppedURL = ""
                         if (gif) {
-                            const gifData = await functions.extractGIFFrames(url)
+                            const gifData = await functions.extractGIFFrames(bytes.buffer)
                             let frameArray = [] as Buffer[] 
                             let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
@@ -273,8 +273,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                             croppedURL = await functions.crop(url, 1, false)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                        const bytes = new Uint8Array(arrayBuffer)
-                        await functions.post("/api/user/pfp", {bytes: Object.values(bytes)}, session, setSessionFlag)
+                        await functions.post("/api/user/pfp", {bytes: Object.values(new Uint8Array(arrayBuffer))}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
                     }
