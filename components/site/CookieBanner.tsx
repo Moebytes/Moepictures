@@ -5,6 +5,8 @@ import functions from "../../structures/Functions"
 import cookieIcon from "../../assets/icons/cookie.png"
 import "./styles/cookiebanner.less"
 
+let cookieTimer = null as any
+
 const CookieBanner: React.FunctionComponent = (props) => {
     const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session} = useSessionSelector()
@@ -18,9 +20,12 @@ const CookieBanner: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.cookieConsent === undefined || session.cookieConsent === null) {
-            setShowCookieBanner(true)
-        }
+        clearTimeout(cookieTimer)
+        cookieTimer = setTimeout(() => {
+            if (session.cookieConsent === undefined || session.cookieConsent === null) {
+                setShowCookieBanner(true)
+            }
+        }, 3000)
     }, [session])
 
     const click = async (button: "accept" | "reject") => {
@@ -33,11 +38,11 @@ const CookieBanner: React.FunctionComponent = (props) => {
             <div className="cookie-icon-container">
                 <img className="cookie-icon" src={cookieIcon} style={{filter: getFilter()}}/>
                 <div className="cookie-text-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <span className="cookie-text">We use cookies to store your preferences and enhance your experience. By continuing to use our site, you consent to our use of cookies.</span>
+                    <span className="cookie-text">{i18n.dialogs.cookieBanner.text}</span>
                 </div>
             </div>
-            <button className="cookie-button" onClick={() => click("accept")}>Agree</button>
-            <button className="cookie-button-deny" onClick={() => click("reject")}>Deny</button>
+            <button className="cookie-button" onClick={() => click("accept")}>{i18n.labels.agree}</button>
+            {/* <button className="cookie-button-deny" onClick={() => click("reject")}>{i18n.labels.deny}</button> */}
         </div>
     )
 }

@@ -241,6 +241,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         imageType, ratingType, styleType, sortType, sortReverse, showChildren])
 
     useEffect(() => {
+        if (searchFlag) searchPosts()
+    }, [searchFlag])
+
+    useEffect(() => {
         if (reloadedPost) {
             setTimeout(() => {
                 reloadedPost = false

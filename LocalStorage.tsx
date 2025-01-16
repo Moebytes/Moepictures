@@ -3,6 +3,7 @@ import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
 usePageSelector, usePageActions, useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
 import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
+import localforage from "localforage"
 
 const LocalStorage: React.FunctionComponent = (props) => {
     const {theme, language, siteHue, siteSaturation, siteLightness, particles, 
@@ -21,8 +22,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
     groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage} = usePageSelector()
     const {setPage, setHistoryPage, setMessagePage, setThreadPage, setArtistsPage, setCharactersPage, setCommentsPage,
     setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage} = usePageActions()
-    const {posts, tags, bannerTags, post, tagCategories, order, related} = useCacheSelector()
-    const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setOrder, setRelated} = useCacheActions()
+    const {posts, tags, bannerTags, post, tagCategories, order, related, artists, characters, series} = useCacheSelector()
+    const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom} = usePlaybackSelector()
     const {setDisableZoom} = usePlaybackActions()
     const {session} = useSessionSelector()
@@ -39,8 +40,24 @@ const LocalStorage: React.FunctionComponent = (props) => {
         }
     }
 
+    const initAsync = async () => {
+        const savedPosts = await localforage.getItem("savedPosts") as string
+        const savedTags = await localforage.getItem("savedTags") as string
+        const savedRelated = await localforage.getItem("savedRelated") as string
+        const savedArtists = await localforage.getItem("savedArtists") as string
+        const savedCharacters = await localforage.getItem("savedCharacters") as string
+        const savedSeries = await localforage.getItem("savedSeries") as string
+        if (savedPosts) setPosts(JSON.parse(savedPosts))
+        if (savedTags) setTags(JSON.parse(savedTags))
+        if (savedRelated) setRelated(JSON.parse(savedRelated))
+        if (savedArtists) setArtists(JSON.parse(savedArtists))
+        if (savedCharacters) setCharacters(JSON.parse(savedCharacters))
+        if (savedSeries) setSeries(JSON.parse(savedSeries))
+    }
+
     useEffect(() => {
         initLanguage()
+        initAsync()
         const savedTheme = localStorage.getItem("theme")
         const savedSiteHue = localStorage.getItem("siteHue")
         const savedSiteSaturation = localStorage.getItem("siteSaturation")
@@ -91,14 +108,11 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedHideSidebar = localStorage.getItem("sidebar")
         const savedHideNavbar = localStorage.getItem("navbar")
         const savedHideSortbar = localStorage.getItem("sortbar")
-        const savedPosts = localStorage.getItem("savedPosts")
-        const savedTags = localStorage.getItem("savedTags")
+        const savedOrder = localStorage.getItem("order")
         const savedBannerTags = localStorage.getItem("savedBannerTags")
         const savedSession = localStorage.getItem("savedSession")
         const savedPost = localStorage.getItem("savedPost")
         const savedTagCategories = localStorage.getItem("savedTagCategories")
-        const savedOrder = localStorage.getItem("order")
-        const savedRelated = localStorage.getItem("savedRelated")
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
@@ -149,26 +163,43 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedHideNavbar) setHideNavbar(savedHideNavbar === "true")
         if (savedHideSidebar) setHideSidebar(savedHideSidebar === "true")
         if (savedHideSortbar) setHideSortbar(savedHideSortbar === "true")
-        if (savedPosts) setPosts(JSON.parse(savedPosts))
-        if (savedTags) setTags(JSON.parse(savedTags))
         if (savedBannerTags) setBannerTags(JSON.parse(savedBannerTags))
         if (savedSession) setSession(JSON.parse(savedSession))
         if (savedPost) setPost(JSON.parse(savedPost))
         if (savedTagCategories) setTagCategories(JSON.parse(savedTagCategories))
         if (savedOrder) setOrder(Number(savedOrder))
-        if (savedRelated) setRelated(JSON.parse(savedRelated))
     }, [])
 
     useEffect(() => {
-        localStorage.setItem("theme", theme)
         localStorage.setItem("siteHue", String(siteHue))
         localStorage.setItem("siteSaturation", String(siteSaturation))
         localStorage.setItem("siteLightness", String(siteLightness))
+    }, [siteHue, siteSaturation, siteLightness])
+
+    useEffect(() => {
+        localStorage.setItem("theme", theme)
+        localStorage.setItem("language", language)
+        localStorage.setItem("particles", String(particles))
+        localStorage.setItem("particleAmount", String(particleAmount))
+        localStorage.setItem("particleSize", String(particleSize))
+        localStorage.setItem("particleSpeed", String(particleSpeed))
+    }, [theme, language, particles, particleAmount, particleSize, particleSpeed])
+
+    useEffect(() => {
         localStorage.setItem("scroll", String(scroll))
-        localStorage.setItem("disableZoom", String(disableZoom))
-        localStorage.setItem("imageExpand", String(imageExpand))
-        localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
-        localStorage.setItem("format", format)
+        localStorage.setItem("type", imageType)
+        localStorage.setItem("rating", ratingType)
+        localStorage.setItem("style", styleType)
+        localStorage.setItem("size", sizeType)
+        localStorage.setItem("sort", sortType)
+        localStorage.setItem("sortReverse", String(sortReverse))
+        localStorage.setItem("pageMultiplier", String(pageMultiplier))
+        localStorage.setItem("square", String(square))
+        localStorage.setItem("showChildren", String(showChildren))
+    }, [scroll, imageType, ratingType, styleType, sizeType, sortType, sortReverse, 
+        pageMultiplier, square, showChildren])
+
+    useEffect(() => {
         localStorage.setItem("brightness", String(brightness))
         localStorage.setItem("contrast", String(contrast))
         localStorage.setItem("hue", String(hue))
@@ -178,25 +209,45 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("sharpen", String(sharpen))
         localStorage.setItem("pixelate", String(pixelate))
         localStorage.setItem("splatter", String(splatter))
-        localStorage.setItem("language", language)
-        localStorage.setItem("particles", String(particles))
-        localStorage.setItem("particleAmount", String(particleAmount))
-        localStorage.setItem("particleSize", String(particleSize))
-        localStorage.setItem("particleSpeed", String(particleSpeed))
+    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
+
+    useEffect(() => {
+        localStorage.setItem("disableZoom", String(disableZoom))
+        localStorage.setItem("imageExpand", String(imageExpand))
+        localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
+        localStorage.setItem("format", format)
         localStorage.setItem("saveSearch", String(saveSearch))
-        localStorage.setItem("type", imageType)
-        localStorage.setItem("rating", ratingType)
-        localStorage.setItem("style", styleType)
-        localStorage.setItem("size", sizeType)
-        localStorage.setItem("sort", sortType)
-        localStorage.setItem("sortReverse", String(sortReverse))
-        localStorage.setItem("pageMultiplier", String(pageMultiplier))
+    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch])
+
+    useEffect(() => {
         localStorage.setItem("sidebar", String(hideSidebar))
         localStorage.setItem("titlebar", String(hideTitlebar))
         localStorage.setItem("navbar", String(hideNavbar))
         localStorage.setItem("sortbar", String(hideSortbar))
-        localStorage.setItem("square", String(square))
-        localStorage.setItem("showChildren", String(showChildren))
+    }, [hideSidebar, hideTitlebar, hideNavbar, hideSortbar])
+
+    useEffect(() => {
+        localforage.setItem("savedPosts", JSON.stringify(posts))
+        localforage.setItem("savedTags", JSON.stringify(tags))
+        localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
+        localStorage.setItem("savedSession", JSON.stringify(session))
+    }, [posts, tags, bannerTags, session])
+
+    useEffect(() => {
+        localStorage.setItem("order", String(order))
+        localStorage.setItem("savedPost", JSON.stringify(post))
+        localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
+        localforage.setItem("savedRelated", JSON.stringify(related))
+    }, [order, tagCategories, post, related])
+
+
+    useEffect(() => {
+        localforage.setItem("savedArtists", JSON.stringify(artists))
+        localforage.setItem("savedCharacters", JSON.stringify(characters))
+        localforage.setItem("savedSeries", JSON.stringify(series))
+    }, [artists, characters, series])
+
+    useEffect(() => {
         localStorage.setItem("page", String(page || ""))
         localStorage.setItem("historyPage", String(historyPage || ""))
         localStorage.setItem("messagePage", String(messagePage || ""))
@@ -211,21 +262,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("notesPage", String(notesPage || ""))
         localStorage.setItem("seriesPage", String(seriesPage || ""))
         localStorage.setItem("tagsPage", String(tagsPage || ""))
-        localStorage.setItem("savedPosts", JSON.stringify(posts))
-        localStorage.setItem("savedTags", JSON.stringify(tags))
-        localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
-        localStorage.setItem("savedSession", JSON.stringify(session))
-        localStorage.setItem("order", String(order))
-        localStorage.setItem("savedPost", JSON.stringify(post))
-        localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
-        localStorage.setItem("savedRelated", JSON.stringify(related))
-    }, [theme, siteHue, siteSaturation, siteLightness, scroll, disableZoom, imageExpand, noteDrawingEnabled, 
-        format, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter, language,
-        particles, particleAmount, particleSize, particleSpeed, saveSearch, imageType, ratingType, styleType, 
-        sizeType, sortType, sortReverse, pageMultiplier, hideSidebar, hideTitlebar, hideNavbar, hideSortbar, square, 
-        showChildren, historyPage, messagePage, threadPage, page, artistsPage, charactersPage, commentsPage, forumPage, 
-        groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, posts, tags, bannerTags, session, order,
-        tagCategories, post, related])
+    }, [historyPage, messagePage, threadPage, page, artistsPage, charactersPage, commentsPage, forumPage, 
+        groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage])
 
     return null
 }

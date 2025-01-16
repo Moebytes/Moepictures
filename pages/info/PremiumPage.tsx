@@ -24,6 +24,7 @@ import animatedAvatar from "../../assets/images/premium-animated-avatar.png"
 import changeUsername from "../../assets/images/premium-change-username.png"
 import noAds from "../../assets/images/premium-no-ads.png"
 import functions from "../../structures/Functions"
+import permissions from "../../structures/Permissions"
 import bitcoin from "../../assets/icons/bitcoin.png"
 import "./styles/premiumpage.less"
 import axios from "axios"
@@ -69,7 +70,8 @@ const PremiumPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!session.username) {
+        let condition = permissions.isPremiumEnabled() ? session.username : permissions.isAdmin(session)
+        if (!condition) {
             functions.replaceLocation("/401")
         }
     }, [session])

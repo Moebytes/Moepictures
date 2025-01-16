@@ -13,9 +13,9 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
-import path from "path"
+import EffectImage from "../image/EffectImage"
 import "./styles/historyrow.less"
-import {GroupHistory} from "../../types/Types"
+import {GroupHistory, PostFull} from "../../types/Types"
 
 interface Props {
     groupHistory: GroupHistory
@@ -34,27 +34,22 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteGroupHistoryID, revertGroupHistoryID, deleteGroupHistoryFlag, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setDeleteGroupHistoryID, setRevertGroupHistoryID, setDeleteGroupHistoryFlag, setRevertGroupHistoryFlag} = useGroupDialogActions()
     const history = useHistory()
+    const [groupPost, setGroupPost] = useState(null as PostFull | null)
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
     const slug = props.groupHistory.slug
     let prevHistory = props.previousHistory || Boolean(props.exact)
-    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
-    const updateImages = async () => {
+    const updatePost = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
         props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
         const post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag)
         if (!post) return
-        const initialImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
-        const initialImg = await functions.decryptThumb(initialImgLink, session)
-        setImg(initialImg)
-        const index = props.groupHistory.posts.findIndex((p) => String(p.postID) === String(targetID))
-        setPostIndex(index)
+        setGroupPost(post)
     }
 
     const updateUserRole = async () => {
@@ -64,7 +59,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateUserRole()
-        updateImages()
+        updatePost()
     }, [props.groupHistory, session])
 
     const revertGroupHistory = async () => {
@@ -265,17 +260,11 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="historyrow">
             {session.username ? groupHistoryOptions() : null}
-            <div className="historyrow-container" ref={imageFiltersRef}>
-                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/>}
+            <div className="historyrow-container">
+                <EffectImage className="historyrow-img" post={groupPost} onClick={imgClick} height={200}/>
                 {!mobile ? <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span> : null}
             </div>
             {mobile ? <div className="historyrow-container">

@@ -51,6 +51,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [visibleImages, setVisibleImages] = useState([] as string[])
     const [visibleIndex, setVisibleIndex] = useState(0)
     const [updateImagesFlag, setUpdateImagesFlag] = useState(false)
+    const [ended, setEnded] = useState(false)
     const [scrollTimeout, setScrollTimeout] = useState(false)
     const [trackPad, setTrackPad] = useState(false)
     const [lastResetFlag, setLastResetFlag] = useState(null)
@@ -91,6 +92,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
         setVisibleImages([])
         setVisibleIndex(0)
+        setEnded(false)
         if (sliderRef?.current) {
             sliderRef.current.style.marginLeft = `0px`
         }
@@ -153,6 +155,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                     setLastPos(null)
                 }, 700)
             } else {
+                setEnded(true)
                 props.update?.()
             }
             setUpdateImagesFlag(false)
@@ -166,7 +169,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 const margin = parseInt(sliderRef.current.style.marginLeft)
                 if (margin < 0) {
                     if (!scrollTimeout) {
-                        setLastPos(margin)
+                        if (ended) setLastPos(margin)
                         setUpdateImagesFlag(true)
                     }
                 }
@@ -235,7 +238,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             observer.disconnect()
             resizeObserver.disconnect()
         }
-    }, [imageFilterRefs])
+    }, [imageFilterRefs, ended])
 
     useEffect(() => {
         for (let i = 0; i < imageFilterRefs.length; i++) {
@@ -432,106 +435,20 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }, [imageFilterRefs, brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
-    const imagePixelate = () => {
+    useEffect(() => {
         for (let i = 0; i < pixelateRefs.length; i++) {
             const pixelateRef = pixelateRefs[i]
             const imageRef = imageRefs[i]
-            if (!pixelateRef.current || !imageRef.current) return
-            const pixelateCanvas = pixelateRef.current
-            const ctx = pixelateCanvas.getContext("2d")!
-            const imageWidth = imageRef.current.clientWidth 
-            const imageHeight = imageRef.current.clientHeight
-            const landscape = imageWidth >= imageHeight
-            ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-            pixelateCanvas.width = imageWidth
-            pixelateCanvas.height = imageHeight
-            const pixelWidth = imageWidth / pixelate 
-            const pixelHeight = imageHeight / pixelate
-            if (pixelate !== 1) {
-                ctx.drawImage(imageRef.current, 0, 0, pixelWidth, pixelHeight)
-                if (landscape) {
-                    pixelateCanvas.style.width = `${imageWidth * pixelate}px`
-                    pixelateCanvas.style.height = "auto"
-                } else {
-                    pixelateCanvas.style.width = "auto"
-                    pixelateCanvas.style.height = `${imageHeight * pixelate}px`
-                }
-                pixelateCanvas.style.opacity = "1"
-            } else {
-                pixelateCanvas.style.width = "none"
-                pixelateCanvas.style.height = "none"
-                pixelateCanvas.style.opacity = "0"
-            }
+            functions.pixelateEffect(pixelateRef.current, imageRef.current, pixelate)
         }
-    }
-
-    const splatterEffect = () => {
-        for (let i = 0; i < effectRefs.length; i++) {
-            const effectRef = effectRefs[i]
-            const imageRef = imageRefs[i]
-            if (!effectRef.current || !imageRef.current) return
-            if (splatter !== 0) {
-                effectRef.current.style.opacity = "1"
-                effectRef.current.width = imageRef.current.width
-                effectRef.current.height = imageRef.current.height
-                const ctx = effectRef.current.getContext("2d")!
-
-                ctx.drawImage(imageRef.current, 0, 0, effectRef.current.width, effectRef.current.height)
-    
-                const lineAmount = splatter * 3
-                const minOpacity = 0.1
-                const maxOpacity = 0.2
-                const minLineWidth = 1
-                const maxLineWidth = 3
-                const minLineLength = 50
-                const maxLineLength = 70
-                const maxAngle = 180
-    
-                const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
-                const blendModes = ["lighter"] as GlobalCompositeOperation[]
-                for (let i = 0; i < lineCount; i++) {
-                    const startX = Math.random() * effectRef.current.width
-                    const startY = Math.random() * effectRef.current.height
-                    const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
-    
-                    const radians = (Math.PI / 180) * maxAngle
-                    let angle1 = Math.random() * radians - radians / 2
-                    let angle2 = Math.random() * radians - radians / 2
-    
-                    const controlX1 = startX + length * Math.cos(angle1)
-                    const controlY1 = startY + length * Math.sin(angle1)
-                    const controlX2 = startX + length * Math.cos(angle2)
-                    const controlY2 = startY + length * Math.sin(angle2)
-                    const endX = startX + length * Math.cos((angle1 + angle2) / 2)
-                    const endY = startY + length * Math.sin((angle1 + angle2) / 2)
-    
-                    const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
-                    const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
-                    const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
-    
-                    ctx.globalAlpha = opacity
-                    ctx.globalCompositeOperation = blendMode
-                    ctx.strokeStyle = "#ffffff"
-                    ctx.lineWidth = lineWidth
-                    ctx.beginPath()
-                    ctx.moveTo(startX, startY)
-                    ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
-                    ctx.stroke()
-                }
-                ctx.globalAlpha = 1
-                ctx.globalCompositeOperation = "source-over"
-            } else {
-                effectRef.current.style.opacity = "0"
-            }
-        }
-    }
-
-    useEffect(() => {
-        imagePixelate()
     }, [pixelateRefs, pixelate])
 
     useEffect(() => {
-        splatterEffect()
+        for (let i = 0; i < effectRefs.length; i++) {
+            const effectRef = effectRefs[i]
+            const imageRef = imageRefs[i]
+            functions.splatterEffect(effectRef.current, imageRef.current, splatter, {lineMultiplier: 3, maxLineWidth: 3})
+        }
     }, [effectRefs, splatter])
 
     const generateJSX = () => {

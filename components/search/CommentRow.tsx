@@ -18,6 +18,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import jsxFunctions from "../../structures/JSXFunctions"
+import EffectImage from "../image/EffectImage"
 import "./styles/commentrow.less"
 import {CommentSearch} from "../../types/Types"
 
@@ -40,8 +41,6 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
     const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const history = useHistory()
-    const [img, setImg] = useState("")
-    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -237,38 +236,17 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
     }
 
-    useEffect(() => {
-        const loadImage = async () => {
-            if (functions.isVideo(img) && mobile) {
-                const thumbnail = await functions.videoThumbnail(img)
-                setImg(thumbnail)
-            } else {
-                const image = props.comment.post.images[0]
-                const thumb = functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "medium", mobile)
-                const img = await functions.decryptThumb(thumb, session)
-                setImg(img)
-            }
-        }
-        loadImage()
-    }, [])
-
     const commentJump = () => {
         setCommentID(Number(props.comment?.commentID))
         setCommentJumpFlag(true)
         history.push(`/post/${props.comment?.postID}/${props.comment.post.slug}?comment=${props.comment?.commentID}`)
     }
 
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="commentrow" comment-id={props.comment?.commentID}>
-            <div className="commentrow-container" ref={imageFiltersRef}>
-                {functions.isVideo(img) && !mobile ? 
-                <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                <img className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
+            <div className="commentrow-container">
+                <EffectImage className="commentrow-img" post={props.comment.post} 
+                onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">
                 <div className="commentrow-container">

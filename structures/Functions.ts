@@ -31,7 +31,7 @@ import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
-PostHistory, PostSearchParams} from "../types/Types"
+PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -3056,6 +3056,101 @@ export default class Functions {
         if (!title) return "untitled"
         if (englishTitle) return Functions.generateSlug(englishTitle)
         return Functions.generateSlug(title)
+    }
+
+    public static pixelateEffect = (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
+        pixelate: number, opt?: PixelateOptions) => {
+        if (!opt) opt = {}
+        if (!canvas || !image) return canvas
+        if (opt.isAnimation || opt.isVideo) return canvas
+        const ctx = canvas.getContext("2d")!
+        const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
+        const imageHeight = (image instanceof ImageBitmap ? image.height : image.clientHeight)
+        const landscape = imageWidth >= imageHeight
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        const pixelWidth = imageWidth / pixelate 
+        const pixelHeight = imageHeight / pixelate
+        canvas.width = opt.directWidth ? pixelWidth : imageWidth
+        canvas.height = opt.directWidth ? pixelHeight : imageHeight
+        if (pixelate !== 1) {
+            ctx.drawImage(image, 0, 0, pixelWidth, pixelHeight)
+            if (landscape) {
+                canvas.style.width = `${imageWidth * pixelate}px`
+                canvas.style.height = "auto"
+            } else {
+                canvas.style.width = "auto"
+                canvas.style.height = `${imageHeight * pixelate}px`
+            }
+            canvas.style.opacity = "1"
+        } else {
+            canvas.style.width = "none"
+            canvas.style.height = "none"
+            canvas.style.opacity = "0"
+        }
+        return canvas
+    }
+
+    public static splatterEffect = (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
+        splatter: number, opt?: SplatterOptions) => {
+        if (!opt) opt = {}
+        if (!canvas || !image) return canvas
+        if (opt.isAnimation || opt.isVideo) return canvas
+        if (splatter !== 0) {
+            canvas.style.opacity = "1"
+            const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
+            const imageHeight = (image instanceof ImageBitmap ? image.height : image.clientHeight)
+            canvas.width = imageWidth
+            canvas.height = imageHeight
+            const ctx = canvas.getContext("2d")!
+
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+            const lineAmount = splatter * (opt.lineMultiplier || 30) * (opt.imageExpand ? 2 : 1)
+            const minOpacity = opt.minOpacity || 0.1
+            const maxOpacity = opt.maxOpacity || 0.2
+            const minLineWidth = opt.minLineWidth || 1
+            const maxLineWidth = opt.maxLineWidth || 7
+            const minLineLength = opt.minLineLength || 50
+            const maxLineLength = opt.maxLineLength || 70
+            const maxAngle = opt.maxAngle || 180
+
+            const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
+            const blendModes = ["lighter"] as GlobalCompositeOperation[]
+            for (let i = 0; i < lineCount; i++) {
+                const startX = Math.random() * canvas.width
+                const startY = Math.random() * canvas.height
+                const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
+
+                const radians = (Math.PI / 180) * maxAngle
+                let angle1 = Math.random() * radians - radians / 2
+                let angle2 = Math.random() * radians - radians / 2
+
+                const controlX1 = startX + length * Math.cos(angle1)
+                const controlY1 = startY + length * Math.sin(angle1)
+                const controlX2 = startX + length * Math.cos(angle2)
+                const controlY2 = startY + length * Math.sin(angle2)
+                const endX = startX + length * Math.cos((angle1 + angle2) / 2)
+                const endY = startY + length * Math.sin((angle1 + angle2) / 2)
+
+                const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
+                const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
+                const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
+
+                ctx.globalAlpha = opacity
+                ctx.globalCompositeOperation = blendMode
+                ctx.strokeStyle = "#ffffff"
+                ctx.lineWidth = lineWidth
+                ctx.beginPath()
+                ctx.moveTo(startX, startY)
+                ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
+                ctx.stroke()
+            }
+            ctx.globalAlpha = 1
+            ctx.globalCompositeOperation = "source-over"
+        } else {
+            canvas.style.opacity = "0"
+        }
+        return canvas
     }
 
     public static parseUserAgent = (userAgent?: string) => {

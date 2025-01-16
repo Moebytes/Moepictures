@@ -427,7 +427,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span>
-                    {session.username ? <div className="mobile-nav-img-container" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}}>
+                    {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}}>
                         <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
@@ -499,7 +499,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/groups")}>{i18n.sort.groups}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/forum")}>{i18n.navbar.forum}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/help")}>{i18n.navbar.help}</span>
-                    {session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}
+                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>

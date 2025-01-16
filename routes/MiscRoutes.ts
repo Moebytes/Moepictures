@@ -475,6 +475,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/premium/paymentlink", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!permissions.isPremiumEnabled()) return res.status(400).send("Closed")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const data = {
                 local_price: {
@@ -501,6 +502,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/premium/payment", async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!permissions.isPremiumEnabled()) return res.status(400).send("Closed")
             const {event} = req.body as {event: CoinbaseEvent}
             const signature = req.headers["x-cc-webhook-signature"]
 

@@ -13,7 +13,7 @@ interface Props {
 const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
-    const {setPosts, setImage} = useCacheActions()
+    const {setPosts} = useCacheActions()
     const history = useHistory()
 
     const getImages = () => {
@@ -21,7 +21,6 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     }
 
     const click = (img: string, index: number) => {
-        setImage("")
         const post = props.posts[index]
         history.push(`/post/${post.postID}/${post.slug}`)
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())

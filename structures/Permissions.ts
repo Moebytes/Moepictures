@@ -27,6 +27,7 @@ export default class Permissions {
     }
 
     public static isPremium = (session: ServerSession) => {
+        if (!Permissions.isPremiumEnabled()) return true
         if (Permissions.isMod(session)) return true 
         if (Permissions.isSystem(session)) return true
         if (session.role === "premium-curator") return true
@@ -55,6 +56,10 @@ export default class Permissions {
 
     public static noEncryption = (session: ServerSession) => {
         // if (Permissions.isAdmin(session)) return true
+        return false
+    }
+
+    public static isPremiumEnabled = () => {
         return false
     }
 }

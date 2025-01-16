@@ -155,6 +155,26 @@ export interface TagLookup {
     danbooruLink: string
 }
 
+export interface PixelateOptions {
+    isAnimation?: boolean
+    isVideo?: boolean
+    directWidth?: boolean
+}
+
+export interface SplatterOptions {
+    isAnimation?: boolean
+    isVideo?: boolean
+    lineMultiplier?: number
+    minOpacity?: number
+    maxOpacity?: number
+    minLineWidth?: number
+    maxLineWidth?: number
+    minLineLength?: number
+    maxLineLength?: number
+    maxAngle?: number
+    imageExpand?: boolean
+}
+
 export type MiscGetEndpoint<T extends string> = 
     T extends "/api/misc/captcha/create" ? {params: {color: string}, response: string} :
     T extends "/api/misc/pixiv" ? {params: {url: string}, response: PixivResponse} :

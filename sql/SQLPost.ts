@@ -579,6 +579,7 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
+                    LIMIT 1
                 )
                 SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -604,6 +605,7 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
+                    LIMIT 1
                 )
                 SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -629,6 +631,7 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
+                    LIMIT 1
                 )
                 SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -654,6 +657,7 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
+                    LIMIT 1
                 )
                 SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post

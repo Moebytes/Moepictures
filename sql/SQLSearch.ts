@@ -6,8 +6,8 @@ import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, Ta
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
         limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
-        format?: string, condition?: string}) => {
-        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format, condition} = options
+        format?: string, condition?: string, intermLimit?: number}) => {
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format, condition, intermLimit} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -148,6 +148,11 @@ export default class SQLSearch {
             values.push(format)
             i++
         }
+        let intermLimitValue = i
+        if (intermLimit) {
+            values.push(intermLimit)
+            i++
+        }
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
         const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery, childQuery, condition].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
@@ -199,6 +204,7 @@ export default class SQLSearch {
                 ${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
                 ${favgroupOrder ? `, "favgroup map"."order"` : ""}
                 ${!outerSort ? sortQuery : ""}
+                ${intermLimit ? `LIMIT $${intermLimitValue}` : ""}
             )`)
 
         return {postJSON, values, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
@@ -533,19 +539,21 @@ export default class SQLSearch {
                         SELECT posts.*, json_agg(DISTINCT images.*) AS images,
                         ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                         FROM posts
+                        TABLESAMPLE SYSTEM(5)
                         JOIN images ON images."postID" = posts."postID"
                         LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                         WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
                         GROUP BY posts."postID"
                     )
-                    SELECT tags.*, json_agg(post_json.*) AS posts,
+                    SELECT tags.*, json_agg(DISTINCT post_json.*) AS posts,
                     COUNT(*) OVER() AS "tagCount",
-                    COUNT(DISTINCT post_json."postID") AS "postCount",
+                    array_length("tag map posts"."posts", 1) AS "postCount",
                     ROUND(AVG(DISTINCT post_json."cuteness")) AS "cuteness"
                     FROM tags
                     JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                     JOIN post_json ON post_json."postID" = "tag map"."postID"
-                    GROUP BY "tags".tag
+                    JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                    GROUP BY "tags".tag, "tag map posts"."posts"
                     ${sortQuery}
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
             `)
@@ -555,7 +563,7 @@ export default class SQLSearch {
         if (sort === "random") {
             return SQLQuery.run(query) as Promise<TagCategorySearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<TagCategorySearch[]>
+            return SQLQuery.run(query) as Promise<TagCategorySearch[]>
         }
     }
 
@@ -594,7 +602,7 @@ export default class SQLSearch {
             values.push(limit)
             i++
         }
-        let whereQuery = whereArray.length ? `AND ${whereArray.join(" AND ")}` : ""
+        let whereQuery = whereArray.length ? `WHERE ${whereArray.join(" AND ")}` : ""
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (sort === "date") sortQuery = `ORDER BY tags."updatedDate" DESC`
@@ -609,19 +617,22 @@ export default class SQLSearch {
         if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
         if (sort === "length") sortQuery = `ORDER BY LENGTH(tags.tag) ASC`
         if (sort === "reverse length") sortQuery = `ORDER BY LENGTH(tags.tag) DESC`
+        // COUNT(DISTINCT posts."postID") AS "postCount", 
+        // JOIN "tag map" ON "tag map"."tag" = tags."tag" 
+        // JOIN posts ON posts."postID" = "tag map"."postID"
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                     SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
                     COUNT(*) OVER() AS "tagCount",
-                    COUNT(DISTINCT posts."postID") AS "postCount", 
+                    array_length("tag map posts"."posts", 1) AS "postCount",
                     COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
-                    JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
-                    JOIN posts ON posts."postID" = "tag map"."postID"
-                    GROUP BY "tags".tag
+                    JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                    ${whereQuery}
+                    GROUP BY "tags".tag, "tag map posts"."posts"
                     ${sortQuery}
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `)

@@ -456,6 +456,7 @@ export default class SQLTag {
                         JOIN images ON posts."postID" = images."postID"
                         JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"
                         GROUP BY posts."postID", "tag map tags"."tags"
+                        LIMIT 1
                     )
                     SELECT "tag map"."postID",
                     to_json((array_agg(post_json.*))[1]) AS post

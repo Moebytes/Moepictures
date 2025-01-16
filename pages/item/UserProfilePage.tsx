@@ -557,6 +557,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const clearCookieConsent = async () => {
+        await functions.post("/api/user/cookieconsent", {consent: null}, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
+    }
+
     const showBanner = async () => {
         localStorage.removeItem("bannerHideDate")
         functions.clearResponseCacheKey("/api/user/session")
@@ -777,13 +783,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.user.globalMusicPlayer}: <span className="user-text-action" onClick={globalMusicPlayer}>{session.globalMusicPlayer ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        <img className="user-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-text">{i18n.user.upscaledImages}: <span style={{color: "var(--premiumColor)"}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar}/> : null}
+                        <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.upscaledImages}: <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        <img className="user-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-text">{i18n.user.autosearchInterval}: </span>
-                        <input style={{color: "var(--premiumColor)"}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar}/> : null}
+                        <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.autosearchInterval}: </span>
+                        <input style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
                     {permissions.isAdmin(session) ? <div className="user-row">
@@ -793,13 +799,16 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div onClick={clearPfp} className="user-row">
                         <span className="user-link">{i18n.user.clearPfp}</span>
                     </div>
+                    <div onClick={clearCookieConsent} className="user-row">
+                        <span className="user-link">{i18n.user.clearCookieConsent}</span>
+                    </div>
                     {bannerHidden ? 
                     <div onClick={showBanner} className="user-row">
                         <span className="user-link">{i18n.user.showBanner}</span>
                     </div> : null}
                     <div onClick={changeUsername} className="user-row">
-                        <img className="user-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/>
-                        <span style={{color: "var(--premiumColor)"}} className="user-link">{i18n.user.changeUsername}</span>
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/> : null}
+                        <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-link">{i18n.user.changeUsername}</span>
                     </div>
                     <Link to="/change-email" className="user-row">
                         <span className="user-link">{i18n.user.changeEmail}</span>

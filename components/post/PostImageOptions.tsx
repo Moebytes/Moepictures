@@ -71,7 +71,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         localStorage.setItem("downloadText", downloadText)
-    }, [downloadText, format])
+    }, [downloadText])
 
     useEffect(() => {
         const getDLText = async () => {

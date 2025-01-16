@@ -318,7 +318,7 @@ export default class SQLThread {
                     WHERE creator = $1
                     GROUP BY creator
                 )
-                SELECT (COALESCE("threadCount", 0) + COALESCE("replyCount", 0)) AS postCount
+                SELECT (COALESCE("threadCount", 0) + COALESCE("replyCount", 0)) AS "postCount"
                 FROM "threadCounts"
                 LEFT JOIN "replyCounts"
                 ON "threadCounts".creator = "replyCounts".creator

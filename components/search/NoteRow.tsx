@@ -13,6 +13,7 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
+import EffectImage from "../image/EffectImage"
 import "./styles/commentrow.less"
 import {NoteSearch} from "../../types/Types"
 
@@ -29,8 +30,6 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const history = useHistory()
-    const [img, setImg] = useState("")
-    const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -162,33 +161,11 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         return <span className={`commentrow-user-text ${props.note?.banned ? "banned" : ""}`}>{functions.toProperCase(props.note?.updater) || i18n.user.deleted}</span>
     }
 
-    useEffect(() => {
-        const loadImage = async () => {
-            if (functions.isVideo(img) && mobile) {
-                const thumbnail = await functions.videoThumbnail(img)
-                setImg(thumbnail)
-            } else {
-                const image = props.note.post.images[props.note.order - 1]
-                const thumb = functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "medium", mobile)
-                const img = await functions.decryptThumb(thumb, session)
-                setImg(img)
-            }
-        }
-        loadImage()
-    }, [])
-
-
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="commentrow" note-id={props.note?.noteID}>
-            <div className="commentrow-container" style={{justifyContent: "center"}} ref={imageFiltersRef}>
-                {functions.isVideo(img) && !mobile ? 
-                <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                <img className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
+            <div className="commentrow-container" style={{justifyContent: "center"}}>
+                <EffectImage className="commentrow-img" post={props.note.post} order={props.note.order}
+                onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">
                 <div className="commentrow-container">

@@ -139,7 +139,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         const rect = emojiRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
-        let offset = -100
+        let offset = -120
         if (mobile) offset += 0
         return `${raw + offset}px`
     }

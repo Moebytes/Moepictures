@@ -1,11 +1,12 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
-useFilterSelector, useInteractionActions} from "../../store"
+useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
 import undeleteIcon from "../../assets/icons/revert.png"
 import deleteIcon from "../../assets/icons/delete.png"
 import {DeletedPost} from "../../types/Types"
+import EffectImage from "../image/EffectImage"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -19,23 +20,9 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {permaDeletePostID, permaDeletePostFlag} = usePostDialogSelector()
     const {setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag} = usePostDialogActions()
-    const [img, setImg] = useState("")
-    const [imageIndex, setImageIndex] = useState(0)
-    const imageFiltersRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
-
-    const updateImage = async () => {
-        const thumbLink = functions.getThumbnailLink(props.post.images[0].type, props.post.postID, 1, props.post.images[0].filename, "medium", mobile)
-        const thumb = await functions.decryptThumb(thumbLink, session)
-        setImg(thumb)
-    }
-
-    useEffect(() => {
-        updateImage()
-    }, [session, props.post])
 
     const undeletePostDialog = async () => {
         setUndeletePostID({postID: props.post.postID})
@@ -77,19 +64,6 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
         functions.openPost(props.post, event, history, session, setSessionFlag)
     }
 
-    const updateImg = async (event: React.MouseEvent) => {
-        event.preventDefault()
-        if (props.post.images.length > 1) {
-            let newImageIndex = imageIndex + 1 
-            if (newImageIndex > props.post.images.length - 1) newImageIndex = 0
-            const newImage = props.post.images[newImageIndex]
-            const thumbLink = functions.getThumbnailLink(newImage.type, props.post.postID, newImage.order, newImage.filename, "medium", mobile)
-            const thumb = await functions.decryptThumb(thumbLink, session)
-            setImg(thumb)
-            setImageIndex(newImageIndex)
-        }
-    }
-
     const printMirrors = () => {
         const mapped = Object.values(props.post.mirrors || {}) as string[]
         return mapped.map((m, i) => {
@@ -98,17 +72,11 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
         })
     }
 
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="historyrow">
             {deleteHistoryOptions()}
-            <div className="historyrow-container" ref={imageFiltersRef}>
-                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/>}
+            <div className="historyrow-container">
+                <EffectImage className="historyrow-img" post={props.post} onClick={imgClick} height={200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

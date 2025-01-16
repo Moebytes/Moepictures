@@ -48,7 +48,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
-    const {setImage} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -530,106 +529,23 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
-    const imagePixelate = () => {
-        if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) return
-        if (!pixelateRef.current || !ref.current) return
-        const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d")!
-        const imageWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.clientWidth 
-        const imageHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.clientHeight
-        const landscape = imageWidth >= imageHeight
-        ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = imageWidth
-        pixelateCanvas.height = imageHeight
-        const pixelWidth = imageWidth / pixelate 
-        const pixelHeight = imageHeight / pixelate
-        if (pixelate !== 1) {
-            ctx.drawImage(ref.current, 0, 0, pixelWidth, pixelHeight)
-            if (landscape) {
-                pixelateCanvas.style.width = `${imageWidth * pixelate}px`
-                pixelateCanvas.style.height = "auto"
-            } else {
-                pixelateCanvas.style.width = "auto"
-                pixelateCanvas.style.height = `${imageHeight * pixelate}px`
-            }
-            pixelateCanvas.style.opacity = "1"
-        } else {
-            pixelateCanvas.style.width = "none"
-            pixelateCanvas.style.height = "none"
-            pixelateCanvas.style.opacity = "0"
-        }
-    }
-
-    const splatterEffect = () => {
-        if (!effectRef.current || !ref.current) return
-        if (splatter !== 0) {
-            effectRef.current.style.opacity = "1"
-            effectRef.current.width = ref.current.width
-            effectRef.current.height = ref.current.height
-            const ctx = effectRef.current.getContext("2d")!
-            
-            ctx.drawImage(ref.current, 0, 0, effectRef.current.width, effectRef.current.height)
-
-            const lineAmount = splatter * 4
-            const minOpacity = 0.1
-            const maxOpacity = 0.2
-            const minLineWidth = 1
-            const maxLineWidth = 3
-            const minLineLength = 50
-            const maxLineLength = 70
-            const maxAngle = 180
-
-            const lineCount = Math.floor(Math.random() * lineAmount) + lineAmount
-            const blendModes = ["lighter"] as GlobalCompositeOperation[]
-            for (let i = 0; i < lineCount; i++) {
-                const startX = Math.random() * effectRef.current.width
-                const startY = Math.random() * effectRef.current.height
-                const length = Math.random() * (maxLineLength - minLineLength) + minLineLength
-
-                const radians = (Math.PI / 180) * maxAngle
-                let angle1 = Math.random() * radians - radians / 2
-                let angle2 = Math.random() * radians - radians / 2
-
-                const controlX1 = startX + length * Math.cos(angle1)
-                const controlY1 = startY + length * Math.sin(angle1)
-                const controlX2 = startX + length * Math.cos(angle2)
-                const controlY2 = startY + length * Math.sin(angle2)
-                const endX = startX + length * Math.cos((angle1 + angle2) / 2)
-                const endY = startY + length * Math.sin((angle1 + angle2) / 2)
-
-                const opacity = Math.random() * (maxOpacity - minOpacity) + minOpacity
-                const lineWidth = Math.random() * (maxLineWidth - minLineWidth) + minLineWidth
-                const blendMode = blendModes[Math.floor(Math.random() * blendModes.length)]
-
-                ctx.globalAlpha = opacity
-                ctx.globalCompositeOperation = blendMode
-                ctx.strokeStyle = "#ffffff"
-                ctx.lineWidth = lineWidth
-                ctx.beginPath()
-                ctx.moveTo(startX, startY)
-                ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY)
-                ctx.stroke()
-            }
-            ctx.globalAlpha = 1
-            ctx.globalCompositeOperation = "source-over"
-        } else {
-            effectRef.current.style.opacity = "0"
-        }
-    }
-
     useEffect(() => {
         setTimeout(() => {
-            imagePixelate()
-            splatterEffect()
+            functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+            {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
+            functions.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
+            maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
         }, 50)
     }, [imageLoaded])
 
     useEffect(() => {
-        imagePixelate()
+        functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+        {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
     }, [pixelate, square, imageSize])
 
     useEffect(() => {
-        splatterEffect()
+        functions.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
+        maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
     }, [splatter])
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -691,16 +607,16 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
-            const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = (frame instanceof ImageBitmap ? frame.width : frame.clientWidth) / pixelate 
-            const pixelHeight = (frame instanceof ImageBitmap ? frame.height : frame.clientHeight) / pixelate
-            pixelateCanvas.width = pixelWidth 
-            pixelateCanvas.height = pixelHeight
-            const pixelateCtx = pixelateCanvas.getContext("2d")!
-            pixelateCtx.imageSmoothingEnabled = false
-            pixelateCtx.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
+            let pixelateCanvas = document.createElement("canvas")
+            functions.pixelateEffect(pixelateCanvas, frame, pixelate, {directWidth: true})
             ctx.imageSmoothingEnabled = false
             ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
+            ctx.imageSmoothingEnabled = true
+        }
+        if (splatter !== 0) {
+            const splatterCanvas = document.createElement("canvas")
+            functions.splatterEffect(splatterCanvas, frame, splatter)
+            ctx.drawImage(splatterCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (sharpen !== 0) {
             const sharpnessCanvas = document.createElement("canvas")
@@ -803,7 +719,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 window.URL.revokeObjectURL(url)
             } else {
                 let image = await renderImage()
-                console.log(image)
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
                     image = await functions.convertToFormat(image, format)
                 }
@@ -866,7 +781,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
-                    setImage("")
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }

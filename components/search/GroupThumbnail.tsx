@@ -2,7 +2,8 @@ import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../../store"
 import functions from "../../structures/Functions"
-import {GroupSearch, GroupPosts, GroupHistory} from "../../types/Types"
+import EffectImage from "../image/EffectImage"
+import {GroupSearch, GroupPosts} from "../../types/Types"
 import "./styles/groupthumbnail.less"
 
 interface Props {
@@ -47,17 +48,14 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     }, [brightness, contrast, hue, saturation, blur])
 
     if (props.image) {
-        return (
-            <div ref={imageFiltersRef} onClick={props.onClick ? props.onClick : click} style={props.style ? props.style : {}}>
-                <img draggable={false} className="group-thumbnail-img-outlined" src={props.image}/>
-            </div>
-        )
+        return <EffectImage className="group-thumbnail-img-outlined" image={props.image} height={300}
+                onClick={props.onClick ? props.onClick : click} style={props.style ? props.style : {}}/>
     }
 
     return (
         <div className="group-thumbnail" onClick={click} ref={imageFiltersRef}>
             {props.group ? <>
-            <img draggable={false} className="group-thumbnail-img" src={img}/>
+            <EffectImage className="group-thumbnail-img" post={props.group.posts[0]}/>
             <div className="group-thumbnail-text-container">
                 <span className="group-thumbnail-text">{props.group.name}</span>
             </div></> : null}

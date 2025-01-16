@@ -14,7 +14,7 @@ import pageIcon from "../../assets/icons/page.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions} from "../../store"
+useMiscDialogActions, useCacheSelector, useCacheActions} from "../../store"
 import "./styles/itemspage.less"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 
@@ -40,9 +40,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
+    const {series} = useCacheSelector()
+    const {setSeries} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [series, setSeries] = useState([] as TagCategorySearch[])
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleSeries, setVisibleSeries] = useState([] as TagCategorySearch[])
@@ -91,6 +92,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }
 
     const updateSeries = async (queryOverride?: string) => {
+        console.log("HERE")
         let query = queryOverride ? queryOverride : searchQuery
         const result = await functions.get("/api/search/series", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
@@ -98,6 +100,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setVisibleSeries([])
         setSeries(result)
     }
+
+    useEffect(() => {
+        console.log(series)
+    }, [series])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -174,14 +180,14 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setSeries(result)
             } else {
-                setSeries((prev) => functions.removeDuplicates([...prev, ...result]))
+                setSeries(functions.removeDuplicates([...series, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setSeries(result)
                 } else {
-                    setSeries((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setSeries(functions.removeDuplicates([...series, ...result]))
                 }
             }
             setEnded(true)

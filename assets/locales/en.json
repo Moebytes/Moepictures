@@ -277,6 +277,7 @@
         "autosearchInterval": "Autosearch Interval",
         "showR18": "Show R18",
         "clearPfp": "Clear Pfp",
+        "clearCookieConsent": "Clear Cookie Consent",
         "showBanner": "Show Banner",
         "changeUsername": "Change Username",
         "changeEmail": "Change Email",
@@ -467,7 +468,9 @@
         "characterTag": "Character Tag",
         "joined": "Joined",
         "speed": "Speed",
-        "dimensions": "Dimensions"
+        "dimensions": "Dimensions",
+        "agree": "Agree",
+        "deny": "Deny"
     },
     "errors": {
         "$401":"401 error",
@@ -786,6 +789,9 @@
     "dialogs": {
         "page": {
             "title": "Go To Page"
+        },
+        "cookieBanner": {
+            "text": "We use cookies to store your preferences and enhance your experience. By continuing to use our site, you consent to our use of cookies."
         },
         "aliasTag": {
             "title": "Alias Tag",
@@ -1599,7 +1605,7 @@
         "premium": {
             "title": "Premium Upgrade",
             "line1": "You can purchase an account upgrade to unlock more features. Thank you for supporting us!",
-            "line2": "Your contribution allows us to keep the site ad-free for the foreseeable future. We will use it to pay our hosting and storage costs.",
+            "line2": "Your contribution allows us to stay up online for the foreseeable future. We will use it to pay our hosting and storage costs.",
             "line3": "All of the premium features are listed on the left."
         },
         "upscaledImages": {
@@ -1629,7 +1635,7 @@
         },
         "noAds": {
             "title": "No Ads",
-            "header": "Allow us to continue running the website without intrusive advertisements. They're annoying and not aesthetically pleasing. Thank you!"
+            "header": "Advertisements will get removed for premium users which will make the site more aesthetically pleasing. Thank you!"
         },
         "purchase": {
             "title": "Purchase",
@@ -1683,10 +1689,10 @@
                 "proof3": "⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly.",
                 "goText": "We are sad to see you go."
             },
-            "aiPolicy": {
-                "title": "AI policy",
-                "line1": "⇾ Scraping our website for purposes of training AI or machine learning models is prohibited.",
-                "line2": "⇾ We reserve the right to fully ban IP addresses and IP ranges caught doing this (preventing them from accessing the site at all).",
+            "webScraping": {
+                "title": "Web Scraping",
+                "line1": "⇾ Scraping our website for images, audio, and any other content we have is prohibited.",
+                "line2": "⇾ We reserve the right to fully ban IP addresses and IP ranges caught doing this (preventing them from accessing our site).",
                 "line3": "⇾ We also take measures such as rate limits, captchas, and encryption to make this difficult."
             },
             "accountUpgrades": {

@@ -78,6 +78,7 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
+                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
@@ -105,6 +106,7 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
+                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
@@ -129,6 +131,7 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
+                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",

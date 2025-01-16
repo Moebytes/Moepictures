@@ -39,6 +39,7 @@ import musicImg from "../../assets/images/music.png"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
 import tooltipsImg from "../../assets/images/tooltips.png"
 import functions from "../../structures/Functions"
+import permissions from "../../structures/Permissions"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -601,7 +602,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[0]}</span>{Object.values(i18n.help.users.userLevels.items)[0]}<br/>
                     <span className="help-alt user-color">{Object.keys(i18n.help.users.userLevels.items)[1]}</span>{Object.values(i18n.help.users.userLevels.items)[1]}<br/>
-                    <span className="help-alt premium-color">{Object.keys(i18n.help.users.userLevels.items)[2]}</span>{Object.values(i18n.help.users.userLevels.items)[2]}<br/>
+                    {permissions.isPremiumEnabled() ? <><span className="help-alt premium-color">{Object.keys(i18n.help.users.userLevels.items)[2]}</span>{Object.values(i18n.help.users.userLevels.items)[2]}<br/></> : null}
                     <span className="help-alt contributor-color">{Object.keys(i18n.help.users.userLevels.items)[3]}</span>{Object.values(i18n.help.users.userLevels.items)[3]}<br/>
                     <span className="help-alt curator-color">{Object.keys(i18n.help.users.userLevels.items)[4]}</span>{Object.values(i18n.help.users.userLevels.items)[4]}<br/>
                     <span className="help-alt mod-color">{Object.keys(i18n.help.users.userLevels.items)[5]}</span>{Object.values(i18n.help.users.userLevels.items)[5]}<br/>

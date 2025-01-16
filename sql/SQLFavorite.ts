@@ -22,6 +22,7 @@ export default class SQLFavorite {
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
                     GROUP BY posts."postID"
+                    LIMIT 1
                 )
                 SELECT favorites.*, 
                 to_json((array_agg(post_json.*))[1]) AS post

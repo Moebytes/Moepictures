@@ -34,6 +34,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "delete requests".*, 
             COUNT(*) OVER() AS "requestCount",
@@ -60,6 +61,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "delete requests".*, 
             COUNT(*) OVER() AS "requestCount",
@@ -282,6 +284,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "group requests".*, 
             COUNT(*) OVER() AS "requestCount",
@@ -309,6 +312,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "group requests".*, 
             COUNT(*) OVER() AS "requestCount",
@@ -376,6 +380,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "delete requests".*, groups.*,
             COUNT(*) OVER() AS "requestCount",
@@ -403,6 +408,7 @@ export default class SQLRequest {
                 FROM posts
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
+                LIMIT 1
             )
             SELECT "delete requests".*, groups.*,
             COUNT(*) OVER() AS "requestCount",

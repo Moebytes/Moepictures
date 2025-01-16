@@ -14,7 +14,7 @@ import pageIcon from "../../assets/icons/page.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions} from "../../store"
+useMiscDialogActions, useCacheSelector, useCacheActions} from "../../store"
 import "./styles/itemspage.less"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 
@@ -40,9 +40,10 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
+    const {artists} = useCacheSelector()
+    const {setArtists} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [artists, setArtists] = useState([] as TagCategorySearch[])
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleArtists, setVisibleArtists] = useState([] as TagCategorySearch[])
@@ -173,14 +174,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setArtists(result)
             } else {
-                setArtists((prev) => functions.removeDuplicates([...prev, ...result]))
+                setArtists(functions.removeDuplicates([...artists, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setArtists(result)
                 } else {
-                    setArtists((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setArtists(functions.removeDuplicates([...artists, ...result]))
                 }
             }
             setEnded(true)

@@ -878,3 +878,47 @@ DROP TRIGGER IF EXISTS tag_map_tags_delete_trigger ON "tag map";
 CREATE TRIGGER tag_map_tags_delete_trigger
 AFTER DELETE ON "tag map"
 FOR EACH ROW EXECUTE FUNCTION tag_map_tags_delete();
+
+CREATE TABLE IF NOT EXISTS "tag map posts" (
+    "tag" text PRIMARY KEY REFERENCES tags ("tag") ON UPDATE CASCADE ON DELETE CASCADE,
+    "posts" bigint[]
+);
+
+CREATE OR REPLACE FUNCTION tag_map_posts_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM "tag map posts" WHERE "tag" = NEW."tag") THEN
+        UPDATE "tag map posts"
+        SET "posts" = (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = NEW."tag")
+        WHERE "tag" = NEW."tag";
+    ELSE
+        INSERT INTO "tag map posts"("tag", "posts")
+        VALUES (NEW."tag", (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = NEW."tag"));
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION tag_map_posts_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM "tag map" WHERE "tag" = OLD."tag") THEN
+        DELETE FROM "tag map posts" WHERE "tag" = OLD."tag";
+    ELSE
+        UPDATE "tag map posts"
+        SET "posts" = (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = OLD."tag")
+        WHERE "tag" = OLD."tag";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tag_map_posts_update_trigger ON "tag map";
+CREATE TRIGGER tag_map_posts_update_trigger
+AFTER INSERT OR UPDATE ON "tag map"
+FOR EACH ROW EXECUTE FUNCTION tag_map_posts_insert();
+
+DROP TRIGGER IF EXISTS tag_map_posts_delete_trigger ON "tag map";
+CREATE TRIGGER tag_map_posts_delete_trigger
+AFTER DELETE ON "tag map"
+FOR EACH ROW EXECUTE FUNCTION tag_map_posts_delete();

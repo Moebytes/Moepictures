@@ -5,7 +5,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import tos from "../../assets/icons/tos.png"
 import privacy from "../../assets/icons/privacy.png"
-import functions from "../../structures/Functions"
+import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/tospage.less"
@@ -106,18 +106,19 @@ const TermsPage: React.FunctionComponent = (props) => {
                             </span>
                             {i18n.terms.tos.copyrightTakedown.goText}<br/><br/>
 
-                            {i18n.terms.tos.aiPolicy.title}<br/>
+                            {i18n.terms.tos.webScraping.title}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.aiPolicy.line1}<br/>
-                            {i18n.terms.tos.aiPolicy.line2}<br/>
-                            {i18n.terms.tos.aiPolicy.line3}<br/><br/>
+                            {i18n.terms.tos.webScraping.line1}<br/>
+                            {i18n.terms.tos.webScraping.line2}<br/>
+                            {i18n.terms.tos.webScraping.line3}<br/><br/>
                             </span>
 
+                            {permissions.isPremiumEnabled() ? <>
                             {i18n.terms.tos.accountUpgrades.title}<br/>
                             <span className="terms-text-alt">
                             {i18n.terms.tos.accountUpgrades.line1}<br/>
                             {i18n.terms.tos.accountUpgrades.line2}<br/><br/>
-                            </span>
+                            </span></> : null}
 
                             {i18n.terms.tos.liability.title}<br/>
                             {i18n.terms.tos.liability.header}<br/><br/>

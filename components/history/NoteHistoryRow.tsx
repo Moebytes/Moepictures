@@ -14,6 +14,7 @@ import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import {NoteHistory, Note} from "../../types/Types"
+import EffectImage from "../image/EffectImage"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -31,11 +32,9 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const history = useHistory()
-    const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
@@ -47,15 +46,8 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (user?.role) setUserRole(user.role)
     }
 
-    const updateImage = async () => {
-        const thumb = functions.getThumbnailLink(props.noteHistory.post.images[0].type, props.noteHistory.postID, props.noteHistory.order, props.noteHistory.post.images[0].filename, "medium", mobile)
-        const decrypted = await functions.decryptThumb(thumb, session)
-        setImg(decrypted)
-    }
-
     useEffect(() => {
         updateUserRole()
-        updateImage()
     }, [props.noteHistory, session])
 
     const revertNoteHistory = async () => {
@@ -237,17 +229,11 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="historyrow">
             {session.username ? notehistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>}
+                <EffectImage className="historyrow-img" post={props.noteHistory.post} order={props.noteHistory.order} onClick={imgClick} height={200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

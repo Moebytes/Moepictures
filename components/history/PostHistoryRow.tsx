@@ -14,7 +14,7 @@ import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import "./styles/historyrow.less"
-import path from "path"
+import EffectImage from "../image/EffectImage"
 import {PostHistory, SourceData, TagCategories} from "../../types/Types"
 
 interface Props {
@@ -35,25 +35,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deletePostHistoryID, revertPostHistoryID, deletePostHistoryFlag, revertPostHistoryFlag} = usePostDialogSelector()
     const {setDeletePostHistoryID, setRevertPostHistoryID, setDeletePostHistoryFlag, setRevertPostHistoryFlag} = usePostDialogActions()
     const history = useHistory()
-    const [img, setImg] = useState("")
-    const [currentImg, setCurrentImg] = useState("")
-    const [imageIndex, setImageIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
     const [tagCategories, setTagCategories] = useState({} as TagCategories)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
     let prevHistory = props.previousHistory || Boolean(props.exact)
-
-    const updateImages = async () => {
-        const initialImg = await functions.decryptThumb(functions.getRawThumbnailLink(props.postHistory.images[0], "medium", mobile), session)
-        const currentImg = await functions.decryptThumb(functions.getRawThumbnailLink(props.currentHistory.images[0], "medium", mobile), session)
-        setImg(initialImg)
-        setCurrentImg(currentImg)
-    }
 
     const updateUserRole = async () => {
         const user = await functions.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag)
@@ -69,7 +58,6 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateUserRole()
-        updateImages()
         updateTagCategories()
     }, [props.postHistory, session])
 
@@ -123,7 +111,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertPostHistoryID({failed: error ? error : true, historyID: props.postHistory.historyID})
             })
         }
-    }, [revertPostHistoryFlag, revertPostHistoryID, props.current, currentImg, session])
+    }, [revertPostHistoryFlag, revertPostHistoryID, props.current, session])
 
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
@@ -250,17 +238,6 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             )
         }
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user) || i18n.user.deleted}</span>
-    }
-
-    const updateImg = async (event: React.MouseEvent) => {
-        event.preventDefault()
-        if (props.postHistory.images.length > 1) {
-            let newImageIndex = imageIndex + 1 
-            if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
-            const newImg = await functions.decryptThumb(functions.getRawThumbnailLink(props.postHistory.images[newImageIndex], "medium", mobile), session)
-            setImg(newImg)
-            setImageIndex(newImageIndex)
-        }
     }
 
     const calculateDiff = (addedTags: string[], removedTags: string[]) => {
@@ -399,17 +376,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    useEffect(() => {
-        if (!imageFiltersRef.current) return
-        imageFiltersRef.current.style.filter = `brightness(${brightness}%) contrast(${contrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, blur])
-
     return (
         <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                {functions.isVideo(img) ? <video style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}} className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                <img style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}} className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/>}
+                <EffectImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={200} style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
