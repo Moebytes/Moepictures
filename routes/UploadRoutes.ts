@@ -10,7 +10,7 @@ import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import {PostHistory, UploadParams, UploadImage, EditParams, BulkTag, UnverifiedUploadParams,
 UnverifiedEditParams, PostFull, UnverifiedPost, ApproveParams, TagHistory, UploadTag,
-PostType, SourceData, PostRating, Image, PostStyle, MiniTag} from "../types/Types"
+PostType, SourceData, PostRating, Image, PostStyle, MiniTag, ChildPost} from "../types/Types"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -43,7 +43,7 @@ const validImages = (images: UploadImage[], skipMBCheck?: boolean) => {
   for (let i = 0; i < images.length; i++) {
     if (functions.isModel(images[i].link) || functions.isLive2D(images[i].link)) {
       const MB = images[i].size / (1024*1024)
-      const maxSize = 200
+      const maxSize = functions.isModel(images[i].link) ? 10 : 50
       if (skipMBCheck || MB <= maxSize) continue
       return false
     }
@@ -59,15 +59,7 @@ const validImages = (images: UploadImage[], skipMBCheck?: boolean) => {
     const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
     if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav) {
       const MB = images[i].size / (1024*1024)
-      const maxSize = jpg ? 10 :
-                      avif ? 10 :
-                      png ? 25 :
-                      mp3 ? 25 :
-                      wav ? 50 :
-                      gif ? 100 :
-                      webp ? 100 :
-                      mp4 ? 300 :
-                      webm ? 300 : 300
+      const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, mp4, webm})
       let type = result.typename === "mkv" ? "webm" : result.typename
       if (images[i].ext !== type) return false
       if (skipMBCheck || MB <= maxSize) continue
@@ -220,7 +212,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       if ("bytes" in image) {
         buffer = Buffer.from(image.bytes)
       } else if ("type" in image) {
-        const imagePath = functions.getImagePath(image.type, postID, image.order, image.filename)
+        const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
         if (unverifiedImages) {
           buffer = await serverFunctions.getUnverifiedFile(imagePath)
         } else {
@@ -232,7 +224,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       if ("bytes" in upscaledImage) {
         upscaledBuffer = Buffer.from(upscaledImage.bytes)
       } else if ("type" in upscaledImage) {
-        const upscaledImagePath = functions.getUpscaledImagePath(upscaledImage.type, postID, upscaledImage.order, 
+        const upscaledImagePath = functions.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, 
         upscaledImage.upscaledFilename || upscaledImage.filename)
         if (unverifiedImages) {
           upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath)
@@ -1206,7 +1198,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/reject", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = req.body.postID as string
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
@@ -1243,6 +1235,123 @@ const CreateRoutes = (app: Express) => {
         }
 
         // await serverFunctions.systemMessage(unverified.uploader, subject, message)
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
+    app.post("/api/post/split", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {postID, order} = req.body as {postID: string, order: number | null}
+        if (!req.session.username) return res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return res.status(403).end()
+        const post = await sql.post.post(postID)
+        if (!post) return res.status(400).send("Bad postID")
+
+        for (let i = 0; i < post.images.length; i++) {
+          if (i === 0) {
+            // Always keep the first image
+            continue
+          } else {
+            let image = post.images[i]
+            if (order) {
+              if (image.order !== Number(order)) continue
+            }
+            let images = [image]
+            let upscaledImages = [image]
+            let type = image.type
+            let rating = post.rating
+            let style = post.style
+            let parentID = post.postID
+            let r18 = functions.isR18(post.rating)
+            let source = {
+              title: post.title,
+              englishTitle: post.englishTitle,
+              commentary: post.commentary,
+              englishCommentary: post.englishCommentary,
+              artist: post.artist,
+              bookmarks: post.bookmarks,
+              buyLink: post.buyLink,
+              mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : "",
+              posted: post.posted,
+              source: post.source
+            } as SourceData
+            let {artists, characters, series, tags: allTags} = await serverFunctions.tagCategories(post.tags)
+            let tags = allTags.map((t) => t.tag)
+
+            const newPostID = await sql.post.insertPost()
+            await sql.post.insertChild(newPostID, parentID)
+
+            const {hasOriginal, hasUpscaled} = await insertImages(newPostID, {images, upscaledImages, type, rating, source, characters, imgChanged: true})
+            await updatePost(newPostID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, uploader: req.session.username,
+            updater: req.session.username, approver: req.session.username})
+            await insertTags(newPostID, {artists, characters, series, newTags: [], tags, noImageUpdate: true, username: req.session.username})
+            await sql.cuteness.updateCuteness(newPostID, req.session.username, 500)
+
+            const imagePath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
+            const upscaledImagePath = functions.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
+            await sql.post.deleteImage(image.imageID)
+            await serverFunctions.deleteFile(imagePath, r18)
+            await serverFunctions.deleteFile(upscaledImagePath, r18)
+          }
+        }
+
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
+    app.post("/api/post/join", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {postID, nested} = req.body as {postID: string, nested: boolean}
+        if (!req.session.username) return res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return res.status(403).end()
+        const post = await sql.post.post(postID)
+        if (!post) return res.status(400).send("Bad postID")
+
+        const childPosts = await sql.post.childPosts(postID)
+
+        let maxOrder = Math.max(...post.images.map((image) => image.order))
+        let r18 = functions.isR18(post.rating)
+
+        const joinChildPosts = async (childPosts: ChildPost[]) => {
+          for (const child of childPosts) {
+            if (nested) {
+              const nestedChildren = await sql.post.childPosts(child.postID)
+              if (nestedChildren.length) await joinChildPosts(nestedChildren)
+            }
+            for (const image of child.post.images) {
+              let order = ++maxOrder
+              const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
+              const buffer = await serverFunctions.getFile(imagePath, false, r18)
+              const upscaledImagePath = functions.getUpscaledImagePath(image.type, image.postID, image.order, image.upscaledFilename || image.filename)
+              const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18)
+
+              if (buffer.byteLength) {
+                let imagePath = functions.getImagePath(image.type, postID, order, image.filename)
+                await serverFunctions.uploadFile(imagePath, buffer, r18)
+              }
+
+              if (upscaledBuffer.byteLength) {
+                let imagePath = functions.getUpscaledImagePath(image.type, postID, order, image.upscaledFilename || image.filename)
+                await serverFunctions.uploadFile(imagePath, upscaledBuffer, r18)
+              }
+
+              await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.width, 
+              image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize)
+            }
+            await serverFunctions.deletePost(child.post)
+          }
+        }
+
+        await joinChildPosts(childPosts)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)

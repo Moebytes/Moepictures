@@ -28,6 +28,11 @@ interface UndeleteID {
     unverified?: boolean
 }
 
+interface PostInfoID {
+    post: PostSearch | PostHistory | UnverifiedPost, 
+    order: number
+}
+
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
@@ -50,7 +55,10 @@ const postDialogSlice = createSlice({
         permaDeletePostID: null as string | null,
         permaDeletePostFlag: false,
         permaDeleteAllDialog: false,
-        appealPostID: null as string | null
+        appealPostID: null as string | null,
+        postInfoID: null as PostInfoID | null,
+        splitPostID: null as PostInfoID | null,
+        joinPostID: null as PostEditID | null
     },
     reducers: {
         setDeletePostID: (state, action) => {state.deletePostID = action.payload},
@@ -72,7 +80,10 @@ const postDialogSlice = createSlice({
         setPermaDeletePostID: (state, action) => {state.permaDeletePostID = action.payload},
         setPermaDeletePostFlag: (state, action) => {state.permaDeletePostFlag = action.payload},
         setPermaDeleteAllDialog: (state, action) => {state.permaDeleteAllDialog = action.payload},
-        setAppealPostID: (state, action) => {state.appealPostID = action.payload}
+        setAppealPostID: (state, action) => {state.appealPostID = action.payload},
+        setPostInfoID: (state, action) => {state.postInfoID = action.payload},
+        setSplitPostID: (state, action) => {state.splitPostID = action.payload},
+        setJoinPostID: (state, action) => {state.joinPostID = action.payload}
     }
 })
 
@@ -81,7 +92,8 @@ const {
     setDeletePostHistoryFlag, setRevertPostHistoryID, setRevertPostHistoryFlag, 
     setLockPostID, setPrivatePostID, setTagEditID, setSourceEditID, setChildPostObj,
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
-    setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, setAppealPostID
+    setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, 
+    setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
@@ -106,7 +118,10 @@ export const usePostDialogSelector = () => {
         permaDeletePostID: selector((state) => state.postDialog.permaDeletePostID),
         permaDeletePostFlag: selector((state) => state.postDialog.permaDeletePostFlag),
         permaDeleteAllDialog: selector((state) => state.postDialog.permaDeleteAllDialog),
-        appealPostID: selector((state) => state.postDialog.appealPostID)
+        appealPostID: selector((state) => state.postDialog.appealPostID),
+        postInfoID: selector((state) => state.postDialog.postInfoID),
+        splitPostID: selector((state) => state.postDialog.splitPostID),
+        joinPostID: selector((state) => state.postDialog.joinPostID)
     }
 }
 
@@ -132,7 +147,10 @@ export const usePostDialogActions = () => {
         setPermaDeletePostID: (state: string | null) => dispatch(setPermaDeletePostID(state)),
         setPermaDeletePostFlag: (state: boolean) => dispatch(setPermaDeletePostFlag(state)),
         setPermaDeleteAllDialog: (state: boolean) => dispatch(setPermaDeleteAllDialog(state)),
-        setAppealPostID: (state: string | null) => dispatch(setAppealPostID(state))
+        setAppealPostID: (state: string | null) => dispatch(setAppealPostID(state)),
+        setPostInfoID: (state: PostInfoID | null) => dispatch(setPostInfoID(state)),
+        setSplitPostID: (state: PostInfoID | null) => dispatch(setSplitPostID(state)),
+        setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state))
     }    
 }
 

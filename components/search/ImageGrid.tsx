@@ -23,7 +23,7 @@ let interval = null as any
 let reloadedPost = false
 let replace = false
 let manualHistoryChange = false
-let loadingTimer = null as any
+let init = true
 
 let limit = 100
 
@@ -55,7 +55,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
-    const [init, setInit] = useState(true)
     const history = useHistory()
     const location = useLocation()
 
@@ -261,7 +260,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 sortType !== initData.sortType ||
                 sortReverse !== initData.sortReverse) {
                     if (init) {
-                        return setInit(false)
+                        return init = false
                     } else {
                         updateSearch()
                     }

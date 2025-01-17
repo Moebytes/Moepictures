@@ -354,16 +354,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 canvasFrames.push(canvas)
             }
             setVideoData(frames)
-            setBackFrame(canvasFrames[0].toDataURL())
-            if (backFrameRef.current && videoRef.current) {
-                backFrameRef.current.style.display = "flex"
-                backFrameRef.current.style.position = "relative"
-                videoRef.current.style.position = "absolute"
-                videoRef.current.style.top = "0px"
-                videoRef.current.style.bottom = "0px"
-                videoRef.current.style.right = "0px"
-                videoRef.current.style.left = "0px"
-            }
         }
         
         const reverseAudioStream = async () => {
@@ -383,6 +373,21 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
             ffmpeg.FS("unlink", output)
             // ffmpeg.exit()
+        }
+        
+        if (!videoData && videoLoaded && functions.isVideo(props.img)) {
+            functions.videoThumbnail(props.img).then((thumbnail) => {
+                setBackFrame(thumbnail)
+                if (backFrameRef.current && videoRef.current) {
+                    backFrameRef.current.style.display = "flex"
+                    backFrameRef.current.style.position = "relative"
+                    videoRef.current.style.position = "absolute"
+                    videoRef.current.style.top = "0px"
+                    videoRef.current.style.bottom = "0px"
+                    videoRef.current.style.right = "0px"
+                    videoRef.current.style.left = "0px"
+                }
+            })
         }
 
         if (!videoData && videoLoaded && reverse && functions.isVideo(props.img)) {
@@ -472,7 +477,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             clearTimeout(timeout)
             window.cancelAnimationFrame(id)
         }
-    }, [gifData, reverse, seekTo, pixelate, paused, speed, dragging, dragProgress])
+    }, [gifData, reverse, seekTo, pixelate, splatter, paused, speed, dragging, dragProgress, imageExpand])
 
     
     useEffect(() => {
@@ -1252,8 +1257,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             return setSidebarText(i18n.sidebar.loginRequired)
         }
         if (permissions.isPremium(session)) {
-            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
             functions.clearResponseCacheKey("/api/user/session")
+            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
             setSessionFlag(true)
         } else {
             setPremiumRequired(true)

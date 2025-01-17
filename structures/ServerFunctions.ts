@@ -24,7 +24,7 @@ import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import tagConvert from "../assets/json/tag-convert.json"
 import {MiniTag, Image, UploadImage, DeletedPost, PostFull, PostTagged, Attachment, Note, PostType, PostStyle,
-UnverifiedPost, Tag, PostRating, UploadTag, PixivResponse, SaucenaoResponse, WDTaggerResponse} from "../types/Types"
+UnverifiedPost, Tag, PostRating, UploadTag, PixivResponse, SaucenaoResponse, WDTaggerResponse, PostCuteness} from "../types/Types"
 
 const csrf = new CSRF()
 const exec = util.promisify(child_process.exec)
@@ -601,7 +601,7 @@ export default class ServerFunctions {
         }
     }
 
-    public static deletePost = async (post: DeletedPost | PostFull) => {
+    public static deletePost = async (post: DeletedPost | PostCuteness) => {
         let r18 = functions.isR18(post.rating)
         await sql.post.deletePost(post.postID)
         for (let i = 0; i < post.images.length; i++) {

@@ -463,7 +463,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const showHistory = () => {
         if (!props.post) return
-        history.push(`/note/history/${props.post.postID}/${props.order || 1}`)
+        history.push(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
     }
 
     useEffect(() => {

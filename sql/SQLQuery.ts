@@ -46,7 +46,7 @@ const redis = Redis.createClient({
 
 if (process.env.REDIS === "on") redis.connect()
 
-const generateCacheKey = (query: QueryConfig | QueryArrayConfig | string): string => {
+const hashQuery = (query: QueryConfig | QueryArrayConfig | string): string => {
   return crypto.createHash("sha256").update(typeof query === "string" ? query : JSON.stringify(query)).digest("hex")
 }
 
@@ -68,12 +68,12 @@ export default class SQLQuery {
   public static group = SQLGroup
 
   /** Run an SQL Query */
-  public static run = async (query: QueryConfig | QueryArrayConfig | string, cache?: boolean) => {
+  public static run = async (query: QueryConfig | QueryArrayConfig | string, cacheEndpoint?: string) => {
       let cacheKey: string | null = null
       let redisResult: string | null = null
-      if (cache) {
+      if (cacheEndpoint) {
         try {
-          cacheKey = generateCacheKey(query)
+          cacheKey = `${cacheEndpoint}_${hashQuery(query)}`
           redisResult = await redis.get(cacheKey)
           if (redisResult) return JSON.parse(redisResult)
         } catch (error) {
@@ -83,8 +83,8 @@ export default class SQLQuery {
       const pgClient = await pgPool.connect()
       try {
           const result = await pgClient.query(query)
-          if (cache && cacheKey) {
-            await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch((error) => null)
+          if (cacheKey) {
+            await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch(() => null)
           }
           return result.rows as any
       } catch (error) {
@@ -100,8 +100,14 @@ export default class SQLQuery {
     return SQLQuery.run(CreateDB)
   }
 
-  /** Flush redis db */
-  public static flushDB = async () => {
-    await redis.flushDb().catch(() => null)
+  /** Invalidate cache */
+  public static invalidateCache = async (cacheEndpoint: string) => {
+    try {
+      for await (const key of redis.scanIterator({MATCH: `${cacheEndpoint}*`})) {
+        await redis.del(key).catch(() => null)
+      }
+    } catch {
+      // ignore
+    }
   }
 }

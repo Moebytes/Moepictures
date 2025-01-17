@@ -48,6 +48,9 @@ import unlockIcon from "../../assets/icons/unlock-red.png"
 import privateIcon from "../../assets/icons/private.png"
 import unprivateIcon from "../../assets/icons/unprivate.png"
 import appealIcon from "../../assets/icons/appeal.png"
+import infoIcon from "../../assets/icons/info.png"
+import splitIcon from "../../assets/icons/split.png"
+import joinIcon from "../../assets/icons/join.png"
 import functions from "../../structures/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
@@ -75,7 +78,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {upscalePostID, compressPostID, deletePostID, takedownPostID} = usePostDialogSelector()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
-    setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID} = usePostDialogActions()
+    setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
+    setSplitPostID, setJoinPostID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -533,6 +537,21 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setTakedownPostID({post: props.post, unverified: props.unverified})
     }
 
+    const getPostInfo = async () => {
+        if (!props.post) return
+        setPostInfoID({post: props.post, order: props.order || 1})
+    }
+
+    const triggerSplit = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setSplitPostID({post: props.post, order: props.order || 1})
+    }
+
+    const triggerJoin = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setJoinPostID({post: props.post, unverified: props.unverified})
+    }
+
     const postHistory = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
@@ -798,6 +817,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="tag">{i18n.sidebar.copyHash}</span>
                                 </span>
                             </div>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={getPostInfo}>
+                                    <img className="mobileinfo-icon" src={infoIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.getInfo}</span>
+                                </span>
+                            </div>
                         </div>
                     </div></>
                 : null}
@@ -838,6 +863,18 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerAddNote}>
                                 <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.addNote}</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerSplit}>
+                                <img className="mobileinfo-icon" src={splitIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.splitVariations}</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerJoin}>
+                                <img className="mobileinfo-icon" src={joinIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.joinChildPosts}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">

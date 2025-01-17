@@ -16,7 +16,9 @@ export default class SQLTag {
         if (type) query.values?.push(type)
         if (creator) query.values?.push(creator)
         try {
-            await SQLQuery.flushDB()
+            await SQLQuery.invalidateCache("tag")
+            await SQLQuery.invalidateCache("post")
+            await SQLQuery.invalidateCache("search")
             await SQLQuery.run(query)
             return false
         } catch {
@@ -36,7 +38,9 @@ export default class SQLTag {
             twitter, fandom, pixivTags, banned, hidden, r18, featuredPost]
         }
         try {
-            await SQLQuery.flushDB()
+            await SQLQuery.invalidateCache("tag")
+            await SQLQuery.invalidateCache("post")
+            await SQLQuery.invalidateCache("search")
             await SQLQuery.run(query)
             return false
         } catch {
@@ -75,7 +79,9 @@ export default class SQLTag {
             ),
             values: [...rawValues]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         return SQLQuery.run(query)
     }
 
@@ -137,7 +143,8 @@ export default class SQLTag {
         text: /*sql*/`UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
         values: [value, tag]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
     
@@ -155,7 +162,9 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
             values: [postID, ...tags]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -167,7 +176,9 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM "tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
             values: [postID, ...tags]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -196,7 +207,6 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM "unverified tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
             values: [postID, ...tags]
         }
-        await SQLQuery.flushDB()
         await SQLQuery.run(query)
     }
 
@@ -222,7 +232,7 @@ export default class SQLTag {
             `)
         }
         if (tags?.[0]) query.values = [tags]
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/${tags.join("-")}`)
         return result as Promise<Tag[]>
     }
 
@@ -274,7 +284,7 @@ export default class SQLTag {
             `),
             values: [tag]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/${tag}`)
         return result[0] as Promise<Tag | undefined>
     }
 
@@ -292,7 +302,7 @@ export default class SQLTag {
             `)
         }
         if (tags?.[0]) query.values = [tags]
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/count/${tags.join("-")}`)
         return result as Promise<TagCount[]>
     }
 
@@ -306,7 +316,7 @@ export default class SQLTag {
             `),
             values: [tag]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/related${tag}`)
         return (result[0]?.related || []) as Promise<string[]>
     }
 
@@ -316,7 +326,9 @@ export default class SQLTag {
         text: functions.multiTrim(/*sql*/`DELETE FROM tags WHERE tags."tag" = $1`),
         values: [tag]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -337,7 +349,8 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO "aliases" ("tag", "alias") VALUES ${placeholders}`,
             values: [tag, ...aliases]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -349,7 +362,8 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM "aliases" WHERE "tag" = $1 AND "alias" IN (${placeholders})`,
             values: [tag, ...aliases]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -377,7 +391,7 @@ export default class SQLTag {
             `),
             values: [alias]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/alias/${alias}`)
         return result[0] as Promise<Alias | undefined>
     }
 
@@ -393,7 +407,7 @@ export default class SQLTag {
             `)
         }
         if (search) query.values = [search.toLowerCase()]
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/alias/search`)
         return result as Promise<Alias[]>
     }
 
@@ -405,7 +419,8 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO implications ("tag", "implication") VALUES ${placeholders}`,
             values: [tag, ...implications]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -417,7 +432,8 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM implications WHERE "tag" = $1 AND "implication" IN (${placeholders})`,
             values: [tag, ...implications]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -431,7 +447,7 @@ export default class SQLTag {
             `),
             values: [tag]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/implications/${tag}`)
         return result as Promise<Implication[]>
     }
 
@@ -441,7 +457,9 @@ export default class SQLTag {
             text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
             values: [newTag, tag]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("tag")
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -456,7 +474,6 @@ export default class SQLTag {
                         JOIN images ON posts."postID" = images."postID"
                         JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"
                         GROUP BY posts."postID", "tag map tags"."tags"
-                        LIMIT 1
                     )
                     SELECT "tag map"."postID",
                     to_json((array_agg(post_json.*))[1]) AS post
@@ -481,7 +498,7 @@ export default class SQLTag {
             `),
             values: [pixivTag]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/pixiv-tags/${pixivTag}`)
         return result[0] as Promise<MiniTag | undefined>
     }
 
@@ -495,7 +512,8 @@ export default class SQLTag {
             rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, sourceData, reason]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history")
+        await SQLQuery.invalidateCache("tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -506,7 +524,8 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`DELETE FROM "alias history" WHERE "alias history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history")
+        await SQLQuery.invalidateCache("tag")
         await SQLQuery.run(query)
     }
 
@@ -520,7 +539,8 @@ export default class SQLTag {
             rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, reason]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history")
+        await SQLQuery.invalidateCache("tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -531,7 +551,8 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`DELETE FROM "implication history" WHERE "implication history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history")
+        await SQLQuery.invalidateCache("tag")
         await SQLQuery.run(query)
     }
 
@@ -597,7 +618,7 @@ export default class SQLTag {
             values: []
         }
         if (values?.[0]) query.values = values
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/alias/history`)
         return result as Promise<AliasHistorySearch[]>
     }
 
@@ -613,7 +634,7 @@ export default class SQLTag {
             `),
             values: [wildcard, type]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `tag/wildcard/${wildcard}`)
         return result as Promise<Omit<Tag, "aliases" | "featuredPost">[]>
     }
 }

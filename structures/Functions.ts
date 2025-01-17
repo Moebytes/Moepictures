@@ -31,7 +31,7 @@ import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
-PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable} from "../types/Types"
+PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable, FileFormat} from "../types/Types"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -47,7 +47,7 @@ const live2dExtensions = [".zip"]
 
 let cachedImages = new Map<string, string>()
 let cachedResponses = new Map<string, {data: any, expires: number}>()
-let cacheDuration = 60000
+let cacheDuration = 1000
 
 let privateKey = ""
 let clientKeyLock = false
@@ -158,10 +158,6 @@ export default class Functions {
         let cacheKey = `${endpoint}_${JSON.stringify(params)}`
         if ((params as PostSearchParams)?.sort !== "random") {
             let cachedResponse = cachedResponses.get(cacheKey)
-            if (cachedResponse) {
-                await Functions.timeout(30)
-                cachedResponse = cachedResponses.get(cacheKey)
-            }
             if (cachedResponse && Date.now() < cachedResponse.expires) {
                 return cachedResponse.data as GetEndpoint<T>["response"]
             }
@@ -292,12 +288,46 @@ export default class Functions {
         const secondsStr = (seconds < 10) ? "0" + seconds : seconds
         return `${hoursStr}${minutesStr}:${secondsStr}`
     }
+
+    public static formatBitrate = (bitrate: number) => {
+        if (bitrate < 1000) return bitrate + "Hz"
+        if (bitrate < 1000000) return parseFloat((bitrate / 1000).toFixed(2)) + "kHz"
+        if (bitrate < 1000000000) return parseFloat((bitrate / 1000000).toFixed(2)) + "MHz"
+        return parseFloat((bitrate / 1000000000).toFixed(2)) + "GHz"
+    }
     
     public static arrayIncludes = (str: string | undefined, arr: string[]) => {
         for (let i = 0; i < arr.length; i++) {
             if (str?.includes(arr[i])) return true
         }
         return false
+    }
+
+    public static maxFileSize = (format: FileFormat) => {
+        const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm} = format
+        const maxSize = jpg ? 10 :
+                        png ? 10 :
+                        avif ? 10 :
+                        mp3 ? 10 :
+                        wav ? 10 :
+                        gif ? 25 :
+                        webp ? 25 :
+                        glb ? 10 :
+                        fbx ? 10 :
+                        obj ? 10 :
+                        mp4 ? 50 :
+                        webm ? 50 : 50
+        return maxSize
+    }
+
+    public static maxTagFileSize = (format: FileFormat) => {
+        const {jpg, png, avif, gif, webp} = format
+        const maxSize = jpg ? 3 :
+                        png ? 3 :
+                        avif ? 3 :
+                        gif ? 5 :
+                        webp ? 5 : 5
+        return maxSize
     }
 
     public static isImage = (file?: string) => {
@@ -3096,7 +3126,6 @@ export default class Functions {
         splatter: number, opt?: SplatterOptions) => {
         if (!opt) opt = {}
         if (!canvas || !image) return canvas
-        if (opt.isAnimation || opt.isVideo) return canvas
         if (splatter !== 0) {
             canvas.style.opacity = "1"
             const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
@@ -3105,7 +3134,7 @@ export default class Functions {
             canvas.height = imageHeight
             const ctx = canvas.getContext("2d")!
 
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+            if (!opt.isAnimation && !opt.isVideo) ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
 
             const lineAmount = splatter * (opt.lineMultiplier || 30) * (opt.imageExpand ? 2 : 1)
             const minOpacity = opt.minOpacity || 0.1

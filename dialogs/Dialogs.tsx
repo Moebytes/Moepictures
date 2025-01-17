@@ -39,13 +39,16 @@ import BulkTagEditDialog from "./post/BulkTagEditDialog"
 import CompressPostDialog from "./post/CompressPostDialog"
 import DeletePostDialog from "./post/DeletePostDialog"
 import DeletePostHistoryDialog from "./post/DeletePostHistoryDialog"
+import JoinPostDialog from "./post/JoinPostDialog"
 import LockPostDialog from "./post/LockPostDialog"
 import ParentDialog from "./post/ParentDialog"
 import PermaDeleteAllPostDialog from "./post/PermaDeleteAllPostDialog"
 import PermaDeletePostDialog from "./post/PermaDeletePostDialog"
+import PostInfoDialog from "./post/PostInfoDialog"
 import PrivatePostDialog from "./post/PrivatePostDialog"
 import RevertPostHistoryDialog from "./post/RevertPostHistoryDialog"
 import SourceEditDialog from "./post/SourceEditDialog"
+import SplitPostDialog from "./post/SplitPostDialog"
 import TagEditDialog from "./post/TagEditDialog"
 import TakedownPostDialog from "./post/TakedownPostDialog"
 import UndeletePostDialog from "./post/UndeletePostDialog"
@@ -122,13 +125,16 @@ const Dialogs: React.FunctionComponent = (props) => {
         <CompressPostDialog/>
         <DeletePostDialog/>
         <DeletePostHistoryDialog/>
+        <JoinPostDialog/>
         <LockPostDialog/>
         <ParentDialog/>
         <PermaDeleteAllPostDialog/>
         <PermaDeletePostDialog/>
+        <PostInfoDialog/>
         <PrivatePostDialog/>
         <RevertPostHistoryDialog/>
         <SourceEditDialog/>
+        <SplitPostDialog/>
         <TagEditDialog/>
         <TakedownPostDialog/>
         <UndeletePostDialog/>

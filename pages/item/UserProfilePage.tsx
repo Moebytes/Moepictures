@@ -246,11 +246,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 const avif = result?.mime === "image/avif"
                 if (jpg || png || gif || webp || avif) {
                     const MB = file.size / (1024*1024)
-                    const maxSize = jpg ? 10 :
-                                    png ? 10 :
-                                    avif ? 10 :
-                                    gif ? 25 : 25
-                                    webp ? 25 : 25
+                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
                     if (MB <= maxSize) {
                         const url = URL.createObjectURL(file)
                         let croppedURL = ""

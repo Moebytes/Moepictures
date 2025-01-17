@@ -40,7 +40,6 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
         if (!massImplyDialog) return
         if (permissions.isAdmin(session)) {
             await functions.post("/api/tag/massimply", {wildcard, implyTo}, session, setSessionFlag)
-            functions.clearResponseCacheKey("/api/search/tags")
             setTagSearchFlag(implyTo)
         }
     }

@@ -243,18 +243,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const zip = result?.mime === "application/zip"
                     if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
-                        const maxSize = jpg ? 10 :
-                                        png ? 25 :
-                                        avif ? 10 :
-                                        mp3 ? 25 :
-                                        wav ? 50 :
-                                        gif ? 100 :
-                                        webp ? 100 :
-                                        glb ? 200 :
-                                        fbx ? 200 :
-                                        obj ? 200 :
-                                        mp4 ? 300 :
-                                        webm ? 300 : 300
+                        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm, zip})
                         if (MB <= maxSize || permissions.isMod(session)) {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
@@ -394,50 +383,54 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const avif = result?.mime === "image/avif"
                 let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : avif ? "avif" : null
                 if (jpg || png || gif || webp || avif) {
-                    let url = URL.createObjectURL(file)
-                    let croppedURL = ""
-                    if (gif) {
-                        const gifData = await functions.extractGIFFrames(bytes.buffer)
-                        let frameArray = [] as Buffer[] 
-                        let delayArray = [] as number[]
-                        for (let i = 0; i < gifData.length; i++) {
-                            const canvas = gifData[i].frame as HTMLCanvasElement
-                            const cropped = await functions.crop(canvas.toDataURL(), 1, true)
-                            frameArray.push(cropped)
-                            delayArray.push(gifData[i].delay)
+                    const MB = bytes.byteLength / (1024*1024)
+                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
+                    if (MB <= maxSize) {
+                        let url = URL.createObjectURL(file)
+                        let croppedURL = ""
+                        if (gif) {
+                            const gifData = await functions.extractGIFFrames(bytes.buffer)
+                            let frameArray = [] as Buffer[] 
+                            let delayArray = [] as number[]
+                            for (let i = 0; i < gifData.length; i++) {
+                                const canvas = gifData[i].frame as HTMLCanvasElement
+                                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
+                                frameArray.push(cropped)
+                                delayArray.push(gifData[i].delay)
+                            }
+                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
+                            const {width, height} = await functions.imageDimensions(firstURL, session)
+                            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+                            const blob = new Blob([buffer])
+                            croppedURL = URL.createObjectURL(blob)
+                        } else {
+                            croppedURL = await functions.crop(url, 1, false)
                         }
-                        const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                        const {width, height} = await functions.imageDimensions(firstURL, session)
-                        const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                        const blob = new Blob([buffer])
-                        croppedURL = URL.createObjectURL(blob)
-                    } else {
-                        croppedURL = await functions.crop(url, 1, false)
-                    }
-                    const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                    bytes = new Uint8Array(arrayBuffer)
-                    const blob = new Blob([bytes])
-                    url = URL.createObjectURL(blob)
-                    if (type === "artist") {
-                        artists[index].image = `${url}#.${ext}`
-                        artists[index].ext = result.typename
-                        artists[index].bytes = Object.values(bytes)
-                        setArtists(artists)
-                    } else if (type === "character") {
-                        characters[index].image = `${url}#.${ext}`
-                        characters[index].ext = result.typename
-                        characters[index].bytes = Object.values(bytes)
-                        setCharacters(characters)
-                    } else if (type === "series") {
-                        series[index].image = `${url}#.${ext}`
-                        series[index].ext = result.typename
-                        series[index].bytes = Object.values(bytes)
-                        setSeries(series)
-                    } else if (type === "tag") {
-                        newTags[index].image = `${url}#.${ext}`
-                        newTags[index].ext = result.typename
-                        newTags[index].bytes = Object.values(bytes)
-                        setNewTags(newTags)
+                        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+                        bytes = new Uint8Array(arrayBuffer)
+                        const blob = new Blob([bytes])
+                        url = URL.createObjectURL(blob)
+                        if (type === "artist") {
+                            artists[index].image = `${url}#.${ext}`
+                            artists[index].ext = result.typename
+                            artists[index].bytes = Object.values(bytes)
+                            setArtists(artists)
+                        } else if (type === "character") {
+                            characters[index].image = `${url}#.${ext}`
+                            characters[index].ext = result.typename
+                            characters[index].bytes = Object.values(bytes)
+                            setCharacters(characters)
+                        } else if (type === "series") {
+                            series[index].image = `${url}#.${ext}`
+                            series[index].ext = result.typename
+                            series[index].bytes = Object.values(bytes)
+                            setSeries(series)
+                        } else if (type === "tag") {
+                            newTags[index].image = `${url}#.${ext}`
+                            newTags[index].ext = result.typename
+                            newTags[index].bytes = Object.values(bytes)
+                            setNewTags(newTags)
+                        }
                     }
                 }
                 resolve()

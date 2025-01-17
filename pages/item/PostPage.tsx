@@ -515,7 +515,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (noteID) {
             return (
                 <div className="note-button-container">
-                    <button className="note-button" onClick={() => history.push(`/note/history/${postID}/${order}`)}>
+                    <button className="note-button" onClick={() => history.push(`/note/history/${postID}/${slug}/${order}`)}>
                         <img src={historyIcon}/>
                         <span>History</span>
                     </button>

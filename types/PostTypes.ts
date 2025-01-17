@@ -176,6 +176,29 @@ export interface PostQuickEditParams {
     silent?: boolean
 }
 
+export interface PostMetadata {
+    format: string
+    width?: number
+    height?: number
+    size?: number
+    colorSpace?: string
+    colorChannels?: number
+    progressive?: boolean
+    alpha?: boolean
+    dpi?: number
+    bitdepth?: number
+    chromaSubsampling?: string
+    frames?: number
+    duration?: number
+    bitrate?: number
+    audioChannels?: number
+    sampleRate?: number
+    framerate?: number
+    encoder?: string
+    scanType?: string
+    colorMatrix?: string
+}
+
 export interface PostQuickEditUnverifiedParams extends Omit<PostQuickEditParams, "unverified" | "silent"> {}
 
 export type PostGetEndpoint<T extends string> = 
@@ -209,6 +232,7 @@ export type PostPostEndpoint<T extends string> =
     T extends "/api/post/compress" ? {params: PostCompressParams, response: string} :
     T extends "/api/post/upscale" ? {params: PostUpscaleParams, response: string} :
     T extends "/api/post/appeal" ? {params: {postID: string, reason: string}, response: string} :
+    T extends "/api/post/metadata" ? {params: {postID: string, order: number}, response: PostMetadata} :
     never
 
 export type PostPutEndpoint<T extends string> = 

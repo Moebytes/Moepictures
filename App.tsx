@@ -280,12 +280,6 @@ const App: React.FunctionComponent = (props) => {
         }
     }, [])
 
-    useEffect(() => {
-        if (postFlag || tagFlag || groupFlag || messageFlag || historyFlag || updateUserFlag || sessionFlag) {
-            functions.clearResponseCache()
-        }
-    }, [postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag, sessionFlag])
-
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
             <ParticleEffect/>
@@ -319,7 +313,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
                 <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
-                <Route exact path="/note/history/:id/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
+                <Route exact path="/note/history/:id/:slug/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
                 <Route exact path="/post/history/:id/:slug" render={(props) => <PostHistoryPage {...props}/>}></Route>
                 <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>

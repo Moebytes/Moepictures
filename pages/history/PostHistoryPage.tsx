@@ -47,6 +47,17 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session])
 
+    const processRedirects = async () => {
+        if (!postID || !session.cookie) return
+        const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.processRedirects(postObject, postID, slug, history, session, setSessionFlag)
+    }
+
+    useEffect(() => {
+        updateHistory()
+        processRedirects()
+    }, [postID, session])
+
     const updateHistory = async () => {
         let result = [] as PostHistory[]
         if (props.all) {
@@ -73,17 +84,6 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         setVisibleRevisions([])
         setRevisions(result)
     }
-
-    const processRedirects = async () => {
-        if (!postID || !session.cookie) return
-        const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
-        if (postObject) functions.processRedirects(postObject, postID, slug, history, session, setSessionFlag)
-    }
-
-    useEffect(() => {
-        updateHistory()
-        processRedirects()
-    }, [postID, session])
 
     useEffect(() => {
         setHideNavbar(true)

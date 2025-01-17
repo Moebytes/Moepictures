@@ -13,7 +13,7 @@ import {NoteHistory, Note} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {id: string, order: string, username?: string}}
+    match: {params: {id: string, slug: string, order: string, username?: string}}
     all?: boolean
 }
 
@@ -33,6 +33,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const postID = props.match.params.id
+    const slug = props.match.params.slug
     const order = props.match.params.order
     const username = props.match.params.username
     const history = useHistory()
@@ -40,11 +41,22 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            setRedirect(postID ? `/note/history/${postID}/${order}` : "/note/history")
+            setRedirect(postID ? `/note/history/${postID}/${slug}/${order}` : "/note/history")
             history.push("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
+
+    const processRedirects = async () => {
+        if (!postID || !session.cookie) return
+        const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.processRedirects(postObject, postID, slug, history, session, setSessionFlag)
+    }
+
+    useEffect(() => {
+        updateHistory()
+        processRedirects()
+    }, [postID, session])
 
     const updateHistory = async () => {
         let result = [] as NoteHistory[]
@@ -62,10 +74,6 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
         setVisibleRevisions([])
         setRevisions(result)
     }
-
-    useEffect(() => {
-        updateHistory()
-    }, [postID, session])
 
     useEffect(() => {
         setHideNavbar(true)

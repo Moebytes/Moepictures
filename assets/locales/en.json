@@ -44,6 +44,9 @@
         "lock": "Lock",
         "unlock": "Unlock",
         "history": "History",
+        "getInfo": "Get Info",
+        "splitVariations": "Split Variations",
+        "joinChildPosts": "Join Child Posts",
         "result": "result.",
         "results": "results.",
         "loginRequired": "Login required.",
@@ -219,7 +222,9 @@
         "unban": "Unban",
         "sendLink": "Send Link",
         "appeal": "Appeal",
-        "untranslated": "Untranslated"
+        "untranslated": "Untranslated",
+        "split": "Split",
+        "join": "Join"
     },
     "history": {
         "post": "Post History",
@@ -1131,6 +1136,39 @@
         },
         "qrcode": {
             "title": "QR Code"
+        },
+        "postInfo": {
+            "title": "Post Info",
+            "format": "Format",
+            "width": "Width",
+            "height": "Height",
+            "dpi": "DPI",
+            "duration": "Duration",
+            "frames": "Frames",
+            "framerate": "Framerate",
+            "bitrate": "Bitrate",
+            "bitdepth": "Bitdepth",
+            "sampleRate": "Sample Rate",
+            "colorSpace": "Color Space",
+            "chromaSubsampling": "Subsampling",
+            "colorChannels": "Color Channels",
+            "audioChannels": "Audio Channels",
+            "progressive": "Progressive",
+            "alpha": "Alpha",
+            "encoder": "Encoder",
+            "scanType": "Scan Type",
+            "colorMatrix": "Color Matrix"
+        },
+        "splitPost": {
+            "title": "Split Variations",
+            "header": "Split off variations into child posts of this post? This action is irreversible.",
+            "currentOnly": "Current Only"
+        },
+        "joinPost": {
+            "title": "Join Child Posts",
+            "header": "Join all child posts into variations of this post?",
+            "lostData": " *Tag and source data of the child posts will be lost.",
+            "nestedChildren": "Nested Children"
         }
     },
     "help": {

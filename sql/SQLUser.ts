@@ -22,7 +22,7 @@ export default class SQLUser {
             values: [username]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `user/uploads/${username}`)
         return result as Promise<PostSearch[]>
     }
 

@@ -197,11 +197,8 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
-      let upscaled = false
-      if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
-        upscaled = req.session.upscaledImages as boolean
-        if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
-      }
+      let upscaled = req.session.upscaledImages as boolean
+      if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       if (req.session.captchaNeeded) upscaled = false
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -216,6 +213,7 @@ for (let i = 0; i < folders.length; i++) {
         }
       }
       let body = await serverFunctions.getFile(key, upscaled, r18)
+      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {

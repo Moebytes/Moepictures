@@ -230,7 +230,7 @@ export default class SQLSearch {
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+            return SQLQuery.run(query, `search/posts`) as Promise<PostSearch[]>
         }
     }
 
@@ -254,7 +254,7 @@ export default class SQLSearch {
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+            return SQLQuery.run(query, `search/pixiv-id/${pixivID}`) as Promise<PostSearch[]>
         }
     }
 
@@ -279,7 +279,7 @@ export default class SQLSearch {
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+            return SQLQuery.run(query, `search/twitter-id/${twitterID}`) as Promise<PostSearch[]>
         }
     }
 
@@ -303,7 +303,7 @@ export default class SQLSearch {
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+            return SQLQuery.run(query, `search/source/${source}`) as Promise<PostSearch[]>
         }
     }
 
@@ -328,7 +328,7 @@ export default class SQLSearch {
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             return SQLQuery.run(query) as Promise<PostSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<PostSearch[]>
+            return SQLQuery.run(query, `search/format/${format}`) as Promise<PostSearch[]>
         }
     }
 
@@ -352,7 +352,7 @@ export default class SQLSearch {
             `)
         }
         if (postIDs) query.values = [postIDs]
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `search/posts/${postIDs.join("-")}`)
         return result as Promise<PostFull[]>
     }
 
@@ -378,7 +378,7 @@ export default class SQLSearch {
         }
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `search/posts/deleted`)
         return result as Promise<DeletedPost[]>
     }
 
@@ -642,7 +642,7 @@ export default class SQLSearch {
         if (sort === "random") {
             return SQLQuery.run(query) as Promise<TagSearch[]>
         } else {
-            return SQLQuery.run(query, true) as Promise<TagSearch[]>
+            return SQLQuery.run(query, `search/tags`) as Promise<TagSearch[]>
         }
     }
 
@@ -666,7 +666,7 @@ export default class SQLSearch {
             `),
             values: [social]
         }
-        return SQLQuery.run(query, true) as Promise<TagSearch[]>
+        return SQLQuery.run(query, `search/tags/social`) as Promise<TagSearch[]>
     }
 
     /** Group search. */

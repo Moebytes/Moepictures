@@ -296,6 +296,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
 
     const toggleRead = async () => {
         if (!props.message) return
+        functions.clearResponseCacheKey("/api/search/messages")
         await functions.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
         props.onEdit?.()
         checkMail()

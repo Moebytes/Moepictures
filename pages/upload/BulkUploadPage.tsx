@@ -174,18 +174,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     const zip = result?.mime === "application/zip"
                     if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
-                        const maxSize = jpg ? 10 :
-                                        png ? 25 :
-                                        avif ? 10 :
-                                        mp3 ? 25 :
-                                        wav ? 50 :
-                                        gif ? 100 :
-                                        webp ? 100 :
-                                        glb ? 200 :
-                                        fbx ? 200 :
-                                        obj ? 200 :
-                                        mp4 ? 300 :
-                                        webm ? 300 : 300
+                        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm, zip})
                         if (MB <= maxSize || permissions.isMod(session)) {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)

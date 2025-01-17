@@ -10,7 +10,8 @@ export default class SQLPost {
             text: /*sql*/`INSERT INTO "posts" VALUES (default) RETURNING "postID"`,
             rowMode: "array"
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -36,7 +37,8 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -177,7 +179,8 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "posts" ${setQuery} WHERE "postID" = $${i}`,
             values: [...values, postID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -383,7 +386,7 @@ export default class SQLPost {
             values: [postID, filename, upscaledFilename, type, order, hash, width, height, upscaledWidth, upscaledHeight, 
             size, upscaledSize]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -414,7 +417,7 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 
@@ -437,7 +440,7 @@ export default class SQLPost {
         text: functions.multiTrim(/*sql*/`DELETE FROM images WHERE images."imageID" = $1`),
         values: [imageID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 
@@ -467,7 +470,7 @@ export default class SQLPost {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `post/${postID}`)
         return result[0] as Promise<PostFull | undefined>
     }
 
@@ -503,7 +506,7 @@ export default class SQLPost {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `post/tags/${postID}`)
         return (result[0]?.tags || []) as Promise<MiniTag[]>
     }
 
@@ -513,7 +516,8 @@ export default class SQLPost {
         text: functions.multiTrim(/*sql*/`DELETE FROM posts WHERE posts."postID" = $1`),
         values: [postID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -533,7 +537,8 @@ export default class SQLPost {
             rowMode: "array",
             values: [postID, parentID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -555,7 +560,8 @@ export default class SQLPost {
         text: /*sql*/`DELETE FROM "child posts" WHERE "child posts"."postID" = $1`,
         values: [postID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
+        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -579,7 +585,6 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
-                    LIMIT 1
                 )
                 SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -590,7 +595,7 @@ export default class SQLPost {
             `),
         values: [parentID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `post/children/${parentID}`)
         return result as Promise<ChildPost[]>
     }
 
@@ -605,7 +610,6 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
-                    LIMIT 1
                 )
                 SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -631,7 +635,6 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
-                    LIMIT 1
                 )
                 SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
@@ -642,7 +645,7 @@ export default class SQLPost {
             `),
         values: [postID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `post/parent/${postID}`)
         return result[0] as Promise<ChildPost | undefined>
     }
 
@@ -657,7 +660,6 @@ export default class SQLPost {
                     JOIN images ON images."postID" = posts."postID"
                     LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
-                    LIMIT 1
                 )
                 SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post

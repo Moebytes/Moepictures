@@ -8,7 +8,7 @@ import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import sharp from "sharp"
 import waifu2x from "waifu2x"
-import phash from "sharp-phash"
+import mediaInfoFactory from "mediainfo.js"
 import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
@@ -259,7 +259,7 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "hidden", true)
             }
-            await sql.flushDB()
+            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -280,7 +280,7 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "locked", true)
             }
-            await sql.flushDB()
+            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -302,7 +302,7 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "private", true)
             }
-            await sql.flushDB()
+            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -316,10 +316,10 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.childPosts(postID)
             if (!permissions.isMod(req.session)) {
-                result = result.filter((r: any) => !r.post?.hidden)
+                result = result.filter((r) => !r.post.hidden)
             }
             if (!req.session.showR18) {
-                result = result.filter((r: any) => !functions.isR18(r.post?.rating))
+                result = result.filter((r) => !functions.isR18(r.post.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i].post
@@ -1139,6 +1139,97 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.report.redirects(postID)
             serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/post/metadata", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID, order} = req.body as {postID: string, order: number}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            const post = await sql.post.post(postID)
+            if (!post) return res.status(400).send("Bad postID")
+            const image = post.images[(order || 1) - 1]
+            let filename = req.session.upscaledImages ? image.upscaledFilename || image.filename : image.filename
+            const key = functions.getImagePath(image.type, image.postID, image.order, filename)
+            let upscaled = req.session.upscaledImages as boolean
+            let buffer = await serverFunctions.getFile(key, upscaled, post.rating === functions.r18())
+            if (!buffer.byteLength) buffer = await serverFunctions.getFile(key, false, post.rating === functions.r18())
+            const mediainfo = await mediaInfoFactory()
+            const readChunk = async (chunkSize: number, offset: number) => {
+                return new Uint8Array(buffer.subarray(offset, offset + chunkSize))
+            }
+            let result = {} as any
+            if (image.type === "image" || image.type === "comic" || image.type === "animation") {
+                const rawInfo = await mediainfo.analyzeData(buffer.byteLength, readChunk)
+                let info = rawInfo.media?.track.find((track) => track["@type"] === "Image")
+                if (!info) info = rawInfo.media?.track.find((track) => track["@type"] === "Video") as any
+                let metadata = await sharp(buffer, {limitInputPixels: false}).metadata()
+                let format = path.extname(filename).replace(".", "")
+                let subsampling = info?.ChromaSubsampling ? `${info?.ColorSpace} ${info?.ChromaSubsampling}` : metadata.chromaSubsampling
+                result = {
+                    format,
+                    width: metadata.width,
+                    height: metadata.height,
+                    size: metadata.size,
+                    colorSpace: metadata.space,
+                    colorChannels: metadata.channels,
+                    progressive: metadata.isProgressive,
+                    alpha: metadata.hasAlpha,
+                    dpi: metadata.density,
+                    // @ts-expect-error
+                    bitdepth: info?.BitDepth || metadata.paletteBitDepth,
+                    chromaSubsampling: subsampling,
+                    frames: metadata.pages,
+                    duration: metadata.delay?.reduce((sum, delay) => sum + delay / 1000, 0)
+                }
+            } else if (image.type === "audio") {
+                const rawInfo = await mediainfo.analyzeData(buffer.byteLength, readChunk)
+                const info = rawInfo.media?.track.find((track) => track["@type"] === "Audio")
+                let format = path.extname(filename).replace(".", "")
+                result = {
+                    format,
+                    duration: info?.Duration,
+                    bitrate: info?.BitRate,
+                    audioChannels: info?.Channels,
+                    sampleRate: info?.SamplingRate,
+                    size: buffer.byteLength
+                }
+            } else if (image.type === "video") {
+                const rawInfo = await mediainfo.analyzeData(buffer.byteLength, readChunk)
+                const info = rawInfo.media?.track.find((track) => track["@type"] === "Video")
+                let format = path.extname(filename).replace(".", "")
+                let subsampling = info?.ChromaSubsampling ? `${info?.ColorSpace} ${info?.ChromaSubsampling}` : undefined
+                result = {
+                    format,
+                    width: info?.Width,
+                    height: info?.Height,
+                    duration: info?.Duration,
+                    framerate: info?.FrameRate,
+                    bitrate: info?.BitRate,
+                    bitdepth: info?.BitDepth,
+                    chromaSubsampling: subsampling,
+                    encoder: info?.Encoded_Library_Name,
+                    scanType: info?.ScanType,
+                    colorMatrix: info?.matrix_coefficients,
+                    size: buffer.byteLength
+                }
+            } else {
+                let format = path.extname(filename).replace(".", "")
+                if (image.type === "live2d") format = "live2d"
+                let width = req.session.upscaledImages ? image.upscaledWidth || image.width : image.width
+                let height = req.session.upscaledImages ? image.upscaledHeight || image.height : image.height
+                let size = req.session.upscaledImages ? image.upscaledSize || image.size : image.size
+                result = {
+                    format,
+                    width,
+                    height,
+                    size
+                }
+            }
+            res.status(200).send(result)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

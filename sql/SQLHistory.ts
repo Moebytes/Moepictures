@@ -21,7 +21,7 @@ export default class SQLHistory {
             values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
             twitter, fandom, r18, featuredPost, imageChanged, changes, reason]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -32,7 +32,7 @@ export default class SQLHistory {
         text: functions.multiTrim(/*sql*/`DELETE FROM "tag history" WHERE "tag history"."historyID" = $1`),
         values: [historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/tag")
         await SQLQuery.run(query)
     }
 
@@ -46,7 +46,7 @@ export default class SQLHistory {
             text: /*sql*/`UPDATE "tag history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/tag")
         await SQLQuery.run(query)
     }
 
@@ -78,7 +78,6 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
-                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
@@ -93,7 +92,7 @@ export default class SQLHistory {
             values: []
         }
         if (values?.[0]) query.values = values
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/tag${tag ? `/${tag}` : ""}`)
         return result as Promise<TagHistory[]>
     }
 
@@ -106,7 +105,6 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
-                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
@@ -118,7 +116,7 @@ export default class SQLHistory {
             `),
             values: [tag, historyID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/tag/${tag}`)
         return result[0] as Promise<TagHistory | undefined>
     }
 
@@ -131,7 +129,6 @@ export default class SQLHistory {
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
-                        LIMIT 1
                 )
                 SELECT "tag history".*,
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
@@ -144,7 +141,7 @@ export default class SQLHistory {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/tag/user/${username}`)
         return result as Promise<TagHistory[]>
     }
 
@@ -170,7 +167,7 @@ export default class SQLHistory {
             englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
             artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/post")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -181,7 +178,7 @@ export default class SQLHistory {
         text: functions.multiTrim(/*sql*/`DELETE FROM "post history" WHERE "post history"."historyID" = $1`),
         values: [historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/post")
         await SQLQuery.run(query)
     }
 
@@ -195,7 +192,7 @@ export default class SQLHistory {
             text: /*sql*/`UPDATE "post history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/post")
         await SQLQuery.run(query)
     }
 
@@ -238,7 +235,7 @@ export default class SQLHistory {
             values: []
         }
         if (values?.[0]) query.values = values
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/post${postID ? `/${postID}` : ""}`)
         return result as Promise<PostHistory[]>
     }
 
@@ -256,7 +253,7 @@ export default class SQLHistory {
             `),
             values: [postID, historyID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/post/${postID}`)
         return result[0] as Promise<PostHistory | undefined>
     }
 
@@ -276,7 +273,7 @@ export default class SQLHistory {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/post/user/${username}`)
         return result as Promise<PostHistory[]>
     }
 
@@ -420,7 +417,7 @@ export default class SQLHistory {
             values: [groupID, username, date, slug, name, rating, description, posts, addedPosts, removedPosts, orderChanged, 
             changes, reason]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/group")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -431,7 +428,7 @@ export default class SQLHistory {
             text: functions.multiTrim(/*sql*/`DELETE FROM "group history" WHERE "group history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("history/group")
         await SQLQuery.run(query)
     }
 
@@ -471,7 +468,7 @@ export default class SQLHistory {
             values: []
         }
         if (values?.[0]) query.values = values
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/group${groupID ? `/${groupID}` : ""}`)
         return result as Promise<GroupHistory[]>
     }
 
@@ -485,7 +482,7 @@ export default class SQLHistory {
             `),
             values: [groupID, historyID]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/group/${groupID}`)
         return result[0] as Promise<GroupHistory | undefined>
     }
 
@@ -502,7 +499,7 @@ export default class SQLHistory {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `history/group/user/${username}`)
         return result as Promise<GroupHistory[]>
     }
 

@@ -129,7 +129,6 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateRead = async () => {
-            functions.clearResponseCacheKey("/api/search/threads")
             await functions.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
         }
         updateRead()

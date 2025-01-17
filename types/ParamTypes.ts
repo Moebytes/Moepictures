@@ -163,3 +163,19 @@ export type CanvasDrawable =
     | HTMLImageElement 
     | HTMLVideoElement 
     | ImageBitmap
+
+export interface FileFormat {
+    jpg?: boolean
+    png?: boolean
+    webp?: boolean
+    avif?: boolean
+    gif?: boolean
+    mp4?: boolean
+    webm?: boolean
+    mp3?: boolean
+    wav?: boolean
+    glb?: boolean
+    fbx?: boolean
+    obj?: boolean
+    zip?: boolean
+}

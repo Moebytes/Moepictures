@@ -76,7 +76,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const showHistory = () => {
-        history.push(`/note/history/${props.note.postID}/${props.note.order || 1}`)
+        history.push(`/note/history/${props.note.postID}/${props.note.post.slug}/${props.note.order || 1}`)
     }
 
     const commentOptions = () => {

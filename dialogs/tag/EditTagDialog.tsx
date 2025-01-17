@@ -45,7 +45,6 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const editTag = async () => {
         if (!editTagObj) return
         if (permissions.isContributor(session)) {
-            functions.clearResponseCacheKey("/api/search/tags")
             setEditTagFlag(true)
         } else {
             const badReason = functions.validateReason(editTagObj.reason, i18n)
@@ -100,12 +99,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
                 const webp = result?.mime === "image/webp"
-                if (jpg || png || webp || gif) {
+                const avif = result?.mime === "image/avif"
+                if (jpg || png || webp || gif || avif) {
                     const MB = file.size / (1024*1024)
-                    const maxSize = jpg ? 10 :
-                                    png ? 10 :
-                                    gif ? 25 : 25
-                                    webp ? 25 : 25
+                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
                     if (MB <= maxSize) {
                         let url = URL.createObjectURL(file)
                         let croppedURL = ""

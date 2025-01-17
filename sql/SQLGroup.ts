@@ -68,7 +68,7 @@ export default class SQLGroup {
             `)
         }
         if (groups?.[0]) query.values = [groups]
-        const result = await SQLQuery.run(query, true)
+        const result = await SQLQuery.run(query, `group/${groups.join("-")}`)
         return result as Promise<Group[]>
     }
 

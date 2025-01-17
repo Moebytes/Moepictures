@@ -39,7 +39,7 @@ const GroupRoutes = (app: Express) => {
                 await sql.group.insertGroupPost(String(groupID), postID, 1)
             } else {
                 if (!group.posts?.length) group.posts = [{order: 0}] as any
-                const maxOrder = Math.max(...group.posts.map((post: any) => post.order))
+                let maxOrder = Math.max(...group.posts.map((post) => post.order))
                 if (group.rating !== post.rating) {
                     if (post.rating === functions.r18()) {
                         await sql.group.updateGroup(group.groupID, "rating", functions.r18())

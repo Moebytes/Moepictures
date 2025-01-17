@@ -44,6 +44,9 @@
         "lock": "ロック",
         "unlock": "アンロック",
         "history": "歴史",
+        "getInfo": "情報を得る",
+        "splitVariations": "スプリットのバリエーション",
+        "joinChildPosts": "子どもの投稿に参加する",
         "result": "件の結果。",
         "results": "件の結果。",
         "loginRequired": "ログインが必要です。",
@@ -220,7 +223,9 @@
         "unban": "禁止解除",
         "sendLink": "リンクを送る",
         "appeal": "アピール",
-        "untranslated": "未翻訳"
+        "untranslated": "未翻訳",
+        "split": "スプリット",
+        "join": "参加"
     },
     "history": {
         "post": "投稿履歴",
@@ -1132,6 +1137,39 @@
         },
         "qrcode": {
             "title": "QRコード"
+        },
+        "postInfo": {
+            "title": "投稿情報",
+            "format": "フォーマット",
+            "width": "幅",
+            "height": "高さ",
+            "dpi": "可処分所得",
+            "duration": "期間",
+            "frames": "フレーム",
+            "framerate": "フレームレート",
+            "bitrate": "ビットレート",
+            "bitdepth": "ビット深度",
+            "sampleRate": "サンプルレート",
+            "colorSpace": "色空間",
+            "chromaSubsampling": "サブサンプリング",
+            "colorChannels": "カラーチャンネル",
+            "audioChannels": "オーディオチャンネル",
+            "progressive": "プログレッシブ",
+            "alpha": "アルファ",
+            "encoder": "エンコーダー",
+            "scanType": "スキャンタイプ",
+            "colorMatrix": "カラーマトリックス"
+        },
+        "splitPost": {
+            "title": "スプリットのバリエーション",
+            "header": "この記事の子記事にバリエーションを分割しますか？この操作は不可逆です。",
+            "currentOnly": "現在のみ"
+        },
+        "joinPost": {
+            "title": "子どもの投稿に参加する",
+            "header": "すべての子ポストをこのポストのバリエーションに統合する？",
+            "lostData": " *子投稿のタグとソースデータは失われます。",
+            "nestedChildren": "入れ子の子供たち"
         }
     },
     "help": {

@@ -60,7 +60,7 @@ export default class SQLNote {
             text: /*sql*/`UPDATE "notes" SET "${column}" = $1 WHERE "noteID" = $2`,
             values: [value, noteID]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 
@@ -74,7 +74,6 @@ export default class SQLNote {
             text: /*sql*/`UPDATE "unverified notes" SET "${column}" = $1 WHERE "noteID" = $2`,
             values: [value, noteID]
         }
-        await SQLQuery.flushDB()
         await SQLQuery.run(query)
     }
 
@@ -427,7 +426,7 @@ export default class SQLNote {
             text: /*sql*/`UPDATE "notes" SET "characterTag" = $1 WHERE "characterTag" = $2`,
             values: [newTag, tag]
         }
-        await SQLQuery.flushDB()
+        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 }
