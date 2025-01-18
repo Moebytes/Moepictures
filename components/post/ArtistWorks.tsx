@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useLayoutSelector, useCacheActions, useThemeSelector} from "../../store"
+import {useLayoutSelector, useCacheActions, useThemeSelector, useFlagSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
 import "./styles/related.less"
@@ -23,7 +23,6 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const click = (img: string, index: number) => {
         const post = props.posts[index]
         history.push(`/post/${post.postID}/${post.slug}`)
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(props.posts)
     }
 

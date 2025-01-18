@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions} from "../../store"
+useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Slider from "react-slider"
 import live2dZoomInIcon from "../../assets/icons/live2d-zoom-in.png"
@@ -55,6 +55,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const {disableZoom, paused} = usePlaybackSelector()
     const {setDisableZoom, setPaused} = usePlaybackActions()
     const {noteMode, imageExpand} = useSearchSelector()
+    const {session} = useSessionSelector()
     const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
@@ -79,6 +80,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
+    const [decrypted, setDecrypted] = useState("")
 
     useEffect(() => {
         const savedFPS = localStorage.getItem("live2dFPS")
@@ -94,8 +96,26 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
+    const decryptLive2D = async () => {
+        const decryptedLive2D = await functions.decryptItem(props.live2d, session)
+        if (decryptedLive2D) setDecrypted(decryptedLive2D)
+    }
+
+    useEffect(() => {
+        setModel(null)
+        setApp(null)
+    }, [props.live2d])
+
+    useEffect(() => {
+        decryptLive2D()
+    }, [props.live2d, session])
+
+    useEffect(() => {
+        if (decrypted) loadLive2DModel()
+    }, [decrypted])
+
     const loadLive2DModel = async () => {
-        if (!props.live2d || !rendererRef.current) return
+        if (!decrypted || !rendererRef.current) return
         // @ts-expect-error
         window.PIXI = PIXI
         const app = new PIXI.Application({
@@ -149,7 +169,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             return files
         }
 
-        const model = await Live2DModel.from(props.live2d)
+        const model = await Live2DModel.from(decrypted)
         app.stage.addChild(model)
 
         setModel(model)
@@ -169,13 +189,6 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             setDefaultOpacities(structuredClone(parts.opacities))
         }, 100)
     }
-
-    useEffect(() => {
-        setModel(null)
-        setApp(null)
-        loadLive2DModel()
-    }, [props.live2d])
-
 
     useEffect(() => {
         if (!app || !model || !rendererRef.current) return
@@ -407,12 +420,12 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.live2d), props.live2d)
+                functions.download(path.basename(props.live2d), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, decrypted])
 
     const closeDropdowns = () => {
         setShowParameterDropdown(false)

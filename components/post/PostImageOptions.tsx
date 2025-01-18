@@ -75,26 +75,34 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const getDLText = async () => {
+            let decrypted = props.img || ""
             if (props.img) {
+                if (!functions.isVideo(props.img)) {
+                    decrypted = await functions.decryptItem(props.img, session)
+                }
                 if (props.comicPages) {
                     let sizeTotal = 0
                     for (let i = 0; i < props.comicPages.length; i++) {
-                        let {size} = await functions.imageDimensions(props.comicPages[i], session)
+                        const miniDecrypt = await functions.decryptItem(props.comicPages[i], session)
+                        let {size} = await functions.imageDimensions(miniDecrypt, session)
                         sizeTotal += size
                     }
                     setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
                 } else {
-                    let {width, height, size} = await functions.imageDimensions(props.img, session)
+                    let {width, height, size} = await functions.imageDimensions(decrypted, session)
                     setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
                 }
             } else if (props.model) {
-                let {polycount, size} = await functions.modelDimensions(props.model)
+                decrypted = await functions.decryptItem(props.model, session)
+                let {polycount, size} = await functions.modelDimensions(decrypted)
                 setDownloadText(`${functions.readablePolycount(polycount)} (${functions.readableFileSize(size)})`)
             } else if (props.audio) {
-                let {duration, size} = await functions.audioDimensions(props.audio)
+                decrypted = await functions.decryptItem(props.audio, session)
+                let {duration, size} = await functions.audioDimensions(decrypted)
                 setDownloadText(`${functions.formatSeconds(duration)} (${functions.readableFileSize(size)})`)
             } else if (props.live2d) {
-                let {width, height, size} = await functions.live2dDimensions(props.live2d)
+                decrypted = await functions.decryptItem(props.live2d, session)
+                let {width, height, size} = await functions.live2dDimensions(decrypted)
                 setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
             } 
         }

@@ -73,7 +73,7 @@ import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Type
 import "./styles/sidebar.less"
 
 interface Props {
-    post?: PostSearch | PostHistory | UnverifiedPost
+    post?: PostSearch | PostHistory | UnverifiedPost | null
     artists?: MiniTag[] 
     characters?: MiniTag[]  
     series?: MiniTag[]

@@ -45,6 +45,7 @@ export interface PostHistory {
     user: string
     date: string
     images: string[]
+    upscaledImages: string[]
     uploader: string
     uploadDate: string
     updater: string

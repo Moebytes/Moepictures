@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../../store"
+import {useSessionSelector, useLayoutSelector, useFilterSelector, useCacheActions} from "../../store"
 import functions from "../../structures/Functions"
 import {Post, PostHistory} from "../../types/Types"
 
@@ -20,6 +20,8 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {brightness, contrast, hue, saturation, blur, lightness, sharpen, pixelate, splatter} = useFilterSelector()
+    const {setPost} = useCacheActions()
+    const [original, setOriginal] = useState("")
     const [img, setImg] = useState("")
     const [index, setIndex] = useState(0)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
@@ -34,11 +36,13 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             const image = props.post.images[(props.order || 1) - 1]
             const imageLink = typeof image === "string" ?
             functions.getRawThumbnailLink(image, "medium", mobile) :
-            functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "medium", mobile)
+            functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "tiny", mobile)
+            setOriginal(imageLink)
             if (props.noEncryption) return setImg(imageLink)
             let img = await functions.decryptThumb(imageLink, session, imageLink, mobile)
             setImg(img)
         } else if (props.image) {
+            setOriginal(props.image)
             if (props.noEncryption) return setImg(props.image)
             let img = await functions.decryptThumb(props.image, session, props.image, mobile)
             setImg(img)
@@ -54,7 +58,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             const newImage = props.post.images[newImageIndex]
             const imageLink = typeof newImage === "string" ?
             functions.getRawThumbnailLink(newImage, "medium", mobile) :
-            functions.getThumbnailLink(newImage.type, props.post.postID, newImage.order, newImage.filename, "medium", mobile)
+            functions.getThumbnailLink(newImage.type, props.post.postID, newImage.order, newImage.filename, "tiny", mobile)
             const thumb = await functions.decryptThumb(imageLink, session)
             setImg(thumb)
             setIndex(newImageIndex)
@@ -70,7 +74,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
         const element = imageFiltersRef.current
         let newContrast = contrast
         let image = img
-        if (functions.isVideo(props.image)) image = ""
+        if (functions.isVideo(original)) image = ""
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
@@ -96,7 +100,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             lightnessOverlay.style.opacity = "0"
         }
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen])
+    }, [img, original, brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     useEffect(() => {
         setTimeout(() => {
@@ -111,20 +115,26 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
         }, 100)
     }, [img, splatter])
 
+    const clickFunc = (event: React.MouseEvent) => {
+        if (props.onClick) {
+            setPost(null)
+            props.onClick(event)
+        }
+    }
+
     const className = props.className ? props.className : ""
-    const clickFunc = props.onClick ? props.onClick : () => null
     const containerPointEvents = {pointerEvents: "none"} as React.CSSProperties
     const containerStyle = props.style ? {...containerPointEvents, ...props.style} : containerPointEvents 
     let imageStyle = {pointerEvents: "all", width: "auto", height: props.height ? `${props.height}px` : "250px"} as React.CSSProperties
 
     return (
         <div className="image-filters" ref={imageFiltersRef} style={containerStyle} onClick={clickFunc} onAuxClick={clickFunc}>
-            {!functions.isVideo(props.image) ? <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={img}/> : null}
-            {!functions.isVideo(props.image) ? <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={img}/> : null}
+            {!functions.isVideo(original) ? <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={img}/> : null}
+            {!functions.isVideo(original) ? <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={img}/> : null}
             <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
             <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-            {functions.isVideo(img) && !mobile ? 
-            <video draggable={false} className={className} src={img} ref={ref as any} style={imageStyle} onContextMenu={updateIndex}></video> :
+            {functions.isVideo(original) && !mobile ? 
+            <video draggable={false} autoPlay muted className={className} src={img} ref={ref as any} style={imageStyle} onContextMenu={updateIndex}></video> :
             <img draggable={false} className={className} src={img} ref={ref as any} style={imageStyle} onContextMenu={updateIndex}/>}
         </div>
     )

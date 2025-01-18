@@ -48,6 +48,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setPost} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -743,6 +744,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
+            if (!history.location.pathname.includes("/post/")) setPost(null)
             event.preventDefault()
             const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
@@ -782,6 +784,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    if (!history.location.pathname.includes("/post/")) setPost(null)
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }

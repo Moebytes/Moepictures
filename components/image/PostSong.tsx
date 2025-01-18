@@ -92,7 +92,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const audioVolumeRef = useRef<HTMLImageElement>(null)
     const audioSpeedSliderRef = useRef<Slider>(null)
     const audioVolumeSliderRef = useRef<Slider>(null)
-    const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
     const [coverImg, setCoverImg] = useState("")
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
@@ -101,28 +100,43 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [showShareIcons, setShowShareIcons] = useState(false)
     const [tempLink, setTempLink] = useState("")
     const [audioTempLink, setAudioTempLink] = useState("")
+    const [decrypted, setDecrypted] = useState("")
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateSongCover = async () => {
-        const songCover = await functions.songCover(props.audio)
-        setCoverImg(songCover)
+    const decryptAudio = async () => {
+        const decryptedAudio = await functions.decryptItem(props.audio, session)
+        if (decryptedAudio) setDecrypted(decryptedAudio)
     }
 
     useEffect(() => {
-        if (!props.post) return
         if (!functions.isAudio(props.audio)) return
-        setAudio(props.audio)
-        setAudioPost(props.post)
         if (ref.current) ref.current.style.opacity = "1"
-        updateSongCover()
         if (props.audio) {
             setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
             setAudioTempLink("")
         }
     }, [props.audio])
+
+    useEffect(() => {
+        decryptAudio()
+    }, [props.audio, session])
+
+    const updateSongCover = async () => {
+        const songCover = await functions.songCover(decrypted)
+        setCoverImg(songCover)
+    }
+
+    useEffect(() => {
+        if (!props.post) return
+        if (decrypted) {
+            setAudio(decrypted)
+            setAudioPost(props.post)
+            updateSongCover()
+        }
+    }, [decrypted])
 
     useEffect(() => {
         if (audioSliderRef.current) audioSliderRef.current.resize()
@@ -224,7 +238,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const seek = (position: number) => {
         if (!props.post) return
-        setAudio(props.audio)
+        setAudio(decrypted)
         setAudioPost(props.post)
         setPlayFlag("always")
         let secondsProgress = audioReverse ? ((100 - position) / 100) * audioDuration : (position / 100) * audioDuration
@@ -236,7 +250,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const updatePlay = () => {
         if (!props.post) return
-        setAudio(props.audio)
+        setAudio(decrypted)
         setAudioPost(props.post)
         setPlayFlag("toggle")
     }
@@ -332,12 +346,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.audio), props.audio)
+                functions.download(path.basename(props.audio), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, decrypted])
 
     const controlMouseEnter = () => {
         if (audioControls.current) audioControls.current.style.opacity = "1"
@@ -447,7 +461,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [coverImg])
 
     const generateTempLink = async (audio?: boolean) => {
-        const arrayBuffer = await fetch(audio ? props.audio : coverImg).then((r) => r.arrayBuffer())
+        const arrayBuffer = await fetch(audio ? decrypted : coverImg).then((r) => r.arrayBuffer())
         let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
         if (audio) {
             setAudioTempLink(url)

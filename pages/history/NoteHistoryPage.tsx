@@ -115,7 +115,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/note/history", {postID, order: Number(order), username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev) => [...prev, ...result])
+            setRevisions((prev) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

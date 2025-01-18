@@ -299,7 +299,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             if (!ref.current) continue
             let src = img
             if (functions.isModel(img)) {
-                src = await functions.modelImage(img)
+                src = await functions.modelImage(img, img)
             } else if (functions.isAudio(img)) {
                 src = await functions.songCover(img)
             }

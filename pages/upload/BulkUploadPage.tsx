@@ -233,7 +233,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let urls = [] as UploadImage[]
             for (let i = 0; i < acceptedArray.length; i++) {
                 let url = URL.createObjectURL(acceptedArray[i].file)
-                let link = `${url}#.${acceptedArray[i].ext}`
+                let ext = acceptedArray[i].ext
+                let link = `${url}#.${ext}`
                 let thumbnail = ""
                 let width = 0
                 let height = 0
@@ -245,11 +246,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else if (functions.isVideo(link)) {
                     thumbnail = await functions.videoThumbnail(link)
                 } else if (functions.isModel(link)) {
-                    thumbnail = await functions.modelImage(link)
+                    thumbnail = await functions.modelImage(link, ext)
                 } else if (functions.isAudio(link)) {
                     thumbnail = await functions.songCover(link)
                 }
-                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail, width, height,
+                urls.push({link, ext, size: acceptedArray[i].file.size, thumbnail, width, height,
                 originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
             setCurrentImg(urls[0].link)

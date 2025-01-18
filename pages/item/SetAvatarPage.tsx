@@ -187,9 +187,9 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (isAnimated && permissions.isPremium(session)) {
             let gifData = [] as GIFFrame[]
             const arrayBuffer = await fetch(image).then((r) => r.arrayBuffer())
-            if (functions.isGIF(image)) {
+            if (functions.isGIF(images[0])) {
                 gifData = await functions.extractGIFFrames(arrayBuffer)
-            } else if (functions.isWebP(image)) {
+            } else if (functions.isWebP(images[0])) {
                 gifData = await functions.extractAnimatedWebpFrames(arrayBuffer)
             }
             let frameArray = [] as Buffer[] 
@@ -249,10 +249,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const checkImage = async () => {
-            if (functions.isGIF(image)) return setIsAnimated(true)
-            if (functions.isWebP(image)) {
+            if (functions.isGIF(images[0])) return setIsAnimated(true)
+            if (functions.isWebP(images[0])) {
                 const buffer = await fetch(image).then((r) => r.arrayBuffer())
-                const animatedWebp = await functions.isAnimatedWebp(buffer)
+                const animatedWebp = functions.isAnimatedWebp(buffer)
                 if (animatedWebp) return setIsAnimated(true)
             }
             setIsAnimated(false)

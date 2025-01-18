@@ -47,6 +47,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setPost} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -74,6 +75,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
+    const [decrypted, setDecrypted] = useState("")
     const imageRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
 
@@ -131,6 +133,9 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const loadModel = async () => {
+        const decrypted = await functions.decryptItem(props.model, session)
+        setDecrypted(decrypted)
+
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
@@ -157,15 +162,15 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         let model = null as unknown as THREE.Object3D
         if (functions.isGLTF(props.model)) {
             const loader = new GLTFLoader()
-            const gltf = await loader.loadAsync(props.model)
+            const gltf = await loader.loadAsync(decrypted)
             model = gltf.scene
             model.animations = gltf.animations
         } else if (functions.isOBJ(props.model)) {
             const loader = new OBJLoader()
-            model = await loader.loadAsync(props.model)
+            model = await loader.loadAsync(decrypted)
         } else if (functions.isFBX(props.model)) {
             const loader = new FBXLoader()
-            model = await loader.loadAsync(props.model)
+            model = await loader.loadAsync(decrypted)
         }
         scene.add(model)
 
@@ -256,6 +261,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         setSecondsProgress(0)
         setProgress(0)
         setSeekTo(null)
+        setScreenshot("")
+        setDecrypted("")
         if (props.autoLoad) load()
     }, [props.model])
 
@@ -490,16 +497,17 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.model), props.model)
+                functions.download(path.basename(props.model), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, decrypted])
 
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
+            if (!history.location.pathname.includes("/post/")) setPost(null)
             event.preventDefault()
             const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
@@ -539,6 +547,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    if (!history.location.pathname.includes("/post/")) setPost(null)
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }

@@ -167,14 +167,15 @@ export default class ServerFunctions {
         await sql.message.bulkInsertRecipients(messageID, [username])
     }
 
-    public static getFirstHistoryFile = async (file: string, r18: boolean) => {
+    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean) => {
         const defaultBuffer = Buffer.from("")
-        if (file.includes("artist") || file.includes("character") || file.includes("series") || file.includes("pfp")) {
+        if (file.includes("artist/") || file.includes("character/") || file.includes("series/") || 
+            file.includes("tag/") || file.includes("pfp/")) {
             if (functions.useLocalFiles()) {
                 let folder = r18 ? localR18 : local
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `${folder}/history/post/${id}`
+                const historyFolder = `${folder}/history/tag/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
@@ -191,18 +192,19 @@ export default class ServerFunctions {
         } else {
             if (functions.useLocalFiles()) {
                 let folder = r18 ? localR18 : local
+                let scaleFolder = upscaled ? "upscaled" : "original"
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `${folder}/history/post/${id}`
+                const historyFolder = `${folder}/history/post/${id}/${scaleFolder}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `${folder}/history/post/${id}/${folders[0]}`
+                const firstHistory = `${folder}/history/post/${id}/${scaleFolder}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `${folder}/history/post/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `${folder}/history/post/${id}/${scaleFolder}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -211,12 +213,16 @@ export default class ServerFunctions {
     }
 
     public static getFile = async (file: string, upscaled: boolean, r18: boolean) => {
-        if (file.includes("history/post")) upscaled = false
         if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
-            let upscaledKey = `${folder}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
-            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, r18)
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledKey = `${folder}/${decodeURIComponent(upscaledFile)}`
+            if (file.includes("history/post")) {
+                originalKey = originalKey.replace("upscaled/", "original/")
+                upscaledKey = upscaledKey.replace("original/", "upscaled/")
+            }
+            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         }
@@ -353,7 +359,8 @@ export default class ServerFunctions {
     public static getUnverifiedFile = async (file: string, upscaled?: boolean) => {
         if (functions.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
-            let upscaledKey = `${localUnverified}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledKey = `${localUnverified}/${decodeURIComponent(upscaledFile)}`
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         }

@@ -46,6 +46,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const {setPost} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -68,6 +69,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
     const [model, setModel] = useState(null as Live2DModel | null)
+    const [decrypted, setDecrypted] = useState("")
     const imageRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
 
@@ -126,6 +128,9 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
 
     const loadModel = async () => {
         if (!props.live2d || !rendererRef.current) return
+        const decrypted = await functions.decryptItem(props.live2d, session)
+        setDecrypted(decrypted)
+
         // @ts-expect-error
         window.PIXI = PIXI
         const app = new PIXI.Application({
@@ -179,7 +184,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             return files
         }
 
-        const model = await Live2DModel.from(props.live2d)
+        const model = await Live2DModel.from(decrypted)
         app.stage.addChild(model)
 
         setModel(model)
@@ -260,6 +265,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         setImageLoaded(false)
         setModel(null)
+        setDecrypted("")
         if (props.autoLoad) load()
     }, [props.live2d])
 
@@ -483,16 +489,17 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.live2d), props.live2d)
+                functions.download(path.basename(props.live2d), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, decrypted])
 
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
+            if (!history.location.pathname.includes("/post/")) setPost(null)
             event.preventDefault()
             const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
@@ -532,6 +539,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
+                    if (!history.location.pathname.includes("/post/")) setPost(null)
                     history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }

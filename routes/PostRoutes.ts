@@ -758,7 +758,7 @@ const PostRoutes = (app: Express) => {
 
             const postHistory = await sql.history.postHistory(postID)
             if (!postHistory.length) {
-                const vanilla = JSON.parse(JSON.stringify(post))
+                const vanilla = structuredClone(post) as PostHistory & PostFull
                 vanilla.date = vanilla.uploadDate 
                 vanilla.user = vanilla.uploader
                 const categories = await serverFunctions.tagCategories(vanilla.tags)
@@ -766,43 +766,52 @@ const PostRoutes = (app: Express) => {
                 vanilla.characters = categories.characters.map((c: any) => c.tag)
                 vanilla.series = categories.series.map((s: any) => s.tag)
                 vanilla.tags = categories.tags.map((t: any) => t.tag)
-                let vanillaImages = [] as any
+                let vanillaImages = [] as string[]
+                let vanillaUpscaledImages = [] as string[]
                 for (let i = 0; i < vanilla.images.length; i++) {
                     vanillaImages.push(functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
+                    vanillaUpscaledImages.push(functions.getUpscaledImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
-                    uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
-                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, 
-                    posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
-                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
+                    postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
+                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
+                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, posted: vanilla.posted, 
+                    artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
+                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
+                    slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
+                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
                     changes: null, reason})
-                let images = [] as any
+                let images = [] as string[]
+                let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+                    images.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
+                    postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
-                    characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
+                    mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, 
+                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
+                    imageChanged: false, changes, reason})
             } else {
-                let images = [] as any
+                let images = [] as string[]
+                let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+                    images.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
+                    postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
-                    characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
+                    mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled,
+                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
+                    imageChanged: false, changes, reason})
             }
             res.status(200).send("Success")
           } catch (e) {

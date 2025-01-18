@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector, 
-useSearchSelector, useFilterSelector, useFlagSelector} from "../../store"
+useSearchSelector, useFilterSelector, useFlagSelector, useCacheActions} from "../../store"
 import functions from "../../structures/Functions"
 import arrowLeft from "../../assets/icons/carousel-left.png"
 import arrowRight from "../../assets/icons/carousel-right.png"
@@ -34,7 +34,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {noteDrawingEnabled} = useSearchSelector()
-    const {postFlag} = useFlagSelector()
+    const {setPost} = useCacheActions()
     const [lastPos, setLastPos] = useState(null as number | null)
     const [dragging, setDragging] = useState(false)
     const [imageRefs, setImageRefs] = useState([] as React.RefObject<HTMLImageElement | HTMLVideoElement>[])
@@ -207,8 +207,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         } 
         if (index < 0) index = 0
         if (index > imageFilterRefs.length - 1) index = imageFilterRefs.length - 1
-        if (props.set) props.set(props.images[index], index, false)
-        setActive(imageFilterRefs[index])
+        setFunc(props.images[index], index, false, imageFilterRefs[index])
 
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
@@ -451,13 +450,21 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }, [effectRefs, splatter])
 
+    const setFunc = (image: string, index: number, newTab: boolean, ref: React.RefObject<HTMLDivElement>) => {
+        setActive(ref)
+        props.set?.(image, index, newTab)
+    }
+
     const generateJSX = () => {
         const jsx = [] as React.ReactElement[]
         let visible = functions.removeDuplicates(images)
         for (let i = 0; i < visible.length; i++) {
             const img = visible[i] as string
+            const set = (event: React.MouseEvent) => {
+                setFunc(img, i, event.ctrlKey || event.metaKey || event.button === 1, imageFilterRefs[i])
+            }
             jsx.push(
-                <div key={i} className="carousel-img-filters" ref={imageFilterRefs[i]} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imageFilterRefs[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imageFilterRefs[i])}}>
+                <div key={i} className="carousel-img-filters" ref={imageFilterRefs[i]} onClick={set} onAuxClick={set}>
                     <img draggable={false} ref={lightnessRefs[i]} className="carousel-lightness-overlay" src={img}/>
                     <img draggable={false} ref={sharpenRefs[i]} className="carousel-sharpen-overlay" src={img}/>
                     <canvas draggable={false} ref={effectRefs[i]} className="carousel-effect-canvas"></canvas>

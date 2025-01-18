@@ -178,9 +178,11 @@ app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Re
   res.status(200).send("Success")
 })
 
-let folders = ["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "history"]
+let originalFolders = ["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "history"]
+let originalEncrypted = ["image", "comic", "animation", "audio", "model", "live2d"]
 let noCache = ["artist", "character", "series", "pfp", "tag"]
-let encrypted = ["image", "comic"]
+let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}-upscaled`)]
+let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
 const lastModified = new Date().toUTCString()
 

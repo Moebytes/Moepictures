@@ -595,6 +595,7 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "user" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "date" timestamptz,
     "images" text[],
+    "upscaledImages" text[],
     "uploader" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "updater" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "type" text,

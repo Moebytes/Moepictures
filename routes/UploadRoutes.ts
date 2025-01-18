@@ -649,8 +649,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
   const postHistory = await sql.history.postHistory(post.postID)
   const nextKey = await serverFunctions.getNextKey("post", String(post.postID), r18)
   if (!postHistory.length || (imgChanged && nextKey === 1)) {
-      const vanilla = JSON.parse(JSON.stringify(post))
-      vanilla.date = vanilla.uploadDate 
+      const vanilla = structuredClone(post) as unknown as PostHistory & PostFull
+      vanilla.date = vanilla.uploadDate
       vanilla.user = vanilla.uploader
       const categories = await serverFunctions.tagCategories(vanilla.tags)
       vanilla.artists = categories.artists.map((a) => a.tag)
@@ -658,37 +658,44 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
       vanilla.series = categories.series.map((s) => s.tag)
       vanilla.tags = categories.tags.map((t) => t.tag)
       let vanillaImages = [] as string[]
+      let vanillaUpscaledImages = [] as string[]
       for (let i = 0; i < vanilla.images.length; i++) {
+          const image = vanilla.images[i]
           if (imgChanged) {
             let newImagePath = ""
+            let newUpscaledImagePath = ""
             if (upscaledVanillaBuffers[i]) {
-              newImagePath = functions.getUpscaledImageHistoryPath(post.postID, 1, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename)
-              await serverFunctions.uploadFile(newImagePath, upscaledVanillaBuffers[i], r18)
+              newUpscaledImagePath = functions.getUpscaledImageHistoryPath(post.postID, 1, image.order, image.upscaledFilename || image.filename)
+              await serverFunctions.uploadFile(newUpscaledImagePath, upscaledVanillaBuffers[i], r18)
             }
             if (vanillaBuffers[i]) {
-              newImagePath = functions.getImageHistoryPath(post.postID, 1, vanilla.images[i].order, vanilla.images[i].filename)
+              newImagePath = functions.getImageHistoryPath(post.postID, 1, image.order, image.filename)
               await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i], r18)
             }
             vanillaImages.push(newImagePath)
+            vanillaUpscaledImages.push(newUpscaledImagePath)
           } else {
-            vanillaImages.push(functions.getImagePath(vanilla.images[i].type, post.postID, vanilla.images[i].order, vanilla.images[i].filename))
+            vanillaImages.push(functions.getImagePath(image.type, post.postID, image.order, image.filename))
+            vanillaUpscaledImages.push(functions.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename))
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
-        uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
+        postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
+        updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
         style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, slug: vanilla.slug,
         posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
-        artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [],
-        imageChanged: false, changes: null, reason})
+        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
+        hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, 
+        series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false, changes: null, reason})
 
-      let newImages = [] as any
+      let newImages = [] as string[]
+      let newUpscaledImages = [] as string[]
       for (let i = 0; i < images.length; i++) {
           const image = images[i]
           const upscaledImage = upscaledImages[i]
           if (imgChanged) {
             let newImagePath = ""
+            let newUpscaledImagePath = ""
             if (upscaledImage) {
               let buffer = Buffer.from("")
               if ("bytes" in upscaledImage) {
@@ -698,11 +705,11 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
                 if (unverifiedImages) {
                   buffer = await serverFunctions.getUnverifiedFile(imagePath)
                 } else {
-                  buffer = await serverFunctions.getFile(imagePath, true, r18)
+                  buffer = await serverFunctions.getFile(imagePath, false, r18)
                 }
               }
-              newImagePath = functions.getUpscaledImageHistoryPath(post.postID, 2, imageOrders[i], upscaledImageFilenames[i])
-              await serverFunctions.uploadFile(newImagePath, buffer, r18)
+              newUpscaledImagePath = functions.getUpscaledImageHistoryPath(post.postID, 2, imageOrders[i], upscaledImageFilenames[i])
+              await serverFunctions.uploadFile(newUpscaledImagePath, buffer, r18)
             }
             if (image) {
               let buffer = Buffer.from("")
@@ -713,32 +720,36 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
                 if (unverifiedImages) {
                   buffer = await serverFunctions.getUnverifiedFile(imagePath)
                 } else {
-                  buffer = await serverFunctions.getFile(imagePath, true, r18)
+                  buffer = await serverFunctions.getFile(imagePath, false, r18)
                 }
               }
               newImagePath = functions.getImageHistoryPath(post.postID, 2, imageOrders[i], imageFilenames[i])
               await serverFunctions.uploadFile(newImagePath, buffer, r18)
             }
             newImages.push(newImagePath)
+            newUpscaledImages.push(newUpscaledImagePath)
           } else {
             newImages.push(functions.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].filename))
+            newUpscaledImages.push(functions.getUpscaledImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-        style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
-        posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-        englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, tags, 
-        addedTags, removedTags, imageChanged: imgChanged, changes, reason})
+        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, updater: updated.updater, 
+        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
+        parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
+        source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
+        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        tags, addedTags, removedTags, imageChanged: imgChanged, changes, reason})
   } else {
-      let newImages = [] as any
+      let newImages = [] as string[]
+      let newUpscaledImages = [] as string[]
       for (let i = 0; i < images.length; i++) {
         const image = images[i]
         const upscaledImage = upscaledImages[i]
         if (imgChanged) {
           let newImagePath = ""
+          let newUpscaledImagePath = ""
           if (upscaledImage) {
             let buffer = Buffer.from("")
             if ("bytes" in upscaledImage) {
@@ -748,11 +759,11 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               if (unverifiedImages) {
                 buffer = await serverFunctions.getUnverifiedFile(imagePath)
               } else {
-                buffer = await serverFunctions.getFile(imagePath, true, r18)
+                buffer = await serverFunctions.getFile(imagePath, false, r18)
               }
             }
-            newImagePath = functions.getUpscaledImageHistoryPath(post.postID, nextKey, imageOrders[i], upscaledImageFilenames[i])
-            await serverFunctions.uploadFile(newImagePath, buffer, r18)
+            newUpscaledImagePath = functions.getUpscaledImageHistoryPath(post.postID, nextKey, imageOrders[i], upscaledImageFilenames[i])
+            await serverFunctions.uploadFile(newUpscaledImagePath, buffer, r18)
           }
           if (image) {
             let buffer = Buffer.from("")
@@ -763,7 +774,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               if (unverifiedImages) {
                 buffer = await serverFunctions.getUnverifiedFile(imagePath)
               } else {
-                buffer = await serverFunctions.getFile(imagePath, true, r18)
+                buffer = await serverFunctions.getFile(imagePath, false, r18)
               }
             }
             newImagePath = functions.getImageHistoryPath(post.postID, nextKey, imageOrders[i], imageFilenames[i])
@@ -783,16 +794,17 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
           }
         } else {
           newImages.push(functions.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].filename))
+          newUpscaledImages.push(functions.getUpscaledImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
         }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
-        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-        style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
-        posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-        englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: JSON.stringify(updated.mirrors), 
-        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, tags, 
-        addedTags, removedTags, imageChanged: imgChanged, changes, reason})
+        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, updater: updated.updater, 
+        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
+        parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
+        source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
+        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        tags, addedTags, removedTags, imageChanged: imgChanged, changes, reason})
   }
 }
 

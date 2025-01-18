@@ -222,7 +222,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!historyID) return
             const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag).then((r) => r[0])
             if (!historyPost) return functions.replaceLocation("/404")
-            let images = historyPost.images.map((i) => functions.getHistoryImageLink(i))
+            let images = [] as string[]
+            if (session.upscaledImages && historyPost.upscaledImages?.length) {
+                images = historyPost.upscaledImages.map((i) => functions.getHistoryImageLink(i))
+            } else {
+                images = historyPost.images.map((i) => functions.getHistoryImageLink(i))
+            }
             setImages(images)
             if (images[order-1]) {
                 setImage(images[order-1])
@@ -241,6 +246,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [postID, historyID, order, session])
 
     useEffect(() => {
+        setImage("")
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         const historyParam = new URLSearchParams(window.location.search).get("history")
         if (historyParam) return
         const updatePost = async () => {
@@ -281,8 +288,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i)
-                : functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                if ("upscaledImages" in post && post.upscaledImages.length) {
+                    images = post.upscaledImages.map((i) => functions.getRawImageLink(i))
+                } else {
+                    images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i)
+                    : functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                }
             } else {
                 images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i) 
                 : functions.getImageLink(i.type, post.postID, i.order, i.filename))
@@ -368,7 +379,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}/${post.slug}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
     }
@@ -393,7 +403,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}/${post.slug}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
     }
@@ -553,7 +562,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
                 history.push(`/post/${postID}/${slug}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
             }
             return (
                 <div className="post-item">
@@ -577,7 +585,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
                 history.push(`/post/${postID}/${slug}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)
@@ -623,7 +630,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         } else {
             let img = image
             if (session.cookie) {
-                img += `?upscaled=${session.upscaledImages}`
+                if (img) img += `?upscaled=${session.upscaledImages}`
             }
             return (
                 <>
@@ -639,26 +646,24 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <TitleBar post={post} goBack={true} historyID={historyID} noteID={noteID}/>
         <NavBar goBack={true}/>
         <div className="body">
-            {post && tagCategories ? 
-            <SideBar post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
-            <SideBar/>}
+            <SideBar post={post} order={order} artists={tagCategories?.artists} characters={tagCategories?.characters} series={tagCategories?.series} tags={tagCategories?.tags}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     {historyID || noteID ? getHistoryButtons() : null}
-                    {/*nsfwChecker() &&*/ images.length > 1 ?
+                    {post && images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
-                    {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
+                    {post ? getPostJSX() : null}
                     {generateActiveFavgroupJSX()}
-                    {parentPost ? <Parent post={parentPost}/>: null}
-                    {childPosts.length ? <Children posts={childPosts}/> : null}
+                    {post && parentPost ? <Parent post={parentPost}/>: null}
+                    {post && childPosts.length ? <Children posts={childPosts}/> : null}
                     {generateGroupsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
-                    {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
+                    {post && session.username && !session.banned ? <CutenessMeter post={post}/> : null}
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
-                    {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
+                    {post && artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
                     {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}

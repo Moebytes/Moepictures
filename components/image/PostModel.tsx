@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions} from "../../store"
+useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import cryptoFunctions from "../../structures/CryptoFunctions"
 import Slider from "react-slider"
@@ -62,6 +62,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const {setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed,
     setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
     const {noteMode, imageExpand} = useSearchSelector()
+    const {session} = useSessionSelector()
     const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
@@ -100,13 +101,37 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [objMaterials, setObjMaterials] = useState([] as THREE.Material[])
     const [buttonHover, setButtonHover] = useState(false)
+    const [decrypted, setDecrypted] = useState("")
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
+    const decryptModel = async () => {
+        const decryptedModel = await functions.decryptItem(props.model, session)
+        if (decryptedModel) setDecrypted(decryptedModel)
+    }
+
+    useEffect(() => {
+        setReverse(false)
+        setSecondsProgress(0)
+        setProgress(0)
+        setDragProgress(0)
+        setDragging(false)
+        setSeekTo(null)
+        if (ref) ref.style.opacity = "1"
+    }, [props.model])
+
+    useEffect(() => {
+        decryptModel()
+    }, [props.model, session])
+
+    useEffect(() => {
+        if (decrypted) loadModel()
+    }, [decrypted])
+
     const loadModel = async () => {
-        if (!props.model) return
+        if (!props.model || !decrypted) return
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
@@ -139,15 +164,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         let model = null as unknown as THREE.Object3D
         if (functions.isGLTF(props.model)) {
             const loader = new GLTFLoader()
-            const gltf = await loader.loadAsync(props.model)
+            const gltf = await loader.loadAsync(decrypted)
             model = gltf.scene
             model.animations = gltf.animations
         } else if (functions.isOBJ(props.model)) {
             const loader = new OBJLoader()
-            model = await loader.loadAsync(props.model)
+            model = await loader.loadAsync(decrypted)
         } else if (functions.isFBX(props.model)) {
             const loader = new FBXLoader()
-            model = await loader.loadAsync(props.model)
+            model = await loader.loadAsync(decrypted)
         }
 
         let objMaterials = [] as THREE.Material[]
@@ -327,17 +352,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             })
         }
     }
-
-    useEffect(() => {
-        setReverse(false)
-        setSecondsProgress(0)
-        setProgress(0)
-        setDragProgress(0)
-        setDragging(false)
-        setSeekTo(null)
-        if (ref) ref.style.opacity = "1"
-        loadModel()
-    }, [props.model])
 
     useEffect(() => {
         loadModel()
@@ -563,12 +577,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.model), props.model)
+                functions.download(path.basename(props.model), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, decrypted])
 
     const controlMouseEnter = () => {
         if (modelControls.current) modelControls.current.style.opacity = "1"

@@ -146,25 +146,25 @@ export default class SQLHistory {
     }
 
     /** Insert post history */
-    public static insertPostHistory = async (options: {username: string, postID: string, images: string[], uploader: string, 
+    public static insertPostHistory = async (options: {username: string, postID: string, images: string[], upscaledImages: string[], uploader: string, 
         updater: string, uploadDate: string, updatedDate: string, type: string, rating: string, style: string, parentID: string | null, 
         title: string, englishTitle: string, posted: string, artist: string, source: string, hasUpscaled: boolean | null, hasOriginal: boolean | null, 
-        commentary: string, englishCommentary: string, bookmarks: number, buyLink: string | null, mirrors: string, slug: string | null, artists: string[], 
+        commentary: string, englishCommentary: string, bookmarks: number, buyLink: string | null, mirrors: string | null, slug: string | null, artists: string[], 
         characters: string[], series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, 
         changes: any, reason?: string | null}) => {
-        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
+        const {postID, username, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
         englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, hasOriginal, hasUpscaled, 
         slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
-            "type", "rating", "style", "parentID", "title", "englishTitle", "posted", "artist", "source", "commentary", "englishCommentary", 
-            "bookmarks", "buyLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", 
-            "removedTags", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 
-            $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34) RETURNING "historyID"`,
+            text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "upscaledImages", "uploader", "updater", "uploadDate", 
+            "updatedDate", "type", "rating", "style", "parentID", "title", "englishTitle", "posted", "artist", "source", "commentary", 
+            "englishCommentary", "bookmarks", "buyLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", 
+            "tags", "addedTags", "removedTags", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+            $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35) RETURNING "historyID"`,
             rowMode: "array",
-            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
-            englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
+            values: [postID, username, now, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, 
+            title, englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
             artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason]
         }
         await SQLQuery.invalidateCache("history/post")

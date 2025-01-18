@@ -1209,7 +1209,6 @@ export default class Functions {
 
     public static getImageLink = (folder: string, postID: string, order: number, filename: string) => {
         if (!filename) return ""
-        if (!folder || filename.includes("history/")) return Functions.getRawImageLink(filename)
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
@@ -1241,7 +1240,6 @@ export default class Functions {
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
         if (folder !== "image" && folder !== "comic" && folder !== "animation") {
-            if (!folder || filename.includes("history/")) return Functions.getRawThumbnailLink(filename, sizeType, mobile)
             return Functions.getImageLink(folder, postID, order, filename)
         }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
@@ -1755,20 +1753,19 @@ export default class Functions {
                 })
                 video.src = image
             } else {
-                let imageLink = await Functions.decryptThumb(image, session)
                 const img = document.createElement("img")
                 img.addEventListener("load", async () => {
                     let width = img.width
                     let height = img.height
                     try {
-                        const r = await fetch(imageLink).then((r) => r.arrayBuffer())
+                        const r = await fetch(image).then((r) => r.arrayBuffer())
                         const size = r.byteLength 
                         resolve({width, height, size})
                     } catch {
                         resolve({width, height, size: 0})
                     }
                 })
-                img.src = imageLink
+                img.src = image
             }
         })
     }
@@ -1802,7 +1799,7 @@ export default class Functions {
         return {polycount, size}
     }
 
-    public static modelImage = async (model: string, imageSize?: number) => {
+    public static modelImage = async (model: string, ext: string, imageSize?: number) => {
         if (!imageSize) imageSize = 500
         const width = imageSize
         const height = imageSize
@@ -1817,13 +1814,13 @@ export default class Functions {
         renderer.setPixelRatio(window.devicePixelRatio)
 
         let object = null as unknown as THREE.Object3D
-        if (Functions.isGLTF(model)) {
+        if (Functions.isGLTF(ext)) {
             const loader = new GLTFLoader()
             object = await loader.loadAsync(model).then((l) => l.scene)
-        } else if (Functions.isOBJ(model)) {
+        } else if (Functions.isOBJ(ext)) {
             const loader = new OBJLoader()
             object = await loader.loadAsync(model)
-        } else if (Functions.isFBX(model)) {
+        } else if (Functions.isFBX(ext)) {
             const loader = new FBXLoader()
             object = await loader.loadAsync(model)
         }
@@ -1908,9 +1905,10 @@ export default class Functions {
         await Functions.timeout(100)
 
         return new Promise<string>(async (resolve) => {
-            app.ticker.add(() => {
-                resolve(app.view.toDataURL?.()!)
+            app.ticker.addOnce(() => {
+                const dataURL = app.view.toDataURL?.()
                 app.destroy(true)
+                resolve(dataURL)
             })
         })
     }
@@ -2763,14 +2761,14 @@ export default class Functions {
                 let width = 0
                 let height = 0
                 if (Functions.isLive2D(ext)) {
-                    thumbnail = await Functions.live2dScreenshot(ext)
+                    thumbnail = await Functions.live2dScreenshot(link)
                     const dimensions = await Functions.live2dDimensions(ext)
                     width = dimensions.width
                     height = dimensions.height
                 } else if (Functions.isVideo(ext)) {
                     thumbnail = await Functions.videoThumbnail(link)
                 } else if (Functions.isModel(ext)) {
-                    thumbnail = await Functions.modelImage(link)
+                    thumbnail = await Functions.modelImage(link, ext)
                 } else if (Functions.isAudio(ext)) {
                     thumbnail = await Functions.songCover(link)
                 }
@@ -2793,7 +2791,7 @@ export default class Functions {
                 } else if (Functions.isVideo(upscaledExt)) {
                     thumbnail = await Functions.videoThumbnail(upscaledLink)
                 } else if (Functions.isModel(upscaledExt)) {
-                    thumbnail = await Functions.modelImage(upscaledLink)
+                    thumbnail = await Functions.modelImage(upscaledLink, upscaledExt)
                 } else if (Functions.isAudio(upscaledExt)) {
                     thumbnail = await Functions.songCover(upscaledLink)
                 }
@@ -2970,56 +2968,53 @@ export default class Functions {
     }
 
     public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
+        if (permissions.noEncryption(session)) return img
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
         const cached = cachedImages.get(cacheKey)
         if (cached) return cached
-        if (Functions.isLive2D(img)) {
-            const url = await Functions.live2dScreenshot(img)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
-            return cacheUrl
-        }
-        if (Functions.isModel(img)) {
-            const url = await Functions.modelImage(img)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
-            return cacheUrl
-        }
-        if (Functions.isAudio(img)) {
-            const url = await Functions.songCover(img)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
-            return cacheUrl
-        }
         if (forceImage && Functions.isVideo(img)) {
             const url = await Functions.videoThumbnail(img)
             let cacheUrl = `${url}#${path.extname(img)}`
             cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
-        if (permissions.noEncryption(session)) return img
         let isAnimatedWebP = false
         let arrayBuffer = null as ArrayBuffer | null
-        let decryptedImg = img
-        if (Functions.isImage(img)) {
-            if (Functions.isWebP(img)) {
-                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
-                isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
-            }
-            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        let decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        if (Functions.isWebP(img)) {
+            arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
+            isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
         }
-        const base64 = await Functions.linkToBase64(decryptedImg)
-        if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
+        if (Functions.isLive2D(img)) {
+            const url = await Functions.live2dScreenshot(decryptedImg + "#.zip")
+            let cacheUrl = `${url}#${path.extname(img)}`
+            cachedImages.set(cacheKey, cacheUrl)
+            return cacheUrl
+        }
+        if (Functions.isModel(img)) {
+            const url = await Functions.modelImage(decryptedImg, img)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            cachedImages.set(cacheKey, cacheUrl)
+            return cacheUrl
+        }
+        if (Functions.isAudio(img)) {
+            const url = await Functions.songCover(decryptedImg)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            cachedImages.set(cacheKey, cacheUrl)
+            return cacheUrl
+        }
+        if (Functions.isImage(img) && !isAnimatedWebP) {
+            const base64 = await Functions.linkToBase64(decryptedImg)
+            cachedImages.set(cacheKey, base64)
+            return base64
+        } else {
             if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
-        } else {
-            if (base64) cachedImages.set(cacheKey, base64)
-            return base64
         }
     }
 
@@ -3030,30 +3025,26 @@ export default class Functions {
         if (!cacheKey) cacheKey = img
         const cached = cachedImages.get(cacheKey)
         if (cached) return cached
-        if (Functions.isModel(img) || Functions.isAudio(img) || 
-            Functions.isVideo(img) || Functions.isLive2D(img)) {
+        if (Functions.isVideo(img)) {
             return img
         }
         let isAnimatedWebP = false
         let arrayBuffer = null as ArrayBuffer | null
-        let decrypted = img
-        if (Functions.isImage(img)) {
-            if (Functions.isWebP(img)) {
-                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
-                isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
-            }
-            if (!isAnimatedWebP) decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        let decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        if (Functions.isWebP(img)) {
+            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
         }
-        const base64 = await Functions.linkToBase64(decrypted)
-        if (Functions.isGIF(img) || isAnimatedWebP) {
+        if (Functions.isImage(img) && !isAnimatedWebP) {
+            const base64 = await Functions.linkToBase64(decrypted)
+            cachedImages.set(cacheKey, base64)
+            return base64
+        } else {
             if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
-        } else {
-            if (base64) cachedImages.set(cacheKey, base64)
-            return base64
         }
     }
 
@@ -3061,18 +3052,10 @@ export default class Functions {
         if (permissions.noEncryption(session)) return buffer
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
-        if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || 
-            Functions.isVideo(imageLink) || Functions.isLive2D(imageLink)) {
+        if (Functions.isVideo(imageLink)) {
             return buffer
         }
-        let isAnimatedWebP = false
-        let decrypted = buffer
-        if (Functions.isImage(imageLink)) {
-            if (Functions.isWebP(imageLink)) {
-                isAnimatedWebP = Functions.isAnimatedWebp(buffer)
-            }
-            if (!isAnimatedWebP) decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
-        }
+        let decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
         return decrypted
     }
 

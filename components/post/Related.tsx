@@ -388,7 +388,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const click = (img: string, index: number) => {
         const post = related[index]
         history.push(`/post/${post.postID}/${post.slug}`)
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(related)
     }
 

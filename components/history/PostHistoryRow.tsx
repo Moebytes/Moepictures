@@ -380,7 +380,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                <EffectImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={200} style={props.imageHeight ? {height: `${props.imageHeight}px`} : {}}/>
+                <EffectImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={props.imageHeight}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
