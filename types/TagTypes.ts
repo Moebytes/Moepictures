@@ -40,6 +40,7 @@ export interface Implication {
 }
 
 export interface Tag {
+    tagID: string
     tag: string
     type: TagType
     creator: string

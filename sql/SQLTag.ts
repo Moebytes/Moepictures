@@ -228,7 +228,7 @@ export default class SQLTag {
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
                     ${whereQuery}
-                    GROUP BY "tags".tag
+                    GROUP BY "tags"."tagID"
             `)
         }
         if (tags?.[0]) query.values = [tags]
@@ -280,7 +280,7 @@ export default class SQLTag {
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
                     WHERE "tags".tag = $1
-                    GROUP BY "tags".tag
+                    GROUP BY "tags"."tagID"
             `),
             values: [tag]
         }

@@ -65,7 +65,7 @@ export default class SQLUser {
             SELECT users.*
             FROM users
             WHERE users."username" = $1
-            GROUP BY users."username"
+            GROUP BY users."userID"
             `),
             values: [username]
         }
@@ -80,7 +80,7 @@ export default class SQLUser {
             SELECT users.*
             FROM users
             WHERE users."email" = $1
-            GROUP BY users."username"
+            GROUP BY users."userID"
             `),
             values: [email]
         }

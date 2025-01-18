@@ -1,6 +1,7 @@
 import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory} from "./Types"
 
 export interface PrunedUser {
+    userID: string
     username: string
     bio: string
     image: string | null

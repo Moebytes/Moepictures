@@ -553,7 +553,7 @@ export default class SQLSearch {
                     JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                     JOIN post_json ON post_json."postID" = "tag map"."postID"
                     JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
-                    GROUP BY "tags".tag, "tag map posts"."posts"
+                    GROUP BY "tags"."tagID", "tag map posts"."posts"
                     ${sortQuery}
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
             `)
@@ -632,7 +632,7 @@ export default class SQLSearch {
                     LEFT JOIN implications ON implications."tag" = tags."tag"
                     JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
                     ${whereQuery}
-                    GROUP BY "tags".tag, "tag map posts"."posts"
+                    GROUP BY "tags"."tagID", "tag map posts"."posts"
                     ${sortQuery}
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `)
@@ -662,7 +662,7 @@ export default class SQLSearch {
                     AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
                     OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%')
                     JOIN posts ON posts."postID" = "tag map"."postID"
-                    GROUP BY "tags".tag
+                    GROUP BY "tags"."tagID"
             `),
             values: [social]
         }
