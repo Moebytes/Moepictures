@@ -107,6 +107,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const decryptAudio = async () => {
+        if (!props.audio) return
         const decryptedAudio = await functions.decryptItem(props.audio, session)
         if (decryptedAudio) setDecrypted(decryptedAudio)
     }

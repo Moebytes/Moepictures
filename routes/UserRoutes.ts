@@ -83,10 +83,14 @@ const UserRoutes = (app: Express) => {
             delete user.upscaledImages
             delete user.forceNoteBubbles
             delete user.globalMusicPlayer
+            delete user.liveModelPreview
             delete user.savedSearches
             delete user.blacklist
             delete user.premiumExpiration
             delete user.showR18
+            if (!permissions.isMod(req.session)) {
+                delete user.deletedPosts
+            }
             serverFunctions.sendEncrypted(user, req, res)
         } catch (e) {
             console.log(e)
@@ -114,6 +118,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.insertUser(username, email)
                 await sql.user.updateUser(username, "joinDate", new Date().toISOString())
                 await sql.user.updateUser(username, "publicFavorites", true)
+                await sql.user.updateUser(username, "publicTagFavorites", true)
                 await sql.user.updateUser(username, "showRelated", true)
                 await sql.user.updateUser(username, "showTooltips", true)
                 await sql.user.updateUser(username, "showTagTooltips", true)
@@ -123,6 +128,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "upscaledImages", false)
                 await sql.user.updateUser(username, "forceNoteBubbles", false)
                 await sql.user.updateUser(username, "globalMusicPlayer", true)
+                await sql.user.updateUser(username, "liveModelPreview", false)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
                 await sql.user.updateUser(username, "blacklist", "")
@@ -197,6 +203,7 @@ const UserRoutes = (app: Express) => {
                 req.session.imagePost = user.imagePost
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
+                req.session.publicTagFavorites = user.publicTagFavorites
                 req.session.role = user.role
                 req.session.banned = user.banned
                 const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
@@ -214,9 +221,11 @@ const UserRoutes = (app: Express) => {
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
                 req.session.globalMusicPlayer = user.globalMusicPlayer
+                req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
                 req.session.postCount = user.postCount
+                req.session.deletedPosts = user.deletedPosts
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
@@ -271,6 +280,7 @@ const UserRoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.joinDate = user.joinDate
                 req.session.publicFavorites = user.publicFavorites
+                req.session.publicTagFavorites = user.publicTagFavorites
                 req.session.role = user.role
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
@@ -279,9 +289,11 @@ const UserRoutes = (app: Express) => {
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.postCount = user.postCount
+                req.session.deletedPosts = user.deletedPosts
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
                 req.session.globalMusicPlayer = user.globalMusicPlayer
+                req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
                 req.session.showR18 = user.showR18
@@ -393,6 +405,21 @@ const UserRoutes = (app: Express) => {
             const newPrivacy = !Boolean(user.publicFavorites)
             req.session.publicFavorites = newPrivacy 
             await sql.user.updateUser(req.session.username, "publicFavorites", newPrivacy)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/tagfavoritesprivacy", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newPrivacy = !Boolean(user.publicTagFavorites)
+            req.session.publicTagFavorites = newPrivacy 
+            await sql.user.updateUser(req.session.username, "publicTagFavorites", newPrivacy)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -537,6 +564,21 @@ const UserRoutes = (app: Express) => {
             const newGlobalMusicPlayer = !Boolean(user.globalMusicPlayer)
             req.session.globalMusicPlayer = newGlobalMusicPlayer 
             await sql.user.updateUser(req.session.username, "globalMusicPlayer", newGlobalMusicPlayer)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/livemodelpreview", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newLiveModelPreview = !Boolean(user.liveModelPreview)
+            req.session.liveModelPreview = newLiveModelPreview 
+            await sql.user.updateUser(req.session.username, "liveModelPreview", newLiveModelPreview)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

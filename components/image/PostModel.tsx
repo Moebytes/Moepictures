@@ -108,6 +108,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }
 
     const decryptModel = async () => {
+        if (!props.model) return
         const decryptedModel = await functions.decryptItem(props.model, session)
         if (decryptedModel) setDecrypted(decryptedModel)
     }
@@ -233,24 +234,24 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         const controls = new OrbitControls(camera, controlElement)
 
         const box = new THREE.Box3().setFromObject(model)
-        const size = box.getSize(new THREE.Vector3()).length()
+        const size = box.getSize(new THREE.Vector3())
         const center = box.getCenter(new THREE.Vector3())
 
-        model.position.x += (model.position.x - center.x)
-        model.position.y += (model.position.y - center.y)
-        model.position.z += (model.position.z - center.z)
+        model.position.sub(center)
+        const euler = new THREE.Euler(0, 0, 0, "XYZ")
+        model.rotation.copy(euler)
 
-        camera.near = size / 100
-        camera.far = size * 100
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const fovRad = (camera.fov * Math.PI) / 180
+        const distance = maxDim / (2 * Math.tan(fovRad / 2))
+        camera.position.set(0, 0, distance)
+        camera.lookAt(0, 0, 0)
+
+        camera.near = distance / 10
+        camera.far = distance * 10
         camera.updateProjectionMatrix()
 
-        camera.position.copy(center)
-        camera.position.x += size / 2.0
-        camera.position.y += size / 5.0
-        camera.position.z += size / 2.0
-        camera.lookAt(center)
-
-        controls.maxDistance = size * 10
+        controls.maxDistance = size.length() * 10
         controls.addEventListener("change", () => {
             if (imageTimer) return 
             imageTimer = setTimeout(() => {

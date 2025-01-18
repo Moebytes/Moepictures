@@ -286,6 +286,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const tagFavoritesPrivacy = async () => {
+        await functions.post("/api/user/tagfavoritesprivacy", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
+    }
+
     const showRelated = async () => {
         await functions.post("/api/user/showrelated", null, session, setSessionFlag)
         functions.clearResponseCacheKey("/api/user/session")
@@ -324,6 +330,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const globalMusicPlayer = async () => {
         await functions.post("/api/user/globalmusicplayer", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
+    }
+
+    const liveModelPreview = async () => {
+        await functions.post("/api/user/livemodelpreview", null, session, setSessionFlag)
         functions.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
@@ -753,6 +765,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.user.favoritesPrivacy}: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
                         className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
                     </div>
+                    <div className="user-row">
+                        <span className="user-text">{i18n.user.tagFavoritesPrivacy}: <span style={{color: !session.publicTagFavorites ? "var(--text-strong)" : "var(--text)"}} 
+                        className="user-text-action" onClick={tagFavoritesPrivacy}>{session.publicTagFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
+                    </div>
                     {Number.isFinite(permissions.getUploadLimit(session)) ? <div className="user-row">
                         <span className="user-text">{i18n.labels.uploadLimit}: <span className="user-text-action">{functions.currentUploads(pending)} / {permissions.getUploadLimit(session)}</span></span>
                     </div> : null}
@@ -776,6 +792,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.globalMusicPlayer}: <span className="user-text-action" onClick={globalMusicPlayer}>{session.globalMusicPlayer ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
+                        <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar}/> : null}
@@ -855,6 +874,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="user-column">
                         <span className="user-title">{functions.toProperCase(i18n.user.deleted)} <span className="user-text-alt">{deleted[0].postCount}</span></span>
                         <Carousel images={deletedImages} noKey={true} set={setDel} index={deletedIndex} unverified={true}/>
+                    </div> : null}
+                    {permissions.isMod(session) && session.deletedPosts?.length ? <div className="user-row">
+                        <span className="user-text">{i18n.user.deletedPosts}: <span className="user-text-action">{session.deletedPosts.length}</span></span>
                     </div> : null}
                     {generateFavgroupsJSX()}
                     {favorites.length ?

@@ -45,6 +45,7 @@ const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 const live2dExtensions = [".zip"]
 
+let cachedThumbs = new Map<string, string>()
 let cachedImages = new Map<string, string>()
 let cachedResponses = new Map<string, {data: any, expires: number}>()
 let cacheDuration = 1000
@@ -55,12 +56,8 @@ let serverPublicKey = ""
 let serverKeyLock = false
 
 export default class Functions {
-    public static getImageCache = (cacheKey: string) => {
-        return cachedImages.get(cacheKey) || ""
-    }
-
-    public static clearImageCache = () => {
-        cachedImages.clear()
+    public static getThumbCache = (cacheKey: string) => {
+        return cachedThumbs.get(cacheKey) || ""
     }
 
     public static responseCached = <T extends string>(endpoint: T, params: GetEndpoint<T>["params"]) => {
@@ -1805,10 +1802,15 @@ export default class Functions {
         const height = imageSize
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
-        const light = new THREE.AmbientLight(0xffffff, 1)
-        scene.add(light)
+        const light = new THREE.AmbientLight(0xffffff, 0.5)
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.2)
+        light2.position.set(30, 100, 100)
+        const light3 = new THREE.DirectionalLight(0xffffff, 0.2)
+        light3.position.set(-30, 100, -100)
+        scene.add(light, light2, light3)
         
         const renderer = new THREE.WebGLRenderer({alpha: true, preserveDrawingBuffer: true, powerPreference: "low-power"})
+        renderer.outputEncoding = THREE.sRGBEncoding
         renderer.setClearColor(0x000000, 0)
         renderer.setSize(width, height)
         renderer.setPixelRatio(window.devicePixelRatio)
@@ -1827,24 +1829,39 @@ export default class Functions {
         scene.add(object)
 
         const box = new THREE.Box3().setFromObject(object)
-        const size = box.getSize(new THREE.Vector3()).length()
+        const size = box.getSize(new THREE.Vector3())
         const center = box.getCenter(new THREE.Vector3())
 
-        object.position.x += (object.position.x - center.x)
-        object.position.y += (object.position.y - center.y)
-        object.position.z += (object.position.z - center.z)
+        object.position.sub(center)
+        const euler = new THREE.Euler(0, 0, 0, "XYZ")
+        object.rotation.copy(euler)
 
-        camera.near = size / 100
-        camera.far = size * 100
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const fovRad = (camera.fov * Math.PI) / 180
+        const distance = maxDim / (2 * Math.tan(fovRad / 2))
+        camera.position.set(0, 0, distance)
+        camera.lookAt(0, 0, 0)
+
+        camera.near = distance / 10
+        camera.far = distance * 10
         camera.updateProjectionMatrix()
 
-        const zoomedDistance = size / 5
-        camera.position.set(center.x + zoomedDistance, center.y + zoomedDistance / 2, center.z + zoomedDistance)
-        camera.lookAt(center)
+        let loopCount = 0
+        let id: number
 
-        await Functions.timeout(100)
-        renderer.render(scene, camera)
-        return renderer.domElement.toDataURL()
+        return new Promise<string>((resolve) => {
+            const animate = () => {
+                loopCount++
+                renderer.render(scene, camera)
+                if (loopCount >= 10) {
+                    window.cancelAnimationFrame(id)
+                    resolve(renderer.domElement.toDataURL())
+                } else {
+                    id = window.requestAnimationFrame(animate)
+                }
+            }
+            id = window.requestAnimationFrame(animate)
+        })
     }
 
     public static live2dDimensions = async (live2d: string) => {
@@ -2972,12 +2989,12 @@ export default class Functions {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (!cacheKey) cacheKey = img
-        const cached = cachedImages.get(cacheKey)
+        const cached = cachedThumbs.get(cacheKey)
         if (cached) return cached
         if (forceImage && Functions.isVideo(img)) {
             const url = await Functions.videoThumbnail(img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
+            cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         let isAnimatedWebP = false
@@ -2990,30 +3007,30 @@ export default class Functions {
         if (Functions.isLive2D(img)) {
             const url = await Functions.live2dScreenshot(decryptedImg + "#.zip")
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
+            cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (Functions.isModel(img)) {
             const url = await Functions.modelImage(decryptedImg, img)
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
+            cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (Functions.isAudio(img)) {
             const url = await Functions.songCover(decryptedImg)
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
+            cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
         if (Functions.isImage(img) && !isAnimatedWebP) {
             const base64 = await Functions.linkToBase64(decryptedImg)
-            cachedImages.set(cacheKey, base64)
+            cachedThumbs.set(cacheKey, base64)
             return base64
         } else {
             if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedImages.set(cacheKey, cacheUrl)
+            cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
     }

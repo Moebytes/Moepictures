@@ -14,6 +14,8 @@ import tagHistory from "../../assets/icons/tag-history.png"
 import tagCategorize from "../../assets/icons/tag-category.png"
 import tagEdit from "../../assets/icons/tag-edit.png"
 import tagDelete from "../../assets/icons/tag-delete.png"
+import tagHeart from "../../assets/icons/tag-heart.png"
+import tagHearted from "../../assets/icons/tag-hearted.png"
 import restore from "../../assets/icons/restore.png"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
@@ -317,10 +319,15 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setCategorizeTag({tag: tag.tag, type: tag.type})
     }
 
+    const favoriteTag = async () => {
+        setTagFlag(true)
+    }
+
     const tagOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
         if (session.username) {
+            jsx.push(<img className="tag-social" src={tagHeart} onClick={() => null} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter: getFilter()}}/>)

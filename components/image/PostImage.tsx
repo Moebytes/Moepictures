@@ -159,6 +159,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const decryptImage = async () => {
+        if (!props.img) return
         const decryptedImage = await functions.decryptItem(props.img, session)
         if (!decryptedImage) return
         const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())

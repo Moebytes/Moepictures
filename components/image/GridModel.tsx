@@ -91,13 +91,13 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             load()
         },
         update: async () => {
-            return mobile ? loadImage() : loadModel()
+            return mobile || !session.liveModelPreview ? loadImage() : loadModel()
         }
     }))
 
     const load = async () => {
         if (ref) return
-        return mobile ? loadImage() : loadModel()
+        return mobile || !session.liveModelPreview ? loadImage() : loadModel()
     }
 
     useEffect(() => {
@@ -182,24 +182,24 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         })
 
         const box = new THREE.Box3().setFromObject(model)
-        const size = box.getSize(new THREE.Vector3()).length()
+        const size = box.getSize(new THREE.Vector3())
         const center = box.getCenter(new THREE.Vector3())
 
-        model.position.x += (model.position.x - center.x)
-        model.position.y += (model.position.y - center.y)
-        model.position.z += (model.position.z - center.z)
+        model.position.sub(center)
+        const euler = new THREE.Euler(0, 0, 0, "XYZ")
+        model.rotation.copy(euler)
 
-        camera.near = size / 100
-        camera.far = size * 100
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const fovRad = (camera.fov * Math.PI) / 180
+        const distance = maxDim / (2 * Math.tan(fovRad / 2))
+        camera.position.set(0, 0, distance)
+        camera.lookAt(0, 0, 0)
+
+        camera.near = distance / 10
+        camera.far = distance * 10
         camera.updateProjectionMatrix()
 
-        camera.position.copy(center)
-        camera.position.x += size / 2.0
-        camera.position.y += size / 5.0
-        camera.position.z += size / 2.0
-        camera.lookAt(center)
-
-        controls.maxDistance = size * 10
+        controls.maxDistance = size.length() * 10
         controls.addEventListener("change", () => {
             if (imageTimer) return 
             imageTimer = setTimeout(() => {
@@ -261,8 +261,6 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         setSecondsProgress(0)
         setProgress(0)
         setSeekTo(null)
-        setScreenshot("")
-        setDecrypted("")
         if (props.autoLoad) load()
     }, [props.model])
 
@@ -636,8 +634,10 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         drawImage()
     }, [screenshot])
 
+    const currentRef = ref ? ref : imageRef.current
+
     return (
-        <div style={{opacity: visible && ref?.width ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
+        <div style={{opacity: visible && currentRef?.width ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content", 
         borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
         onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
@@ -646,8 +646,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
                 <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-                {mobile ? <canvas className="image" ref={imageRef}></canvas> : null}
-                <div className="grid-model-renderer" ref={rendererRef} style={mobile ? {display: "none"} : {}}></div>
+                {mobile || !session.liveModelPreview ? <canvas className="image" ref={imageRef}></canvas> : null}
+                <div className="grid-model-renderer" ref={rendererRef} style={mobile || !session.liveModelPreview ? {display: "none"} : {}}></div>
             </div>
         </div>
     )

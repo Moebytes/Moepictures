@@ -237,6 +237,12 @@ const PostRoutes = (app: Express) => {
             const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return res.status(400).send("Bad postID")
 
+            const targetUser = await sql.user.user(unverified.uploader)
+            if (targetUser) {
+                const deletedPosts = functions.removeItem(targetUser.deletedPosts || [], postID)
+                await sql.user.updateUser(targetUser.username, "deletedPosts", deletedPosts)
+            }
+
             await sql.post.updateUnverifiedPost(unverified.postID, "deleted", false)
             await sql.post.updateUnverifiedPost(unverified.postID, "deletionDate", null)
             res.status(200).send("Success")

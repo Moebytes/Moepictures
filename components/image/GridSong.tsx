@@ -114,7 +114,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         setAudioReverse(false)
         setAudioSecondsProgress(0)
         setAudioSeekTo(null)
-        setDecrypted("")
         if (ref.current) ref.current.style.opacity = "1"
         if (props.autoLoad) loadImage()
     }, [props.audio])

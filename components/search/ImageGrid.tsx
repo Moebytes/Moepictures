@@ -617,7 +617,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!image) continue
             const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
             const original = functions.getImageLink(image.type, post.postID, image.order, session.upscaledImages ? image.upscaledFilename || image.filename : image.filename)
-            let img = functions.getImageCache(`${thumbnail}-${sizeType}`)
+            let img = functions.getThumbCache(`${thumbnail}-${sizeType}`)
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {

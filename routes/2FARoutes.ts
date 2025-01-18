@@ -110,14 +110,12 @@ const $2FARoutes = (app: Express) => {
                 req.session.image = user.image 
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
+                req.session.publicTagFavorites = user.publicTagFavorites
                 req.session.image = user.image
                 req.session.imageHash = user.imageHash
                 req.session.imagePost = user.imagePost
                 req.session.role = user.role
                 req.session.banned = user.banned
-                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
-                await sql.user.updateUser(user.username, "ips", ips)
-                req.session.ips = ips
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
                 req.session.csrfToken = token
@@ -130,12 +128,17 @@ const $2FARoutes = (app: Express) => {
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
                 req.session.globalMusicPlayer = user.globalMusicPlayer
+                req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
                 req.session.showR18 = user.showR18
                 req.session.postCount = user.postCount
+                req.session.deletedPosts = user.deletedPosts
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                await sql.user.updateUser(user.username, "ips", ips)
+                req.session.ips = ips
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")

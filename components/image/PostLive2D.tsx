@@ -97,6 +97,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }
 
     const decryptLive2D = async () => {
+        if (!props.live2d) return
         const decryptedLive2D = await functions.decryptItem(props.live2d, session)
         if (decryptedLive2D) setDecrypted(decryptedLive2D)
     }

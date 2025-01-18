@@ -85,13 +85,13 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             load()
         },
         update: async () => {
-            return mobile ? loadImage() : loadModel()
+            return mobile || !session.liveModelPreview ? loadImage() : loadModel()
         }
     }))
 
     const load = async () => {
         if (model) return
-        return mobile ? loadImage() : loadModel()
+        return mobile || !session.liveModelPreview? loadImage() : loadModel()
     }
 
     useEffect(() => {
@@ -265,7 +265,6 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         setImageLoaded(false)
         setModel(null)
-        setDecrypted("")
         if (props.autoLoad) load()
     }, [props.live2d])
 
@@ -638,7 +637,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
                 <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-                {mobile ? <canvas className="image" ref={imageRef}></canvas> : null}
+                {mobile || !session.liveModelPreview ? <canvas className="image" ref={imageRef} style={{position: "absolute"}}></canvas> : null}
                 <canvas className="grid-model-renderer" ref={rendererRef} style={mobile ? {display: "none"} : {}}></canvas>
             </div>
         </div>

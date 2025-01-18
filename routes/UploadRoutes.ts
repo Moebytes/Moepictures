@@ -1105,6 +1105,12 @@ const CreateRoutes = (app: Express) => {
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return res.status(400).send("Bad request")
 
+        const targetUser = await sql.user.user(unverified.uploader)
+        if (targetUser) {
+          const deletedPosts = functions.removeItem(targetUser.deletedPosts || [], postID)
+          await sql.user.updateUser(targetUser.username, "deletedPosts", deletedPosts)
+        }
+
         const newPostID = unverified.originalID ? unverified.originalID : await sql.post.insertPost()
 
         let post = unverified.originalID ? await sql.post.post(unverified.originalID) : null
@@ -1217,6 +1223,12 @@ const CreateRoutes = (app: Express) => {
         if (!permissions.isMod(req.session)) return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return res.status(400).send("Bad postID")
+
+        const targetUser = await sql.user.user(unverified.uploader)
+        if (targetUser) {
+          const deletedPosts = functions.removeDuplicates([postID, ...(targetUser.deletedPosts || [])].filter(Boolean))
+          await sql.user.updateUser(targetUser.username, "deletedPosts", deletedPosts)
+        }
 
         if (unverified.deleted) {
           await serverFunctions.deleteUnverifiedPost(unverified)

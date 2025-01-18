@@ -404,21 +404,24 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
                     {counts.postEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/post/history`)}>
                         {i18n.buttons.post} {!mobile ? <span className="user-text-alt">{counts.postEdits}</span> : null}</span>
                     : null}
                     {counts.tagEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/tag/history`)}>
                         {i18n.tag.tag} {!mobile ? <span className="user-text-alt">{counts.tagEdits}</span> : null}</span>
                     : null}
                     {counts.noteEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/note/history`)}>
                         {i18n.labels.note} {!mobile ? <span className="user-text-alt">{counts.noteEdits}</span> : null}</span>
                     : null}
                     {counts.groupEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/group/history`)}>
                         {i18n.labels.group} {!mobile ? <span className="user-text-alt">{counts.groupEdits}</span> : null}</span>
                     : null}
+                    </div> : null}
+                    {permissions.isMod(session) && user.deletedPosts?.length ? <div className="user-row">
+                        <span className="user-text">{i18n.user.deletedPosts}: <span className="user-text-action">{user.deletedPosts.length}</span></span>
                     </div> : null}
                     {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}

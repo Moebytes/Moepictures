@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "cookieConsent" boolean,
     "$2fa" boolean,
     "publicFavorites" boolean,
+    "publicTagFavorites" boolean,
     "showRelated" boolean,
     "showTooltips" boolean,
     "showTagTooltips" boolean,
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "upscaledImages" boolean,
     "forceNoteBubbles" boolean,
     "globalMusicPlayer" boolean,
+    "liveModelPreview" boolean,
     "savedSearches" jsonb,
     "blacklist" text,
     "showR18" boolean,
@@ -26,6 +28,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "imageHash" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "postCount" int,
+    "deletedPosts" bigint[],
     "ips" inet[],
     "banned" boolean,
     "banExpiration" timestamptz,
@@ -411,6 +414,13 @@ CREATE TABLE IF NOT EXISTS "favorites" (
     "username" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE CASCADE,
     "favoriteDate" timestamptz,
     PRIMARY KEY ("postID", "username")
+);
+
+CREATE TABLE IF NOT EXISTS "tag favorites" (
+    "tag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE CASCADE,
+    "username" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE CASCADE,
+    "favoriteDate" timestamptz,
+    PRIMARY KEY ("tag", "username")
 );
 
 CREATE TABLE IF NOT EXISTS "cuteness" (
