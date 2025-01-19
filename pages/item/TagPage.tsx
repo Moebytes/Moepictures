@@ -248,7 +248,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             console.log(editTagObj)
             history.push(`/tag/${editTagObj.key}`)
-            setTagFlag(true)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 

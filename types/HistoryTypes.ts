@@ -172,6 +172,7 @@ export interface GroupHistory {
 }
 
 export interface SearchHistory extends Omit<PostSearch, "postCount"> {
+    historyID: string
     postID: string
     username: string
     viewDate: string

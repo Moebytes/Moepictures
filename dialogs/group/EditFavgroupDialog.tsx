@@ -54,7 +54,6 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
         const newSlug = functions.generateSlug(name)
         history.push(`/favgroup/${session.username}/${newSlug}`)
         setEditFavGroupObj(null)
-        setGroupFlag(true)
     }
 
     const click = (button: "accept" | "reject") => {

@@ -179,7 +179,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        await functions.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
+        functions.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
         setReorderState(false)
     }
 

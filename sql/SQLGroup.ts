@@ -128,7 +128,7 @@ export default class SQLGroup {
             text: functions.multiTrim(/*sql*/`
                 SELECT * FROM "group map"
                 WHERE "group map"."groupID" = $1 AND "group map"."postID" = $2
-                GROUP BY "group map"."groupID", "group map"."postID"
+                GROUP BY "group map"."mapID"
             `),
             values: [groupID, postID]
         }

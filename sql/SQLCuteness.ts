@@ -33,7 +33,7 @@ export default class SQLCuteness {
                 FROM cuteness
                 JOIN post_json ON post_json."postID" = cuteness."postID"
                 WHERE cuteness."postID" = $1 AND cuteness."username" = $2
-                GROUP BY cuteness."postID", cuteness."username"
+                GROUP BY cuteness."cutenessID"
             `),
             values: [postID, username]
         }

@@ -557,7 +557,7 @@ export default class SQLHistory {
                 ${search ? `AND (post_json."title" ILIKE '%' || $${searchValue} || '%' OR post_json."englishTitle" ILIKE '%' || 
                 $${searchValue} || '%' OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."source" ILIKE '%' 
                 || $${searchValue} || '%' OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
-                GROUP BY "history"."username", "history"."postID", post_json."uploadDate", post_json.posted, post_json."parentID",
+                GROUP BY "history"."historyID", post_json."uploadDate", post_json.posted, post_json."parentID",
                 post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."variationCount", post_json."fileSize", 
                 post_json."aspectRatio"${includeTags ? `, post_json."tagCount"` : ""}
                 ${sortQuery}

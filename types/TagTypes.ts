@@ -30,11 +30,13 @@ export interface TagCount {
 }
 
 export interface Alias {
+    aliasID: string
     tag: string
     alias: string
 }
 
 export interface Implication {
+    implicationID: string
     tag: string
     implication: string
 }

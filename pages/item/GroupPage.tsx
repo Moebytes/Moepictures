@@ -182,7 +182,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        await functions.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
+        functions.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
         setReorderState(false)
     }
 
@@ -244,7 +244,6 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const currentHistory = (key?: string) => {
         history.push(`/group/${key ? key : slug}`)
         setHistoryID(null)
-        setGroupFlag(true)
     }
 
     const revertGroupHistory = async () => {

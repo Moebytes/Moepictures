@@ -1,6 +1,7 @@
 import {PostRating, Post, PostOrdered, PostSearchOrdered} from "./Types"
 
 export interface Favorite {
+    favoriteID: string
     postID: string
     username: string
     favoriteDate: string
@@ -8,6 +9,7 @@ export interface Favorite {
 }
 
 export interface Favgroup {
+    favgroupID: string
     username: string
     slug: string
     name: string

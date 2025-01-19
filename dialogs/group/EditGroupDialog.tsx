@@ -56,7 +56,6 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             const newSlug = functions.generateSlug(name)
             history.push(`/group/${newSlug}`)
             setEditGroupObj(null)
-            setGroupFlag(true)
         } else {
             if (!name) {
                 setError(true)

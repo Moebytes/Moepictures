@@ -254,7 +254,7 @@ export default class SQLTag {
                     LEFT JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
                     LEFT JOIN implications ON implications."tag" = "unverified tags"."tag"
                     ${whereQuery}
-                    GROUP BY "unverified tags".tag
+                    GROUP BY "unverified tags"."tagID"
             `)
         }
         if (tags?.[0]) query.values = [tags]
@@ -312,7 +312,7 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`
                 SELECT json_agg(DISTINCT implications.tag) AS related FROM implications
                 WHERE implications.implication = $1
-                GROUP BY implications."implication"
+                GROUP BY implications."implicationID"
             `),
             values: [tag]
         }

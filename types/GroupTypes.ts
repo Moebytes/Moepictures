@@ -33,6 +33,7 @@ export interface GroupSearch extends GroupPosts {
 }
 
 export interface GroupPost {
+    mapID: string
     groupID: string
     postID: string
     order: number

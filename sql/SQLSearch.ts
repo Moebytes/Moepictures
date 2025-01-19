@@ -182,7 +182,8 @@ export default class SQLSearch {
                     THEN true ELSE false
                 END AS favorited,
                 CASE
-                    WHEN COUNT("favgroup map"."username") FILTER (WHERE "favgroup map"."username" = $${userValue}) > 0 
+                    WHEN COUNT("favgroup map"."favgroupID") FILTER (WHERE "favgroup map"."favgroupID" IN 
+                    (SELECT "favgroupID" FROM "favgroups" WHERE "favgroups"."username" = $${userValue})) > 0 
                     THEN true ELSE false
                 END AS favgrouped` : ""}
                 ${format ? `,

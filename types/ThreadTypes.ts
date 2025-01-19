@@ -50,6 +50,7 @@ export interface ThreadReply {
 }
 
 export interface ThreadRead {
+    readID: string
     threadID: string
     username: string
     read: boolean

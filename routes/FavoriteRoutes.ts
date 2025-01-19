@@ -76,11 +76,11 @@ const FavoriteRoutes = (app: Express) => {
             const post = await sql.post.post(postID)
             if (!post) return res.status(400).send("Invalid post")
             const slug = functions.generateSlug(name)
-            await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
+            const favgroupID = await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
             try {
                 const favgroup = await sql.favorite.favgroup(req.session.username, slug)
                 if (!favgroup) {
-                    await sql.favorite.insertFavgroupPost(req.session.username, slug, postID, 1)
+                    await sql.favorite.insertFavgroupPost(favgroupID, postID, 1)
                 } else {
                     if (!favgroup.posts?.length) favgroup.posts = [{order: 0}] as any
                     const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
@@ -93,7 +93,7 @@ const FavoriteRoutes = (app: Express) => {
                             await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r15())
                         }
                     }
-                    await sql.favorite.insertFavgroupPost(req.session.username, slug, postID, maxOrder + 1)
+                    await sql.favorite.insertFavgroupPost(favgroup.favgroupID, postID, maxOrder + 1)
                 }
             } catch {}
             res.status(200).send("Success")
@@ -152,7 +152,7 @@ const FavoriteRoutes = (app: Express) => {
                 if (filteredPost.rating === functions.r15() && rating !== functions.r17() && rating !== functions.r18()) rating = functions.r15()
             }
             await sql.favorite.updateFavGroup(req.session.username, slug, "rating", rating)
-            await sql.favorite.deleteFavgroupPost(postID, req.session.username, favgroup.slug)
+            await sql.favorite.deleteFavgroupPost(favgroup.favgroupID, postID)
             if (favgroup.posts.length === 1) {
                 await sql.favorite.deleteFavgroup(req.session.username, favgroup.slug)
             }
@@ -249,8 +249,8 @@ const FavoriteRoutes = (app: Express) => {
                 let oldPost = favgroup.posts.find((p) => p.postID === String(newPost.postID))
                 if (Number(oldPost?.order) !== Number(newPost.order)) toChange.push(newPost)
             }
-            await sql.favorite.bulkDeleteFavgroupMappings(req.session.username, favgroup.slug, toChange)
-            await sql.favorite.bulkInsertFavgroupMappings(req.session.username, favgroup.slug, toChange)
+            await sql.favorite.bulkDeleteFavgroupMappings(favgroup.favgroupID, toChange)
+            await sql.favorite.bulkInsertFavgroupMappings(favgroup.favgroupID, toChange)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

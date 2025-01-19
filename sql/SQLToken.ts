@@ -27,7 +27,6 @@ export default class SQLToken {
             SELECT "email tokens".*
             FROM "email tokens"
             WHERE "email tokens"."token" = $1
-            GROUP BY "email tokens"."email"
             `),
             values: [token]
         }
@@ -42,7 +41,6 @@ export default class SQLToken {
             SELECT "email tokens".*
             FROM "email tokens"
             WHERE "email tokens"."email" = $1
-            GROUP BY "email tokens"."email"
             `),
             values: [email]
         }
@@ -56,7 +54,6 @@ export default class SQLToken {
         text: functions.multiTrim(/*sql*/`
             SELECT "email tokens".*
             FROM "email tokens"
-            GROUP BY "email tokens"."email"
             `)
         }
         const result = await SQLQuery.run(query)
@@ -79,7 +76,6 @@ export default class SQLToken {
             SELECT "2fa tokens".*
             FROM "2fa tokens"
             WHERE "2fa tokens"."username" = $1
-            GROUP BY "2fa tokens"."username"
             `),
             values: [username]
         }
@@ -133,7 +129,6 @@ export default class SQLToken {
             SELECT "password tokens".*
             FROM "password tokens"
             WHERE "password tokens"."username" = $1
-            GROUP BY "password tokens"."username"
             `),
             values: [username]
         }
@@ -147,7 +142,6 @@ export default class SQLToken {
         text: functions.multiTrim(/*sql*/`
             SELECT "password tokens".*
             FROM "password tokens"
-            GROUP BY "password tokens"."username"
             `)
         }
         const result = await SQLQuery.run(query)
@@ -186,7 +180,6 @@ export default class SQLToken {
             SELECT "ip tokens".*
             FROM "ip tokens"
             WHERE "ip tokens"."token" = $1
-            GROUP BY "ip tokens"."username"
             `),
             values: [token]
         }
@@ -201,7 +194,6 @@ export default class SQLToken {
             SELECT "ip tokens".*
             FROM "ip tokens"
             WHERE "ip tokens"."username" = $1
-            GROUP BY "ip tokens"."username"
             `),
             values: [username]
         }
@@ -224,7 +216,6 @@ export default class SQLToken {
         text: functions.multiTrim(/*sql*/`
                 SELECT "ip tokens".*
                 FROM "ip tokens"
-                GROUP BY "ip tokens"."username"
             `)
         }
         const result = await SQLQuery.run(query)
