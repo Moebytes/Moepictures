@@ -47,7 +47,7 @@ import modRejectedIcon from "../../assets/icons/tag-delete.png"
 import modRejectedActiveIcon from "../../assets/icons/tag-delete-active.png"
 import "./styles/modqueuepage.less"
 
-let replace = false 
+let replace = true 
 
 const ModQueuePage: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

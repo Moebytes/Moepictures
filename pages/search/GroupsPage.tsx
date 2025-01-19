@@ -19,7 +19,7 @@ import GroupThumbnail from "../../components/search/GroupThumbnail"
 import {GroupSearch, GroupSort} from "../../types/Types"
 import "./styles/itemspage.less"
 
-let replace = false
+let replace = true
 let limit = 100
 
 const GroupsPage: React.FunctionComponent = (props) => {

@@ -6,7 +6,7 @@ import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, Ta
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
         limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
-        format?: string, condition?: string, intermLimit?: number}) => {
+        format?: string, condition?: string, intermLimit?: boolean}) => {
         let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format, condition, intermLimit} = options
         if (!i) i = 1
         let typeQuery = ""
@@ -93,28 +93,28 @@ export default class SQLSearch {
         let tagQueryArray = [] as any
         if (ANDtags.length) {
             values.push(ANDtags)
-            tagQueryArray.push(`tags @> $${i}`)
+            tagQueryArray.push(`"tag map tags".tags @> $${i}`)
             i++ 
         }
         if (ORtags.length) {
             values.push(ORtags)
-            tagQueryArray.push(`tags && $${i}`)
+            tagQueryArray.push(`"tag map tags".tags && $${i}`)
             i++ 
         }
         if (NOTtags.length) {
             values.push(NOTtags)
-            tagQueryArray.push(`NOT tags @> $${i}`)
+            tagQueryArray.push(`NOT "tag map tags".tags @> $${i}`)
             i++
         }
         if (NOTORtags.length) {
             values.push(NOTORtags)
-            tagQueryArray.push(`NOT tags && $${i}`)
+            tagQueryArray.push(`NOT "tag map tags".tags && $${i}`)
             i++ 
         }
         if (STARtags.length) {
             for (const starTag of STARtags) {
                 values.push(starTag)
-                tagQueryArray.push(`EXISTS (SELECT 1 FROM unnest(tags) AS tag WHERE tag ~* $${i})`)
+                tagQueryArray.push(`EXISTS (SELECT 1 FROM unnest("tag map tags".tags) AS tag WHERE tag ~* $${i})`)
                 i++
             }
         }
@@ -123,14 +123,16 @@ export default class SQLSearch {
             values.push(search)
             i++
         }
+        let countValues = structuredClone(values)
         let userValue = i
         if (username) {
             values.push(username)
             i++
         }
         let favoriteQuery = ""
-        if (sort === "favorites" || sort=== "reverse favorites") {
+        if (sort === "favorites" || sort === "reverse favorites") {
             favoriteQuery = `favorites."username" = $${userValue}`
+            countValues.push(username)
         }
         let limitValue = i
         if (limit) {
@@ -148,24 +150,36 @@ export default class SQLSearch {
             values.push(format)
             i++
         }
-        let intermLimitValue = i
-        if (intermLimit) {
-            values.push(intermLimit)
-            i++
-        }
-        let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        const whereQueries = [favoriteQuery, typeQuery, ratingQuery, styleQuery, childQuery, condition].filter(Boolean).join(" AND ")
+        let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""
+        const whereQueries = [tagQuery, typeQuery, ratingQuery, styleQuery, childQuery, favoriteQuery, condition].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
 
-        let postJSON = functions.multiTrim(/*sql*/`
+        let hasFavorites = favoriteQuery || condition?.includes("favorites.")
+        let countJSON = functions.multiTrim(/*sql*/`
             WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                SELECT posts.*
+                FROM posts
+                ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
+                ${hasFavorites ? `LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"` : ""}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                GROUP BY posts."postID"
+                ${hasFavorites ? `, favorites."favoriteID"` : ""}
+            )`)
+
+        let postJSON = functions.multiTrim(/*sql*/`
+            WITH image_json AS (
+                SELECT *
+                FROM images
+                ${format ? `WHERE images."filename" LIKE '%' || $${formatValue}` : ""}
+            ),
+            post_json AS (
+                SELECT posts.*, json_agg(DISTINCT image_json.*) AS images, 
                 ${includeTags ? `"tag map tags"."tags",` : ""}
                 ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
                 ${favgroupOrder ? `"favgroup map"."order",` : ""} 
-                MAX(DISTINCT COALESCE(images."size", 0) + COALESCE(images."upscaledSize", 0)) AS "fileSize",
-                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
-                COUNT(DISTINCT images."imageID") AS "variationCount",
+                MAX(DISTINCT COALESCE(image_json."size", 0) + COALESCE(image_json."upscaledSize", 0)) AS "fileSize",
+                MAX(DISTINCT image_json."width")::float / MAX(DISTINCT image_json."height")::float AS "aspectRatio",
+                COUNT(DISTINCT image_json."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
                 CASE
@@ -186,13 +200,8 @@ export default class SQLSearch {
                     (SELECT "favgroupID" FROM "favgroups" WHERE "favgroups"."username" = $${userValue})) > 0 
                     THEN true ELSE false
                 END AS favgrouped` : ""}
-                ${format ? `,
-                CASE
-                    WHEN BOOL_OR(images."filename" LIKE '%' || $${formatValue})
-                    THEN true ELSE false
-                END AS "formatMatch"` : ""}
                 FROM posts
-                JOIN images ON posts."postID" = images."postID"
+                JOIN image_json ON posts."postID" = image_json."postID"
                 ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
@@ -202,20 +211,37 @@ export default class SQLSearch {
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY posts."postID"
                 ${includeTags ? `, "tag map tags"."tags"` : ""}
-                ${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
+                ${favoriteQuery ? `, favorites."favoriteID"` : ""}
                 ${favgroupOrder ? `, "favgroup map"."order"` : ""}
                 ${!outerSort ? sortQuery : ""}
-                ${intermLimit ? `LIMIT $${intermLimitValue}` : ""}
+                ${intermLimit ? `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}` : ""}
             )`)
 
-        return {postJSON, values, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
+        return {postJSON, countJSON, values, countValues, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
+    }
+
+    /** Get result count */
+    public static count = async (countJSON: string, countValues: string[]) => {
+        const query: QueryArrayConfig = {
+            text: functions.multiTrim(/*sql*/`
+                ${countJSON}
+                SELECT COUNT(*) OVER() AS "postCount"
+                FROM post_json
+                LIMIT 1
+            `),
+            rowMode: "array"
+            }
+        if (countValues?.[0]) query.values = countValues
+        const result = await SQLQuery.run(query)
+        return String(result.flat(Infinity)[0])
     }
 
     /** Search posts. */
     public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: number, 
         limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
-        const {postJSON, values, tagQuery, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+        const {postJSON, countJSON, values, countValues} = 
+        SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, 
+        limit, username, withTags, showChildren, intermLimit: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -223,31 +249,33 @@ export default class SQLSearch {
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
             FROM post_json
-            ${tagQuery}
-            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
         `)
         }
         if (values?.[0]) query.values = values
+        let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query)
         } else {
-            return SQLQuery.run(query, `search/posts`) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query, `search/posts`)
         }
+        const count = await SQLQuery.search.count(countJSON, countValues)
+        result.forEach((r) => r.postCount = count)
+        return result
     }
 
     /** Search pixiv id. */
     public static searchPixivID = async (pixivID: string, type: string, rating: string, style: string, sort: string, 
         offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
         let condition = `(posts."source" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1)`
-        const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+        const {postJSON, values} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 ${postJSON}
                 SELECT post_json.*,
                 COUNT(*) OVER() AS "postCount"
                 FROM post_json
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [pixivID]
         }
@@ -264,15 +292,15 @@ export default class SQLSearch {
         offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
         let condition = `(posts."source" LIKE 'https://%x.com/%/status/' || $1 OR posts."source" LIKE 'https://%twitter.com/%/status/' || $1 
         OR posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1)`
-        const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+        const {postJSON, values} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 ${postJSON}
                 SELECT post_json.*,
                 COUNT(*) OVER() AS "postCount"
                 FROM post_json
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [twitterID]
         }
@@ -288,15 +316,15 @@ export default class SQLSearch {
     public static searchSource = async (source: string, type: string, rating: string, style: string, sort: string, 
         offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
         let condition = `(posts."source" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%')`
-        const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+        const {postJSON, values} = 
+        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 ${postJSON}
                 SELECT post_json.*,
                 COUNT(*) OVER() AS "postCount"
                 FROM post_json
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [source]
         }
@@ -311,8 +339,9 @@ export default class SQLSearch {
     /** Search format. */
     public static searchFormat = async (format: string, type: string, rating: string, style: string, sort: string, 
         offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
-        const {postJSON, values, limitValue, offsetValue, i} = 
-        SQLQuery.search.boilerplate({format, type, rating, style, sort, offset, limit, username, withTags, showChildren})
+        const {postJSON, countJSON, values, countValues} = 
+        SQLQuery.search.boilerplate({format, type, rating, style, sort, offset, 
+        limit, username, withTags, showChildren, intermLimit: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -320,17 +349,18 @@ export default class SQLSearch {
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
             FROM post_json
-            WHERE "formatMatch" IS TRUE
-            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
         `)
         }
         if (values?.[0]) query.values = values
-        console.log(query)
+        let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query)
         } else {
-            return SQLQuery.run(query, `search/format/${format}`) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query, `search/format/${format}`)
         }
+        const count = await SQLQuery.search.count(countJSON, countValues)
+        result.forEach((r) => r.postCount = count)
+        return result
     }
 
     /** Get posts. */

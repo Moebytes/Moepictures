@@ -19,7 +19,7 @@ import "./styles/itemspage.less"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 
 let limit = 10
-let replace = false
+let replace = true
 let pageAmount = 5
 
 const SeriesPage: React.FunctionComponent = (props) => {

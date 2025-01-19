@@ -740,136 +740,45 @@ CREATE TABLE IF NOT EXISTS "redirects" (
     "oldSlug" text UNIQUE
 );
 
-CREATE INDEX IF NOT EXISTS "idx_posts"
-    ON "posts" USING btree
-    ("postID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_post_type" 
-    ON "posts" USING btree ("type");
-
-CREATE INDEX IF NOT EXISTS "idx_post_rating" 
-    ON "posts" USING btree ("rating");
-
-CREATE INDEX IF NOT EXISTS "idx_post_style" 
-    ON "posts" USING btree ("style");
-
-CREATE INDEX IF NOT EXISTS "idx_post_uploadDate" 
-    ON "posts" USING btree ("uploadDate");
-
-CREATE INDEX IF NOT EXISTS "idx_post_posted" 
-    ON "posts" USING btree ("posted");
-
-CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" 
-    ON "posts" USING btree ("bookmarks");
-
-CREATE INDEX IF NOT EXISTS "idx_images"
-    ON "images" USING btree
-    ("imageID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_images_size"
-    ON "images" USING btree ("size");
-
-CREATE INDEX IF NOT EXISTS "idx_cuteness"
-    ON "cuteness" USING btree
-    ("postID" ASC, "username" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_cuteness_cuteness"
-    ON "cuteness" USING btree ("cuteness");
-
-CREATE INDEX IF NOT EXISTS "idx_favorites"
-    ON "favorites" USING btree
-    ("postID" ASC, "username" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_history"
-    ON "history" USING btree
-    ("username" ASC, "postID" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_aliases"
-    ON "unverified aliases" USING btree
-    ("tag" ASC, "alias" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_comments"
-    ON "comments" USING btree
-    ("commentID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_notes"
-    ON "notes" USING btree
-    ("noteID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_tag_map_postID"
-    ON "tag map" USING btree
-    ("postID" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_tags"
-    ON "tags" USING btree
-    ("tag" ASC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_aliases"
-    ON "aliases" USING btree
-    ("tag" ASC, "alias" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_implications"
-    ON "implications" USING btree
-    ("tag" ASC, "implication" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_users"
-    ON "users" USING btree
-    (username ASC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_threads"
-    ON "threads" USING btree
-    ("threadID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_replies"
-    ON "replies" USING btree
-    ("replyID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_messages"
-    ON "messages" USING btree
-    ("messageID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_message_replies"
-    ON "message replies" USING btree
-    ("replyID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_post_history"
-    ON "post history" USING btree
-    ("historyID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_tag_history"
-    ON "tag history" USING btree
-    ("historyID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_note_history"
-    ON "note history" USING btree
-    ("historyID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_images"
-    ON "unverified images" USING btree
-    ("imageID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_posts"
-    ON "unverified posts" USING btree
-    ("postID" DESC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_tag_map"
-    ON "unverified tag map" USING btree
-    ("postID" ASC, "tag" ASC);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_tags"
-    ON "unverified tags" USING btree
-    (tag ASC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_unverified_aliases"
-    ON "unverified aliases" USING btree
-    ("tag" ASC, "alias" ASC);
-    
-CREATE INDEX IF NOT EXISTS "idx_unverified_notes"
-    ON "unverified notes" USING btree
-    ("noteID" ASC NULLS LAST);
-
-CREATE INDEX IF NOT EXISTS "idx_sessions_expire"
-    ON "sessions" ("expires");
+CREATE INDEX IF NOT EXISTS "idx_posts" ON "posts" ("postID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_post_type" ON "posts" ("type");
+CREATE INDEX IF NOT EXISTS "idx_post_rating" ON "posts" ("rating");
+CREATE INDEX IF NOT EXISTS "idx_post_style" ON "posts" ("style");
+CREATE INDEX IF NOT EXISTS "idx_post_uploadDate" ON "posts" ("uploadDate");
+CREATE INDEX IF NOT EXISTS "idx_post_posted" ON "posts" ("posted");
+CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" ON "posts" ("bookmarks");
+CREATE INDEX IF NOT EXISTS "idx_images" ON "images" ("imageID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_images_size" ON "images" ("size");
+CREATE INDEX IF NOT EXISTS "idx_cuteness" ON "cuteness" ("postID", "username");
+CREATE INDEX IF NOT EXISTS "idx_cuteness_cuteness" ON "cuteness" ("cuteness");
+CREATE INDEX IF NOT EXISTS "idx_favorites" ON "favorites" ("postID", "username");
+CREATE INDEX IF NOT EXISTS "idx_favgroup_map_postID" ON "favgroup map" ("postID");
+CREATE INDEX IF NOT EXISTS "idx_favgroup_map_favgroupID" ON "favgroup map" ("favgroupID");
+CREATE INDEX IF NOT EXISTS "idx_favgroups_username_favgroupID" ON "favgroups" ("username", "favgroupID");
+CREATE INDEX IF NOT EXISTS "idx_child_posts_parentID" ON "child posts" ("parentID");
+CREATE INDEX IF NOT EXISTS "idx_history" ON "history" ("username", "postID");
+CREATE INDEX IF NOT EXISTS "idx_unverified_aliases" ON "unverified aliases" ("tag", "alias");
+CREATE INDEX IF NOT EXISTS "idx_comments" ON "comments" ("commentID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_notes" ON "notes" ("noteID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_tag_map_postID" ON "tag map" ("postID");
+CREATE INDEX IF NOT EXISTS "idx_tags" ON "tags" ("tag");
+CREATE INDEX IF NOT EXISTS "idx_aliases" ON "aliases" ("tag", "alias");
+CREATE INDEX IF NOT EXISTS "idx_implications" ON "implications" ("tag", "implication");
+CREATE INDEX IF NOT EXISTS "idx_users" ON "users" ("username" ASC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_threads" ON "threads" ("threadID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_replies" ON "replies" ("replyID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_messages" ON "messages" ("messageID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_message_replies" ON "message replies" ("replyID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_post_history" ON "post history" ("historyID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_tag_history" ON "tag history" ("historyID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_note_history" ON "note history" ("historyID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_unverified_images" ON "unverified images" ("imageID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_unverified_posts" ON "unverified posts" ("postID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_unverified_tag_map" ON "unverified tag map" ("postID", "tag");
+CREATE INDEX IF NOT EXISTS "idx_unverified_tags" ON "unverified tags" ("tag" ASC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_unverified_aliases" ON "unverified aliases" ("tag", "alias");
+CREATE INDEX IF NOT EXISTS "idx_unverified_notes" ON "unverified notes" ("noteID" ASC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_sessions_expire" ON "sessions" ("expires");
 
 CREATE TABLE IF NOT EXISTS "tag map tags" (
     "postID" bigint PRIMARY KEY REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE CASCADE,

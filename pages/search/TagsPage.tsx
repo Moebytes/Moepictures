@@ -21,7 +21,7 @@ import "./styles/itemspage.less"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
 
 let limit = 200
-let replace = false
+let replace = true
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

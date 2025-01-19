@@ -39,25 +39,25 @@ export default class SQLFavorite {
     /** Get favorites. */
     public static favorites = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, 
         style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
-        const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
+        let condition = `favorites."username" = $1`
+        const {postJSON, countJSON, values, countValues} = 
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, condition,
+        limit, showChildren, username: sessionUsername, intermLimit: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 ${postJSON}
-                SELECT favorites.*, 
-                COUNT(*) OVER() AS "postCount",
-                post_json.* AS post
-                FROM favorites
-                JOIN post_json ON post_json."postID" = favorites."postID"
-                WHERE favorites."username" = $1
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+                SELECT post_json.*,
+                COUNT(*) OVER() AS "postCount"
+                FROM post_json
             `),
             values: [username]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query)
-        return result as Promise<PostSearch[]>
+        const result = await SQLQuery.run(query, `favorites/${username}`) as PostSearch[]
+        const count = await SQLQuery.search.count(countJSON, [username, ...countValues])
+        result.forEach((r) => r.postCount = count)
+        return result
     }
 
     /** Delete favorite. */

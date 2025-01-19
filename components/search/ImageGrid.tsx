@@ -21,7 +21,7 @@ interface Ref {
 
 let interval = null as any
 let reloadedPost = false
-let replace = false
+let replace = true
 let manualHistoryChange = false
 let init = true
 
@@ -339,6 +339,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (Number.isNaN(resultCount)) resultCount = posts.length
         setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
     }, [posts, i18n])
+
+    useEffect(()=> {
+        console.log(posts)
+    }, [posts])
 
     const updateOffset = async () => {
         if (noResults) return

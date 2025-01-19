@@ -131,7 +131,8 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     const maxTextWidth = width - padding
     let lines = [] as string[]
     if (overlay && !session.forceNoteBubbles) {
-        lines = splitTextIntoLines(text, maxTextWidth, fontSize || 100, breakWord && !showTranscript)
+        let size = (fontSize || 100) - (showTranscript ? Math.floor(fontSize/4) : 0)
+        lines = splitTextIntoLines(text, maxTextWidth, size, breakWord && !showTranscript)
     }
     const lineHeight = (fontSize || 100) + padding
     const totalTextHeight = lines.length * lineHeight

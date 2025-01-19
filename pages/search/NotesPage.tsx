@@ -19,7 +19,7 @@ import pageIcon from "../../assets/icons/page.png"
 import "./styles/itemspage.less"
 import {NoteSearch, CommentSort} from "../../types/Types"
 
-let replace = false
+let replace = true
 
 const NotesPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

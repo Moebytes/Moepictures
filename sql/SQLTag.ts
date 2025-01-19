@@ -290,14 +290,16 @@ export default class SQLTag {
 
     /** Get tag counts. */
     public static tagCounts = async (tags: string[]) => {
-        let whereQuery = tags?.[0] ? `WHERE "tag map".tag = ANY ($1)` : ""
+        let whereQuery = tags?.[0] ? `WHERE "tag map posts".tag = ANY($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT "tag map".tag, "tags".type, "tags".image, "tags"."imageHash", COUNT(*) AS count
-                    FROM "tag map"
-                    LEFT JOIN tags ON tags."tag" = "tag map".tag
+                    SELECT "tag map posts".tag, 
+                    array_length("tag map posts"."posts", 1) AS count,
+                    "tags".type, "tags".image, "tags"."imageHash"
+                    FROM "tag map posts"
+                    LEFT JOIN tags ON tags."tag" = "tag map posts".tag
                     ${whereQuery}
-                    GROUP BY "tag map".tag, "tags".type, "tags".image, "tags"."imageHash"
+                    GROUP BY "tag map posts".tag, "tags".type, "tags".image, "tags"."imageHash"
                     ORDER BY count DESC
             `)
         }
@@ -484,7 +486,7 @@ export default class SQLTag {
             `),
             values: [tag]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, `/tag/posts/${tag}`)
         return result.map((r: any) => r.post) as Promise<PostTagged[]>
     }
 

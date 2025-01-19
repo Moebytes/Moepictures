@@ -205,7 +205,11 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
-        const post = await sql.post.post(postID)
+        let post = await sql.getCache(`cached-post/${postID}`)
+        if (!post) {
+          post = await sql.post.post(postID)
+          await sql.setCache(`cached-post/${postID}`, post)
+        }
         if (post && functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
@@ -257,7 +261,11 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
-        const post = await sql.post.post(postID)
+        let post = await sql.getCache(`cached-post/${postID}`)
+        if (!post) {
+          post = await sql.post.post(postID)
+          await sql.setCache(`cached-post/${postID}`, post)
+        }
         if (post && functions.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true

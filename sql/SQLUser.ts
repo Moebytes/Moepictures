@@ -7,8 +7,10 @@ export default class SQLUser {
     /** Get uploads. */
     public static uploads = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, style?: string, 
         sort?: string, showChildren?: boolean, sessionUsername?: string) => {
-        const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
+        let condition = `posts."uploader" = $1`
+        const {postJSON, countJSON, values, countValues} = 
+        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, 
+        limit, showChildren, condition, username: sessionUsername, intermLimit: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -16,14 +18,14 @@ export default class SQLUser {
                 SELECT post_json.*,
                 COUNT(*) OVER() AS "postCount"
                 FROM post_json
-                WHERE post_json."uploader" = $1
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [username]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query, `user/uploads/${username}`)
-        return result as Promise<PostSearch[]>
+        const result = await SQLQuery.run(query, `user/uploads/${username}`) as PostSearch[]
+        const count = await SQLQuery.search.count(countJSON, [username, ...countValues])
+        result.forEach((r) => r.postCount = count)
+        return result 
     }
 
     /** Create a new user. */

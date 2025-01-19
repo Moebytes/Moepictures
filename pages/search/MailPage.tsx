@@ -23,7 +23,7 @@ import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import "./styles/itemspage.less"
 import {MessageSearch, CommentSort} from "../../types/Types"
 
-let replace = false
+let replace = true
 
 const MailPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
