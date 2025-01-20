@@ -286,6 +286,30 @@ const FavoriteRoutes = (app: Express) => {
             res.status(400).send("Bad request") 
         }
     })
+
+    app.get("/api/tagfavorites", favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            let username = req.query?.username as string | undefined
+            if (!username) username = req.session.username
+            if (!username) return res.status(400).send("Bad username")
+            const tagFavorites = await sql.favorite.tagFavorites(username)
+            serverFunctions.sendEncrypted(tagFavorites, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.delete("/api/tagfavorites/delete", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            await sql.favorite.deleteTagFavorites(req.session.username)
+            res.status(200).send("Success") 
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
 }
 
 export default FavoriteRoutes

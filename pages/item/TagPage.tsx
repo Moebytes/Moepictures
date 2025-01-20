@@ -47,7 +47,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {setPosts} = useCacheActions()
     const {tagFlag} = useFlagSelector()
-    const {setTagFlag} = useFlagActions()
+    const {setTagFlag, setTagFavoriteFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, revertTagHistoryID, revertTagHistoryFlag} = useTagDialogSelector()
@@ -330,6 +330,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (!tag) return
         await functions.post("/api/tagfavorite/toggle", {tag: tag.tag}, session, setSessionFlag)
         getFavorite()
+        setTagFavoriteFlag(true)
     }
 
     const tagOptionsJSX = () => {

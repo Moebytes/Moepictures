@@ -3259,7 +3259,7 @@ export default class Functions {
     }
 
     public static negateBlacklist = (blacklist: string) => {
-        const blacklistArr = blacklist.split(/ +/g).slice(0, 10)
+        const blacklistArr = blacklist.split(/ +/g).slice(0, 100)
         let newBlacklist = [] as string[]
         for (const item of blacklistArr) {
             if (!item) continue
@@ -3275,5 +3275,15 @@ export default class Functions {
             }
         }
         return newBlacklist
+    }
+
+    public static appendFavoriteTags = (favoriteTags: string[]) => {
+        const favoriteArr = favoriteTags.slice(0, 100)
+        let newFavoriteTags = [] as string[]
+        for (const item of favoriteArr) {
+            if (!item) continue
+            newFavoriteTags.push(`+${item}`)
+        }
+        return newFavoriteTags
     }
 }

@@ -25,7 +25,7 @@ const searchLimiter = rateLimit({
 const SearchRoutes = (app: Express) => {
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {query, type, rating, style, sort, offset, limit} = req.query as PostSearchParams
+            let {query, type, rating, style, sort, offset, limit, favoriteMode} = req.query as PostSearchParams
             if (!type) type = "all"
             if (!rating) rating = "all"
             if (!style) style = "all"
@@ -66,6 +66,11 @@ const SearchRoutes = (app: Express) => {
             if (req.session.blacklist) {
                 const negated = functions.negateBlacklist(req.session.blacklist)
                 tags.unshift(...negated)
+            }
+            if (favoriteMode && req.session.username) {
+                const favoriteTags = await sql.favorite.tagFavorites(req.session.username)
+                const appended = functions.appendFavoriteTags(favoriteTags.map((t) => t.tag))
+                tags.unshift(...appended)
             }
             if (query.startsWith("id:")) {
                 const id = query.match(/(\d+)/g)?.[0] || ""

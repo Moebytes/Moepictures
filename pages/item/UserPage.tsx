@@ -26,7 +26,7 @@ import unbanIcon from "../../assets/icons/unban.png"
 import promoteIcon from "../../assets/icons/promote.png"
 import dmIcon from "../../assets/icons/dm.png"
 import jsxFunctions from "../../structures/JSXFunctions"
-import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch} from "../../types/Types"
+import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount} from "../../types/Types"
 import "./styles/userpage.less"
 
 interface Props {
@@ -62,6 +62,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [favgroups, setFavgroups] = useState([] as Favgroup[])
     const [uploadImages, setUploadImages] = useState([] as string[])
     const [favoriteImages, setFavoriteImages] = useState([] as string[])
+    const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
     const [user, setUser] = useState(null as PrunedUser | null)
     const [defaultIcon, setDefaultIcon] = useState(false)
     const [counts, setCounts] = useState(null as EditCounts | null)
@@ -138,6 +139,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setCounts(counts)
     }
 
+    const updateFavoriteTags = async () => {
+        const favoriteTags = await functions.get("/api/tagfavorites", {username}, session, setSessionFlag)
+        setFavoriteTags(favoriteTags)
+    }
+
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
@@ -155,6 +161,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         updateFavgroups()
         updateComments()
         updateCounts()
+        updateFavoriteTags()
     }, [username, ratingType, session])
 
     useEffect(() => {
@@ -220,10 +227,44 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setCommentSearchFlag(`comments:${user.username}`)
     }
 
+    const searchTag = (event: React.MouseEvent, tag?: string) => {
+        if (!tag) return
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/posts?query=${tag}`, "_blank")
+        } else {
+            history.push("/posts")
+            setSearch(tag)
+            setSearchFlag(true)
+        }
+    }
+
+    const generateFavoriteTagsJSX = () => {
+        if (!user) return null
+        if (!favoriteTags.length) return null
+        if (user.publicTagFavorites) {
+            return (
+                <div className="user-column">
+                    <span className="user-title">{i18n.user.favoriteTags} <span className="user-text-alt">{favoriteTags.length}</span></span>
+                    <div className="tag-alias-button-container">
+                        {favoriteTags.map((tag) =>
+                            <button className="tag-alias-button" onClick={(event) => searchTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
+                        )}
+                    </div>
+                </div> 
+            )
+        } else {
+            return (
+                <div className="user-column">
+                    <span className="user-text">{i18n.user.favoriteTags}: <span className="user-text-alt">{i18n.sort.private}</span></span>
+                </div>
+            )
+        }
+    }
+
     const generateFavoritesJSX = () => {
         if (!user) return null
+        if (!favorites.length) return null
         if (user.publicFavorites) {
-            if (!favorites.length) return null
             return (
                 <div className="user-column">
                     <span className="user-title" onClick={viewFavorites}>{i18n.sort.favorites} <span className="user-text-alt">{favorites[0].postCount}</span></span>
@@ -423,6 +464,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {permissions.isMod(session) && user.deletedPosts?.length ? <div className="user-row">
                         <span className="user-text">{i18n.user.deletedPosts}: <span className="user-text-action">{user.deletedPosts.length}</span></span>
                     </div> : null}
+                    {generateFavoriteTagsJSX()}
                     {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}
                     {uploads.length ?

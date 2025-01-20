@@ -35,7 +35,8 @@ const tagDialogSlice = createSlice({
         deleteAliasHistoryFlag: false,
         revertAliasHistoryID: null as AliasHistoryID | null,
         revertAliasHistoryFlag: false,
-        massImplyDialog: false
+        massImplyDialog: false,
+        deleteTagFavoritesDialog: false
     },
     reducers: {
         setDeleteTagHistoryID: (state, action) => {state.deleteTagHistoryID = action.payload},
@@ -56,7 +57,8 @@ const tagDialogSlice = createSlice({
         setDeleteAliasHistoryFlag: (state, action) => {state.deleteAliasHistoryFlag = action.payload},
         setRevertAliasHistoryID: (state, action) => {state.revertAliasHistoryID = action.payload},
         setRevertAliasHistoryFlag: (state, action) => {state.revertAliasHistoryFlag = action.payload},
-        setMassImplyDialog: (state, action) => {state.massImplyDialog = action.payload}
+        setMassImplyDialog: (state, action) => {state.massImplyDialog = action.payload},
+        setDeleteTagFavoritesDialog: (state, action) => {state.deleteTagFavoritesDialog = action.payload}
     }
 })
 
@@ -64,7 +66,8 @@ const {
     setDeleteTagHistoryID, setDeleteTagHistoryFlag, setRevertTagHistoryID, setRevertTagHistoryFlag,
     setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setAliasTagID, setAliasTagFlag,
     setAliasTagName, setTakedownTag, setCategorizeTag, setShowBulkTagEditDialog, setMassImplyDialog,
-    setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag
+    setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag,
+    setDeleteTagFavoritesDialog
 } = tagDialogSlice.actions
 
 export const useTagDialogSelector = () => {
@@ -88,7 +91,8 @@ export const useTagDialogSelector = () => {
         deleteAliasHistoryFlag: selector((state) => state.tagDialog.deleteAliasHistoryFlag),
         revertAliasHistoryID: selector((state) => state.tagDialog.revertAliasHistoryID),
         revertAliasHistoryFlag: selector((state) => state.tagDialog.revertAliasHistoryFlag),
-        massImplyDialog: selector((state) => state.tagDialog.massImplyDialog)
+        massImplyDialog: selector((state) => state.tagDialog.massImplyDialog),
+        deleteTagFavoritesDialog: selector((state) => state.tagDialog.deleteTagFavoritesDialog)
     }
 }
 
@@ -113,8 +117,9 @@ export const useTagDialogActions = () => {
         setDeleteAliasHistoryFlag: (state: boolean) => dispatch(setDeleteAliasHistoryFlag(state)),
         setRevertAliasHistoryID: (state: AliasHistoryID | null) => dispatch(setRevertAliasHistoryID(state)),
         setRevertAliasHistoryFlag: (state: boolean) => dispatch(setRevertAliasHistoryFlag(state)),
-        setMassImplyDialog: (state: boolean) => dispatch(setMassImplyDialog(state))
-    }    
+        setMassImplyDialog: (state: boolean) => dispatch(setMassImplyDialog(state)),
+        setDeleteTagFavoritesDialog: (state: boolean) => dispatch(setDeleteTagFavoritesDialog(state))
+    }
 }
 
 export default tagDialogSlice.reducer

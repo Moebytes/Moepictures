@@ -47,6 +47,7 @@
         "getInfo": "Get Info",
         "splitVariations": "Split Variations",
         "joinChildPosts": "Join Child Posts",
+        "deleteFavorites": "Delete Favorites",
         "result": "result.",
         "results": "results.",
         "loginRequired": "Login required.",
@@ -295,6 +296,7 @@
         "ipBlacklist": "IP Blacklist",
         "newsBanner": "News Banner",
         "apiKey": "API Key",
+        "favoriteTags": "Favorite Tags",
         "deleted": "deleted"
     },
     "roles": {
@@ -1172,6 +1174,10 @@
             "header": "Join all child posts into variations of this post?",
             "lostData": " *Tag and source data of the child posts will be lost.",
             "nestedChildren": "Nested Children"
+        },
+        "deleteTagFavorites": {
+            "title": "Delete Tag Favorites",
+            "header": "Are you sure you want to delete all your tag favorites?"
         }
     },
     "help": {

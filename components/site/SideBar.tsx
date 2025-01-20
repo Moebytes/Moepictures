@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions, usePostDialogSelector,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePostDialogActions, useSearchDialogActions, 
-useGroupDialogActions, useActiveSelector, useSearchDialogSelector} from "../../store"
+useGroupDialogActions, useActiveSelector, useSearchDialogSelector, useFlagSelector, useTagDialogActions,
+useTagDialogSelector} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
@@ -45,10 +46,13 @@ import SearchSuggestions from "../tooltip/SearchSuggestions"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import question from "../../assets/icons/question.png"
+import unheart from "../../assets/icons/unheart.png"
 import autoSearchIcon from "../../assets/icons/autosearch.png"
 import autoSearchActiveIcon from "../../assets/icons/autosearch-active.gif"
 import saveSearchIcon from "../../assets/icons/savesearch.png"
 import saveSearchActiveIcon from "../../assets/icons/savesearch-active.png"
+import favSearchIcon from "../../assets/icons/tag-heart.png"
+import favSearchActiveIcon from "../../assets/icons/tag-hearted.png"
 import danbooru from "../../assets/icons/danbooru.png"
 import gelbooru from "../../assets/icons/gelbooru.png"
 import safebooru from "../../assets/icons/safebooru.png"
@@ -69,7 +73,7 @@ import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
 import functions from "../../structures/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount} from "../../types/Types"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -92,14 +96,17 @@ let maxHeight3 = 672 // 698
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar} = useLayoutSelector()
-    const {search, noteMode, autoSearch, saveSearch} = useSearchSelector()
-    const {setSearch, setSearchFlag, setNoteMode, setNoteDrawingEnabled, setAutoSearch, setSaveSearch} = useSearchActions()
+    const {search, noteMode, autoSearch, saveSearch, favSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setNoteMode, setNoteDrawingEnabled, setAutoSearch, setSaveSearch, setFavSearch} = useSearchActions()
     const {posts, unverifiedPosts, tags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {mobileScrolling} = useInteractionSelector()
     const {setEnableDrag, setSidebarHover, setTagToolTipTag, setTagToolTipEnabled, setTagToolTipY} = useInteractionActions()
+    const {deleteTagFavoritesDialog} = useTagDialogSelector()
+    const {setDeleteTagFavoritesDialog} = useTagDialogActions()
     const {sidebarText} = useActiveSelector()
-    const {setRandomFlag, setImageSearchFlag} = useFlagActions()
+    const {tagFavoriteFlag} = useFlagSelector()
+    const {setRandomFlag, setImageSearchFlag, setTagFavoriteFlag} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -118,6 +125,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
+    const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
     const history = useHistory()
 
     const getFilter = () => {
@@ -152,9 +160,22 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const updateFavoriteTags = async () => {
+        const favoriteTags = await functions.get("/api/tagfavorites", null, session, setSessionFlag)
+        setFavoriteTags(favoriteTags)
+    }
+
+    useEffect(() => {
+        if (tagFavoriteFlag) {
+            updateFavoriteTags()
+            setTagFavoriteFlag(false)
+        }
+    }, [tagFavoriteFlag, session])
+
     useEffect(() => {
         updateTags()
         updateUserImg()
+        if (!props.post) updateFavoriteTags()
         const savedUploaderImage = localStorage.getItem("uploaderImage")
         if (savedUploaderImage) setUploaderImage(savedUploaderImage)
     }, [session])
@@ -318,6 +339,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const getFavSearch = () => {
+        if (favSearch) {
+            return favSearchActiveIcon
+        } else {
+            return favSearchIcon
+        }
+    }
+
     const tagInfo = (event: React.MouseEvent, tag?: string) => {
         if (!tag) return
         event.preventDefault()
@@ -470,6 +499,29 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const generateFavSearchJSX = () => {
+        if (!session.username) return null
+        let jsx = [] as React.ReactElement[]
+        for (let i = 0; i < favoriteTags.length; i++) {
+            if (!favoriteTags[i]) break
+            const tagClick = () => {
+                history.push(`/posts`)
+                setSearch(favoriteTags[i].tag)
+                setSearchFlag(true)
+            }
+            jsx.push(
+                <div className="sidebar-row">
+                    <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, favoriteTags[i].tag)}>
+                        <img className="tag-info" src={favSearchActiveIcon} onClick={(event) => tagInfo(event, favoriteTags[i].tag)} onAuxClick={(event) => tagInfo(event, favoriteTags[i].tag)}/>
+                        <span className={`tag ${functions.getTagColor(favoriteTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, favoriteTags[i].tag)}>{favoriteTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag-count ${favoriteTags[i].count === "1" ? "artist-tag-color" : ""}`}>{favoriteTags[i].count}</span>
+                    </span>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     const generateSavedSearchJSX = () => {
         if (!session.username) return null
         let jsx = [] as React.ReactElement[]
@@ -512,6 +564,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateTagJSX = () => {
+        if (!props.tags && favSearch) return generateFavSearchJSX()
         if (!props.tags && saveSearch) return generateSavedSearchJSX()
         let jsx = [] as React.ReactElement[]
         let currentTags = props.tags ? organizeTags() : tags
@@ -973,6 +1026,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         functions.openPost(postID, event, history, session, setSessionFlag)
     }
 
+    const changeSearchType = (type: "savesearch" | "favsearch") => {
+        if (type === "savesearch") {
+            const enabled = !saveSearch
+            if (enabled) setFavSearch(false)
+            setSaveSearch(enabled)
+        } else if (type === "favsearch") {
+            const enabled = !favSearch
+            if (enabled) setSaveSearch(false)
+            setFavSearch(enabled)
+        }
+    }
+
     if (mobile) return (
         <>
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
@@ -1025,8 +1090,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img src={random}/>
                     </button>
                     {session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
-                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => setSaveSearch(!saveSearch)}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => changeSearchType("savesearch")}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{height: "20px", filter: getFilter()}} src={getFavSearch()} onClick={() => changeSearchType("favsearch")}/> : null}
                 </div>
+                {!props.post && session.username && favSearch ? 
+                <div className="random-container">
+                    <button className="fav-search-button" style={{filter: getFilterSearch()}} onClick={() => setDeleteTagFavoritesDialog(!deleteTagFavoritesDialog)}>
+                        <img src={unheart}/>
+                        <span>{i18n.sidebar.deleteFavorites}</span>
+                    </button>
+                </div> : null}
                 {!props.post && session.username && saveSearch ? 
                 <div className="random-container">
                     <button className="save-search-button" style={{filter: getFilterSearch()}} onClick={() => setSaveSearchDialog(!saveSearchDialog)}>

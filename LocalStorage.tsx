@@ -10,10 +10,10 @@ const LocalStorage: React.FunctionComponent = (props) => {
     particleAmount, particleSize, particleSpeed} = useThemeSelector()
     const {setTheme, setLanguage, setSiteHue, setSiteSaturation, setSiteLightness, 
     setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
-    const {imageExpand, noteDrawingEnabled, scroll, format, saveSearch, square, imageType, 
+    const {imageExpand, noteDrawingEnabled, scroll, format, saveSearch, favSearch, square, imageType, 
     ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier, showChildren} = useSearchSelector()
-    const {setImageExpand, setNoteDrawingEnabled, setScroll, setFormat, setSaveSearch, setImageType, setRatingType, setStyleType, 
-    setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren} = useSearchActions()
+    const {setImageExpand, setNoteDrawingEnabled, setScroll, setFormat, setSaveSearch, setFavSearch, setImageType, setRatingType, 
+    setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren} = useSearchActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
@@ -81,6 +81,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedParticleSize = localStorage.getItem("particleSize")
         const savedParticleSpeed = localStorage.getItem("particleSpeed")
         const savedSaveSearch = localStorage.getItem("saveSearch")
+        const savedFavSearch = localStorage.getItem("favSearch")
         const savedType = localStorage.getItem("type")
         const savedRating = localStorage.getItem("rating")
         const savedStyle = localStorage.getItem("style")
@@ -136,6 +137,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedParticleSize) setParticleSize(Number(savedParticleSize))
         if (savedParticleSpeed) setParticleSpeed(Number(savedParticleSpeed))
         if (savedSaveSearch) setSaveSearch(savedSaveSearch === "true")
+        if (savedFavSearch) setFavSearch(savedFavSearch === "true")
         if (savedType) setImageType(savedType as PostType)
         if (savedRating) setRatingType(savedRating as PostRating)
         if (savedStyle) setStyleType(savedStyle as PostStyle)
@@ -217,7 +219,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
         localStorage.setItem("format", format)
         localStorage.setItem("saveSearch", String(saveSearch))
-    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch])
+        localStorage.setItem("favSearch", String(favSearch))
+    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch, favSearch])
 
     useEffect(() => {
         localStorage.setItem("sidebar", String(hideSidebar))

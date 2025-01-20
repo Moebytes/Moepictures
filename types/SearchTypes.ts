@@ -13,6 +13,7 @@ export type PostSearchParams = {
     limit?: number
     showChildren?: boolean
     withTags?: boolean
+    favoriteMode?: boolean
 }
 
 export type CommentSearchParams = {

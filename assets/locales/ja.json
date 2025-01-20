@@ -47,6 +47,7 @@
         "getInfo": "情報を得る",
         "splitVariations": "スプリットのバリエーション",
         "joinChildPosts": "子どもの投稿に参加する",
+        "deleteFavorites": "お気に入りの削除",
         "result": "件の結果。",
         "results": "件の結果。",
         "loginRequired": "ログインが必要です。",
@@ -296,6 +297,7 @@
         "ipBlacklist": "IPブラックリスト",
         "newsBanner": "ニュースバナー",
         "apiKey": "APIキー",
+        "favoriteTags": "お気に入りタグ",
         "deleted": "削除された"
     },
     "roles": {
@@ -1173,6 +1175,10 @@
             "header": "すべての子ポストをこのポストのバリエーションに統合する？",
             "lostData": " *子投稿のタグとソースデータは失われます。",
             "nestedChildren": "入れ子の子供たち"
+        },
+        "deleteTagFavorites": {
+            "title": "タグのお気に入りを削除",
+            "header": "タグのお気に入りをすべて削除してもよろしいですか？"
         }
     },
     "help": {

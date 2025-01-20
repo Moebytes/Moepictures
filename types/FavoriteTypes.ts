@@ -1,4 +1,4 @@
-import {PostRating, Post, PostOrdered, PostSearchOrdered} from "./Types"
+import {PostRating, Post, PostOrdered, PostSearchOrdered, TagCount} from "./Types"
 
 export interface Favorite {
     favoriteID: string
@@ -53,6 +53,7 @@ export type FavoriteGetEndpoint<T extends string> =
     T extends "/api/favgroups" ? {params: {postID: string}, response: Favgroup[]} :
     T extends "/api/favgroup" ? {params: {username: string, name: string}, response: FavgroupSearch | undefined} :
     T extends "/api/tagfavorite" ? {params: {tag: string}, response: TagFavorite | undefined} :
+    T extends "/api/tagfavorites" ? {params: {username: string} | null, response: TagCount[]} :
     never
 
 export type FavoritePostEndpoint<T extends string> = 
@@ -70,4 +71,5 @@ export type FavoritePutEndpoint<T extends string> =
 export type FavoriteDeleteEndpoint<T extends string> = 
     T extends "/api/favgroup/post/delete" ? {params: {postID: string, name: string}, response: string} :
     T extends "/api/favgroup/delete" ? {params: {name: string}, response: string} :
+    T extends "/api/tagfavorites/delete" ? {params: null, response: string} :
     never

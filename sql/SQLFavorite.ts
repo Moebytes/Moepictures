@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Favorite, TagFavorite, PostSearch, Favgroup, FavgroupSearch} from "../types/Types"
+import {Favorite, TagFavorite, TagCount, PostSearch, Favgroup, FavgroupSearch} from "../types/Types"
 
 export default class SQLFavorite {
     /** Insert favorite. */
@@ -280,7 +280,16 @@ export default class SQLFavorite {
             values: [tag, username]
         }
         await SQLQuery.run(query)
-    }   
+    }
+
+    /** Delete tag favorites. */
+    public static deleteTagFavorites = async (username: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "tag favorites" WHERE "tag favorites"."username" = $1`),
+            values: [username]
+        }
+        await SQLQuery.run(query)
+    }
 
     /** Get tag favorite. */
     public static tagFavorite = async (tag: string, username: string) => {
@@ -295,5 +304,29 @@ export default class SQLFavorite {
         }
         const result = await SQLQuery.run(query)
         return result[0] as Promise<TagFavorite | undefined>
+    }
+
+    /** Get tag favorites. */
+    public static tagFavorites = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                WITH tag_json AS (
+                    SELECT "tag map posts".tag, 
+                    array_length("tag map posts"."posts", 1) AS count,
+                    "tags".type, "tags".image, "tags"."imageHash"
+                    FROM "tag map posts"
+                    LEFT JOIN tags ON tags."tag" = "tag map posts".tag
+                    GROUP BY "tag map posts".tag, "tags".type, "tags".image, "tags"."imageHash"
+                    ORDER BY count DESC
+                )
+                SELECT tag_json.*
+                FROM "tag favorites"
+                JOIN tag_json ON tag_json."tag" = "tag favorites"."tag"
+                WHERE "tag favorites"."username" = $1
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result as Promise<TagCount[]>
     }
 }

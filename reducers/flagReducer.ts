@@ -29,7 +29,8 @@ const flagSlice = createSlice({
         messageFlag: false,
         tagFlag: false as string | boolean,
         pasteNoteFlag: null as Note[] | null,
-        historyFlag: false
+        historyFlag: false,
+        tagFavoriteFlag: false
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -55,7 +56,8 @@ const flagSlice = createSlice({
         setMessageFlag: (state, action) => {state.messageFlag = action.payload},
         setTagFlag: (state, action) => {state.tagFlag = action.payload},
         setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload},
-        setHistoryFlag: (state, action) => {state.historyFlag = action.payload}
+        setHistoryFlag: (state, action) => {state.historyFlag = action.payload},
+        setTagFavoriteFlag: (state, action) => {state.tagFavoriteFlag = action.payload}
     }
 })
 
@@ -65,7 +67,7 @@ const {
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
-    setPasteNoteFlag, setHistoryFlag, setTagSearchFlag
+    setPasteNoteFlag, setHistoryFlag, setTagSearchFlag, setTagFavoriteFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -94,7 +96,8 @@ export const useFlagSelector = () => {
         messageFlag: selector((state) => state.flag.messageFlag),
         tagFlag: selector((state) => state.flag.tagFlag),
         pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag),
-        historyFlag: selector((state) => state.flag.historyFlag)
+        historyFlag: selector((state) => state.flag.historyFlag),
+        tagFavoriteFlag: selector((state) => state.flag.tagFavoriteFlag)
     }
 }
 
@@ -125,6 +128,7 @@ export const useFlagActions = () => {
         setTagFlag: (state: string | boolean) => dispatch(setTagFlag(state)),
         setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state)),
         setHistoryFlag: (state: boolean) => dispatch(setHistoryFlag(state)),
+        setTagFavoriteFlag: (state: boolean) => dispatch(setTagFavoriteFlag(state)),
     }    
 }
 

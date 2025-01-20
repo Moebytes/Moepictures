@@ -38,7 +38,7 @@ import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
 import jsxFunctions from "../../structures/JSXFunctions"
-import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost} from "../../types/Types"
+import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount} from "../../types/Types"
 import "./styles/userpage.less"
 
 let intervalTimer = null as any
@@ -77,6 +77,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [favgroups, setFavgroups] = useState([] as Favgroup[])
     const [uploadImages, setUploadImages] = useState([] as string[])
     const [favoriteImages, setFavoriteImages] = useState([] as string[])
+    const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
     const [counts, setCounts] = useState(null as EditCounts | null)
     const [pending, setPending] = useState([] as UnverifiedPost[])
     const [pendingImages, setPendingImages] = useState([] as string[])
@@ -171,6 +172,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setCounts(counts)
     }
 
+    const updateFavoriteTags = async () => {
+        const favoriteTags = await functions.get("/api/tagfavorites", null, session, setSessionFlag)
+        setFavoriteTags(favoriteTags)
+    }
+
     const updatePending = async () => {
          const pending = await functions.get("/api/post/pending", null, session, setSessionFlag)
          const images = pending.map((p) => functions.getUnverifiedThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
@@ -201,6 +207,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         updateFavgroups()
         updateComments()
         updateCounts()
+        updateFavoriteTags()
         checkHiddenBanner()
         updatePending()
         updateDeleted()
@@ -604,6 +611,32 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }
 
+    const searchTag = (event: React.MouseEvent, tag?: string) => {
+        if (!tag) return
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/posts?query=${tag}`, "_blank")
+        } else {
+            history.push("/posts")
+            setSearch(tag)
+            setSearchFlag(true)
+        }
+    }
+
+    const generateFavoriteTagsJSX = () => {
+        if (favoriteTags.length) {
+            return (
+                <div className="user-column">
+                    <span className="user-title">{i18n.user.favoriteTags} <span className="user-text-alt">{favoriteTags.length}</span></span>
+                    <div className="tag-alias-button-container">
+                        {favoriteTags.map((tag) =>
+                            <button className="tag-alias-button" onClick={(event) => searchTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
+                        )}
+                    </div>
+                </div> 
+            )
+        }
+    }
+
     const generateFavgroupsJSX = () => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < favgroups.length; i++) {
@@ -878,6 +911,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {permissions.isMod(session) && session.deletedPosts?.length ? <div className="user-row">
                         <span className="user-text">{i18n.user.deletedPosts}: <span className="user-text-action">{session.deletedPosts.length}</span></span>
                     </div> : null}
+                    {generateFavoriteTagsJSX()}
                     {generateFavgroupsJSX()}
                     {favorites.length ?
                     <div className="user-column">

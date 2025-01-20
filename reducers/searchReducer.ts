@@ -24,6 +24,7 @@ const searchSlice = createSlice({
         format: "jpg" as ImageFormat,
         autoSearch: false,
         saveSearch: false,
+        favSearch: false,
         noteMode: false,
         noteDrawingEnabled: false,
         imageExpand: false,
@@ -48,6 +49,7 @@ const searchSlice = createSlice({
         setFormat: (state, action) => {state.format = action.payload},
         setAutoSearch: (state, action) => {state.autoSearch = action.payload},
         setSaveSearch: (state, action) => {state.saveSearch = action.payload},
+        setFavSearch: (state, action) => {state.favSearch = action.payload},
         setNoteMode: (state, action) => {state.noteMode = action.payload},
         setNoteDrawingEnabled: (state, action) => {state.noteDrawingEnabled = action.payload},
         setImageExpand: (state, action) => {state.imageExpand = action.payload},
@@ -60,7 +62,7 @@ const {
     setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSizeType,
     setSortType, setSortReverse, setSquare, setScroll, setSelectionMode, setPageMultiplier,
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
-    setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled,
+    setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled, setFavSearch,
     setShowChildren
 } = searchSlice.actions
 
@@ -84,6 +86,7 @@ export const useSearchSelector = () => {
         format: selector((state) => state.search.format),
         autoSearch: selector((state) => state.search.autoSearch),
         saveSearch: selector((state) => state.search.saveSearch),
+        favSearch: selector((state) => state.search.favSearch),
         noteMode: selector((state) => state.search.noteMode),
         noteDrawingEnabled: selector((state) => state.search.noteDrawingEnabled),
         imageExpand: selector((state) => state.search.imageExpand),
@@ -112,6 +115,7 @@ export const useSearchActions = () => {
         setFormat: (state: ImageFormat) => dispatch(setFormat(state)),
         setAutoSearch: (state: boolean) => dispatch(setAutoSearch(state)),
         setSaveSearch: (state: boolean) => dispatch(setSaveSearch(state)),
+        setFavSearch: (state: boolean) => dispatch(setFavSearch(state)),
         setNoteMode: (state: boolean) => dispatch(setNoteMode(state)),
         setNoteDrawingEnabled: (state: boolean) => dispatch(setNoteDrawingEnabled(state)),
         setImageExpand: (state: boolean) => dispatch(setImageExpand(state)),

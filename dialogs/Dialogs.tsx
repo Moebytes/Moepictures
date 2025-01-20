@@ -57,6 +57,7 @@ import AliasTagDialog from "./tag/AliasTagDialog"
 import CategorizeTagDialog from "./tag/CategorizeTagDialog"
 import DeleteAliasHistoryDialog from "./tag/DeleteAliasHistoryDialog"
 import DeleteTagDialog from "./tag/DeleteTagDialog"
+import DeleteTagFavoritesDialog from "./tag/DeleteTagFavoritesDialog"
 import DeleteTagHistoryDialog from "./tag/DeleteTagHistoryDialog"
 import EditTagDialog from "./tag/EditTagDialog"
 import MassImplyDialog from "./tag/MassImplyDialog"
@@ -143,6 +144,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <CategorizeTagDialog/>
         <DeleteAliasHistoryDialog/>
         <DeleteTagDialog/>
+        <DeleteTagFavoritesDialog/>
         <DeleteTagHistoryDialog/>
         <EditTagDialog/>
         <MassImplyDialog/>
