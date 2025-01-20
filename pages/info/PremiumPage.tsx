@@ -130,7 +130,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
                     <span className="premium-heading">{i18n.premium.premium.title}</span>
                     <img className="premium-star" src={premiumStar}/>
                 </div>
-                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text">
                     {i18n.premium.premium.line1}<br/><br/>
 
                     {i18n.premium.premium.line2}<br/><br/>
@@ -143,7 +143,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "upscaled-images") {
             return (
                 <><img className="premium-banner" src={upscaledImages}/>
-                <span className="premium-text" style={{color: "#2f91ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#2f91ff"}}>
                     {i18n.premium.upscaledImages.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={upscaledImg} style={{maxWidth: "100%"}}/></div></>
@@ -152,7 +152,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "autosearch") {
             return (
                 <><img className="premium-banner" src={autosearch}/>
-                <span className="premium-text" style={{color: "#5b2fff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#5b2fff"}}>
                     {i18n.premium.autoSearch.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={autosearchImg}/></div></>
@@ -161,7 +161,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "search-history") {
             return (
                 <><img className="premium-banner" src={searchHistory}/>
-                <span className="premium-text" style={{color: "#ff2792"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#ff2792"}}>
                     {i18n.premium.searchHistory.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={historyImg}/></div></>
@@ -170,7 +170,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "unlimited-tags") {
             return (
                 <><img className="premium-banner" src={unlimitedTags}/>
-                <span className="premium-text" style={{color: "#ff3afd"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#ff3afd"}}>
                     {i18n.premium.unlimitedTages.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={unlimitedTagsImg}/></div></>
@@ -179,7 +179,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "bookmark-sort") {
             return (
                 <><img className="premium-banner" src={bookmarkSort}/>
-                <span className="premium-text" style={{color: "#3a51ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#3a51ff"}}>
                     {i18n.premium.bookmarkSort.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={bookmarksImg}/></div></>
@@ -188,7 +188,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "animated-avatar") {
             return (
                 <><img className="premium-banner" src={animatedAvatar}/>
-                <span className="premium-text" style={{color: "#fb1d90"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#fb1d90"}}>
                     {i18n.premium.animatedAvatar.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={animatedImg}/></div></>
@@ -197,7 +197,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "change-username") {
             return (
                 <><img className="premium-banner" src={changeUsername}/>
-                <span className="premium-text" style={{color: "#5e2cff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#5e2cff"}}>
                     {i18n.premium.changeUsername.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={changeUsernameImg}/></div></>
@@ -206,7 +206,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "no-ads") {
             return (
                 <><img className="premium-banner" src={noAds} style={{width: "300px"}}/>
-                <span className="premium-text" style={{color: "#297aff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text" style={{color: "#297aff"}}>
                     {i18n.premium.noAds.header}
                 </span></>
             )
@@ -214,7 +214,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "purchase") {
             return (
                 <><span className="premium-heading">{i18n.premium.purchase.title}</span>
-                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text">
                     {i18n.premium.purchase.line1}<br/><br/>
 
                     {i18n.premium.purchase.line2}<br/><br/>
@@ -228,7 +228,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "refund-policy") {
             return (
                 <><span className="premium-heading">{i18n.premium.refundPolicy.title}</span>
-                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="premium-text">
                     {i18n.premium.refundPolicy.header}
                 </span></>
             )

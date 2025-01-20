@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Favorite, PostSearch, Favgroup, FavgroupSearch} from "../types/Types"
+import {Favorite, TagFavorite, PostSearch, Favgroup, FavgroupSearch} from "../types/Types"
 
 export default class SQLFavorite {
     /** Insert favorite. */
@@ -262,5 +262,38 @@ export default class SQLFavorite {
             values: [...rawValues]
         }
         await SQLQuery.run(query)
+    }
+
+    /** Insert tag favorite. */
+    public static insertTagFavorite = async (tag: string, username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "tag favorites" ("tag", "username", "favoriteDate") VALUES ($1, $2, $3)`,
+            values: [tag, username, new Date().toISOString()]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Delete tag favorite. */
+    public static deleteTagFavorite = async (tag: string, username: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "tag favorites" WHERE "tag favorites"."tag" = $1 AND "tag favorites"."username" = $2`),
+            values: [tag, username]
+        }
+        await SQLQuery.run(query)
+    }   
+
+    /** Get tag favorite. */
+    public static tagFavorite = async (tag: string, username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "tag favorites".*
+                FROM "tag favorites"
+                WHERE "tag favorites"."tag" = $1 AND "tag favorites"."username" = $2
+                GROUP BY "tag favorites"."favoriteID"
+            `),
+            values: [tag, username]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<TagFavorite | undefined>
     }
 }

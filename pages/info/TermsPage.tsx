@@ -54,7 +54,7 @@ const TermsPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content" onMouseEnter={() => setEnableDrag(false)}>
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="terms-container">
                     <div className="terms">
                         <div className="terms-title-container">

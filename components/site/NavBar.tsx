@@ -511,7 +511,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getColorDropdownJSX()}
                 {getParticleDropdownJSX()}

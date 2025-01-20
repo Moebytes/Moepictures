@@ -32,7 +32,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {related} = useCacheSelector()
     const {setPosts, setRelated} = useCacheActions()
-    const {ratingType, square, showChildren, scroll} = useSearchSelector()
+    const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
     const {setSearch, setSearchFlag, setScroll, setSquare} = useSearchActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -312,9 +312,33 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return mobile ? 10 : 30
     }
 
-    const getHeight = () => {
-        if (mobile) return square ? 150 : 210
-        return square ? 220 : 250
+    const getSquareSize = () => {
+        if (sizeType === "tiny") {
+            return mobile ? 110 : 130
+        } else if (sizeType === "small") {
+            return mobile ? 160 : 170
+        } else if (sizeType === "medium") {
+            return mobile ? 150 : 220
+        } else if (sizeType === "large") {
+            return mobile ? 360 : 380
+        } else if (sizeType === "massive") {
+            return mobile ? 460 : 480
+        }
+    }
+
+    const getSize = () => {
+        if (square) return getSquareSize()
+        if (sizeType === "tiny") {
+            return mobile ? 110 : 130
+        } else if (sizeType === "small") {
+            return mobile ? 150 : 180
+        } else if (sizeType === "medium") {
+            return mobile ? 210 : 250
+        } else if (sizeType === "large") {
+            return mobile ? 380 : 400
+        } else if (sizeType === "massive") {
+            return mobile ? 450 : 500
+        }
     }
 
     const generateImagesJSX = () => {
@@ -336,16 +360,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} model={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} live2d={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} audio={images[0]} post={post}/>)
+                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getHeight()} borderRadius={4} img={thumb} original={images[0]} post={post}
+                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post}
                 comicPages={post.type === "comic" ? images : null}/>)
             }
         }

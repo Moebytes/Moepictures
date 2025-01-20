@@ -135,18 +135,19 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     useEffect(() => {
-        if (!scroll) if (!visible) setVisible(true)
-    }, [scroll])
-
-    useEffect(() => {
         if (typeof window === "undefined") return
-        const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "1000px 0px 1000px 0px", threshold: 0.01})
-        const element = containerRef.current
-        if (element) observer.observe(element)
-        return () => {
-            observer.disconnect()
+        if (!scroll) {
+            if (!visible) setVisible(true)
+            return
+        } else {
+            const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "2000px 0px 2000px 0px", threshold: 0.01})
+            const element = containerRef.current
+            if (element) observer.observe(element)
+            return () => {
+                observer.disconnect()
+            }
         }
-    }, [])
+    }, [scroll])
 
     const cancelAnimation = () => {
         clearTimeout(timeout)
@@ -841,7 +842,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     const refWidth = ref.current?.width || videoRef.current?.videoWidth
-
     return (
         <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
         onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>

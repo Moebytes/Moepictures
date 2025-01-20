@@ -60,6 +60,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const [relatedTags, setRelatedTags] = useState([] as string[])
     const [historyID, setHistoryID] = useState(null as string | null)
     const [featuredImage, setFeaturedImage] = useState("")
+    const [favorited, setFavorited] = useState(false)
     const [count, setCount] = useState(0)
     const history = useHistory()
     const location = useLocation()
@@ -125,6 +126,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setRelatedTags(related)
     }
 
+    const getFavorite = async () => {
+        if (!session.username) return
+        const tagFavorite = await functions.get("/api/tagfavorite", {tag: tagName}, session, setSessionFlag)
+        setFavorited(tagFavorite ? true : false)
+    }
+
     const updatePosts = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
@@ -148,6 +155,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         tagInfo()
         updateRelatedTags()
+        getFavorite()
         // updatePosts()
     }, [tagName, ratingType, historyID, session])
 
@@ -319,14 +327,16 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const favoriteTag = async () => {
-        setTagFlag(true)
+        if (!tag) return
+        await functions.post("/api/tagfavorite/toggle", {tag: tag.tag}, session, setSessionFlag)
+        getFavorite()
     }
 
     const tagOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
         if (session.username) {
-            jsx.push(<img className="tag-social" src={tagHeart} onClick={() => null} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={favorited ? tagHearted : tagHeart} onClick={() => favoriteTag()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter: getFilter()}}/>)

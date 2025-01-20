@@ -20,7 +20,7 @@ const favoriteLimiter = rateLimit({
 const FavoriteRoutes = (app: Express) => {
     app.post("/api/favorite/toggle", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID} = req.body
+            const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(postID, req.session.username)
@@ -252,6 +252,35 @@ const FavoriteRoutes = (app: Express) => {
             await sql.favorite.bulkDeleteFavgroupMappings(favgroup.favgroupID, toChange)
             await sql.favorite.bulkInsertFavgroupMappings(favgroup.favgroupID, toChange)
             res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/tagfavorite/toggle", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            const {tag} = req.body as {tag: string}
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const tagFavorite = await sql.favorite.tagFavorite(tag, req.session.username)
+            if (tagFavorite) {
+                await sql.favorite.deleteTagFavorite(tag, req.session.username)
+            } else {
+                await sql.favorite.insertTagFavorite(tag, req.session.username)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/tagfavorite", favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            const tag = req.query.tag as string
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const tagFavorite = await sql.favorite.tagFavorite(tag, req.session.username)
+            serverFunctions.sendEncrypted(tagFavorite, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

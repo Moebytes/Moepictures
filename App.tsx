@@ -71,6 +71,7 @@ import TagToolTip from "./components/tooltip/TagToolTip"
 import ToolTip from "./components/tooltip/ToolTip"
 import ParticleEffect from "./components/site/ParticleEffect"
 import LocalStorage from "./LocalStorage"
+import DragScroll from "./components/site/DragScroll"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -248,11 +249,6 @@ const App: React.FunctionComponent = (props) => {
     }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
-        if (mobile) return functions.dragScroll(false)
-        functions.dragScroll(enableDrag)
-    }, [enableDrag, history])
-
-    useEffect(() => {
         functions.changeFavicon(theme)
     }, [theme])
 
@@ -282,80 +278,82 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
-            <ParticleEffect/>
-            <DragAndDrop/>
-            <NewsBanner/>
-            <ActionBanner/>
-            <CookieBanner/>
-            <Dialogs/>
-            <LocalStorage/>
-            <TagToolTip/>
-            <ToolTip/>
-            <Switch>
-                <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
-                <Route exact path="/profile"><UserProfilePage/></Route>
-                <Route exact path="/upload"><UploadPage/></Route>
-                <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
-                <Route exact path="/tags"><TagsPage/></Route>
-                <Route exact path="/series"><SeriesPage/></Route>
-                <Route exact path="/characters"><CharactersPage/></Route>
-                <Route exact path="/artists"><ArtistsPage/></Route>
-                <Route exact path="/comments"><CommentsPage/></Route>
-                <Route exact path="/notes"><NotesPage/></Route>
-                <Route exact path="/groups"><GroupsPage/></Route>
-                <Route exact path="/history"><HistoryPage/></Route>
-                <Route exact path="/premium"><PremiumPage/></Route>
-                <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
-                <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
-                <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
-                <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
-                <Route exact path="/note/history/:id/:slug/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
-                <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
-                <Route exact path="/post/history/:id/:slug" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
-                <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
-                <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
-                <Route exact path="/edit-post/:id/:slug" render={(props) => <EditPostPage {...props}/>}></Route>
-                <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
-                <Route exact path="/set-avatar/:id/:slug" render={(props) => <SetAvatarPage {...props}/>}></Route>
-                <Route exact path="/help"><HelpPage/></Route>
-                <Route exact path="/forum"><ForumPage/></Route>
-                <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
-                <Route exact path="/mail"><MailPage/></Route>
-                <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
-                <Route exact path="/change-username"><ChangeUsernamePage/></Route>
-                <Route exact path="/change-email"><ChangeEmailPage/></Route>
-                <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
-                <Route exact path="/verify-email"><VerifyEmailPage/></Route>
-                <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
-                <Route exact path="/verify-login-success"><VerifyLoginSuccessPage/></Route>
-                <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
-                <Route exact path="/reset-password"><ResetPasswordPage/></Route>
-                <Route exact path="/change-password"><ChangePasswordPage/></Route>
-                <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
-                <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
-                <Route exact path="/login"><LoginPage/></Route>
-                <Route exact path="/2fa"><$2FAPage/></Route>
-                <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
-                <Route exact path="/login-history"><LoginHistoryPage/></Route>
-                <Route exact path="/contact"><ContactPage/></Route>
-                <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
-                <Route exact path="/mod-queue"><ModQueuePage/></Route>
-                <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
-                <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
-                <Route exact path="/news-banner"><NewsBannerPage/></Route>
-                <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
-                <Route exact path="/api-key"><APIKeyPage/></Route>
-                <Route exact path="/401"><$401Page/></Route>
-                <Route exact path="/403"><$403Page/></Route>
-                <Route path="*"><$404Page/></Route>
-            </Switch>
-            <AudioPlayer/>
+            <DragScroll>
+                <ParticleEffect/>
+                <DragAndDrop/>
+                <NewsBanner/>
+                <ActionBanner/>
+                <CookieBanner/>
+                <Dialogs/>
+                <LocalStorage/>
+                <TagToolTip/>
+                <ToolTip/>
+                <Switch>
+                    <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
+                    <Route exact path="/profile"><UserProfilePage/></Route>
+                    <Route exact path="/upload"><UploadPage/></Route>
+                    <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
+                    <Route exact path="/tags"><TagsPage/></Route>
+                    <Route exact path="/series"><SeriesPage/></Route>
+                    <Route exact path="/characters"><CharactersPage/></Route>
+                    <Route exact path="/artists"><ArtistsPage/></Route>
+                    <Route exact path="/comments"><CommentsPage/></Route>
+                    <Route exact path="/notes"><NotesPage/></Route>
+                    <Route exact path="/groups"><GroupsPage/></Route>
+                    <Route exact path="/history"><HistoryPage/></Route>
+                    <Route exact path="/premium"><PremiumPage/></Route>
+                    <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
+                    <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
+                    <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
+                    <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
+                    <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
+                    <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
+                    <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
+                    <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
+                    <Route exact path="/note/history/:id/:slug/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
+                    <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
+                    <Route exact path="/post/history/:id/:slug" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                    <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                    <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
+                    <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
+                    <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
+                    <Route exact path="/edit-post/:id/:slug" render={(props) => <EditPostPage {...props}/>}></Route>
+                    <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
+                    <Route exact path="/set-avatar/:id/:slug" render={(props) => <SetAvatarPage {...props}/>}></Route>
+                    <Route exact path="/help"><HelpPage/></Route>
+                    <Route exact path="/forum"><ForumPage/></Route>
+                    <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
+                    <Route exact path="/mail"><MailPage/></Route>
+                    <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
+                    <Route exact path="/change-username"><ChangeUsernamePage/></Route>
+                    <Route exact path="/change-email"><ChangeEmailPage/></Route>
+                    <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
+                    <Route exact path="/verify-email"><VerifyEmailPage/></Route>
+                    <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
+                    <Route exact path="/verify-login-success"><VerifyLoginSuccessPage/></Route>
+                    <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
+                    <Route exact path="/reset-password"><ResetPasswordPage/></Route>
+                    <Route exact path="/change-password"><ChangePasswordPage/></Route>
+                    <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
+                    <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
+                    <Route exact path="/login"><LoginPage/></Route>
+                    <Route exact path="/2fa"><$2FAPage/></Route>
+                    <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
+                    <Route exact path="/login-history"><LoginHistoryPage/></Route>
+                    <Route exact path="/contact"><ContactPage/></Route>
+                    <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
+                    <Route exact path="/mod-queue"><ModQueuePage/></Route>
+                    <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
+                    <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                    <Route exact path="/news-banner"><NewsBannerPage/></Route>
+                    <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
+                    <Route exact path="/api-key"><APIKeyPage/></Route>
+                    <Route exact path="/401"><$401Page/></Route>
+                    <Route exact path="/403"><$403Page/></Route>
+                    <Route path="*"><$404Page/></Route>
+                </Switch>
+                <AudioPlayer/>
+            </DragScroll>
         </div>
     )
 }

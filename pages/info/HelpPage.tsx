@@ -103,7 +103,7 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">{i18n.navbar.help}</span>
                 <span className="help-text">{i18n.help.help.welcome}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.help.line1}<br/><br/>
 
                     {i18n.help.help.line2}
@@ -114,7 +114,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "searching") {
             return (
                 <><span className="help-heading">{i18n.help.searching.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.searching.header}<br/>
                     <span className="help-alt">
                     {i18n.help.searching.example1}<br/>
@@ -180,7 +180,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "image-searching") {
             return (
                 <><span className="help-heading">{i18n.help.imageSearching.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.imageSearching.line1}<br/><br/>
 
                     {i18n.help.imageSearching.line2}<br/><br/>
@@ -193,7 +193,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "filters") {
             return (
                 <><span className="help-heading">{i18n.filters.filters}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.filters.line1}<br/><br/>
 
                     {i18n.help.filters.line2}
@@ -204,7 +204,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "custom-players") {
             return (
                 <><span className="help-heading">{i18n.help.customPlayers.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.customPlayers.line1}<br/><br/>
 
                     {i18n.help.customPlayers.line2}
@@ -215,7 +215,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "music") {
             return (
                 <><span className="help-heading">{i18n.help.music.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.music.line1}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={musicImg}/></div></>
@@ -224,7 +224,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "notes") {
             return (
                 <><span className="help-heading">{i18n.navbar.notes}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.notes.line1}<br/><br/>
 
                     {i18n.help.notes.line2}
@@ -245,7 +245,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "overlay-notes") {
             return (
                 <><span className="help-heading">{i18n.help.overlayNotes.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.overlayNotes.line1}<br/><br/>
 
                     {i18n.help.overlayNotes.customization.header}<br/>
@@ -266,7 +266,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "character-notes") {
             return (
                 <><span className="help-heading">{i18n.help.characterNotes.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.characterNotes.line1}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={characterNotesImg}/></div></>
@@ -275,7 +275,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "favorites") {
             return (
                 <><span className="help-heading">{i18n.sort.favorites}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.favorites.line1}<br/><br/>
 
                     {i18n.help.favorites.line2}
@@ -286,7 +286,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "favgroups") {
             return (
                 <><span className="help-heading">{i18n.help.favoriteGroups.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.favoriteGroups.line1}
                     <span className="help-alt">{i18n.help.favoriteGroups.search1}</span>.
                 </span>
@@ -296,7 +296,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "cuteness") {
             return (
                 <><span className="help-heading">{i18n.sort.cuteness}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.cuteness.line1}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={cutenessMeterImg}/></div></>
@@ -305,7 +305,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "uploading") {
             return (
                 <><span className="help-heading">{i18n.help.uploading.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.uploading.line1}<br/><br/>
                     {i18n.help.uploading.uploadGuidelines.header}<br/>
                     <span className="help-alt">
@@ -380,7 +380,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "tagging") {
             return (
                 <><span className="help-heading">{i18n.help.tagging.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.tagging.line1}<br/><br/>
 
                     {i18n.help.tagging.tagGuidelines.header}<br/>
@@ -431,7 +431,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "self-uploads") {
             return (
                 <><span className="help-heading">{i18n.help.selfUploads.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.selfUploads.line1}<br/><br/>
 
                     {i18n.help.selfUploads.shouldTag}<span className="help-alt">self-upload{i18n.period}</span>
@@ -448,7 +448,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "upscaling") {
             return (
                 <><span className="help-heading">{i18n.help.upscaling.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.upscaling.line1}<br/><br/>
 
                     {i18n.help.upscaling.line2}<br/>
@@ -462,7 +462,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "compressing") {
             return (
                 <><span className="help-heading">{i18n.help.compressing.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.compressing.line1}<br/><br/>
 
                     {i18n.help.compressing.line2}<br/>
@@ -486,7 +486,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "pixiv-downloads") {
             return (
                 <><span className="help-heading">{i18n.help.pixivDownloads.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.pixivDownloads.line1}<a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv{i18n.period}</a><br/><br/>
 
                     {i18n.help.pixivDownloads.line2}<br/>
@@ -499,11 +499,11 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "bookmarklet") {
             return (
                 <><span className="help-heading">{i18n.help.bookmarklet.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.bookmarklet.line1}<br/><br/>
 
                     <a style={{width: "auto", height: "60px"}} className="help-link" href={getBookmarklet()}
-                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                   >
                         <img src={bookmarkletImg} alt="Upload to Moepictures"/>
                     </a><br/><br/>
 
@@ -532,7 +532,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "variations") {
             return (
                 <><span className="help-heading">{i18n.sort.variations}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.variations.line1}<br/><br/>
 
                     {i18n.help.variations.line2}<br/><br/>
@@ -545,7 +545,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "child-posts") {
             return (
                 <><span className="help-heading">{i18n.post.childPosts}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.childPosts.line1}<br/><br/>
                     
                     {i18n.help.childPosts.line2}<br/><br/>
@@ -558,7 +558,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "groups") {
             return (
                 <><span className="help-heading">{i18n.sort.groups}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.groups.line1}<br/><br/>
 
                     {i18n.help.groups.line2}<br/><br/>
@@ -572,7 +572,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "aliases") {
             return (
                 <><span className="help-heading">{i18n.sort.aliases}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.aliases.line1}<br/><br/>
 
                     <span className="help-alt">{i18n.help.aliases.aliasingTo.title}</span><br/>
@@ -586,7 +586,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "implications") {
             return (
                 <><span className="help-heading">{i18n.labels.implications}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.implications.line1}<br/><br/>
 
                     {i18n.help.implications.line2}
@@ -597,7 +597,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "users") {
             return (
                 <><span className="help-heading">{i18n.help.users.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.users.userLevels.header}<br/><br/>
 
                     <span className="help-alt">{Object.keys(i18n.help.users.userLevels.items)[0]}</span>{Object.values(i18n.help.users.userLevels.items)[0]}<br/>
@@ -623,7 +623,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "tooltips") {
             return (
                 <><span className="help-heading">{i18n.help.tooltips.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.tooltips.line1}<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={tooltipsImg}/></div></>
@@ -632,7 +632,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "commenting") {
             return (
                 <><span className="help-heading">{i18n.help.commenting.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.commenting.rules.header}<br/>
                     <span className="help-alt">
                     {i18n.help.commenting.rules.rule1}<br/>
@@ -714,7 +714,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "bans") {
             return (
                 <><span className="help-heading">{i18n.help.bans.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.bans.line1}<br/><br/>
 
                     {i18n.help.bans.banActions.header}<br/>
@@ -731,7 +731,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "captcha") {
             return (
                 <><span className="help-heading">{i18n.help.captcha.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.captcha.line1}<br/><br/>
                     
                     {i18n.help.captcha.line2}<br/><br/>
@@ -742,7 +742,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "language") {
             return (
                 <><span className="help-heading">{i18n.help.language.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.language.line1}<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={languageImg}/></div></>
@@ -751,7 +751,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "account-deletion") {
             return (
                 <><span className="help-heading">{i18n.help.accountDeletion.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.accountDeletion.line1}<br/><br/>
                 </span></>
             )
@@ -759,7 +759,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "copyright-removal") {
             return (
                 <><span className="help-heading">{i18n.pages.copyrightRemoval.title}</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="help-text">
                     {i18n.help.copyrightRemoval.line1}<br/><br/>
 
                     {i18n.help.copyrightRemoval.submitForm}
