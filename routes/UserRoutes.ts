@@ -13,7 +13,7 @@ import permissions from "../structures/Permissions"
 import path from "path"
 import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
 ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
-PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams, User} from "../types/Types"
+PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams, User, ForumPostSearchParams} from "../types/Types"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -1471,6 +1471,25 @@ const UserRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/forumposts", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let {username, query, sort, offset} = req.query as unknown as ForumPostSearchParams
+            if (!sort) sort = "random"
+            if (!username) username = req.session.username!
+            if (!username) return res.status(400).send("Bad username")
+            if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
+            const search = query?.trim() ?? ""
+            let result = await sql.thread.forumPosts(username, search, sort, Number(offset))
+            if (!req.session.showR18) {
+                result = result.filter((t) => !t.r18)
+            }
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
         }
     })
 }

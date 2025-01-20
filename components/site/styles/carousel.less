@@ -135,6 +135,18 @@
     opacity: 1;
 }
 
+.vertical-carousel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 450px;
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 @media screen and (max-width: 500px) {
     .carousel {
         max-width: calc(100vw - 10px);

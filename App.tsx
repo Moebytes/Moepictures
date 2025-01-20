@@ -50,6 +50,7 @@ import EditUnverifiedPostPage from "./pages/upload/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/item/SetAvatarPage"
 import NoteHistoryPage from "./pages/history/NoteHistoryPage"
 import ForumPage from "./pages/search/ForumPage"
+import ForumPostsPage from "./pages/search/ForumPostsPage"
 import ThreadPage from "./pages/item/ThreadPage"
 import GroupsPage from "./pages/search/GroupsPage"
 import BulkUploadPage from "./pages/upload/BulkUploadPage"
@@ -322,6 +323,7 @@ const App: React.FunctionComponent = (props) => {
                     <Route exact path="/set-avatar/:id/:slug" render={(props) => <SetAvatarPage {...props}/>}></Route>
                     <Route exact path="/help"><HelpPage/></Route>
                     <Route exact path="/forum"><ForumPage/></Route>
+                    <Route exact path="/posts/:username" render={(props) => <ForumPostsPage {...props}/>}></Route>
                     <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
                     <Route exact path="/mail"><MailPage/></Route>
                     <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>

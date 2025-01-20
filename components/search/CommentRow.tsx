@@ -256,8 +256,8 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
-                    {jsxFunctions.renderText(props.comment?.comment, emojis, "commentrow", goToComment)}
+                    <span className="commentrow-date-link" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
+                    {jsxFunctions.renderText(props.comment?.comment, emojis, "comment", goToComment)}
                 </div>
             </div>
             {session.username ? commentOptions() : null}

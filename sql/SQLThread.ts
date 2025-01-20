@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {Thread, ThreadSearch, ThreadUser, ThreadReply, ThreadRead} from "../types/Types"
+import {Thread, ThreadSearch, ThreadUser, ThreadReply, ThreadRead, ForumPostSearch} from "../types/Types"
 
 export default class SQLThread {
     /** Insert thread. */
@@ -328,5 +328,56 @@ export default class SQLThread {
         }
         const result = await SQLQuery.run(query)
         return Number(result[0] || 0)
+    }
+
+    /** Search threads and replies of a user. */
+    public static forumPosts = async (username: string, search: string, sort: string, offset?: number) => {
+        let i = 2
+        let whereQuery = ""
+        let values = [] as any
+        if (search) {
+            values.push(search.toLowerCase())
+            whereQuery += `WHERE (lower(forum_post."title") LIKE '%' || $${i} || '%' 
+                OR lower(forum_post."content") LIKE '%' || $${i} || '%')`
+            i++
+        }
+        if (offset) values.push(offset)
+        let sortQuery = ""
+        if (sort === "random") sortQuery = `ORDER BY random()`
+        if (sort === "date") sortQuery = `ORDER BY forum_post."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY forum_post."updatedDate" ASC`
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT forum_post.*, users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash",
+                to_jsonb(thread_data.*) AS thread,
+                COUNT(*) OVER() AS "postCount"
+                FROM (
+                    SELECT "threadID" AS "id", "creator", "createDate", "updatedDate",
+                    "title", "content", "r18", 'thread' AS "type"
+                    FROM threads
+                    WHERE threads."creator" = $1
+                    UNION ALL
+                    SELECT "replyID" AS "id", "creator", "createDate", "updatedDate",
+                    NULL AS "title", "content", "r18", 'reply' AS "type"
+                    FROM replies
+                    WHERE replies."creator" = $1
+                ) AS forum_post
+                JOIN users ON users."username" = forum_post."creator"
+                LEFT JOIN threads AS thread_data 
+                ON (forum_post."type" = 'thread' AND forum_post."id" = thread_data."threadID") 
+                OR (forum_post."type" = 'reply' AND EXISTS (
+                    SELECT 1 FROM replies WHERE replies."replyID" = forum_post."id" 
+                    AND replies."threadID" = thread_data."threadID"
+                ))
+                ${whereQuery}
+                ${sortQuery}
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: [username]
+        }
+        if (values?.[0]) query.values?.push(...values)
+        const result = await SQLQuery.run(query)
+        return result as Promise<ForumPostSearch[]>
     }
 }

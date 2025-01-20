@@ -1,4 +1,4 @@
-import {UserRole} from "./Types"
+import {UserRole, CommentSort} from "./Types"
 
 export interface Thread {
     threadID: string
@@ -54,6 +54,26 @@ export interface ThreadRead {
     threadID: string
     username: string
     read: boolean
+}
+
+export interface ForumPostSearch {
+    id: string
+    creator: string
+    createDate: string
+    updater: string
+    updatedDate: string
+    title: string
+    content: string
+    r18: boolean | null
+    type: "thread" | "reply"
+    role: UserRole
+    image: string | null
+    imagePost: string | null
+    imageHash: string | null
+    banned: boolean | null
+    thread: Thread | null
+    postCount: string
+    fake?: boolean
 }
 
 export interface ThreadCreateParams {

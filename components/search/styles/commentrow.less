@@ -52,10 +52,30 @@
     }
 }
 
-.commentrow-date-text {
+.commentrow-date-link {
     font-family: Tahoma, sans-serif;
     font-size: 18px;
     color: var(--text-strong);
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.commentrow-date-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text-strong);
+}
+
+.commentrow-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text);
+    user-select: text;
+    word-wrap: break-word;
+    white-space: preserve;
     cursor: pointer;
     &:hover {
         filter: brightness(130%);
@@ -148,7 +168,7 @@
         padding-right: 0px;
     }
 
-    .commentrow-date-text {
+    .commentrow-date-link {
         font-size: 16px;
     }
     

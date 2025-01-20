@@ -1,4 +1,5 @@
-import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory} from "./Types"
+import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory,
+ForumPostSearch} from "./Types"
 
 export interface PrunedUser {
     userID: string
@@ -182,6 +183,13 @@ export interface EditCounts {
     groupEdits: number
 }
 
+export interface ForumPostSearchParams {
+    username?: string
+    query?: string
+    sort?: CommentSort
+    offset?: number
+}
+
 export type UserGetEndpoint<T extends string> = 
     T extends "/api/user" ? {params: {username: string}, response: PrunedUser | undefined} :
     T extends "/api/user/session" ? {params: null, response: Session} :
@@ -197,6 +205,7 @@ export type UserGetEndpoint<T extends string> =
     T extends "/api/user/history" ? {params: {offset?: number, query?: string}, response: SearchHistory[]} :
     T extends "/api/user/login/history" ? {params: null, response: LoginHistory[]} :
     T extends "/api/user/edit/counts" ? {params: {username: string} | null, response: EditCounts} :
+    T extends "/api/user/forumposts" ? {params: ForumPostSearchParams, response: ForumPostSearch[]} :
     never
 
 export type UserPostEndpoint<T extends string> = 

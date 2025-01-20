@@ -627,8 +627,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const viewThreads = () => {
         if (!thread) return
-        history.push("/forum")
-        setThreadSearchFlag(`threads:${thread.creator}`)
+        history.push(`/posts/${thread.creator}`)
     }
 
     const getReplyBoxJSX = () => {

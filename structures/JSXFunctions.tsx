@@ -346,7 +346,6 @@ export default class JSXFunctions {
     public static renderText = (text: string, emojis: any, type: string = "comment", clickFunc?: (id: string) => any, r18?: boolean) => {
         const renderFunction = {
             "comment": JSXFunctions.renderCommentText,
-            "commentrow": JSXFunctions.renderCommentText,
             "reply": JSXFunctions.renderReplyText,
             "message": JSXFunctions.renderMessageText
         }[type]

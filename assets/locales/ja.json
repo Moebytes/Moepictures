@@ -298,6 +298,7 @@
         "newsBanner": "ニュースバナー",
         "apiKey": "APIキー",
         "favoriteTags": "お気に入りタグ",
+        "forumPosts": "フォーラム投稿",
         "deleted": "削除された"
     },
     "roles": {

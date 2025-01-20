@@ -15,6 +15,7 @@ const flagSlice = createSlice({
         messageSearchFlag: null as string | null,
         groupSearchFlag: null as string | null,
         tagSearchFlag: null as string | null,
+        forumPostSearchFlag: null as string | null,
         pageFlag: null as number | null,
         downloadIDs: [] as string[],
         postAmount: 0,
@@ -42,6 +43,7 @@ const flagSlice = createSlice({
         setMessageSearchFlag: (state, action) => {state.messageSearchFlag = action.payload},
         setGroupSearchFlag: (state, action) => {state.groupSearchFlag = action.payload},
         setTagSearchFlag: (state, action) => {state.tagSearchFlag = action.payload},
+        setForumPostSearchFlag: (state, action) => {state.forumPostSearchFlag = action.payload},
         setPageFlag: (state, action) => {state.pageFlag = action.payload},
         setDownloadIDs: (state, action) => {state.downloadIDs = action.payload},
         setPostAmount: (state, action) => {state.postAmount = action.payload},
@@ -67,7 +69,8 @@ const {
     setUpdateUserFlag, setCommentID, setCommentJumpFlag, setPostFlag,
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
-    setPasteNoteFlag, setHistoryFlag, setTagSearchFlag, setTagFavoriteFlag
+    setPasteNoteFlag, setHistoryFlag, setTagSearchFlag, setTagFavoriteFlag,
+    setForumPostSearchFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -82,6 +85,7 @@ export const useFlagSelector = () => {
         messageSearchFlag: selector((state) => state.flag.messageSearchFlag),
         groupSearchFlag: selector((state) => state.flag.groupSearchFlag),
         tagSearchFlag: selector((state) => state.flag.tagSearchFlag),
+        forumPostSearchFlag: selector((state) => state.flag.forumPostSearchFlag),
         pageFlag: selector((state) => state.flag.pageFlag),
         downloadIDs: selector((state) => state.flag.downloadIDs),
         postAmount: selector((state) => state.flag.postAmount),
@@ -113,6 +117,7 @@ export const useFlagActions = () => {
         setMessageSearchFlag: (state: string | null) => dispatch(setMessageSearchFlag(state)),
         setGroupSearchFlag: (state: string | null) => dispatch(setGroupSearchFlag(state)),
         setTagSearchFlag: (state: string | null) => dispatch(setTagSearchFlag(state)),
+        setForumPostSearchFlag: (state: string | null) => dispatch(setForumPostSearchFlag(state)),
         setPageFlag: (state: number | null) => dispatch(setPageFlag(state)),
         setDownloadIDs: (state: string[]) => dispatch(setDownloadIDs(state)),
         setPostAmount: (state: number) => dispatch(setPostAmount(state)),

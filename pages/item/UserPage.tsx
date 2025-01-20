@@ -12,7 +12,7 @@ useCacheSelector, useCacheActions} from "../../store"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
-import CommentCarousel from "../../components/site/CommentCarousel"
+import VerticalCarousel from "../../components/site/VerticalCarousel"
 import adminLabel from "../../assets/icons/admin-label.png"
 import modLabel from "../../assets/icons/mod-label.png"
 import systemLabel from "../../assets/icons/system-label.png"
@@ -26,7 +26,7 @@ import unbanIcon from "../../assets/icons/unban.png"
 import promoteIcon from "../../assets/icons/promote.png"
 import dmIcon from "../../assets/icons/dm.png"
 import jsxFunctions from "../../structures/JSXFunctions"
-import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount} from "../../types/Types"
+import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
 interface Props {
@@ -59,6 +59,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [favorites, setFavorites] = useState([] as PostSearch[])
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([] as string[])
     const [comments, setComments] = useState([] as CommentSearch[])
+    const [forumPosts, setForumPosts] = useState([] as ForumPostSearch[])
     const [favgroups, setFavgroups] = useState([] as Favgroup[])
     const [uploadImages, setUploadImages] = useState([] as string[])
     const [favoriteImages, setFavoriteImages] = useState([] as string[])
@@ -134,6 +135,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setComments(filtered)
     }
 
+    const updateForumPosts = async () => {
+        const forumPosts = await functions.get("/api/user/forumposts", {username, sort: "date"}, session, setSessionFlag)
+        setForumPosts(forumPosts)
+    }
+
     const updateCounts = async () => {
         const counts = await functions.get("/api/user/edit/counts", {username}, session, setSessionFlag)
         setCounts(counts)
@@ -160,6 +166,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         updateFavorites()
         updateFavgroups()
         updateComments()
+        updateForumPosts()
         updateCounts()
         updateFavoriteTags()
     }, [username, ratingType, session])
@@ -225,6 +232,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (!user) return
         history.push("/comments")
         setCommentSearchFlag(`comments:${user.username}`)
+    }
+
+    const viewForumPosts = () => {
+        if (!user) return
+        history.push(`/posts/${user.username}`)
     }
 
     const searchTag = (event: React.MouseEvent, tag?: string) => {
@@ -475,7 +487,12 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {comments.length ?
                     <div className="user-column">
                         <span className="user-title" onClick={viewComments}>{i18n.navbar.comments} <span className="user-text-alt">{comments.length}</span></span>
-                        <CommentCarousel comments={comments}/>
+                        <VerticalCarousel items={comments} type="comment"/>
+                    </div> : null}
+                    {forumPosts.length ?
+                    <div className="user-column">
+                        <span className="user-title" onClick={viewForumPosts}>{i18n.user.forumPosts} <span className="user-text-alt">{forumPosts.length}</span></span>
+                        <VerticalCarousel items={forumPosts} type="forumpost"/>
                     </div> : null}
                 </div> : null}
                 <Footer/>

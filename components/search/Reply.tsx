@@ -238,8 +238,9 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const viewThreads = () => {
-        history.push("/forum")
-        setThreadSearchFlag(`threads:${props.reply.creator}`)
+        history.push(`/posts/${props.reply.creator}`)
+        //history.push("/forum")
+        //setThreadSearchFlag(`threads:${props.reply.creator}`)
     }
 
     return (

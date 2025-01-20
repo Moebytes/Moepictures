@@ -13,6 +13,7 @@ const pageSlice = createSlice({
         seriesPage: 1,
         tagsPage: 1,
         forumPage: 1,
+        forumPostsPage: 1,
         threadPage: 1,
         mailPage: 1,
         historyPage: 1,
@@ -30,6 +31,7 @@ const pageSlice = createSlice({
         setSeriesPage: (state, action) => {state.seriesPage = action.payload},
         setTagsPage: (state, action) => {state.tagsPage = action.payload},
         setForumPage: (state, action) => {state.forumPage = action.payload},
+        setForumPostsPage: (state, action) => {state.forumPostsPage = action.payload},
         setThreadPage: (state, action) => {state.threadPage = action.payload},
         setMailPage: (state, action) => {state.mailPage = action.payload},
         setHistoryPage: (state, action) => {state.historyPage = action.payload},
@@ -44,7 +46,7 @@ const {
     setPage, setCommentsPage, setNotesPage, setArtistsPage, 
     setCharactersPage, setSeriesPage, setTagsPage, setForumPage, 
     setThreadPage, setMailPage, setHistoryPage, setModPage, 
-    setGroupsPage, setMessagePage, setRelatedPage
+    setGroupsPage, setMessagePage, setRelatedPage, setForumPostsPage
 } = pageSlice.actions
 
 export const usePageSelector = () => {
@@ -58,6 +60,7 @@ export const usePageSelector = () => {
         seriesPage: selector((state) => state.page.seriesPage),
         tagsPage: selector((state) => state.page.tagsPage),
         forumPage: selector((state) => state.page.forumPage),
+        forumPostsPage: selector((state) => state.page.forumPostsPage),
         threadPage: selector((state) => state.page.threadPage),
         mailPage: selector((state) => state.page.mailPage),
         historyPage: selector((state) => state.page.historyPage),
@@ -79,6 +82,7 @@ export const usePageActions = () => {
         setSeriesPage: (state: number) => dispatch(setSeriesPage(state)),
         setTagsPage: (state: number) => dispatch(setTagsPage(state)),
         setForumPage: (state: number) => dispatch(setForumPage(state)),
+        setForumPostsPage: (state: number) => dispatch(setForumPostsPage(state)),
         setThreadPage: (state: number) => dispatch(setThreadPage(state)),
         setMailPage: (state: number) => dispatch(setMailPage(state)),
         setHistoryPage: (state: number) => dispatch(setHistoryPage(state)),

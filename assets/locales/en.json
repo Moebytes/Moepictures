@@ -297,6 +297,7 @@
         "newsBanner": "News Banner",
         "apiKey": "API Key",
         "favoriteTags": "Favorite Tags",
+        "forumPosts": "Forum Posts",
         "deleted": "deleted"
     },
     "roles": {
