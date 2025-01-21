@@ -23,6 +23,7 @@ export default class SQLSearch {
         if (rating === "ecchi") ratingQuery = `posts.rating = 'ecchi'`
         if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
         if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'ecchi')`
+        if (rating === "all+h") ratingQuery = ``
         if (rating === "all" && !username) ratingQuery = `posts.rating = 'cute'`
         let styleQuery = ""
         if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
@@ -34,6 +35,7 @@ export default class SQLSearch {
         if (style === "lineart") styleQuery = `posts.style = 'lineart'`
         if (style === "promo") styleQuery = `posts.style = 'promo'`
         if (style === "all") styleQuery = `NOT (posts.style = 'sketch' OR posts.style = 'lineart')`
+        if (style === "all+s") styleQuery = ``
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`

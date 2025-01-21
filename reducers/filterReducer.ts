@@ -13,7 +13,13 @@ const filterSlice = createSlice({
         blur: 0,
         sharpen: 0,
         pixelate: 1,
-        splatter: 0
+        splatter: 0,
+        lowpass: 100,
+        highpass: 0,
+        reverb: 0,
+        delay: 0,
+        phaser: 0,
+        bitcrush: 0
     },
     reducers: {
         setBrightness: (state, action) => {state.brightness = action.payload},
@@ -25,11 +31,20 @@ const filterSlice = createSlice({
         setSharpen: (state, action) => {state.sharpen = action.payload},
         setPixelate: (state, action) => {state.pixelate = action.payload},
         setSplatter: (state, action) => {state.splatter = action.payload},
+        setLowpass: (state, action) => {state.lowpass = action.payload},
+        setHighpass: (state, action) => {state.highpass = action.payload},
+        setReverb: (state, action) => {state.reverb = action.payload},
+        setDelay: (state, action) => {state.delay = action.payload},
+        setPhaser: (state, action) => {state.phaser = action.payload},
+        setBitcrush: (state, action) => {state.bitcrush = action.payload}
     }    
 })
 
-const {setBrightness, setContrast, setHue, setSaturation, setLightness, 
-    setBlur, setSharpen, setPixelate, setSplatter} = filterSlice.actions
+const {
+    setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, 
+    setSharpen, setPixelate, setSplatter, setLowpass, setHighpass, setReverb, 
+    setDelay, setPhaser, setBitcrush
+} = filterSlice.actions
 
 export const useFilterSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
@@ -42,7 +57,13 @@ export const useFilterSelector = () => {
         blur: selector((state) => state.filter.blur),
         sharpen: selector((state) => state.filter.sharpen),
         pixelate: selector((state) => state.filter.pixelate),
-        splatter: selector((state) => state.filter.splatter)
+        splatter: selector((state) => state.filter.splatter),
+        lowpass: selector((state) => state.filter.lowpass),
+        highpass: selector((state) => state.filter.highpass),
+        reverb: selector((state) => state.filter.reverb),
+        delay: selector((state) => state.filter.delay),
+        phaser: selector((state) => state.filter.phaser),
+        bitcrush: selector((state) => state.filter.bitcrush)
     }
 }
 
@@ -57,7 +78,13 @@ export const useFilterActions = () => {
         setBlur: (state: number) => dispatch(setBlur(state)),
         setSharpen: (state: number) => dispatch(setSharpen(state)),
         setPixelate: (state: number) => dispatch(setPixelate(state)),
-        setSplatter: (state: number) => dispatch(setSplatter(state))
+        setSplatter: (state: number) => dispatch(setSplatter(state)),
+        setLowpass: (state: number) => dispatch(setLowpass(state)),
+        setHighpass: (state: number) => dispatch(setHighpass(state)),
+        setReverb: (state: number) => dispatch(setReverb(state)),
+        setDelay: (state: number) => dispatch(setDelay(state)),
+        setPhaser: (state: number) => dispatch(setPhaser(state)),
+        setBitcrush: (state: number) => dispatch(setBitcrush(state))
     }
 }
 

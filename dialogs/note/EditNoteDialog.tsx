@@ -99,6 +99,9 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
         return (
             <>
             <div className="edit-note-dialog-row">
+                <span className="edit-note-dialog-info-text">{i18n.dialogs.editNote.characterNotesInfo}</span>
+            </div>
+            <div className="edit-note-dialog-row">
                 <span className="edit-note-dialog-text">{i18n.labels.characterTag}</span>
             </div>
             <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

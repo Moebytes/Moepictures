@@ -68,6 +68,7 @@
             "model": "モデル"
         },
         "rating": {
+            "allH": "オール+H",
             "cute": "かわいい",
             "sexy": "セクシー",
             "ecchi": "エッチ",
@@ -109,6 +110,12 @@
         "sharpen": "研ぐ",
         "pixelate": "ピクセルレート",
         "splatter": "スプラッター",
+        "lowpass": "ローパス",
+        "highpass": "ハイパス",
+        "reverb": "リバーブ",
+        "delay": "遅延",
+        "phaser": "フェーザー",
+        "bitcrush": "ビットクラッシュ",
         "reset": "リセット"
     },
     "sort": {
@@ -997,7 +1004,8 @@
             "error": "このタグを編集できませんでした。"
         },
         "editNote": {
-            "title": "編集ノート"
+            "title": "編集ノート",
+            "characterNotesInfo": "*複数のキャラクターがいる場合のみ、キャラクターノートを使用する。"
         },
         "favgroup": {
             "title": "お気に入りグループに追加"

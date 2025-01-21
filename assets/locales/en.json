@@ -68,6 +68,7 @@
             "model": "Model"
         },
         "rating": {
+            "allH": "All+H",
             "cute": "Cute",
             "sexy": "Sexy",
             "ecchi": "Ecchi",
@@ -109,6 +110,12 @@
         "sharpen": "Sharpen",
         "pixelate": "Pixelate",
         "splatter": "Splatter",
+        "lowpass": "Lowpass",
+        "highpass": "Highpass",
+        "reverb": "Reverb",
+        "delay": "Delay",
+        "phaser": "Phaser",
+        "bitcrush": "Bitcrush",
         "reset": "Reset"
     },
     "sort": {
@@ -996,7 +1003,8 @@
             "error": "Could not edit this tag."
         },
         "editNote": {
-            "title": "Edit Note"
+            "title": "Edit Note",
+            "characterNotesInfo": "*Only use character notes if there are multiple characters"
         },
         "favgroup": {
             "title": "Add to Favorite Group"

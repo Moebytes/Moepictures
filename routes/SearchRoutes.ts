@@ -25,13 +25,14 @@ const searchLimiter = rateLimit({
 const SearchRoutes = (app: Express) => {
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {query, type, rating, style, sort, offset, limit, favoriteMode} = req.query as PostSearchParams
+            let {query, type, rating, style, sort, offset, limit} = req.query as PostSearchParams
             if (!type) type = "all"
             if (!rating) rating = "all"
             if (!style) style = "all"
             if (!sort) sort = "random"
             let showChildren = req.query.showChildren === "true"
             let withTags = req.query.withTags === "true"
+            let favoriteMode = req.query.favoriteMode === "true"
             if (!query) query = ""
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRating(rating, true)) return res.status(400).send("Invalid rating")

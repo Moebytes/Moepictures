@@ -191,9 +191,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const postsClick = () => {
         if (props.goBack) {
-            history.push("/posts")
+            history.push("/posts?loaded=true")
         } else {
-            history.push("/posts")
+            history.push("/posts?loaded=true")
             setSearchFlag(true)
         }
     }

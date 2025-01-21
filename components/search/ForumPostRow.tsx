@@ -5,10 +5,10 @@ useFilterSelector, useThreadDialogSelector, useThreadDialogActions, useFlagActio
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import quoteOptIcon from "../../assets/icons/commentquote.png"
-import reportOptIcon from "../../assets/icons/commentreport.png"
-import editOptIcon from "../../assets/icons/commentedit.png"
-import deleteOptIcon from "../../assets/icons/commentdelete.png"
+import quoteOptIcon from "../../assets/icons/quote-opt.png"
+import reportOptIcon from "../../assets/icons/report-opt.png"
+import editOptIcon from "../../assets/icons/edit-opt.png"
+import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -185,11 +185,11 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
                         <img className="commentrow-options-img" src={editOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.edit}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
                         <img className="commentrow-options-img" src={deleteOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.delete}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div>
                 </div>
             )
@@ -199,20 +199,20 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
                         <img className="commentrow-options-img" src={quoteOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.quote}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
                         <img className="commentrow-options-img" src={editOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.edit}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
                         <img className="commentrow-options-img" src={deleteOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.delete}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="commentrow-options-container" onClick={reportForumPostDialog}>
                         <img className="commentrow-options-img" src={reportOptIcon}/>
-                        <span className="commentrow-options-text">{i18n.buttons.report}</span>
+                        <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.report}</span>
                     </div>}
                 </div>
             )

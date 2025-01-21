@@ -1022,12 +1022,21 @@ export default class Functions {
         const scale = (maxValue - minValue) / (maxPos - minPos)
         const value = Math.exp(minValue + scale * (position - minPos))
         return value
-      }
+    }
 
-      public static linearToDecibels = (value: number) => {
+    public static logSlider2 = (position: number, min: number, max: number) => {
+        const minPos = 0
+        const maxPos = 100
+        const minValue = Math.log(min)
+        const maxValue = Math.log(max)
+        const scale = (maxValue - minValue) / (maxPos - minPos)
+        return Math.exp(minValue + scale * (position - minPos))
+    }
+
+    public static linearToDecibels = (value: number) => {
         if (value === 0) return -Infinity
         return 20 * Math.log10(value)
-      }
+    }
 
     private static parseTransparentColor = (color: string) => {
         return Number(`0x${color.replace(/^#/, "")}`)
@@ -1316,7 +1325,7 @@ export default class Functions {
     }
       
     public static validRating = (rating: PostRating, all?: boolean) => {
-        if (all) if (rating === "all") return true
+        if (all) if (rating === "all" || rating === "all+h") return true
         if (rating === "cute" ||
             rating === "sexy" ||
             rating === "ecchi" ||
@@ -1325,7 +1334,7 @@ export default class Functions {
     }
 
     public static isR18 = (ratingType: PostRating) => {
-        return ratingType === "hentai"
+        return ratingType === "hentai" || ratingType === "all+h"
     }
 
     public static r18 = () => {
@@ -2501,9 +2510,13 @@ export default class Functions {
         return fileType(new Uint8Array(buffer))
     }
 
-    public static isEncrypted = (buffer: ArrayBuffer | Buffer) => {
+    public static isEncrypted = (buffer: ArrayBuffer | Buffer, link: string) => {
         const result = Functions.bufferFileType(buffer)
         if (result.length) {
+            if (result[0].typename === "mp3") {
+                if (!Functions.isAudio(link)) return true
+            }
+            if (result[0].typename === "exe") return true
             if (result[0].typename === "pic") return true
             if (result[0].typename === "mpeg") return true
             return false

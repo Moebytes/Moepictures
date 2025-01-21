@@ -50,18 +50,18 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const history = useHistory()
 
-    let rating = props.post?.rating || (ratingType === functions.r18() ? functions.r18() : "all")
+    let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
 
     const searchPosts = async () => {
         // These posts won't have related for performance
         if (props.post?.type === "model" || props.post?.type === "live2d") return []
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
-        rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
 
         if (result.length < 50 && props.fallback?.[0]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
-            rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -70,7 +70,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
         if (result.length < 50 && props.fallback?.[1]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
-            rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -139,7 +139,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             }
         }
         let result = await functions.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
-        rating: functions.isR18(rating) ? functions.r18() : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren, offset: newOffset}, session, setSessionFlag)
 
         let hasMore = result?.length >= 100

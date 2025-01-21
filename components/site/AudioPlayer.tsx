@@ -28,6 +28,7 @@ let audioNode: Tone.ToneAudioNode
 let bitcrusherNode: AudioWorkletNode
 let soundtouchNode: AudioWorkletNode
 let gainNode: Tone.Gain
+let timer = null as any
 
 const initialize = async () => {
     player = new Tone.Player(silence).sync().start()
@@ -52,7 +53,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
-    const {pixelate} = useFilterSelector()
+    const {lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {audio, audioPost, audioRewindFlag, audioFastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, audioSecondsProgress, audioProgress, 
     audioDragProgress, audioReverse, audioSpeed, pitch, audioVolume, audioPreviousVolume, audioPaused, audioDuration, audioDragging, audioSeekTo} = usePlaybackSelector()
     const {setAudio, setAudioPost, setAudioRewindFlag, setAudioFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
@@ -70,6 +71,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const audioVolumeSliderRef = useRef<Slider>(null)
     const [init, setInit] = useState(false)
     const [hover, setHover] = useState(false)
+    const [effects, setEffects] = useState([] as {type: string, node: (Tone.ToneAudioNode | AudioWorkletNode)}[])
     const location = useLocation()
     const history = useHistory()
 
@@ -82,6 +84,38 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const getFilter = () => {
         if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const removeEffect = (type: string) => {
+        const index = effects.findIndex((e) => e?.type === type)
+        if (index !== -1) {
+            effects[index] = null as any
+            setEffects(effects.filter(Boolean))
+        }
+    }
+
+    const pushEffect = (type: string, node: Tone.ToneAudioNode | AudioWorkletNode) => {
+        const obj = {type, node}
+        const index = effects.findIndex((e) => e?.type === type)
+        if (index !== -1) {
+            effects[index] = obj
+        } else {
+            effects.push(obj)
+        }
+        setEffects(effects)
+    }
+    
+    const applyEffects = () => {
+        if (!soundtouchNode) return
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(() => {
+            player.disconnect()
+            soundtouchNode.disconnect()
+            const nodes = effects.map((e) => e?.node).filter(Boolean)
+            if (nodes.length) nodes.forEach((n) => n.disconnect())
+            audioNode.input = player
+            audioNode.input.chain(...[soundtouchNode, ...nodes, audioNode.output!])
+        }, 25)
     }
     
     const loadAudio = async () => {
@@ -266,16 +300,91 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         updatePitch()
     }, [pitch, audioSpeed])
 
-    const bitcrush = async () => {
+    const updateBitcrush = async () => {
         if (!bitcrusherNode) return
         const bitcrushParams = bitcrusherNode.parameters as unknown as {get: (key: string) => AudioParam}
-        if (pixelate === 1) return bitcrushParams.get("sampleRate").value = 44100
-        bitcrushParams.get("sampleRate").value = Math.ceil(22050 / pixelate)
+        bitcrushParams.get("sampleRate").value = functions.logSlider2(bitcrush, 44100, 100)
+        if (bitcrush === 0) {
+            removeEffect("bitcrush")
+        } else {
+            pushEffect("bitcrush", bitcrusherNode)
+        }
+        applyEffects()
     }
 
     useEffect(() => {
-        bitcrush()
-    }, [pixelate])
+        updateBitcrush()
+    }, [bitcrush])
+
+    const updateLowpass = async () => {
+        if (lowpass === 100) {
+            removeEffect("lowpass")
+        } else {
+            const lowpassFilter = new Tone.Filter({type: "lowpass", frequency: functions.logSlider2(lowpass, 100, 20000), Q: 5, rolloff: -12})
+            pushEffect("lowpass", lowpassFilter)
+        }
+        applyEffects()
+    }
+
+    useEffect(() => {
+        updateLowpass()
+    }, [lowpass])
+
+    const updateHighpass = async () => {
+        if (highpass === 0) {
+            removeEffect("highpass")
+        } else {
+            const lowpassFilter = new Tone.Filter({type: "highpass", frequency: functions.logSlider2(highpass, 100, 20000), Q: 5, rolloff: -12})
+            pushEffect("highpass", lowpassFilter)
+        }
+        applyEffects()
+    }
+
+    useEffect(() => {
+        updateHighpass()
+    }, [highpass])
+
+    const updateReverb = async () => {
+        if (reverb === 0) {
+            removeEffect("reverb")
+        } else {
+            const reverbEffect = new Tone.Reverb({wet: reverb, decay: 3})
+            pushEffect("reverb", reverbEffect)
+        }
+        applyEffects()
+    }
+
+    useEffect(() => {
+        updateReverb()
+    }, [reverb])
+
+    const updateDelay = async () => {
+        if (delay === 0) {
+            removeEffect("delay")
+        } else {
+            const delayEffect = new Tone.PingPongDelay({wet: delay, delayTime: 0.25, feedback: 0.5})
+            pushEffect("delay", delayEffect)
+        }
+        applyEffects()
+    }
+
+    useEffect(() => {
+        updateDelay()
+    }, [delay])
+
+    const updatePhaser = async () => {
+        if (phaser === 0) {
+            removeEffect("phaser")
+        } else {
+            const phaserEffect = new Tone.Phaser({wet: phaser, frequency: 3})
+            pushEffect("phaser", phaserEffect)
+        }
+        applyEffects()
+    }
+
+    useEffect(() => {
+        updatePhaser()
+    }, [phaser])
 
     const closeDropdowns = () => {
         setShowPitchDropdown(false)

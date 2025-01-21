@@ -50,6 +50,7 @@ const darkColorList = {
     "--previewBG": "#4a44ff",
     "--editBG": "#347bff",
     "--r18BGColor": "#5603033d",
+    "--audioFilterColor": "#ff4d97"
 }
 
 const lightColorList = {
@@ -88,6 +89,7 @@ const lightColorList = {
     "--previewBG": "#b2d0ff",
     "--editBG": "#afe6ff",
     "--r18BGColor": "#e206444a",
+    "--audioFilterColor": "#ff4d97"
 }
 
 interface Props {

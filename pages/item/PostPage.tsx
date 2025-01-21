@@ -305,11 +305,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setImage(images[0])
                 setOrder(1)
             }
+            /*
             if (functions.isR18(ratingType)) {
                 if (!functions.isR18(post.rating)) setRatingType("all")
             } else {
                 if (functions.isR18(post.rating)) setRatingType(functions.r18())
-            }
+            }*/
         }
     }, [post, ratingType, order, session.upscaledImages])
 

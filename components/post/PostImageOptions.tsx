@@ -1,29 +1,20 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useFilterSelector, useInteractionActions, useLayoutSelector,  
+import {useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
-useSessionActions, useCacheSelector, useGroupDialogActions, useFilterActions,
+useSessionActions, useCacheSelector, useGroupDialogActions,
 useCacheActions} from "../../store"
 import functions from "../../structures/Functions"
-import Slider from "react-slider"
 import star from "../../assets/icons/star.png"
 import starFavorited from "../../assets/icons/starFavorited.png"
 import starGroup from "../../assets/icons/stargroup.png"
 import starGroupFavorited from "../../assets/icons/stargroup-favorited.png"
 import download from "../../assets/icons/download.png"
 import filters from "../../assets/icons/filters.png"
-import brightnessIcon from "../../assets/icons/brightness.png"
-import contrastIcon from "../../assets/icons/contrast.png"
-import hueIcon from "../../assets/icons/hue.png"
-import saturationIcon from "../../assets/icons/saturation.png"
-import lightnessIcon from "../../assets/icons/lightness.png"
-import blurIcon from "../../assets/icons/blur.png"
-import sharpenIcon from "../../assets/icons/sharpen.png"
-import pixelateIcon from "../../assets/icons/pixelate.png"
-import splatterIcon from "../../assets/icons/splatter.png"
 import nextIcon from "../../assets/icons/next.png"
 import prevIcon from "../../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
-import {PostFull, PostHistory, UnverifiedPost, ImageFormat} from "../../types/Types"
+import Filters from "./Filters"
+import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 
 interface Props {
     img?: string
@@ -44,8 +35,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {noteMode, format} = useSearchSelector()
     const {setFormat} = useSearchActions()
     const {posts} = useCacheSelector()
@@ -142,31 +131,19 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const resetFilters = () => {
-        setBrightness(100)
-        setContrast(100)
-        setHue(180)
-        setSaturation(100)
-        setLightness(100)
-        setBlur(0)
-        setSharpen(0)
-        setPixelate(1)
-        setSplatter(0)
-    }
-
     const getFilterMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
+        if (typeof document === "undefined") return 0
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
+        if (!rect) return 0
         const raw = window.innerWidth - rect.right
         let offset = -120
         if (mobile) offset += 80
         if (noteMode) offset += 10
-        return `${raw + offset}px`
+        return raw + offset
     }
 
     const getFilterMarginTop = () => {
-        if (typeof document === "undefined") return "0px"
+        if (typeof document === "undefined") return 0
         let elementName = ".post-image-box"
         if (props.model) elementName = ".post-model-box"
         if (props.live2d) elementName = ".post-model-box"
@@ -174,12 +151,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (noteMode) elementName = ".note-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
+        if (!rect || !bodyRect) return 0
         const raw = bodyRect.bottom - rect.bottom
         let offset = -250
         if (mobile) offset += 20
         if (session.showR18) offset -= 35
-        return `${raw + offset}px`
+        return raw + offset
     }
 
     const getFormatMarginRight = () => {
@@ -336,57 +313,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 <button className="format-dropdown-button" onClick={() => {setFormat("jxl"); setShowFormatDropdown(false)}}>JXL</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("svg"); setShowFormatDropdown(false)}}>SVG</button>
             </div>
-            <div className={`post-dropdown ${showFilterDropdown ? "" : "hide-post-dropdown"}`}
-            style={{marginRight: getFilterMarginRight(), marginTop: getFilterMarginTop()}}>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={brightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.brightness}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={contrastIcon} style={{marginLeft: "7px", marginRight: "-7px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.contrast}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={hueIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.hue}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={saturationIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.saturation}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={lightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.lightness}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={blurIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.blur}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={sharpenIcon} style={{marginLeft: "8px", marginRight: "-8px", filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.sharpen}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
-                </div>
-                <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={pixelateIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.pixelate}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
-                </div>
-                {session.showR18 ? <div className="post-dropdown-row filters-row">
-                    <img className="post-dropdown-img" src={splatterIcon} style={{filter: getFilter()}}/>
-                    <span className="post-dropdown-text">{i18n.filters.splatter}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
-                </div> : null}
-                <div className="post-dropdown-row filters-row">
-                    <button className="filters-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                </div>
-            </div>
+            <Filters active={showFilterDropdown} right={getFilterMarginRight()} top={getFilterMarginTop()} origin="bottom"/>
         </div>
     )
 }

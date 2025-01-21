@@ -14,8 +14,10 @@ const LocalStorage: React.FunctionComponent = (props) => {
     ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier, showChildren} = useSearchSelector()
     const {setImageExpand, setNoteDrawingEnabled, setScroll, setFormat, setSaveSearch, setFavSearch, setImageType, setRatingType, 
     setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren} = useSearchActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
+    lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
+    setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush} = useFilterActions()
     const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
     const {page, historyPage, messagePage, threadPage, artistsPage, charactersPage, commentsPage, forumPage,
@@ -76,6 +78,12 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedSharpen = localStorage.getItem("sharpen")
         const savedPixelate = localStorage.getItem("pixelate")
         const savedSplatter = localStorage.getItem("splatter")
+        const savedLowpass = localStorage.getItem("lowpass")
+        const savedHighpass = localStorage.getItem("highpass")
+        const savedReverb = localStorage.getItem("reverb")
+        const savedDelay = localStorage.getItem("delay")
+        const savedPhaser = localStorage.getItem("phaser")
+        const savedBitcrush = localStorage.getItem("bitcrush")
         const savedParticles = localStorage.getItem("particles")
         const savedParticleAmount = localStorage.getItem("particleAmount")
         const savedParticleSize = localStorage.getItem("particleSize")
@@ -132,6 +140,12 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedSharpen) setSharpen(Number(savedSharpen))
         if (savedPixelate) setPixelate(Number(savedPixelate))
         if (savedSplatter) setSplatter(Number(savedSplatter))
+        if (savedLowpass) setLowpass(Number(savedLowpass))
+        if (savedHighpass) setHighpass(Number(savedHighpass))
+        if (savedReverb) setReverb(Number(savedReverb))
+        if (savedDelay) setDelay(Number(savedDelay))
+        if (savedPhaser) setPhaser(Number(savedPhaser))
+        if (savedBitcrush) setBitcrush(Number(savedBitcrush))
         if (savedParticles) setParticles(savedParticles === "true")
         if (savedParticleAmount) setParticleAmount(Number(savedParticleAmount))
         if (savedParticleSize) setParticleSize(Number(savedParticleSize))
@@ -212,6 +226,15 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("pixelate", String(pixelate))
         localStorage.setItem("splatter", String(splatter))
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter])
+
+    useEffect(() => {
+        localStorage.setItem("lowpass", String(lowpass))
+        localStorage.setItem("highpass", String(highpass))
+        localStorage.setItem("reverb", String(reverb))
+        localStorage.setItem("delay", String(delay))
+        localStorage.setItem("phaser", String(phaser))
+        localStorage.setItem("bitcrush", String(bitcrush))
+    }, [lowpass, highpass, reverb, delay, phaser, bitcrush])
 
     useEffect(() => {
         localStorage.setItem("disableZoom", String(disableZoom))

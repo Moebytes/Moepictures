@@ -42,7 +42,7 @@ export default class Crypto {
         if (functions.isVideo(link) || functions.isGIF(link)) return link
         const buffer = await fetch(link, {credentials: "include"}).then((r) => r.arrayBuffer())
         if (functions.isWebP(link)) if (functions.isAnimatedWebp(buffer)) return link
-        if (!functions.isEncrypted(buffer)) return link
+        if (!functions.isEncrypted(buffer, link)) return link
         try {
             const decrypted = Crypto.decrypt(buffer, privateKey, serverPublicKey, session)
             const blob = new Blob([new Uint8Array(decrypted)])
@@ -57,7 +57,7 @@ export default class Crypto {
         if (permissions.noEncryption(session)) return buffer
         if (link.includes("/unverified")) return buffer
         if (functions.isVideo(link) || functions.isGIF(link)) return buffer
-        if (!functions.isEncrypted(buffer)) return buffer
+        if (!functions.isEncrypted(buffer, link)) return buffer
         if (functions.isWebP(link)) if (functions.isAnimatedWebp(buffer)) return buffer
         const decrypted = Crypto.decrypt(buffer, privateKey, serverPublicKey, session)
         return decrypted

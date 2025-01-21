@@ -24,7 +24,6 @@ let reloadedPost = false
 let replace = true
 let manualHistoryChange = false
 let init = true
-
 let limit = 100
 
 const ImageGrid: React.FunctionComponent = (props) => {
@@ -263,6 +262,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 styleType !== initData.styleType || 
                 sortType !== initData.sortType ||
                 sortReverse !== initData.sortReverse) {
+                    const loadParam = new URLSearchParams(window.location.search).get("loaded")
+                    if (loadParam) init = false
                     if (init) {
                         return init = false
                     } else {
@@ -343,10 +344,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (Number.isNaN(resultCount)) resultCount = posts.length
         setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
     }, [posts, i18n])
-
-    useEffect(()=> {
-        console.log(posts)
-    }, [posts])
 
     const updateOffset = async () => {
         if (noResults) return
@@ -443,6 +440,14 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
     }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, 
         ratingType, styleType, sortType, sortReverse, pageMultiplier, showChildren, favSearch])
+
+    useEffect(() => {
+        if (loaded) {
+            const searchParams = new URLSearchParams(window.location.search)
+            searchParams.delete("loaded")
+            history.replace(`${location.pathname}?${searchParams.toString()}`)
+        }
+    }, [loaded])
 
     useEffect(() => {
         if (manualHistoryChange) return

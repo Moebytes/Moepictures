@@ -18,6 +18,7 @@ export type PostType =
 
 export type PostRating =
     | "all"
+    | "all+h"
     | "cute" 
     | "sexy" 
     | "ecchi" 

@@ -8,6 +8,7 @@ const activeSlice = createSlice({
     initialState: {
         activeDropdown: "none",
         filterDropActive: false,
+        showMusicFilters: false,
         activeGroup: null as GroupPosts | null,
         activeFavgroup: null as Favgroup | null,
         headerText: "",
@@ -21,6 +22,7 @@ const activeSlice = createSlice({
     reducers: {
         setActiveDropdown: (state, action) => {state.activeDropdown = action.payload},
         setFilterDropActive: (state, action) => {state.filterDropActive = action.payload},
+        setShowMusicFilters: (state, action) => {state.showMusicFilters = action.payload},
         setActiveGroup: (state, action) => {state.activeGroup = action.payload},
         setActiveFavgroup: (state, action) => {state.activeFavgroup = action.payload},
         setHeaderText: (state, action) => {state.headerText = action.payload},
@@ -36,7 +38,7 @@ const activeSlice = createSlice({
 const {
     setActiveDropdown, setFilterDropActive, setActiveGroup, setActiveFavgroup,
     setHeaderText, setSidebarText, setQuoteText, setHelpTab, setModState,
-    setActionBanner, setNewsBanner
+    setActionBanner, setNewsBanner, setShowMusicFilters
 } = activeSlice.actions
 
 export const useActiveSelector = () => {
@@ -44,6 +46,7 @@ export const useActiveSelector = () => {
     return {
         activeDropdown: selector((state) => state.active.activeDropdown),
         filterDropActive: selector((state) => state.active.filterDropActive),
+        showMusicFilters: selector((state) => state.active.showMusicFilters),
         activeGroup: selector((state) => state.active.activeGroup),
         activeFavgroup: selector((state) => state.active.activeFavgroup),
         headerText: selector((state) => state.active.headerText),
@@ -61,6 +64,7 @@ export const useActiveActions = () => {
     return {
         setActiveDropdown: (state: string) => dispatch(setActiveDropdown(state)),
         setFilterDropActive: (state: boolean) => dispatch(setFilterDropActive(state)),
+        setShowMusicFilters: (state: boolean) => dispatch(setShowMusicFilters(state)),
         setActiveGroup: (state: GroupPosts | null) => dispatch(setActiveGroup(state)),
         setActiveFavgroup: (state: Favgroup | null) => dispatch(setActiveFavgroup(state)),
         setHeaderText: (state: string) => dispatch(setHeaderText(state)),

@@ -1,12 +1,11 @@
-import React, {useEffect, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import Slider from "react-slider"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+import {useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagActions, useMiscDialogActions, 
 useInteractionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions, useActiveSelector,
-usePageSelector, useCacheSelector, useFilterActions, useActiveActions, useLayoutActions,
-useMiscDialogSelector, usePostDialogSelector, useGroupDialogSelector, useCacheActions} from "../../store"
+usePageSelector, useCacheSelector, useActiveActions, useLayoutActions, useMiscDialogSelector, usePostDialogSelector, 
+useGroupDialogSelector, useCacheActions} from "../../store"
 import leftArrow from "../../assets/icons/leftArrow.png"
 import rightArrow from "../../assets/icons/rightArrow.png"
 import upArrow from "../../assets/icons/upArrow.png"
@@ -16,6 +15,7 @@ import download from "../../assets/icons/download.png"
 import reset from "../../assets/icons/reset.png"
 import all from "../../assets/icons/all.png"
 import allS from "../../assets/icons/all+s.png"
+import allH from "../../assets/icons/all+h.png"
 import image from "../../assets/icons/image.png"
 import animation from "../../assets/icons/animation.png"
 import video from "../../assets/icons/video.png"
@@ -39,16 +39,7 @@ import filters from "../../assets/icons/filters.png"
 import size from "../../assets/icons/size.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
-import brightnessIcon from "../../assets/icons/brightness.png"
-import contrastIcon from "../../assets/icons/contrast.png"
-import hueIcon from "../../assets/icons/hue.png"
-import saturationIcon from "../../assets/icons/saturation.png"
-import lightnessIcon from "../../assets/icons/lightness.png"
-import blurIcon from "../../assets/icons/blur.png"
-import sharpenIcon from "../../assets/icons/sharpen.png"
 import squareIcon from "../../assets/icons/square.png"
-import pixelateIcon from "../../assets/icons/pixelate.png"
-import splatterIcon from "../../assets/icons/splatter.png"
 import speedIcon from "../../assets/icons/speed.png"
 import reverseIcon from "../../assets/icons/reverse.png"
 import scrollIcon from "../../assets/icons/scroll.png"
@@ -72,20 +63,19 @@ import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import checkbox from "../../assets/icons/checkbox2.png"
 import checkboxChecked from "../../assets/icons/checkbox2-checked.png"
-import {PostType, PostStyle, PostSize, PostSort} from "../../types/Types"
+import Filters from "../post/Filters"
+import {PostSort} from "../../types/Types"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {mobile, tablet, relative, hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
+    const {mobile, tablet, relative, hideSortbar, hideSidebar, hideTitlebar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {activeDropdown, filterDropActive} = useActiveSelector()
     const {setActiveDropdown, setFilterDropActive} = useActiveActions()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
     const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
@@ -298,6 +288,13 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.hentai}</span>
                 </div>
             )
+        } else if (ratingType === "all+h") {
+            return (
+                <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img rotate" src={allH}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.allH}</span>
+                </div>
+            )
         } else {
             return (
                 <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
@@ -317,6 +314,8 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={ecchi} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         } else if (ratingType === "hentai") {
             return <img style={{height: "30px"}} className="sortbar-img" src={hentai} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "all+h") {
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={allH} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         }
@@ -329,6 +328,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const raw = rect.x
         let offset = 0
         if (ratingType === "all") offset = -15
+        if (ratingType === "all+h") offset = -15
         if (ratingType === "cute") offset = -10
         if (ratingType === "sexy") offset = -10
         if (ratingType === "ecchi") offset = -5
@@ -543,10 +543,10 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getFiltersMargin = () => {
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return "30px"
+        if (!rect) return 30
         const raw = window.innerWidth - rect.right
         let offset = -110
-        return `${raw + offset}px`
+        return raw + offset
     }
 
     const toggleFilterDrop = () => {
@@ -565,18 +565,6 @@ const SortBar: React.FunctionComponent = (props) => {
         const newValue = activeDropdown === "page-multiplier" ? "none" : "page-multiplier"
         setActiveDropdown(newValue)
         setFilterDropActive(newValue === "page-multiplier")
-    }
-
-    const resetFilters = () => {
-        setBrightness(100)
-        setContrast(100)
-        setHue(180)
-        setSaturation(100)
-        setLightness(100)
-        setBlur(0)
-        setSharpen(0)
-        setPixelate(1)
-        setSplatter(0)
     }
 
     const toggleSquare = () => {
@@ -956,6 +944,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img rotate" src={all} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">{i18n.tag.all}</span>
                 </div>
+                {session.showR18 ?
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("all+h")}>
+                    <img className="sortbar-dropdown-img rotate" src={allH}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.allH}</span>
+                </div> : null}
                 <div className="sortbar-dropdown-row" onClick={() => setRatingType("cute")}>
                     <img className="sortbar-dropdown-img" src={cute} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.rating.cute}</span>
@@ -1106,58 +1099,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
                 </> : null}
             </div>
-            <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getFiltersMargin(), top: `${dropTop}px`}}>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={brightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.brightness}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={contrastIcon} style={{marginLeft: "7px", marginRight: "-7px", filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.contrast}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={hueIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.hue}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={saturationIcon} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.saturation}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={lightnessIcon} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.lightness}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={blurIcon} style={{marginLeft: "20px", marginRight: "-20px", filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.blur}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={sharpenIcon} style={{marginLeft: "8px", marginRight: "-8px", filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.sharpen}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
-                </div>
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={pixelateIcon} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.pixelate}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
-                </div>
-                {session.showR18 ? 
-                <div className="sortbar-dropdown-row filters-row">
-                    <img className="sortbar-dropdown-img" src={splatterIcon} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">{i18n.filters.splatter}</span>
-                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
-                </div> : null}
-                <div className="sortbar-dropdown-row filters-row">
-                    <button className="filters-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                </div>
-            </div>
+            <Filters active={activeDropdown === "filters"} right={getFiltersMargin()} top={dropTop}/>
         </div>
         </>
     )
