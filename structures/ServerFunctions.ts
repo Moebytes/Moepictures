@@ -689,7 +689,7 @@ export default class ServerFunctions {
 
     public static tagMap = async () => {
         let result = await sql.tag.tags([])
-        const tagMap = {} as {[key: string]: any}
+        const tagMap = {} as {[key: string]: Tag}
         for (const tag of result) {
             tagMap[tag.tag] = tag
         }
@@ -1106,6 +1106,7 @@ export default class ServerFunctions {
         let artists = [{}] as UploadTag[]
         let characters = [{}] as UploadTag[]
         let series = [{}] as UploadTag[]
+        let meta = [] as string[]
         let tags = [] as string[]
         let newTags = [] as UploadTag[]
         const tagMap = await ServerFunctions.tagMap()
@@ -1179,16 +1180,21 @@ export default class ServerFunctions {
                 series.push({})
             }
 
-            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            tagArr = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
 
             let notExists = [] as UploadTag[]
-            for (let i = 0; i < tags.length; i++) {
-                const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
-            }
-            for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
-                if (index !== -1) notExists[i] = newTags[index]
+            for (let i = 0; i < tagArr.length; i++) {
+                const exists = tagMap[tagArr[i]]
+                if (exists) {
+                    if (exists.type === "meta") {
+                        meta.push(tagArr[i])
+                    } else {
+                        tags.push(tagArr[i])
+                    }
+                } else {
+                    tags.push(tagArr[i])
+                    notExists.push({tag: tagArr[i], description: `${functions.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
+                }
             }
             newTags = notExists
         } else {
@@ -1251,15 +1257,21 @@ export default class ServerFunctions {
                 series[series.length - 1].tag = seriesArr[i]
                 series.push({})
             }
-            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            tagArr = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+
             let notExists = [] as UploadTag[]
-            for (let i = 0; i < tags.length; i++) {
-                const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
-            }
-            for (let i = 0; i < notExists.length; i++) {
-                const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
-                if (index !== -1) notExists[i] = newTags[index]
+            for (let i = 0; i < tagArr.length; i++) {
+                const exists = tagMap[tagArr[i]]
+                if (exists) {
+                    if (exists.type === "meta") {
+                        meta.push(tagArr[i])
+                    } else {
+                        tags.push(tagArr[i])
+                    }
+                } else {
+                    tags.push(tagArr[i])
+                    notExists.push({tag: tagArr[i], description: `${functions.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
+                }
             }
             newTags = notExists
         }
@@ -1270,6 +1282,7 @@ export default class ServerFunctions {
             artists,
             characters,
             series,
+            meta,
             tags,
             newTags,
             danbooruLink

@@ -67,6 +67,27 @@ export const useFilterSelector = () => {
     }
 }
 
+const resetImageFilters = (dispatch: StoreDispatch) => {
+    dispatch(setBrightness(100))
+    dispatch(setContrast(100))
+    dispatch(setHue(180))
+    dispatch(setSaturation(100))
+    dispatch(setLightness(100))
+    dispatch(setBlur(0))
+    dispatch(setSharpen(0))
+    dispatch(setPixelate(1))
+    dispatch(setSplatter(0))
+}
+
+const resetAudioFilters = (dispatch: StoreDispatch) => {
+    dispatch(setLowpass(100))
+    dispatch(setHighpass(0))
+    dispatch(setReverb(0))
+    dispatch(setDelay(0))
+    dispatch(setPhaser(0))
+    dispatch(setBitcrush(0))
+}
+
 export const useFilterActions = () => {
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
@@ -84,7 +105,9 @@ export const useFilterActions = () => {
         setReverb: (state: number) => dispatch(setReverb(state)),
         setDelay: (state: number) => dispatch(setDelay(state)),
         setPhaser: (state: number) => dispatch(setPhaser(state)),
-        setBitcrush: (state: number) => dispatch(setBitcrush(state))
+        setBitcrush: (state: number) => dispatch(setBitcrush(state)),
+        resetImageFilters: () => resetImageFilters(dispatch),
+        resetAudioFilters: () => resetAudioFilters(dispatch)
     }
 }
 

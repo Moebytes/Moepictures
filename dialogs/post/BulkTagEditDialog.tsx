@@ -119,7 +119,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 let artistData = tagCategories.artists.map((a) => a.tag)
                 let characterData = tagCategories.characters.map((c) => c.tag)
                 let seriesData = tagCategories.series.map((s) => s.tag)
-                let tagData = tagCategories.tags.map((t) => t.tag)
+                let tagData = [...tagCategories.tags.map((t) => t.tag), ...tagCategories.meta.map((m) => m.tag)]
 
                 if (functions.cleanHTML(artists)?.trim()) {
                     artistData = functions.cleanHTML(artists).trim().split(/[\n\r\s]+/g)

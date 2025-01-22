@@ -77,12 +77,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setArtists(tagEditID.artists.map((t) => t.tag).join(" "))
         setCharacters(tagEditID.characters.map((t) => t.tag).join(" "))
         setSeries(tagEditID.series.map((t) => t.tag).join(" "))
-        const rawMetaTags = tagEditID.tags.filter((t) => t.type === "meta")
-        const rawTags = tagEditID.tags.filter((t) => t.type === "appearance" || 
-        t.type === "outfit" ||  t.type === "accessory" ||  t.type === "action" || 
-        t.type === "scenery" || t.type === "tag")
-        setMetaTags(rawMetaTags.map((t) => t.tag).join(" "))
-        setRawTags(functions.parseTagGroupsField(rawTags.map((t) => t.tag), tagEditID.tagGroups))
+        setMetaTags(tagEditID.meta.map((t) => t.tag).join(" "))
+        setRawTags(functions.parseTagGroupsField(tagEditID.tags.map((t) => t.tag), tagEditID.tagGroups))
     }
 
     const reset = () => {
@@ -258,20 +254,17 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             let hasUpscaled = image.upscaledFilename ? true : false
             const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
             const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
-            const tagMap = await functions.tagsCache(session, setSessionFlag)
 
             let artistArr = sourceLookup.artists.length ? sourceLookup.artists : tagLookup.artists
             const newArtists = artistArr?.map((a) => a.tag) || []
             const newCharacters = tagLookup.characters.map((c) => c.tag)
             const newSeries = tagLookup.series.map((s) => s.tag)
-            const newMeta = tagLookup.tags.filter((t) => tagMap[t]?.type === "meta")
-            const newTags = tagLookup.tags.filter((t) => !newMeta.includes(t))
 
             setArtists(newArtists.join(" "))
             setCharacters(newCharacters.join(" "))
             setSeries(newSeries.join(" "))
-            setMetaTags(newMeta.join(" "))
-            setRawTags(newTags.join(" "))
+            setMetaTags(tagLookup.meta.join(" "))
+            setRawTags(tagLookup.tags.join(" "))
         } catch (e) {
             console.log(e)
             errorRef.current!.innerText = i18n.pages.upload.nothingFound

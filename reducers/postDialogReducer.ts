@@ -10,6 +10,7 @@ interface TagEditID {
     artists: MiniTag[], 
     characters: MiniTag[], 
     series: MiniTag[], 
+    meta: MiniTag[],
     tags: MiniTag[],
     tagGroups?: TagGroupCategory[]
 }

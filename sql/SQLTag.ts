@@ -691,6 +691,7 @@ export default class SQLTag {
     public static insertTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
         const values = [groupID, postID] as string[]
         const valueArray = [] as string[]
+        if (!tags.length) return
     
         tags.forEach((tag, index) => {
             const offset = index + 3
@@ -712,6 +713,7 @@ export default class SQLTag {
     public static deleteTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
         const values = [groupID, postID] as string[]
         const valueArray = [] as string[]
+        if (!tags.length) return
 
         tags.forEach((tag, index) => {
             const offset = index + 3

@@ -35,24 +35,12 @@ const Filters: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
-    setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush} = useFilterActions()
+    setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush, resetImageFilters, resetAudioFilters} = useFilterActions()
     const {showMusicFilters} = useActiveSelector()
     const {setShowMusicFilters} = useActiveActions()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const resetFilters = () => {
-        setBrightness(100)
-        setContrast(100)
-        setHue(180)
-        setSaturation(100)
-        setLightness(100)
-        setBlur(0)
-        setSharpen(0)
-        setPixelate(1)
-        setSplatter(0)
     }
 
     const imageFiltersJSX = () => {
@@ -105,22 +93,13 @@ const Filters: React.FunctionComponent<Props> = (props) => {
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
             </div> : null}
             <div className="filter-dropdown-row filter-row">
-                <button className="filter-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
+                <button className="filter-button" onClick={() => resetImageFilters()}>{i18n.filters.reset}</button>
                 <button style={{marginLeft: "20px"}} className="filter-button" onClick={() => setShowMusicFilters(!showMusicFilters)}>
                     <img src={filterImage}/>
                 </button>
             </div>
             </>
         )
-    }
-
-    const resetMusicFilters = () => {
-        setLowpass(100)
-        setHighpass(0)
-        setReverb(0)
-        setDelay(0)
-        setPhaser(0)
-        setBitcrush(0)
     }
 
     const musicFiltersJSX = () => {
@@ -157,7 +136,7 @@ const Filters: React.FunctionComponent<Props> = (props) => {
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setBitcrush(value)} min={0} max={100} step={1} value={bitcrush}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <button className="audio-filter-button" onClick={() => resetMusicFilters()}>{i18n.filters.reset}</button>
+                <button className="audio-filter-button" onClick={() => resetAudioFilters()}>{i18n.filters.reset}</button>
                 <button style={{marginLeft: "20px"}} className="audio-filter-button" onClick={() => setShowMusicFilters(!showMusicFilters)}>
                     <img src={filterMusic}/>
                 </button>

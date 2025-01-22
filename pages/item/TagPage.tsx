@@ -254,7 +254,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
             featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
-            console.log(editTagObj)
+            if (editTagObj.tag === editTagObj.key) setTagFlag(true)
             history.push(`/tag/${editTagObj.key}`)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {

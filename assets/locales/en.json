@@ -757,8 +757,10 @@
             "seriesExists": "If the series tag does not yet exist, please upload a series image.",
             "hideImage": "Hide Image",
             "displayImage": "Display Image",
-            "enterTags": "Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it. If you need help with tags, read the ",
+            "enterTags": "Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be prompted to create it. If you need help with tags, read the ",
             "taggingGuide": "tagging guide.",
+            "organizeTags": " If there are multiple characters, please organize the tags into ",
+            "tagGroups": "tag groups.",
             "artistTag": "Artist Tag",
             "artistImage": "Artist Image",
             "addArtist": "Add artist",
@@ -791,6 +793,7 @@
             "commonArtist": "Common Artist",
             "commonCharacter": "Common Character",
             "commonSeries": "Common Series",
+            "commonMeta": "Common Meta",
             "appendTags": "Append Tags"
         },
         "edit": {

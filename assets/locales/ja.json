@@ -760,6 +760,8 @@
             "displayImage": "表示イメージ",
             "enterTags": "破線のタグをスペースで区切って入力します。タグはどの画像でも記述できます。タグが存在しない場合は、タグを作成するよう促されます。タグについてのヘルプが必要な場合は、こちらをお読みください：",
             "taggingGuide": "タグ付けガイド",
+            "organizeTags": " 複数の文字がある場合は、タグを整理してください： ",
+            "tagGroups": "タグのグループ",
             "artistTag": "アーティスト・タグ",
             "artistImage": "アーティスト・イメージ",
             "addArtist": "アーティストを追加",
@@ -792,6 +794,7 @@
             "commonArtist": "コモンアーティスト",
             "commonCharacter": "共通キャラクター",
             "commonSeries": "共通シリーズ",
+            "commonMeta": "コモンメタ",
             "appendTags": "タグの追加"
         },
         "edit": {

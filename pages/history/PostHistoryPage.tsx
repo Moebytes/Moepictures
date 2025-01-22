@@ -75,7 +75,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 historyObject.artists = categories.artists.map((a) => a.tag)
                 historyObject.characters = categories.characters.map((c) => c.tag)
                 historyObject.series = categories.series.map((s) => s.tag)
-                historyObject.tags = categories.tags.map((t) => t.tag)
+                historyObject.tags = [...categories.tags.map((t) => t.tag), ...categories.meta.map((m) => m.tag)]
                 result = [historyObject]
             }
         }

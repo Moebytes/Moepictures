@@ -21,7 +21,7 @@ import {useSessionSelector, useSessionActions, useLayoutActions, useActiveAction
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import "./styles/postpage.less"
-import {TagCategories, UnverifiedPost, ChildPost} from "../../types/Types"
+import {TagCategories, UnverifiedPost, ChildPost, TagGroupCategory} from "../../types/Types"
 
 interface Props {
     match: {params: {id: string}}
@@ -45,6 +45,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [image, setImage] = useState("")
     const [post, setPost] = useState(null as UnverifiedPost | null)
     const [tagCategories, setTagCategories] = useState(null as TagCategories | null)
+    const [tagGroupCategories, setTagGroupCategories] = useState([] as TagGroupCategory[])
     const [order, setOrder] = useState(1)
     const history = useHistory()
     const postID = props.match.params.id
@@ -121,6 +122,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -164,6 +167,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 }
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -264,10 +269,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <TitleBar post={post} unverified={true} goBack={true}/>
         <NavBar/>
         <div className="body">
-            {post && tagCategories ? 
-            <SideBar unverified={true} post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
-            <SideBar unverified={true}/>
-            }
+            <SideBar unverified={true} post={post} order={order} artists={tagCategories?.artists} characters={tagCategories?.characters} 
+            series={tagCategories?.series} tags={tagCategories?.tags} meta={tagCategories?.meta} tagGroups={tagGroupCategories}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     {images.length > 1 ?
@@ -275,7 +278,9 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
-                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} 
+                    artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} 
+                    tags={tagCategories.tags} meta={tagCategories.meta} tagGroups={tagGroupCategories}/> : null}
                     {originalPostJSX()}
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}

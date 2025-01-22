@@ -61,6 +61,7 @@ interface Props {
     artists?: MiniTag[] 
     characters?: MiniTag[]  
     series?: MiniTag[]
+    meta?: MiniTag[]
     tags?: MiniTag[]
     tagGroups?: TagGroupCategory[]
     unverified?: boolean
@@ -245,6 +246,27 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const generateMetaJSX = () => {
+        if (!props.meta) return
+        let jsx = [] as React.ReactElement[]
+        for (let i = 0; i < props.meta.length; i++) {
+            if (!props.meta[i]) break
+            const tagClick = () => {
+                if (!props.meta) return
+                history.push(`/tag/${props.meta[i].tag}`)
+            }
+            jsx.push(
+                <div className="mobileinfo-row">
+                    <span className="tag-hover">
+                        <span className="tag meta-tag-color" onClick={() => tagClick()}>{props.meta[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag-count ${props.meta[i].count === "1" ? "artist-tag-color" : ""}`}>{props.meta[i].count}</span>
+                    </span>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     const organizeTags = (tags: MiniTag[]) => {
         if (!tags?.length) return [] as MiniTag[]
         const meta = tags.filter((t) => t.type === "meta")
@@ -419,18 +441,18 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerTagEdit = () => {
-        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.meta || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, tagGroups: props.tagGroups,
+            meta: props.meta, tags: props.tags, tagGroups: props.tagGroups,
             unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerSourceEdit = () => {
-        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags || !props.order) return
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.meta || !props.tags || !props.order) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, tagGroups: props.tagGroups,
+            meta: props.meta, tags: props.tags, tagGroups: props.tagGroups,
             unverified: props.unverified, order: props.order || 1})
     }
 
@@ -774,6 +796,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-subcontainer">
                         {generateTagJSX()}
                     </div>
+                : null}
+
+                {props.meta ? <>
+                    <div className="mobileinfo-title-container">
+                            <span className="mobileinfo-title">{i18n.tag.meta}</span>
+                        </div>
+                    <div className="mobileinfo-subcontainer-column">
+                        {generateMetaJSX()}
+                    </div> </>
                 : null}
 
                 {props.post ? <>

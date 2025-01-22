@@ -1564,11 +1564,12 @@ export default class Functions {
 
     public static tagCategories = async (parsedTags: string[] | TagCount[] | Tag[] | undefined, session: Session, 
         setSessionFlag: (value: boolean) => void, cache?: boolean) => {
-        let artists = [] as MiniTag[] 
-        let characters = [] as MiniTag[] 
-        let series = [] as MiniTag[] 
+        let artists = [] as MiniTag[]
+        let characters = [] as MiniTag[]
+        let series = [] as MiniTag[]
+        let meta = [] as MiniTag[]
         let tags = [] as MiniTag[] 
-        if (!parsedTags) return {artists, characters, series, tags}
+        if (!parsedTags) return {artists, characters, series, meta, tags}
         let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", 
         {tags: parsedTags.map((t: string | TagCount | Tag) => typeof t === "string" ? t : t.tag)}, session, setSessionFlag)
         for (let i = 0; i < parsedTags.length; i++) {
@@ -1595,6 +1596,8 @@ export default class Functions {
                         characters.push(obj)
                     } else if (unverifiedTag.type === "series") {
                         series.push(obj)
+                    } else if (unverifiedTag.type === "meta") {
+                        meta.push(obj)
                     } else {
                         tags.push(obj)
                     }
@@ -1618,11 +1621,13 @@ export default class Functions {
                 characters.push(obj)
             } else if (foundTag.type === "series") {
                 series.push(obj)
+            } else if (foundTag.type === "meta") {
+                meta.push(obj)
             } else {
                 tags.push(obj)
             }
         }
-        return {artists, characters, series, tags}
+        return {artists, characters, series, meta, tags}
     }
 
     public static tagGroupCategories = async (tagGroups: MiniTagGroup[], session: Session, 
@@ -2284,6 +2289,62 @@ export default class Functions {
       
         return ""
     }
+
+    public static getCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
+        if (!ref) return 0
+        let caretPosition = 0
+        if (ref instanceof HTMLInputElement || ref instanceof HTMLTextAreaElement) {
+            caretPosition = ref.selectionStart || 0
+        } else {
+            const selection = window.getSelection()!
+            if (!selection.rangeCount) return 0
+            var range = selection.getRangeAt(0)
+            var preCaretRange = range.cloneRange()
+            preCaretRange.selectNodeContents(ref)
+            preCaretRange.setEnd(range.endContainer, range.endOffset)
+            caretPosition = preCaretRange.toString().length
+        }
+        return caretPosition
+    }
+
+    public static getTagX = () => {
+        if (typeof window === "undefined") return 0
+        const activeElement = document.activeElement
+        
+        if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+            const rect = activeElement.getBoundingClientRect()
+            const caretPosition = activeElement.selectionStart || 0
+            const approxCharWidth = parseFloat(getComputedStyle(activeElement).fontSize) * 0.5
+            return rect.left + caretPosition * approxCharWidth - 10
+        }
+
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = range.getBoundingClientRect()
+            return rect.left - 10
+        }
+        return 0
+    }
+
+    public static getTagY = () => {
+        if (typeof window === "undefined") return 0
+        const activeElement = document.activeElement
+
+        if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+            const rect = activeElement.getBoundingClientRect()
+            return rect.bottom + window.scrollY + 10
+        }
+
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = range.getBoundingClientRect()
+            return rect.bottom + window.scrollY + 10
+        }
+        return 0
+    }
+
     public static insertAtCaret = (text: string, caretPosition: number, tag: string) => {
         const words = text.split(" ")
         let charCount = 0
@@ -3473,6 +3534,7 @@ export default class Functions {
         let resultStr = ""
         let removeTags = [] as string[]
         for (const tagGroup of tagGroups) {
+            if (!tagGroup) continue
             if (tagGroup.name.toLowerCase() === "tags") continue
             let stringTags = tagGroup.tags.map((tag: string | MiniTag) => typeof tag === "string" ? tag : tag.tag)
             resultStr += `${tagGroup.name}{${stringTags.join(" ")}}\n`
@@ -3480,7 +3542,6 @@ export default class Functions {
         }
         let missingTags = tags.filter((tag) => !removeTags.includes(tag))
         resultStr += `${missingTags.join(" ")}`
-        console.log(resultStr)
         return resultStr
     }
 }

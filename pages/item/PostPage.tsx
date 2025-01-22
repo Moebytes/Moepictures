@@ -466,7 +466,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             currentPost.artists = categories.artists.map((a) => a.tag)
             currentPost.characters = categories.characters.map((c) => c.tag)
             currentPost.series = categories.series.map((s) => s.tag)
-            currentPost.tags = categories.tags.map((t) => t.tag)
+            currentPost.tags = [...categories.tags.map((t) => t.tag), ...categories.meta.map((m) => m.tag)]
         }
         const imgChanged = await functions.imagesChanged(post, currentPost, session)
         const tagsChanged = functions.tagsChanged(post, currentPost)
@@ -656,7 +656,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar post={post} order={order} artists={tagCategories?.artists} 
             characters={tagCategories?.characters} series={tagCategories?.series} 
-            tags={tagCategories?.tags} tagGroups={tagGroupCategories}/>
+            tags={tagCategories?.tags} meta={tagCategories?.meta} tagGroups={tagGroupCategories}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     {/* <AdBanner/> */}
@@ -672,7 +672,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {generateGroupsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} 
                     characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags} 
-                    tagGroups={tagGroupCategories}/> : null}
+                    meta={tagCategories?.meta} tagGroups={tagGroupCategories}/> : null}
                     {post && session.username && !session.banned ? <CutenessMeter post={post}/> : null}
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}

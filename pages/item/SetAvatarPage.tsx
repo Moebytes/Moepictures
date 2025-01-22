@@ -24,14 +24,13 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag, setUserImg} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {posts} = useCacheSelector()
-    const {setPosts, setTags} = useCacheActions()
+    const {posts, tagCategories, tagGroupCategories} = useCacheSelector()
+    const {setPosts, setTags, setTagCategories, setTagGroupCategories} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setRedirect, setPostFlag} = useFlagActions()
     const [images, setImages] = useState([] as string[])
     const [image, setImage] = useState("")
     const [post, setPost] = useState(null as PostSearch | null)
-    const [tagCategories, setTagCategories] = useState(null as TagCategories |  null)
     const [crop, setCrop] = useState({unit: "%", x: 25, y: 25, width: 50, height: 50, aspect: 1} as PercentCrop)
     const [pixelCrop, setPixelCrop] = useState({unit: "px", x: 0, y: 0, width: 100, height: 100, aspect: 1} as PixelCrop)
     const [imageLoaded, setImageLoaded] = useState(false)
@@ -91,6 +90,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setImage(thumb)
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -123,6 +124,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setImage(thumb)
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -270,10 +273,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         <TitleBar goBack={true}/>
         <NavBar/>
         <div className="body">
-            {post && tagCategories ? 
-            <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags} noActions={true}/> : 
+            <SideBar post={post} artists={tagCategories?.artists} characters={tagCategories?.characters} 
+            series={tagCategories?.series} tags={tagCategories?.tags} meta={tagCategories?.meta} 
+            tagGroups={tagGroupCategories} noActions={true}/> : 
             <SideBar/>
-            }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     <div className="set-avatar">

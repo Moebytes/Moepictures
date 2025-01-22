@@ -18,6 +18,7 @@ export interface TagCategories {
     artists: MiniTag[]
     characters: MiniTag[]
     series: MiniTag[]
+    meta: MiniTag[]
     tags: MiniTag[]
 }
 

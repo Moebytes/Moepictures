@@ -279,8 +279,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const removeArr = [...props.postHistory.artists, ...props.postHistory.characters, ...props.postHistory.series]
         const filteredTags = props.postHistory.tags.filter((tag: string) => !removeArr.includes(tag))
         if (!prevHistory) return filteredTags.join(" ")
-        if (!tagCategories.tags) return null
-        const tagCategory = tagCategories.tags.map((t) => t.tag)
+        let totalTags = [...(tagCategories.tags || []), ...(tagCategories.meta || [])]
+        if (!totalTags.length) return null
+        const tagCategory = totalTags.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
         const removedTags = props.postHistory.removedTags.filter((tag: string) => tagCategory.includes(tag))
         return calculateDiff(addedTags, removedTags)

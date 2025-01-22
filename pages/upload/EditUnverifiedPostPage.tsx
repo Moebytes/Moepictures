@@ -71,7 +71,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {showUpscaled} = useSearchSelector()
     const {setShowUpscaled} = useSearchActions()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen} = useFilterActions()
+    const {resetImageFilters, resetAudioFilters} = useFilterActions()
     const {uploadDropFiles} = useCacheSelector()
     const {setUploadDropFiles} = useCacheActions()
     const [displayImage, setDisplayImage] = useState(false)
@@ -109,6 +109,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [series, setSeries] = useState([{}] as UploadTag[])
     const [newTags, setNewTags] = useState([] as UploadTag[])
     const [rawTags, setRawTags] = useState("")
+    const [metaTags, setMetaTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [artistActive, setArtistActive] = useState([] as boolean[])
     const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a) => React.createRef<HTMLInputElement>()))
@@ -117,9 +118,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [seriesActive, setSeriesActive] = useState([] as boolean[])
     const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a) => React.createRef<HTMLInputElement>()))
     const [tagActive, setTagActive] = useState(false)
+    const [metaActive, setMetaActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
-    const rawTagRef = useRef<HTMLDivElement>(null)
+    const metaTagRef = useRef<HTMLInputElement>(null)
+    const rawTagRef = useRef<HTMLTextAreaElement>(null)
     const [edited, setEdited] = useState(false)
     const [originalID, setOriginalID] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
@@ -127,10 +130,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const postID = props.match.params.id
     const history = useHistory()
 
-    const updateFields = async () => {
+    const updatePost = async () => {
         const post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
         if (!post) return functions.replaceLocation("/404")
         setPost(post)
+    }
+
+    const updateFields = async () => {
+        if (!post) return
         setOriginalID(post.originalID)
         setType(post.type)
         setRating(post.rating)
@@ -244,6 +251,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         setSeries(series)
+        setMetaTags(tagCategories.meta.map((m) => m.tag).join(" "))
         setRawTags(functions.parseTagGroupsField(tagCategories.tags.map((t) => t.tag), post.tagGroups))
         setEdited(false)
     }
@@ -268,17 +276,17 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setHeaderText("")
         setSidebarText("")
         window.scrollTo(0, 0)
-
-        setBrightness(100)
-        setContrast(100)
-        setHue(180)
-        setSaturation(100)
-        setLightness(100)
-        setBlur(0)
-        setSharpen(0)
-        setPixelate(1)
-        updateFields()
+        resetImageFilters()
+        resetAudioFilters()
     }, [])
+
+    useEffect(() => {
+        updatePost()
+    }, [postID, session])
+
+    useEffect(() => {
+        if (post) updateFields()
+    }, [post])
 
     useEffect(() => {
         document.title = i18n.pages.edit.unverifiedTitle
@@ -893,6 +901,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const submit = async () => {
         let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+        if (metaTags) tags.push(...metaTags.split(/[\n\r\s]+/g).filter(Boolean))
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
@@ -1095,6 +1104,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setSeriesInputRefs(seriesInputRefs)
             forceUpdate()
 
+            setMetaTags(tagLookup.meta.join(" "))
             setRawTags(tagLookup.tags.join(" "))
             setDanbooruError(false)
         } catch (e) {
@@ -1184,57 +1194,32 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const getTagX = () => {
-        if (typeof window === "undefined") return 0
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range)
-            return rect.left - 10
-        }
-        return 0
-    }
-
-    const getTagY = () => {
-        if (typeof window === "undefined") return 0
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range)
-            return rect.bottom + window.scrollY + 10
-        }
-        return 0
-    }
-
     useEffect(() => {
-        const tagX = getTagX()
-        const tagY = getTagY()
+        const tagX = functions.getTagX()
+        const tagY = functions.getTagY()
         setTagX(tagX)
         setTagY(tagY)
-    }, [rawTags])
+    }, [metaTags, rawTags])
 
     useEffect(() => {
-        if (tagActive) {
-            const tagX = getTagX()
-            const tagY = getTagY()
+        if (metaActive || tagActive) {
+            const tagX = functions.getTagX()
+            const tagY = functions.getTagY()
             setTagX(tagX)
             setTagY(tagY)
         }
-    }, [tagActive])
+    }, [metaActive, tagActive])
     
-    const setCaretPosition = () => {
-        if (!rawTagRef.current) return
-        const selection = window.getSelection()!
-        if (!selection.rangeCount) return
-        var range = selection.getRangeAt(0)
-        var preCaretRange = range.cloneRange()
-        preCaretRange.selectNodeContents(rawTagRef.current!)
-        preCaretRange.setEnd(range.endContainer, range.endOffset)
-        caretPosition = preCaretRange.toString().length
+    const setCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
+        caretPosition = functions.getCaretPosition(ref)
     }
 
     const handleRawTagClick = (tag: string) => {
         setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+    }
+
+    const handleMetaTagClick = (tag: string) => {
+        setMetaTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getPostJSX = () => {
@@ -1700,6 +1685,15 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-container">
                     {generateSeriesJSX()}
                 </div>
+                <div className="upload-row" style={{marginBottom: "0px"}}>
+                    <span className="upload-heading">{i18n.tag.meta}</span>
+                </div>
+                <div className="upload-container" style={{marginBottom: "5px"}}>
+                    <SearchSuggestions active={metaActive} text={functions.getTypingWord(metaTagRef.current)} x={tagX} y={tagY} width={200} click={handleMetaTagClick} type="meta"/>
+                    <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
+                        <input style={{width: "40%"}} ref={metaTagRef} className="upload-input meta-tag-color" spellCheck={false} value={metaTags} onChange={(event) => {setCaretPosition(metaTagRef.current); setMetaTags(event.target.value)}} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                    </div>
+                </div>
                 {displayImage && getCurrentFiles().length ?
                 <div className="upload-row">
                     {functions.isVideo(currentImg) ? 
@@ -1720,12 +1714,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 </div>
                 {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
                 <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>{i18n.pages.upload.fetchFromDanbooru}</span>
-                <span className="upload-text-alt">{i18n.pages.upload.enterTags}
-                <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link></span>
+            <span className="upload-text-alt">{i18n.pages.upload.enterTags}
+            <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link>
+            {i18n.pages.upload.organizeTags}
+            <Link className="upload-bold-link" target="_blank" to="/help#tag-groups">{i18n.pages.upload.tagGroups}</Link></span>
                 <div className="upload-container">
                     <SearchSuggestions active={tagActive} text={functions.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
                     <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
-                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(rawTagRef.current); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>
                 </div>
                 {newTags.length ? <>

@@ -65,7 +65,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {showUpscaled} = useSearchSelector()
     const {setShowUpscaled} = useSearchActions()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen} = useFilterActions()
+    const {resetImageFilters, resetAudioFilters} = useFilterActions()
     const {uploadDropFiles} = useCacheSelector()
     const {setUploadDropFiles} = useCacheActions()
     const [uploadError, setUploadError] = useState(false)
@@ -87,10 +87,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [rawCharacter, setRawCharacter] = useState("")
     const [rawSeries, setRawSeries] = useState("")
     const [rawAppendTags, setRawAppendTags] = useState("")
+    const [rawMetaTags, setRawMetaTags] = useState("")
     const [artistActive, setArtistActive] = useState(false)
     const [characterActive, setCharacterActive] = useState(false)
     const [seriesActive, setSeriesActive] = useState(false)
     const [tagActive, setTagActive] = useState(false)
+    const [metaActive, setMetaActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [progress, setProgress] = useState(0)
@@ -99,7 +101,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const artistInputRef = useRef<HTMLInputElement>(null)
     const characterInputRef = useRef<HTMLInputElement>(null)
     const seriesInputRef = useRef<HTMLInputElement>(null)
-    const appendTagsRef = useRef<HTMLDivElement>(null)
+    const metaInputRef = useRef<HTMLInputElement>(null)
+    const appendTagsRef = useRef<HTMLTextAreaElement>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -110,14 +113,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         window.scrollTo(0, 0)
-        setBrightness(100)
-        setContrast(100)
-        setHue(180)
-        setSaturation(100)
-        setLightness(100)
-        setBlur(0)
-        setSharpen(0)
-        setPixelate(1)
+        resetImageFilters()
+        resetAudioFilters()
     }, [])
 
     useEffect(() => {
@@ -463,7 +460,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 characters: tagData.characters,
                 series: tagData.series,
                 newTags: tagData.newTags,
-                tags: tagData.tags,
+                tags: [...tagData.tags, ...tagData.meta],
                 tagGroups: [],
                 duplicates: false,
                 noImageUpdate: true
@@ -518,6 +515,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 toAppend.forEach(tag => tagSet.add(tag))
                 toRemove.forEach(tag => tagSet.delete(tag))
                 data.tags = Array.from(tagSet)
+            }
+            if (rawMetaTags?.trim()) {
+                const newMeta = functions.cleanHTML(rawMetaTags).trim().split(/[\n\r\s]+/g)
+                if (data.tags.filter(Boolean).length === 1) {
+                    data.tags = newMeta
+                } else {
+                    data.tags.push(...newMeta)
+                }
+                data.tags = functions.removeDuplicates(data.tags)
             }
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
@@ -833,111 +839,44 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [type, style])
 
     const handleArtistClick = (tag: string) => {
-        setRawArtist((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
-        })
+        setRawArtist((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const handleCharacterClick = (tag: string) => {
-        setRawCharacter((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
-        })
+        setRawCharacter((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
     
     const handleSeriesClick = (tag: string) => {
-        setRawSeries((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
-        })
+        setRawSeries((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
-    const setCaretPosition = () => {
-        if (!appendTagsRef.current) return
-        const selection = window.getSelection()!
-        if (!selection.rangeCount) return
-        var range = selection.getRangeAt(0)
-        var preCaretRange = range.cloneRange()
-        preCaretRange.selectNodeContents(appendTagsRef.current!)
-        preCaretRange.setEnd(range.endContainer, range.endOffset)
-        caretPosition = preCaretRange.toString().length
+    const handleMetaClick = (tag: string) => {
+        setRawMetaTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+    }
+
+    const setCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
+        caretPosition = functions.getCaretPosition(ref)
     }
 
     const handleTagsClick = (tag: string) => {
         setRawAppendTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
-    const getX = (kind: string) => {
-        if (typeof document === "undefined") return 15
-        let element = null as HTMLInputElement | null
-        if (kind === "artist") {
-            element = artistInputRef?.current
-        } else if (kind === "character") {
-            element = characterInputRef?.current
-        } else if (kind === "series") {
-            element = seriesInputRef?.current
-        }
-        if (!element) return 15
-        const rect = element.getBoundingClientRect()
-        return rect.left
-    }
-
-    const getY = (kind: string) => {
-        if (typeof document === "undefined") return 177
-        let element = null as HTMLInputElement | null
-        if (kind === "artist") {
-            element = artistInputRef?.current
-        } else if (kind === "character") {
-            element = characterInputRef?.current
-        } else if (kind === "series") {
-            element = seriesInputRef?.current
-        }
-        if (!element) return 177
-        const rect = element.getBoundingClientRect()
-        return rect.bottom + window.scrollY
-    }
-
-    const getTagX = () => {
-        if (typeof window === "undefined") return 0
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range)
-            return rect.left - 10
-        }
-        return 0
-    }
-
-    const getTagY = () => {
-        if (typeof window === "undefined") return 0
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0)
-            const rect = functions.rangeRect(range)
-            return rect.bottom + window.scrollY + 10
-        }
-        return 0
-    }
-
     useEffect(() => {
-        const tagX = getTagX()
-        const tagY = getTagY()
+        const tagX = functions.getTagX()
+        const tagY = functions.getTagY()
         setTagX(tagX)
         setTagY(tagY)
-    }, [rawAppendTags])
+    }, [rawArtist, rawCharacter, rawSeries, rawMetaTags, rawAppendTags])
 
     useEffect(() => {
-        if (tagActive) {
-            const tagX = getTagX()
-            const tagY = getTagY()
+        if (artistActive || characterActive || seriesActive || metaActive || tagActive) {
+            const tagX = functions.getTagX()
+            const tagY = functions.getTagY()
             setTagX(tagX)
             setTagY(tagY)
         }
-    }, [tagActive])
+    }, [artistActive, characterActive, seriesActive, metaActive, tagActive])
 
     const updateProgressColor = () => {
         const progressBar = progressBarRef.current?.querySelector(".progress-bar") as HTMLElement
@@ -1083,31 +1022,38 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             {getRatingJSX()}
             {getStyleJSX()}
             <div className="upload-container">
-                <SearchSuggestions active={artistActive} x={getX("artist")} y={getY("artist")} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRef.current)} click={handleArtistClick} type="artist"/>
+                <SearchSuggestions active={artistActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRef.current)} click={handleArtistClick} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonArtist}: </span>
-                    <input ref={artistInputRef} className="upload-input-wide2 artist-tag-color" type="text" value={rawArtist} onChange={(event) => setRawArtist(event.target.value)} spellCheck={false} onFocus={() => setArtistActive(true)} onBlur={() => setArtistActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={artistInputRef} className="upload-input-wide2 artist-tag-color" type="text" value={rawArtist} onChange={(event) => {setCaretPosition(artistInputRef.current); setRawArtist(event.target.value)}} spellCheck={false} onFocus={() => setArtistActive(true)} onBlur={() => setArtistActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={characterActive} x={getX("character")} y={getY("character")} width={mobile ? 150 : 200} text={functions.getTypingWord(characterInputRef.current)} click={handleCharacterClick} type="character"/>
+                <SearchSuggestions active={characterActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(characterInputRef.current)} click={handleCharacterClick} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonCharacter}: </span>
-                    <input ref={characterInputRef} className="upload-input-wide2 character-tag-color" type="text" value={rawCharacter} onChange={(event) => setRawCharacter(event.target.value)} spellCheck={false} onFocus={() => setCharacterActive(true)} onBlur={() => setCharacterActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={characterInputRef} className="upload-input-wide2 character-tag-color" type="text" value={rawCharacter} onChange={(event) => {setCaretPosition(characterInputRef.current); setRawCharacter(event.target.value)}} spellCheck={false} onFocus={() => setCharacterActive(true)} onBlur={() => setCharacterActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={seriesActive} x={getX("series")} y={getY("series")} width={mobile ? 150 : 200} text={functions.getTypingWord(seriesInputRef.current)} click={handleSeriesClick} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(seriesInputRef.current)} click={handleSeriesClick} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonSeries}: </span>
-                    <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => setRawSeries(event.target.value)} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => {setCaretPosition(seriesInputRef.current); setRawSeries(event.target.value)}} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+            </div>
+            <div className="upload-container">
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(metaInputRef.current)} click={handleMetaClick} type="meta"/>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text">{i18n.pages.bulkUpload.commonMeta}: </span>
+                    <input ref={metaInputRef} className="upload-input-wide2 meta-tag-color" type="text" value={rawMetaTags} onChange={(event) => {setCaretPosition(metaInputRef.current); setRawMetaTags(event.target.value)}} spellCheck={false} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
                 <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(appendTagsRef.current)} click={handleTagsClick} type="tags"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text" style={{marginRight: "10px"}}>{i18n.pages.bulkUpload.appendTags}: </span>
-                    <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => {setCaretPosition(); setRawAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => {setCaretPosition(appendTagsRef.current); setRawAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             {progressText ?

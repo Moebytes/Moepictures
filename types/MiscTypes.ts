@@ -150,6 +150,7 @@ export interface TagLookup {
     artists: UploadTag[]
     characters: UploadTag[]
     series: UploadTag[]
+    meta: string[]
     tags: string[]
     newTags: UploadTag[]
     danbooruLink: string

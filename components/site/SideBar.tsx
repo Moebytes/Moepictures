@@ -81,6 +81,7 @@ interface Props {
     artists?: MiniTag[] 
     characters?: MiniTag[]  
     series?: MiniTag[]
+    meta?: MiniTag[]
     tags?: MiniTag[]
     tagGroups?: TagGroupCategory[]
     unverified?: boolean
@@ -500,6 +501,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const generateMetaJSX = () => {
+        if (!props.meta) return
+        let jsx = [] as React.ReactElement[]
+        for (let i = 0; i < props.meta.length; i++) {
+            if (!props.meta[i]) break
+            const tagClick = () => {
+                if (!props.meta) return
+                history.push(`/posts`)
+                setSearch(props.meta[i].tag)
+                setSearchFlag(true)
+            }
+            jsx.push(
+                <div className="sidebar-row">
+                    <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.meta?.[i].tag)}>
+                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.meta?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.meta?.[i].tag)}/>
+                        <span className="tag meta-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.meta?.[i].tag)}>{props.meta[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag-count ${props.meta[i].count === "1" ? "artist-tag-color" : ""}`}>{props.meta[i].count}</span>
+                    </span>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     const generateFavSearchJSX = () => {
         if (!session.username) return null
         let jsx = [] as React.ReactElement[]
@@ -846,18 +871,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
     
     const triggerTagEdit = () => {
-        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.meta || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, tagGroups: props.tagGroups,
+            meta: props.meta, tags: props.tags, tagGroups: props.tagGroups,
             unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerSourceEdit = () => {
-        if (!props.post || !props.artists || !props.characters || !props.series || !props.tags || !props.order) return
+        if (!props.post || !props.artists || !props.characters || !props.series || !props.meta || !props.tags || !props.order) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, tagGroups: props.tagGroups,
+            meta: props.meta, tags: props.tags, tagGroups: props.tagGroups,
             unverified: props.unverified, order: props.order || 1})
     }
 
@@ -1211,6 +1236,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-subcontainer" style={{height: subcontainerHeight()}}>
                     {generateTagJSX()}
                 </div>
+
+                {props.meta ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">{i18n.tag.meta}</span>
+                        </div>
+                        {generateMetaJSX()}
+                    </div>
+                : null}
 
                 {props.post ? 
                     <div className="sidebar-subcontainer">
