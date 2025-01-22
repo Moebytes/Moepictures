@@ -1,5 +1,5 @@
 import {Post, DeletedPost, Image, PostType, PostStyle, PostMirrors, PostSearch, AliasHistoryType,
-PostRating, Alias, Implication, TagType, Note, AliasHistorySearch} from "./Types"
+PostRating, Alias, Implication, TagType, Note, AliasHistorySearch, MiniTagGroup} from "./Types"
 
 export type History = 
     | PostHistory 
@@ -66,6 +66,7 @@ export interface PostHistory {
     characters: string[]
     series: string[]
     tags: string[]
+    tagGroups: MiniTagGroup[]
     reason: string | null
     mirrors: PostMirrors | null
     bookmarks: number
@@ -74,6 +75,8 @@ export interface PostHistory {
     buyLink: string | null
     addedTags: string[]
     removedTags: string[]
+    addedTagGroups: string[]
+    removedTagGroups: string[]
     imageChanged: boolean
     changes: PostChanges
     historyCount: string

@@ -90,13 +90,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             type: props.postHistory.type, rating: props.postHistory.rating, source: source!, style: props.postHistory.style, 
             artists: functions.tagObject(props.postHistory.artists), characters: functions.tagObject(props.postHistory.characters), 
             preserveChildren: Boolean(props.postHistory.parentID), series: functions.tagObject(props.postHistory.series), 
-            parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, newTags, 
-            reason: props.postHistory.reason}, session, setSessionFlag)
+            parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, tagGroups: props.postHistory.tagGroups, 
+            newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
             rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
             characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, 
-            parentID: props.postHistory.parentID, reason: props.postHistory.reason}, session, setSessionFlag)
+            tagGroups: props.postHistory.tagGroups, parentID: props.postHistory.parentID, reason: props.postHistory.reason}, 
+            session, setSessionFlag)
         }
         props.onEdit?.()
     }
@@ -285,6 +286,15 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return calculateDiff(addedTags, removedTags)
     }
 
+    const tagGroupsDiff = () => {
+        if (!props.postHistory.tagGroups?.length) return null
+        if (!prevHistory) return props.postHistory.tagGroups.map((g) => g.name).join(" ")
+        const groupNames = props.postHistory.tagGroups.map((g) => g.name)
+        const addedTagGroups = props.postHistory.addedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
+        const removedTagGroups = props.postHistory.removedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
+        return calculateDiff(addedTagGroups, removedTagGroups)
+    }
+
     const printMirrors = () => {
         if (!props.postHistory.mirrors) return "None"
         const mapped = Object.values(props.postHistory.mirrors) as string[]
@@ -302,6 +312,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let changes = props.postHistory.changes || {}
         let tagChanges = props.postHistory.addedTags?.length || props.postHistory.removedTags?.length
+        let tagGroupChanges = props.postHistory.addedTagGroups?.length || props.postHistory.removedTagGroups?.length
         if (changes.parentID !== undefined && !changes.parentID) {
             jsx.push(<span className="historyrow-text-strong">[{i18n.labels.parentRemoved}]</span>)
         }
@@ -338,6 +349,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || tagChanges) {
             if (tagsDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.tags}: </span>{tagsDiff()}</span>)
+            }
+        }
+        if (!prevHistory || tagGroupChanges) {
+            if (tagGroupsDiff()) {
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.tagGroups}: </span>{tagGroupsDiff()}</span>)
             }
         }
         if (!prevHistory || changes.title) {

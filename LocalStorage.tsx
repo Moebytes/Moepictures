@@ -24,8 +24,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
     groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage} = usePageSelector()
     const {setPage, setHistoryPage, setMessagePage, setThreadPage, setArtistsPage, setCharactersPage, setCommentsPage,
     setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage} = usePageActions()
-    const {posts, tags, bannerTags, post, tagCategories, order, related, artists, characters, series} = useCacheSelector()
-    const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
+    const {posts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
+    const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom} = usePlaybackSelector()
     const {setDisableZoom} = usePlaybackActions()
     const {session} = useSessionSelector()
@@ -122,6 +122,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedSession = localStorage.getItem("savedSession")
         const savedPost = localStorage.getItem("savedPost")
         const savedTagCategories = localStorage.getItem("savedTagCategories")
+        const savedTagGroupCategories = localStorage.getItem("savedTagGroupCategories")
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
@@ -183,6 +184,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedSession) setSession(JSON.parse(savedSession))
         if (savedPost) setPost(JSON.parse(savedPost))
         if (savedTagCategories) setTagCategories(JSON.parse(savedTagCategories))
+        if (savedTagGroupCategories) setTagGroupCategories(JSON.parse(savedTagGroupCategories))
         if (savedOrder) setOrder(Number(savedOrder))
     }, [])
 
@@ -263,8 +265,9 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("order", String(order))
         localStorage.setItem("savedPost", JSON.stringify(post))
         localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
+        localStorage.setItem("savedTagGroupCategories", JSON.stringify(tagGroupCategories))
         localforage.setItem("savedRelated", JSON.stringify(related))
-    }, [order, tagCategories, post, related])
+    }, [order, tagCategories, tagGroupCategories, post, related])
 
 
     useEffect(() => {

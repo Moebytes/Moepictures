@@ -30,6 +30,8 @@ import ContentEditable from "react-contenteditable"
 import "../dialog.less"
 import {PostType, PostRating, PostStyle, PostQuickEditParams, PostSearch} from "../../types/Types"
 
+let caretPosition = 0
+
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -59,6 +61,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const artistRef = useRef<HTMLInputElement>(null)
+    const characterRef = useRef<HTMLInputElement>(null)
+    const seriesRef = useRef<HTMLInputElement>(null)
+    const metaRef = useRef<HTMLInputElement>(null)
     const tagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
@@ -230,12 +236,19 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
+    const setCaretPosition = () => {
+        if (!tagRef.current) return
+        const selection = window.getSelection()!
+        if (!selection.rangeCount) return
+        var range = selection.getRangeAt(0)
+        var preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(tagRef.current!)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        caretPosition = preCaretRange.toString().length
+    }
+
     const handleTagClick = (tag: string) => {
-        setAppendTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ")
-        })
+        setAppendTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getStyleJSX = () => {
@@ -472,31 +485,31 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
             </>}
             {getStyleJSX()}
             <div className="dialog-row">
-                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                 <span className="dialog-text">{i18n.navbar.artists}: </span>
-                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+                <input ref={artistRef} className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <span className="dialog-text">{i18n.navbar.characters}: </span>
-                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+                <input ref={characterRef} className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                 <span className="dialog-text">{i18n.tag.series}: </span>
-                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+                <input ref={seriesRef} className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
                 <span className="dialog-text">{i18n.tag.meta}: </span>
-                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                <input ref={metaRef} className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.pages.bulkUpload.appendTags}: </span>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(appendTags)} click={(tag) => handleTagClick(tag)} type="tag"/>
-                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => setAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(tagRef.current)} click={(tag) => handleTagClick(tag)} type="tags"/>
+                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => {setCaretPosition(); setAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
             </>
         )

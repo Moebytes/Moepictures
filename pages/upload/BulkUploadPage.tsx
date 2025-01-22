@@ -51,6 +51,7 @@ import path from "path"
 import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
+let caretPosition = 0
 
 const BulkUploadPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -440,8 +441,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
             const data = {
-                images: originalFiles,
-                upscaledImages: upscaledFiles,
+                images: currentArr,
+                upscaledImages: upscaledCurrentArr,
                 type: tagData.type,
                 rating: tagData.rating,
                 style: tagData.style,
@@ -463,6 +464,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 series: tagData.series,
                 newTags: tagData.newTags,
                 tags: tagData.tags,
+                tagGroups: [],
                 duplicates: false,
                 noImageUpdate: true
             }
@@ -854,12 +856,19 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         })
     }
 
+    const setCaretPosition = () => {
+        if (!appendTagsRef.current) return
+        const selection = window.getSelection()!
+        if (!selection.rangeCount) return
+        var range = selection.getRangeAt(0)
+        var preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(appendTagsRef.current!)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        caretPosition = preCaretRange.toString().length
+    }
+
     const handleTagsClick = (tag: string) => {
-        setRawAppendTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
-        })
+        setRawAppendTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getX = (kind: string) => {
@@ -1074,31 +1083,31 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             {getRatingJSX()}
             {getStyleJSX()}
             <div className="upload-container">
-                <SearchSuggestions active={artistActive} x={getX("artist")} y={getY("artist")} width={mobile ? 150 : 200} text={rawArtist} click={handleArtistClick} type="artist"/>
+                <SearchSuggestions active={artistActive} x={getX("artist")} y={getY("artist")} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRef.current)} click={handleArtistClick} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonArtist}: </span>
                     <input ref={artistInputRef} className="upload-input-wide2 artist-tag-color" type="text" value={rawArtist} onChange={(event) => setRawArtist(event.target.value)} spellCheck={false} onFocus={() => setArtistActive(true)} onBlur={() => setArtistActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={characterActive} x={getX("character")} y={getY("character")} width={mobile ? 150 : 200} text={rawCharacter} click={handleCharacterClick} type="character"/>
+                <SearchSuggestions active={characterActive} x={getX("character")} y={getY("character")} width={mobile ? 150 : 200} text={functions.getTypingWord(characterInputRef.current)} click={handleCharacterClick} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonCharacter}: </span>
                     <input ref={characterInputRef} className="upload-input-wide2 character-tag-color" type="text" value={rawCharacter} onChange={(event) => setRawCharacter(event.target.value)} spellCheck={false} onFocus={() => setCharacterActive(true)} onBlur={() => setCharacterActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={seriesActive} x={getX("series")} y={getY("series")} width={mobile ? 150 : 200} text={rawSeries} click={handleSeriesClick} type="series"/>
+                <SearchSuggestions active={seriesActive} x={getX("series")} y={getY("series")} width={mobile ? 150 : 200} text={functions.getTypingWord(seriesInputRef.current)} click={handleSeriesClick} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonSeries}: </span>
                     <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => setRawSeries(event.target.value)} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={rawAppendTags} click={handleTagsClick} type="tag"/>
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(appendTagsRef.current)} click={handleTagsClick} type="tags"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text" style={{marginRight: "10px"}}>{i18n.pages.bulkUpload.appendTags}: </span>
-                    <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => setRawAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => {setCaretPosition(); setRawAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             {progressText ?

@@ -76,8 +76,8 @@ const BanDialog: React.FunctionComponent = (props) => {
                 await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
                 rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), 
                 characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
-                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, newTags, updatedDate: currentHistory.date,
-                parentID: currentHistory.parentID, noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
+                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, tagGroups: currentHistory.tagGroups, newTags, 
+                updatedDate: currentHistory.date, parentID: currentHistory.parentID, noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {

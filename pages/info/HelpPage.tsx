@@ -22,6 +22,7 @@ import overlayNotesImg from "../../assets/images/overlaynotes.png"
 import characterNotesImg from "../../assets/images/characternotes.png"
 import uploadImg from "../../assets/images/upload.png"
 import taggingImg from "../../assets/images/tagging.png"
+import tagGroupsImg from "../../assets/images/taggroups.png"
 import searchingImg from "../../assets/images/searching.png"
 import imageSearchingImg from "../../assets/images/imagesearching.png"
 import upscalingImg from "../../assets/images/upscaling.png"
@@ -428,6 +429,23 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
         }
+        if (helpTab === "tag-groups") {
+            return (
+                <><span className="help-heading">{i18n.labels.tagGroups}</span>
+                <span className="help-text">
+                    {i18n.help.tagGroups.line1}<br/><br/>
+
+                    {i18n.help.tagGroups.line2}<br/>
+                    <span className="help-alt">{i18n.help.tagGroups.example}</span><br/><br/>
+
+                    {i18n.help.tagGroups.line3}<br/><br/>
+
+                    {i18n.help.tagGroups.line4} 
+                    <span className="help-alt">{i18n.help.tagGroups.search}</span>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={tagGroupsImg}/></div></>
+            )
+        }
         if (helpTab === "self-uploads") {
             return (
                 <><span className="help-heading">{i18n.help.selfUploads.title}</span>
@@ -797,6 +815,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>{i18n.sort.cuteness}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>{i18n.help.uploading.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>{i18n.help.tagging.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("tag-groups")}>{i18n.labels.tagGroups}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>{i18n.help.selfUploads.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>{i18n.help.upscaling.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>{i18n.help.compressing.title}</span>

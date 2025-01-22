@@ -29,6 +29,8 @@ import ContentEditable from "react-contenteditable"
 import {PostType, PostRating, PostStyle, UploadImage} from "../../types/Types"
 import "../dialog.less"
 
+let caretPosition = 0
+
 const TagEditDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -45,7 +47,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const [artists, setArtists] = useState("")
     const [characters, setCharacters] = useState("")
     const [series, setSeries] = useState("")
-    const [tags, setTags] = useState("")
+    const [rawTags, setRawTags] = useState("")
     const [metaTags, setMetaTags] = useState("")
     const [artistsActive, setArtistsActive] = useState(false)
     const [charactersActive, setCharactersActive] = useState(false)
@@ -60,6 +62,10 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const artistRef = useRef<HTMLInputElement>(null)
+    const characterRef = useRef<HTMLInputElement>(null)
+    const seriesRef = useRef<HTMLInputElement>(null)
+    const metaRef = useRef<HTMLInputElement>(null)
     const tagRef = useRef<HTMLDivElement>(null)
     const history = useHistory()
 
@@ -76,7 +82,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         t.type === "outfit" ||  t.type === "accessory" ||  t.type === "action" || 
         t.type === "scenery" || t.type === "tag")
         setMetaTags(rawMetaTags.map((t) => t.tag).join(" "))
-        setTags(rawTags.map((t) => t.tag).join(" "))
+        setRawTags(functions.parseTagGroupsField(rawTags.map((t) => t.tag), tagEditID.tagGroups))
     }
 
     const reset = () => {
@@ -86,7 +92,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setArtists("")
         setCharacters("")
         setSeries("")
-        setTags("")
+        setRawTags("")
     }
 
     useEffect(() => {
@@ -121,12 +127,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const tagEdit = async () => {
         if (!tagEditID) return
         if (tagEditID.unverified || permissions.isContributor(session)) {
-            const joined = `${characters} ${series} ${tags} ${metaTags}`
+            let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+            const joined = `${characters} ${series} ${tags.join(" ")} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.invalidCharacters
-                setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
+                setRawTags(rawTags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
             }
@@ -134,14 +141,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
-                const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
-                setTags(splitTags.join(" "))
+                const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                setRawTags(splitTags.join(" "))
                 await functions.timeout(3000)
                 return setError(false)
             }
-            const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
             if (!permissions.isMod(session)) {
-                if (tagArr.length < 5) {
+                if (tags.length < 5) {
                     setError(true)
                     if (!errorRef.current) await functions.timeout(20)
                     errorRef.current!.innerText = i18n.pages.upload.tagMinimum
@@ -158,7 +164,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
                 series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
+                tags: functions.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
+                tagGroups,
                 reason
             }
             setTagEditID(null)
@@ -166,12 +173,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             setPostFlag(true)
             setActionBanner("tag-edit")
         } else {
-            const joined = `${characters} ${series} ${tags} ${metaTags}`
+            let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+            const joined = `${characters} ${series} ${tags.join(" ")} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.invalidCharacters
-                setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
+                setRawTags(rawTags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
             }
@@ -180,12 +188,11 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
                 await functions.timeout(3000)
-                const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
-                setTags(splitTags.join(" "))
+                const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                setRawTags(splitTags.join(" "))
                 return setError(false)
             }
-            const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
-            if (tagArr.length < 5) {
+            if (tags.length < 5) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.tagMinimum
@@ -208,7 +215,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
                 series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
+                tags: functions.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
+                tagGroups,
                 reason
             }
             await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
@@ -263,7 +271,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             setCharacters(newCharacters.join(" "))
             setSeries(newSeries.join(" "))
             setMetaTags(newMeta.join(" "))
-            setTags(newTags.join(" "))
+            setRawTags(newTags.join(" "))
         } catch (e) {
             console.log(e)
             errorRef.current!.innerText = i18n.pages.upload.nothingFound
@@ -291,7 +299,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         const tagY = posY
         setTagX(tagX)
         setTagY(tagY)
-    }, [artists, characters, series, metaTags, tags])
+    }, [artists, characters, series, metaTags, rawTags])
 
     useEffect(() => {
         if (artistsActive || charactersActive || seriesActive || metaActive || tagActive) {
@@ -334,12 +342,19 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
+    const setCaretPosition = () => {
+        if (!tagRef.current) return
+        const selection = window.getSelection()!
+        if (!selection.rangeCount) return
+        var range = selection.getRangeAt(0)
+        var preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(tagRef.current!)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        caretPosition = preCaretRange.toString().length
+    }
+
     const handleTagClick = (tag: string) => {
-        setTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ")
-        })
+        setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getStyleJSX = () => {
@@ -565,31 +580,31 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             </>}
             {getStyleJSX()}
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                 <span className="dialog-text">{i18n.navbar.artists}: </span>
-                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+                <input ref={artistRef} className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <span className="dialog-text">{i18n.navbar.characters}: </span>
-                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+                <input ref={characterRef} className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                 <span className="dialog-text">{i18n.tag.series}: </span>
-                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+                <input ref={seriesRef} className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
                 <span className="dialog-text">{i18n.tag.meta}: </span>
-                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                <input ref={metaRef} className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text tag-color">{i18n.navbar.tags}: </span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} click={handleTagClick} type="tag"/>
-                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                <SearchSuggestions active={tagActive} text={functions.getTypingWord(tagRef.current)} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} click={handleTagClick} type="tags"/>
+                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.reason}: </span>

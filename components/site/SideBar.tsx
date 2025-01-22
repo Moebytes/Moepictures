@@ -73,7 +73,7 @@ import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
 import functions from "../../structures/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount, TagGroupCategory} from "../../types/Types"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -82,6 +82,7 @@ interface Props {
     characters?: MiniTag[]  
     series?: MiniTag[]
     tags?: MiniTag[]
+    tagGroups?: TagGroupCategory[]
     unverified?: boolean
     noActions?: boolean
     order?: number
@@ -551,23 +552,63 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const organizeTags = () => {
-        if (!props.tags) return [] as MiniTag[]
-        const meta = props.tags.filter((t) => t.type === "meta")
-        const appearance = props.tags.filter((t) => t.type === "appearance")
-        const outfit = props.tags.filter((t) => t.type === "outfit")
-        const accessory = props.tags.filter((t) => t.type === "accessory")
-        const action = props.tags.filter((t) => t.type === "action")
-        const scenery = props.tags.filter((t) => t.type === "scenery")
-        const tags = props.tags.filter((t) => t.type === "tag")
-        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()]
+    const organizeTags = (tags: MiniTag[]) => {
+        if (!tags?.length) return [] as MiniTag[]
+        const meta = tags.filter((t) => t.type === "meta")
+        const appearance = tags.filter((t) => t.type === "appearance")
+        const outfit = tags.filter((t) => t.type === "outfit")
+        const accessory = tags.filter((t) => t.type === "accessory")
+        const action = tags.filter((t) => t.type === "action")
+        const scenery = tags.filter((t) => t.type === "scenery")
+        const other = tags.filter((t) => t.type === "tag")
+        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...other.reverse()]
+    }
+
+    const generateTagGroupJSX = () => {
+        if (!props.tagGroups) return null
+        let jsx = [] as React.ReactElement[]
+        for (const tagGroup of props.tagGroups) {
+            let currentTags = organizeTags(tagGroup.tags)
+            if (!currentTags.length) continue
+            jsx.push(
+                <div key={`tagGroup-${tagGroup.name}`} className="sidebar-row">
+                    <span className="sidebar-title">{functions.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
+                </div>
+            )
+            for (let i = 0; i < currentTags.length; i++) {
+                if (!currentTags[i]) break
+                const tagClick = () => {
+                    history.push(`/posts`)
+                    setSearch(currentTags[i].tag)
+                    setSearchFlag(true)
+                }
+                jsx.push(
+                    <div className="sidebar-row">
+                        <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
+                            <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
+                            <span className={`tag ${functions.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                            <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
+                        </span>
+                    </div>
+                )
+            }
+        }
+        return jsx
     }
 
     const generateTagJSX = () => {
         if (!props.tags && favSearch) return generateFavSearchJSX()
         if (!props.tags && saveSearch) return generateSavedSearchJSX()
+        if (props.tagGroups?.length) return generateTagGroupJSX()
         let jsx = [] as React.ReactElement[]
-        let currentTags = props.tags ? organizeTags() : tags
+        if (props.tags) {
+            jsx.push(
+                <div key="tags-header" className="sidebar-row">
+                    <span className="sidebar-title">{i18n.navbar.tags}</span>
+                </div>
+            )
+        }
+        let currentTags = props.tags ? organizeTags(props.tags) : tags
         let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
@@ -808,14 +849,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified, order: props.order || 1})
+            tags: props.tags, tagGroups: props.tagGroups,
+            unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerSourceEdit = () => {
         if (!props.post || !props.artists || !props.characters || !props.series || !props.tags || !props.order) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified, order: props.order || 1})
+            tags: props.tags, tagGroups: props.tagGroups,
+            unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerAddNote = () => {
@@ -1166,11 +1209,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 : null}
 
                 <div className="sidebar-subcontainer" style={{height: subcontainerHeight()}}>
-                    {props.tags ?
-                        <div className="sidebar-row">
-                            <span className="sidebar-title">{i18n.navbar.tags}</span>
-                        </div>
-                    : null}
                     {generateTagJSX()}
                 </div>
 

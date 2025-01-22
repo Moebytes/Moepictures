@@ -53,7 +53,7 @@ import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
 import functions from "../../structures/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../../types/Types"
 import "./styles/mobileinfo.less"
 
 interface Props {
@@ -62,6 +62,7 @@ interface Props {
     characters?: MiniTag[]  
     series?: MiniTag[]
     tags?: MiniTag[]
+    tagGroups?: TagGroupCategory[]
     unverified?: boolean
     order?: number
 }
@@ -244,21 +245,51 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const organizeTags = () => {
-        if (!props.tags) return [] as MiniTag[]
-        const meta = props.tags.filter((t) => t.type === "meta")
-        const appearance = props.tags.filter((t) => t.type === "appearance")
-        const outfit = props.tags.filter((t) => t.type === "outfit")
-        const accessory = props.tags.filter((t) => t.type === "accessory")
-        const action = props.tags.filter((t) => t.type === "action")
-        const scenery = props.tags.filter((t) => t.type === "scenery")
-        const tags = props.tags.filter((t) => t.type === "tag")
-        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()]
+    const organizeTags = (tags: MiniTag[]) => {
+        if (!tags?.length) return [] as MiniTag[]
+        const meta = tags.filter((t) => t.type === "meta")
+        const appearance = tags.filter((t) => t.type === "appearance")
+        const outfit = tags.filter((t) => t.type === "outfit")
+        const accessory = tags.filter((t) => t.type === "accessory")
+        const action = tags.filter((t) => t.type === "action")
+        const scenery = tags.filter((t) => t.type === "scenery")
+        const other = tags.filter((t) => t.type === "tag")
+        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...other.reverse()]
+    }
+
+    const generateTagGroupJSX = () => {
+        if (!props.tagGroups) return null
+        let jsx = [] as React.ReactElement[]
+        for (const tagGroup of props.tagGroups) {
+            let currentTags = organizeTags(tagGroup.tags)
+            if (!currentTags.length) continue
+            jsx.push(
+                <div key={`tagGroup-${tagGroup.name}`} className="mobileinfo-title-container">
+                    <span className="mobileinfo-title">{functions.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
+                </div>
+            )
+            for (let i = 0; i < currentTags.length; i++) {
+                if (!currentTags[i]) break
+                const tagClick = () => {
+                    history.push(`/tag/${currentTags[i].tag}`)
+                }
+                jsx.push(
+                    <div className="mobileinfo-row">
+                        <span className="tag-hover" onClick={() => tagClick()}>
+                            <span className={`tag ${functions.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                            <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
+                        </span>
+                    </div>
+                )
+            }
+        }
+        return jsx
     }
 
     const generateTagJSX = () => {
+        if (props.tagGroups?.length) return generateTagGroupJSX()
         let jsx = [] as React.ReactElement[]
-        let currentTags = props.tags ? organizeTags() : tags
+        let currentTags = props.tags ? organizeTags(props.tags) : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
@@ -391,14 +422,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!props.post || !props.artists || !props.characters || !props.series || !props.tags) return
         setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified, order: props.order || 1})
+            tags: props.tags, tagGroups: props.tagGroups,
+            unverified: props.unverified, order: props.order || 1})
     }
 
     const triggerSourceEdit = () => {
         if (!props.post || !props.artists || !props.characters || !props.series || !props.tags || !props.order) return
         setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
-            tags: props.tags, unverified: props.unverified, order: props.order || 1})
+            tags: props.tags, tagGroups: props.tagGroups,
+            unverified: props.unverified, order: props.order || 1})
     }
 
     const generateSourceJSX = () => {
@@ -737,13 +770,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     </div> </>
                 : null}
 
-                {props.tags ? <>
-                    <div className="mobileinfo-title-container">
-                        <span className="mobileinfo-title">{i18n.navbar.tags}</span>
-                    </div>
+                {props.tags ?
                     <div className="mobileinfo-subcontainer">
                         {generateTagJSX()}
-                    </div> </> 
+                    </div>
                 : null}
 
                 {props.post ? <>

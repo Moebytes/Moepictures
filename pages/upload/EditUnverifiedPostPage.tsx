@@ -53,6 +53,7 @@ import "./styles/uploadpage.less"
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
 let tagsTimer = null as any
+let caretPosition = 0
 
 interface Props {
     match: {params: {id: string}}
@@ -243,7 +244,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         setSeries(series)
-        setRawTags(tagCategories.tags.map((t) => t.tag).join(" "))
+        setRawTags(functions.parseTagGroupsField(tagCategories.tags.map((t) => t.tag), post.tagGroups))
         setEdited(false)
     }
 
@@ -614,7 +615,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
+                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.artistTag}: </span>
                     <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -697,7 +698,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={characters[i].tag} click={(tag) => handleTagClick(tag, i)} type="character"/>
+                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={functions.getTypingWord(characterInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.characterTag}: </span>
                     <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -780,7 +781,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={series[i].tag} click={(tag) => handleTagClick(tag, i)} type="series"/>
+                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={functions.getTypingWord(seriesInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.seriesTag}: </span>
                     <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -891,6 +892,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const submit = async () => {
+        let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
@@ -908,7 +910,6 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        const tags = functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
         if (tags.length < 5 && !permissions.isMod(session)) {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
@@ -958,7 +959,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             characters,
             series,
             newTags,
-            tags
+            tags,
+            tagGroups
         }
         setSubmitError(true)
         if (!submitErrorRef.current) await functions.timeout(20)
@@ -1118,7 +1120,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }, [rawTags, session])
 
     const updateTags = async () => {
-        const tags = functions.removeDuplicates(functions.cleanHTML(rawTags).trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
+        const {tags} = functions.parseTagGroups(functions.cleanHTML(rawTags))
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
@@ -1220,12 +1222,19 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [tagActive])
     
+    const setCaretPosition = () => {
+        if (!rawTagRef.current) return
+        const selection = window.getSelection()!
+        if (!selection.rangeCount) return
+        var range = selection.getRangeAt(0)
+        var preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(rawTagRef.current!)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        caretPosition = preCaretRange.toString().length
+    }
+
     const handleRawTagClick = (tag: string) => {
-        setRawTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ")
-        })
+        setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getPostJSX = () => {
@@ -1714,9 +1723,9 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <span className="upload-text-alt">{i18n.pages.upload.enterTags}
                 <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link></span>
                 <div className="upload-container">
-                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
+                    <SearchSuggestions active={tagActive} text={functions.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
                     <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
-                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>
                 </div>
                 {newTags.length ? <>

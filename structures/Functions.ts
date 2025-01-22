@@ -31,7 +31,8 @@ import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
-PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable, FileFormat} from "../types/Types"
+PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable, FileFormat, TagGroupCategory,
+MiniTagGroup} from "../types/Types"
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
@@ -1577,7 +1578,7 @@ export default class Functions {
             if (!foundTag) {
                 const unverifiedTag = await Functions.get("/api/tag/unverified", {tag}, session, setSessionFlag)
                 if (unverifiedTag) {
-                    const obj = {} as MiniTag 
+                    const obj = {} as MiniTag
                     obj.tag = tag
                     obj.count = String(count)
                     obj.image = unverifiedTag.image
@@ -1624,6 +1625,19 @@ export default class Functions {
         return {artists, characters, series, tags}
     }
 
+    public static tagGroupCategories = async (tagGroups: MiniTagGroup[], session: Session, 
+        setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+        let newTagGroups = [] as {name: string, tags: MiniTag[]}[]
+        if (!tagGroups) return []
+        for (const tagGroup of tagGroups) {
+            if (!tagGroup) continue
+            const tagCounts = await Functions.tagCountsCache(tagGroup.tags, session, setSessionFlag)
+            let {tags} = await Functions.tagCategories(tagCounts, session, setSessionFlag, cache)
+            newTagGroups.push({name: tagGroup.name, tags})
+        }
+        return newTagGroups
+    }
+
     public static tagsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
         const cache = await localforage.getItem("tags") as string
         if (cache) {
@@ -1633,6 +1647,25 @@ export default class Functions {
             localforage.setItem("tags", JSON.stringify(tagMap))
             return tagMap
         }
+    }
+
+    public static tagCountsCache = async (tags: string[], session: Session, setSessionFlag: (value: boolean) => void) => {
+        let tagCountMap = {} as {[key: string]: TagCount}
+        const cache = await localforage.getItem("tagCounts") as string
+        if (cache) {
+            tagCountMap = JSON.parse(cache) as {[key: string]: TagCount}
+        } else {
+            let tagCounts = await Functions.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
+            for (const tagCount of tagCounts) {
+                tagCountMap[tagCount.tag] = tagCount
+            }
+            localforage.setItem("tagCounts", JSON.stringify(tagCountMap))
+        }
+        let result = [] as TagCount[]
+        for (const tag of tags) {
+            if (tagCountMap[tag]) result.push(tagCountMap[tag])
+        }
+        return result
     }
 
     public static emojisCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
@@ -1648,6 +1681,7 @@ export default class Functions {
 
     public static clearCache = () => {
         localforage.removeItem("tags")
+        localforage.removeItem("tagCounts")
         localforage.removeItem("emojis")
     }
 
@@ -2215,6 +2249,57 @@ export default class Functions {
         }
         setText(updated)
         textarea.focus()
+    }
+
+    public static getTypingWord = (element: HTMLTextAreaElement | HTMLInputElement | HTMLDivElement | null) => {
+        if (!element) return ""
+        let text = ""
+        let cursorPosition = 0
+      
+        if (element.isContentEditable) {
+          const selection = window.getSelection()!
+          if (!selection.rangeCount) return ""
+          const range = selection.getRangeAt(0)
+          const preCaretRange = range.cloneRange()
+          preCaretRange.selectNodeContents(element)
+          preCaretRange.setEnd(range.endContainer, range.endOffset)
+          text = preCaretRange.toString()
+          cursorPosition = text.length
+          text = element.innerText
+        } else {
+          text = (element as HTMLTextAreaElement).value
+          cursorPosition = (element as HTMLTextAreaElement).selectionStart
+        }
+      
+        const words = text.split(" ")
+        let charCount = 0
+      
+        for (const word of words) {
+          charCount += word.length
+          if (cursorPosition <= charCount) {
+            return word.slice(0, cursorPosition - (charCount - word.length))
+          }
+          charCount++
+        }
+      
+        return ""
+    }
+    public static insertAtCaret = (text: string, caretPosition: number, tag: string) => {
+        const words = text.split(" ")
+        let charCount = 0
+        let updatedText = ""
+
+        for (const word of words) {
+            charCount += word.length
+            if (caretPosition <= charCount) {
+                const startOfWord = charCount - word.length
+                updatedText = text.slice(0, startOfWord) + tag + text.slice(charCount)
+                break
+            }
+            charCount++
+        }
+      
+        return updatedText
     }
 
     public static stripTags = <T extends Post[] | PostSearch[] | PostFull[] | PostHistory[]>(posts: T) => {
@@ -3298,5 +3383,104 @@ export default class Functions {
             newFavoriteTags.push(`+${item}`)
         }
         return newFavoriteTags
+    }
+
+    public static parseTagGroups = (rawTags: string) => {
+        const tagGroups: {name: string, tags: string[]}[] = []
+        const tags: Set<string> = new Set()
+        if (!rawTags) return {tagGroups, tags: []}
+      
+        const groupRegex = /([a-zA-Z0-9_-]+)\{([^}]+)\}/g
+        let match = null as RegExpExecArray | null
+      
+        while ((match = groupRegex.exec(rawTags)) !== null) {
+          const name = match[1]
+          const groupTags = match[2].trim().split(/\s+/)
+          tagGroups.push({name, tags: groupTags})
+          groupTags.forEach(tag => tags.add(tag))
+        }
+      
+        const remainingTags = rawTags.replace(groupRegex, "").trim().split(/\s+/)
+        const soloTags = [] as string[]
+        remainingTags.forEach(tag => {if (tag) {tags.add(tag); soloTags.push(tag)}})
+        if (tagGroups.length && soloTags.length) tagGroups.push({name: "Tags", tags: soloTags})
+
+        return {tagGroups, tags: Array.from(tags)}
+    }
+
+    public static cleanTags = (tags: UploadTag[], type: "artists" | "characters" | "series" | "newTags") => {
+        if (!Functions.cleanArray(tags)[0]) {
+          tags = []
+          if (type === "artists") tags = [{tag: "unknown-artist"}]
+          if (type === "characters") tags = [{tag: "unknown-character"}]
+          if (type === "series") tags = [{tag: "unknown-series"}]
+        }
+        tags = tags.filter(Boolean).map((t) => {
+          if (t.tag) t.tag = t.tag.toLowerCase().replace(/[^a-z0-9()]+/g, "-")
+          return t
+        })
+        return tags
+    }
+      
+    public static cleanStringTags = (tags: string[] | undefined, type: "artists" | "characters" | "series" | "tags") => {
+        if (!Functions.cleanArray(tags)[0]) {
+          tags = []
+          if (type === "artists") tags = ["unknown-artist"]
+          if (type === "characters") tags = ["unknown-character"]
+          if (type === "series") tags = ["unknown-series"]
+          if (type === "tags") tags = ["needs-tags"]
+        }
+        tags = tags?.filter(Boolean).map((t) => t.toLowerCase().replace(/[^a-z0-9()]+/g, "-"))
+        return tags || []
+    }
+
+    public static tagGroupChanges = (oldTagGroups?: MiniTagGroup[], newTagGroups?: MiniTagGroup[]) => {
+        let addedTagGroups = [] as MiniTagGroup[]
+        let removedTagGroups = [] as MiniTagGroup[]
+      
+        if (!oldTagGroups || !newTagGroups) return {addedTagGroups, removedTagGroups}
+      
+        for (const newGroup of newTagGroups) {
+          const oldGroup = oldTagGroups.find((group) => group.name === newGroup.name)
+      
+          if (oldGroup) {
+            const addedTags = newGroup.tags.filter((tag) => !oldGroup.tags.includes(tag))
+            const removedTags = oldGroup.tags.filter((tag) => !newGroup.tags.includes(tag))
+      
+            if (addedTags.length) {
+              addedTagGroups.push({name: newGroup.name, tags: addedTags})
+            }
+            if (removedTags.length) {
+              removedTagGroups.push({name: newGroup.name, tags: removedTags})
+            }
+          } else {
+            addedTagGroups.push({name: newGroup.name, tags: newGroup.tags})
+          }
+        }
+
+        for (const oldGroup of oldTagGroups) {
+          const newGroup = newTagGroups.find((group) => group.name === oldGroup.name)
+          if (!newGroup) {
+            removedTagGroups.push({name: oldGroup.name, tags: oldGroup.tags})
+          }
+        }
+      
+        return {addedTagGroups, removedTagGroups}
+    }
+
+    public static parseTagGroupsField = (tags: string[], tagGroups?: MiniTagGroup[] | TagGroupCategory[]) => {
+        if (!tagGroups?.length) return tags.join(" ")
+        let resultStr = ""
+        let removeTags = [] as string[]
+        for (const tagGroup of tagGroups) {
+            if (tagGroup.name.toLowerCase() === "tags") continue
+            let stringTags = tagGroup.tags.map((tag: string | MiniTag) => typeof tag === "string" ? tag : tag.tag)
+            resultStr += `${tagGroup.name}{${stringTags.join(" ")}}\n`
+            removeTags.push(...stringTags)
+        }
+        let missingTags = tags.filter((tag) => !removeTags.includes(tag))
+        resultStr += `${missingTags.join(" ")}`
+        console.log(resultStr)
+        return resultStr
     }
 }

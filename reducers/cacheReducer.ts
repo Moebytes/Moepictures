@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostSearch, PostOrdered, Post, PostHistory, MiniTag, TagCount, TagCategories, UnverifiedPost, TagCategorySearch} from "../types/Types"
+import {PostSearch, PostOrdered, Post, PostHistory, MiniTag, TagCount, TagCategories, TagGroupCategory, UnverifiedPost, TagCategorySearch} from "../types/Types"
 
 const cacheSlice = createSlice({
     name: "cache",
@@ -16,6 +16,7 @@ const cacheSlice = createSlice({
         bannerTags: [] as TagCount[],
         post: null as PostSearch | PostHistory | null,
         tagCategories: null as TagCategories | null,
+        tagGroupCategories: [] as TagGroupCategory[],
         order: 1,
         related: [] as PostSearch[],
         artists: [] as TagCategorySearch[],
@@ -32,6 +33,7 @@ const cacheSlice = createSlice({
         setBannerTags: (state, action) => {state.bannerTags = action.payload},
         setPost: (state, action) => {state.post = action.payload},
         setTagCategories: (state, action) => {state.tagCategories = action.payload},
+        setTagGroupCategories: (state, action) => {state.tagGroupCategories = action.payload},
         setOrder: (state, action) => {state.order = action.payload},
         setRelated: (state, action) => {state.related = action.payload},
         setArtists: (state, action) => {state.artists = action.payload},
@@ -43,7 +45,7 @@ const cacheSlice = createSlice({
 const {
     setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles,
     setBannerTags, setPost, setTagCategories, setOrder, setRelated, setArtists, setCharacters,
-    setSeries
+    setSeries, setTagGroupCategories
 } = cacheSlice.actions
 
 export const useCacheSelector = () => {
@@ -58,6 +60,7 @@ export const useCacheSelector = () => {
         bannerTags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.bannerTags)),
         post: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.post)),
         tagCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)),
+        tagGroupCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagGroupCategories)),
         order: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.order)),
         related: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.related)),
         artists: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.artists)),
@@ -78,6 +81,7 @@ export const useCacheActions = () => {
         setBannerTags: (state: TagCount[]) => dispatch(setBannerTags(state)),
         setPost: (state: PostSearch | PostHistory | null) => dispatch(setPost(state)),
         setTagCategories: (state: TagCategories | null) => dispatch(setTagCategories(state)),
+        setTagGroupCategories: (state: TagGroupCategory[]) => dispatch(setTagGroupCategories(state)),
         setOrder: (state: number) => dispatch(setOrder(state)),
         setRelated: (state: PostSearch[]) => dispatch(setRelated(state)),
         setArtists: (state: TagCategorySearch[]) => dispatch(setArtists(state)),

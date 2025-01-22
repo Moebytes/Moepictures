@@ -20,6 +20,7 @@ import Children from "../../components/post/Children"
 import ArtistWorks from "../../components/post/ArtistWorks"
 import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
+import AdBanner from "../../components/post/AdBanner"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
@@ -29,7 +30,7 @@ useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import "./styles/postpage.less"
-import {PostSearch, TagCategories, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
+import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 
 interface Props {
     match: {params: {id: string, slug: string}}
@@ -46,8 +47,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
     const {setRatingType} = useSearchActions()
-    const {posts, post, tagCategories, order} = useCacheSelector()
-    const {setPosts, setTags, setPost, setTagCategories, setOrder} = useCacheActions()
+    const {posts, post, tagCategories, tagGroupCategories, order} = useCacheSelector()
+    const {setPosts, setTags, setPost, setTagCategories, setTagGroupCategories, setOrder} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setReloadPostFlag, setRedirect, setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const {revertPostHistoryID, revertPostHistoryFlag} = usePostDialogSelector()
@@ -236,8 +237,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setOrder(1)
             }
             const allTags = [...historyPost.artists, ...historyPost.characters, ...historyPost.series, ...historyPost.tags]
-            const tags = await functions.get("/api/tag/counts", {tags: allTags}, session, setSessionFlag)
+            const tags = await functions.tagCountsCache(allTags, session, setSessionFlag)
             const categories = await functions.tagCategories(tags, session, setSessionFlag)
+            const groupCategories = await functions.tagGroupCategories(historyPost.tagGroups, session, setSessionFlag)
+            setTagGroupCategories(groupCategories)
             setTagCategories(categories)
             setTags(tags)
             setPost(historyPost)
@@ -263,6 +266,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -278,7 +283,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 }
                 setSessionFlag(true)
             } else {
-                functions.replaceLocation("/404")
+                //functions.replaceLocation("/404")
             }
         }
         updatePost()
@@ -344,12 +349,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 }
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
                 setSessionFlag(true)
             } else {
-                functions.replaceLocation("/404")
+                //functions.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()
@@ -485,12 +492,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
             style: post.style, artists: functions.tagObject(historyPost.artists), characters: functions.tagObject(historyPost.characters), noImageUpdate: true,
-            preserveChildren: Boolean(post.parentID), series: functions.tagObject(historyPost.series), tags: post.tags, newTags, reason: historyPost.reason}, 
-            session, setSessionFlag)
+            preserveChildren: Boolean(post.parentID), series: functions.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, 
+            reason: historyPost.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
             style: post.style, artists: historyPost.artists, characters: historyPost.characters, series: historyPost.series, tags: post.tags, 
-            reason: historyPost.reason}, session, setSessionFlag)
+            tagGroups: historyPost.tagGroups, reason: historyPost.reason}, session, setSessionFlag)
         }
         currentHistory()
     }
@@ -647,9 +654,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <TitleBar post={post} goBack={true} historyID={historyID} noteID={noteID}/>
         <NavBar goBack={true}/>
         <div className="body">
-            <SideBar post={post} order={order} artists={tagCategories?.artists} characters={tagCategories?.characters} series={tagCategories?.series} tags={tagCategories?.tags}/>
+            <SideBar post={post} order={order} artists={tagCategories?.artists} 
+            characters={tagCategories?.characters} series={tagCategories?.series} 
+            tags={tagCategories?.tags} tagGroups={tagGroupCategories}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
+                    {/* <AdBanner/> */}
                     {historyID || noteID ? getHistoryButtons() : null}
                     {post && images.length > 1 ?
                     <div className="carousel-container">
@@ -660,7 +670,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {post && parentPost ? <Parent post={parentPost}/>: null}
                     {post && childPosts.length ? <Children posts={childPosts}/> : null}
                     {generateGroupsJSX()}
-                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} 
+                    characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags} 
+                    tagGroups={tagGroupCategories}/> : null}
                     {post && session.username && !session.banned ? <CutenessMeter post={post}/> : null}
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}

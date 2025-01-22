@@ -13,7 +13,7 @@ interface Props {
     x?: number 
     y?: number
     width?: number
-    click?: (tag: string) => void
+    click?: (tag: string, current?: string) => void
     type?: TagType
     sticky?: boolean
     fontSize?: number
@@ -77,7 +77,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     }, [props.active])
 
     const updateSearchSuggestions = async () => {
-        const query = props.text ? props.text : search
+        const query = props.text ? functions.parseTagGroups(props.text).tags.join(" ") : search
         if (!query) return setSuggestions([])
         let suggestions = await functions.get("/api/search/suggestions", {query, type: props.type}, session, setSessionFlag)
         if (!suggestions?.length) {
@@ -100,7 +100,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
             if (!suggestions[i]) break
-            const tagClick = () => {
+            const tagClick = (event: React.MouseEvent) => {
                 if (props.click) return props.click(suggestions[i].tag)
                 history.push(`/posts`)
                 const parts = search.split(/ +/g)
@@ -110,7 +110,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 setSearchFlag(true)
             }
             jsx.push(
-                <div className={`search-suggestions-row ${activeIndex === i ? "search-suggestions-active" : ""}`} onClick={() => tagClick()} onMouseEnter={() => setActiveIndex(i)}>
+                <div className={`search-suggestions-row ${activeIndex === i ? "search-suggestions-active" : ""}`} onClick={(event) => tagClick(event)} onMouseEnter={() => setActiveIndex(i)}>
                     <span className="search-suggestions-tag" style={props.fontSize ? {fontSize: `${props.fontSize}px`} : {}}>{suggestions[i].tag.replaceAll("-", " ")}</span>
                     <span className="search-suggestions-count" style={props.fontSize ? {fontSize: `${props.fontSize - 3}px`} : {}}>{suggestions[i].count}</span>
                 </div>

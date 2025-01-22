@@ -1,5 +1,5 @@
 import {PostType, PostRating, PostStyle, PostChanges, MiniTag, PostDeleteRequest, PostHistory,
-ImageFormat, Upscaler, SourceData, UserComment, Redirect} from "./Types"
+ImageFormat, Upscaler, SourceData, UserComment, Redirect, MiniTagGroup} from "./Types"
 
 export interface PostMirrors {
     pixiv?: string
@@ -79,12 +79,14 @@ export interface PostTagged extends Post {
 
 export interface PostFull extends Post {
     tags: string[]
+    tagGroups: MiniTagGroup[]
     favoriteCount: string
     cuteness: string
 }
 
 export interface PostSearch extends Post {
     tags: string[]
+    tagGroups: MiniTagGroup[]
     artists: string[]
     characters: string[]
     series: string[]
@@ -105,9 +107,12 @@ export interface UnverifiedPost extends Post {
     duplicates: boolean | null
     thumbnail: string | null
     tags: string[]
+    tagGroups: MiniTagGroup[]
     newTags: string[] | null
     addedTags: string[] | null
     removedTags: string[] | null
+    addedTagGroups: string[] | null
+    removedTagGroups: string[] | null
     imageChanged: boolean | null
     changes: PostChanges
     reason: string | null
@@ -172,9 +177,12 @@ export interface PostQuickEditParams {
     characters?: string[]
     series?: string[]
     tags?: string[]
+    tagGroups?: {name: string, tags: string[]}[]
     reason?: string | null
     silent?: boolean
 }
+
+export interface PostQuickEditUnverifiedParams extends Omit<PostQuickEditParams, "unverified" | "silent"> {}
 
 export interface PostMetadata {
     format: string
@@ -198,8 +206,6 @@ export interface PostMetadata {
     scanType?: string
     colorMatrix?: string
 }
-
-export interface PostQuickEditUnverifiedParams extends Omit<PostQuickEditParams, "unverified" | "silent"> {}
 
 export type PostGetEndpoint<T extends string> = 
     T extends "/api/post" ? {params: {postID: string}, response: PostFull | undefined} :

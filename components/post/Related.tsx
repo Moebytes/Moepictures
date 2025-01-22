@@ -13,12 +13,14 @@ import GridSong from "../image/GridSong"
 import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
 import Carousel from "../site/Carousel"
+import AdBanner from "./AdBanner"
 import "./styles/related.less"
 import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
 
 let replace = false
 let relatedTimer = null as any
 let delay = 2000
+let limit = 100
 
 interface Props {
     tag: string
@@ -57,12 +59,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (props.post?.type === "model" || props.post?.type === "live2d") return []
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
         rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+        sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
 
         if (result.length < 50 && props.fallback?.[0]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
             rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-            sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+            sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
             setSearchTerm(props.fallback[0])
@@ -71,7 +73,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (result.length < 50 && props.fallback?.[1]) {
             let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
             rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-            sort: props.count ? "date" : "random", showChildren}, session, setSessionFlag)
+            sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
             setSearchTerm(props.fallback[1])
@@ -126,7 +128,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (!props.count && (session.username && !session.showRelated)) return
         if (ended) return
         if (props.post?.type === "model" || props.post?.type === "live2d") return
-        let newOffset = offset + 100
+        let newOffset = offset + limit
         let padded = false
         if (!scroll) {
             newOffset = (relatedPage - 1) * getPageAmount()
@@ -140,9 +142,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
         let result = await functions.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
         rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", showChildren, offset: newOffset}, session, setSessionFlag)
+        sort: props.count ? "date" : "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
 
-        let hasMore = result?.length >= 100
+        let hasMore = result?.length >= limit
         const cleanRelated = related.filter((t) => !t.fake)
         if (!scroll) {
             if (cleanRelated.length <= newOffset) {
@@ -154,14 +156,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (hasMore) {
             setOffset(newOffset)
             if (padded) {
-                setRelated(functions.removeDuplicates(result))
+                setRelated(functions.removeDuplicates([...related, ...result]))
             } else {
                 setRelated(functions.removeDuplicates([...related, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
-                    setRelated(functions.removeDuplicates(result))
+                    setRelated(functions.removeDuplicates([...related, ...result]))
                 } else {
                     setRelated(functions.removeDuplicates([...related, ...result]))
                 }
@@ -222,7 +224,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, related, relatedPage, ended])
+    }, [scroll, relatedPage, ended])
 
     useEffect(() => {
         if (related?.length) {
@@ -373,6 +375,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 comicPages={post.type === "comic" ? images : null}/>)
             }
         }
+        // jsx.push(<div key="ad" style={{width: "100%"}}><AdBanner/></div>)
         if (!scroll) {
             jsx.push(
                 <div key="page-numbers" className="page-container">

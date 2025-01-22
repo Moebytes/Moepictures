@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
-import {TagHistory, PostHistory, NoteHistory, GroupHistory, SearchHistory} from "../types/Types"
+import {TagHistory, PostHistory, NoteHistory, GroupHistory, SearchHistory, MiniTagGroup} from "../types/Types"
 
 export default class SQLHistory {
     /** Insert tag history */
@@ -150,22 +150,23 @@ export default class SQLHistory {
         updater: string, uploadDate: string, updatedDate: string, type: string, rating: string, style: string, parentID: string | null, 
         title: string, englishTitle: string, posted: string, artist: string, source: string, hasUpscaled: boolean | null, hasOriginal: boolean | null, 
         commentary: string, englishCommentary: string, bookmarks: number, buyLink: string | null, mirrors: string | null, slug: string | null, artists: string[], 
-        characters: string[], series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, 
-        changes: any, reason?: string | null}) => {
+        characters: string[], series: string[], tags: string[], addedTags: string[], removedTags: string[], tagGroups: string, addedTagGroups: string[], 
+        removedTagGroups: string[], imageChanged: boolean, changes: string | null, reason?: string | null}) => {
         const {postID, username, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
         englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, hasOriginal, hasUpscaled, 
-        slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
+        slug, artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "upscaledImages", "uploader", "updater", "uploadDate", 
             "updatedDate", "type", "rating", "style", "parentID", "title", "englishTitle", "posted", "artist", "source", "commentary", 
             "englishCommentary", "bookmarks", "buyLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", 
-            "tags", "addedTags", "removedTags", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
-            $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35) RETURNING "historyID"`,
+            "tags", "addedTags", "removedTags", "tagGroups", "addedTagGroups", "removedTagGroups", "imageChanged", "changes", "reason") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, 
+            $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38) RETURNING "historyID"`,
             rowMode: "array",
             values: [postID, username, now, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, 
             title, englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
-            artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason]
+            artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageChanged, changes, reason]
         }
         await SQLQuery.invalidateCache("history/post")
         const result = await SQLQuery.run(query)

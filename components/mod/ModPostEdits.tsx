@@ -341,6 +341,11 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         return calculateDiff(newPost.addedTags || [], newPost.removedTags || [])
     }
 
+    const tagGroupsDiff = (originalPost: UnverifiedPost, newPost: UnverifiedPost) => {
+        if (!originalPost) return newPost.tagGroups.map((g) => g.name).join(" ").trim()
+        return calculateDiff(newPost.addedTagGroups || [], newPost.removedTagGroups || [])
+    }
+
     const printMirrors = (newPost: UnverifiedPost) => {
         if (!newPost.mirrors) return "None"
         const mapped = Object.values(newPost.mirrors) as string[]
@@ -359,6 +364,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (!originalPost) return []
         const changes = newPost.changes || {}
         let tagChanges = newPost.addedTags?.length || newPost.removedTags?.length
+        let tagGroupChanges = newPost.addedTagGroups?.length || newPost.removedTagGroups?.length
         if (changes.images) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.images}:</span> {newPost.images.length}</span>)
         }
@@ -377,6 +383,11 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (tagChanges) {
             if (tagsDiff(originalPost, newPost)) {
                 jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.navbar.tags}:</span> {tagsDiff(originalPost, newPost)}</span>)
+            }
+        }
+        if (tagGroupChanges) {
+            if (tagGroupsDiff(originalPost, newPost)) {
+                jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.tagGroups}:</span> {tagGroupsDiff(originalPost, newPost)}</span>)
             }
         }
         if (changes.title) {

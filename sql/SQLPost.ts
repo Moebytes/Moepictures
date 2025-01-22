@@ -190,10 +190,10 @@ export default class SQLPost {
         englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, 
         reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
-        imageChanged?: boolean, changes?: any}) => {
+        addedTagGroups?: string[], removedTagGroups?: string[], imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
-        isNote, addedTags, removedTags, imageChanged, changes, reason} = params
+        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -337,6 +337,16 @@ export default class SQLPost {
             values.push(removedTags)
             i++
         }
+        if (addedTagGroups !== undefined) {
+            setArray.push(`"addedTagGroups" = $${i}`)
+            values.push(addedTagGroups)
+            i++
+        }
+        if (removedTagGroups !== undefined) {
+            setArray.push(`"removedTagGroups" = $${i}`)
+            values.push(removedTagGroups)
+            i++
+        }
         if (imageChanged !== undefined) {
             setArray.push(`"imageChanged" = $${i}`)
             values.push(imageChanged)
@@ -457,14 +467,22 @@ export default class SQLPost {
     public static post = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+            WITH tag_groups_json AS (
+                SELECT "tag group tags"."name", "tag group tags"."postID", "tag group tags"."tags"
+                FROM "tag group tags"
+            )
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
             COUNT(DISTINCT favorites."username") AS "favoriteCount",
-            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
+            json_agg(DISTINCT tag_groups_json.*) AS "tagGroups"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
             JOIN "tag map" ON posts."postID" = "tag map"."postID"
+            LEFT JOIN tag_groups_json ON posts."postID" = tag_groups_json."postID"
             LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
             LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+            LEFT JOIN "tag group map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+            LEFT JOIN "tag groups" ON "tag group map"."groupID" = "tag groups"."groupID"
             WHERE posts."postID" = $1
             GROUP BY posts."postID"
             `),
@@ -478,11 +496,24 @@ export default class SQLPost {
     public static unverifiedPost = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+            WITH tag_groups_json AS (
+                SELECT "unverified tag groups".name, "unverified tag groups"."postID",
+                jsonb_agg(DISTINCT "unverified tag map".tag) AS tags
+                FROM "unverified tag groups"
+                JOIN "unverified tag group map" ON "unverified tag group map"."groupID" = "unverified tag groups"."groupID"
+                JOIN "unverified tag map" ON "unverified tag map"."mapID" = "unverified tag group map"."tagMapID"
+                WHERE "unverified tag groups"."groupID" = "unverified tag group map"."groupID"
+                GROUP BY "unverified tag groups"."groupID"
+            )
             SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
-            json_agg(DISTINCT "unverified tag map".tag) AS tags
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            json_agg(DISTINCT tag_groups_json.*) AS "tagGroups"
             FROM "unverified posts"
-            LEFT JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
-            LEFT JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+            JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            LEFT JOIN tag_groups_json ON "unverified posts"."postID" = tag_groups_json."postID"
+            LEFT JOIN "unverified tag group map" ON "unverified tag map"."mapID" = "unverified tag group map"."tagMapID"
+            LEFT JOIN "unverified tag groups" ON "unverified tag group map"."groupID" = "unverified tag groups"."groupID"
             WHERE "unverified posts"."postID" = $1
             GROUP BY "unverified posts"."postID"
             `),

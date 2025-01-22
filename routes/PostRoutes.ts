@@ -12,8 +12,8 @@ import mediaInfoFactory from "mediainfo.js"
 import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
-PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory} from "../types/Types"
-import {cleanStringTags, insertImages, updatePost, insertTags} from "./UploadRoutes"
+PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost} from "../types/Types"
+import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -554,7 +554,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, unverified, type, rating, style, source, parentID, artists, characters, 
-            series, tags, reason, silent} = req.body as PostQuickEditParams
+            series, tags, tagGroups, reason, silent} = req.body as PostQuickEditParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -577,6 +577,9 @@ const PostRoutes = (app: Express) => {
 
             let addedTags = [] as string[]
             let removedTags = [] as string[]
+            let addedTagGroups = [] as string[]
+            let removedTagGroups = [] as string[]
+            if (!tagGroups) tagGroups = []
 
             if (parentEdit) {
                 const updatedDate = new Date().toISOString()
@@ -653,11 +656,17 @@ const PostRoutes = (app: Express) => {
                 if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
                     return res.status(400).send("Invalid characters in tags: , _ / \\")
                 }
-        
-                artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-                characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-                series = series.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-                tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+
+                artists = functions.cleanStringTags(artists, "artists")
+                characters = functions.cleanStringTags(characters, "characters")
+                series = functions.cleanStringTags(series, "series")
+                tags = functions.cleanStringTags(tags, "tags")
+
+                for (let i = 0; i < (tagGroups?.length || 0); i++) {
+                    if (tagGroups?.[i]) {
+                        tagGroups[i].tags = functions.cleanStringTags(tagGroups[i].tags, "tags")
+                    }
+                }
         
                 if (!functions.validType(type)) return res.status(400).send("Invalid type")
                 if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
@@ -738,10 +747,16 @@ const PostRoutes = (app: Express) => {
                     await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
                     await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
                     await sql.tag.insertUnverifiedTagMap(postID, addedTags)
+                    const resultGroups = await updateTagGroups(postID, {unverified: true, oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+                    addedTagGroups = resultGroups.addedTagGroups
+                    removedTagGroups = resultGroups.removedTagGroups
                 } else {
                     await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
                     await sql.tag.deleteTagMap(postID, removedTags)
                     await sql.tag.insertTagMap(postID, addedTags)
+                    const resultGroups = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+                    addedTagGroups = resultGroups.addedTagGroups
+                    removedTagGroups = resultGroups.removedTagGroups
                     
                     await serverFunctions.migratePost(post as PostFull, oldType, newType, oldR18, newR18)
                 }
@@ -785,8 +800,8 @@ const PostRoutes = (app: Express) => {
                     artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
                     bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
                     slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
-                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
-                    changes: null, reason})
+                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
+                    addedTagGroups: [], removedTagGroups: [], imageChanged: false, changes: null, reason})
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
@@ -801,7 +816,7 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, 
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    imageChanged: false, changes, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             } else {
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
@@ -817,7 +832,7 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled,
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    imageChanged: false, changes, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -829,7 +844,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit/unverified", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, type, rating, style, source, parentID, artists, characters, 
-            series, tags, reason} = req.body as PostQuickEditUnverifiedParams
+            series, tags, tagGroups, reason} = req.body as PostQuickEditUnverifiedParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -843,7 +858,7 @@ const PostRoutes = (app: Express) => {
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
             if (!reason) reason = null
 
-            const originalPostID = postID as any
+            const originalPostID = postID
             const post = await sql.post.post(originalPostID)
             if (!post) return res.status(400).send("Bad postID")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
@@ -851,10 +866,10 @@ const PostRoutes = (app: Express) => {
 
             if (!tagEdit) {
                 const categories = await serverFunctions.tagCategories(post.tags)
-                artists = categories.artists.map((a: any) => a.tag)
-                characters = categories.characters.map((c: any) => c.tag)
-                series = categories.series.map((s: any) => s.tag)
-                tags = categories.tags.map((t: any) => t.tag)
+                artists = categories.artists.map((a) => a.tag)
+                characters = categories.characters.map((c) => c.tag)
+                series = categories.series.map((s) => s.tag)
+                tags = categories.tags.map((t) => t.tag)
                 type = post.type
                 rating = post.rating
                 style = post.style
@@ -878,10 +893,16 @@ const PostRoutes = (app: Express) => {
                 parentID = parentPost?.parentID || null
             }
 
-            artists = cleanStringTags(artists, "artists")
-            characters = cleanStringTags(characters, "characters")
-            series = cleanStringTags(series, "series")
-            tags = cleanStringTags(tags, "tags")
+            artists = functions.cleanStringTags(artists, "artists")
+            characters = functions.cleanStringTags(characters, "characters")
+            series = functions.cleanStringTags(series, "series")
+            tags = functions.cleanStringTags(tags, "tags")
+
+            for (let i = 0; i < (tagGroups?.length || 0); i++) {
+                if (tagGroups?.[i]) {
+                    tagGroups[i].tags = functions.cleanStringTags(tagGroups[i].tags, "tags")
+                }
+            }
 
             let invalidTags = functions.invalidTags(characters, series, tags)
             if (invalidTags) {
@@ -904,8 +925,26 @@ const PostRoutes = (app: Express) => {
             source, originalID: originalPostID, reason, parentID: post.parentID, updater: req.session.username, uploader: post.uploader,
             uploadDate: post.uploadDate})
 
-            await insertTags(postID, {unverified: true, tags, artists: artistTags, characters: characterTags, 
+            let {addedTags, removedTags} = await insertTags(postID, {unverified: true, tags, artists: artistTags, characters: characterTags, 
             series: seriesTags, newTags, username: req.session.username})
+
+            let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {unverified: true, 
+            oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+
+            
+            const updated = await sql.post.unverifiedPost(postID) as UnverifiedPost
+            const changes = functions.parsePostChanges(post, updated)
+            
+            await sql.post.bulkUpdateUnverifiedPost(postID, {
+                uploader: post.uploader,
+                uploadDate: post.uploadDate,
+                addedTags,
+                removedTags,
+                addedTagGroups,
+                removedTagGroups,
+                imageChanged: false,
+                changes
+            })
     
             res.status(200).send("Success")
           } catch (e) {

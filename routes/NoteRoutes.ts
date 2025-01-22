@@ -10,7 +10,7 @@ import sharp from "sharp"
 import phash from "sharp-phash"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag} from "../types/Types"
-import {insertImages, updatePost, insertTags} from "./UploadRoutes"
+import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const noteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -208,6 +208,8 @@ const NoteRoutes = (app: Express) => {
             uploadDate: post.uploadDate})
 
             await insertTags(postID, {unverified: true, tags, artists, characters, series, newTags, username: req.session.username})
+
+            await updateTagGroups(postID, {unverified: true, oldTagGroups: [], newTagGroups: post.tagGroups})
 
             const notes = await sql.note.notes(postID, order)
             let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)

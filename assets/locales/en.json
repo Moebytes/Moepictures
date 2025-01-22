@@ -376,6 +376,7 @@
         "mirrors": "Mirrors",
         "commentary": "Commentary",
         "englishCommentary": "English Commentary",
+        "tagGroups": "Tag Groups",
         "category": "Category",
         "website": "Website",
         "social": "Social",
@@ -1460,7 +1461,14 @@
                     "Pixiv Tags": " - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in Japanese."
                 }
             }
-            
+        },
+        "tagGroups": {
+            "line1": "Tag groups are custom groups of tags displayed in the sidebar of a post. Most commonly we use them to group together the tags of each respective character in the post, making the tags more organized and easier to read.",
+            "line2": "The syntax to add tag groups while tagging is the following:",
+            "example": "Group-Name{tag-1 tag-2 tag-3}",
+            "line3": "Note that tag group names do not directly support spaces, if you want it to have a space use a dash \"-\" and this will get replaced as a space for viewing. Any stray tags not included in a tag group will automatically be put into the generic \"Tags\" tag group.",
+            "line4": "Adding tag groups is a task in progress and you may find posts to group with ",
+            "search": " multiple-characters -tag-groups."
         },
         "selfUploads": {
             "title": "Self Uploads",

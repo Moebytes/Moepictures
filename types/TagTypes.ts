@@ -90,6 +90,23 @@ export interface BulkTag {
     imageHash: string | null
 }
 
+export interface TagGroup {
+    groupID: string
+    postID: string
+    name: string
+    tags: string[]
+}
+
+export interface MiniTagGroup {
+    name: string
+    tags: string[]
+}
+
+export interface TagGroupCategory {
+    name: string
+    tags: MiniTag[]
+}
+
 export interface AliasHistory {
     historyID: string
     user: string

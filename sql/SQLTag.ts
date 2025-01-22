@@ -2,7 +2,7 @@ import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
 import {Tag, MiniTag, BulkTag, TagCount, Implication, Alias, PostTagged, 
-AliasHistory, ImplicationHistory, AliasHistorySearch} from "../types/Types"
+AliasHistory, ImplicationHistory, AliasHistorySearch, TagGroup} from "../types/Types"
 
 export default class SQLTag {
     /** Insert a new tag. */
@@ -638,5 +638,185 @@ export default class SQLTag {
         }
         const result = await SQLQuery.run(query, `tag/wildcard/${wildcard}`)
         return result as Promise<Omit<Tag, "aliases" | "featuredPost">[]>
+    }
+
+    /** Insert tag group */
+    public static insertTagGroup = async (postID: string, name: string) => {
+        const query: QueryArrayConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "tag groups" ("postID", "name") VALUES ($1, $2) 
+                ON CONFLICT ("postID", "name") 
+                DO UPDATE SET "name" = EXCLUDED."name"  
+                RETURNING "groupID"
+            `),
+            rowMode: "array",
+            values: [postID, name]
+        }
+        await SQLQuery.invalidateCache("history")
+        await SQLQuery.invalidateCache("tag")
+        const result = await SQLQuery.run(query)
+        return String(result.flat(Infinity)[0])
+    }
+
+    /** Delete tag group */
+    public static deleteTagGroup = async (postID: string, name: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "tag groups" WHERE "postID" = $1 AND "name" = $2
+            `),
+            values: [postID, name]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Get tag group */
+    public static tagGroup = async (postID: string, name: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT "tag groups".*,
+                json_agg(DISTINCT "tag map"."tag") AS tags
+                FROM "tag groups" 
+                LEFT JOIN "tag group map" ON "tag group map"."groupID" = "tag groups"."groupID"
+                LEFT JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                WHERE "tag groups"."postID" = $1 AND "tag groups"."name" = $2
+                GROUP BY "tag groups"."groupID"
+            `),
+            values: [postID, name]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<TagGroup | undefined>
+    }
+
+    /** Insert tag group map */
+    public static insertTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
+        const values = [groupID, postID] as string[]
+        const valueArray = [] as string[]
+    
+        tags.forEach((tag, index) => {
+            const offset = index + 3
+            values.push(tag)
+            valueArray.push(`($1, (SELECT "tag map"."mapID" FROM "tag map" WHERE "tag map"."postID" = $2 AND "tag map".tag = $${offset}))`)
+        })
+    
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "tag group map" ("groupID", "tagMapID")
+                VALUES ${valueArray.join(", ")}
+            `),
+            values
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Delete tag group map */
+    public static deleteTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
+        const values = [groupID, postID] as string[]
+        const valueArray = [] as string[]
+
+        tags.forEach((tag, index) => {
+            const offset = index + 3
+            values.push(tag)
+            valueArray.push(`((SELECT "tag map"."mapID" FROM "tag map" WHERE "tag map"."postID" = $2 AND "tag map".tag = $${offset}))`)
+        })
+
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "tag group map"
+                WHERE "groupID" = $1 AND "tagMapID" IN (${valueArray.join(", ")})
+            `),
+            values
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Insert unverified tag group */
+    public static insertUnverifiedTagGroup = async (postID: string, name: string) => {
+        const query: QueryArrayConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "unverified tag groups" ("postID", "name") 
+                VALUES ($1, $2) 
+                ON CONFLICT ("postID", "name") 
+                DO UPDATE SET "name" = EXCLUDED."name"
+                RETURNING "groupID"
+            `),
+            rowMode: "array",
+            values: [postID, name]
+        }
+        const result = await SQLQuery.run(query)
+        return String(result.flat(Infinity)[0])
+    }
+
+    /** Delete unverified tag group */
+    public static deleteUnverifiedTagGroup = async (postID: string, name: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "unverified tag groups" 
+                WHERE "postID" = $1 AND "name" = $2
+            `),
+            values: [postID, name]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Get unverified tag group */
+    public static unverifiedTagGroup = async (postID: string, name: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT "unverified tag groups".*,
+                json_agg(DISTINCT "unverified tag map"."tag") AS tags
+                FROM "unverified tag groups" 
+                LEFT JOIN "unverified tag group map" 
+                    ON "unverified tag group map"."groupID" = "unverified tag groups"."groupID"
+                LEFT JOIN "unverified tag map" 
+                    ON "unverified tag map"."mapID" = "unverified tag group map"."tagMapID"
+                WHERE "unverified tag groups"."postID" = $1 AND "unverified tag groups"."name" = $2
+                GROUP BY "unverified tag groups"."groupID"
+            `),
+            values: [postID, name]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<TagGroup | undefined>
+    }
+
+    /** Insert unverified tag group map */
+    public static insertUnverifiedTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
+        const values = [groupID, postID] as string[]
+        const valueArray = [] as string[]
+    
+        tags.forEach((tag, index) => {
+            const offset = index + 3
+            values.push(tag)
+            valueArray.push(`($1, (SELECT "unverified tag map"."mapID" FROM "unverified tag map" WHERE "unverified tag map"."postID" = $2 AND "unverified tag map".tag = $${offset}))`)
+        })
+    
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "unverified tag group map" ("groupID", "tagMapID")
+                VALUES ${valueArray.join(", ")}
+            `),
+            values
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Delete unverified tag group map */
+    public static deleteUnverifiedTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
+        const values = [groupID, postID] as string[]
+        const valueArray = [] as string[]
+
+        tags.forEach((tag, index) => {
+            const offset = index + 3
+            values.push(tag)
+            valueArray.push(`((SELECT "unverified tag map"."mapID" FROM "unverified tag map" WHERE "unverified tag map"."postID" = $2 AND "unverified tag map".tag = $${offset}))`)
+        })
+
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "unverified tag group map"
+                WHERE "groupID" = $1 AND "tagMapID" IN (${valueArray.join(", ")})
+            `),
+            values
+        }
+        await SQLQuery.run(query)
     }
 }

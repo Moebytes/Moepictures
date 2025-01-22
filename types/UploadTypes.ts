@@ -1,4 +1,4 @@
-import {PostType, PostRating, PostStyle} from "./Types"
+import {PostType, PostRating, PostStyle, MiniTagGroup} from "./Types"
 
 export interface SourceData {
     title: string | null
@@ -52,6 +52,7 @@ export interface UploadParams {
     characters: UploadTag[]
     series: UploadTag[]
     tags: string[]
+    tagGroups: MiniTagGroup[]
     newTags: UploadTag[]
     unverifiedID?: string
     noImageUpdate?: boolean

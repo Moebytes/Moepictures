@@ -1,7 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag} from "../types/Types"
+import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../types/Types"
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
@@ -10,7 +10,8 @@ interface TagEditID {
     artists: MiniTag[], 
     characters: MiniTag[], 
     series: MiniTag[], 
-    tags: MiniTag[]
+    tags: MiniTag[],
+    tagGroups?: TagGroupCategory[]
 }
 
 interface PostEditID {
