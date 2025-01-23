@@ -114,7 +114,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(newVisibleRevisions)
+        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
     }, [revisions, session])
 
     const updateOffset = async () => {
@@ -146,27 +146,28 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(newRevisions)
+                setVisibleRevisions(functions.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [visibleRevisions])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let current = visibleRevisions[0]
+        let visible = functions.removeDuplicates(visibleRevisions)
+        let current = visible[0]
         let currentIndex = 0
-        for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1] as TagHistory | null
-            if (current.tag !== visibleRevisions[i].tag) {
-                current = visibleRevisions[i]
+        for (let i = 0; i < visible.length; i++) {
+            let previous = visible[i + 1] as TagHistory | null
+            if (current.tag !== visible[i].tag) {
+                current = visible[i]
                 currentIndex = i
             }
             if (previous?.tag !== current.tag) previous = null
-            jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visibleRevisions[i]} 
+            jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory}/>)
         }

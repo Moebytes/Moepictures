@@ -106,7 +106,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(newVisibleRevisions)
+        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
     }, [revisions])
 
     const updateOffset = async () => {
@@ -133,29 +133,30 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(newRevisions)
+                setVisibleRevisions(functions.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [visibleRevisions])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let current = visibleRevisions[0]
+        let visible = functions.removeDuplicates(visibleRevisions)
+        let current = visible[0]
         let currentIndex = 0
-        for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1] as NoteHistory | null
-            if (current.postID !== visibleRevisions[i].postID &&
-                current.order !== visibleRevisions[i].order) {
-                current = visibleRevisions[i]
+        for (let i = 0; i < visible.length; i++) {
+            let previous = visible[i + 1] as NoteHistory | null
+            if (current.postID !== visible[i].postID &&
+                current.order !== visible[i].order) {
+                current = visible[i]
                 currentIndex = i
             }
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
-            jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visibleRevisions[i]} 
+            jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
                 onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
         }
         return jsx

@@ -121,7 +121,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(newVisibleRevisions)
+        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
     }, [revisions, session])
 
     const updateOffset = async () => {
@@ -153,27 +153,28 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(newRevisions)
+                setVisibleRevisions(functions.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [visibleRevisions])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let current = visibleRevisions[0]
+        let visible = functions.removeDuplicates(visibleRevisions)
+        let current = visible[0]
         let currentIndex = 0
-        for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1] as PostHistory | null
-            if (current.postID !== visibleRevisions[i].postID) {
-                current = visibleRevisions[i]
+        for (let i = 0; i < visible.length; i++) {
+            let previous = visible[i + 1] as PostHistory | null
+            if (current.postID !== visible[i].postID) {
+                current = visible[i]
                 currentIndex = i
             }
             if (previous?.postID !== current.postID) previous = null
-            jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visibleRevisions[i]} 
+            jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory} imageHeight={300}/>)
         }

@@ -106,7 +106,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(newVisibleRevisions)
+        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
     }, [revisions, session])
 
     const updateOffset = async () => {
@@ -138,27 +138,28 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(newRevisions)
+                setVisibleRevisions(functions.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [visibleRevisions])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let current = visibleRevisions[0]
+        let visible = functions.removeDuplicates(visibleRevisions)
+        let current = visible[0]
         let currentIndex = 0
-        for (let i = 0; i < visibleRevisions.length; i++) {
-            let previous = visibleRevisions[i + 1] as GroupHistory | null
-            if (current.groupID !== visibleRevisions[i].groupID) {
-                current = visibleRevisions[i]
+        for (let i = 0; i < visible.length; i++) {
+            let previous = visible[i + 1] as GroupHistory | null
+            if (current.groupID !== visible[i].groupID) {
+                current = visible[i]
                 currentIndex = i
             }
             if (previous?.groupID !== current.groupID) previous = null
-            jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visibleRevisions[i]} 
+            jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory}/>)
         }
