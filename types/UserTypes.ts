@@ -39,6 +39,7 @@ export interface User extends PrunedUser {
     blacklist?: string
     showR18?: boolean
     premiumExpiration?: string | null
+    lastNameChange?: string | null
 }
 
 type Require<T> = {

@@ -136,6 +136,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.deletedPosts = user.deletedPosts
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.lastNameChange = user.lastNameChange
                 const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips

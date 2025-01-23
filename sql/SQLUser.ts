@@ -42,13 +42,13 @@ export default class SQLUser {
         | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
         | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "publicTagFavorites"
-        | "deletedPosts", value?: string | number | boolean | null | string[]) => {
+        | "deletedPosts" | "lastNameChange", value?: string | number | boolean | null | string[]) => {
 
         let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
         "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "publicTagFavorites",
-        "deletedPosts"]
+        "deletedPosts", "lastNameChange"]
         
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)

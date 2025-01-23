@@ -229,6 +229,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.lastNameChange = user.lastNameChange
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 return res.status(200).send("Success")
@@ -299,6 +300,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.lastNameChange = user.lastNameChange
 
                 if (user.role.includes("premium") && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
@@ -686,13 +688,22 @@ const UserRoutes = (app: Express) => {
             if (badUsername) return res.status(400).send("Bad username")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
+
+            if (!permissions.isAdmin(req.session) && user.lastNameChange) {
+                let timeDiff = new Date().getTime() - new Date(user.lastNameChange).getTime()
+                if (timeDiff < 7 * 24 * 60 * 60 * 1000) {
+                    return res.status(429).send("Changing username too frequently")
+                }
+            }
+            const lastNameChange = new Date().toISOString()
+            await sql.user.updateUser(req.session.username, "lastNameChange", lastNameChange)
             await sql.user.updateUser(req.session.username, "username", newUsername)
             req.session.username = newUsername
+            req.session.lastNameChange = lastNameChange
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
-            await sql.user.insertLoginHistory(user.username, "username changed", ip, device, region)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
@@ -701,6 +712,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
             }
+            await sql.user.insertLoginHistory(newUsername, "username changed", ip, device, region)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

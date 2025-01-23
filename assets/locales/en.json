@@ -577,9 +577,11 @@
             "error": "Bad password."
         },
         "changeUsername": {
-            "heading": "Your old username will become available after the change.",
+            "heading": "You can change your username every 7 days. Your old username will become available after the change.",
             "submitHeading": "Your username has been changed.",
-            "error": "Bad username or captcha."
+            "error": "Bad username or captcha.",
+            "rateLimit": "You already changed your username in the last 7 days.",
+            "changeIn": "You can change your name in "
         },
         "forgotPassword": {
             "title": "Forgot Password",

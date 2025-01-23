@@ -24,6 +24,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
+    const [timeRemaining, setTimeRemaining] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
     const history = useHistory()
 
@@ -98,11 +99,32 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
-        } catch {
-            errorRef.current!.innerText = i18n.pages.changeUsername.error
+        } catch (err: any) {
+            let errMsg = i18n.pages.changeUsername.error
+            if (err.response?.data.includes("Changing username too frequently")) errMsg = i18n.pages.changeUsername.rateLimit
+            errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()
+        }
+    }
+
+    useEffect(() => {
+        if (!permissions.isAdmin(session) && session.lastNameChange) {
+            let timeDiff = new Date().getTime() - new Date(session.lastNameChange).getTime()
+            if (timeDiff < 7 * 24 * 60 * 60 * 1000) {
+                const timeRemaining = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000 - timeDiff)).toISOString()
+                return setTimeRemaining(timeRemaining)
+            }
+        }
+        setTimeRemaining("")
+    }, [session])
+
+    const changeText = () => {
+        if (timeRemaining) {
+            return <span className="sitepage-link" style={{fontWeight: "bold"}}>{i18n.pages.changeUsername.changeIn} {functions.timeUntil(timeRemaining, i18n)}</span>
+        } else {
+            return <span className="sitepage-link">{i18n.pages.changeUsername.heading}</span>
         }
     }
 
@@ -122,11 +144,12 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                         <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
-                    <span className="sitepage-link">{i18n.pages.changeUsername.heading}</span>
+                    {changeText()}
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.username}: </span>
                         <span className="sitepage-text-small">{session.username}</span>
                     </div>
+                    {!timeRemaining ? <>
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.newUsername}: </span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
@@ -134,11 +157,11 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
-                    </div>
+                    </div></> : null}
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
-                    <div className="sitepage-button-container">
+                    <div className="sitepage-button-container" style={{justifyContent: timeRemaining ? "flex-start" : "center"}}>
                         <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
-                        <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeUsername}</button>
+                        {!timeRemaining ? <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeUsername}</button> : null}
                     </div>
                     </>
                     }
