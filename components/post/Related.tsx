@@ -83,9 +83,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateRelated = async () => {
-        if (init && related.length) {
-            return setInit(false)
-        }
         if (!props.count && (session.username && !session.showRelated)) return
         if (!props.tag) return
         let result = await searchPosts()
@@ -101,9 +98,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         clearTimeout(relatedTimer)
         relatedTimer = setTimeout(() => {
+            if (init && related.length) {
+                return setInit(false)
+            }
             updateRelated()
         }, delay)
-    }, [props.post, props.tag, session])
+    }, [props.post, session])
+
+    useEffect(() => {
+        clearTimeout(relatedTimer)
+        relatedTimer = setTimeout(() => {
+            updateRelated()
+        }, delay)
+    }, [props.tag, session])
 
     const getPageAmount = () => {
         return mobile ? 10 : scroll ? 15 : 20

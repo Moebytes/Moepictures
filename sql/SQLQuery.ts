@@ -2,6 +2,7 @@ import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import * as Redis from "redis"
 import crypto from "crypto"
 import CreateDB from "./CreateDB.sql"
+import DBTriggers from "./DBTriggers.sql"
 import functions from "../structures/Functions"
 import SQLPost from "./SQLPost"
 import SQLTag from "./SQLTag"
@@ -100,7 +101,8 @@ export default class SQLQuery {
 
   /** Create the Database. */
   public static createDB = async () => {
-    return SQLQuery.run(CreateDB)
+    await SQLQuery.run(CreateDB)
+    await SQLQuery.run(DBTriggers)
   }
 
   /** Set cache */

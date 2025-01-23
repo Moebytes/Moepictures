@@ -806,7 +806,7 @@ const PostRoutes = (app: Express) => {
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
-                    images.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
+                    upscaledImages.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
@@ -822,7 +822,7 @@ const PostRoutes = (app: Express) => {
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
-                    images.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
+                    upscaledImages.push(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 

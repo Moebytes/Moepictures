@@ -439,12 +439,13 @@ export const updateTagGroups = async (postID: string, data: {oldTagGroups?: Mini
   let {addedTagGroups, removedTagGroups} = functions.tagGroupChanges(oldTagGroups, newTagGroups)
   if (!oldTagGroups) oldTagGroups = []
   if (!newTagGroups) newTagGroups = []
-  let oldTagsSet = new Set<string>(oldTagGroups.map((o) => o.name))
-  let newTagsSet = new Set<string>(newTagGroups.map((n) => n.name))
+  let oldTagsSet = new Set<string>(oldTagGroups.filter(Boolean).map((o) => o.name))
+  let newTagsSet = new Set<string>(newTagGroups.filter(Boolean).map((n) => n.name))
   let addedGroups = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
   let removedGroups = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
   for (const tagGroup of addedTagGroups) {
+    if (!tagGroup) continue
     if (unverified) {
       const groupID = await sql.tag.insertUnverifiedTagGroup(postID, tagGroup.name)
       await sql.tag.insertUnverifiedTagGroupMap(groupID, postID, tagGroup.tags)
@@ -455,6 +456,7 @@ export const updateTagGroups = async (postID: string, data: {oldTagGroups?: Mini
   }
 
   for (const tagGroup of removedTagGroups) {
+    if (!tagGroup) continue
     if (unverified) {
       const group = await sql.tag.unverifiedTagGroup(postID, tagGroup.name)
       if (group) await sql.tag.deleteUnverifiedTagGroupMap(group.groupID, postID, tagGroup.tags)
@@ -466,6 +468,7 @@ export const updateTagGroups = async (postID: string, data: {oldTagGroups?: Mini
 
   // Delete empty tag groups
   for (const tagGroup of newTagGroups) {
+    if (!tagGroup) continue
     if (unverified) {
       const group = await sql.tag.unverifiedTagGroup(postID, tagGroup.name)
       if (!group?.tags.length) {
@@ -810,6 +813,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             await serverFunctions.uploadFile(newImagePath, buffer, r18)
           }
           newImages.push(newImagePath)
+          newUpscaledImages.push(newUpscaledImagePath)
 
           let result = await sql.history.postHistory(post.postID)
           if (result.length > 1) {

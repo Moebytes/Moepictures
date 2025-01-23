@@ -3502,28 +3502,31 @@ export default class Functions {
         if (!oldTagGroups || !newTagGroups) return {addedTagGroups, removedTagGroups}
       
         for (const newGroup of newTagGroups) {
-          const oldGroup = oldTagGroups.find((group) => group.name === newGroup.name)
-      
-          if (oldGroup) {
-            const addedTags = newGroup.tags.filter((tag) => !oldGroup.tags.includes(tag))
-            const removedTags = oldGroup.tags.filter((tag) => !newGroup.tags.includes(tag))
-      
-            if (addedTags.length) {
-              addedTagGroups.push({name: newGroup.name, tags: addedTags})
+            if (!newGroup) continue
+        
+            const oldGroup = oldTagGroups.find((group) => group?.name === newGroup.name)
+        
+            if (oldGroup) {
+                const addedTags = newGroup.tags.filter((tag) => !oldGroup.tags.includes(tag))
+                const removedTags = oldGroup.tags.filter((tag) => !newGroup.tags.includes(tag))
+        
+                if (addedTags.length) {
+                addedTagGroups.push({name: newGroup.name, tags: addedTags})
+                }
+                if (removedTags.length) {
+                removedTagGroups.push({name: newGroup.name, tags: removedTags})
+                }
+            } else {
+                addedTagGroups.push({name: newGroup.name, tags: newGroup.tags})
             }
-            if (removedTags.length) {
-              removedTagGroups.push({name: newGroup.name, tags: removedTags})
-            }
-          } else {
-            addedTagGroups.push({name: newGroup.name, tags: newGroup.tags})
-          }
         }
 
         for (const oldGroup of oldTagGroups) {
-          const newGroup = newTagGroups.find((group) => group.name === oldGroup.name)
-          if (!newGroup) {
-            removedTagGroups.push({name: oldGroup.name, tags: oldGroup.tags})
-          }
+            if (!oldGroup) continue
+            const newGroup = newTagGroups.find((group) => group?.name === oldGroup.name)
+            if (!newGroup) {
+                removedTagGroups.push({name: oldGroup.name, tags: oldGroup.tags})
+            }
         }
       
         return {addedTagGroups, removedTagGroups}
