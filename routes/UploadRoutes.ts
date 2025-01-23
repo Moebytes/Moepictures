@@ -86,7 +86,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
 
   const tagHistory = await sql.history.tagHistory(targetTag)
   const nextKey = await serverFunctions.getNextKey("tag", targetTag, false)
-  if (!tagHistory.length || nextKey === 1) {
+  if (!tagHistory.length) {
       let vanilla = tag as unknown as TagHistory
       vanilla.date = tag.createDate 
       vanilla.user = tag.creator
@@ -678,7 +678,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
 
   const postHistory = await sql.history.postHistory(post.postID)
   const nextKey = await serverFunctions.getNextKey("post", String(post.postID), r18)
-  if (!postHistory.length || (imgChanged && nextKey === 1)) {
+  if (!postHistory.length) {
       const vanilla = structuredClone(post) as unknown as PostHistory & PostFull
       vanilla.date = vanilla.uploadDate
       vanilla.user = vanilla.uploader
