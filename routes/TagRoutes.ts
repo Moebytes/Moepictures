@@ -349,7 +349,7 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
+                await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: vanilla.tag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
                     description: vanilla.description, aliases: functions.filterNulls(vanilla.aliases), implications: functions.filterNulls(vanilla.implications), pixivTags: functions.filterNulls(vanilla.pixivTags), 
                     website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {
