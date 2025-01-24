@@ -33,7 +33,6 @@ export interface User extends PrunedUser {
     autosearchInterval?: number
     upscaledImages?: boolean
     forceNoteBubbles?: boolean
-    globalMusicPlayer?: boolean
     liveModelPreview?: boolean
     savedSearches?: {[key: string]: string} | null
     blacklist?: string
@@ -224,7 +223,6 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/autosearchinterval" ? {params: {interval: number | null}, response: string} :
     T extends "/api/user/upscaledimages" ? {params: {reset: boolean} | null, response: string} :
     T extends "/api/user/forcenotebubbles" ? {params: null, response: string} :
-    T extends "/api/user/globalmusicplayer" ? {params: null, response: string} :
     T extends "/api/user/livemodelpreview" ? {params: null, response: string} :
     T extends "/api/user/tagfavoritesprivacy" ? {params: null, response: string} :
     T extends "/api/user/savesearch" ? {params: SaveSearchParams, response: string} :

@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS "users" (
     "autosearchInterval" int,
     "upscaledImages" boolean,
     "forceNoteBubbles" boolean,
-    "globalMusicPlayer" boolean,
     "liveModelPreview" boolean,
     "savedSearches" jsonb,
     "blacklist" text,

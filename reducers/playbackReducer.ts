@@ -40,7 +40,9 @@ const playbackSlice = createSlice({
         audioSeekTo: null as number | null,
         audioDragging: false,
         audioRewindFlag: false,
-        audioFastForwardFlag: false
+        audioFastForwardFlag: false,
+        showMiniPlayer: false,
+        showBigPlayer: true
     },
     reducers: {
         setAudio: (state, action) => {state.audio = action.payload},
@@ -77,7 +79,9 @@ const playbackSlice = createSlice({
         setAudioSeekTo: (state, action) => {state.audioSeekTo = action.payload},
         setAudioDragging: (state, action) => {state.audioDragging = action.payload},
         setAudioRewindFlag: (state, action) => {state.audioRewindFlag = action.payload},
-        setAudioFastForwardFlag: (state, action) => {state.audioFastForwardFlag = action.payload}
+        setAudioFastForwardFlag: (state, action) => {state.audioFastForwardFlag = action.payload},
+        setShowMiniPlayer: (state, action) => {state.showMiniPlayer = action.payload},
+        setShowBigPlayer: (state, action) => {state.showBigPlayer = action.payload}
     }
 })
 
@@ -88,7 +92,8 @@ const {
     setVolumeFlag, setMuteFlag, setResetFlag, setDisableZoom, setAudioSpeed, 
     setAudioReverse, setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, 
     setAudioVolume, setAudioPreviousVolume, setAudioPaused, setAudioDuration, 
-    setAudioSeekTo, setAudioDragging, setAudioRewindFlag, setAudioFastForwardFlag
+    setAudioSeekTo, setAudioDragging, setAudioRewindFlag, setAudioFastForwardFlag,
+    setShowMiniPlayer, setShowBigPlayer
 } = playbackSlice.actions
 
 export const usePlaybackSelector = () => {
@@ -128,7 +133,9 @@ export const usePlaybackSelector = () => {
         audioSeekTo: selector((state) => state.playback.audioSeekTo),
         audioDragging: selector((state) => state.playback.audioDragging),
         audioRewindFlag: selector((state) => state.playback.audioRewindFlag),
-        audioFastForwardFlag: selector((state) => state.playback.audioFastForwardFlag)
+        audioFastForwardFlag: selector((state) => state.playback.audioFastForwardFlag),
+        showMiniPlayer: selector((state) => state.playback.showMiniPlayer),
+        showBigPlayer: selector((state) => state.playback.showBigPlayer)
     }
 }
 
@@ -169,7 +176,9 @@ export const usePlaybackActions = () => {
         setAudioSeekTo: (state: number | null) => dispatch(setAudioSeekTo(state)),
         setAudioDragging: (state: boolean) => dispatch(setAudioDragging(state)),
         setAudioRewindFlag: (state: boolean) => dispatch(setAudioRewindFlag(state)),
-        setAudioFastForwardFlag: (state: boolean) => dispatch(setAudioFastForwardFlag(state))
+        setAudioFastForwardFlag: (state: boolean) => dispatch(setAudioFastForwardFlag(state)),
+        setShowMiniPlayer: (state: boolean) => dispatch(setShowMiniPlayer(state)),
+        setShowBigPlayer: (state: boolean) => dispatch(setShowBigPlayer(state))
     }
 }
 

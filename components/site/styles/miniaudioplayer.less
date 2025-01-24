@@ -1,0 +1,309 @@
+@import "../../../index.less";
+
+.mini-audio-player {
+    position: absolute;
+    z-index: 5000;
+    right: 0;
+    top: @nav-bar-height;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 400px;
+    height: max-content;
+    padding: 20px;
+    background-color: var(--sortbarBG);
+    transform-origin: top;
+    transition: transform 0.3s;  
+    overflow: hidden;
+}
+
+.hide-mini-audio-player {
+    transform-origin: top;
+    transform: scaleY(0);
+}
+
+.mini-audio-player-expand-icon {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.mini-audio-player-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-audio-player-row-start {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.mini-audio-player-title {
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 16px;
+    font-style: italic;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    cursor: pointer;
+    animation: scroll-mini-title 10s linear infinite;
+}
+
+.mini-audio-player-title-mobile {
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    font-size: 15px;
+    font-style: italic;
+    margin-left: 40px;
+    margin-top: 3px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+@keyframes scroll-mini-title {
+    0% {
+        transform: translateX(calc(100% + 80px));
+    }
+    100% {
+        transform: translateX(calc(-100% - 40px));
+    }
+}
+
+.mini-audio-player-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: max-content;
+    height: 50px;
+}
+
+.mini-audio-player-text {
+    font-family: Tahoma, sans-serif;
+    color: white;
+    .stroke-black();
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 10px;
+    margin-right: 10px;  
+    margin-bottom: 5px;
+}
+
+.mini-audio-player-play-icon {
+    width: auto;
+    height: 30px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.mini-audio-player-icon {
+    width: auto;
+    height: 23px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.mini-audio-player-icon-small {
+    width: auto;
+    height: 18px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.mini-audio-player-img {
+    width: auto;
+    height: 150px;
+    cursor: pointer;
+}
+
+.mini-audio-player-slider {
+    display: flex;
+    width: 100%;
+    border-radius: 0.2;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.mini-audio-player-slider-track-0 {
+    height: 10px;
+    background-color: var(--text);
+    border-radius: 0.2;
+}
+
+.mini-audio-player-slider-track-1 {
+    height: 10px;
+    background-color: var(--progressBG);
+    border-radius: 0.2;
+}
+
+.mini-audio-player-slider-thumb {
+    background-color: transparent;
+    margin-top: -1px;
+    border: none;
+    height: 10px;
+    width: 10px;
+    cursor: pointer;
+    &:active {
+        box-shadow: none;
+        filter: hue-rotate(60deg);
+    }
+    &:hover {
+        filter: hue-rotate(60deg);
+    }
+    &:focus {
+        outline: none;
+    }
+}
+
+.mini-audio-player-volume-dropdown {
+    position: absolute;
+    z-index: 5100;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    transform-origin: bottom;
+    transition: all 0.3s;
+}
+
+.hide-mini-player-volume-dropdown {
+    transform-origin: bottom;
+    transform: scaleY(0);
+}
+
+.mini-audio-player-volume-slider {
+    display: flex;
+    height: 100px;
+    border-radius: 0.2;
+    align-items: center;
+}
+
+.mini-audio-player-volume-slider-track-0 {
+    width: 10px;
+    background-color: var(--text);
+    border-radius: 0.2;
+}
+
+.mini-audio-player-volume-slider-track-1 {
+    width: 10px;
+    background-color: var(--progressBG);
+    border-radius: 0.2;
+}
+
+.mini-audio-player-volume-slider-thumb {
+    display: none;
+}
+
+.mini-audio-player-speed-dropdown {
+    position: absolute;
+    z-index: 5100;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    margin-top: 5px;
+    padding-bottom: 15px;
+    transform-origin: bottom;
+    transition: all 0.3s;
+}
+
+.hide-mini-player-speed-dropdown {
+    transition: all 0.3s;
+    transform-origin: bottom;
+    transform: scaleY(0);
+}
+
+.mini-audio-player-pitch-dropdown {
+    position: absolute;
+    z-index: 5100;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    margin-top: 5px;
+    padding-bottom: 15px;
+    transform-origin: bottom;
+    transition: all 0.3s;
+}
+
+.hide-mini-player-pitch-dropdown {
+    transition: all 0.3s;
+    transform-origin: bottom;
+    transform: scaleY(0);
+}
+
+.mini-audio-player-speed-dropdown-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid var(--text);
+    background-color: var(--sortbarBG);
+    width: 50px;
+    padding: 5px 0px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.mini-audio-player-speed-dropdown-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 12px;
+    color: var(--text);
+    .stroke-black-thin();
+}
+
+.mini-audio-player-pitch-dropdown-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid var(--text);
+    background-color: var(--sortbarBG);
+    width: 50px;
+    padding: 5px 0px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.mini-audio-player-pitch-dropdown-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 12px;
+    color: var(--text);
+    .stroke-black-thin();
+}
+
+@media screen and (max-width: 500px) {
+    .mini-audio-player {
+        left: 0px;
+        right: unset;
+    }
+}

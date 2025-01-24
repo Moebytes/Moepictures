@@ -35,9 +35,14 @@ import premiumStar from "../../assets/icons/premium-star.png"
 import snowflake from "../../assets/icons/snowflake.png"
 import snowflakeLight from "../../assets/icons/snowflake-light.png"
 import snowflakeOn from "../../assets/icons/snowflake-on.png"
+import music from "../../assets/icons/music.png"
+import musicLight from "../../assets/icons/music-light.png"
+import musicActive from "../../assets/icons/music-active.png"
+import MiniAudioPlayer from "./MiniAudioPlayer"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
-useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions} from "../../store"
+useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, usePlaybackSelector,
+usePlaybackActions} from "../../store"
 import {Themes} from "../../types/Types"
 import "./styles/navbar.less"
 
@@ -51,6 +56,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
+    const {audio, showMiniPlayer} = usePlaybackSelector()
+    const {setShowMiniPlayer} = usePlaybackActions()
     const {search, scroll} = useSearchSelector()
     const {setSearch, setSearchFlag, setScroll} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
@@ -128,13 +135,24 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [hideTitlebar])
 
     const colorChange = () => {
+        setShowMiniPlayer(false)
         setActiveParticleDropdown(false)
         setActiveColorDropdown(!activeColorDropdown)
     }
 
     const particleChange = () => {
+        setShowMiniPlayer(false)
         setActiveColorDropdown(false)
         setActiveParticleDropdown(!activeParticleDropdown)
+    }
+
+
+
+    const miniPlayer = () => {
+        if (!audio) return
+        setActiveParticleDropdown(false)
+        setActiveColorDropdown(false)
+        setShowMiniPlayer(!showMiniPlayer)
     }
 
     const lightChange = () => {
@@ -176,6 +194,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         if (particles) return snowflakeOn
         if (theme.includes("light")) return snowflakeLight
         return snowflake
+    }
+
+    const getMusicIcon = () => {
+        if (audio) return musicActive
+        if (theme.includes("light")) return musicLight
+        return music
     }
 
     const getScrollIcon = () => {
@@ -434,6 +458,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="mobile-nav-color-container">
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
@@ -441,6 +466,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
+                <MiniAudioPlayer/>
                 {getColorDropdownJSX()}
                 {getParticleDropdownJSX()}
             </div>
@@ -507,12 +533,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
+                <MiniAudioPlayer/>
                 {getColorDropdownJSX()}
                 {getParticleDropdownJSX()}
             </div>

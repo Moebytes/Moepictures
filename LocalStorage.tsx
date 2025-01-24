@@ -26,8 +26,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
     setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage} = usePageActions()
     const {posts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
     const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
-    const {disableZoom} = usePlaybackSelector()
-    const {setDisableZoom} = usePlaybackActions()
+    const {disableZoom, showBigPlayer} = usePlaybackSelector()
+    const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session} = useSessionSelector()
     const {setSession} = useSessionActions()
 
@@ -123,6 +123,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedPost = localStorage.getItem("savedPost")
         const savedTagCategories = localStorage.getItem("savedTagCategories")
         const savedTagGroupCategories = localStorage.getItem("savedTagGroupCategories")
+        const savedShowBigPlayer = localStorage.getItem("showBigPlayer")
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
@@ -186,6 +187,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedTagCategories) setTagCategories(JSON.parse(savedTagCategories))
         if (savedTagGroupCategories) setTagGroupCategories(JSON.parse(savedTagGroupCategories))
         if (savedOrder) setOrder(Number(savedOrder))
+        if (savedShowBigPlayer) setShowBigPlayer(savedShowBigPlayer === "true")
     }, [])
 
     useEffect(() => {
@@ -245,7 +247,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("format", format)
         localStorage.setItem("saveSearch", String(saveSearch))
         localStorage.setItem("favSearch", String(favSearch))
-    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch, favSearch])
+        localStorage.setItem("showBigPlayer", String(showBigPlayer))
+    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch, favSearch, showBigPlayer])
 
     useEffect(() => {
         localStorage.setItem("sidebar", String(hideSidebar))

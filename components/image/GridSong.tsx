@@ -472,7 +472,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }, [coverArt])
 
     const songClick = (event: React.MouseEvent) => {
-        if (session.username && !session.globalMusicPlayer) return
         event.stopPropagation()
         setAudio(decrypted)
         setAudioPost(props.post)

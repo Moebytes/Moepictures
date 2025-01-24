@@ -226,6 +226,30 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
+    const closeDropdowns = () => {
+        setShowPitchDropdown(false)
+        setShowSpeedDropdown(false)
+    }
+
+    const toggleDropdown = (dropdown: string) => {
+        if (dropdown === "pitch") {
+            if (showPitchDropdown) {
+                setShowPitchDropdown(false)
+            } else {
+                closeDropdowns()
+                setShowPitchDropdown(true)
+            }
+        }
+        if (dropdown === "speed") {
+            if (showSpeedDropdown) {
+                setShowSpeedDropdown(false)
+            } else {
+                closeDropdowns()
+                setShowSpeedDropdown(true)
+            }
+        }
+    }
+
     const updateProgressText = (value: number) => {
         let percent = value / 100
         if (audioReverse === true) {
@@ -547,8 +571,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
                                     <img draggable={false} className="audio-control-img" src={audioReverseIcon} onClick={() => changeReverse()}/>
-                                    <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => setShowPitchDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => toggleDropdown("speed")}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => toggleDropdown("pitch")}/>
                                 </div> 
                                 <div className="audio-control-row-container">
                                     <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => setAudioRewindFlag(true)}/>

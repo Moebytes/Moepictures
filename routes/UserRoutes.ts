@@ -82,7 +82,6 @@ const UserRoutes = (app: Express) => {
             delete user.showTagBanner
             delete user.upscaledImages
             delete user.forceNoteBubbles
-            delete user.globalMusicPlayer
             delete user.liveModelPreview
             delete user.savedSearches
             delete user.blacklist
@@ -127,7 +126,6 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
                 await sql.user.updateUser(username, "upscaledImages", false)
                 await sql.user.updateUser(username, "forceNoteBubbles", false)
-                await sql.user.updateUser(username, "globalMusicPlayer", true)
                 await sql.user.updateUser(username, "liveModelPreview", false)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
@@ -220,7 +218,6 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
-                req.session.globalMusicPlayer = user.globalMusicPlayer
                 req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
@@ -293,7 +290,6 @@ const UserRoutes = (app: Express) => {
                 req.session.deletedPosts = user.deletedPosts
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
-                req.session.globalMusicPlayer = user.globalMusicPlayer
                 req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
@@ -551,21 +547,6 @@ const UserRoutes = (app: Express) => {
             const newForceNoteBubbles = !Boolean(user.forceNoteBubbles)
             req.session.forceNoteBubbles = newForceNoteBubbles 
             await sql.user.updateUser(req.session.username, "forceNoteBubbles", newForceNoteBubbles)
-            res.status(200).send("Success")
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/user/globalmusicplayer", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
-        try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            const user = await sql.user.user(req.session.username)
-            if (!user) return res.status(400).send("Bad username")
-            const newGlobalMusicPlayer = !Boolean(user.globalMusicPlayer)
-            req.session.globalMusicPlayer = newGlobalMusicPlayer 
-            await sql.user.updateUser(req.session.username, "globalMusicPlayer", newGlobalMusicPlayer)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

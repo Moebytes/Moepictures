@@ -341,13 +341,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         functions.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
-
-    const globalMusicPlayer = async () => {
-        await functions.post("/api/user/globalmusicplayer", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
-        setSessionFlag(true)
-    }
-
+    
     const liveModelPreview = async () => {
         await functions.post("/api/user/livemodelpreview", null, session, setSessionFlag)
         functions.clearResponseCacheKey("/api/user/session")
@@ -833,9 +827,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.forceNoteBubbles}: <span className="user-text-action" onClick={forceNoteBubbles}>{session.forceNoteBubbles ? i18n.buttons.yes : i18n.buttons.no}</span></span>
-                    </div>
-                    <div className="user-row">
-                        <span className="user-text">{i18n.user.globalMusicPlayer}: <span className="user-text-action" onClick={globalMusicPlayer}>{session.globalMusicPlayer ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>

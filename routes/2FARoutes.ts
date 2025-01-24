@@ -127,7 +127,6 @@ const $2FARoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.forceNoteBubbles = user.forceNoteBubbles
-                req.session.globalMusicPlayer = user.globalMusicPlayer
                 req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist

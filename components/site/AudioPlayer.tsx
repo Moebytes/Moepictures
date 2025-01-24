@@ -55,7 +55,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {audio, audioPost, audioRewindFlag, audioFastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, audioSecondsProgress, audioProgress, 
-    audioDragProgress, audioReverse, audioSpeed, pitch, audioVolume, audioPreviousVolume, audioPaused, audioDuration, audioDragging, audioSeekTo} = usePlaybackSelector()
+    audioDragProgress, audioReverse, audioSpeed, pitch, audioVolume, audioPreviousVolume, audioPaused, audioDuration, audioDragging, audioSeekTo, showBigPlayer} = usePlaybackSelector()
     const {setAudio, setAudioPost, setAudioRewindFlag, setAudioFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
     setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, setAudioReverse, setAudioSpeed, setPitch, setAudioVolume, setAudioPreviousVolume, setAudioPaused, 
     setAudioDuration, setAudioDragging, setAudioSeekTo} = usePlaybackActions()
@@ -196,6 +196,8 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (playFlag !== null) {
             if (playFlag === "always") {
                 updatePlay(true)
+            } else if (playFlag === "stop") {
+                stop()
             } else {
                 updatePlay()
             }
@@ -479,14 +481,14 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             setAudioProgress((audioDragProgress / audioDuration) * 100)
             setAudioDragProgress(null)
        }
-    }, [audioDragging, audioDragProgress, audioDuration])
+    })
 
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
         const rect = audioSpeedRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
-        let offset = -2
+        let offset = -10
         if (mobile) offset -= 10
         return `${raw + offset}px`
     }
@@ -496,7 +498,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         const rect = audioPitchRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
-        let offset = -2
+        let offset = -10
         if (mobile) offset -= 10
         return `${raw + offset}px`
     }
@@ -506,7 +508,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         const rect = audioVolumeRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
-        let offset = 7
+        let offset = 0
         if (mobile) offset -= 10
         return `${raw + offset}px`
     }
@@ -659,11 +661,11 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
 
     const getHeight = () => {
-        if (mobile) return audioPost ? "160px" : "120px"
-        return audioPost ? "140px" : "100px"
+        if (mobile) return audioPost ? "140px" : "100px"
+        return audioPost ? "100px" : "80px"
     }
 
-    if (session.username && !session.globalMusicPlayer) return null
+    if (!showBigPlayer) return null
 
     if (audio) {
         return (
@@ -672,7 +674,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
                 </div> : null}
                 {playerJSX()}
-                <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-370px"}}
+                <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-340px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">4x</span>
@@ -702,7 +704,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                         <span className="audio-player-speed-dropdown-text">0.25x</span>
                     </div>
                 </div>
-                <div className={`audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-player-pitch-dropdown"}`} style={{marginRight: getAudioPitchMarginRight(), marginTop: "-370px"}}
+                <div className={`audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-player-pitch-dropdown"}`} style={{marginRight: getAudioPitchMarginRight(), marginTop: "-340px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-player-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
                         <span className="audio-player-pitch-dropdown-text">+24</span>
@@ -732,7 +734,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                         <span className="audio-player-pitch-dropdown-text">-24</span>
                     </div>
                 </div>
-                <div className={`audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-player-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-270px"}}
+                <div className={`audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-player-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-180px"}}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-player-volume-slider" trackClassName="audio-player-volume-slider-track" thumbClassName="audio-player-volume-slider-thumb"
                     value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
