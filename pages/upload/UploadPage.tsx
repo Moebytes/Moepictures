@@ -235,7 +235,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                     if (glb) result.typename = "glb"
                     if (fbx) result.typename = "fbx"
                     if (obj) result.typename = "obj"
-                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
+                    if (result?.typename === "mkv") result.typename = "webm"
+                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "webm")
                     const zip = result?.mime === "application/zip"
                     if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
@@ -244,7 +245,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             if (zip) {
                                 live2d = await functions.isLive2DZip(bytes)
                                 if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
+                                    acceptedArray.push({file: files[i], ext: "zip", originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
                                     resolve()
                                 } else {
                                     const reader = new JSZip()
@@ -268,9 +269,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                                         if (glb) result.typename = "glb"
                                         if (fbx) result.typename = "fbx"
                                         if (obj) result.typename = "obj"
-                                        const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
+                                        const webm = (path.extname(filename) === ".webm" && result?.typename === "webm")
                                         if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(data)})
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename, originalLink: links ? links[i] : "", bytes: Object.values(data)})
                                         } else {
                                             error = i18n.pages.upload.supportedFiletypesZip
                                         }
@@ -278,11 +279,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     resolve()
                                 }
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
+                                acceptedArray.push({file: files[i], ext: result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
                                 resolve()
                             }
                         } else {
-                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} ${i18n.pages.upload.maxFileSize}: ${maxSize}MB`
+                            error = `${(result.typename).toUpperCase()} ${i18n.pages.upload.maxFileSize}: ${maxSize}MB`
                             resolve()
                         }
                     } else {

@@ -6,9 +6,7 @@ useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFla
 import path from "path"
 import functions from "../../structures/Functions"
 import "./styles/gridimage.less"
-import * as PIXI from "pixi.js"
-import type {Live2DModel} from "pixi-live2d-display"
-import JSZip from "jszip"
+import {Live2DCubismModel} from "live2d-renderer"
 import privateIcon from "../../assets/icons/lock-opt.png"
 import {PostSearch} from "../../types/Types"
 
@@ -68,7 +66,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     const [screenshot, setScreenshot] = useState(null as string | null)
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
-    const [model, setModel] = useState(null as Live2DModel | null)
+    const [model, setModel] = useState(null as Live2DCubismModel | null)
     const [decrypted, setDecrypted] = useState("")
     const imageRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
@@ -131,135 +129,11 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         const decrypted = await functions.decryptItem(props.live2d, session)
         setDecrypted(decrypted)
 
-        // @ts-expect-error
-        window.PIXI = PIXI
-        const app = new PIXI.Application({
-            view: rendererRef.current,
-            autoStart: true,
-            width: 800,
-            height: 800,
-            backgroundAlpha: 0
-        })
-
-        // @ts-expect-error
-        const {Live2DModel, ZipLoader} = await import("pixi-live2d-display/cubism4")
-
-        ZipLoader.zipReader = async (data: Blob, url: string) => {
-            const zip = await JSZip.loadAsync(data)
-            const renamedZip = new JSZip()
-            await Promise.all(Object.keys(zip.files).map(async (relativePath) => {
-                    const file = zip.files[relativePath]
-                    const encodedPath = encodeURI(relativePath)
-                    if (file.dir) {
-                        renamedZip.folder(encodedPath)
-                    } else {
-                        const content = await file.async("blob")
-                        renamedZip.file(encodedPath, content)
-                    }
-                })
-            )
-            return renamedZip
-        }
-        ZipLoader.readText = async (jsZip: JSZip, path: string) => {
-            const file = jsZip.file(path)
-            if (!file) throw new Error(`Cannot find file: ${path}`)
-            const content = await file.async("text")
-            return content
-        }
-        ZipLoader.getFilePaths = async (jsZip: JSZip) => {
-            const paths: string[] = []
-            jsZip.forEach((relativePath) => {
-                if (relativePath.startsWith("__MACOSX/") ||
-                    relativePath.includes(".DS_Store")) return
-                paths.push(relativePath)
-            })
-            return paths
-        }
-        ZipLoader.getFiles = async (jsZip: JSZip, paths: string[]) => {
-            const files = await Promise.all(paths.map(async (path) => {
-                    const fileName = path.slice(path.lastIndexOf("/") + 1)
-                    const blob = await jsZip.file(path)!.async("blob")
-                    return new File([blob], fileName)
-            }))
-            return files
-        }
-
-        const model = await Live2DModel.from(decrypted)
-        app.stage.addChild(model)
-
+        rendererRef.current.width = 500
+        rendererRef.current.height = 500
+        const model = new Live2DCubismModel(rendererRef.current)
+        await model.load(decrypted)
         setModel(model)
-
-        const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
-        model.transform.scale.set(initialScale)
-        model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
-        model.anchor.set(0.5)
-        /*
-
-        let isPanning = false
-        let lastPosition = {x: 0, y: 0}
-
-        const handleWheel = (event: WheelEvent) => {
-            if (!rendererRef.current) return
-            event.preventDefault()
-        
-            const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1
-            const minScale = 0.01
-            const maxScale = 10.0
-        
-            const bounds = rendererRef.current.getBoundingClientRect()
-            const mouseX = event.clientX - bounds.left
-            const mouseY = event.clientY - bounds.top
-        
-            const worldMouseX = (mouseX - model.transform.position.x) / model.transform.scale.x
-            const worldMouseY = (mouseY - model.transform.position.y) / model.transform.scale.y
-            const newScaleX = Math.max(minScale, Math.min(model.transform.scale.x * zoomFactor, maxScale))
-            const newScaleY = Math.max(minScale, Math.min(model.transform.scale.y * zoomFactor, maxScale))
-        
-            model.transform.scale.set(newScaleX, newScaleY)
-            model.transform.position.x = mouseX - worldMouseX * model.transform.scale.x
-            model.transform.position.y = mouseY - worldMouseY * model.transform.scale.y
-        }
-
-        const handleMouseDown = (event: MouseEvent) => {
-            isPanning = true
-            lastPosition = {x: event.clientX, y: event.clientY}
-        }
-
-        const handleMouseMove = (event: MouseEvent) => {
-            if (isPanning) {
-                const dx = event.clientX - lastPosition.x
-                const dy = event.clientY - lastPosition.y
-                model.transform.position.x += dx
-                model.transform.position.y += dy
-                lastPosition = {x: event.clientX, y: event.clientY}
-            }
-        }
-
-        const handleMouseUp = (event: MouseEvent) => {
-            isPanning = false
-        }
-
-        const handleDoubleClick = () => {
-            model.transform.scale.set(initialScale)
-            model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
-        }
-
-        rendererRef.current.addEventListener("wheel", handleWheel)
-        rendererRef.current.addEventListener("mousedown", handleMouseDown)
-        rendererRef.current.addEventListener("mousemove", handleMouseMove)
-        rendererRef.current.addEventListener("mouseup", handleMouseUp)
-        rendererRef.current.addEventListener("dblclick", handleDoubleClick)
-        rendererRef.current.addEventListener("contextmenu", (event) => event.preventDefault())
-
-        return () => {
-            if (!rendererRef.current) return
-            rendererRef.current.removeEventListener("wheel", handleWheel)
-            rendererRef.current.removeEventListener("mousedown", handleMouseDown)
-            rendererRef.current.removeEventListener("mousemove", handleMouseMove)
-            rendererRef.current.removeEventListener("mouseup", handleMouseUp)
-            rendererRef.current.removeEventListener("dblclick", handleDoubleClick)
-            rendererRef.current.removeEventListener("contextmenu", e => e.preventDefault())
-        }*/
     }
 
     useEffect(() => {

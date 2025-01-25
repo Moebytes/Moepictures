@@ -314,8 +314,8 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
           if (buffer?.byteLength) dimensions = await sharp(thumbBuffer).metadata()
           if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(thumbUpscaledBuffer).metadata()
           if (kind === "live2d") {
-            dimensions.width = upscaled.width
-            dimensions.height = upscaled.height
+            dimensions.width = original.width
+            dimensions.height = original.height
           }
       } else {
           hash = await phash(bufferFallback).then((hash: string) => functions.binaryToHex(hash))
@@ -324,11 +324,11 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       }
       if (unverified) {
         await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions.width, dimensions.height, upscaledDimensions.width, upscaledDimensions.height, 
+        dimensions?.width, dimensions?.height, upscaledDimensions?.width, upscaledDimensions?.height, 
         buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
       } else {
         await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions.width, dimensions.height, upscaledDimensions.width, upscaledDimensions.height, 
+        dimensions?.width, dimensions?.height, upscaledDimensions?.width, upscaledDimensions?.height, 
         buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
       }
     }

@@ -9,9 +9,9 @@ import live2dZoomOffIcon from "../../assets/icons/live2d-zoom-off.png"
 import live2dZoomOffEnabledIcon from "../../assets/icons/live2d-zoom-off-enabled.png"
 import live2dPlayIcon from "../../assets/icons/live2d-play.png"
 import live2dPauseIcon from "../../assets/icons/live2d-pause.png"
-import live2d30FPSIcon from "../../assets/icons/live2d-0.5x.png"
-import live2d60FPSIcon from "../../assets/icons/live2d-1x.png"
-import live2d120FPSIcon from "../../assets/icons/live2d-2x.png"
+import live2dHalfSpeedIcon from "../../assets/icons/live2d-0.5x.png"
+import live2d1xSpeedIcon from "../../assets/icons/live2d-1x.png"
+import live2d2xSpeedIcon from "../../assets/icons/live2d-2x.png"
 import live2dParameterIcon from "../../assets/icons/live2d-parameter.png"
 import live2dPartIcon from "../../assets/icons/live2d-part.png"
 import live2dFullscreenIcon from "../../assets/icons/live2d-fullscreen.png"
@@ -22,9 +22,7 @@ import NoteEditor from "./NoteEditor"
 import path from "path"
 import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
-import * as PIXI from "pixi.js"
-import type {Live2DModel} from "pixi-live2d-display"
-import JSZip from "jszip"
+import {Live2DCubismModel} from "live2d-renderer"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postmodel.less"
 
@@ -71,26 +69,25 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const live2dParameterRef = useRef<HTMLImageElement>(null)
     const live2dPartRef = useRef<HTMLImageElement>(null)
     const [image, setImage] = useState(null as string | null)
-    const [model, setModel] = useState(null as Live2DModel | null)
+    const [model, setModel] = useState(null as Live2DCubismModel | null)
     const [modelWidth, setModelWidth] = useState(0)
     const [modelHeight, setModelHeight] = useState(0)
-    const [app, setApp] = useState(null as PIXI.Application | null)
-    const [fps, setFPS] = useState(60)
-    const [defaultOpacities, setDefaultOpacities] = useState([] as number[])
+    const [modelSpeed, setModelSpeed] = useState(1)
+    const [defaultOpacities, setDefaultOpacities] = useState(new Float32Array())
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
     const [decrypted, setDecrypted] = useState("")
 
     useEffect(() => {
-        const savedFPS = localStorage.getItem("live2dFPS")
-        if (savedFPS) setFPS(Number(savedFPS))
+        const savedSpeed = localStorage.getItem("live2dSpeed")
+        if (savedSpeed) setModelSpeed(Number(savedSpeed))
         setPaused(false)
     }, [])
 
     useEffect(() => {
-        localStorage.setItem("live2dFPS", String(fps))
-    }, [fps])
+        localStorage.setItem("live2dSpeed", String(modelSpeed))
+    }, [modelSpeed])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -104,7 +101,6 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         setModel(null)
-        setApp(null)
     }, [props.live2d])
 
     useEffect(() => {
@@ -116,170 +112,29 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }, [decrypted])
 
     const loadLive2DModel = async () => {
+        console.log(decrypted)
         if (!decrypted || !rendererRef.current) return
-        // @ts-expect-error
-        window.PIXI = PIXI
-        const app = new PIXI.Application({
-            view: rendererRef.current,
-            autoStart: true,
-            width: 800,
-            height: 800,
-            backgroundAlpha: 0
-        })
 
-        // @ts-expect-error
-        const {Live2DModel, ZipLoader} = await import("pixi-live2d-display/cubism4")
-
-        ZipLoader.zipReader = async (data: Blob, url: string) => {
-            const zip = await JSZip.loadAsync(data)
-            const renamedZip = new JSZip()
-            await Promise.all(Object.keys(zip.files).map(async (relativePath) => {
-                    const file = zip.files[relativePath]
-                    const encodedPath = encodeURI(relativePath)
-                    if (file.dir) {
-                        renamedZip.folder(encodedPath)
-                    } else {
-                        const content = await file.async("blob")
-                        renamedZip.file(encodedPath, content)
-                    }
-                })
-            )
-            return renamedZip
-        }
-        ZipLoader.readText = async (jsZip: JSZip, path: string) => {
-            const file = jsZip.file(path)
-            if (!file) throw new Error(`Cannot find file: ${path}`)
-            const content = await file.async("text")
-            return content
-        }
-        ZipLoader.getFilePaths = async (jsZip: JSZip) => {
-            const paths: string[] = []
-            jsZip.forEach((relativePath) => {
-                if (relativePath.startsWith("__MACOSX/") ||
-                    relativePath.includes(".DS_Store")) return
-                paths.push(relativePath)
-            })
-            return paths
-        }
-        ZipLoader.getFiles = async (jsZip: JSZip, paths: string[]) => {
-            const files = await Promise.all(paths.map(async (path) => {
-                    const fileName = path.slice(path.lastIndexOf("/") + 1)
-                    const blob = await jsZip.file(path)!.async("blob")
-                    return new File([blob], fileName)
-            }))
-            return files
-        }
-
-        const model = await Live2DModel.from(decrypted)
-        app.stage.addChild(model)
+        rendererRef.current.width = 1000
+        rendererRef.current.height = 1000
+        const model = new Live2DCubismModel(rendererRef.current)
+        // @ts-ignore
+        console.log( await model.loadBuffers(decrypted))
+        await model.load(decrypted)
 
         setModel(model)
-        setApp(app)
-        setModelWidth(model.internalModel.width)
-        setModelHeight(model.internalModel.height)
-
-        const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
-        model.transform.scale.set(initialScale)
-        model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
-        model.anchor.set(0.5)
-
-        setTimeout(() => {
-            model.autoUpdate = false
-            let coreModel = model.internalModel.coreModel
-            let parts = coreModel.getModel().parts
-            setDefaultOpacities(structuredClone(parts.opacities))
-        }, 100)
+        setModelWidth(model.width)
+        setModelHeight(model.height)
+        setDefaultOpacities(structuredClone(model.parts.opacities))
     }
 
     useEffect(() => {
-        if (!app || !model || !rendererRef.current) return
+        if (!model || !rendererRef.current) return
 
-        let before = performance.now()
-        let lastFrameTime = 0
-        const frameTime = 1000 / fps
-
-        const animate = (now: number) => {
-            if (paused) return window.cancelAnimationFrame(id)
-            const delta = now - before
-            if (now - lastFrameTime >= frameTime) {
-                model.update(delta)
-                forceUpdate()
-                lastFrameTime = now
-            }
-            before = now
-            id = window.requestAnimationFrame(animate)
-        }
-        animate(before)
-
-        const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
-        let isPanning = false
-        let lastPosition = {x: 0, y: 0}
-
-        const handleWheel = (event: WheelEvent) => {
-            if (!rendererRef.current) return
-            if (disableZoom) return
-            event.preventDefault()
-        
-            const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1
-            const minScale = 0.01
-            const maxScale = 10.0
-        
-            const bounds = rendererRef.current.getBoundingClientRect()
-            const mouseX = event.clientX - bounds.left
-            const mouseY = event.clientY - bounds.top
-        
-            const worldMouseX = (mouseX - model.transform.position.x) / model.transform.scale.x
-            const worldMouseY = (mouseY - model.transform.position.y) / model.transform.scale.y
-            const newScaleX = Math.max(minScale, Math.min(model.transform.scale.x * zoomFactor, maxScale))
-            const newScaleY = Math.max(minScale, Math.min(model.transform.scale.y * zoomFactor, maxScale))
-        
-            model.transform.scale.set(newScaleX, newScaleY)
-            model.transform.position.x = mouseX - worldMouseX * model.transform.scale.x
-            model.transform.position.y = mouseY - worldMouseY * model.transform.scale.y
-        }
-
-        const handleMouseDown = (event: MouseEvent) => {
-            isPanning = true
-            lastPosition = {x: event.clientX, y: event.clientY}
-        }
-
-        const handleMouseMove = (event: MouseEvent) => {
-            if (isPanning) {
-                const dx = event.clientX - lastPosition.x
-                const dy = event.clientY - lastPosition.y
-                model.transform.position.x += dx
-                model.transform.position.y += dy
-                lastPosition = {x: event.clientX, y: event.clientY}
-            }
-        }
-
-        const handleMouseUp = (event: MouseEvent) => {
-            isPanning = false
-        }
-
-        const handleDoubleClick = () => {
-            model.transform.scale.set(initialScale)
-            model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
-        }
-
-        rendererRef.current.addEventListener("wheel", handleWheel)
-        rendererRef.current.addEventListener("mousedown", handleMouseDown)
-        rendererRef.current.addEventListener("mousemove", handleMouseMove)
-        rendererRef.current.addEventListener("mouseup", handleMouseUp)
-        rendererRef.current.addEventListener("dblclick", handleDoubleClick)
-        rendererRef.current.addEventListener("contextmenu", (event) => event.preventDefault())
-
-        return () => {
-            window.cancelAnimationFrame(id)
-            if (!rendererRef.current) return
-            rendererRef.current.removeEventListener("wheel", handleWheel)
-            rendererRef.current.removeEventListener("mousedown", handleMouseDown)
-            rendererRef.current.removeEventListener("mousemove", handleMouseMove)
-            rendererRef.current.removeEventListener("mouseup", handleMouseUp)
-            rendererRef.current.removeEventListener("dblclick", handleDoubleClick)
-            rendererRef.current.removeEventListener("contextmenu", e => e.preventDefault())
-        }
-    }, [app, model, disableZoom, paused, fps])
+        model.paused = paused
+        model.enableZoom = !disableZoom
+        model.speed = modelSpeed
+    }, [model, disableZoom, paused, modelSpeed])
 
     const resizeImageCanvas = () => {
         if (!pixelateRef.current || !rendererRef.current) return
@@ -452,6 +307,18 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    useEffect(() => {
+        if (showParameterDropdown || showPartDropdown) {
+            const loop = () => {
+                forceUpdate()
+                setTimeout(() => {
+                    loop()
+                }, 5)
+            }
+            loop()
+        }
+    }, [showParameterDropdown, showPartDropdown])
+
     const controlMouseEnter = () => {
         if (live2dControls.current) live2dControls.current.style.opacity = "1"
     }
@@ -473,17 +340,17 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }
 
     const getFPSIcon = () => {
-        if (fps === 30) return live2d30FPSIcon
-        if (fps === 60) return live2d60FPSIcon
-        if (fps === 120) return live2d120FPSIcon
-        return live2d60FPSIcon
+        if (modelSpeed === 0.5) return live2dHalfSpeedIcon
+        if (modelSpeed === 1) return live2d1xSpeedIcon
+        if (modelSpeed === 2) return live2d2xSpeedIcon
+        return live2d1xSpeedIcon
     }
 
     const changeFPS = () => {
-        if (fps === 30) return setFPS(60)
-        if (fps === 60) return setFPS(120)
-        if (fps === 120) return setFPS(30)
-        return setFPS(60)
+        if (modelSpeed === 0.5) return setModelSpeed(1)
+        if (modelSpeed === 1) return setModelSpeed(2)
+        if (modelSpeed === 2) return setModelSpeed(0.5)
+        return setModelSpeed(1)
     }
 
     const fullscreen = async (exit?: boolean) => {
@@ -548,17 +415,12 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const zoomFactor = 1.1
             const maxScale = 10.0
 
-            const newScaleX = Math.min(model.transform.scale.x * zoomFactor, maxScale)
-            const newScaleY = Math.min(model.transform.scale.y * zoomFactor, maxScale)
-
-            const centerX = model.transform.position.x
-            const centerY = model.transform.position.y
-            const offsetX = (centerX - model.transform.position.x) / model.transform.scale.x
-            const offsetY = (centerY - model.transform.position.y) / model.transform.scale.y
-
-            model.transform.scale.set(newScaleX, newScaleY)
-            model.transform.position.x = centerX - offsetX * newScaleX
-            model.transform.position.y = centerY - offsetY * newScaleY
+            const newScale = Math.min(model.scale * zoomFactor, maxScale)
+            const offsetX = model.x / model.scale
+            const offsetY = model.x / model.scale
+            model.scale = newScale
+            model.x = model.x - offsetX * newScale
+            model.y = model.y - offsetY * newScale
         }
     }
 
@@ -568,19 +430,12 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const zoomFactor = 0.9
             const minScale = 0.01
 
-            const newScaleX = Math.max(model.transform.scale.x * zoomFactor, minScale)
-            const newScaleY = Math.max(model.transform.scale.y * zoomFactor, minScale)
-
-            const centerX = model.transform.position.x
-            const centerY = model.transform.position.y
-
-            const offsetX = (centerX - model.transform.position.x) / model.transform.scale.x
-            const offsetY = (centerY - model.transform.position.y) / model.transform.scale.y
-
-            model.transform.scale.set(newScaleX, newScaleY)
-
-            model.transform.position.x = centerX - offsetX * newScaleX
-            model.transform.position.y = centerY - offsetY * newScaleY
+            const newScale = Math.max(model.scale * zoomFactor, minScale)
+            const offsetX = model.x / model.scale
+            const offsetY = model.x / model.scale
+            model.scale = newScale
+            model.x = model.x - offsetX * newScale
+            model.y = model.y - offsetY * newScale
         }
     }
 
@@ -588,16 +443,13 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (!model) return null
         let jsx = [] as React.ReactElement[]
 
-        let coreModel = model.internalModel.coreModel as any
-        let parameters = coreModel.getModel().parameters
-
+        let parameters = model.parameters
         const resetParameters = () => {
             for (let i = 0; i < parameters.ids.length; i++) {
-                const id = parameters.ids[i]
                 const defaultValue = parameters.defaultValues[i]
-                coreModel.setParameterValueById(id, defaultValue)
+                model.setParameter(i, defaultValue)
             }
-            coreModel.update()
+            model.model.update()
             forceUpdate()
         }
 
@@ -610,8 +462,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const keys = parameters.keyValues[i]
             const step = (Math.abs(max - min) / 100) || 0.01
             const updateParameter = (value: number) => {
-                coreModel.setParameterValueById(id, value)
-                coreModel.update()
+                model.setParameter(i, value)
                 forceUpdate()
             }
             jsx.push(
@@ -639,15 +490,13 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (!model) return null
         let jsx = [] as React.ReactElement[]
 
-        let coreModel = model.internalModel.coreModel as any
-        let parts = coreModel.getModel().parts
+        let parts = model.parts
 
         const resetParts = () => {
             for (let i = 0; i < parts.ids.length; i++) {
-                const id = parts.ids[i]
-                coreModel.setPartOpacityById(id, defaultOpacities[i] ?? 1)
+                model.setPartOpacity(i, defaultOpacities[i] ?? 1)
             }
-            coreModel.update()
+            model.model.update()
             forceUpdate()
         }
 
@@ -655,9 +504,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const id = parts.ids[i]
             const opacity = parts.opacities[i]
             const updatePart = (value: number) => {
-                const coreModel = model.internalModel.coreModel as any
-                coreModel.setPartOpacityById(id, value)
-                coreModel.update()
+                model.setPartOpacity(i, value)
                 forceUpdate()
             }
             jsx.push(

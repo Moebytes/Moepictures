@@ -17,13 +17,13 @@ import permissions from "./Permissions"
 import localforage from "localforage"
 import mm from "music-metadata"
 import * as THREE from "three"
-import * as PIXI from "pixi.js"
 import WebPXMux from "webpxmux"
 import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
 import avifJS from "../assets/misc/avif_enc"
 import jxlJS from "../assets/misc/jxl_enc"
 import crypto from "crypto"
+import {Live2DCubismModel} from "live2d-renderer"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
 import tempMails from "../assets/json/temp-email.json"
@@ -1837,71 +1837,29 @@ export default class Functions {
     }
 
     public static live2dDimensions = async (live2d: string) => {
-        // @ts-expect-error
-        const {Live2DModel} = await import("pixi-live2d-display/cubism4")
-        const model = await Live2DModel.from(live2d)
-        const width = Number(model.internalModel.width)
-        const height = Number(model.internalModel.height)
-        const r = await fetch(live2d).then((r) => r.arrayBuffer())
-        const size = r.byteLength
+        const canvas = document.createElement("canvas")
+        canvas.width = 500
+        canvas.height = 500
+        const model = new Live2DCubismModel(canvas, {autoAnimate: false})
+        await model.load(live2d)
+        const width = model.width
+        const height = model.height
+        const size = model.size
+        model.destroy()
         return {width, height, size}
     }
 
     public static live2dScreenshot = async (live2d: string, imageSize?: number) => {
         if (!imageSize) imageSize = 500
-        // @ts-expect-error
-        window.PIXI = PIXI
-        const app = new PIXI.Application({
-            view: document.createElement("canvas"),
-            autoStart: true,
-            width: imageSize,
-            height: imageSize,
-            backgroundAlpha: 0,
-            powerPreference: "low-power",
-            preserveDrawingBuffer: true
-        })
-
-        // @ts-expect-error
-        const {Live2DModel, ZipLoader} = await import("pixi-live2d-display/cubism4")
-
-        ZipLoader.zipReader = (data: Blob, url: string) => JSZip.loadAsync(data)
-        ZipLoader.readText = (jsZip: JSZip, path: string) => {
-            const file = jsZip.file(path)
-            if (!file) throw new Error("Cannot find file: " + path)
-            return file.async("text")
-        }
-        ZipLoader.getFilePaths = (jsZip: JSZip) => {
-            const paths: string[] = []
-            jsZip.forEach(relativePath => paths.push(relativePath))
-            return Promise.resolve(paths)
-        }
-        ZipLoader.getFiles = (jsZip: JSZip, paths: string[]) =>
-            Promise.all(paths.map(
-                async path => {
-                    const fileName = path.slice(path.lastIndexOf("/") + 1)
-                    const blob = await jsZip.file(path)!.async("blob")
-                    return new File([blob], fileName)
-        }))
-
-        const model = await Live2DModel.from(live2d)
-        app.stage.addChild(model)
-
-        const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
-        model.transform.scale.set(initialScale)
-        model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
-        model.anchor.set(0.5)
-
-        await Functions.timeout(100)
-
-        return new Promise<string>(async (resolve) => {
-            app.ticker.addOnce(() => {
-                const dataURL = app.view.toDataURL?.()
-                app.destroy(true)
-                resolve(dataURL)
-            })
-        })
+        const canvas = document.createElement("canvas")
+        canvas.width = imageSize
+        canvas.height = imageSize
+        const model = new Live2DCubismModel(canvas, {autoAnimate: false})
+        await model.load(live2d)
+        const screenshot = await model.takeScreenshot()
+        model.destroy()
+        return screenshot
     }
-
     
     public static audioDimensions = async (audio: string) => {
         const buffer = await fetch(audio).then((r) => r.arrayBuffer())
@@ -1912,7 +1870,7 @@ export default class Functions {
     }
 
     public static songCover = async (audio: string) => {
-        const buffer = await fetch(audio).then((r) => r.arrayBuffer())
+        let buffer = await fetch(audio).then((r) => r.arrayBuffer())
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const picture = tagInfo.common.picture
         if (picture) {
