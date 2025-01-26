@@ -229,7 +229,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         try {
             let image = tagEditID.post.images[tagEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
-            let link = functions.getImageLink(image.type, image.postID, image.order, image.filename)
+            let link = functions.getImageLink(image)
             let response = await fetch(`${link}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             let current = null as UploadImage | null
             if (response.byteLength) {
@@ -247,6 +247,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     width: image.width,
                     height: image.height,
                     thumbnail: "",
+                    thumbnailExt: "",
                     name: `${pixivID}.${ext}`
                 }
             }

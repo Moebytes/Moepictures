@@ -81,9 +81,9 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image, true))
                 } else {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image))
                 }
                 setImages(images)
                 const thumb = await functions.decryptThumb(images[0], session, undefined, true)
@@ -115,9 +115,9 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image, true))
                 } else {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image))
                 }
                 setImages(images) 
                 const thumb = await functions.decryptThumb(images[0], session, undefined, true)
@@ -212,7 +212,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
-            const {width, height} = await functions.imageDimensions(firstURL, session)
+            const {width, height} = await functions.imageDimensions(firstURL)
             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
             const blob = new Blob([buffer])
             croppedURL = URL.createObjectURL(blob)

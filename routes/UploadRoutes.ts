@@ -155,8 +155,8 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
 
 export const insertImages = async (postID: string, data: {images: UploadImage[] | Image[], upscaledImages: UploadImage[] | Image[], type: PostType,
   rating: PostRating, source: SourceData, characters: UploadTag[] | MiniTag[], imgChanged: boolean, unverified?: boolean, unverifiedImages?: boolean,
-  thumbnail?: string | null}) => {
-  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages, thumbnail} = data
+  thumbnail?: string | null, thumbnailFilename?: string}) => {
+  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages, thumbnail, thumbnailFilename} = data
 
   if (images.length !== upscaledImages.length) {
     const maxLength = Math.max(images.length, upscaledImages.length)
@@ -181,8 +181,11 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
     let order = i + 1
     const image = images[i]
     const upscaledImage = upscaledImages[i]
+    let original = image ? image : upscaledImage
+    let upscaled = upscaledImage ? upscaledImage : image
     let buffer = null as Buffer | null
     let upscaledBuffer = null as Buffer | null
+    let thumbBuffer = null as Buffer | null
     if (image) {
       if ("bytes" in image) {
         buffer = Buffer.from(image.bytes)
@@ -208,10 +211,19 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
         }
       }
     }
-    let original = image ? image : upscaledImage
-    let upscaled = upscaledImage ? upscaledImage : image
+    if (image.thumbnail) {
+      if (functions.isBase64(image.thumbnail)) {
+        thumbBuffer = functions.base64ToBuffer(image.thumbnail)
+      } else {
+        let thumbnailImagePath = functions.getThumbnailImagePath((image as Image).type, image.thumbnail)
+        if (unverifiedImages) {
+          thumbBuffer = await serverFunctions.getUnverifiedFile(thumbnailImagePath)
+        } else {
+          thumbBuffer = await serverFunctions.getFile(thumbnailImagePath, false, r18)
+        }
+      }
+    }
     let bufferFallback = buffer?.byteLength ? buffer : upscaledBuffer as Buffer
-    let upscaledBufferFallback = upscaledBuffer?.byteLength ? upscaledBuffer : buffer as Buffer
     let ext = ""
     if ("ext" in original) {
       ext = original.ext
@@ -221,6 +233,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
     const cleanTitle = functions.cleanTitle(source.title)
     let filename = ""
     let upscaledFilename = ""
+    let thumbnailFilename = ""
     if (image) {
       let ext = ""
       if ("ext" in image) {
@@ -242,6 +255,15 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       upscaledFilename = cleanTitle ? `${cleanTitle}.${ext}` : 
       characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
       `${postID}.${ext}`
+    }
+    if (thumbBuffer?.byteLength) {
+      let ext = ""
+      if ("thumbnailExt" in original) {
+        ext = original.thumbnailExt
+      } else {
+        ext = path.extname(original.thumbnail).replace(".", "")
+      }
+      thumbnailFilename = `${postID}-${order}.${ext}`
     }
     imageFilenames.push(filename)
     upscaledImageFilenames.push(upscaledFilename)
@@ -291,45 +313,43 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
         hasUpscaled = true
         upscaledCheck.push(imagePath)
       }
+
+      if (thumbBuffer?.byteLength && thumbnailFilename) {
+        let thumbPath = functions.getThumbnailImagePath(kind, thumbnailFilename)
+        if (unverified) {
+          await serverFunctions.uploadUnverifiedFile(thumbPath, thumbBuffer)
+        } else {
+          await serverFunctions.uploadFile(thumbPath, thumbBuffer, r18)
+        }
+      }
   
-      let dimensions = null as any
-      let upscaledDimensions = null as any
+      let dimensions = {} as {width?: number, height?: number}
+      let upscaledDimensions = {} as {width?: number, height?: number}
       let hash = ""
       if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
-          let thumbBuffer = null as Buffer | null
-          if ("thumbnail" in original) {
-            thumbBuffer = functions.base64ToBuffer(original.thumbnail)
-          } else if (thumbnail) {
-            thumbBuffer = functions.base64ToBuffer(thumbnail)
-          } else {
-            thumbBuffer = bufferFallback
-          }
-          let thumbUpscaledBuffer = null as Buffer | null
-          if ("thumbnail" in upscaled) {
-            thumbUpscaledBuffer = functions.base64ToBuffer(upscaled.thumbnail || (original as UploadImage).thumbnail)
-          } else {
-            thumbUpscaledBuffer = upscaledBufferFallback
-          }
-          hash = await phash(thumbBuffer).then((hash: string) => functions.binaryToHex(hash))
-          if (buffer?.byteLength) dimensions = await sharp(thumbBuffer).metadata()
-          if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(thumbUpscaledBuffer).metadata()
-          if (kind === "live2d") {
-            dimensions.width = original.width
-            dimensions.height = original.height
-          }
+          hash = await phash(thumbBuffer || bufferFallback).then((hash: string) => functions.binaryToHex(hash))
+          dimensions.width = original.width
+          dimensions.height = original.height
+          upscaledDimensions.width = upscaled.width
+          upscaledDimensions.height = upscaled.height
       } else {
           hash = await phash(bufferFallback).then((hash: string) => functions.binaryToHex(hash))
           if (buffer?.byteLength) dimensions = await sharp(buffer).metadata()
           if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(upscaledBuffer).metadata()
       }
+      let width = dimensions?.width || null
+      let height = dimensions?.height || null
+      let upscaledWidth = upscaledDimensions?.width || null
+      let upscaledHeight = upscaledDimensions?.height || null
+      let size = buffer?.byteLength || null
+      let upscaledSize = upscaledBuffer?.byteLength || null
+      let duration = original.duration || null
       if (unverified) {
         await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions?.width, dimensions?.height, upscaledDimensions?.width, upscaledDimensions?.height, 
-        buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
       } else {
         await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
-        dimensions?.width, dimensions?.height, upscaledDimensions?.width, upscaledDimensions?.height, 
-        buffer?.byteLength || null, upscaledBuffer?.byteLength || null)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
       }
     }
   }
@@ -340,9 +360,9 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
 }
 
 export const updatePost = async (postID: string, data: {artists: UploadTag[] | MiniTag[], type: PostType, rating: PostRating, 
-  style: PostStyle, source: SourceData, parentID?: string | null, hasOriginal: boolean, isNote?: boolean,
-  hasUpscaled: boolean, uploader?: string, uploadDate?: string, approver?: string, updater?: string, originalID?: string,
-  updatedDate?: string, unverified?: boolean, duplicates?: boolean, newTags?: UploadTag[], reason?: string | null}) => {
+  style: PostStyle, source: SourceData, parentID?: string | null, hasOriginal: boolean, isNote?: boolean, hasUpscaled: boolean, 
+  uploader?: string, uploadDate?: string, approver?: string, updater?: string, originalID?: string, updatedDate?: string, 
+  unverified?: boolean, duplicates?: boolean, newTags?: UploadTag[], reason?: string | null}) => {
   let {artists, type, rating, style, source, parentID, uploader, approver, hasOriginal, hasUpscaled,
   updater, updatedDate, uploadDate, unverified, duplicates, newTags, originalID, isNote, reason} = data
   let hidden = false 
@@ -1224,8 +1244,7 @@ const CreateRoutes = (app: Express) => {
         let style = unverified.style
         let {hasOriginal, hasUpscaled, imageOrders, imageFilenames, upscaledImageFilenames} = 
         await insertImages(newPostID, {unverifiedImages: true, images: unverified.images, 
-        upscaledImages: unverified.images, type, rating, source: sourceData,
-        thumbnail: unverified.thumbnail, characters, imgChanged})
+        upscaledImages: unverified.images, type, rating, source: sourceData, characters, imgChanged})
 
         let {newSlug} = await updatePost(newPostID, {artists, type, rating, style, hasOriginal, hasUpscaled,
         source: sourceData, uploader: unverified.uploader, updater: unverified.updater, uploadDate: unverified.uploadDate,
@@ -1435,7 +1454,7 @@ const CreateRoutes = (app: Express) => {
               }
 
               await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.width, 
-              image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize)
+              image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize, image.duration, image.thumbnail)
             }
             await serverFunctions.deletePost(child.post)
           }

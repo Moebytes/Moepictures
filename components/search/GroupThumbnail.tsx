@@ -24,7 +24,7 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     const updateImage = async () => {
         if (!props.group) return
         const post = props.group.posts[0]
-        const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
+        const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
         let img = await functions.decryptThumb(imageLink, session)
         setImg(img)
     }

@@ -107,7 +107,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setTag(tag)
         setCount(tagCount)
         if (tag.featuredPost) {
-            const featuredImage = functions.getThumbnailLink(tag.featuredPost.images[0].type, tag.featuredPost.postID, tag.featuredPost.images[0].order, tag.featuredPost.images[0].filename, "massive", mobile)
+            const featuredImage = functions.getThumbnailLink(tag.featuredPost.images[0], "massive", session, mobile)
             const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
             if ((!session.username && tag.featuredPost.rating !== functions.r13()) || 
                 (!session.showR18 && tag.featuredPost.rating !== functions.r18()) ||
@@ -135,7 +135,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "medium", session, mobile))
         setTagPosts(uploads)
         setPostImages(images)
     }
@@ -147,7 +147,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "medium", session, mobile))
         setTagPosts(uploads)
         setAppendImages(images)
     }

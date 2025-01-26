@@ -99,6 +99,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             loadImage()
         },
         update: async () => {
+            if (!shouldUpdate()) return
             if (!gifData) {
                 if (functions.isGIF(props.img)) return parseGIF()
                 if (functions.isWebP(props.img)) return parseAnimatedWebP()
@@ -116,13 +117,18 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         setDecrypted(true)
     }
 
-    useEffect(() => {
+    const shouldUpdate = () => {
         if (functions.isVideo(props.img)) {
-            if (reverse !== false) props.reupdate?.()
+            if (reverse !== false) return true
         }
         if (functions.isGIF(props.img) || functions.isWebP(props.img)) {
-            if (reverse !== false || speed !== 1 || pixelate !== 1) props.reupdate?.()
+            if (reverse !== false || speed !== 1 || pixelate !== 1) return true
         }
+        return false
+    }
+
+    useEffect(() => {
+        if (shouldUpdate()) props.reupdate?.()
     }, [imageLoaded, reverse, speed, pixelate])
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {

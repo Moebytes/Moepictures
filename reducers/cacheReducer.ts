@@ -4,6 +4,38 @@ import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
 import {PostSearch, PostOrdered, Post, PostHistory, MiniTag, TagCount, TagCategories, TagGroupCategory, UnverifiedPost, TagCategorySearch} from "../types/Types"
 
+interface LoadedFile {
+    name: string, 
+    type: string, 
+    size: number, 
+    lastModified: number, 
+    content: string
+}
+const serializeFile = async (file: File) => {
+    const readFileAsBase64 = (file: File) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.readAsDataURL(file)
+        })
+    }
+    return {
+        name: file.name, type: file.type, 
+        size: file.size, lastModified: file.lastModified, 
+        content: await readFileAsBase64(file)
+    } as LoadedFile
+}
+
+const unserializeFile = (obj: {name: string, type: string, size: number, lastModified: number, content: string}) => {
+    const byteString = atob(obj.content.split(",")[1])
+    const byteArray = new Uint8Array(byteString.length)
+    for (let i = 0; i < byteString.length; i++) {
+        byteArray[i] = byteString.charCodeAt(i)
+    }
+    const contentBlob = new Blob([byteArray], {type: obj.type})
+    return new File([contentBlob], obj.name, {type: obj.type, lastModified: obj.lastModified})
+}
+
 const cacheSlice = createSlice({
     name: "cache",
     initialState: {
@@ -12,7 +44,7 @@ const cacheSlice = createSlice({
         tags: [] as MiniTag[] | TagCount[],
         visiblePosts: [] as PostSearch[],
         unverifiedPosts: [] as UnverifiedPost[],
-        uploadDropFiles: [] as File[],
+        uploadDropFiles: [] as {name: string, type: string, size: number, lastModified: number, content: string}[],
         bannerTags: [] as TagCount[],
         post: null as PostSearch | PostHistory | null,
         tagCategories: null as TagCategories | null,
@@ -56,7 +88,7 @@ export const useCacheSelector = () => {
         tags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tags)),
         visiblePosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.visiblePosts)),
         unverifiedPosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.unverifiedPosts)),
-        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles)),
+        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles.map((file) => unserializeFile(file)))),
         bannerTags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.bannerTags)),
         post: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.post)),
         tagCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)),
@@ -77,7 +109,7 @@ export const useCacheActions = () => {
         setTags: (state: MiniTag[] | TagCount[]) => dispatch(setTags(state)),
         setVisiblePosts: (state: PostSearch[]) => dispatch(setVisiblePosts(state)),
         setUnverifiedPosts: (state: UnverifiedPost[]) => dispatch(setUnverifiedPosts(state)),
-        setUploadDropFiles: (state: File[]) => dispatch(setUploadDropFiles(state)),
+        setUploadDropFiles: (state: LoadedFile[]) => dispatch(setUploadDropFiles(state)),
         setBannerTags: (state: TagCount[]) => dispatch(setBannerTags(state)),
         setPost: (state: PostSearch | PostHistory | null) => dispatch(setPost(state)),
         setTagCategories: (state: TagCategories | null) => dispatch(setTagCategories(state)),
@@ -86,7 +118,8 @@ export const useCacheActions = () => {
         setRelated: (state: PostSearch[]) => dispatch(setRelated(state)),
         setArtists: (state: TagCategorySearch[]) => dispatch(setArtists(state)),
         setCharacters: (state: TagCategorySearch[]) => dispatch(setCharacters(state)),
-        setSeries: (state: TagCategorySearch[]) => dispatch(setSeries(state))
+        setSeries: (state: TagCategorySearch[]) => dispatch(setSeries(state)),
+        serializeFile: (file: File) => serializeFile(file)
     }
 }
 

@@ -35,8 +35,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
         if (props.post) {
             const image = props.post.images[(props.order || 1) - 1]
             const imageLink = typeof image === "string" ?
-            functions.getRawThumbnailLink(image, "medium", mobile) :
-            functions.getThumbnailLink(image.type, image.postID, image.order, image.filename, "tiny", mobile)
+            functions.getRawThumbnailLink(image, "medium", mobile) : functions.getThumbnailLink(image, "tiny", session, mobile)
             setOriginal(imageLink)
             if (props.noEncryption) return setImg(imageLink)
             let img = await functions.decryptThumb(imageLink, session, imageLink, mobile)
@@ -58,7 +57,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             const newImage = props.post.images[newImageIndex]
             const imageLink = typeof newImage === "string" ?
             functions.getRawThumbnailLink(newImage, "medium", mobile) :
-            functions.getThumbnailLink(newImage.type, props.post.postID, newImage.order, newImage.filename, "tiny", mobile)
+            functions.getThumbnailLink(newImage, "tiny", session, mobile)
             const thumb = await functions.decryptThumb(imageLink, session)
             setImg(thumb)
             setIndex(newImageIndex)

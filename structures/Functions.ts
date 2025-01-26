@@ -27,12 +27,13 @@ import {Live2DCubismModel} from "live2d-renderer"
 import JSZip from "jszip"
 import enLocale from "../assets/locales/en.json"
 import tempMails from "../assets/json/temp-email.json"
+import imageFunctions from "./ImageFunctions"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
 PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable, FileFormat, TagGroupCategory,
-MiniTagGroup} from "../types/Types"
+MiniTagGroup, Image} from "../types/Types"
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
@@ -295,7 +296,7 @@ export default class Functions {
         return false
     }
 
-    public static maxFileSize = (format: FileFormat) => {
+    public static maxFileSize = (format: FileFormat = {}) => {
         const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm} = format
         const maxSize = jpg ? 10 :
                         png ? 10 :
@@ -788,7 +789,7 @@ export default class Functions {
 
     public static getImageOrFallback = async (path: string, fallback: string) => {
         return new Promise<string>(resolve => {
-          const img = new Image()
+          const img = new window.Image()
           img.src = path
           img.onload = () => resolve(path)
           img.onerror = () => resolve(fallback)
@@ -1126,6 +1127,10 @@ export default class Functions {
         return `${folder}-upscaled/${postID}-${order}-${filename}`
     }
 
+    public static getThumbnailImagePath = (folder: string, filename: string) => {
+        return `thumbnail/${folder}/${filename}`
+    }
+
     public static getImageHistoryPath = (postID: string, key: number, order: number, filename: string) => {
         return `history/post/${postID}/original/${key}/${postID}-${order}-${filename}`
     }
@@ -1138,9 +1143,10 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${historyFile}`
     }
 
-    public static getImageLink = (folder: string, postID: string, order: number, filename: string) => {
-        if (!filename) return ""
-        return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
+    public static getImageLink = (image: Image, upscaled?: boolean) => {
+        if (!image.filename && !image.upscaledFilename) return ""
+        let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
+        return `${window.location.protocol}//${window.location.host}/${image.type}/${image.postID}-${image.order}-${encodeURIComponent(filename)}`
     }
 
     public static getRawImageLink = (filename: string) => {
@@ -1148,21 +1154,14 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${filename}`
     }
 
-    public static linkToBase64 = async (link: string) => {
-        const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
-        if (!arrayBuffer.byteLength) return ""
-        const buffer = Buffer.from(arrayBuffer)
-        let mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
-        return `data:${mime};base64,${buffer.toString("base64")}`
+    public static getUnverifiedImageLink = (image: Image, upscaled?: boolean) => {
+        if (!image.filename && !image.upscaledFilename) return ""
+        let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
+        return `${window.location.protocol}//${window.location.host}/unverified/${image.type}/${image.postID}-${image.order}-${filename}`
     }
 
-    public static getUnverifiedImageLink = (folder: string, postID: string, order: number, filename: string) => {
-        if (!filename) return ""
-        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
-    }
-
-    public static getThumbnailLink = (folder: string, postID: string, order: number, filename: string, sizeType: string, mobile?: boolean) => {
-        if (!filename) return ""
+    public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean) => {
+        if (!image.thumbnail && !image.filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
@@ -1170,10 +1169,11 @@ export default class Functions {
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
-        if (folder !== "image" && folder !== "comic" && folder !== "animation") {
-            return Functions.getImageLink(folder, postID, order, filename)
+        if (session.liveModelPreview) {
+            return Functions.getImageLink(image)
         }
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
+        let filename = image.thumbnail || `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${filename}`
     }
 
     public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {
@@ -1189,16 +1189,20 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
     }
 
-    public static getUnverifiedThumbnailLink = (folder: string, postID: string, order: number, filename: string, sizeType: string) => {
-        if (!filename) return ""
-        if (folder !== "image" && folder !== "comic") return Functions.getUnverifiedImageLink(folder, postID, order, filename)
+    public static getUnverifiedThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean) => {
+        if (!image.thumbnail && !image.filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
         if (sizeType === "medium") size = 600
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
+        if (mobile) size = Math.floor(size / 2)
+        if (session.liveModelPreview) {
+            return Functions.getImageLink(image)
+        }
+        let filename = image.thumbnail || `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
     }
 
     public static getTagPath = (folder: string, filename: string) => {
@@ -1234,6 +1238,14 @@ export default class Functions {
         if (folder === "series") dest = "series"
         if (folder === "pfp") dest = "pfp"
         return `${window.location.protocol}//${window.location.host}/unverified/${dest}/${encodeURIComponent(filename)}`
+    }
+
+    public static linkToBase64 = async (link: string) => {
+        const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
+        if (!arrayBuffer.byteLength) return ""
+        const buffer = Buffer.from(arrayBuffer)
+        let mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
+        return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
     public static formatDate(date: Date, yearFirst?: boolean) {
@@ -1303,10 +1315,29 @@ export default class Functions {
         })
     }
 
+    public static animationDuration = async (link: string) => {
+        if (Functions.isGIF(link)) {
+            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            const frames = await Functions.extractGIFFrames(arrayBuffer)
+            return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
+        } else if (Functions.isWebP(link)) {
+            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            if (Functions.isAnimatedWebp(arrayBuffer)) {
+                const frames = await Functions.extractAnimatedWebpFrames(arrayBuffer)
+                return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
+            }
+        }
+        return 0
+    }
+
     public static base64ToBuffer = (base64: string) => {
         const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
         if (!matches) return Buffer.from("")
         return Buffer.from(matches[2], "base64")
+    }
+
+    public static isBase64 = (unknown: string) => {
+        return /^data:([A-Za-z-+\/]+);base64,(.+)$/.test(unknown)
     }
 
     public static base64toUint8Array = async (base64: string) => {
@@ -1705,19 +1736,20 @@ export default class Functions {
         return canvas
     }
 
-    public static imageDimensions = async (image: string, session: Session) => {
-        return new Promise<{width: number, height: number, size: number}>(async (resolve) => {
+    public static imageDimensions = async (image: string) => {
+        return new Promise<{width: number, height: number, size: number, duration?: number}>(async (resolve) => {
             if (Functions.isVideo(image)) {
                 const video = document.createElement("video")
                 video.addEventListener("loadedmetadata", async () => {
                     let width = video.videoWidth 
                     let height = video.videoHeight
+                    let duration = video.duration
                     try {
                         const r = await fetch(image).then(((r) => r.arrayBuffer()))
                         const size = r.byteLength
-                        resolve({width, height, size})
+                        resolve({width, height, size, duration})
                     } catch {
-                        resolve({width, height, size: 0})
+                        resolve({width, height, size: 0, duration})
                     }
                 })
                 video.src = image
@@ -1727,11 +1759,12 @@ export default class Functions {
                     let width = img.width
                     let height = img.height
                     try {
+                        let duration = await Functions.animationDuration(image)
                         const r = await fetch(image).then((r) => r.arrayBuffer())
                         const size = r.byteLength 
-                        resolve({width, height, size})
+                        resolve({width, height, size, duration})
                     } catch {
-                        resolve({width, height, size: 0})
+                        resolve({width, height, size: 0, duration: 0})
                     }
                 })
                 img.src = image
@@ -1762,10 +1795,14 @@ export default class Functions {
         scene.add(object)
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
         renderer.render(scene, camera)
+
+        const box = new THREE.Box3().setFromObject(object)
+        const width = box.max.x - box.min.x
+        const height = box.max.y - box.min.y
         const polycount = renderer.info.render.triangles
         const r = await fetch(model).then((r) => r.arrayBuffer())
         const size = r.byteLength
-        return {polycount, size}
+        return {width, height, size, polycount}
     }
 
     public static modelImage = async (model: string, ext: string, imageSize?: number) => {
@@ -1838,26 +1875,24 @@ export default class Functions {
 
     public static live2dDimensions = async (live2d: string) => {
         const canvas = document.createElement("canvas")
-        canvas.width = 500
-        canvas.height = 500
+        canvas.width = 1000
+        canvas.height = 1000
         const model = new Live2DCubismModel(canvas, {autoAnimate: false})
         await model.load(live2d)
         const width = model.width
         const height = model.height
         const size = model.size
-        model.destroy()
         return {width, height, size}
     }
 
     public static live2dScreenshot = async (live2d: string, imageSize?: number) => {
-        if (!imageSize) imageSize = 500
+        if (!imageSize) imageSize = 1000
         const canvas = document.createElement("canvas")
         canvas.width = imageSize
         canvas.height = imageSize
         const model = new Live2DCubismModel(canvas, {autoAnimate: false})
         await model.load(live2d)
         const screenshot = await model.takeScreenshot()
-        model.destroy()
         return screenshot
     }
     
@@ -1866,7 +1901,9 @@ export default class Functions {
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const duration = tagInfo.format.duration || 0
         const size = buffer.byteLength
-        return {duration, size}
+        const coverArt = await Functions.songCover(audio)
+        const {width, height} = await Functions.imageDimensions(coverArt)
+        return {width, height, size, duration}
     }
 
     public static songCover = async (audio: string) => {
@@ -1920,7 +1957,7 @@ export default class Functions {
     }
 
     public static createImage = async (image: string) => {
-        const img = new Image()
+        const img = new window.Image()
         img.src = image
         return new Promise<HTMLImageElement>((resolve) => {
             img.onload = () => resolve(img)
@@ -1930,7 +1967,7 @@ export default class Functions {
     public static crop = async <T extends boolean | undefined>(url: string, aspectRatio: number, buffer?: T, jpeg?: boolean) => {
         type CropReturn = T extends true ? Buffer : string
         return new Promise<CropReturn>((resolve) => {
-            const inputImage = new Image()
+            const inputImage = new window.Image()
             inputImage.onload = () => {
                 const inputWidth = inputImage.naturalWidth
                 const inputHeight = inputImage.naturalHeight
@@ -2730,17 +2767,13 @@ export default class Functions {
             const revImage = revertPost.images[i]
             const currImage = currentPost.images[i]
             
-            let imgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) 
-            : Functions.getImageLink(revImage.type, revertPost.postID, i+1, revImage.filename)
+            let imgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) : Functions.getImageLink(revImage)
 
-            let currentLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) 
-            : Functions.getImageLink(currImage.type, currentPost.postID, i+1, currImage.filename)
+            let currentLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) : Functions.getImageLink(currImage)
 
-            let upscaledImgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) 
-            : Functions.getImageLink(revImage.type, revertPost.postID, i+1, revImage.upscaledFilename || revImage.filename)
+            let upscaledImgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) : Functions.getImageLink(revImage, true)
 
-            let currentUpscaledLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) 
-            : Functions.getImageLink(currImage.type, currentPost.postID, i+1, currImage.upscaledFilename || currImage.filename)
+            let currentUpscaledLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) : Functions.getImageLink(currImage, true)
 
             
             let imgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
@@ -2803,11 +2836,8 @@ export default class Functions {
         let upscaledImages = [] as UploadImage[]
         for (let i = 0; i < post.images.length; i++) {
             const image = post.images[i]
-            let imgLink = typeof image === "string" ? Functions.getRawImageLink(image) 
-            : Functions.getImageLink(image.type, post.postID, i+1, image.filename)
-
-            let upscaledImgLink = typeof image === "string" ? Functions.getRawImageLink(image) 
-            : Functions.getImageLink(image.type, post.postID, i+1, image.upscaledFilename || image.filename)
+            let imgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image)
+            let upscaledImgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image, true)
 
             let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let upscaledBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
@@ -2815,47 +2845,26 @@ export default class Functions {
                 let ext = path.extname(imgLink)
                 let link = await Functions.decryptItem(imgLink, session)
                 if (!link.includes(ext)) link += `#${ext}`
-                let thumbnail = ""
-                let width = 0
-                let height = 0
-                if (Functions.isLive2D(ext)) {
-                    thumbnail = await Functions.live2dScreenshot(link)
-                    const dimensions = await Functions.live2dDimensions(ext)
-                    width = dimensions.width
-                    height = dimensions.height
-                } else if (Functions.isVideo(ext)) {
-                    thumbnail = await Functions.videoThumbnail(link)
-                } else if (Functions.isModel(ext)) {
-                    thumbnail = await Functions.modelImage(link, ext)
-                } else if (Functions.isAudio(ext)) {
-                    thumbnail = await Functions.songCover(link)
-                }
                 let decrypted = await Functions.decryptBuffer(buffer, imgLink, session)
-                images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail, width, height,
+
+                let {width, height, size, duration} = await imageFunctions.dimensions(link)
+                let {thumbnail, thumbnailExt} = await imageFunctions.thumbnail(link)
+
+                images.push({link, ext: ext.replace(".", ""), width, height, size, duration, thumbnail, thumbnailExt, 
                 originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
             }
             if (upscaledBuffer.byteLength) {
                 let upscaledExt = path.extname(upscaledImgLink)
                 let upscaledLink = await Functions.decryptItem(upscaledImgLink, session)
                 if (!upscaledLink.includes(upscaledExt)) upscaledLink += `#${upscaledExt}`
-                let thumbnail = ""
-                let width = 0
-                let height = 0
-                if (Functions.isLive2D(upscaledExt)) {
-                    thumbnail = await Functions.live2dScreenshot(upscaledLink)
-                    const dimensions = await Functions.live2dDimensions(upscaledLink)
-                    width = dimensions.width
-                    height = dimensions.height
-                } else if (Functions.isVideo(upscaledExt)) {
-                    thumbnail = await Functions.videoThumbnail(upscaledLink)
-                } else if (Functions.isModel(upscaledExt)) {
-                    thumbnail = await Functions.modelImage(upscaledLink, upscaledExt)
-                } else if (Functions.isAudio(upscaledExt)) {
-                    thumbnail = await Functions.songCover(upscaledLink)
-                }
                 let decrypted = await Functions.decryptBuffer(upscaledBuffer, upscaledImgLink, session)
-                upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), size: decrypted.byteLength, thumbnail,
-                width, height, originalLink: upscaledImgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
+                
+                let {width, height, size, duration} = await imageFunctions.dimensions(upscaledLink)
+                let {thumbnail, thumbnailExt} = await imageFunctions.thumbnail(upscaledLink)
+                
+                upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), width, height, 
+                size, duration, thumbnail, thumbnailExt, originalLink: upscaledImgLink, 
+                bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
             }
         }
         return {images, upscaledImages}
@@ -3032,18 +3041,14 @@ export default class Functions {
         if (!cacheKey) cacheKey = img
         const cached = cachedThumbs.get(cacheKey)
         if (cached) return cached
+        let isAnimatedWebP = false
+        let arrayBuffer = null as ArrayBuffer | null
+        let decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
         if (forceImage && Functions.isVideo(img)) {
             const url = await Functions.videoThumbnail(img)
             let cacheUrl = `${url}#${path.extname(img)}`
             cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
-        }
-        let isAnimatedWebP = false
-        let arrayBuffer = null as ArrayBuffer | null
-        let decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
-        if (Functions.isWebP(img)) {
-            arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
-            isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
         }
         if (Functions.isLive2D(img)) {
             const url = await Functions.live2dScreenshot(decryptedImg + "#.zip")
@@ -3063,15 +3068,19 @@ export default class Functions {
             cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
+        if (Functions.isWebP(img)) {
+            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
+        }
         if (Functions.isImage(img) && !isAnimatedWebP) {
             const base64 = await Functions.linkToBase64(decryptedImg)
-            cachedThumbs.set(cacheKey, base64)
+            cachedImages.set(cacheKey, base64)
             return base64
         } else {
             if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
-            cachedThumbs.set(cacheKey, cacheUrl)
+            cachedImages.set(cacheKey, cacheUrl)
             return cacheUrl
         }
     }

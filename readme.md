@@ -54,7 +54,7 @@ Rename the file `.env.example` to `.env` and put in your credentials. `COOKIE_SE
 
 To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`, each containing the following subfolders:
 
-`["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "live2d"]`
+`["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "thumbnail"]`
 
 The site runs on port 8082 by default but it can be configured by changing `PORT`.
 

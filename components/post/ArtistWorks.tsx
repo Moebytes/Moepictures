@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {useLayoutSelector, useCacheActions, useThemeSelector, useFlagSelector} from "../../store"
+import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
 import "./styles/related.less"
@@ -13,11 +13,12 @@ interface Props {
 const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
     const {setPosts} = useCacheActions()
     const history = useHistory()
 
     const getImages = () => {
-        return props.posts.map((post) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small"))
+        return props.posts.map((post) => functions.getThumbnailLink(post.images[0], "tiny", session, mobile))
     }
 
     const click = (img: string, index: number) => {

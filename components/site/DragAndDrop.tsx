@@ -12,7 +12,7 @@ let timeout = null as any
 const DragAndDrop: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {setUploadDropFiles} = useCacheActions()
+    const {setUploadDropFiles, serializeFile} = useCacheActions()
     const {setImageSearchFlag, setPasteNoteFlag} = useFlagActions()
     const [visible, setVisible] = useState(false)
     const [searchHover, setSearchHover] = useState(false)
@@ -132,14 +132,14 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         history.push("/posts")
     }
 
-    const uploadFiles = (files: File[]) => {
+    const uploadFiles = async (files: File[]) => {
         setSearchHover(false)
         setUploadHover(false)
         if (!files?.length) return
         if (history.location.pathname !== "/upload" &&
         history.location.pathname !== "/bulk-upload" &&
         !history.location.pathname.includes("edit-post")) history.push("/upload")
-        setUploadDropFiles(files)
+        setUploadDropFiles(await Promise.all(files.map((file) => serializeFile(file))))
     }
 
     const searchDrop = async (event: React.DragEvent) => {

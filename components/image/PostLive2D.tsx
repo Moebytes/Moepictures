@@ -112,14 +112,11 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }, [decrypted])
 
     const loadLive2DModel = async () => {
-        console.log(decrypted)
         if (!decrypted || !rendererRef.current) return
 
         rendererRef.current.width = 1000
         rendererRef.current.height = 1000
         const model = new Live2DCubismModel(rendererRef.current)
-        // @ts-ignore
-        console.log( await model.loadBuffers(decrypted))
         await model.load(decrypted)
 
         setModel(model)

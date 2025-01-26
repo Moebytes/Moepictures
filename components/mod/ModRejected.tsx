@@ -277,7 +277,7 @@ const ModRejected: React.FunctionComponent = (props) => {
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
             const ref = imagesRef[i]
-            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
             let src = img
             if (functions.isModel(img)) {
@@ -344,7 +344,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
                 history.push(`/unverified/post/${post.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
             let canvasImg = functions.isModel(img) || functions.isLive2D(img) || functions.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} key={i}>

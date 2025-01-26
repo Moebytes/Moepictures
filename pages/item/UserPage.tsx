@@ -89,7 +89,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateUploads = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const uploads = await functions.get("/api/user/uploads", {username, rating}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -100,7 +100,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
@@ -108,7 +108,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateFavorites = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const favorites = await functions.get("/api/user/favorites", {username, rating}, session, setSessionFlag)
-        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -119,7 +119,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = result.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
@@ -401,7 +401,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             } else {
                 if (functions.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${username}/${favgroup.slug}`)
             }

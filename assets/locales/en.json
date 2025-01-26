@@ -1279,7 +1279,7 @@
         },
         "filters": {
             "line1": "You can apply custom filters such as brightness, contrast, hue, and sharpen. Some filters like pixelate and blur will ruin most images, and are purely for fun.",
-            "line2": "For audio, the pixelate filter will behave as a bitcrusher and will reduce the sample rate of the audio."
+            "line2": "For audio, there are also filters for effects like lowpass, bitcrush, and reverb."
         },
         "customPlayers": {
             "title": "Custom Players",

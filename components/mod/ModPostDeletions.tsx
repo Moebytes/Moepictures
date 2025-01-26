@@ -169,7 +169,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         for (let i = 0; i < visibleRequests.length; i++) {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
             let src = await functions.decryptThumb(img, session)
             const imgElement = document.createElement("img")
@@ -338,7 +338,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             const imgClick = (event: React.MouseEvent) => {
                 functions.openPost(request.post, event, history, session, setSessionFlag)
             }
-            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

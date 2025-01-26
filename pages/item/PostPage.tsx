@@ -296,12 +296,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 if ("upscaledImages" in post && post.upscaledImages.length) {
                     images = post.upscaledImages.map((i) => functions.getRawImageLink(i))
                 } else {
-                    images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i)
-                    : functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((i: Image | string) => typeof i === "string" ? 
+                    functions.getRawImageLink(i) : functions.getImageLink(i, true))
                 }
             } else {
-                images = post.images.map((i: Image | string) => typeof i === "string" ? functions.getRawImageLink(i) 
-                : functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                images = post.images.map((i: Image | string) => typeof i === "string" ? 
+                functions.getRawImageLink(i) : functions.getImageLink(i))
             }
             setImages(images)
             if (images[order-1]) {
@@ -336,9 +336,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image, true))
                 } else {
-                    images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+                    images = post.images.map((image) => functions.getImageLink(image))
                 }
                 setImages(images)
                 if (images[order-1]) {
@@ -566,7 +566,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const generateActiveFavgroupJSX = () => {
         if (activeFavgroup) {
             if (functions.isR18(activeFavgroup.rating)) if (!session.showR18) return null
-            const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
                 history.push(`/post/${postID}/${slug}`)
@@ -589,7 +589,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
             if (functions.isR18(group.rating)) if (!session.showR18) continue
-            const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
                 history.push(`/post/${postID}/${slug}`)

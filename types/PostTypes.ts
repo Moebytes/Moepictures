@@ -31,6 +31,8 @@ export interface Image {
     upscaledHeight: number
     size: number
     upscaledSize: number
+    duration: number
+    thumbnail: string
     hash: string
 }
 
@@ -105,7 +107,6 @@ export interface PostSearch extends Post {
 export interface UnverifiedPost extends Post {
     originalID: string
     duplicates: boolean | null
-    thumbnail: string | null
     tags: string[]
     tagGroups: MiniTagGroup[]
     newTags: string[] | null

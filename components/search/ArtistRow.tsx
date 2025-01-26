@@ -58,10 +58,10 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         let images = [] as string[]
         if (!session.username) {
             let filtered = props.artist.posts.filter((p) => p.rating === functions.r13())
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         } else {
             let filtered = props.artist.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
+            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         }
         setImages(images)
     }

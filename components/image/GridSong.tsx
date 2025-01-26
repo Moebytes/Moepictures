@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
+import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle, SyntheticEvent} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions, useCacheActions,
@@ -49,7 +49,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
     const lightnessRef = useRef<HTMLImageElement>(null)
-    const ref = useRef<HTMLCanvasElement>(null)
+    const ref = useRef<HTMLImageElement>(null)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const songIconRef = useRef<HTMLImageElement>(null)
     const [imageWidth, setImageWidth] = useState(0)
@@ -80,10 +80,12 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     const loadImage = async () => {
-        const decryptedImage = await functions.decryptThumb(props.audio, session, `${props.audio}-${sizeType}`)
-        setCoverArt(decryptedImage)
         const decrypted = await functions.decryptItem(props.audio, session)
         setDecrypted(decrypted)
+        if (!coverArt) {
+            const decryptedImage = await functions.decryptThumb(props.img, session, `${props.audio}-${sizeType}`)
+            setCoverArt(decryptedImage)
+        }
     }
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
@@ -447,29 +449,15 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [selectionMode])
 
-    const drawImage = async () => {
-        if (!ref.current || !overlayRef.current || !lightnessRef.current) return
-        let src = coverArt
-        const img = document.createElement("img")
-        img.src = src 
-        img.onload = () => {
-            if (!ref.current || !overlayRef.current || !lightnessRef.current) return
-            setImageWidth(img.width)
-            setImageHeight(img.height)
-            setNaturalWidth(img.naturalWidth)
-            setNaturalHeight(img.naturalHeight)
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = img.width
-            ref.current.height = img.height
-            refCtx?.drawImage(img, 0, 0, img.width, img.height)
-            setImageLoaded(true)
-            ref.current.style.opacity = "1"
-        }
+    const onLoad = (event: SyntheticEvent) => {
+        const element = event.target as HTMLImageElement
+        setImageWidth(element.width)
+        setImageHeight(element.height)
+        setNaturalWidth(element.naturalWidth)
+        setNaturalHeight(element.naturalHeight)
+        setImageLoaded(true)
+        element.style.opacity = "1"
     }
-
-    useEffect(() => {
-        drawImage()
-    }, [coverArt])
 
     const songClick = (event: React.MouseEvent) => {
         event.stopPropagation()
@@ -488,7 +476,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={coverArt}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={coverArt}/>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-                <canvas draggable={false} className="image" ref={ref}></canvas>
+                <img draggable={false} className="image" src={coverArt} onLoad={onLoad} ref={ref}/>
             </div>
         </div>
     )

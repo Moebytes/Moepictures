@@ -144,7 +144,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         try {
             let image = sourceEditID.post.images[sourceEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
-            let link = functions.getImageLink(image.type, image.postID, image.order, image.filename)
+            let link = functions.getImageLink(image)
             let response = await fetch(`${link}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             let current = null as UploadImage | null
             if (response.byteLength) {
@@ -162,6 +162,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     width: image.width,
                     height: image.height,
                     thumbnail: "",
+                    thumbnailExt: "",
                     name: `${pixivID}.${ext}`
                 }
             }

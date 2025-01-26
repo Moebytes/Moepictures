@@ -122,7 +122,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploads = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const uploads = await functions.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -133,7 +133,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
@@ -141,7 +141,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavorites = async () => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const favorites = await functions.get("/api/user/favorites", {limit, rating}, session, setSessionFlag)
-        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -152,7 +152,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        const images = result.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
@@ -185,14 +185,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updatePending = async () => {
          const pending = await functions.get("/api/post/pending", null, session, setSessionFlag)
-         const images = pending.map((p) => functions.getUnverifiedThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+         const images = pending.map((p) => functions.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
          setPending(pending)
          setPendingImages(images)
     }
 
     const updateDeleted = async () => {
         const deleted = await functions.get("/api/post/rejected", null, session, setSessionFlag)
-        const images = deleted.map((p) => functions.getUnverifiedThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = deleted.map((p) => functions.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
         setDeleted(pending)
         setDeletedImages(images)
    }
@@ -275,7 +275,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                                 delayArray.push(gifData[i].delay)
                             }
                             const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                            const {width, height} = await functions.imageDimensions(firstURL, session)
+                            const {width, height} = await functions.imageDimensions(firstURL)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([buffer])
                             croppedURL = URL.createObjectURL(blob)
@@ -651,7 +651,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             } else {
                 if (functions.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${session.username}/${favgroup.slug}`)
             }

@@ -274,7 +274,10 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
-      let body = await serverFunctions.getFile(key, false, r18)
+      let thumbKey = `thumbnail/${folders[i]}/${path.basename(key)}`
+      if (req.path.includes("history/post")) thumbKey = key
+      let body = await serverFunctions.getFile(thumbKey, false, r18)
+      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
@@ -282,6 +285,7 @@ for (let i = 0; i < folders.length; i++) {
         body = await imageLock(body)
         return res.status(200).send(body)
       }
+      /*
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         if (metadata.pages === 1) {
@@ -291,7 +295,7 @@ for (let i = 0; i < folders.length; i++) {
           .toBuffer()
           contentLength = body.length
         }
-      }
+      }*/
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
         body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
@@ -375,7 +379,10 @@ for (let i = 0; i < folders.length; i++) {
       } else {
         if (!permissions.isMod(req.session)) return res.status(403).end()
       }
-      let body = await serverFunctions.getUnverifiedFile(key, false)
+      let thumbKey = `thumbnail/${folders[i]}/${path.basename(key)}`
+      if (req.path.includes("history/post")) thumbKey = key
+      let body = await serverFunctions.getUnverifiedFile(thumbKey, false)
+      if (!body.byteLength) body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")

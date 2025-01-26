@@ -221,7 +221,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
             const post = await functions.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
             if (!post) return
             const filename = post.images[0]?.filename
-            const newImgLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
+            const newImgLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
             const newImg = await functions.decryptThumb(newImgLink, session)
             setImg(newImg)
             setPostIndex(newPostIndex)

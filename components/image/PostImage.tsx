@@ -1295,7 +1295,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (typeof image === "string") {
             img = functions.getRawImageLink(image)
         } else {
-            img = functions.getImageLink(image.type, props.post.postID, image.order, image.filename)
+            img = functions.getImageLink(image)
         }
         if (forceOriginal) {
             encryptedBuffer = await fetch(`${img}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())

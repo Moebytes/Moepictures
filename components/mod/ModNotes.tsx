@@ -307,7 +307,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/unverified/post/${noteGroup.postID}`, "_blank")
                 history.push(`/unverified/post/${noteGroup.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(noteGroup.post.images[0].type, noteGroup.postID, noteGroup.post.images[0].order, noteGroup.post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(noteGroup.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

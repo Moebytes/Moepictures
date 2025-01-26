@@ -176,7 +176,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             const request = visibleRequests[i]
             if (!request.post) continue
             const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(request.post.images[0].type, request.post.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
             let src = await functions.decryptThumb(img, session)
             const imgElement = document.createElement("img")
@@ -354,7 +354,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
                 }
             }
             let img = ""
-            if (request.post) img = functions.getThumbnailLink(request.post.images[0].type, request.post.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
+            if (request.post) img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {request.post ? <div className="mod-post-img-container">

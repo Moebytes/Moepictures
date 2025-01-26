@@ -180,3 +180,11 @@ export interface FileFormat {
     obj?: boolean
     zip?: boolean
 }
+
+export interface Dimensions {
+    width: number 
+    height: number
+    size: number
+    polycount?: number
+    duration?: number
+}

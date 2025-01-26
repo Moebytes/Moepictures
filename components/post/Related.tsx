@@ -365,8 +365,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (!session.username) if (post.rating !== functions.r13()) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
             const image = post.images[0]
-            const thumb = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "medium", mobile)
-            const images = post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename))
+            const thumb = functions.getThumbnailLink(image, "medium", session, mobile)
+            const images = post.images.map((image) => functions.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
                 marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post}/>)
@@ -415,8 +415,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        return related.map((post) => functions.getThumbnailLink(post.images[0].type, post.postID, 
-        post.images[0].order, post.images[0].filename, "medium"))
+        return related.map((post) => functions.getThumbnailLink(post.images[0], "tiny", session, mobile))
     }
 
     const click = (img: string, index: number) => {

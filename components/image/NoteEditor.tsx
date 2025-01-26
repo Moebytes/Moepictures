@@ -171,7 +171,7 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
             } else {
                 setInit(true)
             }
-        }, 100)
+        }, 500)
     }, [active, noteDrawingEnabled])
 
     const getFilter = () => {

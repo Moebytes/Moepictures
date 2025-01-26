@@ -44,9 +44,8 @@ import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../../structures/Permissions"
-import xButton from "../../assets/icons/x-button-magenta.png"
-import tagConvert from "../../assets/json/tag-convert.json"
-import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile} from "../../types/Types"
+import imageFunctions from "../../structures/ImageFunctions"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage} from "../../types/Types"
 import path from "path"
 import "./styles/uploadpage.less"
 
@@ -144,127 +143,21 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        let acceptedArray = [] as UploadImageFile[] 
-        let error = ""
-        let isLive2DArr = [] as boolean[]
-        for (let i = 0; i < files.length; i++) {
-            const fileReader = new FileReader()
-            await new Promise<void>((resolve) => {
-                fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
-                    let live2d = false
-                    const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                    const result = functions.bufferFileType(bytes)?.[0] || {}
-                    const jpg = result?.mime === "image/jpeg"
-                    const png = result?.mime === "image/png"
-                    const gif = result?.mime === "image/gif"
-                    const webp = result?.mime === "image/webp"
-                    const avif = result?.mime === "image/avif"
-                    const mp4 = result?.mime === "video/mp4"
-                    const mp3 = result?.mime === "audio/mpeg"
-                    const wav = result?.mime === "audio/x-wav"
-                    const glb = functions.isGLTF(files[i].name)
-                    const fbx = functions.isFBX(files[i].name)
-                    const obj = functions.isOBJ(files[i].name)
-                    if (glb) result.typename = "glb"
-                    if (fbx) result.typename = "fbx"
-                    if (obj) result.typename = "obj"
-                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
-                    const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
-                        const MB = files[i].size / (1024*1024)
-                        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm, zip})
-                        if (MB <= maxSize || permissions.isMod(session)) {
-                            if (zip) {
-                                live2d = await functions.isLive2DZip(bytes)
-                                if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
-                                    resolve()
-                                } else {
-                                    const reader = new JSZip()
-                                    const content = await reader.loadAsync(bytes)
-                                    for (const filename in content.files) {
-                                        const file = content.files[filename]
-                                        if (file.dir || filename.startsWith("__MACOSX/")) continue
-                                        const data = await file.async("uint8array")
-                                        const result = functions.bufferFileType(data)?.[0] || {}
-                                        const jpg = result?.mime === "image/jpeg"
-                                        const png = result?.mime === "image/png"
-                                        let webp = result?.mime === "image/webp"
-                                        let avif = result?.mime === "image/avif"
-                                        const gif = result?.mime === "image/gif"
-                                        const mp4 = result?.mime === "video/mp4"
-                                        const mp3 = result?.mime === "audio/mpeg"
-                                        const wav = result?.mime === "audio/x-wav"
-                                        const glb = functions.isGLTF(filename)
-                                        const fbx = functions.isFBX(filename)
-                                        const obj = functions.isOBJ(filename)
-                                        if (glb) result.typename = "glb"
-                                        if (fbx) result.typename = "fbx"
-                                        if (obj) result.typename = "obj"
-                                        const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
-                                        if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(data)})
-                                        } else {
-                                            error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
-                                        }
-                                    }
-                                    resolve()
-                                }
-                            } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
-                                resolve()
-                            }
-                        } else {
-                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} max file size: ${maxSize}MB`
-                            resolve()
-                        }
-                    } else {
-                        error = `Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
-                        resolve()
-                    }
-                    isLive2DArr.push(live2d)
-                }
-                fileReader.readAsArrayBuffer(files[i])
-            })
-        }
-        if (acceptedArray.length) {
-            let urls = [] as UploadImage[]
-            for (let i = 0; i < acceptedArray.length; i++) {
-                let url = URL.createObjectURL(acceptedArray[i].file)
-                let ext = acceptedArray[i].ext
-                let link = `${url}#.${ext}`
-                let thumbnail = ""
-                let width = 0
-                let height = 0
-                if (isLive2DArr[i]) {
-                    thumbnail = await functions.live2dScreenshot(link)
-                    let dimensions = await functions.live2dDimensions(link)
-                    width = dimensions.width
-                    height = dimensions.height
-                } else if (functions.isVideo(link)) {
-                    thumbnail = await functions.videoThumbnail(link)
-                } else if (functions.isModel(link)) {
-                    thumbnail = await functions.modelImage(link, ext)
-                } else if (functions.isAudio(link)) {
-                    thumbnail = await functions.songCover(link)
-                }
-                urls.push({link, ext, size: acceptedArray[i].file.size, thumbnail, width, height,
-                originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
-            }
-            setCurrentImg(urls[0].link)
-            setCurrentIndex(0)
-            if (showUpscaled) {
-                setUpscaledFiles((prev) => [...prev, ...urls])
-            } else {
-                setOriginalFiles((prev) => [...prev, ...urls])
-            }
-        }
+        let {images, error} = await imageFunctions.validateImages(files, links, session, i18n)
         if (error) {
             setUploadError(true)
             if (!uploadErrorRef.current) await functions.timeout(20)
             uploadErrorRef.current!.innerText = error
             await functions.timeout(3000)
             setUploadError(false)
+        } else {
+            setCurrentImg(images[0].link)
+            setCurrentIndex(0)
+            if (showUpscaled) {
+                setUpscaledFiles((prev) => [...prev, ...images])
+            } else {
+                setOriginalFiles((prev) => [...prev, ...images])
+            }
         }
     }
 
@@ -306,7 +199,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     delayArray.push(gifData[i].delay)
                 }
                 const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                const {width, height} = await functions.imageDimensions(firstURL, session)
+                const {width, height} = await functions.imageDimensions(firstURL)
                 const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                 const blob = new Blob([buffer])
                 croppedURL = URL.createObjectURL(blob)

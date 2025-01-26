@@ -138,9 +138,9 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+                images = post.images.map((image) => functions.getUnverifiedImageLink(image, true))
             } else {
-                images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
+                images = post.images.map((image) => functions.getUnverifiedImageLink(image))
             }
             setImages(images)
             if (images[order-1]) {
@@ -157,7 +157,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setPostFlag(false)
             let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => null)
             if (post) {
-                const images = post.images.map((i) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
+                const images = post.images.map((image) => functions.getUnverifiedImageLink(image))
                 setImages(images)
                 if (images[order-1]) {
                     setImage(images[order-1])

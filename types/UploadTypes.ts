@@ -21,23 +21,18 @@ export interface UploadTag {
     bytes?: number[]
 }
 
-export interface UploadImageFile {
-    file: File
-    ext: string
-    originalLink: string
-    bytes: number[]
-}
-
 export interface UploadImage {
     name: string
     link: string
     originalLink: string
     ext: string
     size: number
-    thumbnail: string
     width: number
     height: number
     bytes: number[]
+    thumbnail: string
+    thumbnailExt: string
+    duration?: number
 }
 
 export interface UploadParams {

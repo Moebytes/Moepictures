@@ -92,7 +92,6 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }
 
     const updateSeries = async (queryOverride?: string) => {
-        console.log("HERE")
         let query = queryOverride ? queryOverride : searchQuery
         const result = await functions.get("/api/search/series", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
@@ -100,10 +99,6 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setVisibleSeries([])
         setSeries(result)
     }
-
-    useEffect(() => {
-        console.log(series)
-    }, [series])
 
     useEffect(() => {
         setHideNavbar(true)

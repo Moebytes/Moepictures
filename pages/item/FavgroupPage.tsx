@@ -107,7 +107,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < favgroup.posts.length; i++) {
             const post = favgroup.posts[i]
             if (functions.isR18(post.rating)) if (!session.showR18) continue
-            const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
+            const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
             let img = await functions.decryptThumb(imageLink, session)
             items.push({id: post.order, image: img, post})
         }

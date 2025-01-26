@@ -45,8 +45,8 @@ import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import permissions from "../../structures/Permissions"
 import xButton from "../../assets/icons/x-button-magenta.png"
-import tagConvert from "../../assets/json/tag-convert.json"
-import {PostType, PostRating, PostStyle, UploadTag, UploadImage, UploadImageFile, UnverifiedPost} from "../../types/Types"
+import imageFunctions from "../../structures/ImageFunctions"
+import {PostType, PostRating, PostStyle, UploadTag, UploadImage, UnverifiedPost} from "../../types/Types"
 import path from "path"
 import "./styles/uploadpage.less"
 
@@ -160,7 +160,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         let upscaledFiles = [] as File[]
         let upscaledLinks = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
-            let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
+            let imageLink = functions.getUnverifiedImageLink(post.images[i])
             const response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
@@ -168,7 +168,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 files.push(file)
                 links.push(imageLink)
             }
-            let upscaledImageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            let upscaledImageLink = functions.getUnverifiedImageLink(post.images[i], true)
             const upscaledResponse = await fetch(`${upscaledImageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
@@ -308,135 +308,29 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }, [post, session])
 
     const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
-        let acceptedArray = [] as UploadImageFile[] 
-        let error = ""
-        let isLive2DArr = [] as boolean[]
-        for (let i = 0; i < files.length; i++) {
-            const fileReader = new FileReader()
-            await new Promise<void>((resolve) => {
-                fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
-                    let live2d = false
-                    const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                    const result = functions.bufferFileType(bytes)?.[0] || {}
-                    const jpg = result?.mime === "image/jpeg"
-                    const png = result?.mime === "image/png"
-                    const gif = result?.mime === "image/gif"
-                    const webp = result?.mime === "image/webp"
-                    const avif = result?.mime === "image/avif"
-                    const mp4 = result?.mime === "video/mp4"
-                    const mp3 = result?.mime === "audio/mpeg"
-                    const wav = result?.mime === "audio/x-wav"
-                    const glb = functions.isGLTF(files[i].name)
-                    const fbx = functions.isFBX(files[i].name)
-                    const obj = functions.isOBJ(files[i].name)
-                    if (glb) result.typename = "glb"
-                    if (fbx) result.typename = "fbx"
-                    if (obj) result.typename = "obj"
-                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
-                    const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
-                        const MB = files[i].size / (1024*1024)
-                        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm, zip})
-                        if (MB <= maxSize || permissions.isMod(session)) {
-                            if (zip) {
-                                live2d = await functions.isLive2DZip(bytes)
-                                if (live2d) {
-                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
-                                    resolve()
-                                } else {
-                                    const reader = new JSZip()
-                                    const content = await reader.loadAsync(bytes)
-                                    for (const filename in content.files) {
-                                        const file = content.files[filename]
-                                        if (file.dir || filename.startsWith("__MACOSX/")) continue
-                                        const data = await file.async("uint8array")
-                                        const result = functions.bufferFileType(data)?.[0] || {}
-                                        const jpg = result?.mime === "image/jpeg"
-                                        const png = result?.mime === "image/png"
-                                        let webp = result?.mime === "image/webp"
-                                        let avif = result?.mime === "image/avif"
-                                        const gif = result?.mime === "image/gif"
-                                        const mp4 = result?.mime === "video/mp4"
-                                        const mp3 = result?.mime === "audio/mpeg"
-                                        const wav = result?.mime === "audio/x-wav"
-                                        const glb = functions.isGLTF(filename)
-                                        const fbx = functions.isFBX(filename)
-                                        const obj = functions.isOBJ(filename)
-                                        if (glb) result.typename = "glb"
-                                        if (fbx) result.typename = "fbx"
-                                        if (obj) result.typename = "obj"
-                                        const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
-                                        if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
-                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(data)})
-                                        } else {
-                                            error = i18n.pages.upload.supportedFiletypesZip
-                                        }
-                                    }
-                                    resolve()
-                                }
-                            } else {
-                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : "", bytes: Object.values(bytes)})
-                                resolve()
-                            }
-                        } else {
-                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} ${i18n.pages.upload.maxFileSize}: ${maxSize}MB`
-                            resolve()
-                        }
-                    } else {
-                        error = i18n.pages.upload.supportedFiletypes
-                        resolve()
-                    }
-                    isLive2DArr.push(live2d)
-                }
-                fileReader.readAsArrayBuffer(files[i])
-            })
-        }
-        if (acceptedArray.length) {
-            let urls = [] as UploadImage[]
-            for (let i = 0; i < acceptedArray.length; i++) {
-                let url = URL.createObjectURL(acceptedArray[i].file)
-                let ext = acceptedArray[i].ext
-                let link = `${url}#.${ext}`
-                let thumbnail = ""
-                let width = 0
-                let height = 0
-                if (isLive2DArr[i]) {
-                    thumbnail = await functions.live2dScreenshot(link)
-                    let dimensions = await functions.live2dDimensions(link)
-                    width = dimensions.width
-                    height = dimensions.height
-                } else if (functions.isVideo(link)) {
-                    thumbnail = await functions.videoThumbnail(link)
-                } else if (functions.isModel(link)) {
-                    thumbnail = await functions.modelImage(link, ext)
-                } else if (functions.isAudio(link)) {
-                    thumbnail = await functions.songCover(link)
-                }
-                urls.push({link, ext, size: acceptedArray[i].file.size, thumbnail, width, height,
-                originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
-            }
-            setCurrentImg(urls[0].link)
-            setCurrentIndex(0)
-            if (forceUpscale !== undefined) {
-                if (forceUpscale) {
-                    setUpscaledFiles((prev) => [...prev, ...urls])
-                } else {
-                    setOriginalFiles((prev) => [...prev, ...urls])
-                }
-            } else {
-                if (showUpscaled) {
-                    setUpscaledFiles((prev) => [...prev, ...urls])
-                } else {
-                    setOriginalFiles((prev) => [...prev, ...urls])
-                }
-            }
-        }
+        let {images, error} = await imageFunctions.validateImages(files, links, session, i18n)
         if (error) {
             setEditPostError(true)
             if (!editPostErrorRef.current) await functions.timeout(20)
             editPostErrorRef.current!.innerText = error
             await functions.timeout(3000)
             setEditPostError(false)
+        } else {
+            setCurrentImg(images[0].link)
+            setCurrentIndex(0)
+            if (forceUpscale !== undefined) {
+                if (forceUpscale) {
+                    setUpscaledFiles((prev) => [...prev, ...images])
+                } else {
+                    setOriginalFiles((prev) => [...prev, ...images])
+                }
+            } else {
+                if (showUpscaled) {
+                    setUpscaledFiles((prev) => [...prev, ...images])
+                } else {
+                    setOriginalFiles((prev) => [...prev, ...images])
+                }
+            }
         }
     }
 
@@ -473,72 +367,30 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const uploadTagImg = async (event: File | React.ChangeEvent<HTMLInputElement>, type: string, index: number) => {
         const file = event instanceof File ? event : event.target.files?.[0]
         if (!file) return
-        const fileReader = new FileReader()
-        await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
-                let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                const result = functions.bufferFileType(bytes)?.[0]
-                const jpg = result?.mime === "image/jpeg"
-                const png = result?.mime === "image/png"
-                const gif = result?.mime === "image/gif"
-                const webp = result?.mime === "image/webp"
-                const avif = result?.mime === "image/avif"
-                let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : avif ? "avif" : null
-                if (jpg || png || gif || webp || avif) {
-                    const MB = bytes.byteLength / (1024*1024)
-                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
-                    if (MB <= maxSize) {
-                        let url = URL.createObjectURL(file)
-                        let croppedURL = ""
-                        if (gif) {
-                            const gifData = await functions.extractGIFFrames(bytes.buffer)
-                            let frameArray = [] as Buffer[] 
-                            let delayArray = [] as number[]
-                            for (let i = 0; i < gifData.length; i++) {
-                                const canvas = gifData[i].frame as HTMLCanvasElement
-                                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
-                                frameArray.push(cropped)
-                                delayArray.push(gifData[i].delay)
-                            }
-                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                            const {width, height} = await functions.imageDimensions(firstURL, session)
-                            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                            const blob = new Blob([buffer])
-                            croppedURL = URL.createObjectURL(blob)
-                        } else {
-                            croppedURL = await functions.crop(url, 1, false)
-                        }
-                        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                        bytes = new Uint8Array(arrayBuffer)
-                        const blob = new Blob([bytes])
-                        url = URL.createObjectURL(blob)
-                        if (type === "artist") {
-                            artists[index].image = `${url}#.${ext}`
-                            artists[index].ext = result.typename
-                            artists[index].bytes = Object.values(bytes)
-                            setArtists(artists)
-                        } else if (type === "character") {
-                            characters[index].image = `${url}#.${ext}`
-                            characters[index].ext = result.typename
-                            characters[index].bytes = Object.values(bytes)
-                            setCharacters(characters)
-                        } else if (type === "series") {
-                            series[index].image = `${url}#.${ext}`
-                            series[index].ext = result.typename
-                            series[index].bytes = Object.values(bytes)
-                            setSeries(series)
-                        } else if (type === "tag") {
-                            newTags[index].image = `${url}#.${ext}`
-                            newTags[index].ext = result.typename
-                            newTags[index].bytes = Object.values(bytes)
-                            setNewTags(newTags)
-                        }
-                    }
-                }
-                resolve()
+        const item = await imageFunctions.validateTagImage(file)
+        if (item) {
+            if (type === "artist") {
+                artists[index].image = item.image
+                artists[index].ext = item.ext
+                artists[index].bytes = item.bytes
+                setArtists(artists)
+            } else if (type === "character") {
+                characters[index].image = item.image
+                characters[index].ext = item.ext
+                characters[index].bytes = item.bytes
+                setCharacters(characters)
+            } else if (type === "series") {
+                series[index].image = item.image
+                series[index].ext = item.ext
+                series[index].bytes = item.bytes
+                setSeries(series)
+            } else if (type === "tag") {
+                newTags[index].image = item.image
+                newTags[index].ext = item.ext
+                newTags[index].bytes = item.bytes
+                setNewTags(newTags)
             }
-            fileReader.readAsArrayBuffer(file)
-        })
+        }
         if (!(event instanceof File)) event.target.value = ""
         forceUpdate()
     }

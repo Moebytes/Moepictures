@@ -528,7 +528,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             for (const post of posts) {
                 const image = post.images?.[0]
                 if (!image) continue
-                const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
+                const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
                 functions.decryptThumb(thumbnail, session, `${thumbnail}-${sizeType}`)
             }
         }
@@ -631,8 +631,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
             const image = post.images?.[0]
             if (!image) continue
-            const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
-            const original = functions.getImageLink(image.type, post.postID, image.order, session.upscaledImages ? image.upscaledFilename || image.filename : image.filename)
+            const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
+            const original = functions.getImageLink(image, session.upscaledImages)
             let img = functions.getThumbCache(`${thumbnail}-${sizeType}`)
             let cached = img ? true : false
             if (!img) img = thumbnail
@@ -643,7 +643,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
-                const comicPages = post.type === "comic" ? post.images.map((i) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename)) : null
+                const comicPages = post.type === "comic" ? post.images.map((image) => functions.getImageLink(image, session.upscaledImages)) : null
                 jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }

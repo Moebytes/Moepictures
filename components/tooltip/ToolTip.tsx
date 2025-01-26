@@ -138,9 +138,9 @@ const ToolTip: React.FunctionComponent = (props) => {
         const postImage = tooltipPost.images[0]
         let img = ""
         if (session.upscaledImages) {
-            img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.upscaledFilename || postImage?.filename)
+            img = functions.getImageLink(postImage, true)
         } else {
-            img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.filename)
+            img = functions.getImageLink(postImage)
         }
         const decrypted = await functions.decryptItem(img, session)
         window.open(decrypted, "_blank")

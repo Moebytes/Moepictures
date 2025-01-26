@@ -262,6 +262,23 @@ export default class ServerFunctions {
         }
     }
 
+    private static removeLocalDirectory = (dir: string) => {
+        if (!fs.existsSync(dir)) return
+        fs.readdirSync(dir).forEach((file) => {
+            const current = path.join(dir, file)
+            if (fs.lstatSync(current).isDirectory()) {
+                ServerFunctions.removeLocalDirectory(current)
+            } else {
+                fs.unlinkSync(current)
+            }
+        })
+        try {
+            fs.rmdirSync(dir)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     public static deleteFolder = async (folderPath: string, r18: boolean) => {
         if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
@@ -614,8 +631,10 @@ export default class ServerFunctions {
         for (let i = 0; i < post.images.length; i++) {
             const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
             const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            const thumbnail = functions.getThumbnailImagePath(post.images[i].type, post.images[i].thumbnail)
             await ServerFunctions.deleteFile(file, r18)
             await ServerFunctions.deleteFile(upscaledFile, r18)
+            await ServerFunctions.deleteFile(thumbnail, r18)
         }
         await ServerFunctions.deleteFolder(`history/post/${post.postID}`, r18).catch(() => null)
     }
@@ -625,8 +644,10 @@ export default class ServerFunctions {
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
             const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
+            const thumbnail = functions.getThumbnailImagePath(unverified.images[i].type, unverified.images[i].thumbnail)
             await ServerFunctions.deleteUnverifiedFile(file)
             await ServerFunctions.deleteUnverifiedFile(upscaledFile)
+            await ServerFunctions.deleteUnverifiedFile(thumbnail)
         }
     }
 
@@ -1289,20 +1310,7 @@ export default class ServerFunctions {
         }
     }
 
-    private static removeLocalDirectory = (dir: string) => {
-        if (!fs.existsSync(dir)) return
-        fs.readdirSync(dir).forEach((file) => {
-            const current = path.join(dir, file)
-            if (fs.lstatSync(current).isDirectory()) {
-                ServerFunctions.removeLocalDirectory(current)
-            } else {
-                fs.unlinkSync(current)
-            }
-        })
-        try {
-            fs.rmdirSync(dir)
-        } catch (error) {
-            console.log(error)
-        }
+    public static resizeImage = async (buffer: Buffer, maxSize = 1000) => {
+        return sharp(buffer).resize(maxSize, maxSize, {fit: "inside"}).toBuffer()
     }
 }

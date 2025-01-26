@@ -13,6 +13,7 @@ import filters from "../../assets/icons/filters.png"
 import nextIcon from "../../assets/icons/next.png"
 import prevIcon from "../../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
+import imageFunctions from "../../structures/ImageFunctions"
 import Filters from "./Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 
@@ -73,27 +74,27 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     let sizeTotal = 0
                     for (let i = 0; i < props.comicPages.length; i++) {
                         const miniDecrypt = await functions.decryptItem(props.comicPages[i], session)
-                        let {size} = await functions.imageDimensions(miniDecrypt, session)
+                        let {size} = await imageFunctions.dimensions(miniDecrypt)
                         sizeTotal += size
                     }
                     setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
                 } else {
-                    let {width, height, size} = await functions.imageDimensions(decrypted, session)
+                    let {width, height, size} = await imageFunctions.dimensions(decrypted)
                     setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
                 }
             } else if (props.model) {
                 decrypted = await functions.decryptItem(props.model, session)
-                let {polycount, size} = await functions.modelDimensions(decrypted)
-                setDownloadText(`${functions.readablePolycount(polycount)} (${functions.readableFileSize(size)})`)
+                let {polycount, size} = await imageFunctions.dimensions(decrypted)
+                setDownloadText(`${functions.readablePolycount(polycount!)} (${functions.readableFileSize(size)})`)
             } else if (props.audio) {
                 decrypted = await functions.decryptItem(props.audio, session)
-                let {duration, size} = await functions.audioDimensions(decrypted)
-                setDownloadText(`${functions.formatSeconds(duration)} (${functions.readableFileSize(size)})`)
+                let {duration, size} = await imageFunctions.dimensions(decrypted)
+                setDownloadText(`${functions.formatSeconds(duration!)} (${functions.readableFileSize(size)})`)
             } else if (props.live2d) {
                 decrypted = await functions.decryptItem(props.live2d, session)
-                let {width, height, size} = await functions.live2dDimensions(decrypted)
+                let {width, height, size} = await imageFunctions.dimensions(decrypted)
                 setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
-            } 
+            }
         }
         getDLText()
     }, [props.img, props.model, props.audio, props.live2d, props.comicPages, session])

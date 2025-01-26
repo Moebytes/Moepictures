@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, 
-useInteractionActions, useSearchActions, useFilterSelector} from "../../store"
+useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
 import functions from "../../structures/Functions"
 import jsxFunctions from "../../structures/JSXFunctions"
 import website from "../../assets/icons/website.png"
@@ -18,6 +18,7 @@ let changeTimer = null as any
 const TagToolTip: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {selectionMode, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
@@ -38,7 +39,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 32}, session, setSessionFlag)
         let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement>}[]
         await Promise.all(posts.map(async (post) => {
-            let thumbnail = functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            let thumbnail = functions.getThumbnailLink(post.images[0], "tiny", session, mobile)
             let image = await functions.decryptThumb(thumbnail, session, `tooltip-${thumbnail}`, true)
             items.push({post, image, ref: React.createRef<HTMLImageElement>()})
         }))

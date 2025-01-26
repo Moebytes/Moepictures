@@ -7,7 +7,7 @@ import App from "./App"
 import pace from "pace-js"
 
 pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
-hydrateRoot(document.getElementById("root")!, <Router><Provider store={store}><App/></Provider></Router>)
+hydrateRoot(document.getElementById("root")!, <Router><Provider store={store} stabilityCheck="never"><App/></Provider></Router>)
 
 if (process.env.SCAN === "yes") {
     scan({enabled: true})
