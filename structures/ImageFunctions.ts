@@ -202,10 +202,11 @@ export default class ImageFunctions {
     }
 
     public static resize = async (image: string, ext = "png", size = 1000) => {
-        const img = new Image()
-        img.src = image
-        await new Promise(resolve => {
-            img.onload = resolve
+        const img = new window.Image()
+        await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve()
+            img.onerror = (err) => reject(err)
+            img.src = image
         })
         const scale = Math.min(size / img.width, size / img.height)
         const canvas = document.createElement("canvas")

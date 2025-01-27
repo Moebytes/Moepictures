@@ -51,6 +51,7 @@ import appealIcon from "../../assets/icons/appeal.png"
 import infoIcon from "../../assets/icons/info.png"
 import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
+import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../structures/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../../types/Types"
@@ -78,10 +79,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {setRandomFlag, setImageSearchFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {upscalePostID, compressPostID, deletePostID, takedownPostID} = usePostDialogSelector()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setEditThumbnailID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -311,7 +311,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateTagJSX = () => {
         if (props.tagGroups?.length) return generateTagGroupJSX()
         let jsx = [] as React.ReactElement[]
-        let currentTags = props.tags ? organizeTags(props.tags) : tags
+        let currentTags = props.tags ? organizeTags([...(props.meta || []), ...props.tags]) : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
@@ -597,6 +597,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setPostInfoID({post: props.post, order: props.order || 1})
     }
 
+    const editThumbnail = async () => {
+        if (!props.post) return
+        setEditThumbnailID({post: props.post, order: props.order || 1, unverified: props.unverified})
+    }
+
     const triggerSplit = async () => {
         if (!permissions.isAdmin(session) || !props.post) return
         setSplitPostID({post: props.post, order: props.order || 1})
@@ -798,7 +803,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     </div>
                 : null}
 
-                {props.meta ? <>
+                {props.tagGroups?.length && props.meta ? <>
                     <div className="mobileinfo-title-container">
                             <span className="mobileinfo-title">{i18n.tag.meta}</span>
                         </div>
@@ -924,6 +929,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerAddNote}>
                                 <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.addNote}</span>
+                            </span>
+                        </div> : null}
+                        {permissions.isMod(session) ? <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={editThumbnail}>
+                                <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.editThumbnail}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">

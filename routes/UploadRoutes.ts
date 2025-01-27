@@ -140,6 +140,7 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
     const image = post.images[i]
     const imagePath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
     const upscaledImagePath = functions.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
+    const thumbnailPath = functions.getThumbnailImagePath(image.type, image.thumbnail)
     const oldImage = await serverFunctions.getFile(imagePath, false, r18) as Buffer
     const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
     vanillaBuffers.push(oldImage)
@@ -148,6 +149,7 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
       await sql.post.deleteImage(image.imageID)
       await serverFunctions.deleteFile(imagePath, r18)
       await serverFunctions.deleteFile(upscaledImagePath, r18)
+      await serverFunctions.deleteFile(thumbnailPath, r18)
     }
   }
   return {vanillaBuffers, upscaledVanillaBuffers}

@@ -33,6 +33,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.banner.copiedNotes)
             document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
         }
+        if (actionBanner === "edit-thumbnail") {
+            setStickyText(i18n.banner.updatedThumbnail)
+            document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
+        }
         if (actionBanner === "logout-sessions") {
             setStickyText(i18n.banner.logoutSessions)
             document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")

@@ -41,14 +41,14 @@ export default class SQLUser {
     public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premiumExpiration" | "banExpiration" | "banned"
         | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
-        | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "publicTagFavorites"
-        | "deletedPosts" | "lastNameChange", value?: string | number | boolean | null | string[]) => {
+        | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" 
+        | "publicTagFavorites" | "deletedPosts" | "lastNameChange", value?: string | number | boolean | null | string[]) => {
 
         let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
-        "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "publicTagFavorites",
-        "deletedPosts", "lastNameChange"]
+        "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "liveAnimationPreview",
+        "publicTagFavorites", "deletedPosts", "lastNameChange"]
         
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)

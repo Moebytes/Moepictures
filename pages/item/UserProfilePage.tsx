@@ -341,6 +341,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         functions.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
+
+    const liveAnimationPreview = async () => {
+        await functions.post("/api/user/liveanimationpreview", null, session, setSessionFlag)
+        functions.clearResponseCacheKey("/api/user/session")
+        setSessionFlag(true)
+    }
     
     const liveModelPreview = async () => {
         await functions.post("/api/user/livemodelpreview", null, session, setSessionFlag)
@@ -827,6 +833,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.forceNoteBubbles}: <span className="user-text-action" onClick={forceNoteBubbles}>{session.forceNoteBubbles ? i18n.buttons.yes : i18n.buttons.no}</span></span>
+                    </div>
+                    <div className="user-row">
+                        <span className="user-text">{i18n.user.liveAnimationPreview}: <span className="user-text-action" onClick={liveAnimationPreview}>{session.liveAnimationPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>

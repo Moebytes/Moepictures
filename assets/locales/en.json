@@ -48,6 +48,7 @@
         "splitVariations": "Split Variations",
         "joinChildPosts": "Join Child Posts",
         "deleteFavorites": "Delete Favorites",
+        "editThumbnail": "Edit Thumbnail",
         "result": "result.",
         "results": "results.",
         "loginRequired": "Login required.",
@@ -232,7 +233,9 @@
         "appeal": "Appeal",
         "untranslated": "Untranslated",
         "split": "Split",
-        "join": "Join"
+        "join": "Join",
+        "update": "Update",
+        "updateAll": "Update All"
     },
     "history": {
         "post": "Post History",
@@ -261,6 +264,7 @@
         "copiedNotes": "Copied Notes!",
         "editedTags": "Edited Tags!",
         "editedSource": "Edited Source!",
+        "updatedThumbnail": "Updated Thumbnail!",
         "logoutSessions": "Logged out other sessions!",
         "blacklist": "Blacklisted IP!",
         "unblacklist": "Unblacklisted IP!",
@@ -286,6 +290,7 @@
         "showTagBanner": "Show Tag Banner",
         "downloadPixivID": "Download Pixiv ID",
         "forceNoteBubbles": "Force Note Bubbles",
+        "liveAnimationPreview": "Live Animation Preview",
         "liveModelPreview": "Live Model Preview",
         "deletedPosts": "Deleted Posts",
         "upscaledImages": "Upscaled Images",

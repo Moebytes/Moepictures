@@ -420,8 +420,8 @@ export default class SQLPost {
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: string, column: "hash" | "type", value: string | number | boolean) => {
-        let whitelist = ["hash", "type"]
+    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail", value: string | number | boolean) => {
+        let whitelist = ["hash", "type", "thumbnail"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -434,8 +434,8 @@ export default class SQLPost {
     }
 
     /** Updates an image (unverified) */
-    public static updateUnverifiedImage = async (imageID: string, column: "filename", value: string | number | boolean) => {
-        let whitelist = ["filename"]
+    public static updateUnverifiedImage = async (imageID: string, column: "filename" | "thumbnail", value: string | number | boolean) => {
+        let whitelist = ["filename", "thumbnail"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

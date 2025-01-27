@@ -71,6 +71,7 @@ import appealIcon from "../../assets/icons/appeal.png"
 import infoIcon from "../../assets/icons/info.png"
 import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
+import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../structures/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount, TagGroupCategory} from "../../types/Types"
@@ -112,10 +113,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setPremiumRequired} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {upscalePostID, compressPostID, deletePostID, takedownPostID} = usePostDialogSelector()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setEditThumbnailID} = usePostDialogActions()
     const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
     const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
     const {setActionBanner} = useActiveActions()
@@ -633,7 +633,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        let currentTags = props.tags ? organizeTags(props.tags) : tags
+        let currentTags = props.tags ? organizeTags([...(props.meta || []), ...props.tags]) : tags
         let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
@@ -911,6 +911,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const getPostInfo = async () => {
         if (!props.post) return
         setPostInfoID({post: props.post, order: props.order || 1})
+    }
+
+    const editThumbnail = async () => {
+        if (!props.post) return
+        setEditThumbnailID({post: props.post, order: props.order || 1, unverified: props.unverified})
     }
 
     const triggerSplit = async () => {
@@ -1237,7 +1242,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     {generateTagJSX()}
                 </div>
 
-                {props.meta ? 
+                {props.tagGroups?.length && props.meta ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">{i18n.tag.meta}</span>
@@ -1351,6 +1356,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerAddNote}>
                                 <img className="sidebar-icon" src={addNote} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.addNote}</span>
+                            </span>
+                        </div> : null}
+                        {permissions.isMod(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={editThumbnail}>
+                                <img className="sidebar-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.editThumbnail}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">

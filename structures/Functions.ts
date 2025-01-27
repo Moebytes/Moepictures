@@ -1169,10 +1169,14 @@ export default class Functions {
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
-        if (session.liveModelPreview) {
-            return Functions.getImageLink(image)
+        let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        let filename = image.thumbnail || originalFilename
+        if (image.type === "animation" || image.type === "video") {
+            if (session.liveAnimationPreview) filename = originalFilename
         }
-        let filename = image.thumbnail || `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        if (image.type === "model" || image.type === "live2d") {
+            if (session.liveModelPreview) filename = originalFilename
+        }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${filename}`
     }
 
@@ -1198,10 +1202,14 @@ export default class Functions {
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
-        if (session.liveModelPreview) {
-            return Functions.getImageLink(image)
+        let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        let filename = image.thumbnail || originalFilename
+        if (image.type === "animation" || image.type === "video") {
+            if (session.liveAnimationPreview) filename = originalFilename
         }
-        let filename = image.thumbnail || `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        if (image.type === "model" || image.type === "live2d") {
+            if (session.liveModelPreview) filename = originalFilename
+        }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
     }
 

@@ -12,7 +12,7 @@ import mediaInfoFactory from "mediainfo.js"
 import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
-PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost} from "../types/Types"
+PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate} from "../types/Types"
 import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const postLimiter = rateLimit({
@@ -1284,6 +1284,45 @@ const PostRoutes = (app: Express) => {
                 }
             }
             res.status(200).send(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/post/thumbnail", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID, thumbnails, unverified} = req.body as {postID: string, thumbnails: ThumbnailUpdate[], unverified?: boolean}
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            let post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
+            if (!post) return res.status(400).send("Invalid postID")
+            let r18 = functions.isR18(post.rating)
+
+            for (const thumb of thumbnails) {
+                const image = post.images.find((image) => image.order === thumb.order)
+                if (!image) continue
+                const thumbBuffer = functions.base64ToBuffer(thumb.thumbnail)
+                const thumbnailFilename = `${postID}-${thumb.order}.${thumb.thumbnailExt}`
+                let thumbPath = functions.getThumbnailImagePath(image.type, thumbnailFilename)
+                if (unverified) {
+                    if (image.thumbnail) {
+                        const oldThumbnail = functions.getThumbnailImagePath(image.type, image.thumbnail)
+                        await serverFunctions.deleteUnverifiedFile(oldThumbnail)
+                    }
+                    await serverFunctions.uploadUnverifiedFile(thumbPath, thumbBuffer)
+                    await sql.post.updateUnverifiedImage(image.imageID, "thumbnail", thumbnailFilename)
+                } else {
+                    if (image.thumbnail) {
+                        const oldThumbnail = functions.getThumbnailImagePath(image.type, image.thumbnail)
+                        await serverFunctions.deleteFile(oldThumbnail, r18)
+                    }
+                    await serverFunctions.uploadFile(thumbPath, thumbBuffer, r18)
+                    await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
+                }
+            }
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

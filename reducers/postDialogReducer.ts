@@ -35,6 +35,12 @@ interface PostInfoID {
     order: number
 }
 
+interface EditThumbnailID {
+    post: PostSearch | PostHistory | UnverifiedPost, 
+    order: number
+    unverified?: boolean
+}
+
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
@@ -59,6 +65,7 @@ const postDialogSlice = createSlice({
         permaDeleteAllDialog: false,
         appealPostID: null as string | null,
         postInfoID: null as PostInfoID | null,
+        editThumbnailID: null as EditThumbnailID | null,
         splitPostID: null as PostInfoID | null,
         joinPostID: null as PostEditID | null
     },
@@ -84,6 +91,7 @@ const postDialogSlice = createSlice({
         setPermaDeleteAllDialog: (state, action) => {state.permaDeleteAllDialog = action.payload},
         setAppealPostID: (state, action) => {state.appealPostID = action.payload},
         setPostInfoID: (state, action) => {state.postInfoID = action.payload},
+        setEditThumbnailID: (state, action) => {state.editThumbnailID = action.payload},
         setSplitPostID: (state, action) => {state.splitPostID = action.payload},
         setJoinPostID: (state, action) => {state.joinPostID = action.payload}
     }
@@ -95,7 +103,7 @@ const {
     setLockPostID, setPrivatePostID, setTagEditID, setSourceEditID, setChildPostObj,
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
     setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, 
-    setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID
+    setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID, setEditThumbnailID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
@@ -122,6 +130,7 @@ export const usePostDialogSelector = () => {
         permaDeleteAllDialog: selector((state) => state.postDialog.permaDeleteAllDialog),
         appealPostID: selector((state) => state.postDialog.appealPostID),
         postInfoID: selector((state) => state.postDialog.postInfoID),
+        editThumbnailID: selector((state) => state.postDialog.editThumbnailID),
         splitPostID: selector((state) => state.postDialog.splitPostID),
         joinPostID: selector((state) => state.postDialog.joinPostID)
     }
@@ -151,6 +160,7 @@ export const usePostDialogActions = () => {
         setPermaDeleteAllDialog: (state: boolean) => dispatch(setPermaDeleteAllDialog(state)),
         setAppealPostID: (state: string | null) => dispatch(setAppealPostID(state)),
         setPostInfoID: (state: PostInfoID | null) => dispatch(setPostInfoID(state)),
+        setEditThumbnailID: (state: EditThumbnailID | null) => dispatch(setEditThumbnailID(state)),
         setSplitPostID: (state: PostInfoID | null) => dispatch(setSplitPostID(state)),
         setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state))
     }    

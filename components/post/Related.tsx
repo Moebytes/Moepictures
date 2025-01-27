@@ -55,8 +55,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
     let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
 
     const searchPosts = async () => {
-        // These posts won't have related for performance
-        if (props.post?.type === "model" || props.post?.type === "live2d") return []
+        if (props.post?.type === "model" || props.post?.type === "live2d") {
+            if (session.liveModelPreview) return []
+        }
         let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
         rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)

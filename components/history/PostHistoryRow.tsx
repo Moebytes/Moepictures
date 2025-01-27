@@ -289,8 +289,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const tagGroupsDiff = () => {
         if (!props.postHistory.tagGroups?.length) return null
-        if (!prevHistory) return props.postHistory.tagGroups.map((g) => g.name).join(" ")
-        const groupNames = props.postHistory.tagGroups.map((g) => g.name)
+        if (!prevHistory) return props.postHistory.tagGroups.map((g) => g?.name)?.join(" ")
+        const groupNames = props.postHistory.tagGroups.map((g) => g?.name).filter(Boolean)
         const addedTagGroups = props.postHistory.addedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
         const removedTagGroups = props.postHistory.removedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
         return calculateDiff(addedTagGroups, removedTagGroups)

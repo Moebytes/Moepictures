@@ -208,6 +208,12 @@ export interface PostMetadata {
     colorMatrix?: string
 }
 
+export interface ThumbnailUpdate {
+    order: number
+    thumbnail: string
+    thumbnailExt: string
+}
+
 export type PostGetEndpoint<T extends string> = 
     T extends "/api/post" ? {params: {postID: string}, response: PostFull | undefined} :
     T extends "/api/posts" ? {params: {postIDs: string[]}, response: PostFull[]} :
@@ -247,6 +253,7 @@ export type PostPutEndpoint<T extends string> =
     T extends "/api/post/quickedit/unverified" ? {params: PostQuickEditUnverifiedParams, response: string} :
     T extends "/api/post/undelete" ? {params: {postID: string}, response: string} :
     T extends "/api/post/undelete/unverified" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/thumbnail" ? {params: {postID: string, thumbnails: ThumbnailUpdate[], unverified?: boolean}, response: string} :
     never
 
 export type PostDeleteEndpoint<T extends string> = 

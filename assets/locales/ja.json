@@ -48,6 +48,7 @@
         "splitVariations": "スプリットのバリエーション",
         "joinChildPosts": "子どもの投稿に参加する",
         "deleteFavorites": "お気に入りの削除",
+        "editThumbnail": "サムネイルの編集",
         "result": "件の結果。",
         "results": "件の結果。",
         "loginRequired": "ログインが必要です。",
@@ -233,7 +234,9 @@
         "appeal": "アピール",
         "untranslated": "未翻訳",
         "split": "スプリット",
-        "join": "参加"
+        "join": "参加",
+        "update": "更新",
+        "updateAll": "すべて更新"
     },
     "history": {
         "post": "投稿履歴",
@@ -262,6 +265,7 @@
         "copiedNotes": "コピーノート！",
         "editedTags": "編集済みタグ！",
         "editedSource": "編集元！",
+        "updatedThumbnail": "サムネイルを更新しました！",
         "logoutSessions": "他のセッションをログアウト！",
         "blacklist": "ブラックリストに載ったIP！",
         "unblacklist": "ブラックリストに載っていないIP！",
@@ -287,6 +291,7 @@
         "showTagBanner": "タグバナーを表示",
         "downloadPixivID": "Pixiv IDをダウンロード",
         "forceNoteBubbles": "フォース・ノート・バブル",
+        "liveAnimationPreview": "ライブ・アニメーション・プレビュー",
         "liveModelPreview": "ライブ・モデル・プレビュー",
         "deletedPosts": "削除された投稿",
         "upscaledImages": "アップスケール画像",
