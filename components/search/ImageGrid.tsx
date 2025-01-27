@@ -632,6 +632,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const image = post.images?.[0]
             if (!image) continue
             const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
+            const liveThumbnail = functions.getThumbnailLink(image, sizeType, session, mobile, true)
             const original = functions.getImageLink(image, session.upscaledImages)
             let img = functions.getThumbCache(`${thumbnail}-${sizeType}`)
             let cached = img ? true : false
@@ -644,7 +645,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.getImageLink(image, session.upscaledImages)) : null
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }
         if (!jsx.length && noResults) {

@@ -108,8 +108,10 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             const post = favgroup.posts[i]
             if (functions.isR18(post.rating)) if (!session.showR18) continue
             const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile, true)
             let img = await functions.decryptThumb(imageLink, session)
-            items.push({id: post.order, image: img, post})
+            let live = await functions.decryptThumb(liveLink, session)
+            items.push({id: post.order, image: img, live, post})
         }
         setItems(items)
     }
@@ -160,7 +162,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <EffectImage className="group-thumbnail-img-outlined" image={item.image} height={300}
+                    <EffectImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
                     onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )

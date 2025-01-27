@@ -116,8 +116,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             if (!session.username) if (post.rating !== functions.r13()) continue
             if (functions.isR18(post.rating)) if (!session.showR18) continue
             const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile, true)
             let img = await functions.decryptThumb(imageLink, session)
-            items.push({id: post.order, image: img, post})
+            let live = await functions.decryptThumb(liveLink, session)
+            items.push({id: post.order, image: img, live, post})
         }
         setItems(items)
     }
@@ -164,7 +166,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <GroupThumbnail image={item.image} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
+                    <GroupThumbnail image={item.image} live={item.live} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }

@@ -367,6 +367,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
             const image = post.images[0]
             const thumb = functions.getThumbnailLink(image, "medium", session, mobile)
+            const liveThumb = functions.getThumbnailLink(image, "medium", session, mobile, true)
             const images = post.images.map((image) => functions.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
@@ -379,7 +380,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post}
+                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
                 comicPages={post.type === "comic" ? images : null}/>)
             }
         }

@@ -7,6 +7,7 @@ interface Props {
     post?: Post | PostHistory | null
     order?: number
     image?: string
+    live?: string
     className?: string
     onClick?: (event: React.MouseEvent) => void
     style?: React.CSSProperties
@@ -22,8 +23,12 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, blur, lightness, sharpen, pixelate, splatter} = useFilterSelector()
     const {setPost} = useCacheActions()
     const [original, setOriginal] = useState("")
+    const [originalLive, setOriginalLive] = useState("")
     const [img, setImg] = useState("")
+    const [staticImg, setStaticImg] = useState("")
+    const [liveImg, setLiveImg] = useState("")
     const [index, setIndex] = useState(0)
+    const [hover, setHover] = useState(false)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const effectRef = useRef<HTMLCanvasElement>(null)
@@ -37,16 +42,33 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             const imageLink = typeof image === "string" ?
             functions.getRawThumbnailLink(image, "medium", mobile) : functions.getThumbnailLink(image, "tiny", session, mobile)
             setOriginal(imageLink)
-            if (props.noEncryption) return setImg(imageLink)
+            const liveLink = typeof image === "string" ? imageLink : functions.getThumbnailLink(image, "tiny", session, mobile, true)
+            setOriginalLive(liveLink)
+            if (props.noEncryption) {
+                setStaticImg(imageLink)
+                setLiveImg(liveLink)
+                return setImg(imageLink)
+            }
             let img = await functions.decryptThumb(imageLink, session, imageLink, mobile)
+            let live = await functions.decryptThumb(liveLink, session, imageLink, mobile)
             setImg(img)
+            setStaticImg(img)
+            setLiveImg(live)
         } else if (props.image) {
             setOriginal(props.image)
+            setOriginalLive(props.live || props.image)
             if (props.noEncryption) return setImg(props.image)
             let img = await functions.decryptThumb(props.image, session, props.image, mobile)
+            let live = await functions.decryptThumb(props.live || props.image, session, props.image, mobile)
             setImg(img)
+            setStaticImg(img)
+            setLiveImg(live)
         }
     }
+
+    useEffect(() => {
+        setImage()
+    }, [props.image, props.post, session])
 
     const updateIndex = async (event: React.MouseEvent) => {
         if (!props.post) return
@@ -58,15 +80,30 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             const imageLink = typeof newImage === "string" ?
             functions.getRawThumbnailLink(newImage, "medium", mobile) :
             functions.getThumbnailLink(newImage, "tiny", session, mobile)
+            const liveLink = typeof newImage === "string" ? imageLink : 
+            functions.getThumbnailLink(newImage, "tiny", session, mobile, true)
             const thumb = await functions.decryptThumb(imageLink, session)
+            const liveThumb = await functions.decryptThumb(liveLink, session)
             setImg(thumb)
+            setStaticImg(thumb)
+            setLiveImg(liveThumb)
             setIndex(newImageIndex)
         }
     }
 
+    const toggleLive = async () => {
+        if (session.liveAnimationPreview) return
+        if (!staticImg && !liveImg) return
+        if (hover) {
+            setImg(liveImg)
+        } else {
+            setImg(staticImg)
+        }
+    }
+
     useEffect(() => {
-        setImage()
-    }, [props.image, props.post, session])
+        toggleLive()
+    }, [hover, liveImg, staticImg, session])
 
     useEffect(() => {
         if (!imageFiltersRef.current) return
@@ -114,6 +151,21 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
         }, 100)
     }, [img, splatter])
 
+    const getOriginal = () => {
+        return hover ? originalLive : original
+    }
+
+    const getDisplay = (invert?: boolean) => {
+        let condition = hover && functions.isVideo(getOriginal()) && !mobile
+        if (invert) condition = !condition
+        return condition ? {opacity: "0", position: "absolute",
+        top: "0", left: "0", width: "100%", height: "100%"} as React.CSSProperties : {}
+    }
+
+    const dynamicSrc = () => {
+        return functions.isVideo(getOriginal()) && !mobile ? staticImg : img
+    }
+
     const clickFunc = (event: React.MouseEvent) => {
         if (props.onClick) {
             setPost(null)
@@ -127,14 +179,15 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
     let imageStyle = {pointerEvents: "all", width: "auto", height: props.height ? `${props.height}px` : "250px"} as React.CSSProperties
 
     return (
-        <div className="image-filters" ref={imageFiltersRef} style={containerStyle} onClick={clickFunc} onAuxClick={clickFunc}>
-            {!functions.isVideo(original) ? <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={img}/> : null}
-            {!functions.isVideo(original) ? <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={img}/> : null}
+        <div className="image-filters" ref={imageFiltersRef} style={containerStyle} onClick={clickFunc} onAuxClick={clickFunc}
+        onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+            {!functions.isVideo(getOriginal()) ? <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={dynamicSrc()}/> : null}
+            {!functions.isVideo(getOriginal()) ? <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={dynamicSrc()}/> : null}
             <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
             <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-            {functions.isVideo(original) && !mobile ? 
-            <video draggable={false} autoPlay muted className={className} src={img} ref={ref as any} style={imageStyle} onContextMenu={updateIndex}></video> :
-            <img draggable={false} className={className} src={img} ref={ref as any} style={imageStyle} onContextMenu={updateIndex}/>}
+            <video draggable={false} autoPlay muted disablePictureInPicture className={className} src={liveImg} ref={ref as any} 
+            style={{...imageStyle, ...getDisplay(true)}} onContextMenu={updateIndex}></video>
+            <img draggable={false} className={className} src={dynamicSrc()} ref={ref as any} style={{...imageStyle, ...getDisplay()}} onContextMenu={updateIndex}/>
         </div>
     )
 }

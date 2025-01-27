@@ -42,6 +42,7 @@ export interface GroupPost {
 export interface GroupItem {
     id: number
     image: string
+    live: string
     post: PostOrdered
 }
 

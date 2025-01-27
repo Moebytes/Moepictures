@@ -18,6 +18,7 @@ interface Props {
     id: string
     img: string
     original: string
+    live: string
     cached?: boolean
     comicPages?: string[] | null
     post: PostSearch,
@@ -71,7 +72,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [videoData, setVideoData] = useState(null as ImageBitmap[] | null)
     const [visible, setVisible] = useState(true)
     const [img, setImg] = useState(props.cached ? props.img : "")
-    const [decrypted, setDecrypted] = useState(props.cached)
+    const [staticImg, setStaticImg] = useState("")
+    const [liveImg, setLiveImg] = useState("")
     const [loadingFrames, setLoadingFrames] = useState(false)
     const [pageBuffering, setPageBuffering] = useState(true)
     const [selected, setSelected] = useState(false)
@@ -111,11 +113,25 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     const loadImage = async () => {
-        if (decrypted) return
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
+        const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
         setImg(decryptedImg)
-        setDecrypted(true)
+        setStaticImg(decryptedImg)
+        setLiveImg(liveImg)
     }
+
+    const toggleLive = async () => {
+        if (session.liveAnimationPreview) return
+        if (hover) {
+            setImg(liveImg)
+        } else {
+            setImg(staticImg)
+        }
+    }
+
+    useEffect(() => {
+        toggleLive()
+    }, [hover, liveImg, staticImg, session, mobile])
 
     const shouldUpdate = () => {
         if (functions.isVideo(props.img)) {
@@ -172,8 +188,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         setSecondsProgress(0)
         setSeekTo(null)
         cancelAnimation()
-        if (ref.current) ref.current.style.opacity = "1"
-        if (videoRef.current) videoRef.current.style.opacity = "1"
         if (props.autoLoad) loadImage()
     }, [props.img])
 
@@ -391,7 +405,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 window.cancelAnimationFrame(id)
             }
         }
-    }, [imageLoaded, gifData, videoData, sharpen, pixelate, square, imageSize, reverse, speed])
+    }, [imageLoaded, gifData, videoData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
 
     const resizeOverlay = () => {
         if (functions.isVideo(props.img) && !mobile) {
@@ -595,14 +609,12 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             setImageHeight(element.clientHeight)
             setNaturalWidth(element.videoWidth)
             setNaturalHeight(element.videoHeight)
-            element.style.opacity = "1"
         } else {
             const element = event.target as HTMLImageElement
             setImageWidth(element.width)
             setImageHeight(element.height)
             setNaturalWidth(element.naturalWidth)
             setNaturalHeight(element.naturalHeight)
-            element.style.opacity = "1"
         }
         setImageLoaded(true)
     }
@@ -847,6 +859,16 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [selectionMode])
 
+    const getDisplay = (invert?: boolean) => {
+        let condition = hover && functions.isVideo(props.original) && !mobile
+        if (invert) condition = !condition
+        return condition ? {opacity: "0", zIndex: 100, position: "absolute", width: "100%", height: "100%"} as React.CSSProperties : {opacity: "1"}
+    }
+
+    const dynamicSrc = () => {
+        return functions.isVideo(props.original) && !mobile ? staticImg : img
+    }
+
     const refWidth = ref.current?.width || videoRef.current?.videoWidth
     return (
         <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
@@ -854,15 +876,16 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
                 ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
-                {functions.isVideo(props.img) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={img}></video> : null}   
-                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
-                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>
+                {functions.isVideo(props.img) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={liveImg}></video> : null}
+                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={dynamicSrc()}/>
+                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={dynamicSrc()}/>
                 {functions.isVideo(props.img) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-                {functions.isVideo(props.img) && !mobile ? <>
-                <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img draggable={false} className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>}
+                <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" 
+                ref={videoRef} src={liveImg} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
+                <img draggable={false} className="image" ref={ref} src={dynamicSrc()} 
+                onLoad={(event) => onLoad(event)} style={{...getDisplay()}}/>
                 </div>
         </div>
     )

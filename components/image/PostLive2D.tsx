@@ -114,8 +114,8 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     const loadLive2DModel = async () => {
         if (!decrypted || !rendererRef.current) return
 
-        rendererRef.current.width = 1000
-        rendererRef.current.height = 1000
+        rendererRef.current.width = 700
+        rendererRef.current.height = 700
         const model = new Live2DCubismModel(rendererRef.current)
         await model.load(decrypted)
 

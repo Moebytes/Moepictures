@@ -9,6 +9,7 @@ import "./styles/groupthumbnail.less"
 interface Props {
     group?: GroupSearch | GroupPosts
     image?: string
+    live?: string
     onClick?: (event: React.MouseEvent) => void
     style?: React.CSSProperties
 }
@@ -17,21 +18,9 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
-    const [img, setImg] = useState("")
     const history = useHistory()
     const imageFiltersRef = useRef<HTMLDivElement | HTMLImageElement>(null)
 
-    const updateImage = async () => {
-        if (!props.group) return
-        const post = props.group.posts[0]
-        const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
-        let img = await functions.decryptThumb(imageLink, session)
-        setImg(img)
-    }
-
-    useEffect(() => {
-        updateImage()
-    }, [props.group, session])
 
     const click = (event: React.MouseEvent) => {
         if (!props.group) return
@@ -48,7 +37,7 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     }, [brightness, contrast, hue, saturation, blur])
 
     if (props.image) {
-        return <EffectImage className="group-thumbnail-img-outlined" image={props.image} height={300}
+        return <EffectImage className="group-thumbnail-img-outlined" image={props.image} live={props.live} height={300}
                 onClick={props.onClick ? props.onClick : click} style={props.style ? props.style : {}}/>
     }
 

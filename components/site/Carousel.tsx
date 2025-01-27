@@ -23,7 +23,7 @@ let startX = 0
 let deltaCounter = 0
 let lastDeltaY = 0
 
-const loadAmount = 10
+const loadAmount = 25
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -124,7 +124,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setVisibleImages(functions.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
         updateRefs(newVisibleImages.length)
-    }, [props.images, props.appendImages])
+    }, [props.images, props.appendImages, visibleIndex])
 
     useEffect(() => {
         if (props.index !== undefined) {
@@ -237,7 +237,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             observer.disconnect()
             resizeObserver.disconnect()
         }
-    }, [imageFilterRefs, ended])
+    })
 
     useEffect(() => {
         for (let i = 0; i < imageFilterRefs.length; i++) {
@@ -263,22 +263,24 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             deltaCounter = 0
         }
         if (Math.abs(event.deltaY) > 0 && !skipDelta) lastDeltaY = Math.abs(event.deltaY)
+        let step = 25
         if (trackPadScroll) {
-            sliderRef.current.style.marginLeft = `0px`
-            return setTrackPad(true)
+            //sliderRef.current.style.marginLeft = `0px`
+            //return setTrackPad(true)
+            step = 15
         }
         setTrackPad(false)
         if (Math.abs(event.deltaY) < 5) {
             if (event.deltaX < 0) {
-                marginLeft += 25
+                marginLeft += step
             } else {
-                marginLeft -= 25
+                marginLeft -= step
             }
         } else {
             if (event.deltaY < 0) {
-                marginLeft -= 25
+                marginLeft -= step
             } else {
-                marginLeft += 25
+                marginLeft += step
             }
         }
         if (marginLeft > 0) marginLeft = 0

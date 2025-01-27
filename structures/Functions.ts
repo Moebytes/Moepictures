@@ -1160,7 +1160,7 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/unverified/${image.type}/${image.postID}-${image.order}-${filename}`
     }
 
-    public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean) => {
+    public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean, forceLive?: boolean) => {
         if (!image.thumbnail && !image.filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
@@ -1171,6 +1171,7 @@ export default class Functions {
         if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
+        if (forceLive) filename = originalFilename
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview) filename = originalFilename
         }
