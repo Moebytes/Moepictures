@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
@@ -8,6 +8,7 @@ import permissions from "../../structures/Permissions"
 import pageIcon from "../../assets/icons/page.png"
 import scrollIcon from "../../assets/icons/scroll.png"
 import squareIcon from "../../assets/icons/square.png"
+import sizeIcon from "../../assets/icons/size.png"
 import GridImage from "../image/GridImage"
 import GridSong from "../image/GridSong"
 import GridModel from "../image/GridModel"
@@ -35,7 +36,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {related} = useCacheSelector()
     const {setPosts, setRelated} = useCacheActions()
     const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
-    const {setSearch, setSearchFlag, setScroll, setSquare} = useSearchActions()
+    const {setSearch, setSearchFlag, setScroll, setSquare, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {relatedPage} = usePageSelector()
@@ -50,6 +51,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const [init, setInit] = useState(true)
     const [searchTerm, setSearchTerm] = useState(props.tag)
+    const [sizeDropdown, setSizeDropdown] = useState(false)
+    const sizeRef = useRef<HTMLImageElement>(null)
     const history = useHistory()
 
     let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
@@ -314,6 +317,20 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const getSizeMargin = () => {
+        const rect = sizeRef.current?.getBoundingClientRect()
+        if (!rect || mobile) return "100px"
+        const raw = window.innerWidth - rect.x
+        let offset = -60
+        if (sizeType === "tiny") offset += -15
+        if (sizeType === "small") offset += -10
+        if (sizeType === "medium") offset += -5
+        if (sizeType === "large") offset += -10
+        if (sizeType === "massive") offset += -5
+        if (props.count) offset -= 20
+        return `${raw + offset}px`
+    }
+
     const getMarginLeft = () => {
         return mobile ? 5 : 15
     }
@@ -437,16 +454,36 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <span className="tag-label" onClick={searchTag} onAuxClick={searchTag}>{i18n.sort.posts}
                 </span><span className="tag-label-alt">{props.count}</span>
                 <img className="related-icon" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll}/>
-                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)}/>
+                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)} style={{filter: "brightness(110%) hue-rotate(60deg)"}}/>
+                <img className="related-icon" ref={sizeRef} src={sizeIcon} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div> :
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="related-title">{i18n.post.related}</span>
                 <img className="related-icon" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll}/>
-                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)}/>
+                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)} style={{filter: "brightness(110%) hue-rotate(60deg)"}}/>
+                <img className="related-icon" ref={sizeRef} src={sizeIcon} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div>}
             <div className="related-container" style={{width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/> */}
+            </div>
+            <div className={`related-dropdown ${sizeDropdown ? "" : "hide-related-dropdown"}`} 
+            style={{marginRight: getSizeMargin(), top: `50px`}} onClick={() => setSizeDropdown(false)}>
+                <div className="related-dropdown-row" onClick={() => setSizeType("tiny")}>
+                    <span className="related-dropdown-text">{i18n.sortbar.size.tiny}</span>
+                </div>
+                <div className="related-dropdown-row" onClick={() => setSizeType("small")}>
+                    <span className="related-dropdown-text">{i18n.sortbar.size.small}</span>
+                </div>
+                <div className="related-dropdown-row" onClick={() => setSizeType("medium")}>
+                    <span className="related-dropdown-text">{i18n.sortbar.size.medium}</span>
+                </div>
+                <div className="related-dropdown-row" onClick={() => setSizeType("large")}>
+                    <span className="related-dropdown-text">{i18n.sortbar.size.large}</span>
+                </div>
+                <div className="related-dropdown-row" onClick={() => setSizeType("massive")}>
+                    <span className="related-dropdown-text">{i18n.sortbar.size.massive}</span>
+                </div>
             </div>
         </div>
     )

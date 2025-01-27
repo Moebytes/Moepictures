@@ -559,7 +559,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             functions.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
             maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
         }, 50)
-    }, [imageLoaded])
+    }, [imageLoaded, hover])
 
     useEffect(() => {
         functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 

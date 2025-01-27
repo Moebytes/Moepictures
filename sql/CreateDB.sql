@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS "images" (
     "upscaledHeight" int,
     "size" int,
     "upscaledSize" int,
-    "duration" int,
+    "duration" double precision,
     "thumbnail" text,
     "hash" text
 );
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS "unverified images" (
     "upscaledHeight" int,
     "size" int,
     "upscaledSize" int,
-    "duration" int,
+    "duration" double precision,
     "thumbnail" text,
     "hash" text
 );
