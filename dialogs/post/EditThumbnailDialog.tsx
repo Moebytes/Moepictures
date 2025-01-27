@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions} from "../../store"
@@ -7,11 +7,13 @@ import imageFunctions from "../../structures/ImageFunctions"
 import permissions from "../../structures/Permissions"
 import historyIcon from "../../assets/icons/history-state.png"
 import uploadIcon from "../../assets/icons/upload.png"
+import Carousel from "../../components/site/Carousel"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import {ThumbnailUpdate} from "../../types/PostTypes"
 
 const EditThumbnailDialog: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setSessionFlag} = useSessionActions()
@@ -89,7 +91,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
         const bytes = await imageFunctions.readFileBytes(file)
         const base64 = functions.arrayBufferToBase64(bytes)
         images[order - 1] = base64
-        setImages(images)
+        setImages(structuredClone(images))
         setThumbnail(base64)
     }
 
@@ -100,15 +102,20 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
         const decrypted = await functions.decryptItem(imageLink, session)
         const {thumbnail} = await imageFunctions.thumbnail(decrypted)
         images[order - 1] = thumbnail
-        setImages(images)
+        setImages(structuredClone(images))
         setThumbnail(thumbnail)
+    }
+
+    const set = (image: string, index: number) => {
+        setThumbnail(image)
+        setOrder(index + 1)
     }
 
     if (editThumbnailID) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "max-content", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
+                <div className="dialog-box" style={{width: "max-content", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
                 onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
@@ -117,7 +124,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row-start" style={{marginTop: "10px", width: "100%"}}>
                             <button onClick={autoGenerate} style={{backgroundColor: "var(--buttonBG)", marginRight: "20px"}} className="dialog-button">
                                 <img className="dialog-button-img-small" src={historyIcon}/>
-                                <span className="dialog-button-text-small">Auto-Generate</span>
+                                <span className="dialog-button-text-small">{i18n.buttons.autogenerate}</span>
                             </button>
                             <label htmlFor="file-upload" style={{backgroundColor: "var(--buttonBG)"}} className="dialog-button">
                                 <img className="dialog-button-img-small" src={uploadIcon}/>
@@ -125,8 +132,11 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
                             </label>
                             <input id="file-upload" type="file" onChange={(event) => uploadFile(event)}/>
                         </div>
+                        {images.length > 1 ? <div className="dialog-row-start" style={{width: "500px"}}>
+                            <Carousel images={images} set={set} index={order-1} height={100} marginTop={10}/>
+                        </div> : null}
                         {thumbnail ? <div className="dialog-row" style={{justifyContent: "center"}}>
-                            <img style={{height: "600px", width: "auto"}} src={thumbnail}/>
+                            <img style={{height: "500px", width: "auto"}} src={thumbnail}/>
                         </div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

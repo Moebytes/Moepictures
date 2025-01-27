@@ -235,7 +235,8 @@
         "split": "Split",
         "join": "Join",
         "update": "Update",
-        "updateAll": "Update All"
+        "updateAll": "Update All",
+        "autogenerate": "Auto-Generate"
     },
     "history": {
         "post": "Post History",
