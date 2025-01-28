@@ -93,7 +93,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
 
     const toggleLive = async () => {
         if (session.liveAnimationPreview) return
-        if (!staticImg && !liveImg) return
+        if (!liveImg) return
         if (hover) {
             setImg(liveImg)
         } else {

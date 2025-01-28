@@ -37,6 +37,7 @@ import languageImg from "../../assets/images/language.png"
 import pixivDownloaderImg from "../../assets/images/pixiv-downloader.png"
 import setAvatarImg from "../../assets/images/set-avatar.png"
 import musicImg from "../../assets/images/music.png"
+import mangaReaderImg from "../../assets/images/mangareader.png"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
 import tooltipsImg from "../../assets/images/tooltips.png"
 import functions from "../../structures/Functions"
@@ -220,6 +221,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.music.line1}
                 </span>
                 <div className="help-img-container"><img className="help-img" src={musicImg}/></div></>
+            )
+        }
+        if (helpTab === "manga-reader") {
+            return (
+                <><span className="help-heading">{i18n.help.mangaReader.title}</span>
+                <span className="help-text">
+                    {i18n.help.mangaReader.line1}
+                </span>
+                <div className="help-img-container"><img className="help-img" src={mangaReaderImg}/></div></>
             )
         }
         if (helpTab === "notes") {
@@ -807,6 +817,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("filters")}>{i18n.filters.filters}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>{i18n.help.customPlayers.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("music")}>{i18n.help.music.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("manga-reader")}>{i18n.help.mangaReader.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("notes")}>{i18n.navbar.notes}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("overlay-notes")}>{i18n.help.overlayNotes.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("character-notes")}>{i18n.help.characterNotes.title}</span>

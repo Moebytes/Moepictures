@@ -1294,7 +1294,11 @@
         },
         "music": {
             "title": "Music",
-            "line1": "The music player is available globally (apart from having the per-post player which is also synced). This means that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback, click the stop button on the left of the player or reload the page on a non-music post."
+            "line1": "The music player is available globally (apart from having the per-post player which is also synced). There is a mini player always available from the navbar as well as a large player at the bottom that can be toggled to show. To stop playback, click the stop button or reload the page on a non-music post."
+        },
+        "mangaReader": {
+            "title": "Manga Reader",
+            "line1": "The manga reader can be opened from any image post and provides a better reading experience for comics/manga. If the post was translated (with overlay notes) you can quickly toggle the translation on or off. There is a top-to-bottom reading mode as well as right-to-left."
         },
         "notes": {
             "line1": "Notes can be added to any post and is most often used for soft translations. This is useful so that non-native speakers can understand the post's content and any jokes.",
