@@ -34,6 +34,7 @@ import imageZoomOutIcon from "../../assets/icons/image-zoom-out.png"
 import imageZoomOffIcon from "../../assets/icons/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../../assets/icons/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../../assets/icons/image-fullscreen.png"
+import imageReaderIcon from "../../assets/icons/image-reader.png"
 import noteToggleOn from "../../assets/icons/note-toggle-on.png"
 import waifu2xIcon from "../../assets/icons/waifu2x.png"
 import reverseSearchIcon from "../../assets/icons/reverse-search.png"
@@ -1529,6 +1530,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                     <img draggable={false} className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={imageFullscreenIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => history.push(`/post/${props.post?.postID}/${props.post?.slug}/reader`)} src={imageReaderIcon}/>
                                 </div> 
                             </div>
                         </div>

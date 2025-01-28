@@ -27,9 +27,14 @@ const searchSlice = createSlice({
         favSearch: false,
         noteMode: false,
         noteDrawingEnabled: false,
+        showTranscript: false,
         imageExpand: false,
         showUpscaled: false,
-        showChildren: false
+        showChildren: false,
+        readerThumbnails: true,
+        readerZoom: 100,
+        readerInvert: false,
+        readerHorizontal: false
     },
     reducers: {
         setSearch: (state, action) => {state.search = action.payload},
@@ -52,9 +57,14 @@ const searchSlice = createSlice({
         setFavSearch: (state, action) => {state.favSearch = action.payload},
         setNoteMode: (state, action) => {state.noteMode = action.payload},
         setNoteDrawingEnabled: (state, action) => {state.noteDrawingEnabled = action.payload},
+        setShowTranscript: (state, action) => {state.showTranscript = action.payload},
         setImageExpand: (state, action) => {state.imageExpand = action.payload},
         setShowUpscaled: (state, action) => {state.showUpscaled = action.payload},
-        setShowChildren: (state, action) => {state.showChildren = action.payload}
+        setShowChildren: (state, action) => {state.showChildren = action.payload},
+        setReaderThumbnails: (state, action) => {state.readerThumbnails = action.payload},
+        setReaderHorizontal: (state, action) => {state.readerHorizontal = action.payload},
+        setReaderInvert: (state, action) => {state.readerInvert = action.payload},
+        setReaderZoom: (state, action) => {state.readerZoom = action.payload}
     }    
 })
 
@@ -63,7 +73,8 @@ const {
     setSortType, setSortReverse, setSquare, setScroll, setSelectionMode, setPageMultiplier,
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
     setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled, setFavSearch,
-    setShowChildren
+    setShowChildren, setReaderHorizontal, setReaderInvert, setReaderThumbnails, setReaderZoom,
+    setShowTranscript
 } = searchSlice.actions
 
 export const useSearchSelector = () => {
@@ -92,6 +103,11 @@ export const useSearchSelector = () => {
         imageExpand: selector((state) => state.search.imageExpand),
         showUpscaled: selector((state) => state.search.showUpscaled),
         showChildren: selector((state) => state.search.showChildren),
+        readerHorizontal: selector((state) => state.search.readerHorizontal),
+        readerThumbnails: selector((state) => state.search.readerThumbnails),
+        readerInvert: selector((state) => state.search.readerInvert),
+        readerZoom: selector((state) => state.search.readerZoom),
+        showTranscript: selector((state) => state.search.showTranscript)
     }
 }
 
@@ -120,7 +136,12 @@ export const useSearchActions = () => {
         setNoteDrawingEnabled: (state: boolean) => dispatch(setNoteDrawingEnabled(state)),
         setImageExpand: (state: boolean) => dispatch(setImageExpand(state)),
         setShowUpscaled: (state: boolean) => dispatch(setShowUpscaled(state)),
-        setShowChildren: (state: boolean) => dispatch(setShowChildren(state))
+        setShowChildren: (state: boolean) => dispatch(setShowChildren(state)),
+        setReaderHorizontal: (state: boolean) => dispatch(setReaderHorizontal(state)),
+        setReaderThumbnails: (state: boolean) => dispatch(setReaderThumbnails(state)),
+        setReaderInvert: (state: boolean) => dispatch(setReaderInvert(state)),
+        setReaderZoom: (state: number) => dispatch(setReaderZoom(state)),
+        setShowTranscript: (state: boolean) => dispatch(setShowTranscript(state))
     }
 }
 

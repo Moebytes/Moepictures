@@ -62,6 +62,7 @@ import NewsBannerPage from "./pages/settings/NewsBannerPage"
 import APIKeyPage from "./pages/settings/APIKeyPage"
 import PremiumPage from "./pages/info/PremiumPage"
 import PremiumSuccessPage from "./pages/settings/PremiumSuccessPage"
+import ReaderPage from "./pages/item/ReaderPage"
 import Dialogs from "./dialogs/Dialogs"
 import DragAndDrop from "./components/site/DragAndDrop"
 import AudioPlayer from "./components/site/AudioPlayer"
@@ -317,6 +318,7 @@ const App: React.FunctionComponent = (props) => {
                     <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
                     <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                     <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
+                    <Route exact path="/post/:id/:slug/reader" render={(props) => <ReaderPage {...props}/>}></Route>
                     <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                     <Route exact path="/edit-post/:id/:slug" render={(props) => <EditPostPage {...props}/>}></Route>
                     <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>

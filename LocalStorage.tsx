@@ -3,17 +3,97 @@ import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
 usePageSelector, usePageActions, useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
 import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
+import functions from "./structures/Functions"
 import localforage from "localforage"
 
+const darkColorList = {
+    "--selection": "#6c69fc",
+    "--background": "#09071c",
+    "--background2": "#080622",
+    "--titlebarBG": "#090420",
+    "--titleTextA": "#6814ff",
+    "--titleTextB": "#4214ff",
+    "--titlebarText": "#431dff",
+    "--navbarBG": "#0b0322",
+    "--navbarText": "#3a1cff",
+    "--sidebarBG": "#0a041e",
+    "--sidebarSearchFocus": "#2908e0",
+    "--sidebarSearchBG": "#0e0631",
+    "--tagReadColor": "rgba(98, 31, 255, 0.5)",
+    "--tagColor": "#641fff",
+    "--sortbarBG": "rgba(11, 3, 34, 0.95)",
+    "--tooltipBG": "rgba(11, 3, 34, 0.85)",
+    "--sortbarText": "#3538fc",
+    "--imageBorder": "#0a0f7f",
+    "--inputBorder": "#0d0325",
+    "--text": "#5a56ff",
+    "--text-alt": "#8b4dff",
+    "--inputBG": "#050020",
+    "--footerBG": "#0b0322",
+    "--drop-color1": "rgba(59, 13, 165, 0.7)",
+    "--drop-color2": "rgba(86, 26, 226, 0.9)",
+    "--bubbleBG": "rgba(89, 43, 255, 0.8)",
+    "--binary": "#000000",
+    "--selectBorder": "#6710e6",
+    "--progressText": "#ffffff",
+    "--progressBG": "#000000",
+    "--audioPlayerColor": "#130737",
+    "--buttonBG": "#ff11af",
+    "--previewBG": "#4a44ff",
+    "--editBG": "#347bff",
+    "--r18BGColor": "#5603033d",
+    "--audioFilterColor": "#ff4d97"
+}
+
+const lightColorList = {
+    "--selection": "#e0e0ff",
+    "--background": "#ffffff",
+    "--background2": "#f9f9ff",
+    "--titlebarBG": "#c2c2ff",
+    "--titleTextA": "#745dff",
+    "--titleTextB": "#5d60ff",
+    "--titlebarText": "#7e66ff",
+    "--navbarBG": "#c2c2ff",
+    "--navbarText": "#6c47ff",
+    "--sidebarBG": "#f7f8ff",
+    "--sidebarSearchFocus": "#8581ff",
+    "--sidebarSearchBG": "#dbdaff",
+    "--tagReadColor": "rgba(154, 87, 255, 0.5)",
+    "--tagColor": "#9957ff",
+    "--sortbarBG": "rgba(240, 240, 255, 0.3)",
+    "--tooltipBG": "rgba(240, 240, 255, 0.5)",
+    "--sortbarText": "#6d77ff",
+    "--imageBorder": "#7fa0ff",
+    "--inputBorder": "#7fa0ff",
+    "--text": "#7b6dff",
+    "--text-alt": "#cb7cff",
+    "--inputBG": "#f4f2ff",
+    "--footerBG": "#ffffff",
+    "--drop-color1": "rgba(153, 112, 250, 0.7)",
+    "--drop-color2": "rgba(158, 124, 252, 0.9)",
+    "--bubbleBG": "rgba(202, 171, 255, 0.8)",
+    "--binary": "#ffffff",
+    "--selectBorder": "#8373ff",
+    "--progressText": "#000000",
+    "--progressBG": "#ffffff",
+    "--audioPlayerColor": "#fbfaff",
+    "--buttonBG": "#ff92ff",
+    "--previewBG": "#b2d0ff",
+    "--editBG": "#afe6ff",
+    "--r18BGColor": "#e206444a",
+    "--audioFilterColor": "#ff4d97"
+}
 const LocalStorage: React.FunctionComponent = (props) => {
     const {theme, language, siteHue, siteSaturation, siteLightness, particles, 
     particleAmount, particleSize, particleSpeed} = useThemeSelector()
     const {setTheme, setLanguage, setSiteHue, setSiteSaturation, setSiteLightness, 
     setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const {imageExpand, noteDrawingEnabled, scroll, format, saveSearch, favSearch, square, imageType, 
-    ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier, showChildren} = useSearchSelector()
+    ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier, showChildren, readerHorizontal,
+    readerInvert, readerThumbnails, readerZoom, showTranscript} = useSearchSelector()
     const {setImageExpand, setNoteDrawingEnabled, setScroll, setFormat, setSaveSearch, setFavSearch, setImageType, setRatingType, 
-    setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren} = useSearchActions()
+    setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren, setReaderHorizontal,
+    setReaderInvert, setReaderThumbnails, setReaderZoom, setShowTranscript} = useSearchActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
@@ -21,15 +101,36 @@ const LocalStorage: React.FunctionComponent = (props) => {
     const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
     const {page, historyPage, messagePage, threadPage, artistsPage, charactersPage, commentsPage, forumPage,
-    groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage} = usePageSelector()
+    groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, readerPage} = usePageSelector()
     const {setPage, setHistoryPage, setMessagePage, setThreadPage, setArtistsPage, setCharactersPage, setCommentsPage,
-    setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage} = usePageActions()
+    setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage, setReaderPage} = usePageActions()
     const {posts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
     const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session} = useSessionSelector()
     const {setSession} = useSessionActions()
+
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        const colorList = theme.includes("light") ? lightColorList : darkColorList
+        let targetLightness = siteLightness
+        if (theme.includes("light") && siteLightness > 50) targetLightness = 50
+        let noRotation = [
+            "--buttonBG",
+            "--previewBG",
+            "--r18BGColor"
+        ]
+        for (let i = 0; i < Object.keys(colorList).length; i++) {
+            const key = Object.keys(colorList)[i]
+            const color = Object.values(colorList)[i]
+            if (noRotation.includes(key)) {
+                document.documentElement.style.setProperty(key, color)
+            } else {
+                document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
+            }
+        }
+    }, [theme, siteHue, siteSaturation, siteLightness])
 
     const initLanguage = () => {
         const savedLanguage = localStorage.getItem("language")
@@ -68,6 +169,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedDisableZoom = localStorage.getItem("disableZoom")
         const savedImageExpand = localStorage.getItem("imageExpand")
         const savedNoteDrawing = localStorage.getItem("noteDrawingEnabled")
+        const savedShowTranscript = localStorage.getItem("showTranscript")
         const savedFormat = localStorage.getItem("format")
         const savedBrightness = localStorage.getItem("brightness")
         const savedContrast = localStorage.getItem("contrast")
@@ -113,6 +215,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedNotesPage = localStorage.getItem("notesPage")
         const savedSeriesPage = localStorage.getItem("seriesPage")
         const savedTagsPage = localStorage.getItem("tagsPage")
+        const savedReaderPage = localStorage.getItem("readerPage")
         const savedHideTitlebar = localStorage.getItem("titlebar")
         const savedHideSidebar = localStorage.getItem("sidebar")
         const savedHideNavbar = localStorage.getItem("navbar")
@@ -124,6 +227,10 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedTagCategories = localStorage.getItem("savedTagCategories")
         const savedTagGroupCategories = localStorage.getItem("savedTagGroupCategories")
         const savedShowBigPlayer = localStorage.getItem("showBigPlayer")
+        const savedReaderHorizontal = localStorage.getItem("readerHorizontal")
+        const savedReaderThumbnails = localStorage.getItem("readerThumbnails")
+        const savedReaderZoom = localStorage.getItem("readerZoom")
+        const savedReaderInvert = localStorage.getItem("readerInvert")
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
@@ -132,6 +239,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
         if (savedImageExpand) setImageExpand(savedImageExpand === "true")
         if (savedNoteDrawing) setNoteDrawingEnabled(savedNoteDrawing === "true")
+        if (savedShowTranscript) setShowTranscript(savedShowTranscript === "true")
         if (savedFormat) setFormat(savedFormat as ImageFormat)
         if (savedBrightness) setBrightness(Number(savedBrightness))
         if (savedContrast) setContrast(Number(savedContrast))
@@ -177,6 +285,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedNotesPage && Number(savedNotesPage) > 0) setNotesPage(Number(savedNotesPage))
         if (savedSeriesPage && Number(savedSeriesPage) > 0) setSeriesPage(Number(savedSeriesPage))
         if (savedTagsPage && Number(savedTagsPage) > 0) setTagsPage(Number(savedTagsPage))
+        if (savedReaderPage && Number(savedReaderPage) > 0) setReaderPage(Number(savedReaderPage))
         if (savedHideTitlebar) setHideTitlebar(savedHideTitlebar === "true")
         if (savedHideNavbar) setHideNavbar(savedHideNavbar === "true")
         if (savedHideSidebar) setHideSidebar(savedHideSidebar === "true")
@@ -188,6 +297,10 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedTagGroupCategories) setTagGroupCategories(JSON.parse(savedTagGroupCategories))
         if (savedOrder) setOrder(Number(savedOrder))
         if (savedShowBigPlayer) setShowBigPlayer(savedShowBigPlayer === "true")
+        if (savedReaderHorizontal) setReaderHorizontal(savedReaderHorizontal === "true")
+        if (savedReaderThumbnails) setReaderThumbnails(savedReaderThumbnails === "true")
+        if (savedReaderInvert) setReaderInvert(savedReaderInvert === "true")
+        if (savedReaderZoom) setReaderZoom(Number(savedReaderZoom))
     }, [])
 
     useEffect(() => {
@@ -244,11 +357,19 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("disableZoom", String(disableZoom))
         localStorage.setItem("imageExpand", String(imageExpand))
         localStorage.setItem("noteDrawingEnabled", String(noteDrawingEnabled))
+        localStorage.setItem("showTranscript", String(showTranscript))
         localStorage.setItem("format", format)
         localStorage.setItem("saveSearch", String(saveSearch))
         localStorage.setItem("favSearch", String(favSearch))
         localStorage.setItem("showBigPlayer", String(showBigPlayer))
-    }, [disableZoom, imageExpand, noteDrawingEnabled, format, saveSearch, favSearch, showBigPlayer])
+    }, [disableZoom, imageExpand, noteDrawingEnabled, showTranscript, format, saveSearch, favSearch, showBigPlayer])
+
+    useEffect(() => {
+        localStorage.setItem("readerHorizontal", String(readerHorizontal))
+        localStorage.setItem("readerInvert", String(readerInvert))
+        localStorage.setItem("readerThumbnails", String(readerThumbnails))
+        localStorage.setItem("readerZoom", String(readerZoom))
+    }, [readerHorizontal, readerInvert, readerThumbnails, readerZoom])
 
     useEffect(() => {
         localStorage.setItem("sidebar", String(hideSidebar))
@@ -294,8 +415,9 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("notesPage", String(notesPage || ""))
         localStorage.setItem("seriesPage", String(seriesPage || ""))
         localStorage.setItem("tagsPage", String(tagsPage || ""))
+        localStorage.setItem("readerPage", String(readerPage || ""))
     }, [historyPage, messagePage, threadPage, page, artistsPage, charactersPage, commentsPage, forumPage, 
-        groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage])
+        groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, readerPage])
 
     return null
 }

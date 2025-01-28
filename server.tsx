@@ -285,7 +285,6 @@ for (let i = 0; i < folders.length; i++) {
         body = await imageLock(body)
         return res.status(200).send(body)
       }
-      /*
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         if (metadata.pages === 1) {
@@ -295,7 +294,7 @@ for (let i = 0; i < folders.length; i++) {
           .toBuffer()
           contentLength = body.length
         }
-      }*/
+      }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
         body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
