@@ -129,7 +129,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (!model || !rendererRef.current) return
 
         model.paused = paused
-        model.enableZoom = !disableZoom
+        model.zoomEnabled = !disableZoom
         model.speed = modelSpeed
     }, [model, disableZoom, paused, modelSpeed])
 
@@ -408,32 +408,12 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     const zoomIn = () => {
         if (disableZoom) return
-        if (model) {
-            const zoomFactor = 1.1
-            const maxScale = 10.0
-
-            const newScale = Math.min(model.scale * zoomFactor, maxScale)
-            const offsetX = model.x / model.scale
-            const offsetY = model.x / model.scale
-            model.scale = newScale
-            model.x = model.x - offsetX * newScale
-            model.y = model.y - offsetY * newScale
-        }
+        model?.zoomIn()
     }
 
     const zoomOut = () => {
         if (disableZoom) return
-        if (model) {
-            const zoomFactor = 0.9
-            const minScale = 0.01
-
-            const newScale = Math.max(model.scale * zoomFactor, minScale)
-            const offsetX = model.x / model.scale
-            const offsetY = model.x / model.scale
-            model.scale = newScale
-            model.x = model.x - offsetX * newScale
-            model.y = model.y - offsetY * newScale
-        }
+        model?.zoomOut()
     }
 
     const parameterDropdownJSX = () => {
@@ -442,11 +422,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
         let parameters = model.parameters
         const resetParameters = () => {
-            for (let i = 0; i < parameters.ids.length; i++) {
-                const defaultValue = parameters.defaultValues[i]
-                model.setParameter(i, defaultValue)
-            }
-            model.model.update()
+            model.resetParameters()
             forceUpdate()
         }
 
@@ -459,7 +435,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const keys = parameters.keyValues[i]
             const step = (Math.abs(max - min) / 100) || 0.01
             const updateParameter = (value: number) => {
-                model.setParameter(i, value)
+                model.setParameter(id, value)
                 forceUpdate()
             }
             jsx.push(
@@ -490,10 +466,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         let parts = model.parts
 
         const resetParts = () => {
-            for (let i = 0; i < parts.ids.length; i++) {
-                model.setPartOpacity(i, defaultOpacities[i] ?? 1)
-            }
-            model.model.update()
+            model.resetPartOpacities()
             forceUpdate()
         }
 
@@ -501,7 +474,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             const id = parts.ids[i]
             const opacity = parts.opacities[i]
             const updatePart = (value: number) => {
-                model.setPartOpacity(i, value)
+                model.setPartOpacity(id, value)
                 forceUpdate()
             }
             jsx.push(
