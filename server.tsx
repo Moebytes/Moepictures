@@ -7,7 +7,6 @@ import fs from "fs"
 import sharp from "sharp"
 import express, {Request, Response, NextFunction} from "express"
 import session from "express-session"
-import S3 from "aws-sdk/clients/s3"
 import PGSession from "connect-pg-simple"
 import webpack from "webpack"
 import middleware from "webpack-dev-middleware"
@@ -55,11 +54,6 @@ app.disable("x-powered-by")
 declare module "express-session" {
   interface SessionData extends ServerSession {}
 }
-
-const s3 = new S3({region: "us-east-1", credentials: {
-  accessKeyId: process.env.AWS_ACCESS_KEY!,
-  secretAccessKey: process.env.AWS_SECRET_KEY!
-}})
 
 const pgPool = functions.isLocalHost() ? new Pool({
   user: process.env.PG_LOCAL_USER,

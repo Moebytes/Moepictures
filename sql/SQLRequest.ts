@@ -105,7 +105,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL
-            GROUP BY "delete requests"."requestID", tags.tag
+            GROUP BY "delete requests"."requestID", tags."tagID"
             ORDER BY "delete requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
@@ -124,7 +124,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL AND "delete requests".username = $1
-            GROUP BY "delete requests"."requestID", tags.tag
+            GROUP BY "delete requests"."requestID", tags."tagID"
             ORDER BY "delete requests"."requestID" DESC
         `),
         values: [username]
@@ -162,7 +162,7 @@ export default class SQLRequest {
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL
-            GROUP BY "alias requests"."requestID", tags.tag
+            GROUP BY "alias requests"."requestID", tags."tagID"
             ORDER BY "alias requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
@@ -181,7 +181,7 @@ export default class SQLRequest {
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL AND "alias requests".username = $1
-            GROUP BY "alias requests"."requestID", tags.tag
+            GROUP BY "alias requests"."requestID", tags."tagID"
             ORDER BY "alias requests"."requestID" DESC
         `),
         values: [username]

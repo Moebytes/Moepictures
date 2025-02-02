@@ -87,6 +87,7 @@
     "webpack-obfuscator": "^3.5.1"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.740.0",
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
     "@napi-rs/canvas": "^0.1.56",
@@ -97,7 +98,6 @@
     "@tsparticles/react": "^3.0.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "audio-encoder": "^1.0.4",
-    "aws-sdk": "^2.1120.0",
     "axios": "^0.26.1",
     "bcrypt": "^5.1.0",
     "bing-translate-api": "^2.5.0",
@@ -126,7 +126,7 @@
     "jszip": "^3.7.1",
     "kuroshiro": "^1.2.0",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
-    "live2d-renderer": "^0.2.7",
+    "live2d-renderer": "^0.3.6",
     "localforage": "^1.10.0",
     "magic-bytes.js": "^1.0.10",
     "mediainfo.js": "^0.3.4",

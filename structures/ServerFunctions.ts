@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
-import S3 from "aws-sdk/clients/s3"
+import {S3} from "@aws-sdk/client-s3"
 import CSRF from "csrf"
 import axios from "axios"
 import sharp from "sharp"
@@ -35,10 +35,18 @@ let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
 let localUnverified = process.env.MOEPICTURES_LOCAL_UNVERIFIED
 
-const s3 = new S3({region: "us-east-1", credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY!,
-    secretAccessKey: process.env.AWS_SECRET_KEY!
-}})
+let remote = process.env.MOEPICTURES_BUCKET!
+let remoteR18 = process.env.MOEPICTURES_BUCKET_R18!
+let remoteUnverified = process.env.MOEPICTURES_BUCKET_UNVERIFIED!
+
+const r2 = new S3({
+    region: "auto",
+    endpoint: process.env.R2_ENDPOINT,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!
+    }
+})
 
 export const keyGenerator = (req: Request, res: Response) => {
     return req.session.username || req.ip
@@ -169,46 +177,31 @@ export default class ServerFunctions {
 
     public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean) => {
         const defaultBuffer = Buffer.from("")
-        if (file.includes("artist/") || file.includes("character/") || file.includes("series/") || 
-            file.includes("tag/") || file.includes("pfp/")) {
-            if (functions.useLocalFiles()) {
-                let folder = r18 ? localR18 : local
-                const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
-                if (!id) return defaultBuffer
-                const historyFolder = `${folder}/history/tag/${id}`
-                if (!fs.existsSync(historyFolder)) return defaultBuffer
-                let folders = fs.readdirSync(historyFolder)
-                if (!folders.length) return defaultBuffer
-                folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `${folder}/history/tag/${id}/${folders[0]}`
-                let files = fs.readdirSync(firstHistory)
-                if (!files.length) return defaultBuffer
-                files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `${folder}/history/tag/${id}/${folders[0]}/${files[0]}`
-                return fs.readFileSync(firstFile)
-            } else {
-                return defaultBuffer
-            }
+        const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
+        const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
+        if (!id) return defaultBuffer
+
+        if (functions.useLocalFiles()) {
+            let folder = r18 ? localR18 : local
+            const historyFolder = isTag ? `${folder}/history/tag/${id}` : `${folder}/history/post/${id}/${upscaled ? "upscaled" : "original"}`
+            if (!fs.existsSync(historyFolder)) return defaultBuffer
+            let folders = fs.readdirSync(historyFolder).filter((f) => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+            if (!folders.length) return defaultBuffer
+            let firstHistory = `${historyFolder}/${folders[0]}`
+            let files = fs.readdirSync(firstHistory).filter(f => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+            if (!files.length) return defaultBuffer
+            return fs.readFileSync(`${firstHistory}/${files[0]}`)
         } else {
-            if (functions.useLocalFiles()) {
-                let folder = r18 ? localR18 : local
-                let scaleFolder = upscaled ? "upscaled" : "original"
-                const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
-                if (!id) return defaultBuffer
-                const historyFolder = `${folder}/history/post/${id}/${scaleFolder}`
-                if (!fs.existsSync(historyFolder)) return defaultBuffer
-                let folders = fs.readdirSync(historyFolder)
-                if (!folders.length) return defaultBuffer
-                folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `${folder}/history/post/${id}/${scaleFolder}/${folders[0]}`
-                let files = fs.readdirSync(firstHistory)
-                if (!files.length) return defaultBuffer
-                files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `${folder}/history/post/${id}/${scaleFolder}/${folders[0]}/${files[0]}`
-                return fs.readFileSync(firstFile)
-            } else {
-                return defaultBuffer
-            }
+            let bucket = r18 ? remoteR18 : remote
+            const prefix = isTag ? `history/tag/${id}/` : `history/post/${id}/${upscaled ? "upscaled" : "original"}/`
+            const list = await r2.listObjectsV2({Bucket: bucket, Prefix: prefix})
+            if (!list.Contents?.length) return defaultBuffer
+            const sortedKeys = list.Contents.map((obj) => obj.Key!).sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+            if (!sortedKeys.length) return defaultBuffer
+            const firstKey = sortedKeys[0]
+            const body = await r2.getObject({Bucket: bucket, Key: firstKey}).then((r) => r.Body)
+            if (!body) return defaultBuffer
+            return Buffer.from(await body.transformToByteArray())
         }
     }
 
@@ -225,8 +218,20 @@ export default class ServerFunctions {
             if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
+        } else {
+            let bucket = r18 ? remoteR18 : remote
+            let originalKey = `${decodeURIComponent(file)}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledKey = `${decodeURIComponent(upscaledFile)}`
+            if (file.includes("history/post")) {
+                originalKey = originalKey.replace("upscaled/", "original/")
+                upscaledKey = upscaledKey.replace("original/", "upscaled/")
+            }
+            let body = upscaled ? await r2.getObject({Bucket: bucket, Key: upscaledKey}).then((r) => r.Body)
+            : await r2.getObject({Bucket: bucket, Key: originalKey}).then((r) => r.Body)
+            if (!body) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18)
+            return Buffer.from(await body.transformToByteArray()) 
         }
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadFile = async (file: string, content: any, r18: boolean) => {
@@ -236,9 +241,11 @@ export default class ServerFunctions {
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
             fs.writeFileSync(`${folder}/${file}`, content)
             return `${folder}/${file}`
+        } else {
+            let bucket = r18 ? remoteR18 : remote
+            await r2.putObject({Bucket: bucket, Key: file, Body: content})
+            return `${bucket}/${file}`
         }
-        const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures"}).promise()
-        return upload.Location
     }
 
     public static deleteFile = async (file: string, r18: boolean) => {
@@ -247,9 +254,12 @@ export default class ServerFunctions {
                 let folder = r18 ? localR18 : local
                 fs.unlinkSync(`${folder}/${file}`)
             } catch {}
-            return
+        } else {
+            try {
+                let bucket = r18 ? remoteR18 : remote
+                await r2.deleteObject({Key: file, Bucket: bucket})
+            } catch {}
         }
-        await s3.deleteObject({Key: file, Bucket: "moepictures"}).promise()
     }
 
     public static deleteIfEmpty = async (folderPath: string, r18: boolean) => {
@@ -258,7 +268,14 @@ export default class ServerFunctions {
                 let folder = r18 ? localR18 : local
                 fs.rmdirSync(`${folder}/${folderPath}`)
             } catch {}
-            return
+        } else {
+            try {
+                let bucket = r18 ? remoteR18 : remote
+                const objects = await r2.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/"})
+                if (objects.Contents?.length === 0) {
+                    await r2.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
+                }
+            } catch {}
         }
     }
 
@@ -284,17 +301,25 @@ export default class ServerFunctions {
             let folder = r18 ? localR18 : local
             const dir = `${folder}/${folderPath}`
             return ServerFunctions.removeLocalDirectory(dir)
+        } else {
+            let bucket = r18 ? remoteR18 : remote
+            let isTruncated = true
+            let continuationToken: string | undefined = undefined
+
+            while (isTruncated) {
+                const objects = await r2.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/", ContinuationToken: continuationToken})
+                if (objects.Contents?.length) {
+                    const deleteParams = {Bucket: bucket, Delete: {Objects: [] as {Key: string | undefined}[]}}
+                    objects.Contents.forEach(({Key}) => {
+                        deleteParams.Delete.Objects.push({Key})
+                    })
+                    await r2.deleteObjects(deleteParams)
+                }
+                isTruncated = objects.IsTruncated
+                continuationToken = objects.NextContinuationToken
+            }  
+            await r2.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
         }
-        const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: folderPath}).promise()
-        if (listedObjects.Contents?.length === 0) return
-    
-        const deleteParams = {Bucket: "moepictures", Delete: {Objects: [] as any}}
-    
-        listedObjects.Contents?.forEach(({Key}) => {
-            deleteParams.Delete.Objects.push({Key});
-        })
-        await s3.deleteObjects(deleteParams).promise()
-        if (listedObjects.IsTruncated) await ServerFunctions.deleteFolder(folderPath, r18)
     }
 
     public static renameFile = async (oldFile: string, newFile: string, oldR18: boolean, newR18: boolean) => {
@@ -305,13 +330,13 @@ export default class ServerFunctions {
                 fs.renameSync(`${oldFolder}/${oldFile}`, `${newFolder}/${newFile}`)
             } catch {}
             return
+        } else {
+            const oldBucket = oldR18 ? remoteR18 : remote
+            const newBucket = newR18 ? remoteR18 : remote
+
+            await r2.copyObject({Bucket: newBucket, CopySource: `${oldBucket}/${oldFile}`, Key: newFile})
+            await r2.deleteObject({Bucket: oldBucket, Key: oldFile})
         }
-        try {
-            await s3.copyObject({CopySource: `moepictures/${oldFile}`, Key: newFile, Bucket: "moepictures"}).promise()
-        } catch {
-            await s3.copyObject({CopySource: `moepictures/${encodeURI(oldFile)}`, Key: newFile, Bucket: "moepictures"}).promise()
-        }
-        await s3.deleteObject({Key: oldFile, Bucket: "moepictures"}).promise()
     }
 
     public static renameFolder = async (oldFolder: string, newFolder: string, r18: boolean) => {
@@ -323,25 +348,27 @@ export default class ServerFunctions {
                 fs.renameSync(`${folder}/${encodeURI(oldFolder)}`, `${folder}/${encodeURI(newFolder)}`)
             }
             return
-        }
-        try {
-            const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: `${oldFolder}/`}).promise()
-    
-            if (listedObjects.Contents?.length === 0) return
-            const renamePromises = listedObjects.Contents!.map(async (obj) => {
-                const oldKey = obj.Key 
-                if (!oldKey) return
-                const newKey = oldKey.replace(`${oldFolder}/`, `${newFolder}/`)
-                try {
-                    await s3.copyObject({CopySource: `moepictures/${oldKey}`, Key: newKey, Bucket: "moepictures"}).promise()
-                } catch {
-                    await s3.copyObject({CopySource: `moepictures/${encodeURI(oldKey)}`, Key: newKey, Bucket: "moepictures"}).promise()
+        } else {
+            const bucket = r18 ? remoteR18 : remote
+            let isTruncated = true
+            let continuationToken: string | undefined = undefined
+
+            while (isTruncated) {
+                const listObjectsResponse = await r2.listObjectsV2({Bucket: bucket, 
+                Prefix: `${oldFolder}/`, Delimiter: "/", ContinuationToken: continuationToken})
+
+                if (listObjectsResponse.Contents) {
+                    for (const {Key} of listObjectsResponse.Contents) {
+                        if (Key) {
+                            const newKey = Key.replace(`${oldFolder}/`, `${newFolder}/`)
+                            await r2.copyObject({Bucket: bucket, CopySource: `${bucket}/${Key}`, Key: newKey})
+                            await r2.deleteObject({Bucket: bucket, Key: Key})
+                        }
+                    }
                 }
-                await s3.deleteObject({Key: oldKey, Bucket: "moepictures"}).promise()
-            })
-            await Promise.all(renamePromises)
-        } catch (error) {
-            console.error("Error renaming folder in S3:", error)
+                isTruncated = listObjectsResponse.IsTruncated
+                continuationToken = listObjectsResponse.NextContinuationToken
+            }
         }
     }
 
@@ -360,17 +387,28 @@ export default class ServerFunctions {
                 if (keyNumber >= nextKey) nextKey = keyNumber
             }
             return nextKey + 1
+        } else {
+            const bucket = r18 ? remoteR18 : remote
+            let isTruncated = true
+            let continuationToken: string | undefined = undefined
+            let nextKey = 0
+
+            while (isTruncated) {
+                const objects = await r2.listObjectsV2({Bucket: bucket,
+                Prefix: `${key}/`, Delimiter: "/", ContinuationToken: continuationToken})
+
+                if (objects.Contents) {
+                    for (const {Key} of objects.Contents) {
+                        const keyMatch = Key?.replace(key + "/", "").match(/\d+/)?.[0]
+                        const keyNumber = Number(keyMatch)
+                        if (keyNumber >= nextKey) nextKey = keyNumber
+                    }
+                }
+                isTruncated = objects.IsTruncated
+                continuationToken = objects.NextContinuationToken
+            }
+            return nextKey + 1
         }
-        const objects = await s3.listObjects({Prefix: key, Bucket: "moepictures"}).promise()
-        let nextKey = 0
-        for (let i = 0; i < (objects.Contents || []).length; i++) {
-            const object = objects.Contents?.[i]
-            if (!object) continue
-            const keyMatch = object.Key?.replace(key, "").match(/\d+/)?.[0]
-            const keyNumber = Number(keyMatch)
-            if (keyNumber >= nextKey) nextKey = keyNumber
-        }
-        return nextKey + 1
     }
 
     public static getUnverifiedFile = async (file: string, upscaled?: boolean) => {
@@ -380,8 +418,16 @@ export default class ServerFunctions {
             let upscaledKey = `${localUnverified}/${decodeURIComponent(upscaledFile)}`
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
+        } else {
+            let bucket = remoteUnverified
+            let originalKey = `${decodeURIComponent(file)}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledKey = `${decodeURIComponent(upscaledFile)}`
+            let body = upscaled ? await r2.getObject({Bucket: bucket, Key: upscaledKey}).then((r) => r.Body)
+            : await r2.getObject({Bucket: bucket, Key: originalKey}).then((r) => r.Body)
+            if (!body) return Buffer.from("")
+            return Buffer.from(await body.transformToByteArray()) 
         }
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadUnverifiedFile = async (file: string, content: any) => {
@@ -390,9 +436,11 @@ export default class ServerFunctions {
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
             fs.writeFileSync(`${localUnverified}/${file}`, content)
             return `${localUnverified}/${file}`
+        } else {
+            let bucket = remoteUnverified
+            await r2.putObject({Bucket: bucket, Key: file, Body: content})
+            return `${bucket}/${file}`
         }
-        const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures-unverified"}).promise()
-        return upload.Location
     }
 
     public static deleteUnverifiedFile = async (file: string) => {
@@ -403,8 +451,12 @@ export default class ServerFunctions {
                 //fs.rmdirSync(dir)
             } catch {}
             return
+        } else {
+            try {
+                let bucket = remoteUnverified
+                await r2.deleteObject({Key: file, Bucket: bucket})
+            } catch {}
         }
-        await s3.deleteObject({Key: file, Bucket: "moepictures-unverified"}).promise()
     }
 
     public static tagCategories = async (tags: string[] | undefined) => {
