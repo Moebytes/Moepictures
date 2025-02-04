@@ -178,6 +178,7 @@ export interface FileFormat {
     glb?: boolean
     fbx?: boolean
     obj?: boolean
+    vrm?: boolean
     zip?: boolean
 }
 

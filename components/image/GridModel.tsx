@@ -9,6 +9,7 @@ import "./styles/gridimage.less"
 import * as THREE from "three"
 import privateIcon from "../../assets/icons/lock-opt.png"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {VRMLoaderPlugin} from "@pixiv/three-vrm"
 import {GIFFrame, PostSearch} from "../../types/Types"
 
 let tooltipTimer = null as any
@@ -171,6 +172,16 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         } else if (functions.isFBX(props.model)) {
             const loader = new FBXLoader()
             model = await loader.loadAsync(decrypted)
+        } else if (functions.isVRM(props.model)) {
+            const loader = new GLTFLoader()
+            loader.register((parser: any) => {
+                return new VRMLoaderPlugin(parser) as any
+            })
+            const vrm = await loader.loadAsync(decrypted).then((l) => l.userData.vrm)
+            if (vrm.meta?.metaVersion === "0") {
+                scene.rotation.y = Math.PI
+            }
+            model = vrm.scene
         }
         scene.add(model)
 

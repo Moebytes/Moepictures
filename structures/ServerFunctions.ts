@@ -16,6 +16,7 @@ import sharp from "sharp"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import child_process from "child_process"
+import mime from "mime-types"
 import util from "util"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
@@ -243,7 +244,8 @@ export default class ServerFunctions {
             return `${folder}/${file}`
         } else {
             let bucket = r18 ? remoteR18 : remote
-            await r2.putObject({Bucket: bucket, Key: file, Body: content})
+            const mimeType = mime.lookup(file) || "application/octet-stream"
+            await r2.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
             return `${bucket}/${file}`
         }
     }
@@ -334,7 +336,8 @@ export default class ServerFunctions {
             const oldBucket = oldR18 ? remoteR18 : remote
             const newBucket = newR18 ? remoteR18 : remote
 
-            await r2.copyObject({Bucket: newBucket, CopySource: `${oldBucket}/${oldFile}`, Key: newFile})
+            const mimeType = mime.lookup(newFile) || "application/octet-stream"
+            await r2.copyObject({Bucket: newBucket, CopySource: `${oldBucket}/${oldFile}`, Key: newFile, ContentType: mimeType})
             await r2.deleteObject({Bucket: oldBucket, Key: oldFile})
         }
     }
@@ -361,7 +364,8 @@ export default class ServerFunctions {
                     for (const {Key} of listObjectsResponse.Contents) {
                         if (Key) {
                             const newKey = Key.replace(`${oldFolder}/`, `${newFolder}/`)
-                            await r2.copyObject({Bucket: bucket, CopySource: `${bucket}/${Key}`, Key: newKey})
+                            const mimeType = mime.lookup(newKey) || "application/octet-stream"
+                            await r2.copyObject({Bucket: bucket, CopySource: `${bucket}/${Key}`, Key: newKey, ContentType: mimeType})
                             await r2.deleteObject({Bucket: bucket, Key: Key})
                         }
                     }
@@ -438,7 +442,8 @@ export default class ServerFunctions {
             return `${localUnverified}/${file}`
         } else {
             let bucket = remoteUnverified
-            await r2.putObject({Bucket: bucket, Key: file, Body: content})
+            const mimeType = mime.lookup(file) || "application/octet-stream"
+            await r2.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
             return `${bucket}/${file}`
         }
     }
@@ -457,6 +462,12 @@ export default class ServerFunctions {
                 await r2.deleteObject({Key: file, Bucket: bucket})
             } catch {}
         }
+    }
+
+    public static uploadBackup = async (file: string, content: Buffer) => {
+        let bucket = process.env.MOEPICTURES_BACKUP_BUCKET!
+        await r2.putObject({Bucket: bucket, Key: file, Body: content,
+        Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)})
     }
 
     public static tagCategories = async (tags: string[] | undefined) => {

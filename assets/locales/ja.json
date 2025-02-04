@@ -791,8 +791,8 @@
             "wait": "数秒待つ。",
             "noResults": "結果は見つからなかった。",
             "nothingFound": "何も見つからない。",
-            "supportedFiletypes": "対応ファイル形式： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.",
-            "supportedFiletypesZip": "zipでサポートされているタイプ： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.",
+            "supportedFiletypes": "対応ファイル形式： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, vrm, fbx, obj, zip.",
+            "supportedFiletypesZip": "zipでサポートされているタイプ： png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, vrm, fbx, obj.",
             "maxFileSize": "最大ファイルサイズ"
         },
         "bulkUpload": {
@@ -1510,7 +1510,7 @@
                 "format2": "アニメーション ⇾ GIFよりもWEBPアニメーションの方が好ましい。",
                 "format3": "動画 ⇾ H.264コーデックのMP4またはVP9コーデックのWEBM。H.265コーデックはブラウザのサポートが悪いので避けてください。",
                 "format4": "音楽 ⇾ カバーアートのあるMP3。WAVはカバーアートに対応していないので避けてください。",
-                "format5": "3Dモデル ⇾ GLBまたはFBX。OBJはサポートしていないテクスチャの読み込みが必要なので避けてください。",
+                "format5": "3Dモデル ⇾ GLBまたはVRM。OBJはサポートしていないテクスチャの読み込みが必要なので避けてください。",
                 "format6": "Live2D ⇾ MOC3、JSONファイル、テクスチャを含むZIP。"
             },
             "line3": "私たちが一般的に使用している圧縮設定は、プログレッシブをオンにした品質95％です。それ以上大きいと、アップスケールされた投稿が大きすぎてしまうので、オリジナルの投稿は2000x2000px以下になるようにダウンスケールしてください。"

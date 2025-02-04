@@ -29,6 +29,7 @@ import enLocale from "../assets/locales/en.json"
 import tempMails from "../assets/json/temp-email.json"
 import imageFunctions from "./ImageFunctions"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {VRMLoaderPlugin, VRMUtils} from "@pixiv/three-vrm"
 import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRating, PostStyle, PostSort, UploadImage,
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
@@ -38,7 +39,7 @@ MiniTagGroup, Image} from "../types/Types"
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
-const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
+const modelExtensions = [".glb", ".gltf", ".fbx", ".vrm", ".obj"]
 const live2dExtensions = [".zip"]
 
 let cachedThumbs = new Map<string, string>()
@@ -297,7 +298,7 @@ export default class Functions {
     }
 
     public static maxFileSize = (format: FileFormat = {}) => {
-        const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm} = format
+        const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm} = format
         const maxSize = jpg ? 10 :
                         png ? 10 :
                         avif ? 10 :
@@ -305,9 +306,10 @@ export default class Functions {
                         wav ? 10 :
                         gif ? 25 :
                         webp ? 25 :
-                        glb ? 10 :
-                        fbx ? 10 :
-                        obj ? 10 :
+                        glb ? 30 :
+                        fbx ? 30 :
+                        obj ? 30 :
+                        vrm ? 30 :
                         mp4 ? 50 :
                         webm ? 50 : 50
         return maxSize
@@ -443,6 +445,17 @@ export default class Functions {
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
         return ext === ".fbx"
+    }
+
+    public static isVRM = (file?: string) => {
+        if (!file) return false
+        file = file.replace(/\?.*$/, "")
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".vrm"
+        }
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".vrm"
     }
 
     public static isAnimatedWebp = (buffer: ArrayBuffer) => {
@@ -1253,7 +1266,8 @@ export default class Functions {
         const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
         if (!arrayBuffer.byteLength) return ""
         const buffer = Buffer.from(arrayBuffer)
-        let mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
+        let mime = Functions.bufferFileType(arrayBuffer)[0]?.mime || "image/jpeg"
+        if (mime === "application/json") mime = "image/jpeg"
         return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
@@ -1800,14 +1814,30 @@ export default class Functions {
         } else if (Functions.isFBX(model)) {
             const loader = new FBXLoader()
             object = await loader.loadAsync(model)
+        } else if (Functions.isVRM(model)) {
+            const loader = new GLTFLoader()
+            loader.register((parser: any) => {
+                return new VRMLoaderPlugin(parser) as any
+            })
+            const vrm = await loader.loadAsync(model).then((l) => l.userData.vrm)
+            object = vrm.scene
         }
         scene.add(object)
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
         renderer.render(scene, camera)
 
         const box = new THREE.Box3().setFromObject(object)
-        const width = box.max.x - box.min.x
-        const height = box.max.y - box.min.y
+        const convertToPixels = (vec: THREE.Vector3) => {
+            const projected = vec.clone().project(camera)
+            return {
+                x: (projected.x * 0.5 + 0.5) * window.innerWidth,
+                y: (1 - (projected.y * 0.5 + 0.5)) * window.innerHeight
+            }
+        }
+        const minScreen = convertToPixels(box.min)
+        const maxScreen = convertToPixels(box.max)
+        const width = Math.round(Math.abs(maxScreen.x - minScreen.x))
+        const height = Math.round(Math.abs(maxScreen.y - minScreen.y))
         const polycount = renderer.info.render.triangles
         const r = await fetch(model).then((r) => r.arrayBuffer())
         const size = r.byteLength
@@ -1843,6 +1873,16 @@ export default class Functions {
         } else if (Functions.isFBX(ext)) {
             const loader = new FBXLoader()
             object = await loader.loadAsync(model)
+        } else if (Functions.isVRM(model)) {
+            const loader = new GLTFLoader()
+            loader.register((parser: any) => {
+                return new VRMLoaderPlugin(parser) as any
+            })
+            const vrm = await loader.loadAsync(model).then((l) => l.userData.vrm)
+            if (vrm.meta?.metaVersion === "0") {
+                scene.rotation.y = Math.PI
+            }
+            object = vrm.scene
         }
         scene.add(object)
 
@@ -1947,11 +1987,13 @@ export default class Functions {
                 const glb = Functions.isGLTF(file.name)
                 const fbx = Functions.isFBX(file.name)
                 const obj = Functions.isOBJ(file.name)
+                const vrm = Functions.isVRM(file.name)
                 if (glb) result.typename = "glb"
                 if (fbx) result.typename = "fbx"
                 if (obj) result.typename = "obj"
+                if (vrm) result.typename = "vrm"
                 const webm = (path.extname(file.name) === ".webm" && result?.typename === "mkv")
-                if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
+                if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm) {
                     if (mp4 || webm) {
                         const url = URL.createObjectURL(file)
                         const thumbnail = await Functions.videoThumbnail(url)
@@ -2487,8 +2529,16 @@ export default class Functions {
         return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     }
 
+    public static useLocalDB = () => {
+        return process.env.LOCAL_DATABASE === "yes"
+    }
+
     public static useLocalFiles = () => {
         return process.env.LOCAL_FILES === "yes"
+    }
+
+    public static backupsEnabled = () => {
+        return process.env.DATABASE_BACKUPS === "yes"
     }
 
     public static mirrorsJSON = (sourceMirrors: string) => {
@@ -3116,7 +3166,7 @@ export default class Functions {
             cachedImages.set(cacheKey, base64)
             return base64
         } else {
-            if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             cachedImages.set(cacheKey, cacheUrl)

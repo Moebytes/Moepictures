@@ -29,6 +29,7 @@ import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import {VRMLoaderPlugin, VRMUtils} from "@pixiv/three-vrm"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postmodel.less"
 
@@ -174,6 +175,16 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         } else if (functions.isFBX(props.model)) {
             const loader = new FBXLoader()
             model = await loader.loadAsync(decrypted)
+        } else if (functions.isVRM(props.model)) {
+            const loader = new GLTFLoader()
+            loader.register((parser: any) => {
+                return new VRMLoaderPlugin(parser) as any
+            })
+            const vrm = await loader.loadAsync(decrypted).then((l) => l.userData.vrm)
+            if (vrm.meta?.metaVersion === "0") {
+                scene.rotation.y = Math.PI
+            }
+            model = vrm.scene
         }
 
         let objMaterials = [] as THREE.Material[]

@@ -1,9 +1,13 @@
 import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
+import {pgDump} from "pg-dump-restore"
 import * as Redis from "redis"
+import functions from "../structures/Functions"
+import serverFunctions from "../structures/ServerFunctions"
+import path from "path"
+import fs from "fs"
 import crypto from "crypto"
 import CreateDB from "./CreateDB.sql"
 import DBTriggers from "./DBTriggers.sql"
-import functions from "../structures/Functions"
 import SQLPost from "./SQLPost"
 import SQLTag from "./SQLTag"
 import SQLSearch from "./SQLSearch"
@@ -27,7 +31,7 @@ const jsonStringIDs = (json: string) => {
 types.setTypeParser(types.builtins.JSON, jsonStringIDs)
 types.setTypeParser(types.builtins.JSONB, jsonStringIDs)
 
-const pgPool = functions.isLocalHost() ? new Pool({
+const pgPool = functions.useLocalDB() ? new Pool({
   user: process.env.PG_LOCAL_USER,
   host: process.env.PG_LOCAL_HOST,
   database: process.env.PG_LOCAL_DATABASE,
@@ -42,7 +46,7 @@ const pgPool = functions.isLocalHost() ? new Pool({
 })
 
 const redis = Redis.createClient({
-  url: process.env.REDIS_URL
+  url: functions.useLocalDB() ? process.env.LOCAL_REDIS_URL : process.env.REDIS_URL
 })
 
 if (process.env.REDIS === "on") redis.connect()
@@ -125,5 +129,37 @@ export default class SQLQuery {
     } catch {
       // ignore
     }
+  }
+
+  /** Backup the database */
+  public static backupDB = async () => {
+    if (!functions.backupsEnabled()) return
+    const folder = path.join(__dirname, "./dump")
+    if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+    const filename = `Moepictures-${timestamp}.dump`
+    const backupPath = path.join(folder, filename)
+
+    let connection = functions.useLocalDB() ? {
+        username: process.env.PG_LOCAL_USER!,
+        host: process.env.PG_LOCAL_HOST!,
+        database: process.env.PG_LOCAL_DATABASE!,
+        password: process.env.PG_LOCAL_PASSWORD!,
+        port: Number(process.env.PG_LOCAL_PORT)
+    } : {
+        username: process.env.PG_USER!,
+        host: process.env.PG_HOST!,
+        database: process.env.PG_DATABASE!,
+        password: process.env.PG_PASSWORD!,
+        port: Number(process.env.PG_PORT)
+    }
+    await pgDump(connection, {
+        filePath: backupPath,
+        noOwner: true
+    })
+
+    const backupData = fs.readFileSync(backupPath)
+    await serverFunctions.uploadBackup(filename, backupData)
+    fs.unlinkSync(backupPath)
   }
 }

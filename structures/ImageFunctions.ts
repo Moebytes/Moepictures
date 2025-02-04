@@ -19,19 +19,21 @@ export default class ImageFunctions {
         const glb = functions.isGLTF(file.name)
         const fbx = functions.isFBX(file.name)
         const obj = functions.isOBJ(file.name)
+        const vrm = functions.isVRM(file.name)
         if (glb) result.typename = "glb"
         if (fbx) result.typename = "fbx"
         if (obj) result.typename = "obj"
+        if (vrm) result.typename = "vrm"
         if (result?.typename === "mkv") result.typename = "webm"
         const webm = (path.extname(file.name) === ".webm" && result?.typename === "webm")
         const zip = result?.mime === "application/zip"
         let allowed = false
         if (inZip) {
-            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj
+            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm
         } else {
-            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip
+            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm || zip
         }
-        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, mp4, webm, zip})
+        const maxSize = functions.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm, zip})
         return {allowed, maxSize, result}
     }
 

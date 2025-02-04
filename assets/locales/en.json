@@ -744,7 +744,7 @@
                     },
                     "model": {
                         "title1": "3D Model Format ⇾ ",
-                        "header1": "GLB or FBX."
+                        "header1": "GLB or VRM."
                     }
                 }
             },
@@ -790,8 +790,8 @@
             "wait": "Wait a few seconds.",
             "noResults": "No results found.",
             "nothingFound": "Nothing found.",
-            "supportedFiletypes": "Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.",
-            "supportedFiletypesZip": "Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.",
+            "supportedFiletypes": "Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, vrm, fbx, obj, zip.",
+            "supportedFiletypesZip": "Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, vrm, fbx, obj.",
             "maxFileSize": "max file size"
         },
         "bulkUpload": {
@@ -1509,7 +1509,7 @@
                 "format2": "Animations ⇾ Animated WEBP is preferred over GIF.",
                 "format3": "Videos ⇾ MP4 with H.264 codec or WEBM with VP9 codec. Avoid H.265 codec for poor browser support.",
                 "format4": "Music ⇾ MP3 with cover art. Avoid WAV as it doesn't support cover art.",
-                "format5": "3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support.",
+                "format5": "3D Models ⇾ GLB or VRM. Avoid OBJ, as it needs separate texture loading we don't support.",
                 "format6": "Live2D ⇾ ZIP containing MOC3, JSON files, and textures."
             },
             "line3": "The compressing settings that we commonly use are quality at 95% with progressive turned on. Please downscale original posts to be under 2000x2000px, as anything bigger will result in an upscaled post that is way too large."

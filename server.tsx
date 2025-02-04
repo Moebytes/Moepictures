@@ -555,7 +555,12 @@ const deleteQueuedUnverifiedPosts = async () => {
   }
 }
 
+const backupDatabase = async () => {
+  await sql.backupDB()
+}
+
 const runDaily = async () => {
+  await backupDatabase()
   await deleteExpiredTokens()
   await deleteQueuedPosts()
   await deleteQueuedUnverifiedPosts()
