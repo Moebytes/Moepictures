@@ -115,9 +115,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const loadImage = async () => {
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
-        setImg(decryptedImg)
-        setStaticImg(decryptedImg)
         setLiveImg(liveImg)
+        if (functions.isImage(props.img) && !functions.isWebP(props.img)) {
+            setImg(liveImg)
+            setStaticImg(liveImg)
+        } else {
+            setImg(decryptedImg)
+            setStaticImg(decryptedImg)
+        }
     }
 
     const toggleLive = async () => {

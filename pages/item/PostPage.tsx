@@ -317,7 +317,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 if (functions.isR18(post.rating)) setRatingType(functions.r18())
             }*/
         }
-    }, [post, ratingType, order, session.upscaledImages])
+    }, [post, order, session.upscaledImages])
 
     useEffect(() => {
         const historyParam = new URLSearchParams(window.location.search).get("history")

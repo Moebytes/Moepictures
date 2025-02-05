@@ -60,7 +60,6 @@ import path from "path"
 import mime from "mime-types"
 import "./styles/postimage.less"
 import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
-import { console } from "inspector"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -81,6 +80,7 @@ interface Props {
     artists?: MiniTag[]
 }
 
+let timer = null as any
 let timeout = null as any
 let id = 0
 
@@ -164,8 +164,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const decryptedImage = await functions.decryptItem(props.img, session)
         if (!decryptedImage) return
         const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
-        const type = functions.bufferFileType(arrayBuffer)
-        if (!type?.length) return
         let isAnimatedWebp = false
         if (functions.isWebP(props.img)) {
             isAnimatedWebp = functions.isAnimatedWebp(arrayBuffer)
@@ -211,7 +209,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }, [props.img])
 
     useEffect(() => {
-        decryptImage()
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+            decryptImage()
+        }, 200)
     }, [props.img, session])
 
     useEffect(() => {

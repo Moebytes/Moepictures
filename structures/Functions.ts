@@ -1191,7 +1191,10 @@ export default class Functions {
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview) filename = originalFilename
         }
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${filename}`
+        if (image.type === "image" || image.type === "comic") {
+            if (sizeType === "large" || sizeType === "massive") return Functions.getImageLink(image, false)
+        }
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
     }
 
     public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {

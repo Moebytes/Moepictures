@@ -30,6 +30,8 @@ interface Props {
     noFavorite?: boolean
 }
 
+let timer = null as any
+
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -63,40 +65,44 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("downloadText", downloadText)
     }, [downloadText])
 
-    useEffect(() => {
-        const getDLText = async () => {
-            let decrypted = props.img || ""
-            if (props.img) {
-                if (!functions.isVideo(props.img)) {
-                    decrypted = await functions.decryptItem(props.img, session)
+    const getDLText = async () => {
+        let decrypted = props.img || ""
+        if (props.img) {
+            if (!functions.isVideo(props.img)) {
+                decrypted = await functions.decryptItem(props.img, session)
+            }
+            if (props.comicPages) {
+                let sizeTotal = 0
+                for (let i = 0; i < props.comicPages.length; i++) {
+                    const miniDecrypt = await functions.decryptItem(props.comicPages[i], session)
+                    let {size} = await imageFunctions.dimensions(miniDecrypt)
+                    sizeTotal += size
                 }
-                if (props.comicPages) {
-                    let sizeTotal = 0
-                    for (let i = 0; i < props.comicPages.length; i++) {
-                        const miniDecrypt = await functions.decryptItem(props.comicPages[i], session)
-                        let {size} = await imageFunctions.dimensions(miniDecrypt)
-                        sizeTotal += size
-                    }
-                    setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
-                } else {
-                    let {width, height, size} = await imageFunctions.dimensions(decrypted)
-                    setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
-                }
-            } else if (props.model) {
-                decrypted = await functions.decryptItem(props.model, session)
-                let {polycount, size} = await imageFunctions.dimensions(decrypted)
-                setDownloadText(`${functions.readablePolycount(polycount!)} (${functions.readableFileSize(size)})`)
-            } else if (props.audio) {
-                decrypted = await functions.decryptItem(props.audio, session)
-                let {duration, size} = await imageFunctions.dimensions(decrypted)
-                setDownloadText(`${functions.formatSeconds(duration!)} (${functions.readableFileSize(size)})`)
-            } else if (props.live2d) {
-                decrypted = await functions.decryptItem(props.live2d, session)
+                setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
+            } else {
                 let {width, height, size} = await imageFunctions.dimensions(decrypted)
                 setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
             }
+        } else if (props.model) {
+            decrypted = await functions.decryptItem(props.model, session)
+            let {polycount, size} = await imageFunctions.dimensions(decrypted)
+            setDownloadText(`${functions.readablePolycount(polycount!)} (${functions.readableFileSize(size)})`)
+        } else if (props.audio) {
+            decrypted = await functions.decryptItem(props.audio, session)
+            let {duration, size} = await imageFunctions.dimensions(decrypted)
+            setDownloadText(`${functions.formatSeconds(duration!)} (${functions.readableFileSize(size)})`)
+        } else if (props.live2d) {
+            decrypted = await functions.decryptItem(props.live2d, session)
+            let {width, height, size} = await imageFunctions.dimensions(decrypted)
+            setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
         }
-        getDLText()
+    }
+
+    useEffect(() => {
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+            getDLText()
+        }, 200)
     }, [props.img, props.model, props.audio, props.live2d, props.comicPages, session])
 
     const getFavorite = async () => {
