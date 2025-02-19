@@ -1,0 +1,23 @@
+#Sensitive data
+.env
+.ssh
+dump.rdb
+*.pem
+
+#Node modules
+node_modules
+__pycache__
+
+#Compiled folder
+dist
+
+#IDE settings
+.vscode
+.idea
+
+#Downloaded Files
+files
+dump
+
+#Other
+.DS_Store

@@ -1167,6 +1167,28 @@ export default class ServerFunctions {
         }
     }
 
+    public static downloadWDTagger = async () => {
+        const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
+        if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
+        const configPath = path.join(wdTaggerPath, "config.json")
+        const modelPath = path.join(wdTaggerPath, "model.safetensors")
+        const csvPath = path.join(wdTaggerPath, "selected_tags.csv")
+        if (!fs.existsSync(configPath)) {
+            const data = await axios.get(`https://huggingface.co/SmilingWolf/wd-swinv2-tagger-v3/resolve/main/config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(csvPath)) {
+            const data = await axios.get(`https://huggingface.co/SmilingWolf/wd-swinv2-tagger-v3/resolve/main/selected_tags.csv`, {responseType: "text"}).then((r) => r.data)
+            fs.writeFileSync(csvPath, data)
+        }
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading waifu diffusion tagger...")
+            const data = await axios.get(`https://huggingface.co/SmilingWolf/wd-swinv2-tagger-v3/resolve/main/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
     public static wdtagger = async (bytes: number[]) => {
         const buffer = Buffer.from(bytes)
         const folder = path.join(__dirname, "./dump")
@@ -1176,7 +1198,8 @@ export default class ServerFunctions {
         const imagePath = path.join(folder, filename)
         fs.writeFileSync(imagePath, buffer)
         const scriptPath = path.join(__dirname, "../../assets/misc/wdtagger.py")
-        let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
+        const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
+        let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${wdTaggerPath}"`
         const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
         const json = JSON.parse(str) as WDTaggerResponse
         fs.unlinkSync(imagePath)

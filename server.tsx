@@ -568,6 +568,7 @@ const runDaily = async () => {
 
 const run = async () => {
   await sql.createDB()
+  await serverFunctions.downloadWDTagger()
   runDaily()
   setInterval(runDaily, 24 * 60 * 60 * 1000)
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))

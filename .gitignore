@@ -1,14 +1,32 @@
-node_modules
-__pycache__
-dist
+#Sensitive data
 .env
-.vscode
-.idea
-.DS_Store
-files
-*.pem
 .ssh
 dump.rdb
+*.pem
+
+#Node modules
+node_modules
+__pycache__
+
+#Compiled folder
+dist
+
+#IDE settings
+.vscode
+.idea
+
+#Downloaded Files
+files
 dump
+
+#Other
+.DS_Store
+
+#Crypto
 structures/CryptoFunctions.ts
+
+#Live2D Cubism
 assets/live2d/*
+
+#WDTagger (large)
+assets/misc/wdtagger
