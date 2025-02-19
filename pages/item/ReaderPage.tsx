@@ -59,7 +59,7 @@ const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
     return (
         <div ref={ref} className="reader-image" style={{marginLeft: readerThumbnails && !readerHorizontal ? "100px" : "0px",
         filter: readerInvert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}>
-            <PostImage img={img} noEncryption={true} post={post} order={order}/>
+            <PostImage img={img} post={post} order={order}/>
         </div>
     )
 }

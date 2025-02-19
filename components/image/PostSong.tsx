@@ -131,10 +131,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (!props.post) return
         if (decrypted) {
             setAudio(decrypted)
-            setAudioPost(props.post)
+            if (props.post) setAudioPost(props.post)
             updateSongCover()
         }
     }, [decrypted])

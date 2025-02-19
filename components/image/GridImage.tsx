@@ -115,13 +115,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const loadImage = async () => {
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
+        const bufferTest = await fetch(decryptedImg).then((r) => r.arrayBuffer())
+        const result = functions.bufferFileType(bufferTest)
         setLiveImg(liveImg)
-        if (functions.isImage(props.img) && !functions.isWebP(props.img)) {
-            setImg(liveImg)
-            setStaticImg(liveImg)
-        } else {
+        if (result[0].mime !== "application/json") {
             setImg(decryptedImg)
             setStaticImg(decryptedImg)
+        } else {
+            setImg(liveImg)
+            setStaticImg(liveImg)
         }
     }
 

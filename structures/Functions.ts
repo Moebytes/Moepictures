@@ -2055,7 +2055,8 @@ export default class Functions {
     }
 
     public static arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
-        const mime = Functions.bufferFileType(Buffer.from(arrayBuffer))[0]?.mime || "image/png"
+        let mime = Functions.bufferFileType(Buffer.from(arrayBuffer))[0]?.mime || "image/png"
+        if (mime === "application/json") mime = "image/jpeg"
         return `data:${mime};base64,${Buffer.from(arrayBuffer).toString("base64")}`
     }
 

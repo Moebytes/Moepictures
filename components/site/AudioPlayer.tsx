@@ -662,7 +662,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const getHeight = () => {
         if (mobile) return audioPost ? "140px" : "100px"
-        return audioPost ? "100px" : "80px"
+        return audioPost ? "100px" : "60px"
     }
 
     if (!showBigPlayer) return null

@@ -266,9 +266,9 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
         return (
             <div className={`mini-audio-player ${showMiniPlayer ? "" : "hide-mini-audio-player"}`} style={style} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setAudioDragging(false)}>
                 <img className="mini-audio-player-expand-icon" src={showBigPlayer ? contractMusicPlayer : expandMusicPlayer} onClick={() => setShowBigPlayer(!showBigPlayer)}/>
-                {!mobile && coverImg && audioPost ? <div className="mini-audio-player-row">
-                    <img className="mini-audio-player-img" src={coverImg} onClick={() => history.push(`/post/${audioPost.postID}/${audioPost.slug}`)}/>
-                </div> : null}
+                <div className="mini-audio-player-row">
+                    <img className="mini-audio-player-img" src={coverImg} onClick={() => audioPost ? history.push(`/post/${audioPost.postID}/${audioPost.slug}`) : null} style={{height: !mobile && coverImg ? "150px" : "50px"}}/>
+                </div>
                 {getTitleJSX()}
                 {playerJSX()}
                 <div className={`mini-audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-mini-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "40px"}}

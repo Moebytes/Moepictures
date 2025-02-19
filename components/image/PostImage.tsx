@@ -71,7 +71,6 @@ interface Props {
     noKeydown?: boolean
     comicPages?: string[] | null
     order?: number
-    noEncryption?: boolean
     noNotes?: boolean
     unverified?: boolean
     previous?: () => void

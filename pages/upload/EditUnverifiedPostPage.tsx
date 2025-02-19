@@ -1082,7 +1082,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         } else if (functions.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noNotes={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
         }
     }
 
