@@ -868,6 +868,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const getDisplay = (invert?: boolean) => {
         let condition = hover && functions.isVideo(props.original) && !mobile
+        if (session.liveAnimationPreview && functions.isVideo(props.original) && !mobile) condition = true
         if (invert) condition = !condition
         return condition ? {opacity: "0", zIndex: 100, position: "absolute", width: "100%", height: "100%"} as React.CSSProperties : {opacity: "1"}
     }

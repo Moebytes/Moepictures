@@ -275,8 +275,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar post={post} artists={tagCategories?.artists} characters={tagCategories?.characters} 
             series={tagCategories?.series} tags={tagCategories?.tags} meta={tagCategories?.meta} 
-            tagGroups={tagGroupCategories} noActions={true}/> : 
-            <SideBar/>
+            tagGroups={tagGroupCategories} noActions={true}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     <div className="set-avatar">
