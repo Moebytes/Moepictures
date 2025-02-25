@@ -1306,6 +1306,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             functions.openPost(postID, event, history, session, setSessionFlag)
         }
 
+        const currentImages = () => {
+            return getCurrentFiles().map((u) => functions.appendURLParams(u.link, {upscaled: showUpscaled}))
+        }
+
         return (
             <>
             <div className="upload">
@@ -1393,7 +1397,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u) => functions.appendURLParams(u.link, {upscaled: showUpscaled}))} set={set} index={currentIndex}/>
+                    <Carousel images={currentImages()} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

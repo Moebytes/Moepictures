@@ -3583,10 +3583,12 @@ export default class Functions {
     }
 
     public static appendURLParams = (url: string, params: {[key: string]: string | boolean | undefined}) => {
-        const obj = new URL(url)
+        const [baseUrl, hash] = url.split("#")
+        const obj = new URL(baseUrl)
+    
         for (const [key, value] of Object.entries(params)) {
             if (typeof value !== "undefined") obj.searchParams.set(key, value.toString())
         }
-        return obj.toString()
+        return hash ? `${baseUrl}#${hash.split("?")[0]}?${obj.searchParams.toString()}` : obj.toString()
     }
 }
