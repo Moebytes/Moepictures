@@ -970,11 +970,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setActionBanner("copy-tags")
     }
 
-    const copyHash = () => {
+    const copyHash = (pixelHash?: boolean) => {
         if (!props.post || !props.order) return
         const image = props.post.images[props.order-1]
         if (typeof image === "string") return
-        navigator.clipboard.writeText(image.hash)
+        navigator.clipboard.writeText(pixelHash ? image.pixelHash : image.hash)
         setActionBanner("copy-hash")
     }
 
@@ -1306,7 +1306,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-alt">{(props.post as PostSearch).cuteness || 500}</span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>
+                            <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
                                 <img className="sidebar-icon" src={hashIcon} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.copyHash}</span>
                             </span>

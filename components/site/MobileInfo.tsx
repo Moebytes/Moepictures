@@ -342,11 +342,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setActionBanner("copy-tags")
     }
 
-    const copyHash = () => {
+    const copyHash = (pixelHash?: boolean) => {
         if (!props.post || !props.order) return
         const image = props.post.images[props.order-1]
         if (typeof image === "string") return
-        navigator.clipboard.writeText(image.hash)
+        navigator.clipboard.writeText(pixelHash ? image.pixelHash : image.hash)
         setActionBanner("copy-hash")
     }
 
@@ -878,7 +878,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>
+                                <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
                                     <img className="mobileinfo-icon" src={hashIcon} style={{filter: getFilter()}}/>
                                     <span className="tag">{i18n.sidebar.copyHash}</span>
                                 </span>

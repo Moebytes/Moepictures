@@ -205,6 +205,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
+        decryptImage()
     }, [props.img])
 
     useEffect(() => {
