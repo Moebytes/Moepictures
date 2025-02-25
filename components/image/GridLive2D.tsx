@@ -434,7 +434,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.live2d)
             setToolTipEnabled(true)
-        }, 200)
+        }, 700)
     }
 
     const mouseLeave = () => {

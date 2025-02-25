@@ -484,9 +484,31 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [coverImg])
 
-    const generateTempLink = async (audio?: boolean) => {
+    const getCurrentLink = (forceOriginal?: boolean) => {
+        if (!props.post) return props.audio
+        const image = props.post.images[(props.order || 1) - 1]
+        let img = ""
+        if (typeof image === "string") {
+            img = functions.getRawImageLink(image)
+        } else {
+            img = functions.getImageLink(image)
+        }
+        if (forceOriginal) {
+            return functions.appendURLParams(img, {upscaled: false})
+        } else {
+            return img
+        }
+    }
+
+    const noAuthURL = async (audio?: boolean) => {
         const arrayBuffer = await fetch(audio ? decrypted : coverImg).then((r) => r.arrayBuffer())
         let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        return url
+    }
+
+    const generateTempLink = async (audio?: boolean) => {
+        const link = getCurrentLink()
+        let url = await functions.post("/storage", {link, songCover: !audio}, session, setSessionFlag)
         if (audio) {
             setAudioTempLink(url)
         } else {
@@ -497,8 +519,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateQRCode = async () => {
-        let img = audioTempLink
-        if (!tempLink) img = await generateTempLink(true)
+        let img = await generateTempLink(true)
         QRCode.toDataURL(img, {margin: 0}, (err, url) => {
             setQRCodeImage(url)
         })
@@ -509,8 +530,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         let url = `${window.location.origin}${window.location.pathname}`
         let text = `${props.post.englishTitle || props.post.title} by ${props.artists[0].tag}\n\n`
         if (site === "pinterest") {
-            let img = tempLink
-            if (!tempLink) img = await generateTempLink()
+            let img = await generateTempLink()
             window.open(`http://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${img}&description=${encodeURIComponent(text)}`, "_blank")
         } else if (site === "twitter") {
             window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank")
@@ -528,8 +548,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             "saucenao": "https://saucenao.com/search.php?url=",
             "ascii2d": "https://ascii2d.net/search/url/"
         }
-        let url = tempLink
-        if (!tempLink) url = await generateTempLink()
+        let url = await generateTempLink()
         window.open(baseMap[service] + encodeURIComponent(url), "_blank", "noreferrer")
     }
 

@@ -832,7 +832,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.img)
             setToolTipEnabled(true)
-        }, 200)
+        }, 700)
     }
 
     const mouseLeave = () => {

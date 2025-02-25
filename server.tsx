@@ -21,7 +21,7 @@ import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
-import serverFunctions, {keyGenerator, handler, apiKeyLogin} from "./structures/ServerFunctions"
+import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./structures/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
@@ -40,7 +40,7 @@ import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
 import torIPs from "./assets/json/tor-ip.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
-import {ServerSession} from "./types/Types"
+import {ServerSession, Storage} from "./types/Types"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -143,9 +143,9 @@ const imageLimiter = rateLimit({
     handler
 })
 
-const tokenLimiter = rateLimit({
+const imageUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 10,
+	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -183,7 +183,7 @@ const lastModified = new Date().toUTCString()
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${req.protocol}://${req.hostname}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const pixelHash = new URL(`${req.protocol}://${req.get("host")}${req.originalUrl}`).searchParams.get("hash") ?? ""
       let url = req.url.replace(/\?.*$/, "")
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -247,7 +247,7 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${req.protocol}://${req.hostname}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const pixelHash = new URL(`${req.protocol}://${req.get("host")}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
@@ -412,6 +412,67 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 }
+
+const storageMap = new Map<string, Storage>()
+
+app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const {link, songCover} = req.body as {link: string, songCover?: boolean}
+    if (!req.session.username) return res.status(403).send("Unauthorized")
+    const pixelHash = new URL(link).searchParams.get("hash") ?? ""
+    const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))
+    let upscaled = req.session.upscaledImages as boolean
+    if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
+    if (req.session.captchaNeeded) {
+      storageMap.delete(req.session.username)
+      return res.status(403).end()
+    }
+    const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+    let r18 = false
+    if (postID) {
+      let post = await sql.getCache(`cached-post/${postID}`)
+      if (!post) {
+        post = await sql.post.post(postID)
+        await sql.setCache(`cached-post/${postID}`, post)
+      }
+      if (post && functions.isR18(post.rating)) {
+        if (!req.session.showR18) return res.status(403).end()
+        r18 = true
+      }
+      if (post && post.hidden) {
+        if (!permissions.isMod(req.session)) return res.status(403).end()
+      }
+    }
+    const secret = cryptoFunctions.generateAPIKey(16)
+    storageMap.set(req.session.username, {secret, key, upscaled, r18, pixelHash, songCover})
+    let ext = songCover ? ".jpg" : path.extname(key)
+    const url = `${req.protocol}://${req.get("host")}/storage/${req.session.username}${ext}?secret=${secret}`
+    res.status(200).send(url)
+  } catch {
+    res.status(400).end()
+  }
+})
+
+app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const secret = req.query.secret
+    const storage = storageMap.get(path.basename(req.params.username, path.extname(req.params.username)))
+    if (!storage) return res.status(404).json({message: "Not found"})
+    if (secret !== storage.secret) return res.status(403).json({message: "Unauthorized"})
+    
+    let body = await serverFunctions.getFile(storage.key, storage.upscaled, storage.r18, storage.pixelHash)
+    if (!body.byteLength) body = await serverFunctions.getFile(storage.key, false, storage.r18, storage.pixelHash)
+
+    if (storage.songCover) body = await serverFunctions.songCover(body)
+  
+    const mimeType = mime.getType(req.path)
+    if (mimeType) res.setHeader("Content-Type", mimeType)
+    res.setHeader("Content-Length", body.byteLength)
+    res.status(200).send(body)
+  } catch {
+    res.status(400).end()
+  }
+})
 
 app.get("/*", async (req: Request, res: Response) => {
   try {

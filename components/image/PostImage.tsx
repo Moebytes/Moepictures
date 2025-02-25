@@ -1289,9 +1289,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (mobile) setImageExpand(false)
     }, [mobile])
 
-    const getCurrentBuffer = async (forceOriginal?: boolean) => {
-        let encryptedBuffer = new ArrayBuffer(0)
-        if (!props.post) return encryptedBuffer
+    const getCurrentLink = (forceOriginal?: boolean) => {
+        if (!props.post) return props.img
         const image = props.post.images[(props.order || 1) - 1]
         let img = ""
         if (typeof image === "string") {
@@ -1300,6 +1299,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             img = functions.getImageLink(image)
         }
         if (forceOriginal) {
+            return functions.appendURLParams(img, {upscaled: false})
+        } else {
+            return img
+        }
+    }
+
+    const getCurrentBuffer = async (forceOriginal?: boolean) => {
+        let encryptedBuffer = new ArrayBuffer(0)
+        if (!props.post) return encryptedBuffer
+        const img = getCurrentLink(forceOriginal)
+        if (forceOriginal) {
             encryptedBuffer = await fetch(functions.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
         } else {
             encryptedBuffer = await fetch(img).then((r) => r.arrayBuffer())
@@ -1307,17 +1317,22 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         return functions.decryptBuffer(encryptedBuffer, img, session)
     }
 
-    const generateTempLink = async () => {
+    const noAuthURL = async () => {
         const arrayBuffer = await getCurrentBuffer(true)
         let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        return url
+    }
+
+    const generateTempLink = async () => {
+        const link = getCurrentLink()
+        let url = await functions.post("/storage", {link}, session, setSessionFlag)
         localStorage.setItem("reverseSearchLink", url)
         setTempLink(url)
         return url
     }
 
     const generateQRCode = async () => {
-        let img = tempLink
-        if (!tempLink) img = await generateTempLink()
+        let img = await generateTempLink()
         QRCode.toDataURL(img, {margin: 0}, (err, url) => {
             setQRCodeImage(url)
         })
@@ -1328,8 +1343,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         let url = `${window.location.origin}${window.location.pathname}`
         let text = `${props.post.englishTitle} (${props.post.title}) by ${props.artists[0].tag} (${props.post.artist})\n\n`
         if (site === "pinterest") {
-            let img = tempLink
-            if (!tempLink) img = await generateTempLink()
+            let img = await generateTempLink()
             window.open(`http://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${img}&description=${encodeURIComponent(text)}`, "_blank")
         } else if (site === "twitter") {
             window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank")
@@ -1347,8 +1361,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             "saucenao": "https://saucenao.com/search.php?url=",
             "ascii2d": "https://ascii2d.net/search/url/"
         }
-        let img = tempLink
-        if (!tempLink) img = await generateTempLink()
+        let img = await generateTempLink()
         window.open(baseMap[service] + encodeURIComponent(img), "_blank", "noreferrer")
     }
 

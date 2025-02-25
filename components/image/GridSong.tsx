@@ -415,7 +415,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.audio)
             setToolTipEnabled(true)
-        }, 200)
+        }, 700)
     }
 
     const mouseLeave = () => {

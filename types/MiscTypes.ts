@@ -209,6 +209,7 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/api-key" ? {params: null, response: string} :
     T extends "/api/misc/sourcelookup" ? {params: SourceLookupParams, response: SourceLookup} :
     T extends "/api/misc/taglookup" ? {params: TagLookupParams, response: TagLookup} :
+    T extends "/storage" ? {params: {link: string, songCover?: boolean}, response: string} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 

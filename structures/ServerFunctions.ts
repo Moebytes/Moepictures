@@ -3,6 +3,7 @@ import {Request, Response, NextFunction} from "express"
 import path from "path"
 import fs from "fs"
 import FormData from "form-data"
+import mm from "music-metadata"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
@@ -1422,5 +1423,19 @@ export default class ServerFunctions {
 
     public static resizeImage = async (buffer: Buffer, maxSize = 1000) => {
         return sharp(buffer).resize(maxSize, maxSize, {fit: "inside"}).toBuffer()
+    }
+
+    public static songCover = async (audio: Buffer) => {
+        const tagInfo = await mm.parseBuffer(new Uint8Array(audio))
+        const picture = tagInfo.common.picture
+        if (picture) {
+            let buffer = new Uint8Array()
+            for (let i = 0; i < picture.length; i++) {
+                buffer = new Uint8Array(Buffer.concat([buffer, new Uint8Array(picture[i].data)]))
+            }
+            return Buffer.from(buffer)
+        } else {
+            return Buffer.from("")
+        }
     }
 }

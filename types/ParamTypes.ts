@@ -189,3 +189,12 @@ export interface Dimensions {
     polycount?: number
     duration?: number
 }
+
+export interface Storage {
+    secret: string
+    key: string
+    upscaled: boolean
+    r18: boolean
+    pixelHash: string
+    songCover?: boolean
+}
