@@ -1159,7 +1159,8 @@ export default class Functions {
     public static getImageLink = (image: Image, upscaled?: boolean) => {
         if (!image.filename && !image.upscaledFilename) return ""
         let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
-        return `${window.location.protocol}//${window.location.host}/${image.type}/${image.postID}-${image.order}-${encodeURIComponent(filename)}`
+        const link = `${window.location.protocol}//${window.location.host}/${image.type}/${image.postID}-${image.order}-${encodeURIComponent(filename)}`
+        return Functions.appendURLParams(link, {hash: image.pixelHash})
     }
 
     public static getRawImageLink = (filename: string) => {
@@ -1170,7 +1171,8 @@ export default class Functions {
     public static getUnverifiedImageLink = (image: Image, upscaled?: boolean) => {
         if (!image.filename && !image.upscaledFilename) return ""
         let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
-        return `${window.location.protocol}//${window.location.host}/unverified/${image.type}/${image.postID}-${image.order}-${filename}`
+        const link = `${window.location.protocol}//${window.location.host}/unverified/${image.type}/${image.postID}-${image.order}-${filename}`
+        return Functions.appendURLParams(link, {hash: image.pixelHash})
     }
 
     public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean, forceLive?: boolean) => {
@@ -1194,7 +1196,8 @@ export default class Functions {
         if (image.type === "image" || image.type === "comic") {
             if (sizeType === "large" || sizeType === "massive") return Functions.getImageLink(image, false)
         }
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
+        const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
+        return Functions.appendURLParams(link, {hash: image.pixelHash})
     }
 
     public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {
@@ -1227,7 +1230,8 @@ export default class Functions {
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview) filename = originalFilename
         }
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
+        const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
+        return Functions.appendURLParams(link, {hash: image.pixelHash})
     }
 
     public static getTagPath = (folder: string, filename: string) => {
@@ -1252,7 +1256,7 @@ export default class Functions {
         if (folder === "pfp") dest = "pfp"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         const link = `${window.location.protocol}//${window.location.host}/${dest}/${encodeURIComponent(filename)}`
-        return hash ? `${link}?hash=${hash}` : link
+        return hash ? Functions.appendURLParams(link, {hash: hash}) : link
     }
 
     public static getUnverifiedTagLink = (folder: string, filename: string | null) => {
@@ -2839,10 +2843,10 @@ export default class Functions {
             let currentUpscaledLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) : Functions.getImageLink(currImage, true)
 
             
-            let imgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
-            let currentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=false`, {"x-force-upscale": "false"})
-            let upscaledImgBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
-            let upscaledCurrentBuffer = await Functions.getBuffer(`${currentUpscaledLink}?upscaled=true`, {"x-force-upscale": "true"})
+            let imgBuffer = await Functions.getBuffer(Functions.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
+            let currentBuffer = await Functions.getBuffer(Functions.appendURLParams(currentLink, {upscaled: false}), {"x-force-upscale": "false"})
+            let upscaledImgBuffer = await Functions.getBuffer(Functions.appendURLParams(upscaledImgLink, {upscaled: true}), {"x-force-upscale": "true"})
+            let upscaledCurrentBuffer = await Functions.getBuffer(Functions.appendURLParams(currentUpscaledLink, {upscaled: true}), {"x-force-upscale": "true"})
 
             if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(imgBuffer)
@@ -2902,8 +2906,8 @@ export default class Functions {
             let imgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image)
             let upscaledImgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image, true)
 
-            let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
-            let upscaledBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
+            let buffer = await Functions.getBuffer(Functions.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
+            let upscaledBuffer = await Functions.getBuffer(Functions.appendURLParams(upscaledImgLink, {upscaled: true}), {"x-force-upscale": "true"})
             if (buffer.byteLength) {
                 let ext = path.extname(imgLink)
                 let link = await Functions.decryptItem(imgLink, session)
@@ -3576,5 +3580,13 @@ export default class Functions {
         let missingTags = tags.filter((tag) => !removeTags.includes(tag))
         resultStr += `${missingTags.join(" ")}`
         return resultStr
+    }
+
+    public static appendURLParams = (url: string, params: {[key: string]: string | boolean | undefined}) => {
+        const obj = new URL(url)
+        for (const [key, value] of Object.entries(params)) {
+            if (typeof value !== "undefined") obj.searchParams.set(key, value.toString())
+        }
+        return obj.toString()
     }
 }

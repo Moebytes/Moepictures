@@ -145,7 +145,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             let image = sourceEditID.post.images[sourceEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
             let link = functions.getImageLink(image)
-            let response = await fetch(`${link}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let response = await fetch(functions.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             let current = null as UploadImage | null
             if (response.byteLength) {
                 const decrypted = await functions.decryptBuffer(response, link, session)

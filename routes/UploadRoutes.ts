@@ -141,8 +141,8 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
     const imagePath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
     const upscaledImagePath = functions.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
     const thumbnailPath = functions.getThumbnailImagePath(image.type, image.thumbnail)
-    const oldImage = await serverFunctions.getFile(imagePath, false, r18) as Buffer
-    const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
+    const oldImage = await serverFunctions.getFile(imagePath, false, r18, image.pixelHash) as Buffer
+    const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath, false, r18, image.pixelHash) as Buffer
     vanillaBuffers.push(oldImage)
     upscaledVanillaBuffers.push(oldUpscaledImage)
     if (imgChanged) {
@@ -194,9 +194,9 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       } else if ("type" in image) {
         const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
         if (unverifiedImages) {
-          buffer = await serverFunctions.getUnverifiedFile(imagePath)
+          buffer = await serverFunctions.getUnverifiedFile(imagePath, false, image.pixelHash)
         } else {
-          buffer = await serverFunctions.getFile(imagePath, false, r18)
+          buffer = await serverFunctions.getFile(imagePath, false, r18, image.pixelHash)
         }
       }
     }
@@ -207,9 +207,9 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
         const upscaledImagePath = functions.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, 
         upscaledImage.upscaledFilename || upscaledImage.filename)
         if (unverifiedImages) {
-          upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath)
+          upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath, false, upscaledImage.pixelHash)
         } else {
-          upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18)
+          upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18, upscaledImage.pixelHash)
         }
       }
     }
@@ -328,14 +328,17 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let dimensions = {} as {width?: number, height?: number}
       let upscaledDimensions = {} as {width?: number, height?: number}
       let hash = ""
+      let pixelHash = ""
       if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
           hash = await phash(thumbBuffer || bufferFallback).then((hash: string) => functions.binaryToHex(hash))
+          pixelHash = await serverFunctions.pixelHash(thumbBuffer || bufferFallback)
           dimensions.width = original.width
           dimensions.height = original.height
           upscaledDimensions.width = upscaled.width
           upscaledDimensions.height = upscaled.height
       } else {
           hash = await phash(bufferFallback).then((hash: string) => functions.binaryToHex(hash))
+          pixelHash = await serverFunctions.pixelHash(bufferFallback)
           if (buffer?.byteLength) dimensions = await sharp(buffer).metadata()
           if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(upscaledBuffer).metadata()
       }
@@ -347,10 +350,10 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let upscaledSize = upscaledBuffer?.byteLength || null
       let duration = original.duration || null
       if (unverified) {
-        await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, 
+        await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
         width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
       } else {
-        await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, 
+        await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
         width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
       }
     }
@@ -756,9 +759,9 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               } else {
                 const imagePath = functions.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
                 if (unverifiedImages) {
-                  buffer = await serverFunctions.getUnverifiedFile(imagePath)
+                  buffer = await serverFunctions.getUnverifiedFile(imagePath, false, upscaledImage.pixelHash)
                 } else {
-                  buffer = await serverFunctions.getFile(imagePath, false, r18)
+                  buffer = await serverFunctions.getFile(imagePath, false, r18, upscaledImage.pixelHash)
                 }
               }
               newUpscaledImagePath = functions.getUpscaledImageHistoryPath(post.postID, 2, imageOrders[i], upscaledImageFilenames[i])
@@ -771,9 +774,9 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               } else {
                 const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
                 if (unverifiedImages) {
-                  buffer = await serverFunctions.getUnverifiedFile(imagePath)
+                  buffer = await serverFunctions.getUnverifiedFile(imagePath, false, image.pixelHash)
                 } else {
-                  buffer = await serverFunctions.getFile(imagePath, false, r18)
+                  buffer = await serverFunctions.getFile(imagePath, false, r18, image.pixelHash)
                 }
               }
               newImagePath = functions.getImageHistoryPath(post.postID, 2, imageOrders[i], imageFilenames[i])
@@ -811,9 +814,9 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             } else {
               const imagePath = functions.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
               if (unverifiedImages) {
-                buffer = await serverFunctions.getUnverifiedFile(imagePath)
+                buffer = await serverFunctions.getUnverifiedFile(imagePath, false, upscaledImage.pixelHash)
               } else {
-                buffer = await serverFunctions.getFile(imagePath, false, r18)
+                buffer = await serverFunctions.getFile(imagePath, false, r18, upscaledImage.pixelHash)
               }
             }
             newUpscaledImagePath = functions.getUpscaledImageHistoryPath(post.postID, nextKey, imageOrders[i], upscaledImageFilenames[i])
@@ -826,9 +829,9 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             } else {
               const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
               if (unverifiedImages) {
-                buffer = await serverFunctions.getUnverifiedFile(imagePath)
+                buffer = await serverFunctions.getUnverifiedFile(imagePath, false, image.pixelHash)
               } else {
-                buffer = await serverFunctions.getFile(imagePath, false, r18)
+                buffer = await serverFunctions.getFile(imagePath, false, r18, image.pixelHash)
               }
             }
             newImagePath = functions.getImageHistoryPath(post.postID, nextKey, imageOrders[i], imageFilenames[i])
@@ -1441,9 +1444,9 @@ const CreateRoutes = (app: Express) => {
             for (const image of child.post.images) {
               let order = ++maxOrder
               const imagePath = functions.getImagePath(image.type, image.postID, image.order, image.filename)
-              const buffer = await serverFunctions.getFile(imagePath, false, r18)
+              const buffer = await serverFunctions.getFile(imagePath, false, r18, image.pixelHash)
               const upscaledImagePath = functions.getUpscaledImagePath(image.type, image.postID, image.order, image.upscaledFilename || image.filename)
-              const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18)
+              const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18, image.pixelHash)
 
               if (buffer.byteLength) {
                 let imagePath = functions.getImagePath(image.type, postID, order, image.filename)
@@ -1455,8 +1458,9 @@ const CreateRoutes = (app: Express) => {
                 await serverFunctions.uploadFile(imagePath, upscaledBuffer, r18)
               }
 
-              await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.width, 
-              image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize, image.duration, image.thumbnail)
+              await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.pixelHash, 
+              image.width, image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize, image.duration, 
+              image.thumbnail)
             }
             await serverFunctions.deletePost(child.post)
           }

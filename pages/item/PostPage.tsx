@@ -638,7 +638,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         } else {
             let img = image
             if (session.cookie) {
-                if (img) img += `?upscaled=${session.upscaledImages}`
+                if (img) img = functions.appendURLParams(img, {upscaled: session.upscaledImages})
             }
             return (
                 <>

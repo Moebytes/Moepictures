@@ -39,6 +39,9 @@ let localUnverified = process.env.MOEPICTURES_LOCAL_UNVERIFIED
 let remote = process.env.MOEPICTURES_BUCKET!
 let remoteR18 = process.env.MOEPICTURES_BUCKET_R18!
 let remoteUnverified = process.env.MOEPICTURES_BUCKET_UNVERIFIED!
+let publicRemote = process.env.MOEPICTURES_PUBLIC_BUCKET!
+let publicRemoteR18 = process.env.MOEPICTURES_PUBLIC_BUCKET_R18!
+let publicRemoteUnverified = process.env.MOEPICTURES_PUBLIC_BUCKET_UNVERIFIED!
 
 const r2 = new S3({
     region: "auto",
@@ -176,7 +179,7 @@ export default class ServerFunctions {
         await sql.message.bulkInsertRecipients(messageID, [username])
     }
 
-    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean) => {
+    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
         const defaultBuffer = Buffer.from("")
         const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
         const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
@@ -194,19 +197,20 @@ export default class ServerFunctions {
             return fs.readFileSync(`${firstHistory}/${files[0]}`)
         } else {
             let bucket = r18 ? remoteR18 : remote
+            let publicBucket = r18 ? publicRemoteR18 : publicRemote
             const prefix = isTag ? `history/tag/${id}/` : `history/post/${id}/${upscaled ? "upscaled" : "original"}/`
             const list = await r2.listObjectsV2({Bucket: bucket, Prefix: prefix})
             if (!list.Contents?.length) return defaultBuffer
             const sortedKeys = list.Contents.map((obj) => obj.Key!).sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
             if (!sortedKeys.length) return defaultBuffer
             const firstKey = sortedKeys[0]
-            const body = await r2.getObject({Bucket: bucket, Key: firstKey}).then((r) => r.Body)
+            const body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(firstKey)}`, {hash: pixelHash}), {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             if (!body) return defaultBuffer
-            return Buffer.from(await body.transformToByteArray())
+            return Buffer.from(body)
         }
     }
 
-    public static getFile = async (file: string, upscaled: boolean, r18: boolean) => {
+    public static getFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
         if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
@@ -216,11 +220,12 @@ export default class ServerFunctions {
                 originalKey = originalKey.replace("upscaled/", "original/")
                 upscaledKey = upscaledKey.replace("original/", "upscaled/")
             }
-            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18)
+            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18, pixelHash)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         } else {
             let bucket = r18 ? remoteR18 : remote
+            let publicBucket = r18 ? publicRemoteR18 : publicRemote
             let originalKey = `${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
@@ -228,10 +233,16 @@ export default class ServerFunctions {
                 originalKey = originalKey.replace("upscaled/", "original/")
                 upscaledKey = upscaledKey.replace("original/", "upscaled/")
             }
-            let body = upscaled ? await r2.getObject({Bucket: bucket, Key: upscaledKey}).then((r) => r.Body)
-            : await r2.getObject({Bucket: bucket, Key: originalKey}).then((r) => r.Body)
-            if (!body) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18)
-            return Buffer.from(await body.transformToByteArray()) 
+            let body = null as Buffer | null
+            if (upscaled) {
+                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+            } else {
+                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
+                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+            }
+            if (!body) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18, pixelHash)
+            return Buffer.from(body)
         }
     }
 
@@ -415,7 +426,7 @@ export default class ServerFunctions {
         }
     }
 
-    public static getUnverifiedFile = async (file: string, upscaled?: boolean) => {
+    public static getUnverifiedFile = async (file: string, upscaled?: boolean, pixelHash?: string) => {
         if (functions.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
@@ -424,13 +435,20 @@ export default class ServerFunctions {
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         } else {
             let bucket = remoteUnverified
+            let publicBucket = publicRemoteUnverified
             let originalKey = `${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
-            let body = upscaled ? await r2.getObject({Bucket: bucket, Key: upscaledKey}).then((r) => r.Body)
-            : await r2.getObject({Bucket: bucket, Key: originalKey}).then((r) => r.Body)
+            let body = null as Buffer | null
+            if (upscaled) {
+                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+            } else {
+                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
+                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+            }
             if (!body) return Buffer.from("")
-            return Buffer.from(await body.transformToByteArray()) 
+            return Buffer.from(body)
         }
     }
 
@@ -544,7 +562,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
+            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash) as any
             if (!oldBuffer) continue
             const newImage = newImages[i]
             const newBuffer = Buffer.from(newImage.bytes) as any
@@ -567,7 +585,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false) : await ServerFunctions.getUnverifiedFile(oldPath, false) as any
+            const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false, oldImage.pixelHash) : await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash) as any
             if (!oldBuffer) continue
             let newBuffer = null as Buffer | null
             if ("bytes" in newImage) {
@@ -580,7 +598,7 @@ export default class ServerFunctions {
                 } else {
                     newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
                 }
-                newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false)
+                newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false, newImage.pixelHash)
             }
             if (!newBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
@@ -631,16 +649,16 @@ export default class ServerFunctions {
             const newImage = newImages[i]
             if (!oldImage || !newImage) continue
             let oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
-            const oldBuffer = unverified ? await ServerFunctions.getUnverifiedFile(oldPath, false)
-            : await ServerFunctions.getFile(oldPath, false, r18)
+            const oldBuffer = unverified ? await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash)
+            : await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash)
             let newBuffer = null as Buffer | null
             if ("bytes" in newImage) {
                 newBuffer = Buffer.from(newImage.bytes)
             } else {
                 let postImage = newImage as Image
                 let newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
-                newBuffer = unverified ? await ServerFunctions.getUnverifiedFile(newPath, false)
-                : await ServerFunctions.getFile(newPath, false, r18)
+                newBuffer = unverified ? await ServerFunctions.getUnverifiedFile(newPath, false, newImage.pixelHash)
+                : await ServerFunctions.getFile(newPath, false, r18, newImage.pixelHash)
             }
             let oldHash = await phash(oldBuffer).then((hash: string) => functions.binaryToHex(hash))
             let newHash = await phash(newBuffer).then((hash: string) => functions.binaryToHex(hash))
@@ -759,7 +777,7 @@ export default class ServerFunctions {
             for (let j = 0; j < post.images.length; j++) {
                 const image = post.images[j]
                 const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
-                const buffer = await ServerFunctions.getFile(imgPath, false, false) as any
+                const buffer = await ServerFunctions.getFile(imgPath, false, false, image.pixelHash) as any
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 await sql.post.updateImage(image.imageID, "hash", md5)
             }
@@ -769,6 +787,12 @@ export default class ServerFunctions {
 
     public static md5 = (buffer: Buffer) => {
         return crypto.createHash("md5").update(new Uint8Array(buffer)).digest("hex")
+    }
+
+    public static pixelHash = async (buffer: Buffer) => {
+        const rawBuffer = await sharp(buffer, {limitInputPixels: false})
+        .ensureAlpha().toColorspace("srgb").raw().toBuffer()
+        return crypto.createHash("md5").update(rawBuffer).digest("hex")
     }
 
     public static tagMap = async () => {

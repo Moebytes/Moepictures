@@ -133,7 +133,8 @@ CREATE TABLE IF NOT EXISTS "images" (
     "upscaledSize" int,
     "duration" double precision,
     "thumbnail" text,
-    "hash" text
+    "hash" text,
+    "pixelHash" text
 );
 
 CREATE TABLE IF NOT EXISTS "unverified images" (
@@ -151,7 +152,8 @@ CREATE TABLE IF NOT EXISTS "unverified images" (
     "upscaledSize" int,
     "duration" double precision,
     "thumbnail" text,
-    "hash" text
+    "hash" text,
+    "pixelHash" text
 );
 
 CREATE TABLE IF NOT EXISTS "tags" (

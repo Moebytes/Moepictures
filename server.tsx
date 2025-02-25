@@ -172,26 +172,27 @@ app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Re
   res.status(200).send("Success")
 })
 
-let originalFolders = ["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "history"]
+let originalFolders = ["image", "comic", "animation", "video", "audio", "model", "live2d"]
 let originalEncrypted = ["image", "comic", "animation", "audio", "model", "live2d"]
-let noCache = ["artist", "character", "series", "pfp", "tag"]
-let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}-upscaled`)]
+let noCache = ["artist", "character", "series", "pfp", "tag", "history"]
+let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}-upscaled`), ...noCache]
 let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
 const lastModified = new Date().toUTCString()
 
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
-    let url = req.url.replace(/\?.*$/, "")
-    const mimeType = mime.getType(req.path)
-    if (mimeType) res.setHeader("Content-Type", mimeType)
     try {
+      const pixelHash = new URL(`${req.protocol}://${req.hostname}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      let url = req.url.replace(/\?.*$/, "")
+      const mimeType = mime.getType(req.path)
+      if (mimeType) res.setHeader("Content-Type", mimeType)
       if (folders[i] === "tag") {
         if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Last-Modified", lastModified)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.slice(1))
       let upscaled = req.session.upscaledImages as boolean
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
@@ -212,9 +213,9 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
-      let body = await serverFunctions.getFile(key, upscaled, r18)
-      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18)
-      let contentLength = body.length
+      let body = await serverFunctions.getFile(key, upscaled, r18, pixelHash)
+      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18, pixelHash)
+      let contentLength = body.byteLength
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
@@ -224,7 +225,6 @@ for (let i = 0; i < folders.length; i++) {
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
         body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
-        // contentLength = body.length
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -247,10 +247,11 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const pixelHash = new URL(`${req.protocol}://${req.hostname}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -268,11 +269,12 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
-      let thumbKey = `thumbnail/${folders[i]}/${path.basename(key)}`
+      const [id, order, name] = path.basename(key, path.extname(key)).split("-")
+      let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
       if (req.path.includes("history/post")) thumbKey = key
-      let body = await serverFunctions.getFile(thumbKey, false, r18)
-      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18)
-      let contentLength = body.length
+      let body = await serverFunctions.getFile(thumbKey, false, r18, pixelHash)
+      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18, pixelHash)
+      let contentLength = body.byteLength
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
@@ -286,13 +288,13 @@ for (let i = 0; i < folders.length; i++) {
           body = await sharp(body, {animated: false, limitInputPixels: false})
           .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
           .toBuffer()
-          contentLength = body.length
+          contentLength = body.byteLength
         }
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
         body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
-        // contentLength = body.length
+        // contentLength = body.byteLength
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -318,7 +320,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
@@ -333,7 +335,7 @@ for (let i = 0; i < folders.length; i++) {
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
-      const contentLength = body.length
+      const contentLength = body.byteLength
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
@@ -363,7 +365,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
@@ -372,11 +374,12 @@ for (let i = 0; i < folders.length; i++) {
       } else {
         if (!permissions.isMod(req.session)) return res.status(403).end()
       }
-      let thumbKey = `thumbnail/${folders[i]}/${path.basename(key)}`
+      const [id, order, name] = path.basename(key, path.extname(key)).split("-")
+      let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
       if (req.path.includes("history/post")) thumbKey = key
       let body = await serverFunctions.getUnverifiedFile(thumbKey, false)
       if (!body.byteLength) body = await serverFunctions.getUnverifiedFile(key, false)
-      let contentLength = body.length
+      let contentLength = body.byteLength
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
@@ -388,7 +391,7 @@ for (let i = 0; i < folders.length; i++) {
         body = await sharp(body, {animated: false, limitInputPixels: false})
         .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
         .toBuffer()
-        contentLength = body.length
+        contentLength = body.byteLength
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")

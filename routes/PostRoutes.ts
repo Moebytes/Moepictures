@@ -1209,8 +1209,8 @@ const PostRoutes = (app: Express) => {
             let filename = req.session.upscaledImages ? image.upscaledFilename || image.filename : image.filename
             const key = functions.getImagePath(image.type, image.postID, image.order, filename)
             let upscaled = req.session.upscaledImages as boolean
-            let buffer = await serverFunctions.getFile(key, upscaled, post.rating === functions.r18())
-            if (!buffer.byteLength) buffer = await serverFunctions.getFile(key, false, post.rating === functions.r18())
+            let buffer = await serverFunctions.getFile(key, upscaled, post.rating === functions.r18(), image.pixelHash)
+            if (!buffer.byteLength) buffer = await serverFunctions.getFile(key, false, post.rating === functions.r18(), image.pixelHash)
             const mediainfo = await mediaInfoFactory()
             const readChunk = async (chunkSize: number, offset: number) => {
                 return new Uint8Array(buffer.subarray(offset, offset + chunkSize))

@@ -174,7 +174,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         let upscaledLinks = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getImageLink(post.images[i])
-            let response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let response = await fetch(functions.appendURLParams(imageLink, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength) {
                 const decrypted = await functions.decryptBuffer(response, imageLink, session)
                 const blob = new Blob([new Uint8Array(decrypted)])
@@ -183,7 +183,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 links.push(imageLink)
             }
             let upscaledImageLink = functions.getImageLink(post.images[i], true)
-            let upscaledResponse = await fetch(`${upscaledImageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            let upscaledResponse = await fetch(functions.appendURLParams(upscaledImageLink, {upscaled: true}), {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
                 const decrypted = await functions.decryptBuffer(upscaledResponse, upscaledImageLink, session)
                 const upscaledBlob = new Blob([new Uint8Array(decrypted)])
@@ -1393,7 +1393,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u) => `${u.link}?upscaled=${showUpscaled}`)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u) => functions.appendURLParams(u.link, {upscaled: showUpscaled}))} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

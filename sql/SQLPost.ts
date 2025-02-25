@@ -386,15 +386,15 @@ export default class SQLPost {
 
     /** Insert a new image. */
     public static insertImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
-        type: string, order: number, hash: string, width: number | null, height: number | null, upscaledWidth: number | null, 
-        upscaledHeight: number | null, size: number | null, upscaledSize: number | null, duration: number | null,
-        thumbnail: string | null) => {
+        type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
+        upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
+        duration: number | null, thumbnail: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
-            "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail") 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "imageID"`,
+            "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", 
+            "thumbnail") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING "imageID"`,
             rowMode: "array",
-            values: [postID, filename, upscaledFilename, type, order, hash, width, height, upscaledWidth, upscaledHeight, 
+            values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
             size, upscaledSize, duration, thumbnail]
         }
         await SQLQuery.invalidateCache("post")
@@ -404,15 +404,15 @@ export default class SQLPost {
 
     /** Insert a new image (unverified). */
     public static insertUnverifiedImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
-        type: string, order: number, hash: string, width: number | null, height: number | null, upscaledWidth: number | null, 
-        upscaledHeight: number | null, size: number | null, upscaledSize: number | null, duration: number | null,
-        thumbnail: string | null) => {
+        type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
+        upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
+        duration: number | null, thumbnail: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
-            "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail") 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "imageID"`,
+            "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING "imageID"`,
             rowMode: "array",
-            values: [postID, filename, upscaledFilename, type, order, hash, width, height, upscaledWidth, upscaledHeight, 
+            values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
             size, upscaledSize, duration, thumbnail]
         }
         const result = await SQLQuery.run(query)

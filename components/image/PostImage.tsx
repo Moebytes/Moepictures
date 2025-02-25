@@ -1299,7 +1299,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             img = functions.getImageLink(image)
         }
         if (forceOriginal) {
-            encryptedBuffer = await fetch(`${img}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            encryptedBuffer = await fetch(functions.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
         } else {
             encryptedBuffer = await fetch(img).then((r) => r.arrayBuffer())
         }

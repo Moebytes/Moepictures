@@ -34,6 +34,7 @@ export interface Image {
     duration: number
     thumbnail: string
     hash: string
+    pixelHash: string
 }
 
 export interface Post {

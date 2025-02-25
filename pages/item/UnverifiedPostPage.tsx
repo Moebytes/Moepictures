@@ -253,7 +253,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         } else {
             let img = image
             if (session.cookie) {
-                img += `?upscaled=${session.upscaledImages}`
+                img = functions.appendURLParams(img, {upscaled: session.upscaledImages})
             }
             return (
                 <>

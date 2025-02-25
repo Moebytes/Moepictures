@@ -161,7 +161,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         let upscaledLinks = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getUnverifiedImageLink(post.images[i])
-            const response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            const response = await fetch(functions.appendURLParams(imageLink, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
                 const file = new File([blob], path.basename(imageLink))
@@ -169,7 +169,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 links.push(imageLink)
             }
             let upscaledImageLink = functions.getUnverifiedImageLink(post.images[i], true)
-            const upscaledResponse = await fetch(`${upscaledImageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            const upscaledResponse = await fetch(functions.appendURLParams(upscaledImageLink, {upscaled: true}), {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
                 const upscaledFile = new File([upscaledBlob], path.basename(upscaledImageLink))
