@@ -1,13 +1,12 @@
 {
   "name": "moepictures.moe",
   "version": "1.0.0",
-  "description": "Moepictures is a moe anime image board for cute anime art. We exclusively collect the art of cute anime girls. Search for the most moe art on the internet! You can also apply image filters to posts and reverse/change speed of videos and gifs. Posts are organzied by artists, characters, series, and tags.",
+  "description": "Moepictures is a moe anime image board for cute anime art.",
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server/server.js",
-    "test": "tsc test.ts && node test.js",
-    "server": "webpack && npm run pm2",
-    "pm2": "pm2 stop all && pm2 start dist/server/server.js",
+    "build": "webpack",
+    "pm2": "pm2 start ecosystem.config.js --env production",
     "clean": "del-cli ./dist"
   },
   "keywords": [
