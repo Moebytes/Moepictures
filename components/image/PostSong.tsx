@@ -527,7 +527,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const sharePost = async (site: string) => {
         if (!props.post || !props.artists) return
-        let url = `${window.location.origin}${window.location.pathname}`
+        let url = `${functions.getDomain()}${window.location.pathname}`
         let text = `${props.post.englishTitle || props.post.title} by ${props.artists[0].tag}\n\n`
         if (site === "pinterest") {
             let img = await generateTempLink()

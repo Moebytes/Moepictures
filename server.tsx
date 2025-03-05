@@ -183,7 +183,7 @@ const lastModified = new Date().toUTCString()
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${req.protocol}://${req.get("host")}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const pixelHash = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       let url = req.url.replace(/\?.*$/, "")
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -247,7 +247,7 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${req.protocol}://${req.get("host")}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const pixelHash = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
@@ -446,7 +446,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
     const secret = cryptoFunctions.generateAPIKey(16)
     storageMap.set(req.session.username, {secret, key, upscaled, r18, pixelHash, songCover})
     let ext = songCover ? ".jpg" : path.extname(key)
-    const url = `${req.protocol}://${req.get("host")}/storage/${req.session.username}${ext}?secret=${secret}`
+    const url = `${functions.getDomain()}/storage/${req.session.username}${ext}?secret=${secret}`
     res.status(200).send(url)
   } catch {
     res.status(400).end()
