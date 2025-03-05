@@ -199,15 +199,18 @@ export default class ServerFunctions {
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
-            const prefix = isTag ? `history/tag/${id}/` : `history/post/${id}/${upscaled ? "upscaled" : "original"}/`
-            const list = await r2.listObjectsV2({Bucket: bucket, Prefix: prefix})
-            if (!list.Contents?.length) return defaultBuffer
-            const sortedKeys = list.Contents.map((obj) => obj.Key!).sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-            if (!sortedKeys.length) return defaultBuffer
-            const firstKey = sortedKeys[0]
-            const body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(firstKey)}`, {hash: pixelHash}), {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
-            if (!body) return defaultBuffer
-            return Buffer.from(body)
+            const prefix = isTag ? `history/tag/${id}` : `history/post/${id}/${upscaled ? "upscaled" : "original"}`
+            const fileName = file.split("/").pop()
+
+            for (let i = 0; i < 10; i++) {
+                let testKey = `${prefix}/${i}/${fileName}`
+                try {
+                    const body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(testKey)}`, 
+                    {hash: pixelHash}), {responseType: "arraybuffer"}).then(r => r.data)
+                    return Buffer.from(body)
+                } catch {}
+            }
+            return defaultBuffer
         }
     }
 

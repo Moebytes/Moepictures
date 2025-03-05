@@ -1274,7 +1274,6 @@ export default class Functions {
         if (!arrayBuffer.byteLength) return ""
         const buffer = Buffer.from(arrayBuffer)
         let mime = Functions.bufferFileType(arrayBuffer)[0]?.mime || "image/jpeg"
-        if (mime === "application/json") mime = "image/jpeg"
         return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
@@ -2060,7 +2059,6 @@ export default class Functions {
 
     public static arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
         let mime = Functions.bufferFileType(Buffer.from(arrayBuffer))[0]?.mime || "image/png"
-        if (mime === "application/json") mime = "image/jpeg"
         return `data:${mime};base64,${Buffer.from(arrayBuffer).toString("base64")}`
     }
 
@@ -2721,12 +2719,11 @@ export default class Functions {
     public static isEncrypted = (buffer: ArrayBuffer | Buffer, link: string) => {
         const result = Functions.bufferFileType(buffer)
         if (result.length) {
-            if (result[0].typename === "mp3") {
-                if (!Functions.isAudio(link)) return true
-            }
+            if (result[0].typename === "mp3" && !Functions.isAudio(link)) return true
             if (result[0].typename === "exe") return true
             if (result[0].typename === "pic") return true
             if (result[0].typename === "mpeg") return true
+            if (result[0].typename === "Json") return true
             return false
         }
         return true

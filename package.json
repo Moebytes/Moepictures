@@ -5,8 +5,9 @@
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server/server.js",
-    "build": "webpack",
+    "build": "npm run clean && webpack",
     "pm2": "pm2 start ecosystem.config.js --env production",
+    "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",
     "clean": "del-cli ./dist"
   },
   "keywords": [
@@ -55,7 +56,7 @@
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "del-cli": "^3.0.1",
-    "dotenv": "^16.0.3",
+    "dotenv-cli": "^8.0.0",
     "dotenv-webpack": "^8.0.1",
     "express-favicon": "^2.0.1",
     "file-loader": "^6.2.0",
@@ -109,6 +110,7 @@
     "cors": "^2.8.5",
     "csrf": "^3.1.0",
     "deviantart.ts": "^0.2.6",
+    "dotenv": "^16.4.7",
     "evaporate": "^2.1.4",
     "express": "^4.17.3",
     "express-rate-limit": "^6.3.0",
