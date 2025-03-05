@@ -146,7 +146,7 @@ const UserRoutes = (app: Express) => {
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                 await sql.token.insertEmailToken(email, hashToken)
                 const user = functions.toProperCase(username)
-                const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
+                const link = `${functions.getDomain()}/api/user/verifyemail?token=${token}`
                 await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(user, link))
                 const device = functions.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
@@ -186,7 +186,7 @@ const UserRoutes = (app: Express) => {
                         const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                         await sql.token.insertIPToken(user.username, hashToken, ip)
                         const username = functions.toProperCase(user.username)
-                        const link = `${req.protocol}://${req.get("host")}/api/user/verifylogin?token=${token}`
+                        const link = `${functions.getDomain()}/api/user/verifylogin?token=${token}`
                         await serverFunctions.email(user.email!, "Moepictures New Login Location", jsxFunctions.verifyLoginJSX(username, link, ip, region))
                         return res.status(403).send("new IP login location")
                     }
@@ -741,7 +741,7 @@ const UserRoutes = (app: Express) => {
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
                 const username = functions.toProperCase(req.session.username)
-                const link = `${req.protocol}://${req.get("host")}/forgot-password`
+                const link = `${functions.getDomain()}/forgot-password`
                 await serverFunctions.email(user.email!, "Moepictures Password Changed", jsxFunctions.changedPasswordJSX(username, link))
                 return res.status(200).send("Success")
             } else {
@@ -824,7 +824,7 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.token.insertEmailToken(newEmail, hashToken)
             const username = functions.toProperCase(req.session.username)
-            const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
+            const link = `${functions.getDomain()}/api/user/changeemail?token=${token}`
             await serverFunctions.email(newEmail, "Moepictures Email Address Change", jsxFunctions.changeEmailJSX(username, link))
             res.status(200).send("Success")
         } catch (e) {
@@ -883,7 +883,7 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.token.insertEmailToken(email, hashToken)
             const username = functions.toProperCase(req.session.username)
-            const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
+            const link = `${functions.getDomain()}/api/user/verifyemail?token=${token}`
             await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
             await sql.user.updateUser(req.session.username, "email", email)
             req.session.email = email
@@ -932,7 +932,7 @@ const UserRoutes = (app: Express) => {
             const hashToken =  await bcrypt.hash(token, 13)
             await sql.token.insertPasswordToken(user.username, hashToken)
             const username = functions.toProperCase(user.username)
-            const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
+            const link = `${functions.getDomain()}/reset-password?token=${token}&username=${user.username}`
             await serverFunctions.email(user.email!, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
