@@ -492,7 +492,8 @@ app.get("/*", async (req: Request, res: Response) => {
     // @ts-expect-error
     const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
     res.status(200).send(document.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
-  } catch {
+  } catch (e) {
+    console.log(e)
     return res.status(500).json({message: "Internal server error."})
   }
 })
