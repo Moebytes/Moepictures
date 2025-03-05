@@ -477,7 +477,7 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
 app.get("/*", async (req: Request, res: Response) => {
   try {
     if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
-      res.redirect(301, `https://moepictures.moe${req.path}`)
+      return res.redirect(301, `https://moepictures.moe${req.path}`)
     }
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {
       return res.status(404).json({message: "Path not found."})
