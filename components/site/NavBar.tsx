@@ -62,7 +62,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {setSearch, setSearchFlag, setScroll} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
     const {session, userImg, hasNotification} = useSessionSelector()
-    const {setSessionFlag, setUserImg, setHasNotification} = useSessionActions()
+    const {setSessionFlag, setHasNotification} = useSessionActions()
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("60px")
@@ -76,9 +76,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         setShowMiniTitle(false)
-
-        const savedUserImg = localStorage.getItem("userImg")
-        if (savedUserImg) setUserImg(savedUserImg)
 
         const handleScroll = () => {
             if (window.scrollY === 0) return
@@ -99,12 +96,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         }
         checkMail()
     }, [session])
-
-    useEffect(() => {
-        functions.linkToBase64(userImg).then((userImg) => {
-            localStorage.setItem("userImg", userImg)
-        })
-    }, [userImg])
 
     useEffect(() => {
         const scrollHandler = () => {

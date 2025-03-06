@@ -108,8 +108,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
     const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
-    const {session} = useSessionSelector()
-    const {setSession} = useSessionActions()
+    const {session, userImg} = useSessionSelector()
+    const {setSession, setUserImg} = useSessionActions()
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -231,6 +231,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedReaderThumbnails = localStorage.getItem("readerThumbnails")
         const savedReaderZoom = localStorage.getItem("readerZoom")
         const savedReaderInvert = localStorage.getItem("readerInvert")
+        const savedUserImg = localStorage.getItem("userImg")
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
@@ -301,6 +302,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedReaderThumbnails) setReaderThumbnails(savedReaderThumbnails === "true")
         if (savedReaderInvert) setReaderInvert(savedReaderInvert === "true")
         if (savedReaderZoom) setReaderZoom(Number(savedReaderZoom))
+        if (savedUserImg) setUserImg(savedUserImg)
     }, [])
 
     useEffect(() => {
@@ -362,7 +364,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localStorage.setItem("saveSearch", String(saveSearch))
         localStorage.setItem("favSearch", String(favSearch))
         localStorage.setItem("showBigPlayer", String(showBigPlayer))
-    }, [disableZoom, imageExpand, noteDrawingEnabled, showTranscript, format, saveSearch, favSearch, showBigPlayer])
+        localStorage.setItem("userImg", userImg)
+    }, [disableZoom, imageExpand, noteDrawingEnabled, showTranscript, format, saveSearch, favSearch, showBigPlayer, userImg])
 
     useEffect(() => {
         localStorage.setItem("readerHorizontal", String(readerHorizontal))

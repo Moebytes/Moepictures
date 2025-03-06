@@ -418,13 +418,15 @@ const storageMap = new Map<string, Storage>()
 app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {link, songCover} = req.body as {link: string, songCover?: boolean}
-    if (!req.session.username) return res.status(403).send("Unauthorized")
+    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+    ip = ip?.toString().replace("::ffff:", "") || ""
+    let userKey = req.session.username ? req.session.username : ip
     const pixelHash = new URL(link).searchParams.get("hash") ?? ""
     const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))
     let upscaled = req.session.upscaledImages as boolean
     if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
     if (req.session.captchaNeeded) {
-      storageMap.delete(req.session.username)
+      storageMap.delete(userKey)
       return res.status(403).end()
     }
     const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -444,9 +446,9 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
       }
     }
     const secret = cryptoFunctions.generateAPIKey(16)
-    storageMap.set(req.session.username, {secret, key, upscaled, r18, pixelHash, songCover})
+    storageMap.set(userKey, {secret, key, upscaled, r18, pixelHash, songCover})
     let ext = songCover ? ".jpg" : path.extname(key)
-    const url = `${functions.getDomain()}/storage/${req.session.username}${ext}?secret=${secret}`
+    const url = `${functions.getDomain()}/storage/${userKey}${ext}?secret=${secret}`
     res.status(200).send(url)
   } catch {
     res.status(400).end()
