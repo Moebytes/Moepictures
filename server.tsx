@@ -50,6 +50,7 @@ app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}
 app.use(express.json({limit: "1gb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
+app.set("trust proxy", true)
 
 declare module "express-session" {
   interface SessionData extends ServerSession {}
@@ -79,7 +80,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: "lax", secure: "auto"},
+  cookie: {maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: "lax", secure: process.env.TESTING === "no"},
   rolling: true,
   resave: false,
   saveUninitialized: false
