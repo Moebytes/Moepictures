@@ -30,7 +30,7 @@ const searchSlice = createSlice({
         showTranscript: false,
         imageExpand: false,
         showUpscaled: false,
-        showChildren: false,
+        showChildren: true,
         readerThumbnails: true,
         readerZoom: 100,
         readerInvert: false,

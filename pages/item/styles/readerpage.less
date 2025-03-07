@@ -5,7 +5,7 @@
     flex-direction: column;
     background-color: var(--background);  
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .reader-controls {
@@ -218,7 +218,9 @@
     width: 100%;
     height: 100%;
     background-color: transparent;
-    overflow: auto;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .reader-renderer-horizontal {
