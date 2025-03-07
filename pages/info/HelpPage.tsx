@@ -339,11 +339,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.uploading.uploadGuidelines.guide17}<br/><br/>
                     </span>
 
-
                     {i18n.help.uploading.moreNotes.header}<br/>
-                    <span style={{color: "var(--text-strong)"}}>{i18n.help.uploading.moreNotes.note1}</span><br/>
-                    {i18n.help.uploading.moreNotes.note2}<br/>
-                    {i18n.help.uploading.moreNotes.note3}<br/><br/>
+                    {i18n.help.uploading.moreNotes.note1}<br/>
+                    {i18n.help.uploading.moreNotes.note2}<br/><br/>
 
                     {i18n.help.uploading.categorization.header}<br/>
                     <span className="help-alt">{i18n.sidebar.type}</span>{i18n.help.uploading.categorization.type.line1}<br/>

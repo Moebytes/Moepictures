@@ -1369,9 +1369,8 @@
             },
             "moreNotes": {
                 "header": "More notes:",
-                "note1": "*Under no circumstances should you ever upload photographs, 3D-renders, or photo-realism resembling real people! If you have to question it, it probably is too realistic.",
-                "note2": "*Good quality sketches and lineart that don't technically meet our guidelines may still be uploaded under the sketch/lineart categories. They are only available if you filter for the All+S (All+Sketches), sketch or lineart styles.",
-                "note3": "*Original images are often badly optimized and will load slowly. If you compress correctly, there should not be any artifacts. If you want high quality lossless PNG's, you are better off getting them directly from the artist."
+                "note1": "*Good quality sketches and lineart that don't technically meet our guidelines may still be uploaded under the sketch/lineart categories. They are only available if you filter for the All+S (All+Sketches), sketch or lineart styles.",
+                "note2": "*Original images are often badly optimized and will load slowly. If you compress correctly, there should not be any artifacts. If you want high quality lossless PNG's, you are better off getting them directly from the artist."
             },
             "categorization": {
                 "header": "Please classify uploads into the appropriate category. We have three levels of categorization:",
