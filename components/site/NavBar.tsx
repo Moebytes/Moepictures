@@ -215,7 +215,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (tablet) {
-            let marginR = "27px"
+            let marginR = "25px"
             setMarginR(marginR)
         } else {
             let marginR = hideSidebar ? "40px" : "45px"
