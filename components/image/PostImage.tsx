@@ -1558,7 +1558,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={decrypted}/>
                             <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
                             <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={ref} src={decrypted} onLoad={(event) => onLoad(event)}/>
+                            <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={ref} src={decrypted} alt="Anime girl drawing" onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

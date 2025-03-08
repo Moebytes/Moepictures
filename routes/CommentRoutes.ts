@@ -1,4 +1,4 @@
-import e, {Express, NextFunction, Request, Response} from "express"
+import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"

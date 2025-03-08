@@ -36,7 +36,7 @@ module.exports = [
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
-        {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", options: {sources: false, minimize}}]},
+        {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", options: {sources: false, minimize: false}}]},
         {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
         {test: /\.less$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
         {test: /\.(tsx?|jsx?)$/, exclude: webExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]},
@@ -52,7 +52,7 @@ module.exports = [
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "./index.html"),
-        minify: minimize
+        minify: false
       }),
       new webpack.ProvidePlugin({
         process: "process/browser",
@@ -86,7 +86,7 @@ module.exports = [
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
-        {test: /\.html$/, exclude: nodeExclude, use: [{loader: "html-loader", options: {minimize}}]},
+        {test: /\.html$/, exclude: nodeExclude, use: [{loader: "html-loader", options: {minimize: false}}]},
         {test: /\.css$/, exclude: nodeExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
         {test: /\.less$/, exclude: nodeExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
         {test: /\.(tsx?|jsx?)$/, exclude: nodeExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}

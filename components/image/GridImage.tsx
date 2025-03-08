@@ -892,7 +892,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" 
                 ref={videoRef} src={liveImg} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
-                <img draggable={false} className="image" ref={ref} src={dynamicSrc()} 
+                <img draggable={false} className="image" alt="Anime girl drawing" ref={ref} src={dynamicSrc()} 
                 onLoad={(event) => onLoad(event)} style={{...getDisplay()}}/>
                 </div>
         </div>
