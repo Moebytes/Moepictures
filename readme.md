@@ -34,7 +34,7 @@ live2d player has controls for speed, parameters, and parts.
 
 ### Notes
 
-<img src="assets/images/notes.png" height="600">
+<img src="assets/images/notes.png">
 
 As often images might contain japanese text, adding and viewing notes for translations is also supported!
 
