@@ -2,7 +2,7 @@
 
 Moepictures is an image board site for cute anime art, organized by tags.
 
-<img src="assets/images/readme.png">
+<img src="assets/images/mainimg.png">
 
 ### Searching With Spaces
 
@@ -40,10 +40,11 @@ As often images might contain japanese text, adding and viewing notes for transl
 
 ### Self-hosting
 
-First install Node.js >v20 and PostgreSQL >v16 which will run the server and database.
+First you will need to download all of these.
 
-https://nodejs.org/en/
-https://www.postgresql.org
+- Node.js v23: https://nodejs.org/en/
+- PostgreSQL v16: https://www.postgresql.org/
+- Redis v7: https://redis.io/
 
 Clone the project:
 ```
