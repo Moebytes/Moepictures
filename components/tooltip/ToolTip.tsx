@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -52,7 +52,8 @@ const ToolTip: React.FunctionComponent = (props) => {
     const [tags, setTags] = useState([] as MiniTag[])
     const [artist, setArtist] = useState(null as MiniTag | null)
     const scrollRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const updateTags = async () => {
         if (session?.username && !session?.showTooltips) return
@@ -202,11 +203,11 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const searchArtist = () => {
-        if (history.location.pathname === "/" || history.location.pathname === "/posts") {
+        if (location.pathname === "/" || location.pathname === "/posts") {
             setSearch(artist.tag)
             setSearchFlag(true)
         } else {
-            history.push(`/tag/${artist.tag}`)
+            navigate(`/tag/${artist.tag}`)
         }
     }
 

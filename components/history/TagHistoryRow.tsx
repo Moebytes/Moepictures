@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -42,7 +42,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteTagHistoryID, revertTagHistoryID, deleteTagHistoryFlag, revertTagHistoryFlag} = useTagDialogSelector()
     const {setDeleteTagHistoryID, setRevertTagHistoryID, setDeleteTagHistoryFlag, setRevertTagHistoryFlag} = useTagDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
     const tag = props.tagHistory.tag
@@ -81,7 +81,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false,
         featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
-            history.push(`/tag/history/${props.tagHistory.key}`)
+            navigate(`/tag/history/${props.tagHistory.key}`)
         } else {
             props.onEdit?.()
         }
@@ -158,7 +158,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${props.tagHistory.tag}${historyIndex}`, "_blank")
         } else {
-            history.push(`/tag/${props.tagHistory.tag}${historyIndex}`)
+            navigate(`/tag/${props.tagHistory.tag}${historyIndex}`)
         }
     }
 
@@ -166,7 +166,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.tagHistory.user}`, "_blank")
         } else {
-            history.push(`/user/${props.tagHistory.user}`)
+            navigate(`/user/${props.tagHistory.user}`)
         }
     }
 

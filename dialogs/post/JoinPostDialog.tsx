@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -18,7 +17,6 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const {setJoinPostID} = usePostDialogActions()
     const [nestedChildren, setNestedChildren] = useState(false)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

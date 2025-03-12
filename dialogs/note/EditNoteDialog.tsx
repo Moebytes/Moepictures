@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions,
 useLayoutSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -25,7 +24,6 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     const [posY, setPosY] = useState(0)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

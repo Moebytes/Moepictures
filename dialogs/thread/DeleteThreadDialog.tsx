@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -12,7 +11,6 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const {setDeleteThreadID, setDeleteThreadFlag} = useThreadDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteThread.title

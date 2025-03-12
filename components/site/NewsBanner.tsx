@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useActiveSelector, useActiveActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import "./styles/newsbanner.less"
@@ -9,7 +9,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
     const {setNewsBanner} = useActiveActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const updateBanner = async () => {
         const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
@@ -32,7 +32,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
 
     const openLink = () => {
         if (!newsBanner) return
-        history.push(newsBanner.link || "")
+        navigate(newsBanner.link || "")
         closeBanner()
     }
 

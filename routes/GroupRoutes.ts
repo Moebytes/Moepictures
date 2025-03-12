@@ -1,6 +1,5 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
-import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -24,12 +23,12 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, name, username, date} = req.body as GroupParams
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!name) return res.status(400).send("Invalid name")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            if (!name) return void res.status(400).send("Invalid name")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
-            if (!post) return res.status(400).send("Invalid post")
+            if (!post) return void res.status(400).send("Invalid post")
             const slug = functions.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
@@ -82,21 +81,21 @@ const GroupRoutes = (app: Express) => {
     app.put("/api/group/edit", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             let {slug, name, description, username, date, silent, reason} = req.body as GroupEditParams
-            if (!name) return res.status(400).send("Invalid name")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
-            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
+            if (!name) return void res.status(400).send("Invalid name")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
+            if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             const newSlug = functions.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
             if (group.name === name && group.slug === newSlug 
-            && group.description === description) return res.status(200).send("Success")
+            && group.description === description) return void res.status(200).send("Success")
             await sql.group.updateGroupName(group.groupID, targetUser, name, newSlug, description)
 
             if (permissions.isMod(req.session)) {
-                if (silent) return res.status(200).send("Success")
+                if (silent) return void res.status(200).send("Success")
             }
         
             const updated = await sql.group.group(newSlug) as GroupPosts
@@ -126,10 +125,10 @@ const GroupRoutes = (app: Express) => {
     app.delete("/api/group/delete", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const slug = req.query.slug as string
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             await sql.group.deleteGroup(group.groupID)
             res.status(200).send("Success")
         } catch (e) {
@@ -141,7 +140,7 @@ const GroupRoutes = (app: Express) => {
     app.get("/api/group", groupLimiter, async (req: Request, res: Response) => {
         try {
             const name = req.query.name as string
-            if (!name) return res.status(400).send("Invalid name")
+            if (!name) return void res.status(400).send("Invalid name")
             const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug) as GroupPosts
             group.posts = group.posts.filter((p) => !p.deleted)
@@ -149,7 +148,7 @@ const GroupRoutes = (app: Express) => {
                 group.posts = group.posts.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                if (functions.isR18(group.rating)) return res.status(403).end()
+                if (functions.isR18(group.rating)) return void res.status(403).end()
             }
             for (let i = group.posts.length - 1; i >= 0; i--) {
                 const post = group.posts[i]
@@ -169,7 +168,7 @@ const GroupRoutes = (app: Express) => {
     app.get("/api/groups", groupLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             const groups = await sql.group.postGroups(postID)
             let newGroups = [] as GroupPosts[]
             for (let i = 0; i < groups.length; i++) {
@@ -214,23 +213,23 @@ const GroupRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(newGroups, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
     app.delete("/api/group/post/delete", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, name, username, date} = req.query as unknown as GroupPostDeleteParams
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!name) return res.status(400).send("Invalid name")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
-            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
+            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            if (!name) return void res.status(400).send("Invalid name")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
+            if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             const post = await sql.post.post(postID)
-            if (!post) return res.status(400).send("Invalid post")
+            if (!post) return void res.status(400).send("Invalid post")
             const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             let filteredPosts = group.posts.filter((p: any) => p.postID !== post.postID)
             let rating = functions.r13()
             for (const filteredPost of filteredPosts) {
@@ -275,12 +274,12 @@ const GroupRoutes = (app: Express) => {
     app.put("/api/group/reorder", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {slug, posts, silent} = req.body as GroupReorderParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             for (let i = 0; i < posts.length; i++) {
-                if (Number(posts[i].order) !== i + 1) return res.status(400).send("Bad post orders")
+                if (Number(posts[i].order) !== i + 1) return void res.status(400).send("Bad post orders")
             }
             let added = [] as any[]
             let removed = [] as any[]
@@ -307,14 +306,14 @@ const GroupRoutes = (app: Express) => {
             let toAdd = [...added, ...changed]
             let addedPosts = added.map((p: any) => p.postID)
             let removedPosts = removed.map((p: any) => p.postID)
-            if (![...toRemove, ...toAdd].length) return res.status(200).send("Success")
+            if (![...toRemove, ...toAdd].length) return void res.status(200).send("Success")
             await sql.group.bulkDeleteGroupMappings(group.groupID, toRemove)
             await sql.group.bulkInsertGroupMappings(group.groupID, toAdd)
             await sql.group.updateGroup(group.groupID, "updater", req.session.username)
             await sql.group.updateGroup(group.groupID, "updatedDate", new Date().toISOString())
 
             if (permissions.isMod(req.session)) {
-                if (silent) return res.status(200).send("Success")
+                if (silent) return void res.status(200).send("Success")
             }
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
@@ -344,12 +343,12 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/request", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, name, reason} = req.body as GroupRequestParams
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!name) return res.status(400).send("Invalid name")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            if (!name) return void res.status(400).send("Invalid name")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
-            if (!post) return res.status(400).send("Invalid post")
+            if (!post) return void res.status(400).send("Invalid post")
             const slug = functions.generateSlug(name)
             await sql.request.insertGroupRequest(req.session.username, slug, name, postID, reason)
             res.status(200).send("Success")
@@ -363,8 +362,8 @@ const GroupRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.groupRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -376,9 +375,9 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/request/fulfill", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {username, slug, postID, accepted} = req.body as GroupRequestFulfillParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!username) return void res.status(400).send("Bad username")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupRequest(username, slug, postID)
             if (accepted) {
                 let message = `Group request on ${functions.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
@@ -397,11 +396,11 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/delete/request", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {slug, reason} = req.body as GroupDeleteRequestParams
-            if (!slug) return res.status(400).send("Invalid slug")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (!slug) return void res.status(400).send("Invalid slug")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             await sql.request.insertGroupDeleteRequest(req.session.username, slug, reason)
             res.status(200).send("Success")
         } catch (e) {
@@ -413,11 +412,11 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/post/delete/request", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {removalItems, reason} = req.body as GroupPostDeleteRequestParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             for (const item of removalItems) {
                 const group = await sql.group.group(item.slug)
-                if (!group) return res.status(400).send("Invalid group")
+                if (!group) return void res.status(400).send("Invalid group")
             }
             for (const item of removalItems) {
                 await sql.request.insertGroupPostDeleteRequest(req.session.username, item.slug, item.postID, reason)
@@ -433,8 +432,8 @@ const GroupRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.groupDeleteRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -446,9 +445,9 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/delete/request/fulfill", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {username, slug, accepted} = req.body as GroupDeleteRequestFulfillParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!username) return void res.status(400).send("Bad username")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupDeleteRequest(username, slug)
             if (accepted) {
                 let message = `Group deletion request on ${functions.getDomain()}/group/${slug} has been approved. Thanks!`
@@ -467,9 +466,9 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/post/delete/request/fulfill", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {username, slug, postID, accepted} = req.body as GroupPostDeleteRequestFulfillParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!username) return void res.status(400).send("Bad username")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupPostDeleteRequest(username, slug, postID)
             if (accepted) {
                 let message = `Group post deletion request on ${functions.getDomain()}/group/${slug} has been approved. Thanks!`
@@ -488,10 +487,10 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/edit/request", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {slug, name, description, reason} = req.body as GroupEditRequestParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.banned) return res.status(403).send("You are banned")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (req.session.banned) return void res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
-            if (!group) return res.status(400).send("Invalid group")
+            if (!group) return void res.status(400).send("Invalid group")
             const changes = functions.parseGroupChanges(group, {name, description, posts: group.posts} as GroupPosts)
             await sql.request.insertGroupEditRequest(req.session.username, slug, name, description, [], [], false, changes, reason)
             res.status(200).send("Success")
@@ -505,8 +504,8 @@ const GroupRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.groupEditRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -518,9 +517,9 @@ const GroupRoutes = (app: Express) => {
     app.post("/api/group/edit/request/fulfill", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {username, slug, accepted} = req.body as GroupEditRequestFulfillParams
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!username) return void res.status(400).send("Bad username")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupEditRequest(username, slug)
             if (accepted) {
                 let message = `Group edit request on ${functions.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
@@ -540,11 +539,11 @@ const GroupRoutes = (app: Express) => {
         try {
             let {slug, historyID, username, query, offset} = req.query as unknown as GroupHistoryParams
             if (!offset) offset = 0
-            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             let result = [] as GroupHistory[]
             if (slug) {
                 const group = await sql.group.group(slug)
-                if (!group) return res.status(400).send("Bad group")
+                if (!group) return void res.status(400).send("Bad group")
                 if (historyID) {
                     const history = await sql.history.groupHistoryID(group.groupID, historyID)
                     if (history) result = [history]
@@ -566,15 +565,15 @@ const GroupRoutes = (app: Express) => {
     app.delete("/api/group/history/delete", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
             const {slug, historyID} = req.query as {slug: string, historyID: string}
-            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!slug) return res.status(400).send("Bad slug")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!slug) return void res.status(400).send("Bad slug")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             const group = await sql.group.group(slug as string)
-            if (!group) return res.status(400).send("Bad group")
+            if (!group) return void res.status(400).send("Bad group")
             const groupHistory = await sql.history.groupHistory(group.groupID)
             if (groupHistory[0]?.historyID === historyID) {
-                return res.status(400).send("Bad request")
+                return void res.status(400).send("Bad request")
             } else {
                 await sql.history.deleteGroupHistory(historyID)
             }

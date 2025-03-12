@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import Footer from "../../components/site/Footer"
@@ -25,7 +25,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     const [token, setToken] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -59,7 +59,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/enable-2fa")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (session.$2fa) {
@@ -142,7 +142,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     </> : null}
                     {!showValidation ? 
                     <div className="sitepage-row">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     : null}
                     {showValidation ? <>
@@ -155,7 +155,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-row">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                         <button className="f2a-button" onClick={enable2FA}>{i18n.pages.enable2FA.enable}</button>
                     </div>
                     </> : null}

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -55,7 +55,7 @@ const HelpPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {helpTab} = useActiveSelector()
     const {setHelpTab} = useActiveActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const urlState = () => {
         if (window.location.hash) setHelpTab(window.location.hash.replace("#", ""))
@@ -789,7 +789,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.copyrightRemoval.line1}<br/><br/>
 
                     {i18n.help.copyrightRemoval.submitForm}
-                    <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.getDomain()}/copyright-removal`}</a>
+                    <a className="help-link" onClick={() => navigate("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.getDomain()}/copyright-removal`}</a>
                     {i18n.help.copyrightRemoval.emailUs}<span style={{color: "var(--text-alt)"}}>{i18n.email}{i18n.period}</span><br/><br/>
 
                     {i18n.help.copyrightRemoval.line2}<br/><br/>

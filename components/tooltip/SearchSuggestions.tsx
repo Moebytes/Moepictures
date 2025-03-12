@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions} from "../../store"
 import "./styles/searchsuggestions.less"
@@ -28,7 +28,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const [suggestions, setSuggestions] = useState([] as TagCount[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const handleKeydown = (event: any) => {
         if (event.key === "Enter") {
@@ -102,7 +102,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             if (!suggestions[i]) break
             const tagClick = (event: React.MouseEvent) => {
                 if (props.click) return props.click(suggestions[i].tag)
-                history.push(`/posts`)
+                navigate(`/posts`)
                 const parts = search.split(/ +/g)
                 parts[parts.length - 1] = functions.appendSpecialCharacters(parts, suggestions[i].tag)
                 const newSearch = parts.join(" ")

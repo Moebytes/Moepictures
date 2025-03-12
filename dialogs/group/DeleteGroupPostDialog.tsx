@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -19,7 +18,6 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteGroupPost.title

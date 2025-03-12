@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector, useCacheSelector} from "../../store"
 import favicon from "../../assets/icons/favicon.png"
@@ -22,7 +22,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const {emojis} = useCacheSelector()
     const [hover, setHover] = useState(false)
     const [asset, setAsset] = useState(null as UserComment | ThreadUser | ThreadReply | null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -46,7 +46,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const openPost = (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const imgClick = (event: React.MouseEvent) => {
@@ -63,9 +63,9 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             if (props.request.type === "comment") {
                 openPost((asset as UserComment).postID, event)
             } else if (props.request.type === "thread") {
-                history.push(`/thread/${(asset as ThreadUser).threadID}`)
+                navigate(`/thread/${(asset as ThreadUser).threadID}`)
             } else if (props.request.type === "reply") {
-                history.push(`/thread/${(asset as ThreadReply).threadID}`)
+                navigate(`/thread/${(asset as ThreadReply).threadID}`)
             }
         }
     }
@@ -125,9 +125,9 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
                 <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
             </div>
             <div className="mod-post-text-column">
-                <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
+                <span className="mod-post-link" onClick={() => navigate(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
                 <span className="mod-post-text">{i18n.labels.reason}: {props.request.reason}</span>
-                <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>{i18n.roles.user}: {username}</span>
+                <span className="mod-post-link" onClick={() => navigate(`/user/${username}`)}>{i18n.roles.user}: {username}</span>
                 <span className="mod-post-text">{textType}{text}</span>
             </div>
             <div className="mod-post-options">

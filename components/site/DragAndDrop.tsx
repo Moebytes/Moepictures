@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../structures/Functions"
@@ -17,7 +17,8 @@ const DragAndDrop: React.FunctionComponent = (props) => {
     const [visible, setVisible] = useState(false)
     const [searchHover, setSearchHover] = useState(false)
     const [uploadHover, setUploadHover] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const placebo = (event: DragEvent) => {
         event.preventDefault()
@@ -96,9 +97,9 @@ const DragAndDrop: React.FunctionComponent = (props) => {
             }
         }
         if (files.length) {
-            if (history.location.pathname === "/upload" ||
-            history.location.pathname === "/bulk-upload" ||
-            history.location.pathname.includes("edit-post")) {
+            if (location.pathname === "/upload" ||
+            location.pathname === "/bulk-upload" ||
+            location.pathname.includes("edit-post")) {
                 uploadFiles(files)
             } else {
                 searchFiles(files)
@@ -129,16 +130,16 @@ const DragAndDrop: React.FunctionComponent = (props) => {
             result.push(...await functions.imageSearch(files[i], session, setSessionFlag))
         }
         setImageSearchFlag(result)
-        history.push("/posts")
+        navigate("/posts")
     }
 
     const uploadFiles = async (files: File[]) => {
         setSearchHover(false)
         setUploadHover(false)
         if (!files?.length) return
-        if (history.location.pathname !== "/upload" &&
-        history.location.pathname !== "/bulk-upload" &&
-        !history.location.pathname.includes("edit-post")) history.push("/upload")
+        if (location.pathname !== "/upload" &&
+        location.pathname !== "/bulk-upload" &&
+        !location.pathname.includes("edit-post")) navigate("/upload")
         setUploadDropFiles(await Promise.all(files.map((file) => serializeFile(file))))
     }
 

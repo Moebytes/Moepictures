@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -31,7 +31,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [captcha, setCaptcha] = useState(" ")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -77,7 +77,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (session.username) {
-            history.push("/profile")
+            navigate("/profile")
         }
     }, [session])
 
@@ -101,13 +101,13 @@ const LoginPage: React.FunctionComponent = (props) => {
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)
-                history.push(redirect)
+                navigate(redirect)
                 setRedirect(null)
             } else {
-                history.push("/posts")
+                navigate("/posts")
             }
             if (result === "2fa") {
-                history.push("/2fa")
+                navigate("/2fa")
             }
             setError(false)
         } catch (err: any) {

@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector,
 useLayoutSelector, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -38,7 +37,6 @@ const EditMessageReplyDialog: React.FunctionComponent = (props) => {
     const emojiRef = useRef<HTMLButtonElement>(null)
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

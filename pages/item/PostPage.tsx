@@ -1,5 +1,5 @@
 import React, {useEffect, useContext, useState, useReducer} from "react"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -32,11 +32,7 @@ import permissions from "../../structures/Permissions"
 import "./styles/postpage.less"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 
-interface Props {
-    match: {params: {id: string, slug: string}}
-}
-
-const PostPage: React.FunctionComponent<Props> = (props) => {
+const PostPage: React.FunctionComponent = () => {
     const {language, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -65,10 +61,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [historyID, setHistoryID] = useState(null as string | null)
     const [noteID, setNoteID] = useState(null as string | null)
     const [groups, setGroups] = useState([] as GroupPosts[])
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
-    const postID = props.match.params.id
-    const slug = props.match.params.slug
+    const {id: postID, slug} = useParams() as {id: string, slug: string}
 
     useEffect(() => {
         setHideNavbar(false)
@@ -103,7 +98,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 } else {
                     searchParams.delete("order")
                 }
-                history.replace(`${location.pathname}?${searchParams.toString()}`)
+                navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             }
         }, 300)
     }, [order])
@@ -121,7 +116,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             setRedirect(`/post/${postID}/${slug}`)
         }
         if (!session.username && post.rating !== functions.r13()) {
-            history.push("/login")
+            navigate("/login")
             setSidebarText("Login required.")
         }
         if (post.deleted && !permissions.isMod(session)) {
@@ -386,7 +381,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 if (post.fake) return
-                history.push(`/post/${post.postID}/${post.slug}`)
+                navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
     }
@@ -410,7 +405,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 if (post.fake) return
-                history.push(`/post/${post.postID}/${post.slug}`)
+                navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
     }
@@ -525,14 +520,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHistoryID(null)
         setNoteID(null)
         setPostFlag(true)
-        history.push(`/post/${postID}/${slug}`)
+        navigate(`/post/${postID}/${slug}`)
     }
 
     const getHistoryButtons = () => {
         if (noteID) {
             return (
                 <div className="note-button-container">
-                    <button className="note-button" onClick={() => history.push(`/note/history/${postID}/${slug}/${order}`)}>
+                    <button className="note-button" onClick={() => navigate(`/note/history/${postID}/${slug}/${order}`)}>
                         <img src={historyIcon}/>
                         <span>History</span>
                     </button>
@@ -548,7 +543,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         return (
             <div className="history-button-container">
-                <button className="history-button" onClick={() => history.push(`/post/history/${postID}/${slug}`)}>
+                <button className="history-button" onClick={() => navigate(`/post/history/${postID}/${slug}`)}>
                     <img src={historyIcon}/>
                     <span>History</span>
                 </button>
@@ -569,11 +564,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
-                history.push(`/post/${postID}/${slug}`)
+                navigate(`/post/${postID}/${slug}`)
             }
             return (
                 <div className="post-item">
-                    <div className="post-item-title-clickable" onClick={() => history.push(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{i18n.post.favgroup}: {activeFavgroup.name}</div>
+                    <div className="post-item-title-clickable" onClick={() => navigate(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{i18n.post.favgroup}: {activeFavgroup.name}</div>
                     <div className="post-item-container">
                         <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
                     </div>
@@ -592,7 +587,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
-                history.push(`/post/${postID}/${slug}`)
+                navigate(`/post/${postID}/${slug}`)
                 setPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)
@@ -602,7 +597,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 // style={{margin: "0px", paddingLeft: "60px", paddingRight: "60px", paddingTop: "0px", paddingBottom: "0px"}}
                 // style={{marginTop: "0px", marginBottom: "10px"}} 
                 <div className="post-item">
-                    <div className="post-item-title-clickable" onClick={() => history.push(`/group/${group.slug}`)}>{i18n.labels.group}: {group.name}</div>
+                    <div className="post-item-title-clickable" onClick={() => navigate(`/group/${group.slug}`)}>{i18n.labels.group}: {group.name}</div>
                     <div className="post-item-container">
                         <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
                     </div>

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -26,7 +26,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const [timeRemaining, setTimeRemaining] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -73,7 +73,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/change-username")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (!permissions.isPremium(session)) {
@@ -141,7 +141,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     <>
                     <span className="sitepage-link">{i18n.pages.changeUsername.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     {changeText()}
@@ -160,7 +160,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     </div></> : null}
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container" style={{justifyContent: timeRemaining ? "flex-start" : "center"}}>
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                         {!timeRemaining ? <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeUsername}</button> : null}
                     </div>
                     </>

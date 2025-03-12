@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -27,7 +27,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
     const [newPassword, setNewPassword] = useState("")
     const [confirmNewPassword, setConfirmNewPassword] = useState("")
     const [token, setToken] = useState("")
-    const history = useHistory()
+    const navigate = useNavigate()
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const getFilter = () => {
@@ -45,7 +45,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
 
         const token = new URLSearchParams(window.location.search).get("token")
         const username = new URLSearchParams(window.location.search).get("username")
-        if (!token || !username) history.push("/posts")
+        if (!token || !username) navigate("/posts")
     }, [])
 
     useEffect(() => {
@@ -116,7 +116,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
                     <span className="sitepage-link">{i18n.pages.resetPassword.submitHeading}</span>
                     <div className="sitepage-button-container-left">
                         <Link to="/login">
-                            <button className="sitepage-button" onClick={() => history.push("/login")}>{i18n.navbar.login}</button>
+                            <button className="sitepage-button" onClick={() => navigate("/login")}>{i18n.navbar.login}</button>
                         </Link>
                     </div>
                     </> : <>

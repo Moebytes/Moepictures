@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import adminCrown from "../../assets/icons/admin-crown.png"
@@ -35,7 +35,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const [updaterData, setUpdaterData] = useState({} as PrunedUser)
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -73,7 +73,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/thread/${props.thread.threadID}`, "_blank")
         } else {
-            history.push(`/thread/${props.thread.threadID}`)
+            navigate(`/thread/${props.thread.threadID}`)
         }
     }
 
@@ -90,14 +90,14 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.thread.creator}`, "_blank")
         } else {
-            history.push(`/user/${props.thread.creator}`)
+            navigate(`/user/${props.thread.creator}`)
         }
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(creatorData.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getUpdaterPFP = () => {
@@ -113,14 +113,14 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.thread.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.thread.updater}`)
+            navigate(`/user/${props.thread.updater}`)
         }
     }
 
     const updaterImgClick = (event: React.MouseEvent) => {
         if (!updaterData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(updaterData.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(updaterData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {

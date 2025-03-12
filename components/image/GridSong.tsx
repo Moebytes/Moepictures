@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle, SyntheticEvent} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import loading from "../../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../../store"
@@ -64,7 +64,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [decrypted, setDecrypted] = useState("")
     const [selected, setSelected] = useState(false)
     const [hover, setHover] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -354,7 +355,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
-            if (!history.location.pathname.includes("/post/")) setPost(null)
+            if (!location.pathname.includes("/post/")) setPost(null)
             event.preventDefault()
             const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
@@ -393,8 +394,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
-                    if (!history.location.pathname.includes("/post/")) setPost(null)
-                    history.push(`/post/${props.id}/${props.post.slug}`)
+                    if (!location.pathname.includes("/post/")) setPost(null)
+                    navigate(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
             }

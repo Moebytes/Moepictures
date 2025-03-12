@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -19,13 +19,9 @@ import pageIcon from "../../assets/icons/page.png"
 import "./styles/itemspage.less"
 import {CommentSort, ForumPostSearch} from "../../types/Types"
 
-interface Props {
-    match: {params: {username: string}}
-}
-
 let replace = true
 
-const ForumPostsPage: React.FunctionComponent<Props> = (props) => {
+const ForumPostsPage: React.FunctionComponent = () => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -56,8 +52,8 @@ const ForumPostsPage: React.FunctionComponent<Props> = (props) => {
     const {setForumPostSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
     const sortRef = useRef<HTMLDivElement>(null)
-    const username = props.match.params.username
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {username} = useParams() as {username: string}
 
     useEffect(() => {
         const queryParam = new URLSearchParams(window.location.search).get("query")
@@ -259,10 +255,10 @@ const ForumPostsPage: React.FunctionComponent<Props> = (props) => {
         if (searchQuery) searchParams.set("query", searchQuery)
         if (!scroll) searchParams.set("page", String(forumPostsPage || ""))
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, forumPostsPage])
 

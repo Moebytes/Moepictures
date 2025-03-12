@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -15,7 +14,6 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
     const {postInfoID} = usePostDialogSelector()
     const {setPostInfoID} = usePostDialogActions()
     const [info, setInfo] = useState(null as PostMetadata | null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

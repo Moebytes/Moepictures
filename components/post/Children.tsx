@@ -1,5 +1,5 @@
 import React from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import functions from "../../structures/Functions"
 import {useLayoutSelector, useSessionSelector, useThemeSelector} from "../../store"
 import "./styles/children.less"
@@ -14,12 +14,12 @@ const Children: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
     const images = props.posts.map((child) => functions.getThumbnailLink(child.post.images[0], "tiny", session, mobile))
 
     const click = (img: string, index: number) => {
         const post = props.posts[index].post
-        history.push(`/post/${post.postID}/${post.slug}`)
+        navigate(`/post/${post.postID}/${post.slug}`)
     }
 
     return (

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -20,7 +20,7 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.dialogs.deletePost.title
@@ -41,11 +41,11 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
         if (!deletePostID) return
         if (deletePostID.unverified) {
             await functions.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
-            return deletePostID.post.deleted ? history.push("/posts") : setPostFlag(true)
+            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(true)
         }
         if (permissions.isAdmin(session)) {
             await functions.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
-            return deletePostID.post.deleted ? history.push("/posts") : setPostFlag(true)
+            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(true)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,7 +13,6 @@ import {NoteHistory, Note} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {id: string, slug: string, order: string, username?: string}}
     all?: boolean
 }
 
@@ -32,17 +31,14 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [visibleRevisions, setVisibleRevisions] = useState([] as NoteHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const postID = props.match.params.id
-    const slug = props.match.params.slug
-    const order = props.match.params.order
-    const username = props.match.params.username
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {id: postID, slug, order, username} = useParams() as {id: string, slug: string, order: string, username?: string}
 
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect(postID ? `/note/history/${postID}/${slug}/${order}` : "/note/history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])

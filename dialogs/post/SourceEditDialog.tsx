@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useActiveActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -31,7 +30,6 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     const updateFields = async () => {
         if (!sourceEditID) return

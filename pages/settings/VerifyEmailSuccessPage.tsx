@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
@@ -15,7 +15,7 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {mobile} = useLayoutSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -52,7 +52,7 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text">{i18n.pages.verifyEmailSuccess.heading}</span>
                     </div>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/posts")}>{i18n.buttons.ok}</button>
                     </div>
                 </div>
                 <Footer/>

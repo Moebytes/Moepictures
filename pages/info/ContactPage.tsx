@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory, Link} from "react-router-dom"
+import {useNavigate, Link} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -28,7 +28,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -133,7 +133,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                     {submitted ? <>
                     <span className="contact-link">{i18n.pages.contact.submitHeading}</span>
                     <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => history.push("/posts")}>←{i18n.buttons.back}</button>
+                        <button className="contact-button" onClick={() => navigate("/posts")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     <span className="contact-link">

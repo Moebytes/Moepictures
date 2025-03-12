@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -15,7 +14,6 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.takedownTag.title

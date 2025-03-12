@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -12,7 +12,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {deleteFavGroupObj} = useGroupDialogSelector()
     const {setDeleteFavGroupObj} = useGroupDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteFavgroup.title
@@ -34,7 +34,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
         await functions.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
         setDeleteFavGroupObj(null)
         setSessionFlag(true)
-        history.push("/profile")
+        navigate("/profile")
     }
 
     const click = (button: "accept" | "reject") => {

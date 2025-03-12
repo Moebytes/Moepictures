@@ -34,11 +34,11 @@ const SearchRoutes = (app: Express) => {
             let withTags = req.query.withTags === "true"
             let favoriteMode = req.query.favoriteMode === "true"
             if (!query) query = ""
-            if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
-            if (!functions.validRating(rating, true)) return res.status(400).send("Invalid rating")
-            if (functions.isR18(rating)) if (!req.session.showR18) return res.status(403).end()
-            if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
-            if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validType(type, true)) return void res.status(400).send("Invalid type")
+            if (!functions.validRating(rating, true)) return void res.status(400).send("Invalid rating")
+            if (functions.isR18(rating)) if (!req.session.showR18) return void res.status(403).end()
+            if (!functions.validStyle(style, true)) return void res.status(400).send("Invalid style")
+            if (!functions.validSort(sort)) return void res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags?.length; i++) {
                 const tag = await sql.tag.tag(tags[i])
@@ -53,15 +53,15 @@ const SearchRoutes = (app: Express) => {
             }
             let result = [] as PostSearch[]
             if (tags?.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
-                if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
+                if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             }
             if (sort === "favorites" || sort === "reverse favorites") {
-                if (!req.session.username) return res.status(403).send("Unauthorized")
+                if (!req.session.username) return void res.status(403).send("Unauthorized")
             }
             if (sort === "hidden" || sort === "reverse hidden" || 
                 sort === "locked" || sort === "reverse locked" ||
                 sort === "private" || sort === "reverse private") {
-                if (!permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+                if (!permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (req.session.blacklist) {
@@ -99,30 +99,30 @@ const SearchRoutes = (app: Express) => {
             } else if (query.startsWith("favorites:")) {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
-                if (!user?.publicFavorites) return res.status(403).send("Unauthorized")
+                if (!user?.publicFavorites) return void res.status(403).send("Unauthorized")
                 result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("uploads:")) {
                 const username = query.replace("uploads:", "").trim()
                 const user = await sql.user.user(username as string)
-                if (!user) return res.status(400).send("Bad username")
+                if (!user) return void res.status(400).send("Bad username")
                 result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("group:")) {
                 const [g, name] = query.split(":")
                 let group = await sql.group.group(functions.generateSlug(name))
-                if (!group) return res.status(400).send("Bad group")
+                if (!group) return void res.status(400).send("Bad group")
                 result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("favgroup:")) {
                 const [f, username, name] = query.split(":")
                 let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, sort, showChildren, req.session.username)
-                if (!favgroup) return res.status(400).send("Bad favgroup")
+                if (!favgroup) return void res.status(400).send("Bad favgroup")
                 if (favgroup.private) {
-                    if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
+                    if (!permissions.isMod(req.session) && username !== req.session.username) return void res.status(403).send("Unauthorized")
                 }
                 result = favgroup.posts.map((p) => ({...p, postCount: favgroup.postCount}))
             } else if (query.startsWith("history:")) {
                 const [h, username] = query.split(":")
-                if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
-                if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
+                if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
+                if (username !== req.session.username && !permissions.isAdmin(req.session)) return void res.status(403).send("Unauthorized")
                 let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, showChildren, req.session.username)
                 result = history.map((h) => ({...h.post, postCount: h.historyCount}))
             } else {
@@ -152,14 +152,14 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, useMD5} = req.body as SimilarSearchParams
-            if (!bytes) return res.status(400).send("Image data must be provided as bytes")
+            if (!bytes) return void res.status(400).send("Image data must be provided as bytes")
             const buffer = Buffer.from(Object.values(bytes) as any) as any
             let hash = ""
             if (useMD5) {
@@ -187,7 +187,7 @@ const SearchRoutes = (app: Express) => {
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -195,7 +195,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("artists", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
@@ -220,7 +220,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -228,7 +228,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("characters", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
@@ -253,7 +253,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -261,7 +261,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("series", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
@@ -286,7 +286,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -295,8 +295,8 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, type, limit, offset} = req.query as TagSearchParams
             if (!sort) sort = "random"
             if (!type) type = "all"
-            if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
-            if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
+            if (!functions.validTagSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validTagType(type)) return void res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = [] as TagSearch[]
             if (search.startsWith("social:")) {
@@ -314,7 +314,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -322,7 +322,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -359,7 +359,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -367,7 +367,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -404,7 +404,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -413,7 +413,7 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, rating, limit, offset} = req.query as GroupSearchParams
             if (!sort) sort = "random"
             if (!rating) rating = "all"
-            if (!functions.validGroupSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username)
             if (!req.session.showR18) {
@@ -422,7 +422,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -431,12 +431,12 @@ const SearchRoutes = (app: Express) => {
             let {query, type} = req.query as SearchSuggestionsParams
             if (!query) query = ""
             if (!type) type = "all"
-            if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
+            if (!functions.validTagType(type)) return void res.status(400).send("Invalid type")
             query = functions.trimSpecialCharacters(query)
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type, 100).then((r) => r.slice(0, 100))
             if (!result?.[0]) {
-                return serverFunctions.sendEncrypted([], req, res)
+                return void serverFunctions.sendEncrypted([], req, res)
             }
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag: any) => !tag.hidden)
@@ -448,7 +448,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(tags.slice(0, 100), req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -460,7 +460,7 @@ const SearchRoutes = (app: Express) => {
             let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
                 if (postArray?.length === 1) {
-                    return serverFunctions.sendEncrypted([], req, res)
+                    return void serverFunctions.sendEncrypted([], req, res)
                 }
                 postArray = []
             }
@@ -494,7 +494,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(finalTags, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -502,7 +502,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -538,7 +538,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -547,12 +547,13 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, offset} = req.query as MessageSearchParams
             if (!sort) sort = "random"
             const hideSystem = req.query.hideSystem === "true"
-            if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!functions.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, Number(offset))
             let filtered = [] as MessageSearch[]
             let messageCount = messages[0]?.messageCount || 0
+            loop1:
             for (const message of messages) {
                 if (message.r18 && !req.session.showR18) {
                     messageCount--
@@ -568,11 +569,11 @@ const SearchRoutes = (app: Express) => {
                         continue
                     }
                 }
-                for (const recipient of message.recipients) {
-                    if (recipient === req.session.username) {
-                        if (message.delete) {
+                for (const data of message.recipientData) {
+                    if (data.recipient === req.session.username) {
+                        if (data.delete) {
                             messageCount--
-                            continue
+                            continue loop1
                         }
                     }
                 }
@@ -584,7 +585,7 @@ const SearchRoutes = (app: Express) => {
             serverFunctions.sendEncrypted(filtered, req, res)
         } catch (e) {
             console.log(e)
-            return res.status(400).send("Bad request")
+            return void res.status(400).send("Bad request")
         }
     })
 
@@ -592,8 +593,8 @@ const SearchRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.report.reports(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {

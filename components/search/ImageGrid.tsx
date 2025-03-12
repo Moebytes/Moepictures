@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
@@ -51,11 +51,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
-    const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref>[])
+    const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
 
     useEffect(() => {
@@ -85,7 +85,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!session.username) {
                 setSearch("")
                 setSidebarText("Login required.")
-                return history.push("/login")
+                return navigate("/login")
             }
             if (!permissions.isPremium(session)) return setPremiumRequired("tags")
         }
@@ -93,7 +93,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!session.username) {
                 setSearch("")
                 setSidebarText("Login required.")
-                return history.push("/login")
+                return navigate("/login")
             }
             if (!permissions.isPremium(session)) return setPremiumRequired(true)
         }
@@ -445,7 +445,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (loaded) {
             const searchParams = new URLSearchParams(window.location.search)
             searchParams.delete("loaded")
-            history.replace(`${location.pathname}?${searchParams.toString()}`)
+            navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
         }
     }, [loaded])
 
@@ -456,10 +456,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (!scroll) searchParams.set("page", String(page))
         if (!searchParams.toString()) return
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, search, page])
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -96,13 +96,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [progress, setProgress] = useState(0)
     const [progressText, setProgressText] = useState("")
-    const progressBarRef = useRef<HTMLDivElement>(null)
-    const artistInputRef = useRef<HTMLInputElement>(null)
-    const characterInputRef = useRef<HTMLInputElement>(null)
-    const seriesInputRef = useRef<HTMLInputElement>(null)
-    const metaInputRef = useRef<HTMLInputElement>(null)
-    const appendTagsRef = useRef<HTMLTextAreaElement>(null)
-    const history = useHistory()
+    const progressBarRef = useRef<HTMLDivElement>(null!)
+    const artistInputRef = useRef<HTMLInputElement>(null!)
+    const characterInputRef = useRef<HTMLInputElement>(null!)
+    const seriesInputRef = useRef<HTMLInputElement>(null!)
+    const metaInputRef = useRef<HTMLInputElement>(null!)
+    const appendTagsRef = useRef<HTMLTextAreaElement>(null!)
+    const navigate = useNavigate()
 
     useEffect(() => {
         setHideNavbar(true)
@@ -812,7 +812,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             return (
                 <>
                 <span className="upload-ban-text">{i18n.pages.upload.banText}</span>
-                <button className="upload-button" onClick={() => history.goBack()}
+                <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>

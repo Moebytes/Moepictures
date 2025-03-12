@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../structures/Functions"
@@ -19,14 +19,14 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {ratingType} = useSearchSelector()
     const {setPosts} = useCacheActions()
     const [images, setImages] = useState([] as string[])
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const tagPage = (event: React.MouseEvent) => {
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${props.character.tag}`, "_blank")
         } else {
-            history.push(`/tag/${props.character.tag}`)
+            navigate(`/tag/${props.character.tag}`)
         }
     }
 
@@ -37,7 +37,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
             if (newTab) {
                 return window.open(`/post/${post.postID}/${post.slug}`, "_blank")
             } else {
-                return history.push(`/post/${post.postID}/${post.slug}`)
+                return navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
         let filtered = props.character.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
@@ -45,7 +45,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(props.character.posts)

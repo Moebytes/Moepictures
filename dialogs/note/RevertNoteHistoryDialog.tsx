@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -13,7 +12,6 @@ const RevertNoteHistoryDialog: React.FunctionComponent = (props) => {
     const {setRevertNoteHistoryID, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.revertNoteHistory.title

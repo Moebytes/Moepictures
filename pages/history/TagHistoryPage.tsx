@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,7 +13,6 @@ import {TagHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {tag: string, username?: string}}
     all?: boolean
 }
 
@@ -32,15 +31,14 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [visibleRevisions, setVisibleRevisions] = useState([] as TagHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const tag = props.match?.params.tag
-    const username = props.match?.params.username
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {tag, username} = useParams() as {tag: string, username?: string}
 
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect(tag ? `/tag/history/${tag}` : "/tag/history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])

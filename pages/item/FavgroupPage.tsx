@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions} from "../../store"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -25,13 +25,9 @@ import EffectImage from "../../components/image/EffectImage"
 import "./styles/grouppage.less"
 import {GroupItem, Favgroup} from "../../types/Types"
 
-interface Props {
-    match: {params: {username: string, favgroup: string}}
-}
-
 let limit = 25
 
-const FavgroupPage: React.FunctionComponent<Props> = (props) => {
+const FavgroupPage: React.FunctionComponent = () => {
     const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -49,10 +45,9 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const {setPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null as Favgroup | null)
     const [items, setItems] = useState([] as GroupItem[])
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
-    const username = props.match.params.username
-    const favgroupName = props.match.params.favgroup
+    const {username, favgroup: favgroupName} = useParams() as {username: string, favgroup: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -154,7 +149,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
                     return setGroupFlag(true)
                 }
                 if (reorderState) return
-                functions.openPost(item.post, event, history, session, setSessionFlag)
+                functions.openPost(item.post, event, navigate, session, setSessionFlag)
                 setPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
@@ -230,7 +225,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open("/posts", "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
         }
         setSearch(`favgroup:${username}:${favgroup.name}`)
         setSearchFlag(true)

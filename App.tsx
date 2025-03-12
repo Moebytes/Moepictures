@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
+import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, useFlagSelector,
 useInteractionActions, useActiveSelector, useActiveActions, useCacheSelector, useCacheActions, useSearchSelector, useSearchActions} from "./store"
 import favicon from "./assets/icons/favicon.png"
@@ -96,7 +96,7 @@ const App: React.FunctionComponent = (props) => {
     const {setEmojis} = useCacheActions()
     const {selectionMode} = useSearchSelector()
     const {setRatingType} = useSearchActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
 
     const getSessionCookie = async () => {
@@ -188,7 +188,7 @@ const App: React.FunctionComponent = (props) => {
         }
         if (session.username && !session.emailVerified) {
             if (location.pathname !== "/verify-email") {
-                history.push("/verify-email")
+                navigate("/verify-email")
             }
         }
         clearTimeout(destroy2FATimeout)
@@ -290,72 +290,74 @@ const App: React.FunctionComponent = (props) => {
                 <LocalStorage/>
                 <TagToolTip/>
                 <ToolTip/>
-                <Switch>
-                    <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
-                    <Route exact path="/profile"><UserProfilePage/></Route>
-                    <Route exact path="/upload"><UploadPage/></Route>
-                    <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
-                    <Route exact path="/tags"><TagsPage/></Route>
-                    <Route exact path="/series"><SeriesPage/></Route>
-                    <Route exact path="/characters"><CharactersPage/></Route>
-                    <Route exact path="/artists"><ArtistsPage/></Route>
-                    <Route exact path="/comments"><CommentsPage/></Route>
-                    <Route exact path="/notes"><NotesPage/></Route>
-                    <Route exact path="/groups"><GroupsPage/></Route>
-                    <Route exact path="/history"><HistoryPage/></Route>
-                    <Route exact path="/premium"><PremiumPage/></Route>
-                    <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
-                    <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                    <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                    <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
-                    <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
-                    <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                    <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                    <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
-                    <Route exact path="/note/history/:id/:slug/:order" render={(props) => <NoteHistoryPage {...props}/>}></Route>
-                    <Route exact path="/user/:username/note/history" render={(props) => <NoteHistoryPage {...props}/>}></Route>
-                    <Route exact path="/post/history/:id/:slug" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                    <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                    <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
-                    <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
-                    <Route exact path="/post/:id/:slug/reader" render={(props) => <ReaderPage {...props}/>}></Route>
-                    <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
-                    <Route exact path="/edit-post/:id/:slug" render={(props) => <EditPostPage {...props}/>}></Route>
-                    <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
-                    <Route exact path="/set-avatar/:id/:slug" render={(props) => <SetAvatarPage {...props}/>}></Route>
-                    <Route exact path="/help"><HelpPage/></Route>
-                    <Route exact path="/forum"><ForumPage/></Route>
-                    <Route exact path="/posts/:username" render={(props) => <ForumPostsPage {...props}/>}></Route>
-                    <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
-                    <Route exact path="/mail"><MailPage/></Route>
-                    <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
-                    <Route exact path="/change-username"><ChangeUsernamePage/></Route>
-                    <Route exact path="/change-email"><ChangeEmailPage/></Route>
-                    <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
-                    <Route exact path="/verify-email"><VerifyEmailPage/></Route>
-                    <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
-                    <Route exact path="/verify-login-success"><VerifyLoginSuccessPage/></Route>
-                    <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
-                    <Route exact path="/reset-password"><ResetPasswordPage/></Route>
-                    <Route exact path="/change-password"><ChangePasswordPage/></Route>
-                    <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
-                    <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
-                    <Route exact path="/login"><LoginPage/></Route>
-                    <Route exact path="/2fa"><$2FAPage/></Route>
-                    <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
-                    <Route exact path="/login-history"><LoginHistoryPage/></Route>
-                    <Route exact path="/contact"><ContactPage/></Route>
-                    <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
-                    <Route exact path="/mod-queue"><ModQueuePage/></Route>
-                    <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
-                    <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
-                    <Route exact path="/news-banner"><NewsBannerPage/></Route>
-                    <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
-                    <Route exact path="/api-key"><APIKeyPage/></Route>
-                    <Route exact path="/401"><$401Page/></Route>
-                    <Route exact path="/403"><$403Page/></Route>
-                    <Route path="*"><$404Page/></Route>
-                </Switch>
+                <Routes>
+                    <Route path="/" element={<PostsPage/>}/>
+                    <Route path="/posts" element={<PostsPage/>}/>
+                    <Route path="/home" element={<PostsPage/>}/>
+                    <Route path="/profile" element={<UserProfilePage/>}/>
+                    <Route path="/upload" element={<UploadPage/>}/>
+                    <Route path="/bulk-upload" element={<BulkUploadPage/>}/>
+                    <Route path="/tags" element={<TagsPage/>}/>
+                    <Route path="/series" element={<SeriesPage/>}/>
+                    <Route path="/characters" element={<CharactersPage/>}/>
+                    <Route path="/artists" element={<ArtistsPage/>}/>
+                    <Route path="/comments" element={<CommentsPage/>}/>
+                    <Route path="/notes" element={<NotesPage/>}/>
+                    <Route path="/groups" element={<GroupsPage/>}/>
+                    <Route path="/history" element={<HistoryPage/>}/>
+                    <Route path="/premium" element={<PremiumPage/>}/>
+                    <Route path="/user/:username" element={<UserPage/>}/>
+                    <Route path="/tag/history/:tag" element={<TagHistoryPage/>}/>
+                    <Route path="/user/:username/tag/history" element={<TagHistoryPage/>}/>
+                    <Route path="/tag/:tag" element={<TagPage/>}/>
+                    <Route path="/group/:group" element={<GroupPage/>}/>
+                    <Route path="/group/history/:group" element={<GroupHistoryPage/>}/>
+                    <Route path="/user/:username/group/history" element={<GroupHistoryPage/>}/>
+                    <Route path="/favgroup/:username/:favgroup" element={<FavgroupPage/>}/>
+                    <Route path="/note/history/:id/:slug/:order" element={<NoteHistoryPage/>}/>
+                    <Route path="/user/:username/note/history" element={<NoteHistoryPage/>}/>
+                    <Route path="/post/history/:id/:slug" element={<PostHistoryPage/>}/>
+                    <Route path="/user/:username/post/history" element={<PostHistoryPage/>}/>
+                    <Route path="/post/:id" element={<PostPage/>}/>
+                    <Route path="/post/:id/:slug" element={<PostPage/>}/>
+                    <Route path="/post/:id/:slug/reader" element={<ReaderPage/>}/>
+                    <Route path="/unverified/post/:id" element={<UnverifiedPostPage/>}/>
+                    <Route path="/edit-post/:id/:slug" element={<EditPostPage/>}/>
+                    <Route path="/unverified/edit-post/:id" element={<EditUnverifiedPostPage/>}/>
+                    <Route path="/set-avatar/:id/:slug" element={<SetAvatarPage/>}/>
+                    <Route path="/help" element={<HelpPage/>}/>
+                    <Route path="/forum" element={<ForumPage/>}/>
+                    <Route path="/posts/:username" element={<ForumPostsPage/>}/>
+                    <Route path="/thread/:id" element={<ThreadPage/>}/>
+                    <Route path="/mail" element={<MailPage/>}/>
+                    <Route path="/message/:id" element={<MessagePage/>}/>
+                    <Route path="/change-username" element={<ChangeUsernamePage/>}/>
+                    <Route path="/change-email" element={<ChangeEmailPage/>}/>
+                    <Route path="/change-email-success" element={<ChangeEmailSuccessPage/>}/>
+                    <Route path="/verify-email" element={<VerifyEmailPage/>}/>
+                    <Route path="/verify-email-success" element={<VerifyEmailSuccessPage/>}/>
+                    <Route path="/verify-login-success" element={<VerifyLoginSuccessPage/>}/>
+                    <Route path="/premium-success" element={<PremiumSuccessPage/>}/>
+                    <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+                    <Route path="/change-password" element={<ChangePasswordPage/>}/>
+                    <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+                    <Route path="/signup" element={<SignUpPage/>}/>
+                    <Route path="/login" element={<LoginPage/>}/>
+                    <Route path="/2fa" element={<$2FAPage/>}/>
+                    <Route path="/enable-2fa" element={<$2FAEnablePage/>}/>
+                    <Route path="/login-history" element={<LoginHistoryPage/>}/>
+                    <Route path="/contact" element={<ContactPage/>}/>
+                    <Route path="/copyright-removal" element={<CopyrightRemovalPage/>}/>
+                    <Route path="/mod-queue" element={<ModQueuePage/>}/>
+                    <Route path="/privacy" element={<Navigate to="/terms#privacy" replace/>}/>
+                    <Route path="/terms" element={<TermsPage/>}/>
+                    <Route path="/news-banner" element={<NewsBannerPage/>}/>
+                    <Route path="/ip-blacklist" element={<IPBlacklistPage/>}/>
+                    <Route path="/api-key" element={<APIKeyPage/>}/>
+                    <Route path="/401" element={<$401Page/>}/>
+                    <Route path="/403" element={<$403Page/>}/>
+                    <Route path="*" element={<$404Page/>}/>
+                </Routes>
                 <AudioPlayer/>
             </DragScroll>
         </div>

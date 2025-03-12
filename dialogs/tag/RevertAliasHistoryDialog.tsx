@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
@@ -14,7 +13,6 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         if (revertAliasHistoryID) {

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -34,7 +34,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const [userRole, setUserRole] = useState("")
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
@@ -127,14 +127,14 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?note=${props.noteHistory.historyID}&order=${props.noteHistory.order}`
-        functions.openPost(props.noteHistory.post, event, history, session, setSessionFlag, historyIndex)
+        functions.openPost(props.noteHistory.post, event, navigate, session, setSessionFlag, historyIndex)
     }
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.noteHistory.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.noteHistory.updater}`)
+            navigate(`/user/${props.noteHistory.updater}`)
         }
     }
 

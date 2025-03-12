@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useThreadDialogActions, 
 useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions,
 useFlagActions} from "../../store"
@@ -41,7 +41,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {deleteReplyID, deleteReplyFlag, editReplyFlag, editReplyID, editReplyContent, editReplyR18} = useThreadDialogSelector()
     const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyFlag, setEditReplyID, setEditReplyContent, setEditReplyR18, setReportReplyID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const defaultIcon = props.reply.image ? false : true
 
@@ -60,7 +60,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.reply.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.reply.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(props.reply.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const triggerQuote = () => {
@@ -163,7 +163,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.reply.creator}`, "_blank")
         } else {
-            history.push(`/user/${props.reply.creator}`)
+            navigate(`/user/${props.reply.creator}`)
         }
     }
 
@@ -238,8 +238,8 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const viewThreads = () => {
-        history.push(`/posts/${props.reply.creator}`)
-        //history.push("/forum")
+        navigate(`/posts/${props.reply.creator}`)
+        //navigate("/forum")
         //setThreadSearchFlag(`threads:${props.reply.creator}`)
     }
 

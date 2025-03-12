@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
 useSessionActions, useSearchSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -26,9 +25,8 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [name, setName] = useState("")
     const [tags, setTags] = useState("")
-    const errorRef = useRef<HTMLSpanElement>(null)
-    const tagRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const errorRef = useRef<HTMLSpanElement>(null!)
+    const tagRef = useRef<HTMLDivElement>(null!)
 
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {

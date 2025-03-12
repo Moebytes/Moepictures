@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -12,7 +11,6 @@ const PageDialog: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {setPageFlag} = useFlagActions()
     const [pageField, setPageField] = useState("")
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.page.title

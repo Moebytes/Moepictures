@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
@@ -26,7 +26,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -73,7 +73,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/change-email")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
@@ -118,7 +118,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                     <>
                     <span className="sitepage-link">{i18n.pages.changeEmail.submitHeading}</span>
                     <div className="sitepage-button-container-left">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                     </div>
                     </> : <>
                     <span className="sitepage-link">{i18n.pages.changeEmail.heading}</span>
@@ -136,7 +136,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                         <button className="sitepage-button" onClick={() => submit()}>{i18n.user.changeEmail}</button>
                     </div>
                     </>

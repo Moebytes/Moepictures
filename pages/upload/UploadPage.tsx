@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -79,11 +79,11 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
     const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
     const [dupPosts, setDupPosts] = useState([] as Post[])
-    const uploadErrorRef = useRef<HTMLSpanElement>(null)
-    const submitErrorRef = useRef<HTMLSpanElement>(null)
-    const saucenaoErrorRef = useRef<HTMLSpanElement>(null)
-    const danbooruErrorRef = useRef<HTMLSpanElement>(null)
-    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const uploadErrorRef = useRef<HTMLSpanElement>(null!)
+    const submitErrorRef = useRef<HTMLSpanElement>(null!)
+    const saucenaoErrorRef = useRef<HTMLSpanElement>(null!)
+    const danbooruErrorRef = useRef<HTMLSpanElement>(null!)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null!)
     const [currentImg, setCurrentImg] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
@@ -123,9 +123,9 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [danbooruLink, setDanbooruLink] = useState("")
     const [hideGuidelines, setHideGuidelines] = useState(false)
     const [pending, setPending] = useState([] as UnverifiedPost[])
-    const metaTagRef = useRef<HTMLInputElement>(null)
-    const rawTagRef = useRef<HTMLTextAreaElement>(null)
-    const history = useHistory()
+    const metaTagRef = useRef<HTMLInputElement>(null!)
+    const rawTagRef = useRef<HTMLTextAreaElement>(null!)
+    const navigate = useNavigate()
 
     const parseLinkParam = async () => {
         const linkParam = new URLSearchParams(window.location.search).get("link")
@@ -178,7 +178,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/upload")
-            history.push("/login")
+            navigate("/login")
             setSidebarText("Login required.")
         }
         updatePending()
@@ -612,7 +612,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (newTab) {
             window.open(`/post/${dupPost.postID}/${dupPost.slug}`, "_blank")
         } else {
-            history.push(`/post/${dupPost.postID}/${dupPost.slug}`)
+            navigate(`/post/${dupPost.postID}/${dupPost.slug}`)
         }
     }
 
@@ -809,7 +809,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
             if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
-            let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let characterInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.characters.length; i++) {
                 if (!tagLookup.characters[i]?.tag) continue
                 characters[characters.length - 1].tag = tagLookup.characters[i].tag
@@ -834,7 +834,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             forceUpdate()
 
             let series = [{}] as UploadTag[]
-            let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let seriesInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.series.length; i++) {
                 if (!tagLookup.series[i]?.tag) continue
                 series[series.length - 1].tag = tagLookup.series[i].tag
@@ -1158,7 +1158,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             return (
                 <>
                 <span className="upload-ban-text">{i18n.pages.upload.banText}</span>
-                <button className="upload-button" onClick={() => history.goBack()}
+                <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
@@ -1171,7 +1171,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <>
                 <span className="upload-text" style={{marginTop: "10px", 
                 marginLeft: "10px", fontSize: "20px"}}>{i18n.pages.upload.limitReached}</span>
-                <button className="upload-button" onClick={() => history.goBack()}
+                <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
@@ -1200,10 +1200,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                 </div> : <>
                 {!hideGuidelines ? <div className="upload-guidelines">
-                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line1}<span className="upload-guideline-link" onClick={() => history.push(`/help#uploading`)}>{i18n.pages.upload.guidelines.uploadingGuidelines}</span></span>
-                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line2}<span className="upload-guideline-link" onClick={() => history.push(`/help#compressing`)}>{i18n.pages.upload.guidelines.compressingGuide}</span></span>
-                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line3}<span className="upload-guideline-link" onClick={() => history.push(`/help#upscaling`)}>{i18n.pages.upload.guidelines.upscalingGuide}</span></span>
-                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line4}<span className="upload-guideline-link" onClick={() => history.push(`/help#variations`)}>{i18n.pages.upload.guidelines.variation}</span>{i18n.pages.upload.guidelines.or}<span className="upload-guideline-link" onClick={() => history.push(`/help#child-posts`)}>{i18n.pages.upload.guidelines.childPost}</span></span>
+                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line1}<span className="upload-guideline-link" onClick={() => navigate(`/help#uploading`)}>{i18n.pages.upload.guidelines.uploadingGuidelines}</span></span>
+                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line2}<span className="upload-guideline-link" onClick={() => navigate(`/help#compressing`)}>{i18n.pages.upload.guidelines.compressingGuide}</span></span>
+                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line3}<span className="upload-guideline-link" onClick={() => navigate(`/help#upscaling`)}>{i18n.pages.upload.guidelines.upscalingGuide}</span></span>
+                    <span className="upload-guideline">{i18n.pages.upload.guidelines.line4}<span className="upload-guideline-link" onClick={() => navigate(`/help#variations`)}>{i18n.pages.upload.guidelines.variation}</span>{i18n.pages.upload.guidelines.or}<span className="upload-guideline-link" onClick={() => navigate(`/help#child-posts`)}>{i18n.pages.upload.guidelines.childPost}</span></span>
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line5}<span className="upload-guideline-alt">{i18n.pages.upload.guidelines.size2000}</span>{i18n.pages.upload.guidelines.forOriginal}<span className="upload-guideline-alt">{i18n.pages.upload.guidelines.size8000}</span>{i18n.pages.upload.guidelines.forUpscaled}</span>
                     {type === "image" || type === "comic" ? <>
                         <span className="upload-guideline">{i18n.pages.upload.guidelines.formats.image.title1}<span className="upload-guideline-alt">{i18n.pages.upload.guidelines.formats.image.header1}</span></span>

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector} from "../../store"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -31,13 +31,9 @@ import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
 
-interface Props {
-    match: {params: {tag: string}}
-}
-
 let limit = 25
 
-const TagPage: React.FunctionComponent<Props> = (props) => {
+const TagPage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -62,9 +58,9 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const [featuredImage, setFeaturedImage] = useState("")
     const [favorited, setFavorited] = useState(false)
     const [count, setCount] = useState(0)
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
-    const tagName = props.match.params.tag
+    const {tag: tagName} = useParams() as {tag: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -180,7 +176,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(tagPosts)
@@ -191,7 +187,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${alias ? alias : tag.tag}`, "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
             setSearch(alias ? alias : tag.tag)
             setSearchFlag(true)
         }
@@ -234,7 +230,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const showTagHistory = async () => {
         if (!tag) return
         window.scrollTo(0, 0)
-        history.push(`/tag/history/${tag.tag}`)
+        navigate(`/tag/history/${tag.tag}`)
     }
 
     const editTag = async () => {
@@ -255,7 +251,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
             featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
-            history.push(`/tag/${editTagObj.key}`)
+            navigate(`/tag/${editTagObj.key}`)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
@@ -304,7 +300,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const deleteTag = async () => {
         if (!tag) return
         await functions.delete("/api/tag/delete", {tag: tag.tag}, session, setSessionFlag)
-        history.push("/tags")
+        navigate("/tags")
     }
 
     useEffect(() => {
@@ -392,7 +388,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                 if (!implication) continue
                 let implicationSpace = implication.replaceAll("-", " ")
                 if (i !== tag.implications.length - 1) implication += ", "
-                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${implication}`)}>{implicationSpace}</span>)
+                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${implication}`)}>{implicationSpace}</span>)
             }
         }
         if (jsx.length) {
@@ -413,7 +409,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             for (let i = 0; i < relatedTags.length; i++) {
                 let relatedTag = relatedTags[i].replaceAll("-", " ")
                 if (i !== relatedTags.length - 1) relatedTag += ", "
-                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${relatedTags[i]}`)}>{relatedTag}</span>)
+                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${relatedTags[i]}`)}>{relatedTag}</span>)
             }
         }
         if (jsx.length) {
@@ -478,7 +474,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const currentHistory = (key?: string) => {
-        history.push(`/tag/${key ? key : tagName}`)
+        navigate(`/tag/${key ? key : tagName}`)
         setHistoryID(null)
         setTagFlag(true)
     }
@@ -486,7 +482,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const getHistoryButtons = () => {
         return (
             <div className="history-button-container">
-                <button className="history-button" onClick={() => history.push(`/tag/history/${tagName}`)}>
+                <button className="history-button" onClick={() => navigate(`/tag/history/${tagName}`)}>
                     <img src={historyIcon}/>
                     <span>History</span>
                 </button>
@@ -509,7 +505,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const featuredClick = (event: React.MouseEvent) => {
         if (!tag || !tag.featuredPost) return
-        functions.openPost(tag.featuredPost.postID, event, history, session, setSessionFlag)
+        functions.openPost(tag.featuredPost.postID, event, navigate, session, setSessionFlag)
     }
 
     return (

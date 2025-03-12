@@ -1,5 +1,4 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
@@ -23,9 +22,8 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [name, setName] = useState("")
-    const errorRef = useRef<HTMLSpanElement>(null)
-    const tagRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const errorRef = useRef<HTMLSpanElement>(null!)
+    const tagRef = useRef<HTMLDivElement>(null!)
 
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {

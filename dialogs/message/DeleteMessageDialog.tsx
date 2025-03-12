@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -13,7 +12,6 @@ const DeleteMessageDialog: React.FunctionComponent = (props) => {
     const {setDeleteMessageID, setDeleteMessageFlag} = useMessageDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteMessage.title

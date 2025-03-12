@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -31,7 +31,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -77,7 +77,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (session.username) {
-            history.push("/profile")
+            navigate("/profile")
         }
     }, [session])
 
@@ -151,7 +151,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }
 
     const goToLogin = () => {
-        history.push("/login")
+        navigate("/login")
     }
 
     return (

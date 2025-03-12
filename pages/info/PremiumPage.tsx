@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -34,7 +34,7 @@ const PaymentButton: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [paymentLink, setPaymentLink] = useState("")
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const createCharge = async () => {
         const result = await functions.post("/api/premium/paymentlink", null, session, setSessionFlag)
@@ -66,7 +66,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!session.cookie) return

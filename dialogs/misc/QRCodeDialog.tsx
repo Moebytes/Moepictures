@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useMiscDialogSelector, useMiscDialogActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -13,7 +12,6 @@ const QRCodeDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {qrcodeImage} = useMiscDialogSelector()
     const {setQRCodeImage} = useMiscDialogActions()
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

@@ -1,5 +1,5 @@
 import React, {useReducer, useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
@@ -253,7 +253,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [shiftKey, setShiftKey] = useState(false)
     const [bubbleWidth, setBubbleWidth] = useState(bubbleData.width)
     const bubbleRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -432,7 +432,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (!session.username) {
             setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-            history.push("/login")
+            navigate("/login")
             return setSidebarText("Login required.")
         }
         setSaveNoteOrder(props.order || 1)
@@ -463,7 +463,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const showHistory = () => {
         if (!props.post) return
-        history.push(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
+        navigate(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
     }
 
     useEffect(() => {

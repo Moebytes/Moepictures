@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -55,11 +55,7 @@ let saucenaoTimeout = false
 let tagsTimer = null as any
 let caretPosition = 0
 
-interface Props {
-    match: {params: {id: string}}
-}
-
-const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
+const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -81,11 +77,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [danbooruError, setDanbooruError] = useState(false)
     const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
     const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
-    const editPostErrorRef = useRef<HTMLSpanElement>(null)
-    const submitErrorRef = useRef<HTMLSpanElement>(null)
-    const saucenaoErrorRef = useRef<HTMLSpanElement>(null)
-    const danbooruErrorRef = useRef<HTMLSpanElement>(null)
-    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const editPostErrorRef = useRef<HTMLSpanElement>(null!)
+    const submitErrorRef = useRef<HTMLSpanElement>(null!)
+    const saucenaoErrorRef = useRef<HTMLSpanElement>(null!)
+    const danbooruErrorRef = useRef<HTMLSpanElement>(null!)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null!)
     const [currentImg, setCurrentImg] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
@@ -121,14 +117,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [metaActive, setMetaActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
-    const metaTagRef = useRef<HTMLInputElement>(null)
-    const rawTagRef = useRef<HTMLTextAreaElement>(null)
+    const metaTagRef = useRef<HTMLInputElement>(null!)
+    const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const [edited, setEdited] = useState(false)
     const [originalID, setOriginalID] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
     const [post, setPost] = useState(null as UnverifiedPost | null)
-    const postID = props.match.params.id
-    const history = useHistory()
+    const {id: postID} = useParams() as {id: string}
+    const navigate = useNavigate()
 
     const updatePost = async () => {
         const post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
@@ -907,7 +903,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
             if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
-            let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let characterInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.characters.length; i++) {
                 if (!tagLookup.characters[i]?.tag) continue
                 characters[characters.length - 1].tag = tagLookup.characters[i].tag
@@ -932,7 +928,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             forceUpdate()
 
             let series = [{}] as UploadTag[]
-            let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let seriesInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.series.length; i++) {
                 if (!tagLookup.series[i]?.tag) continue
                 series[series.length - 1].tag = tagLookup.series[i].tag
@@ -1271,7 +1267,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span>
                         </div> 
                         <div className="upload-container-row" style={{marginTop: "10px"}}>
-                            <button className="upload-button" onClick={() => {history.push(`/unverified/post/${postID}`); setPostFlag(true)}}>
+                            <button className="upload-button" onClick={() => {navigate(`/unverified/post/${postID}`); setPostFlag(true)}}>
                                     <span className="upload-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>
@@ -1585,7 +1581,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-center-row">
                     {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
                     <div className="upload-submit-button-container">
-                        <button className="upload-button" onClick={() => history.push(`/unverified/post/${postID}`)}>
+                        <button className="upload-button" onClick={() => navigate(`/unverified/post/${postID}`)}>
                                 <span className="upload-button-submit-text">{i18n.buttons.cancel}</span>
                         </button>
                         <button className="upload-button" onClick={() => submit()}>

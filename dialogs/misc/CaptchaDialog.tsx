@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -13,7 +12,6 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
     const [needsVerification, setNeedsVerification] = useState(false)
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState("")

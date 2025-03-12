@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -15,7 +14,6 @@ const DeleteTagFavoritesDialog: React.FunctionComponent = (props) => {
     const {setTagFavoriteFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteTagFavorites.title

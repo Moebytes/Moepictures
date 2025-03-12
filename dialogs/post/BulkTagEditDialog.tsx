@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions, useLayoutSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -60,13 +59,12 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [error, setError] = useState(false)
-    const errorRef = useRef<HTMLSpanElement>(null)
-    const artistRef = useRef<HTMLInputElement>(null)
-    const characterRef = useRef<HTMLInputElement>(null)
-    const seriesRef = useRef<HTMLInputElement>(null)
-    const metaRef = useRef<HTMLInputElement>(null)
-    const tagRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const errorRef = useRef<HTMLSpanElement>(null!)
+    const artistRef = useRef<HTMLInputElement>(null!)
+    const characterRef = useRef<HTMLInputElement>(null!)
+    const seriesRef = useRef<HTMLInputElement>(null!)
+    const metaRef = useRef<HTMLInputElement>(null!)
+    const tagRef = useRef<HTMLDivElement>(null!)
 
     const reset = () => {
         setArtists("")

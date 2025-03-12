@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useReducer} from "react"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -85,7 +85,7 @@ const HistoryPage: React.FunctionComponent = () => {
     const [historyTab, setHistoryTab] = useState("")
     const [searchQuery, setSearchQuery] = useState("")
     const [commitSearch, setCommitSearch] = useState("")
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
 
     useEffect(() => {
@@ -128,7 +128,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText("Login required.")
         }
         const typeParam = new URLSearchParams(window.location.search).get("type")
@@ -473,10 +473,10 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab) searchParams.set("type", historyTab)
         if (!scroll) searchParams.set("page", String(historyPage || ""))
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, historyTab, historyPage])
 
@@ -822,7 +822,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }
 
     const searchHistoryHeaderClick = () => {
-        history.push("/posts")
+        navigate("/posts")
         setSearch(`history:${session.username}`)
         setSearchFlag(true)
     }

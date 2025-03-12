@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
 useSessionActions, useCacheSelector, useLayoutSelector} from "../../store"
 import {useThemeSelector} from "../../store"
@@ -44,7 +44,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -102,7 +102,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         try {
             const messageID = await functions.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
             setDMTarget(null)
-            if (messageID) history.push(`/message/${messageID}`)
+            if (messageID) navigate(`/message/${messageID}`)
         } catch (err: any) {
             setError(true)
             let errMsg = i18n.dialogs.sendMessage.error

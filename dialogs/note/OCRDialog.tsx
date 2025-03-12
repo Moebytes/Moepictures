@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -15,7 +14,6 @@ const OCRDialog: React.FunctionComponent = (props) => {
     const [running, setRunning] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.ocr.title

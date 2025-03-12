@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
@@ -53,7 +53,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
     const sizeRef = useRef<HTMLImageElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
 
@@ -427,7 +427,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${props.tag}`, "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
             setSearch(props.tag)
             setSearchFlag(true)
         }
@@ -439,7 +439,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     const click = (img: string, index: number) => {
         const post = related[index]
-        history.push(`/post/${post.postID}/${post.slug}`)
+        navigate(`/post/${post.postID}/${post.slug}`)
         setPosts(related)
     }
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useLocation, useHistory} from "react-router-dom"
+import {useLocation, useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Slider from "react-slider"
@@ -73,7 +73,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const [effects, setEffects] = useState([] as {type: string, node: (Tone.ToneAudioNode | AudioWorkletNode)}[])
     const location = useLocation()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (location.pathname !== "/post") {
@@ -671,7 +671,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         return (
             <div className="audio-player" style={{height: getHeight()}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setAudioDragging(false)}>
                 {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
+                    <span className="audio-player-title" onClick={() => navigate(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
                 </div> : null}
                 {playerJSX()}
                 <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-340px"}}

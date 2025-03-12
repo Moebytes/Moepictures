@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useLayoutSelector, useActiveActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -61,13 +60,12 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
-    const errorRef = useRef<HTMLSpanElement>(null)
-    const artistRef = useRef<HTMLInputElement>(null)
-    const characterRef = useRef<HTMLInputElement>(null)
-    const seriesRef = useRef<HTMLInputElement>(null)
-    const metaRef = useRef<HTMLInputElement>(null)
-    const tagRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const errorRef = useRef<HTMLSpanElement>(null!)
+    const artistRef = useRef<HTMLInputElement>(null!)
+    const characterRef = useRef<HTMLInputElement>(null!)
+    const seriesRef = useRef<HTMLInputElement>(null!)
+    const metaRef = useRef<HTMLInputElement>(null!)
+    const tagRef = useRef<HTMLDivElement>(null!)
 
     const updateFields = async () => {
         if (!tagEditID) return

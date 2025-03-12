@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
@@ -32,7 +32,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -307,7 +307,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (event.ctrlKey || event.metaKey || event.button === 1) {
                 window.open(`/tag/${newTag.tag}`, "_blank")
             } else {
-                history.push(`/tag/${newTag.tag}`)
+                navigate(`/tag/${newTag.tag}`)
             }
         }
         if (changes.tag) {
@@ -441,7 +441,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={oldImg}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag, request, showOldTags[i])}
                     </div>
@@ -451,7 +451,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={img}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag!, request, showOldTags[i])}
                     </div> </>}

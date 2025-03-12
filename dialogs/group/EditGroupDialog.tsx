@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -21,7 +21,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -54,7 +54,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             }
             await functions.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
             const newSlug = functions.generateSlug(name)
-            history.push(`/group/${newSlug}`)
+            navigate(`/group/${newSlug}`)
             setEditGroupObj(null)
         } else {
             if (!name) {

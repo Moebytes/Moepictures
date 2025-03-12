@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
@@ -25,7 +24,6 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const [scaleFactor, setScaleFactor] = useState("4")
     const [compressJPG, setCompressJPG] = useState(true)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

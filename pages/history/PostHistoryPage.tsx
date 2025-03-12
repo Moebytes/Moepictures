@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,9 +13,7 @@ import {PostHistory, TagHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {id?: string, slug?: string, username?: string}}
     all?: boolean
-    user?: boolean
 }
 
 const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
@@ -33,16 +31,14 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [visibleRevisions, setVisibleRevisions] = useState([] as PostHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const postID = props.match.params.id || ""
-    const slug = props.match.params.slug || ""
-    const username = props.match.params.username
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {id: postID, slug, username} = useParams() as {id: string, slug: string, username?: string}
 
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect(postID ? `/post/history/${postID}/${slug}` : "/post/history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -29,13 +29,9 @@ import jsxFunctions from "../../structures/JSXFunctions"
 import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
-interface Props {
-    match: {params: {username: string}}
-}
-
 let limit = 25
 
-const UserPage: React.FunctionComponent<Props> = (props) => {
+const UserPage: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -67,8 +63,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [user, setUser] = useState(null as PrunedUser | null)
     const [defaultIcon, setDefaultIcon] = useState(false)
     const [counts, setCounts] = useState(null as EditCounts | null)
-    const history = useHistory()
-    const username = props.match.params.username
+    const navigate = useNavigate()
+    const {username} = useParams() as {username: string}
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -185,7 +181,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(uploads)
@@ -197,7 +193,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(favorites)
@@ -211,32 +207,32 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!user?.imagePost) return
         event.stopPropagation()
-        functions.openPost(user.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(user.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const viewFavorites = () => {
         if (!user) return
-        history.push("/posts")
+        navigate("/posts")
         setSearch(`favorites:${user.username}`)
         setSearchFlag(true)
     }
 
     const viewUploads = () => {
         if (!user) return
-        history.push("/posts")
+        navigate("/posts")
         setSearch(`uploads:${user.username}`)
         setSearchFlag(true)
     }
 
     const viewComments = () => {
         if (!user) return
-        history.push("/comments")
+        navigate("/comments")
         setCommentSearchFlag(`comments:${user.username}`)
     }
 
     const viewForumPosts = () => {
         if (!user) return
-        history.push(`/posts/${user.username}`)
+        navigate(`/posts/${user.username}`)
     }
 
     const searchTag = (event: React.MouseEvent, tag?: string) => {
@@ -244,7 +240,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${tag}`, "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
             setSearch(tag)
             setSearchFlag(true)
         }
@@ -403,14 +399,14 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             }
             const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
-                history.push(`/favgroup/${username}/${favgroup.slug}`)
+                navigate(`/favgroup/${username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
                 const post = favgroup.posts[index]
                 if (newTab) {
                     window.open(`/post/${post.postID}/${post.slug}`, "_blank")
                 } else {
-                    history.push(`/post/${post.postID}/${post.slug}`)
+                    navigate(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)
@@ -457,19 +453,19 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
                     {counts.postEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/post/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${user.username}/post/history`)}>
                         {i18n.buttons.post} {!mobile ? <span className="user-text-alt">{counts.postEdits}</span> : null}</span>
                     : null}
                     {counts.tagEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/tag/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${user.username}/tag/history`)}>
                         {i18n.tag.tag} {!mobile ? <span className="user-text-alt">{counts.tagEdits}</span> : null}</span>
                     : null}
                     {counts.noteEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/note/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${user.username}/note/history`)}>
                         {i18n.labels.note} {!mobile ? <span className="user-text-alt">{counts.noteEdits}</span> : null}</span>
                     : null}
                     {counts.groupEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${user.username}/group/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${user.username}/group/history`)}>
                         {i18n.labels.group} {!mobile ? <span className="user-text-alt">{counts.groupEdits}</span> : null}</span>
                     : null}
                     </div> : null}

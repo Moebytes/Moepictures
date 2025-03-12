@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector} from "../../store"
@@ -34,7 +34,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {setSearch, setSearchFlag} = useSearchActions()
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, aliasTagID, aliasTagFlag, aliasTagName} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setCategorizeTag, setAliasTagID, setAliasTagFlag, setAliasTagName} = useTagDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const scrollRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
@@ -69,7 +69,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open("/posts", "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
         }
         setSearch(props.tag.tag)
         setSearchFlag(true)
@@ -80,7 +80,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${props.tag.tag}`, "_blank")
         } else {
-            history.push(`/tag/${props.tag.tag}`)
+            navigate(`/tag/${props.tag.tag}`)
         }
     }
 
@@ -206,7 +206,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
 
     const tagHistory = async () => {
         window.scrollTo(0, 0)
-        history.push(`/tag/history/${props.tag.tag}`)
+        navigate(`/tag/history/${props.tag.tag}`)
     }
 
     const socialJSX = () => {

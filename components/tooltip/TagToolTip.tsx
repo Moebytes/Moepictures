@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, 
 useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -26,8 +26,8 @@ const TagToolTip: React.FunctionComponent = (props) => {
     const {setTagToolTipEnabled} = useInteractionActions()
     const [hover, setHover] = useState(false)
     const [tag, setTag] = useState(null as Tag | null)
-    const [items, setItems] = useState([] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement>}[])
-    const history = useHistory()
+    const [items, setItems] = useState([] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement | null>}[])
+    const navigate = useNavigate()
 
     const updateTag = async () => {
         if (session?.username && !session?.showTagTooltips) return
@@ -37,7 +37,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         setTag(tag)
         let rating = functions.isR18(ratingType) ? functions.r18() : "all"
         let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 32}, session, setSessionFlag)
-        let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement>}[]
+        let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement | null>}[]
         await Promise.all(posts.map(async (post) => {
             let thumbnail = functions.getThumbnailLink(post.images[0], "tiny", session, mobile)
             let image = await functions.decryptThumb(thumbnail, session, `tooltip-${thumbnail}`, true)
@@ -131,7 +131,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         }
     }
 
-    const imageAnimation = (event: React.MouseEvent<HTMLDivElement>, ref: React.RefObject<HTMLImageElement>) => {
+    const imageAnimation = (event: React.MouseEvent<HTMLDivElement>, ref: React.RefObject<HTMLImageElement | null>) => {
         if (!ref.current) return
         const rect = ref.current.getBoundingClientRect()
         const width = rect?.width
@@ -143,7 +143,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         ref.current.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(1.06)`
     }
 
-    const cancelImageAnimation = (ref: React.RefObject<HTMLImageElement>) => {
+    const cancelImageAnimation = (ref: React.RefObject<HTMLImageElement | null>) => {
         if (!ref.current) return
         ref.current.style.transform = "scale(1)"
     }
@@ -151,7 +151,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
     const tagImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
-        const onImageLoad = (ref: React.RefObject<HTMLImageElement>)=> {
+        const onImageLoad = (ref: React.RefObject<HTMLImageElement | null>)=> {
             if (!ref.current) return
             const landscape = ref.current.width <= ref.current.height
             if (landscape) {
@@ -193,7 +193,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${tag.tag}`, "_blank")
         } else {
-            history.push(`/tag/${tag.tag}`)
+            navigate(`/tag/${tag.tag}`)
         }
         setTagToolTipEnabled(false)
     }
@@ -203,14 +203,14 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${alias ? alias : tag.tag}`, "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
             setSearch(alias ? alias : tag.tag)
             setSearchFlag(true)
         }
     }
 
     const openPost = (event: React.MouseEvent, post: PostSearch) => {
-        functions.openPost(post, event, history, session, setSessionFlag)
+        functions.openPost(post, event, navigate, session, setSessionFlag)
         setTagToolTipEnabled(false)
     }
 

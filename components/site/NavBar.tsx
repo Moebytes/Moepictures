@@ -1,6 +1,6 @@
 import React, {useContext, useState, useEffect, useReducer} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import eyedropper from "../../assets/icons/eyedropper.png"
 import light from "../../assets/icons/light.png"
@@ -68,7 +68,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [marginR, setMarginR] = useState("60px")
     const [activeColorDropdown, setActiveColorDropdown] = useState(false)
     const [activeParticleDropdown, setActiveParticleDropdown] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -206,9 +206,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const postsClick = () => {
         if (props.goBack) {
-            history.push("/posts?loaded=true")
+            navigate("/posts?loaded=true")
         } else {
-            history.push("/posts?loaded=true")
+            navigate("/posts?loaded=true")
             setSearchFlag(true)
         }
     }
@@ -226,55 +226,55 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const generateMobileUsernameJSX = () => {
         if (session.role === "admin") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutAdminIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "mod") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutModIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "system") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium-curator") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "curator") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium-contributor") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "contributor") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutContributorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else {
             return (<>
-                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                     <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
                 </>
             )
@@ -284,55 +284,55 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (<>
-                <span className="nav-text nav-user-text admin-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutAdminIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "mod") {
             return (<>
-                <span className="nav-text nav-user-text mod-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "system") {
             return (<>
-                <span className="nav-text nav-user-text system-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-contributor") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "contributor") {
             return (<>
-                <span className="nav-text nav-user-text contributor-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutContributorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else {
             return (<>
-                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
             </>
             )
@@ -429,32 +429,32 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateMobileUsernameJSX()}
                     </div> :
-                    <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}
-                    <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>{i18n.sort.posts}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/comments"); setHideMobileNavbar(true)}}>{i18n.navbar.comments}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/notes"); setHideMobileNavbar(true)}}>{i18n.navbar.notes}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/artists"); setHideMobileNavbar(true)}}>{i18n.navbar.artists}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>{i18n.navbar.characters}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/series"); setHideMobileNavbar(true)}}>{i18n.tag.series}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/tags"); setHideMobileNavbar(true)}}>{i18n.navbar.tags}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span>
-                    <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span>
-                    {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}}>
+                    <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {navigate("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}
+                    <span className="mobile-nav-text" onClick={() => {navigate("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>{i18n.sort.posts}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/comments"); setHideMobileNavbar(true)}}>{i18n.navbar.comments}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/notes"); setHideMobileNavbar(true)}}>{i18n.navbar.notes}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/artists"); setHideMobileNavbar(true)}}>{i18n.navbar.artists}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/characters"); setHideMobileNavbar(true)}}>{i18n.navbar.characters}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/series"); setHideMobileNavbar(true)}}>{i18n.tag.series}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/tags"); setHideMobileNavbar(true)}}>{i18n.navbar.tags}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span>
+                    <span className="mobile-nav-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span>
+                    {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
                         <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
                 </div>
                 <div className="mobile-nav-color-container">
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
                 <MiniAudioPlayer/>
@@ -505,31 +505,31 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
                     </div> :
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => history.push("/login")}>{i18n.navbar.login}</span>}
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => postsClick()}>{i18n.sort.posts}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/comments")}>{i18n.navbar.comments}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/notes")}>{i18n.navbar.notes}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/artists")}>{i18n.navbar.artists}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/characters")}>{i18n.navbar.characters}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/series")}>{i18n.tag.series}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/tags")}>{i18n.navbar.tags}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/groups")}>{i18n.sort.groups}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/forum")}>{i18n.navbar.forum}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => history.push("/help")}>{i18n.navbar.help}</span>
-                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/comments")}>{i18n.navbar.comments}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/notes")}>{i18n.navbar.notes}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/artists")}>{i18n.navbar.artists}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/characters")}>{i18n.navbar.characters}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/series")}>{i18n.tag.series}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/tags")}>{i18n.navbar.tags}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
+                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={premiumStar}/> : null}
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
                         <img className="nav-search-icon" src={searchIcon} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter: getFilter()}}/> : null}
                     <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
                 {getColorDropdownJSX()}

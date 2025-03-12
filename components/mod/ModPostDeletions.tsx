@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
@@ -25,11 +25,11 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const [visibleRequests, setVisibleRequests] = useState([] as PostDeleteRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [requests, setRequests] = useState([] as PostDeleteRequest[])
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
     const ref = useRef<HTMLCanvasElement>(null)
 
     const getFilter = () => {
@@ -336,7 +336,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const imgClick = (event: React.MouseEvent) => {
-                functions.openPost(request.post, event, history, session, setSessionFlag)
+                functions.openPost(request.post, event, navigate, session, setSessionFlag)
             }
             const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             jsx.push(
@@ -347,7 +347,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                     </div>
                     <div className="mod-post-options">

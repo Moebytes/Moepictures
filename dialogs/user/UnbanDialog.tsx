@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -18,7 +17,6 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.unban.title

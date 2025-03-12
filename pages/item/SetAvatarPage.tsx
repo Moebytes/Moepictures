@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -12,11 +12,7 @@ import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "rea
 import "./styles/setavatarpage.less"
 import {TagCategories, PostSearch, GIFFrame, PostOrdered} from "../../types/Types"
 
-interface Props {
-    match: {params: {id: string, slug: string}}
-}
-
-const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
+const SetAvatarPage: React.FunctionComponent = () => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -37,9 +33,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const [isAnimated, setIsAnimated] = useState(false)
     const ref = useRef<HTMLImageElement>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
-    const history = useHistory()
-    const postID = props.match.params.id
-    const slug = props.match.params.slug
+    const navigate = useNavigate()
+    const {id: postID, slug} = useParams() as {id: string, slug: string}
 
     useEffect(() => {
         setHideNavbar(false)
@@ -60,7 +55,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!session.cookie || !post) return
         if (!session.username && post.rating !== functions.r13()) {
             setRedirect(`/set-avatar/${postID}/${slug}`)
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (functions.isR18(post.rating)) {
@@ -232,7 +227,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         await functions.post("/api/user/pfp", {postID, bytes: Object.values(bytes)}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
-        history.push(`/post/${post.postID}/${post.slug}`)
+        navigate(`/post/${post.postID}/${post.slug}`)
     }
 
     const download = async () => {
@@ -264,7 +259,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     }, [image])
 
     const openPost = async (event: React.MouseEvent) => {
-        functions.openPost(post, event, history, session, setSessionFlag)
+        functions.openPost(post, event, navigate, session, setSessionFlag)
     }
 
 

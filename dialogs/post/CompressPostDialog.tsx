@@ -1,5 +1,4 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
@@ -29,7 +28,6 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const [upscaled, setUpscaled] = useState(true)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

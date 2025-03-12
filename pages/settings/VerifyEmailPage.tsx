@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
@@ -26,7 +26,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -73,11 +73,11 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/verify-email")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (session.emailVerified) {
-            history.push("/verify-email-success")
+            navigate("/verify-email-success")
         }
     }, [session])
 

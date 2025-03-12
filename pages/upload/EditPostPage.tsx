@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -55,11 +55,7 @@ let saucenaoTimeout = false
 let tagsTimer = null as any
 let caretPosition = 0
 
-interface Props {
-    match: {params: {id: string, slug: string}}
-}
-
-const EditPostPage: React.FunctionComponent<Props> = (props) => {
+const EditPostPage: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -81,11 +77,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [danbooruError, setDanbooruError] = useState(false)
     const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
     const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
-    const editPostErrorRef = useRef<HTMLSpanElement>(null)
-    const submitErrorRef = useRef<HTMLSpanElement>(null)
-    const saucenaoErrorRef = useRef<HTMLSpanElement>(null)
-    const danbooruErrorRef = useRef<HTMLSpanElement>(null)
-    const enterLinksRef = useRef<HTMLTextAreaElement>(null)
+    const editPostErrorRef = useRef<HTMLSpanElement>(null!)
+    const submitErrorRef = useRef<HTMLSpanElement>(null!)
+    const saucenaoErrorRef = useRef<HTMLSpanElement>(null!)
+    const danbooruErrorRef = useRef<HTMLSpanElement>(null!)
+    const enterLinksRef = useRef<HTMLTextAreaElement>(null!)
     const [currentImg, setCurrentImg] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
     const [imgChangeFlag, setImgChangeFlag] = useState(false)
@@ -122,16 +118,15 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [metaActive, setMetaActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
-    const metaTagRef = useRef<HTMLInputElement>(null)
-    const rawTagRef = useRef<HTMLTextAreaElement>(null)
+    const metaTagRef = useRef<HTMLInputElement>(null!)
+    const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const [edited, setEdited] = useState(false)
     const [reason, setReason] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
     const [needsPermission, setNeedsPermission] = useState(false)
     const [postLocked, setPostLocked] = useState(false)
-    const postID = props.match.params.id
-    const slug = props.match.params.slug
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {id: postID, slug} = useParams() as {id: string, slug: string}
 
     useEffect(() => {
         if (!session.cookie) return
@@ -292,7 +287,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect(`/edit-post/${postID}/${slug}`)
-            history.push("/login")
+            navigate("/login")
             setSidebarText("Login required.")
         }
     }, [session])
@@ -927,7 +922,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
             if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
-            let characterInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let characterInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.characters.length; i++) {
                 if (!tagLookup.characters[i]?.tag) continue
                 characters[characters.length - 1].tag = tagLookup.characters[i].tag
@@ -952,7 +947,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             forceUpdate()
 
             let series = [{}] as UploadTag[]
-            let seriesInputRefs = [] as React.RefObject<HTMLInputElement>[]
+            let seriesInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.series.length; i++) {
                 if (!tagLookup.series[i]?.tag) continue
                 series[series.length - 1].tag = tagLookup.series[i].tag
@@ -1282,7 +1277,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             return (
                 <>
                 <span className="upload-ban-text">{i18n.pages.edit.banText}</span>
-                <button className="upload-button" onClick={() => history.goBack()}
+                <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
@@ -1294,7 +1289,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             return (
                 <>
                 <span className="upload-ban-text">{i18n.pages.edit.locked}</span>
-                <button className="upload-button" onClick={() => history.goBack()}
+                <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
                 </button>
@@ -1303,7 +1298,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
 
         const openPost = async (event: React.MouseEvent) => {
-            functions.openPost(postID, event, history, session, setSessionFlag)
+            functions.openPost(postID, event, navigate, session, setSessionFlag)
         }
 
         const currentImages = () => {

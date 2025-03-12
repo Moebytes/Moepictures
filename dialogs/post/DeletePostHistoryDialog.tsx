@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -13,7 +12,6 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
     const {setDeletePostHistoryID, setDeletePostHistoryFlag} = usePostDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deletePostHistory.title

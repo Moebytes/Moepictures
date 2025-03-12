@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, 
 useSessionActions, useLayoutSelector, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -41,7 +41,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -80,7 +80,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
         try {
             const threadID = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, r18}, session, setSessionFlag)
             setShowNewThreadDialog(false)
-            if (threadID) history.push(`/thread/${threadID}`)
+            if (threadID) navigate(`/thread/${threadID}`)
         } catch {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

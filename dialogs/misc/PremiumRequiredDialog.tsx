@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -13,7 +13,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     const {setPremiumRequired} = useMiscDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.dialogs.premium.title
@@ -32,7 +32,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            history.push("/premium")
+            navigate("/premium")
         }
         setPremiumRequired(false)
     }

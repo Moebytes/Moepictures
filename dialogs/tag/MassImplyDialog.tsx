@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -17,7 +16,6 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [wildcard, setWildcard] = useState("")
     const [implyTo, setImplyTo] = useState("")
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.massImply.title

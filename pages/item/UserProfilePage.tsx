@@ -1,5 +1,5 @@
 import React, {useEffect, useContext, useState, useReducer, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import uploadPfpIcon from "../../assets/icons/uploadpfp.png"
 import TitleBar from "../../components/site/TitleBar"
@@ -96,7 +96,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [previewMode, setPreviewMode] = useState(false)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -233,7 +233,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/profile")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         } else {
             setBio(session.bio)
@@ -430,7 +430,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(uploads)
@@ -442,7 +442,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}`)
+            navigate(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(favorites)
@@ -454,7 +454,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (newTab) {
             window.open(`/unverified/post/${post.postID}`, "_blank")
         } else {
-            history.push(`/unverified/post/${post.postID}`)
+            navigate(`/unverified/post/${post.postID}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
     }
@@ -465,7 +465,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (newTab) {
             window.open(`/unverified/post/${post.postID}`, "_blank")
         } else {
-            history.push(`/unverified/post/${post.postID}`)
+            navigate(`/unverified/post/${post.postID}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
     }
@@ -475,30 +475,30 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const viewFavorites = () => {
-        history.push("/posts")
+        navigate("/posts")
         setSearch(`favorites:${session.username}`)
         setSearchFlag(true)
     }
 
     const viewUploads = () => {
-        history.push("/posts")
+        navigate("/posts")
         setSearch(`uploads:${session.username}`)
         setSearchFlag(true)
     }
 
     const viewComments = () => {
-        history.push("/comments")
+        navigate("/comments")
         setCommentSearchFlag(`comments:${session.username}`)
     }
 
     const viewForumPosts = () => {
-        history.push(`/posts/${session.username}`)
+        navigate(`/posts/${session.username}`)
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!userImgPost) return
         event.stopPropagation()
-        functions.openPost(userImgPost, event, history, session, setSessionFlag)
+        functions.openPost(userImgPost, event, navigate, session, setSessionFlag)
     }
 
     const generateUsernameJSX = () => {
@@ -569,7 +569,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const changeUsername = () => {
         if (permissions.isPremium(session)) {
-            history.push("/change-username")
+            navigate("/change-username")
         } else {
             setPremiumRequired(true)
         }
@@ -627,7 +627,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/posts?query=${tag}`, "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
             setSearch(tag)
             setSearchFlag(true)
         }
@@ -659,14 +659,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             }
             const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
-                history.push(`/favgroup/${session.username}/${favgroup.slug}`)
+                navigate(`/favgroup/${session.username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
                 const post = favgroup.posts[index]
                 if (newTab) {
                     window.open(`/post/${post.postID}/${post.slug}`, "_blank")
                 } else {
-                    history.push(`/post/${post.postID}/${post.slug}`)
+                    navigate(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)
@@ -893,19 +893,19 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="user-row">
                         <span className="user-title" style={{marginRight: "10px"}}>{i18n.labels.edits}:</span>
                     {counts.postEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${session.username}/post/history`)}>
                         {i18n.buttons.post} {!mobile ? <span className="user-text-alt">{counts.postEdits}</span> : null}</span>
                     : null}
                     {counts.tagEdits > 0 ? 
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${session.username}/tag/history`)}>
                         {i18n.tag.tag} {!mobile ? <span className="user-text-alt">{counts.tagEdits}</span> : null}</span>
                     : null}
                     {counts.noteEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/note/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${session.username}/note/history`)}>
                         {i18n.labels.note} {!mobile ? <span className="user-text-alt">{counts.noteEdits}</span> : null}</span>
                     : null}
                     {counts.groupEdits > 0 ?
-                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>
+                        <span style={{marginRight: "10px"}} className="user-title" onClick={() => navigate(`/user/${session.username}/group/history`)}>
                         {i18n.labels.group} {!mobile ? <span className="user-text-alt">{counts.groupEdits}</span> : null}</span>
                     : null}
                     </div> : null}

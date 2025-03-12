@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../../store"
 import functions from "../../structures/Functions"
 import EffectImage from "../image/EffectImage"
@@ -18,7 +18,7 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
     const imageFiltersRef = useRef<HTMLDivElement | HTMLImageElement>(null)
 
 
@@ -27,7 +27,7 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/group/${props.group.slug}`, "_blank")
         } else {
-            history.push(`/group/${props.group.slug}`)
+            navigate(`/group/${props.group.slug}`)
         }
     }
 

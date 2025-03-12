@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
 import {useInteractionSelector} from "../../store"
 import functions from "../../structures/Functions"
 
@@ -12,7 +11,6 @@ let id = 0
 
 const DragScroll = ({children}) => {
     const {enableDrag} = useInteractionSelector()
-    const history = useHistory()
 
     useEffect(() => {
         const element = document.documentElement
@@ -85,7 +83,7 @@ const DragScroll = ({children}) => {
         return () => {
             disable()
         }
-    }, [enableDrag, history])
+    }, [enableDrag])
 
 
   return <>{children}</>

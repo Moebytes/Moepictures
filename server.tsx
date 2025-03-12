@@ -45,12 +45,21 @@ const __dirname = path.resolve()
 
 dotenv.config()
 const app = express() as any
-let compiler = webpack(config as any)
 app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}))
 app.use(express.json({limit: "1gb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 app.set("trust proxy", true)
+
+let compiler = webpack(config as any)
+if (process.env.TESTING === "yes") {
+  app.use(middleware(compiler, {
+    index: false,
+    serverSideRender: false,
+    writeToDisk: false,
+  }))
+  app.use(hot(compiler))
+}
 
 declare module "express-session" {
   interface SessionData extends ServerSession {}
@@ -85,15 +94,6 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }))
-
-if (process.env.TESTING === "yes") {
-  app.use(middleware(compiler, {
-    index: false,
-    serverSideRender: false,
-    writeToDisk: false,
-  }))
-  app.use(hot(compiler))
-}
 
 app.use(express.static(path.join(__dirname, "./public")))
 app.use("/assets", express.static(path.join(__dirname, "./dist/client/assets")))
@@ -492,7 +492,6 @@ app.get("/*", async (req: Request, res: Response) => {
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
     const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
-    // @ts-expect-error
     const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
     res.status(200).send(document.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
   } catch (e) {

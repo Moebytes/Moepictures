@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -49,11 +49,7 @@ import adminLabel from "../../assets/icons/admin-label.png"
 import {ThreadReply, ThreadUser} from "../../types/Types"
 import "./styles/threadpage.less"
 
-interface Props {
-    match: {params: {id: string}}
-}
-
-const ThreadPage: React.FunctionComponent<Props> = (props) => {
+const ThreadPage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -88,11 +84,11 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
-    const history = useHistory()
     const errorRef = useRef<HTMLDivElement>(null)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
-    const threadID = props.match.params.id
+    const navigate = useNavigate()
+    const {id: threadID} = useParams() as {id: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -125,7 +121,6 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             }, 200)
         }
     }, [replies, replyID, replyJumpFlag])
-
 
     useEffect(() => {
         const updateRead = async () => {
@@ -230,9 +225,9 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!scroll) {
-            if (threadPage) history.replace(`${location.pathname}?page=${threadPage}${replyID > -1 ? `&reply=${replyID}` : ""}`)
+            if (threadPage) navigate(`${location.pathname}?page=${threadPage}${replyID > -1 ? `&reply=${replyID}` : ""}`, {replace: true})
         } else {
-            if (replyID > -1) history.replace(`${location.pathname}?reply=${replyID}`) 
+            if (replyID > -1) navigate(`${location.pathname}?reply=${replyID}`, {replace: true}) 
         }
     }, [scroll, threadPage, replyID])
 
@@ -383,14 +378,14 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${thread.creator}`, "_blank")
         } else {
-            history.push(`/user/${thread.creator}`)
+            navigate(`/user/${thread.creator}`)
         }
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!thread?.imagePost) return
         event.stopPropagation()
-        functions.openPost(thread.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(thread.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getCreatorJSX = () => {
@@ -494,7 +489,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const deleteThread = async () => {
         await functions.delete("/api/thread/delete", {threadID}, session, setSessionFlag)
-        history.push("/forum")
+        navigate("/forum")
     }
 
     useEffect(() => {
@@ -627,7 +622,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const viewThreads = () => {
         if (!thread) return
-        history.push(`/posts/${thread.creator}`)
+        navigate(`/posts/${thread.creator}`)
     }
 
     const getReplyBoxJSX = () => {

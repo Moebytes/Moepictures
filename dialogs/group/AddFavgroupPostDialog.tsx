@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -19,7 +18,6 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     const [postID, setPostID] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

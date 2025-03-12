@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import {useThemeSelector, useThemeActions, useInteractionActions, useLayoutSelector, 
 useSessionSelector, useSessionActions, usePageSelector, usePageActions, useSearchSelector,
 useSearchActions, useActiveActions, useFlagActions, useMiscDialogActions} from "../../store"
@@ -31,10 +31,6 @@ import {useInView} from "react-intersection-observer"
 import Filters from "../../components/post/Filters"
 import "./styles/readerpage.less"
 
-interface Props {
-    match: {params: {id: string, slug: string}}
-}
-
 const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
     const {readerPage} = usePageSelector()
     const {setReaderPage} = usePageActions()
@@ -64,7 +60,7 @@ const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
     )
 }
 
-const ReaderPage: React.FunctionComponent<Props> = (props) => {
+const ReaderPage: React.FunctionComponent = () => {
     const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const {setEnableDrag} = useInteractionActions()
@@ -88,9 +84,8 @@ const ReaderPage: React.FunctionComponent<Props> = (props) => {
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const rootRef = useRef<HTMLDivElement>(null)
     const filterRef = useRef<HTMLImageElement>(null)
-    const postID = props.match.params.id
-    const slug = props.match.params.slug
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {id: postID, slug} = useParams() as {id: string, slug: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -228,7 +223,7 @@ const ReaderPage: React.FunctionComponent<Props> = (props) => {
     const toggleUpscale = async () => {
         if (!session.username) {
             setRedirect(`/post/${postID}/${slug}`)
-            history.push("/login")
+            navigate("/login")
             return setSidebarText(i18n.sidebar.loginRequired)
         }
         if (permissions.isPremium(session)) {
@@ -249,7 +244,7 @@ const ReaderPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerBack = () => {
-        history.push(`/post/${postID}/${slug}`)
+        navigate(`/post/${postID}/${slug}`)
     }
 
     useEffect(() => {

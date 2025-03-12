@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import restore from "../../assets/icons/revert-purple.png"
@@ -28,8 +28,8 @@ const ModRejected: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
-    const history = useHistory()
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -314,7 +314,7 @@ const ModRejected: React.FunctionComponent = (props) => {
     }, [scroll, modPage, unverifiedPosts])
 
     const openPost = (postID: string | null, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const generatePostsJSX = () => {
@@ -342,7 +342,7 @@ const ModRejected: React.FunctionComponent = (props) => {
             if (post.fake) continue
             const imgClick = (event?: React.MouseEvent, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
-                history.push(`/unverified/post/${post.postID}`)
+                navigate(`/unverified/post/${post.postID}`)
             }
             const img = functions.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
             let canvasImg = functions.isModel(img) || functions.isLive2D(img) || functions.isAudio(img)
@@ -355,7 +355,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
                         {post.parentID ? <span className="mod-post-link" onClick={(event) => openPost(post.parentID, event)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
                         <span className="mod-post-text">{i18n.tag.artist}: {functions.toProperCase(post.artist || i18n.labels.none)}</span>
                         <span className="mod-post-text">{i18n.navbar.tags}: {post.tags?.length}</span>

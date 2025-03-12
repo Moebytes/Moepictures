@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
 useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions} from "../../store"
-import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
+import {FFmpeg} from "@ffmpeg/ffmpeg"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import loading from "../../assets/icons/loading.gif"
@@ -60,7 +60,6 @@ import path from "path"
 import mime from "mime-types"
 import "./styles/postimage.less"
 import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
-const ffmpeg = createFFmpeg()
 
 interface Props {
     post?: PostFull | PostHistory | UnverifiedPost
@@ -152,7 +151,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [showShareIcons, setShowShareIcons] = useState(false)
     const [tempLink, setTempLink] = useState("")
     const [decrypted, setDecrypted] = useState("")
-    const history = useHistory()
+    const ffmpegRef = useRef(new FFmpeg())
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -362,22 +362,23 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
         
         const reverseAudioStream = async () => {
-            if (!ffmpeg.isLoaded()) await ffmpeg.load()
+            const {fetchFile} = await import("@ffmpeg/util")
+            const ffmpeg = ffmpegRef.current
+            if (!ffmpeg.loaded) await ffmpeg.load()
             const name = path.basename(props.img, path.extname(props.img))
             const ext = path.extname(props.img)
             const input = `${name}${ext}`
             const output = `${name}-reversed${ext}`
-            ffmpeg.FS("writeFile", input, await fetchFile(props.img))
-            await ffmpeg.run("-i", input, "-map", "0", "-c:v", "copy", "-af", "areverse", output)
-            const binary = ffmpeg.FS("readFile", output)
+            ffmpeg.writeFile(input, await fetchFile(props.img))
+            await ffmpeg.exec(["-i", input, "-map", "0", "-c:v", "copy", "-af", "areverse", output])
+            const binary = await ffmpeg.readFile(output) as Uint8Array
             if (binary) {
                 const blob = new Blob([new DataView(binary.buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
                 const url = URL.createObjectURL(blob)
                 setReverseVideo(`${url}#${ext}`)
                 localStorage.setItem("reverseVideo", `${url}#${ext}`)
             }
-            ffmpeg.FS("unlink", output)
-            // ffmpeg.exit()
+            ffmpeg.deleteFile(output)
         }
         
         if (!videoData && videoLoaded && functions.isVideo(props.img)) {
@@ -988,14 +989,16 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const encodeVideo = async (frames: string[], audio: string) => {
-        if (!ffmpeg.isLoaded()) await ffmpeg.load()
+        const {fetchFile} = await import("@ffmpeg/util")
+        const ffmpeg = ffmpegRef.current
+        if (!ffmpeg.loaded) await ffmpeg.load()
         for (let i = 0; i < frames.length; i++) {
             const num = `00${i}`.slice(-3)
-            ffmpeg.FS("writeFile", `${num}.png`, await fetchFile(frames[i]))
+            ffmpeg.writeFile(`${num}.png`, await fetchFile(frames[i]))
         }
-        ffmpeg.FS("writeFile", "audio.wav", await fetchFile(audio))
-        await ffmpeg.run("-framerate", "30", "-pattern_type", "glob", "-i", "*.png", "-i", "audio.wav", "-c:a", "aac", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "video.mp4")
-        const binary = ffmpeg.FS("readFile", "video.mp4")
+        ffmpeg.writeFile("audio.wav", await fetchFile(audio))
+        await ffmpeg.exec(["-framerate", "30", "-pattern_type", "glob", "-i", "*.png", "-i", "audio.wav", "-c:a", "aac", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "video.mp4"])
+        const binary = await ffmpeg.readFile("video.mp4") as Uint8Array
         let url = ""
         if (binary) {
             const blob = new Blob([new DataView(binary.buffer)], {type: "video/mp4"})
@@ -1004,10 +1007,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         try {
             for (let i = 0; i < frames.length; i++) {
                 const num = `00${i}`.slice(-3)
-                ffmpeg.FS("unlink", `${num}.png`)
+                ffmpeg.deleteFile(`${num}.png`)
             }
-            ffmpeg.FS("unlink", "video.mp4")
-            ffmpeg.FS("unlink", "audio.wav")
+            ffmpeg.deleteFile("video.mp4")
+            ffmpeg.deleteFile("audio.wav")
         } catch {
             // ignore
         }
@@ -1015,20 +1018,22 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const audioSpeed = async (audioFile: string) => {
-        if (!ffmpeg.isLoaded()) await ffmpeg.load()
-        ffmpeg.FS("writeFile", "input.wav", await fetchFile(audioFile))
+        const {fetchFile} = await import("@ffmpeg/util")
+        const ffmpeg = ffmpegRef.current
+        if (!ffmpeg.loaded) await ffmpeg.load()
+        ffmpeg.writeFile("input.wav", await fetchFile(audioFile))
         let audioSpeed = preservePitch ? `atempo=${speed}` : `asetrate=44100*${speed},aresample=44100`
         let filter = ["-filter_complex", `[0:a]${audioSpeed}${reverse ? ",areverse" : ""}[a]`, "-map", "[a]"]
-        await ffmpeg.run("-i", "input.wav", ...filter, "audio.wav")
-        const binary = ffmpeg.FS("readFile", "audio.wav")
+        await ffmpeg.exec(["-i", "input.wav", ...filter, "audio.wav"])
+        const binary = await ffmpeg.readFile("audio.wav") as Uint8Array
         let url = ""
         if (binary) {
             const blob = new Blob([new DataView(binary.buffer)], {type: "audio/x-wav"})
             url = URL.createObjectURL(blob)
         }
         try {
-            ffmpeg.FS("unlink", "input.wav")
-            ffmpeg.FS("unlink", "audio.wav")
+            ffmpeg.deleteFile("input.wav")
+            ffmpeg.deleteFile("audio.wav")
         } catch {
             // ignore
         }
@@ -1273,7 +1278,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (!session.username) {
             setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-            history.push("/login")
+            navigate("/login")
             return setSidebarText(i18n.sidebar.loginRequired)
         }
         if (permissions.isPremium(session)) {
@@ -1544,7 +1549,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                     <img draggable={false} className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={imageFullscreenIcon}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => history.push(`/post/${props.post?.postID}/${props.post?.slug}/reader`)} src={imageReaderIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)} src={imageReaderIcon}/>
                                 </div> 
                             </div>
                         </div>

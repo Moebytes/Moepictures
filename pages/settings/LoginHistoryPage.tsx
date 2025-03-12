@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
@@ -23,7 +23,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     const [loginHistory, setLoginHistory] = useState([] as LoginHistory[])
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -60,7 +60,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/login-history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText("Login required.")
         }
         updateLoginHistory()
@@ -129,7 +129,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
                     </div>
                     <span className="sitepage-link">{i18n.pages.loginHistory.heading}</span>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←{i18n.buttons.back}</button>
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                         <button className="sitepage-button" onClick={logoutOtherSessions}>{i18n.pages.loginHistory.logoutSessions}</button>
                     </div>
                     {loginHistoryJSX()}

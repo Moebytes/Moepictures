@@ -873,12 +873,12 @@ const CreateRoutes = (app: Express) => {
         let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, noImageUpdate} = req.body as UploadParams
 
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (!permissions.isCurator(req.session)) return res.status(403).send("Unauthorized")
-        if (req.session.banned) return res.status(403).send("You are banned")
-        if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
-        if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!permissions.isCurator(req.session)) return void res.status(403).send("Unauthorized")
+        if (req.session.banned) return void res.status(403).send("You are banned")
+        if (!functions.validType(type)) return void res.status(400).send("Invalid type")
+        if (!functions.validRating(rating)) return void res.status(400).send("Invalid rating")
+        if (!functions.validStyle(style)) return void res.status(400).send("Invalid style")
 
         artists = functions.cleanTags(artists, "artists")
         characters = functions.cleanTags(characters, "characters")
@@ -893,15 +893,15 @@ const CreateRoutes = (app: Express) => {
         }
 
         const invalidTags = functions.invalidTags(characters, series, tags)
-        if (invalidTags) return res.status(400).send(invalidTags)
+        if (invalidTags) return void res.status(400).send(invalidTags)
         
         let skipMBCheck = permissions.isMod(req.session) ? true : false
-        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (!validImages(images, skipMBCheck)) return void res.status(400).send("Invalid images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return void res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
-        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
+        if (!skipMBCheck && totalMB > 300) return void res.status(400).send("Invalid size")
 
         const postID = await sql.post.insertPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
@@ -930,10 +930,10 @@ const CreateRoutes = (app: Express) => {
         let {postID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
-        if (req.session.banned) return res.status(403).send("You are banned")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
+        if (req.session.banned) return void res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
 
         artists = functions.cleanTags(artists, "artists")
@@ -949,22 +949,22 @@ const CreateRoutes = (app: Express) => {
         }
 
         const invalidTags = functions.invalidTags(characters, series, tags)
-        if (invalidTags) return res.status(400).send(invalidTags)
+        if (invalidTags) return void res.status(400).send(invalidTags)
 
         let skipMBCheck = permissions.isMod(req.session) ? true : false
-        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (!validImages(images, skipMBCheck)) return void res.status(400).send("Invalid images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return void res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
-        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
-        if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
-        if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+        if (!skipMBCheck && totalMB > 300) return void res.status(400).send("Invalid size")
+        if (!functions.validType(type)) return void res.status(400).send("Invalid type")
+        if (!functions.validRating(rating)) return void res.status(400).send("Invalid rating")
+        if (!functions.validStyle(style)) return void res.status(400).send("Invalid style")
 
         const post = await sql.post.post(postID)
-        if (!post) return res.status(400).send("Bad request")
-        if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+        if (!post) return void res.status(400).send("Bad request")
+        if (post.locked && !permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
         let oldR18 = functions.isR18(post.rating)
         let newR18 = functions.isR18(rating)
         let oldType = post.type
@@ -974,7 +974,7 @@ const CreateRoutes = (app: Express) => {
         if (!imgChanged) imgChanged = await serverFunctions.imagesChanged(post.images, upscaledImages, true, oldR18)
 
         if (imgChanged) {
-          if (!permissions.isMod(req.session)) return res.status(403).send("No permission to modify images")
+          if (!permissions.isMod(req.session)) return void res.status(403).send("No permission to modify images")
           await serverFunctions.migrateNotes(post.images, images, oldR18)
         }
 
@@ -1007,7 +1007,7 @@ const CreateRoutes = (app: Express) => {
         await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
 
         if (permissions.isMod(req.session)) {
-          if (silent) return res.status(200).send("Success")
+          if (silent) return void res.status(200).send("Success")
         }
 
         await insertPostHistory(post, {artists, characters, series, tags, imgChanged, addedTags, removedTags, vanillaBuffers, 
@@ -1026,10 +1026,10 @@ const CreateRoutes = (app: Express) => {
         let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series, 
         tags, tagGroups, newTags, duplicates} = req.body as UnverifiedUploadParams
 
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (req.session.banned) return res.status(403).send("You are banned")
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (req.session.banned) return void res.status(403).send("You are banned")
         const pending = await sql.search.unverifiedUserPosts(req.session.username)
-        if (functions.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return res.status(403).send("Upload limit reached")
+        if (functions.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return void res.status(403).send("Upload limit reached")
 
         artists = functions.cleanTags(artists, "artists")
         characters = functions.cleanTags(characters, "characters")
@@ -1045,19 +1045,19 @@ const CreateRoutes = (app: Express) => {
 
         const invalidTags = functions.invalidTags(characters, series, tags)
         if (invalidTags) {
-          return res.status(400).send(invalidTags)
+          return void res.status(400).send(invalidTags)
         }
 
         let skipMBCheck = permissions.isMod(req.session) ? true : false
-        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (!validImages(images, skipMBCheck)) return void res.status(400).send("Invalid images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return void res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
-        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
-        if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
-        if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+        if (!skipMBCheck && totalMB > 300) return void res.status(400).send("Invalid size")
+        if (!functions.validType(type)) return void res.status(400).send("Invalid type")
+        if (!functions.validRating(rating)) return void res.status(400).send("Invalid rating")
+        if (!functions.validStyle(style)) return void res.status(400).send("Invalid style")
 
         const postID = await sql.post.insertUnverifiedPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
@@ -1084,10 +1084,10 @@ const CreateRoutes = (app: Express) => {
         let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
         tags, tagGroups, newTags, reason} = req.body as UnverifiedEditParams
 
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad unverifiedID")
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (req.session.banned) return res.status(403).send("You are banned")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (unverifiedID && Number.isNaN(unverifiedID)) return void res.status(400).send("Bad unverifiedID")
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (req.session.banned) return void res.status(403).send("You are banned")
 
         artists = functions.cleanTags(artists, "artists")
         characters = functions.cleanTags(characters, "characters")
@@ -1103,36 +1103,36 @@ const CreateRoutes = (app: Express) => {
 
         const invalidTags = functions.invalidTags(characters, series, tags)
         if (invalidTags) {
-          return res.status(400).send(invalidTags)
+          return void res.status(400).send(invalidTags)
         }
 
         let skipMBCheck = permissions.isMod(req.session) ? true : false
-        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (!validImages(images, skipMBCheck)) return void res.status(400).send("Invalid images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return void res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
-        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
-        if (!functions.validType(type)) return res.status(400).send("Invalid type")
-        if (!functions.validRating(rating)) return res.status(400).send("Invalid rating")
-        if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+        if (!skipMBCheck && totalMB > 300) return void res.status(400).send("Invalid size")
+        if (!functions.validType(type)) return void res.status(400).send("Invalid type")
+        if (!functions.validRating(rating)) return void res.status(400).send("Invalid rating")
+        if (!functions.validStyle(style)) return void res.status(400).send("Invalid style")
 
         const originalPostID = postID
         postID = unverifiedID ? unverifiedID : await sql.post.insertUnverifiedPost()
         const unverifiedPost = await sql.post.unverifiedPost(postID)
-        if (!unverifiedPost) return res.status(400).send("Bad unverifiedID")
+        if (!unverifiedPost) return void res.status(400).send("Bad unverifiedID")
         let oldR18 = functions.isR18(unverifiedPost.rating)
         let newR18 = functions.isR18(rating)
 
         let post = null as PostFull | null
         if (originalPostID) {
           post = await sql.post.post(originalPostID) as PostFull
-          if (!post) return res.status(400).send("Bad postID")
+          if (!post) return void res.status(400).send("Bad postID")
         }
 
         let imgChanged = true
         if (unverifiedID) {
-          if (unverifiedPost.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+          if (unverifiedPost.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
 
           imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, images, false)
           if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, upscaledImages, true)
@@ -1188,11 +1188,11 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/approve", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, reason, noImageUpdate} = req.body as ApproveParams
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!permissions.isMod(req.session)) return void res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
-        if (!unverified) return res.status(400).send("Bad request")
+        if (!unverified) return void res.status(400).send("Bad request")
 
         const targetUser = await sql.user.user(unverified.uploader)
         if (targetUser) {
@@ -1217,7 +1217,7 @@ const CreateRoutes = (app: Express) => {
         let vanillaBuffers = [] as Buffer[]
         let upscaledVanillaBuffers = [] as Buffer[]
         if (unverified.originalID) {
-          if (!post) return res.status(400).send("Bad postID")
+          if (!post) return void res.status(400).send("Bad postID")
           const deletionResult = await deleteImages(post, {imgChanged, r18: oldR18})
           vanillaBuffers = deletionResult.vanillaBuffers
           upscaledVanillaBuffers = deletionResult.upscaledVanillaBuffers
@@ -1309,10 +1309,10 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/reject", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = req.body.postID as string
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isMod(req.session)) return void res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
-        if (!unverified) return res.status(400).send("Bad postID")
+        if (!unverified) return void res.status(400).send("Bad postID")
 
         const targetUser = await sql.user.user(unverified.uploader)
         if (targetUser) {
@@ -1322,7 +1322,7 @@ const CreateRoutes = (app: Express) => {
 
         if (unverified.deleted) {
           await serverFunctions.deleteUnverifiedPost(unverified)
-          return res.status(200).send("Success")
+          return void res.status(200).send("Success")
         }
 
         if (unverified.appealed) {
@@ -1359,11 +1359,11 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/split", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, order} = req.body as {postID: string, order: number | null}
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!permissions.isAdmin(req.session)) return res.status(403).end()
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return void res.status(403).end()
         const post = await sql.post.post(postID)
-        if (!post) return res.status(400).send("Bad postID")
+        if (!post) return void res.status(400).send("Bad postID")
 
         for (let i = 0; i < post.images.length; i++) {
           if (i === 0) {
@@ -1424,11 +1424,11 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/join", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, nested} = req.body as {postID: string, nested: boolean}
-        if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!permissions.isAdmin(req.session)) return res.status(403).end()
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return void res.status(403).end()
         const post = await sql.post.post(postID)
-        if (!post) return res.status(400).send("Bad postID")
+        if (!post) return void res.status(400).send("Bad postID")
 
         const childPosts = await sql.post.childPosts(postID)
 

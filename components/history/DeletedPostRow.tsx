@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -22,7 +22,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {permaDeletePostID, permaDeletePostFlag} = usePostDialogSelector()
     const {setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag} = usePostDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const undeletePostDialog = async () => {
         setUndeletePostID({postID: props.post.postID})
@@ -61,7 +61,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        functions.openPost(props.post, event, history, session, setSessionFlag)
+        functions.openPost(props.post, event, navigate, session, setSessionFlag)
     }
 
     const printMirrors = () => {

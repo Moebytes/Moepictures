@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -19,7 +18,6 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = getTitle()

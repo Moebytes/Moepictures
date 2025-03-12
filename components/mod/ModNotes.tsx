@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
@@ -27,8 +27,8 @@ const ModNotes: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
-    const history = useHistory()
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -305,7 +305,7 @@ const ModNotes: React.FunctionComponent = (props) => {
             if (noteGroup.fake) continue
             const imgClick = (event?: React.MouseEvent, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${noteGroup.postID}`, "_blank")
-                history.push(`/unverified/post/${noteGroup.postID}`)
+                navigate(`/unverified/post/${noteGroup.postID}`)
             }
             const img = functions.getUnverifiedThumbnailLink(noteGroup.post.images[0], "tiny", session, mobile)
             jsx.push(
@@ -316,7 +316,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                         <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${noteGroup.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(noteGroup?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${noteGroup.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(noteGroup?.updater) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {noteGroup.reason}</span>
                         {noteDataJSX(noteGroup)}
                     </div>

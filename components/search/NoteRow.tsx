@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useSessionActions, useFilterSelector} from "../../store"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
@@ -29,7 +29,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -49,14 +49,14 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.note.postID}/${props.note.post.slug}?order=${props.note.order}`, "_blank")
         } else {
-            history.push(`/post/${props.note.postID}/${props.note.post.slug}?order=${props.note.order}`)
+            navigate(`/post/${props.note.postID}/${props.note.post.slug}?order=${props.note.order}`)
         }
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.note?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.note.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(props.note.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const parseText = () => {
@@ -76,7 +76,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const showHistory = () => {
-        history.push(`/note/history/${props.note.postID}/${props.note.post.slug}/${props.note.order || 1}`)
+        navigate(`/note/history/${props.note.postID}/${props.note.post.slug}/${props.note.order || 1}`)
     }
 
     const commentOptions = () => {
@@ -96,7 +96,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.note.updater}`, "_blank")
         } else {
-            history.push(`/user/${props.note.updater}`)
+            navigate(`/user/${props.note.updater}`)
         }
     }
 

@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import Draggable from "react-draggable"
@@ -13,7 +12,6 @@ const DeleteTagHistoryDialog: React.FunctionComponent = (props) => {
     const {setDeleteTagHistoryID, setDeleteTagHistoryFlag} = useTagDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteTagHistory.title

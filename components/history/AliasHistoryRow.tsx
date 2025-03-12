@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -31,7 +31,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const [userRole, setUserRole] = useState("")
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const updateUserRole = async () => {
         const user = await functions.get("/api/user", {username: props.history.user}, session, setSessionFlag)
@@ -119,7 +119,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.history.user}`, "_blank")
         } else {
-            history.push(`/user/${props.history.user}`)
+            navigate(`/user/${props.history.user}`)
         }
     }
 
@@ -184,25 +184,25 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.history.type === "alias") return (
             <span>
                 <span>{props.history.source}</span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.target}`)}> ⇢ {props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.target}`)}> ⇢ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo alias") return (
             <span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source} ⇠ </span>
-                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.target}`)}>{props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source} ⇠ </span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.target}`)}>{props.history.target}</span>
             </span>
         )
         if (props.history.type === "implication") return (
             <span>
-                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source}</span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.target}`)}> ⇾ {props.history.target}</span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.target}`)}> ⇾ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo implication") return (
             <span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source} ⇽ </span>
-                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.target}`)}>{props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source} ⇽ </span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.target}`)}>{props.history.target}</span>
             </span>
         )
     }

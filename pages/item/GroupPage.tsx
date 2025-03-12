@@ -3,7 +3,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
 useGroupDialogSelector, useFilterSelector} from "../../store"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -28,13 +28,9 @@ import GroupThumbnail from "../../components/search/GroupThumbnail"
 import "./styles/grouppage.less"
 import {GroupPosts, GroupHistory, GroupItem, PostOrdered} from "../../types/Types"
 
-interface Props {
-    match: {params: {group: string}}
-}
-
 let limit = 25
 
-const GroupPage: React.FunctionComponent<Props> = (props) => {
+const GroupPage: React.FunctionComponent = () => {
     const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -55,10 +51,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const [historyID, setHistoryID] = useState(null as string | null)
     const [group, setGroup] = useState(null as GroupPosts | null)
     const [items, setItems] = useState([] as GroupItem[])
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
     const imageFiltersRef = useRef<HTMLDivElement>(null)
-    const slug = props.match.params.group
+    const {group: slug} = useParams() as {group: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -158,7 +154,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})
                 }
                 if (reorderState) return
-                functions.openPost(item.post, event, history, session, setSessionFlag)
+                functions.openPost(item.post, event, navigate, session, setSessionFlag)
                 setPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)
@@ -217,7 +213,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         if (!group) return jsx
         if (session.username) {
-            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => history.push(`/group/history/${group.slug}`)} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => navigate(`/group/history/${group.slug}`)} style={{filter: getFilter()}}/>)
             if (!session.banned) {
                 jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
                 if (reorderState) {
@@ -237,14 +233,14 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open("/posts", "_blank")
         } else {
-            history.push("/posts")
+            navigate("/posts")
         }
         setSearch(`group:${group.slug}`)
         setSearchFlag(true)
     }
 
     const currentHistory = (key?: string) => {
-        history.push(`/group/${key ? key : slug}`)
+        navigate(`/group/${key ? key : slug}`)
         setHistoryID(null)
     }
 
@@ -274,7 +270,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const getHistoryButtons = () => {
         return (
             <div className="history-button-container">
-                <button className="history-button" onClick={() => history.push(`/group/history/${slug}`)}>
+                <button className="history-button" onClick={() => navigate(`/group/history/${slug}`)}>
                     <img src={historyIcon}/>
                     <span>History</span>
                 </button>

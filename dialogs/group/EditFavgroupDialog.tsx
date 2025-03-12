@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -20,7 +20,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     const [isPrivate, setIsPrivate] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -52,7 +52,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
         }
         await functions.put("/api/favgroup/edit", {key: editFavGroupObj.name, name, isPrivate}, session, setSessionFlag)
         const newSlug = functions.generateSlug(name)
-        history.push(`/favgroup/${session.username}/${newSlug}`)
+        navigate(`/favgroup/${session.username}/${newSlug}`)
         setEditFavGroupObj(null)
     }
 

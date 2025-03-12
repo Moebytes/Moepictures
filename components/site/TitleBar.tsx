@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import favicon2 from "../../assets/icons/favicon2.png"
 import favicon3 from "../../assets/icons/favicon3.png"
@@ -38,7 +38,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {setVisiblePosts} = useCacheActions()
     const {activeGroup, activeFavgroup, headerText} = useActiveSelector()
     const {setHeaderText} = useActiveActions()
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     useEffect(() => {
         if (headerFlag) {
@@ -62,7 +63,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const titleClick = (event: React.MouseEvent) => {
-        if (mobile && (history.location.pathname === "/" || history.location.pathname === "/posts")) if (event.clientY < 180) return
+        if (mobile && (location.pathname === "/" || location.pathname === "/posts")) if (event.clientY < 180) return
         if (props.reset) {
             setSearch("")
             setImageType("all")
@@ -70,13 +71,13 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             setStyleType("all")
             setSortType("date")
             setSearchFlag(true)
-            history.push("/posts")
+            navigate("/posts")
             window.scrollTo(0, 0)
             setScrollY(0)
         } else {
             const saved = visiblePosts
             const savedScrollY = scrollY
-            history.push("/posts")
+            navigate("/posts")
             setVisiblePosts(saved)
             if (savedScrollY) window.scrollTo(0, savedScrollY)
         }

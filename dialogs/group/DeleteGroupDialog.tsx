@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -17,7 +17,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteGroup.title
@@ -38,7 +38,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
         if (!deleteGroupObj) return
         if (permissions.isMod(session)) {
             await functions.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
-            history.push("/groups")
+            navigate("/groups")
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {

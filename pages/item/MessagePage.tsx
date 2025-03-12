@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -42,11 +42,7 @@ import codeblock from "../../assets/icons/codeblock.png"
 import "./styles/threadpage.less"
 import {MessageUser, MessageUserReply} from "../../types/Types"
 
-interface Props {
-    match: {params: {id: string}}
-}
-
-const MessagePage: React.FunctionComponent<Props> = (props) => {
+const MessagePage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -81,11 +77,11 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
     const [error, setError] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
     const errorRef = useRef<HTMLDivElement>(null)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
-    const messageID = props.match.params.id
+    const {id: messageID} = useParams() as {id: string}
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -249,9 +245,9 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!scroll) {
-            history.replace(`${location.pathname}?page=${messagePage}${replyID > -1 ? `&reply=${replyID}` : ""}`)
+            navigate(`${location.pathname}?page=${messagePage}${replyID > -1 ? `&reply=${replyID}` : ""}`, {replace: true})
         } else {
-            if (replyID > -1) history.replace(`${location.pathname}?reply=${replyID}`) 
+            if (replyID > -1) navigate(`${location.pathname}?reply=${replyID}`, {replace: true}) 
         }
     }, [scroll, messagePage, replyID])
 
@@ -400,14 +396,14 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${message.creator}`, "_blank")
         } else {
-            history.push(`/user/${message.creator}`)
+            navigate(`/user/${message.creator}`)
         }
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!message?.imagePost) return
         event.stopPropagation()
-        functions.openPost(message.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(message.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getCreatorJSX = () => {
@@ -499,7 +495,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const deleteMessage = async () => {
         await functions.delete("/api/message/delete", {messageID}, session, setSessionFlag)
-        history.push("/mail")
+        navigate("/mail")
     }
 
     useEffect(() => {
@@ -678,7 +674,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             if (event.ctrlKey || event.metaKey || event.button === 1) {
                 window.open(`/user/${user}`, "_blank")
             } else {
-                history.push(`/user/${user}`)
+                navigate(`/user/${user}`)
             }
         }
         return (

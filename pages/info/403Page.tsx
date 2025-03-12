@@ -1,5 +1,4 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -19,7 +18,6 @@ const $403Page: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)

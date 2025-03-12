@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
@@ -22,14 +22,14 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
     const [requests, setRequests] = useState([] as GroupDeleteRequest[])
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement>[])
+    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([] as GroupDeleteRequest[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -343,14 +343,14 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const imgClick = (event: React.MouseEvent) => {
-                functions.openPost(request.post, event, history, session, setSessionFlag)
+                functions.openPost(request.post, event, navigate, session, setSessionFlag)
             }
             const openGroup = (event: React.MouseEvent) => {
                 event.preventDefault()
                 if (event.ctrlKey || event.metaKey || event.button === 1) {
                     window.open(`/group/${request.group}`, "_blank")
                 } else {
-                    history.push(`/group/${request.group}`)
+                    navigate(`/group/${request.group}`)
                 }
             }
             let img = ""
@@ -363,7 +363,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {request.post ? <span className="mod-post-link">{i18n.buttons.post}: {request.post.postID}</span> : null}
                         <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>{i18n.labels.group}: {request.name}</span>

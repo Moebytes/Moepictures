@@ -1,5 +1,4 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import "../dialog.less"
@@ -10,7 +9,6 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteCommentID} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag} = useCommentDialogActions()
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteComment.title

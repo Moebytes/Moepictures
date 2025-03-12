@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -21,7 +21,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const deleteSearchHistory = async () => {
         await functions.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
@@ -52,7 +52,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        functions.openPost(props.history.post, event, history, session, setSessionFlag)
+        functions.openPost(props.history.post, event, navigate, session, setSessionFlag)
     }
 
     const printMirrors = () => {

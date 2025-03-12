@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
 import {useActiveSelector, useActiveActions, useThemeSelector} from "../../store"
 import functions from "../../structures/Functions"
 import "./styles/actionbanner.less"

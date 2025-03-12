@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useActiveSelector, 
 useActiveActions, useLayoutSelector, useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -43,7 +43,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -85,7 +85,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (commentID) history.replace(`${location.pathname}?comment=${commentID}`)
+        if (commentID) navigate(`${location.pathname}?comment=${commentID}`, {replace: true})
     }, [commentID])
 
     const updateComments = async () => {

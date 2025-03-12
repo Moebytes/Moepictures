@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, 
 useTagDialogSelector, useTagDialogActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -15,7 +14,6 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
 
     useEffect(() => {
         if (deleteAliasHistoryID) {

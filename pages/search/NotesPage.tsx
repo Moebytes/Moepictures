@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -52,7 +52,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {setNoteSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
     const sortRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const queryParam = new URLSearchParams(window.location.search).get("query")
@@ -254,10 +254,10 @@ const NotesPage: React.FunctionComponent = (props) => {
         if (searchQuery) searchParams.set("query", searchQuery)
         if (!scroll) searchParams.set("page", String(notesPage || ""))
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, notesPage])
 
@@ -399,7 +399,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     const searchUntranslated = () => {
         setSearch("+untranslated +partially-translated")
         setSearchFlag(true)
-        history.push("/posts")
+        navigate("/posts")
     }
 
     const getUntranslatedButton = () => {

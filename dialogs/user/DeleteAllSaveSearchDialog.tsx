@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useSearchDialogSelector, useSearchDialogActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -13,7 +12,6 @@ const DeleteAllSaveSearchDialog: React.FunctionComponent = (props) => {
     const {setDeleteAllSaveSearchDialog} = useSearchDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteAllSaveSearch.title

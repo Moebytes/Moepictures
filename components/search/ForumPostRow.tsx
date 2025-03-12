@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useFilterSelector, useThreadDialogSelector, useThreadDialogActions, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -42,7 +42,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyID, setEditReplyFlag, setEditReplyContent, setEditReplyR18,
     setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, 
     setEditThreadR18, setReportReplyID, setReportThreadID} = useThreadDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -61,7 +61,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.forumPost?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.forumPost.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(props.forumPost.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const goToPost = (id: string) => {
@@ -71,7 +71,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         if (!props.forumPost.thread) return
-        history.push(`/thread/${props.forumPost.thread.threadID}`)
+        navigate(`/thread/${props.forumPost.thread.threadID}`)
         const cleanComment = functions.parsePieces(props.forumPost?.content).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[${props.forumPost?.id}] ${functions.toProperCase(props.forumPost?.creator)} said:
@@ -82,7 +82,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const deleteThread = async () => {
         if (props.forumPost.type === "thread") {
             await functions.delete("/api/thread/delete", {threadID: props.forumPost.id}, session, setSessionFlag)
-            history.push("/forum")
+            navigate("/forum")
         }
     }
 
@@ -223,7 +223,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.forumPost.creator}`, "_blank")
         } else {
-            history.push(`/user/${props.forumPost.creator}`)
+            navigate(`/user/${props.forumPost.creator}`)
         }
     }
 
@@ -294,7 +294,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/thread/${props.forumPost.thread.threadID}${replyID}`, "_blank")
         } else {
-            history.push(`/thread/${props.forumPost.thread.threadID}${replyID}`)
+            navigate(`/thread/${props.forumPost.thread.threadID}${replyID}`)
         }
     }
 

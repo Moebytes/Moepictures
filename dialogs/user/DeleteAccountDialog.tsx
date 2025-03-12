@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useMiscDialogSelector, useMiscDialogActions, useActiveActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -14,7 +14,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const {setShowDeleteAccountDialog} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.buttons.deleteAccount
@@ -32,7 +32,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const deleteAccount = async () => {
         await functions.delete("/api/user/delete", null, session, setSessionFlag)
         setSessionFlag(true)
-        history.push("/posts")
+        navigate("/posts")
         setSidebarText(i18n.sidebar.accountDeleted)
     }
 

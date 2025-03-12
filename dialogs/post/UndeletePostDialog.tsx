@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
@@ -16,7 +15,6 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
     const {setHistoryFlag, setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const history = useHistory()
 
     useEffect(() => {
         document.title = i18n.dialogs.undeletePost.title

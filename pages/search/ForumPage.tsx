@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -50,7 +50,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const queryParam = new URLSearchParams(window.location.search).get("query")
@@ -252,10 +252,10 @@ const ForumPage: React.FunctionComponent = (props) => {
         if (searchQuery) searchParams.set("query", searchQuery)
         if (!scroll) searchParams.set("page", String(forumPage || ""))
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, forumPage])
 

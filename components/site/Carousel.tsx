@@ -37,14 +37,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {setPost} = useCacheActions()
     const [lastPos, setLastPos] = useState(null as number | null)
     const [dragging, setDragging] = useState(false)
-    const [imageRefs, setImageRefs] = useState([] as React.RefObject<HTMLImageElement | HTMLVideoElement>[])
-    const [imageFilterRefs, setImageFilterRefs] = useState([] as React.RefObject<HTMLDivElement>[])
-    const [pixelateRefs, setPixelateRefs] = useState([] as React.RefObject<HTMLCanvasElement>[])
-    const [effectRefs, setEffectRefs] = useState([] as React.RefObject<HTMLCanvasElement>[])
-    const [sharpenRefs, setSharpenRefs] = useState([] as React.RefObject<HTMLImageElement>[])
-    const [lightnessRefs, setLightnessRefs] = useState([] as React.RefObject<HTMLImageElement>[])
-    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLDivElement> | null)
-    const [active, setActive] = useState(null as React.RefObject<HTMLDivElement> | null)
+    const [imageRefs, setImageRefs] = useState([] as React.RefObject<HTMLImageElement | HTMLVideoElement | null>[])
+    const [imageFilterRefs, setImageFilterRefs] = useState([] as React.RefObject<HTMLDivElement | null>[])
+    const [pixelateRefs, setPixelateRefs] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
+    const [effectRefs, setEffectRefs] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
+    const [sharpenRefs, setSharpenRefs] = useState([] as React.RefObject<HTMLImageElement | null>[])
+    const [lightnessRefs, setLightnessRefs] = useState([] as React.RefObject<HTMLImageElement | null>[])
+    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLDivElement | null> | null)
+    const [active, setActive] = useState(null as React.RefObject<HTMLDivElement | null> | null)
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
     const [images, setImages] = useState([] as string[])
@@ -55,8 +55,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [scrollTimeout, setScrollTimeout] = useState(false)
     const [trackPad, setTrackPad] = useState(false)
     const [lastResetFlag, setLastResetFlag] = useState(null)
-    const carouselRef = useRef<HTMLDivElement>(null)
-    const sliderRef = useRef<HTMLDivElement>(null)
+    const carouselRef = useRef<HTMLDivElement | null>(null)
+    const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -452,7 +452,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
     }, [effectRefs, splatter])
 
-    const setFunc = (image: string, index: number, newTab: boolean, ref: React.RefObject<HTMLDivElement>) => {
+    const setFunc = (image: string, index: number, newTab: boolean, ref: React.RefObject<HTMLDivElement | null>) => {
         setActive(ref)
         props.set?.(image, index, newTab)
     }

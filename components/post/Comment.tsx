@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useCommentDialogSelector, useCommentDialogActions, useCacheSelector} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
@@ -38,7 +38,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {setQuoteText} = useActiveActions()
     const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -57,7 +57,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.comment.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const triggerQuote = () => {
@@ -159,7 +159,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.comment.username}`, "_blank")
         } else {
-            history.push(`/user/${props.comment.username}`)
+            navigate(`/user/${props.comment.username}`)
         }
     }
 

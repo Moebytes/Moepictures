@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useCacheSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import CommentRow from "../search/CommentRow"
@@ -17,7 +17,7 @@ const VerticalCarousel: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const generateJSX = () => {
         let jsx = [] as React.ReactElement[]

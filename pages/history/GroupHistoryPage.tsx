@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,7 +13,6 @@ import {GroupHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
 interface Props {
-    match: {params: {group: string, username?: string}}
     all?: boolean
 }
 
@@ -32,15 +31,14 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [visibleRevisions, setVisibleRevisions] = useState([] as GroupHistory[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const slug = props.match.params.group
-    const username = props.match.params.username
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {group: slug, username} = useParams() as {group: string, username?: string}
 
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect(slug ? `/group/history/${slug}` : "/group/history")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])

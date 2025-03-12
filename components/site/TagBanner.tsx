@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions, useCacheSelector, usePageSelector,
 useCacheActions} from "../../store"
@@ -25,7 +25,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     const [trackPad, setTrackPad] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const [marginLeft, setMarginLeft] = useState(0)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         containerRef.current?.addEventListener("wheel", handleWheel, {passive: false})
@@ -162,7 +162,7 @@ const TagBanner: React.FunctionComponent = (props) => {
             }
             const tagPage = (event: React.MouseEvent) => {
                 event.preventDefault()
-                history.push(`/tag/${bannerTag.tag}`)
+                navigate(`/tag/${bannerTag.tag}`)
             }
             jsx.push(
                 <div className="tagbanner-box" key={bannerTag.tag}>

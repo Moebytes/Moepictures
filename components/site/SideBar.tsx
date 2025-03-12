@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions, usePostDialogSelector,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePostDialogActions, useSearchDialogActions, 
@@ -128,7 +128,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -355,7 +356,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${tag}`, "_blank")
         } else {
-            history.push(`/tag/${tag}`)
+            navigate(`/tag/${tag}`)
         }
         setTagToolTipEnabled(false)
     }
@@ -382,7 +383,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             const tagClick = () => {
                 if (!props.artists) return
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(props.artists[i].tag)
                 setSearchFlag(true)
             }
@@ -430,7 +431,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             const tagClick = () => {
                 if (!props.characters) return
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
             }
@@ -468,7 +469,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             const tagClick = () => {
                 if (!props.series) return
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
             }
@@ -508,7 +509,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             if (!props.meta[i]) break
             const tagClick = () => {
                 if (!props.meta) return
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(props.meta[i].tag)
                 setSearchFlag(true)
             }
@@ -531,7 +532,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < favoriteTags.length; i++) {
             if (!favoriteTags[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(favoriteTags[i].tag)
                 setSearchFlag(true)
             }
@@ -603,7 +604,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             for (let i = 0; i < currentTags.length; i++) {
                 if (!currentTags[i]) break
                 const tagClick = () => {
-                    history.push(`/posts`)
+                    navigate(`/posts`)
                     setSearch(currentTags[i].tag)
                     setSearchFlag(true)
                 }
@@ -638,7 +639,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
+                navigate(`/posts`)
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
             }
@@ -770,16 +771,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerSearch = () => {
-        history.push(`/posts`)
+        navigate(`/posts`)
         setSearchFlag(true)
     }
 
     const randomSearch = async () => {
-        if (props.post && history.location.pathname.includes("/post/")) {
+        if (props.post && location.pathname.includes("/post/")) {
             const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random"}, session, setSessionFlag)
-            history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
+            navigate(`/post/${posts[0].postID}/${posts[0].slug}`)
         } else {
-            history.push(`/posts`)
+            navigate(`/posts`)
             setRandomFlag(true)
         }
     }
@@ -789,7 +790,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!file) return
         const result = await functions.imageSearch(file, session, setSessionFlag)
         setImageSearchFlag(result)
-        history.push("/posts")
+        navigate("/posts")
         event.target.value = ""
     }
 
@@ -810,8 +811,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const editPost = async () => {
         if (!props.post) return
-        if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
-        history.push(`/edit-post/${props.post.postID}/${props.post.slug}`)
+        if (props.unverified) return navigate(`/unverified/edit-post/${props.post.postID}`)
+        navigate(`/edit-post/${props.post.postID}/${props.post.slug}`)
     }
 
     const privatePost = async () => {
@@ -830,10 +831,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
                 const id = unverifiedPosts[currentIndex].postID
-                history.push(`/unverified/post/${id}`)
+                navigate(`/unverified/post/${id}`)
             }
         }
-        history.push(`/mod-queue`)
+        navigate(`/mod-queue`)
     }
 
     const upscalingDialog = () => {
@@ -861,13 +862,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const triggerSetAvatar = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/set-avatar/${props.post.postID}/${props.post.slug}`)
+        navigate(`/set-avatar/${props.post.postID}/${props.post.slug}`)
     }
 
     const postHistory = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/post/history/${props.post.postID}/${props.post.slug}`)
+        navigate(`/post/history/${props.post.postID}/${props.post.slug}`)
     }
     
     const triggerTagEdit = () => {
@@ -942,20 +943,20 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
         if (role === "admin") {
             return (
-                <div className="sidebar-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                <div className="sidebar-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
                      <span className="tag-alt admin-color">{functions.toProperCase(username) || "deleted"}</span>
                     <img className="sidebar-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (role === "mod") {
             return (
-                <div className="sidebar-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                <div className="sidebar-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
                     <span className="tag-alt mod-color">{functions.toProperCase(username) || "deleted"}</span>
                     <img className="sidebar-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
+        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
     const copyTags = (replaceDash?: boolean, commas?: boolean) => {
@@ -998,7 +999,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const tagCaptchaJSX = () => {
         if (!session) return
         if (session.captchaNeeded) {
-            if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
+            if (!location.pathname.includes("/post/") && !location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
                 history.go(0)
@@ -1064,17 +1065,17 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         window.clearInterval(interval)
-        if (autoSearch && history.location.pathname.includes("/post/")) {
+        if (autoSearch && location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!props.post || !autoSearch) return
                 const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
-                history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
+                navigate(`/post/${posts[0].postID}/${posts[0].slug}`)
             }
             if (autoSearch) {
                 interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))
             }
-        } else if (autoSearch && !history.location.pathname.includes("/posts")) {
-            history.push("/posts")
+        } else if (autoSearch && !location.pathname.includes("/posts")) {
+            navigate("/posts")
         }
         return () => {
             window.clearInterval(interval)
@@ -1096,7 +1097,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = async (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const changeSearchType = (type: "savesearch" | "favsearch") => {

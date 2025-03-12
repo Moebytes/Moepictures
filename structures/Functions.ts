@@ -5,6 +5,7 @@ import commonPasswords from "../assets/json/common-passwords.json"
 import bannedUsernames from "../assets/json/banned-usernames.json"
 import badWords from "../assets/json/bad-words.json"
 import axios from "axios"
+import {NavigateFunction} from "react-router-dom"
 import {hexToRgb} from "./Color"
 import MP4Demuxer from "./MP4Demuxer"
 import audioEncoder from "audio-encoder"
@@ -15,7 +16,7 @@ import {JsWebm} from "jswebm"
 import cryptoFunctions from "./CryptoFunctions"
 import permissions from "./Permissions"
 import localforage from "localforage"
-import mm from "music-metadata"
+import * as mm from "music-metadata"
 import * as THREE from "three"
 import WebPXMux from "webpxmux"
 import ImageTracer from "imagetracerjs"
@@ -912,7 +913,8 @@ export default class Functions {
                 const canvasContext = canvas.getContext("2d")!
                 const image = await createImageBitmap(decoded.image)
                 canvasContext.drawImage(image, 0, 0)
-                result.push({frame: canvas, delay: decoded.image.duration / 1000.0})
+                const duration = decoded.image.duration || 0
+                result.push({frame: canvas, delay: duration / 1000.0})
             } catch {
                 break
             }
@@ -968,7 +970,8 @@ export default class Functions {
                 const canvasContext = canvas.getContext("2d")!
                 const image = await createImageBitmap(decoded.image)
                 canvasContext.drawImage(image, 0, 0)
-                result.push({frame: canvas, delay: decoded.image.duration / 1000.0})
+                const duration = decoded.image.duration || 0
+                result.push({frame: canvas, delay: duration / 1000.0})
             } catch {
                 break
             }
@@ -3412,7 +3415,7 @@ export default class Functions {
         return null
     }
 
-    public static openPost = async (postResolvable: Post | PostHistory | string | null, event: React.MouseEvent, history: any, 
+    public static openPost = async (postResolvable: Post | PostHistory | string | null, event: React.MouseEvent, navigate: NavigateFunction, 
         session: Session, setSessionFlag: (value: boolean) => void, historyIndex = "") => {
         if (!postResolvable) return
         let post = postResolvable as Post | undefined
@@ -3421,7 +3424,7 @@ export default class Functions {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${post.postID}/${post.slug}${historyIndex}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}/${post.slug}${historyIndex}`)
+            navigate(`/post/${post.postID}/${post.slug}${historyIndex}`)
         }
     }
 

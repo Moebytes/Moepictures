@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
@@ -22,7 +22,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
     const [newEmail, setNewEmail] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -50,7 +50,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/change-email-success")
-            history.push("/login")
+            navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
@@ -69,7 +69,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text-small2">{session.email}</span>
                     </div>
                     <div className="sitepage-button-container">
-                        <button className="sitepage-button" onClick={() => history.push("/profile")}>{i18n.buttons.ok}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/profile")}>{i18n.buttons.ok}</button>
                     </div>
                 </div>
                 <Footer/>

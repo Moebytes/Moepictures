@@ -3,7 +3,7 @@ import {Request, Response, NextFunction} from "express"
 import path from "path"
 import fs from "fs"
 import FormData from "form-data"
-import mm from "music-metadata"
+import * as mm from "music-metadata"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
@@ -30,8 +30,13 @@ UnverifiedPost, Tag, PostRating, UploadTag, PixivResponse, SaucenaoResponse, WDT
 
 const csrf = new CSRF()
 const exec = util.promisify(child_process.exec)
-const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+let pixiv: Pixiv
+let deviantart: DeviantArt
+const login = async () => {
+    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+}
+login()
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -54,7 +59,7 @@ const r2 = new S3({
 })
 
 export const keyGenerator = (req: Request, res: Response) => {
-    return req.session.username || req.ip
+    return req.session.username || req.ip || ""
 }
 
 export const handler = (req: Request, res: Response) => {
@@ -64,7 +69,7 @@ export const handler = (req: Request, res: Response) => {
 
 export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
     if (req.session.apiKey) return next()
-    if (!ServerFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+    if (!ServerFunctions.validateCSRF(req)) return void res.status(400).send("Bad CSRF token")
     next()
 }
 
@@ -838,7 +843,7 @@ export default class ServerFunctions {
     public static translate = async (words: string[]) => {
         const translate = async (text: string) => {
             try {
-                const translated = await googleTranslate(text, {from: "ja", to: "en"})
+                const translated = await googleTranslate.translate(text, {from: "ja", to: "en"})
                 return translated.text
             } catch {
                 return text

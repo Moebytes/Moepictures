@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useSearchDialogSelector, useSearchDialogActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -15,7 +15,7 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         document.title = i18n.dialogs.deleteAllSearchHistory.title
@@ -34,7 +34,7 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
 
     const deleteAllHistory = async () => {
         await functions.delete("/api/user/history/delete", {all: true}, session, setSessionFlag)
-        history.push("/posts")
+        navigate("/posts")
     }
 
     const click = (button: "accept" | "reject") => {

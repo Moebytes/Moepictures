@@ -1,5 +1,5 @@
 import React, {useEffect, useReducer, useState} from "react"
-import {useHistory, useLocation} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -64,7 +64,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     const {modPage} = usePageSelector()
     const {setModPage} = usePageActions()
     const [queryPage, setQueryPage] = useState(1)
-    const history = useHistory()
+    const navigate = useNavigate()
     const location = useLocation()
 
     useEffect(() => {
@@ -107,10 +107,10 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState) searchParams.set("type", modState)
         if (!scroll) searchParams.set("page", String(modPage))
         if (replace) {
-            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
             replace = false
         } else {
-            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, modState, modPage])
 

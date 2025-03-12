@@ -1,5 +1,5 @@
 import React, {useContext, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector} from "../../store"
 import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
@@ -15,7 +15,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setPosts} = useCacheActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getImages = () => {
         return props.posts.map((post) => functions.getThumbnailLink(post.images[0], "tiny", session, mobile))
@@ -23,7 +23,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
 
     const click = (img: string, index: number) => {
         const post = props.posts[index]
-        history.push(`/post/${post.postID}/${post.slug}`)
+        navigate(`/post/${post.postID}/${post.slug}`)
         setPosts(props.posts)
     }
 

@@ -1,4 +1,3 @@
-import {useHistory} from "react-router-dom"
 import functions from "./Functions"
 import VerifyEmail from "../emails/VerifyEmail"
 import ChangeEmail from "../emails/ChangeEmail"
@@ -53,7 +52,7 @@ export default class JSXFunctions {
     }
 
     public static generateMarkup = (items: {text: any, jsx: any}[]) => {
-        let jsx = [] as JSX.Element[]
+        let jsx = [] as React.ReactElement[]
         items.forEach((item, index) => {
             if (item.jsx) {
                 jsx.push(item.jsx)
@@ -217,12 +216,11 @@ export default class JSXFunctions {
 
     public static parseMention = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
-        const history = useHistory()
         const parts = text.split(/(@\w+)/g)
         parts.forEach((part, index) => {
             if (part.startsWith("@")) {
                 const click = () => {
-                    history.push(`/user/${part.slice(1)}`)
+                    window.open(`/user/${part.slice(1)}`)
                 }
                 const style = {color: "var(--text-strong)", fontWeight: "bold", cursor: "pointer"}
                 items.push({text: null, jsx: <span key={index} style={style} onClick={click}>{part}</span>})

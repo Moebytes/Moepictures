@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -24,7 +23,6 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const [images, setImages] = useState([] as string[])
     const [thumbnail, setThumbnail] = useState("")
     const [order, setOrder] = useState(1)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

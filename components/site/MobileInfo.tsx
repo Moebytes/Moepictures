@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions,
 useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions,
@@ -91,7 +91,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -136,7 +137,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.artists[i]) break
             const tagClick = () => {
                 if (!props.artists) return
-                history.push(`/tag/${props.artists[i].tag}`)
+                navigate(`/tag/${props.artists[i].tag}`)
             }
             const artistSocials = () => {
                 if (!props.artists) return
@@ -181,7 +182,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.characters[i]) break
             const tagClick = () => {
                 if (!props.characters) return
-                history.push(`/tag/${props.characters[i].tag}`)
+                navigate(`/tag/${props.characters[i].tag}`)
             }
             const characterSocials = () => {
                 if (!props.characters) return
@@ -216,7 +217,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.series[i]) break
             const tagClick = () => {
                 if (!props.series) return
-                history.push(`/tag/${props.series[i].tag}`)
+                navigate(`/tag/${props.series[i].tag}`)
             }
             const seriesSocials = () => {
                 if (!props.series) return
@@ -253,7 +254,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.meta[i]) break
             const tagClick = () => {
                 if (!props.meta) return
-                history.push(`/tag/${props.meta[i].tag}`)
+                navigate(`/tag/${props.meta[i].tag}`)
             }
             jsx.push(
                 <div className="mobileinfo-row">
@@ -293,7 +294,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             for (let i = 0; i < currentTags.length; i++) {
                 if (!currentTags[i]) break
                 const tagClick = () => {
-                    history.push(`/tag/${currentTags[i].tag}`)
+                    navigate(`/tag/${currentTags[i].tag}`)
                 }
                 jsx.push(
                     <div className="mobileinfo-row">
@@ -316,7 +317,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
-                history.push(`/tag/${currentTags[i].tag}`)
+                navigate(`/tag/${currentTags[i].tag}`)
             }
             jsx.push(
                 <div className="mobileinfo-row">
@@ -351,12 +352,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerSearch = () => {
-        history.push(`/posts`)
+        navigate(`/posts`)
         setSearchFlag(true)
     }
 
     const randomSearch = () => {
-        history.push(`/posts`)
+        navigate(`/posts`)
         setRandomFlag(true)
     }
 
@@ -365,7 +366,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!file) return
         const result = await functions.imageSearch(file, session, setSessionFlag)
         setImageSearchFlag(result)
-        history.push("/posts")
+        navigate("/posts")
         event.target.value = ""
     }
 
@@ -386,8 +387,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const editPost = async () => {
         if (!props.post) return
-        if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
-        history.push(`/edit-post/${props.post.postID}/${props.post.slug}`)
+        if (props.unverified) return navigate(`/unverified/edit-post/${props.post.postID}`)
+        navigate(`/edit-post/${props.post.postID}/${props.post.slug}`)
     }
 
     const privatePost = async () => {
@@ -406,10 +407,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
                 const id = unverifiedPosts[currentIndex].postID
-                history.push(`/unverified/post/${id}`)
+                navigate(`/unverified/post/${id}`)
             }
         }
-        history.push(`/mod-queue`)
+        navigate(`/mod-queue`)
     }
 
     const upscalingDialog = () => {
@@ -437,7 +438,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const triggerSetAvatar = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/set-avatar/${props.post.postID}/${props.post.slug}`)
+        navigate(`/set-avatar/${props.post.postID}/${props.post.slug}`)
     }
 
     const triggerTagEdit = () => {
@@ -615,7 +616,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const postHistory = () => {
         if (!props.post) return
         window.scrollTo(0, 0)
-        history.push(`/post/history/${props.post.postID}/${props.post.slug}`)
+        navigate(`/post/history/${props.post.postID}/${props.post.slug}`)
     }
 
     const generateUsernameJSX = (type?: string) => {
@@ -632,20 +633,20 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         }
         if (role === "admin") {
             return (
-                <div className="mobileinfo-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
                      <span className="tag-alt admin-color">{functions.toProperCase(username) || "deleted"}</span>
                     <img className="mobileinfo-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (role === "mod") {
             return (
-                <div className="mobileinfo-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
                     <span className="tag-alt mod-color">{functions.toProperCase(username) || "deleted"}</span>
                     <img className="mobileinfo-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
+        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
     const copyTagsJSX = () => {
@@ -668,7 +669,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const tagCaptchaJSX = () => {
         if (!session) return
         if (session.captchaNeeded) {
-            if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
+            if (!location.pathname.includes("/post/") && !location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
                 history.go(0)
@@ -733,7 +734,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = async (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     return (

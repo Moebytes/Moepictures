@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import cookieIcon from "../../assets/icons/cookie.png"

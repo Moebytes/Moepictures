@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -37,7 +37,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deletePostHistoryID, revertPostHistoryID, deletePostHistoryFlag, revertPostHistoryFlag} = usePostDialogSelector()
     const {setDeletePostHistoryID, setRevertPostHistoryID, setDeletePostHistoryFlag, setRevertPostHistoryFlag} = usePostDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const [userRole, setUserRole] = useState("")
     const [tagCategories, setTagCategories] = useState({} as TagCategories)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
@@ -172,14 +172,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?history=${props.postHistory.historyID}`
-        functions.openPost(props.postHistory, event, history, session, setSessionFlag, historyIndex)
+        functions.openPost(props.postHistory, event, navigate, session, setSessionFlag, historyIndex)
     }
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.postHistory.user}`, "_blank")
         } else {
-            history.push(`/user/${props.postHistory.user}`)
+            navigate(`/user/${props.postHistory.user}`)
         }
     }
 
@@ -306,7 +306,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = (postID: string | null, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const diffJSX = () => {

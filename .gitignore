@@ -30,3 +30,6 @@ assets/live2d/*
 
 #WDTagger (large)
 assets/misc/wdtagger
+
+#unfinished
+vite.config.js

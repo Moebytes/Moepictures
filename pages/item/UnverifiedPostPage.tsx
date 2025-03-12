@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -23,11 +23,7 @@ import permissions from "../../structures/Permissions"
 import "./styles/postpage.less"
 import {TagCategories, UnverifiedPost, ChildPost, TagGroupCategory} from "../../types/Types"
 
-interface Props {
-    match: {params: {id: string}}
-}
-
-const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
+const UnverifiedPostPage: React.FunctionComponent = () => {
     const {language} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
@@ -47,8 +43,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState(null as TagCategories | null)
     const [tagGroupCategories, setTagGroupCategories] = useState([] as TagGroupCategory[])
     const [order, setOrder] = useState(1)
-    const history = useHistory()
-    const postID = props.match.params.id
+    const navigate = useNavigate()
+    const {id: postID} = useParams() as {id: string}
 
     useEffect(() => {
         setHideNavbar(false)
@@ -190,7 +186,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
             if (unverifiedPosts[currentIndex]) {
                 const id = unverifiedPosts[currentIndex].postID
-                history.push(`/unverified/post/${id}`)
+                navigate(`/unverified/post/${id}`)
             }
         }
     }
@@ -201,7 +197,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             currentIndex--
             if (unverifiedPosts[currentIndex]) {
                 const id = unverifiedPosts[currentIndex].postID
-                history.push(`/unverified/post/${id}`)
+                navigate(`/unverified/post/${id}`)
             }
         }
     }
@@ -214,7 +210,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const originalPostJSX = () => {
         if (post?.originalID) {
             const click = (img: string, index: number) => {
-                history.push(`/post/${post.originalID}/${post.slug}`)
+                navigate(`/post/${post.originalID}/${post.slug}`)
             }
             return (
                 <div className="parent">

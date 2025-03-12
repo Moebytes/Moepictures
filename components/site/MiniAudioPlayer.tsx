@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useLocation, useHistory} from "react-router-dom"
+import {useLocation, useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../structures/Functions"
 import Slider from "react-slider"
@@ -50,7 +50,7 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const [coverImg, setCoverImg] = useState("")
     const location = useLocation()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
@@ -267,7 +267,7 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
             <div className={`mini-audio-player ${showMiniPlayer ? "" : "hide-mini-audio-player"}`} style={style} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setAudioDragging(false)}>
                 <img className="mini-audio-player-expand-icon" src={showBigPlayer ? contractMusicPlayer : expandMusicPlayer} onClick={() => setShowBigPlayer(!showBigPlayer)}/>
                 <div className="mini-audio-player-row">
-                    <img className="mini-audio-player-img" src={coverImg} onClick={() => audioPost ? history.push(`/post/${audioPost.postID}/${audioPost.slug}`) : null} style={{height: !mobile && coverImg ? "150px" : "50px"}}/>
+                    <img className="mini-audio-player-img" src={coverImg} onClick={() => audioPost ? navigate(`/post/${audioPost.postID}/${audioPost.slug}`) : null} style={{height: !mobile && coverImg ? "150px" : "50px"}}/>
                 </div>
                 {getTitleJSX()}
                 {playerJSX()}

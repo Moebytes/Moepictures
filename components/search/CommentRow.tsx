@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../structures/Functions"
@@ -40,7 +40,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
     const {setCommentID, setCommentJumpFlag} = useFlagActions()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -60,14 +60,14 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.comment.postID}/${props.comment.post.slug}`, "_blank")
         } else {
-            history.push(`/post/${props.comment.postID}/${props.comment.post.slug}`)
+            navigate(`/post/${props.comment.postID}/${props.comment.post.slug}`)
         }
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.comment.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const goToComment = (commentID: string) => {
@@ -76,7 +76,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        history.push(`/post/${props.comment?.postID}/${props.comment.post.slug}`)
+        navigate(`/post/${props.comment?.postID}/${props.comment.post.slug}`)
         const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
             >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
@@ -171,7 +171,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.comment.username}`, "_blank")
         } else {
-            history.push(`/user/${props.comment.username}`)
+            navigate(`/user/${props.comment.username}`)
         }
     }
 
@@ -239,7 +239,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const commentJump = () => {
         setCommentID(Number(props.comment?.commentID))
         setCommentJumpFlag(true)
-        history.push(`/post/${props.comment?.postID}/${props.comment.post.slug}?comment=${props.comment?.commentID}`)
+        navigate(`/post/${props.comment?.postID}/${props.comment.post.slug}?comment=${props.comment?.commentID}`)
     }
 
     return (

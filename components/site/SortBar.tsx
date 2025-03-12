@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagActions, useMiscDialogActions, 
@@ -102,7 +102,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const filterRef = useRef<HTMLDivElement>(null)
     const speedRef = useRef<HTMLDivElement>(null)
     const pageMultiplierRef = useRef<HTMLDivElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -784,7 +784,7 @@ const SortBar: React.FunctionComponent = (props) => {
     let sortBarJSX = () => {
         if (mobile) return (
             <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
-                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={upload} onClick={() => history.push("/upload")}/>
+                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={upload} onClick={() => navigate("/upload")}/>
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={download} onClick={bulkDownload}/>
                 {getMobileImageJSX()}
                 {getMobileRatingJSX()}

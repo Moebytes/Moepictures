@@ -27,8 +27,13 @@ svgCaptcha.loadFont(dotline)
 let processingQueue = new Set<string>()
 
 const exec = util.promisify(child_process.exec)
-const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+let pixiv: Pixiv
+let deviantart: DeviantArt
+const login = async () => {
+    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+}
+login()
 const reddit = new snoowrap({
     userAgent: "kisaragi bot v1.0",
     clientId: process.env.REDDIT_APP_ID,
@@ -100,7 +105,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             let result = await serverFunctions.saucenaoLookup(req.body)
             res.status(200).json(result)
         } catch {
@@ -120,7 +125,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             const result = await serverFunctions.revdanbooru(req.body)
             res.status(200).send(result)
         } catch (e) {
@@ -131,7 +136,7 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
-        if (!link) return res.status(400).send("No url")
+        if (!link) return void res.status(400).send("No url")
         if (link.includes("pixiv.net") || link.includes("pximg.net")) {
             try {
                 const illust = await serverFunctions.getPixivIllust(link)
@@ -146,7 +151,7 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/deviantart", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
-        if (!link) return res.status(400).send("No url")
+        if (!link) return void res.status(400).send("No url")
         if (link.includes("deviantart.com")) {
             try {
                 const deviation = await serverFunctions.getDeviantartDeviation(link)
@@ -161,7 +166,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/proxy", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = decodeURIComponent(req.body.url as string)
-        if (!link) return res.status(400).send("No url")
+        if (!link) return void res.status(400).send("No url")
         let headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:131.0) Gecko/20100101 Firefox/131.0"}
         try {
             if (link.includes("pixiv.net") || link.includes("pximg.net")) {
@@ -169,7 +174,7 @@ const MiscRoutes = (app: Express) => {
                 if (link.includes("pximg.net")) {
                     if (link.includes("user-profile")) {
                         const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
-                        return res.status(200).send([response])
+                        return void res.status(200).send([response])
                     }
                     const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
                     resolvable = Number(id)
@@ -182,17 +187,17 @@ const MiscRoutes = (app: Express) => {
                         const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
                         images.push(response)
                     }
-                    return res.status(200).send(images)
+                    return void res.status(200).send(images)
                 } else {
                     const link = illust.meta_single_page.original_image_url || illust.image_urls.large || illust.image_urls.medium
                     const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
-                    return res.status(200).send([response])
+                    return void res.status(200).send([response])
                 }
             }
             if (link.includes("deviantart.com")) {
                 const deviationRSS = await deviantart.rss.get(link)
                 const response = await axios.get(deviationRSS.content[0].url, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("artstation.com")) {
                 const id = link.match(/(?<=artwork\/)(.*?)(?=$|\/)/g)?.[0]
@@ -212,92 +217,92 @@ const MiscRoutes = (app: Express) => {
                         images.push(response)
                     }
                 }
-                return res.status(200).send(images)
+                return void res.status(200).send(images)
             }
             if (link.includes("reddit.com")) {
                 const postID = link.match(/(?<=comments\/).*?(?=\/|$)/)?.[0]
                 // @ts-ignore
                 const post = await reddit.getSubmission(postID).fetch() as snoowrap.Submission
                 const response = await axios.get(post.url, {responseType: "arraybuffer"}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("pinterest.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(?<=")https:\/\/i\.pinimg\.com\/originals.*?(?=")/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("imgur.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(https?:\/\/i\.imgur\.com\/)(.*?)(?=\?fb)/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("tumblr.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const part = html.match(/(?<=srcSet=").*?(?="\/><\/div><\/figure)/gm)?.[0]?.trim()
                 const image = part.match(/(?<=,?\s)(https?:\/\/[^ ]+)(?=\s\d+w"?$)/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("medibang.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(?<=pictureImageUrl = ')(.*?)(?=')/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("newgrounds.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(?<=full_image_text":"<img src=\\")(.*?)(?=\\")/gm)?.[0]?.replaceAll("\\", "")
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("danbooru.donmai.us")) {
                 const image = await axios.get(`${link}.json`).then((r) => r.data.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("gelbooru.com")) {
                 const apiLink = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&id=${link.match(/\d+/g)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data.post[0]?.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("safebooru.org")) {
                 const apiLink = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${link.match(/\d+/g)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data[0]?.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("yande.re")) {
                 const apiLink = `https://yande.re/post.json?tags=id:${link.match(/\d+/)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data[0]?.jpeg_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("konachan.com") || link.includes("konachan.net")) {
                 const apiLink = `https://${new URL(link).hostname}/post.json?tags=id:${link.match(/\d+/)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data[0]?.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("zerochan.net")) {
                 const image = await axios.get(`${link}?json`, {responseType: "json"}).then((r) => r.data.full)
                 const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("e-shuushuu.net")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const imagePart = html.match(/(\/images\/).*?(?=")/gm)?.[0]
                 const image = `https://e-shuushuu.net${imagePart}`
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             if (link.includes("anime-pictures.net")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(?<=download href=")(.*?)(?=")/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
+                return void res.status(200).send([response])
             }
             const response = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data)
             res.status(200).send([response])
@@ -308,7 +313,7 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/redirect", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
-        if (!link) return res.status(400).send("No url")
+        if (!link) return void res.status(400).send("No url")
         try {
             const response = await serverFunctions.followRedirect(link)
             serverFunctions.sendEncrypted(response, req, res)
@@ -319,14 +324,14 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
-        if (!words?.[0]) return res.status(400).send("No words")
+        if (!words?.[0]) return void res.status(400).send("No words")
         let translated = await serverFunctions.translate(words)
         res.status(200).send(translated)
     })
 
     app.post("/api/misc/romajinize", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
-        if (!words?.[0]) return res.status(400).send("No words")
+        if (!words?.[0]) return void res.status(400).send("No words")
         let romajinized = await serverFunctions.romajinize(words)
         res.status(200).send(romajinized)
     })
@@ -335,11 +340,11 @@ const MiscRoutes = (app: Express) => {
         try {
             let {email, subject, message, files} = req.body as ContactParams
             if (!files) files = []
-            if (!email || !subject || !message) return res.status(400).send("Bad email, subejct, or message.")
+            if (!email || !subject || !message) return void res.status(400).send("Bad email, subejct, or message.")
             const badEmail = functions.validateEmail(email, enLocale)
-            if (badEmail) return res.status(400).send("Bad email")
+            if (badEmail) return void res.status(400).send("Bad email")
             const badMessage = functions.validateMessage(message, enLocale)
-            if (badMessage) return res.status(400).send("Bad message")
+            if (badMessage) return void res.status(400).send("Bad message")
             const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
                 const attachment = {} as Attachment 
@@ -364,10 +369,10 @@ const MiscRoutes = (app: Express) => {
         try {
             let {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, files} = req.body as CopyrightParams
             if (!files) files = []
-            if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return res.status(400).send("Bad fields.")
-            if (!files.length && !proofLinks) return res.status(400).send("Bad proof links.")
+            if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return void res.status(400).send("Bad fields.")
+            if (!files.length && !proofLinks) return void res.status(400).send("Bad proof links.")
             const badEmail = functions.validateEmail(email, enLocale)
-            if (badEmail) return res.status(400).send("Bad email")
+            if (badEmail) return void res.status(400).send("Bad email")
             const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
                 const attachment = {} as Attachment 
@@ -413,8 +418,8 @@ const MiscRoutes = (app: Express) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
-            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(ip)
             const json = await serverFunctions.wdtagger(req.body)
             processingQueue.delete(ip)
@@ -428,9 +433,9 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/ocr", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (processingQueue.has(req.session.username)) return res.status(429).send("Processing in progress")
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
             const buffer = Buffer.from(req.body, "binary") as any
             const folder = path.join(__dirname, "./dump")
@@ -475,8 +480,8 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/premium/paymentlink", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!permissions.isPremiumEnabled()) return res.status(400).send("Closed")
-            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             const data = {
                 local_price: {
                     amount: "15.00",
@@ -502,7 +507,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/premium/payment", async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!permissions.isPremiumEnabled()) return res.status(400).send("Closed")
+            if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
             const {event} = req.body as {event: CoinbaseEvent}
             const signature = req.headers["x-cc-webhook-signature"]
 
@@ -510,7 +515,7 @@ const MiscRoutes = (app: Express) => {
             .update(JSON.stringify(req.body), "utf8").digest("hex")
             
             if (signature !== computedSignature) {
-                return res.status(400).send("Invalid signature")
+                return void res.status(400).send("Invalid signature")
             }
         
             if (event.type === "charge:pending") {
@@ -519,7 +524,7 @@ const MiscRoutes = (app: Express) => {
                 await sql.token.insertPayment(id, metadata.username, metadata.email)
 
                 const user = await sql.user.user(metadata.username)
-                if (!user) return res.status(400).send("Invalid username")
+                if (!user) return void res.status(400).send("Invalid username")
 
                 let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
@@ -547,8 +552,8 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/setbanner", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {text, link} = req.body as {text: string, link: string}
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             await sql.user.setBanner(text, link)
             res.status(200).send("Success")
         } catch (e) {
@@ -569,7 +574,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/litterbox", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             const form = new FormData()
             form.append("time", "1h")
             form.append("reqtype", "fileupload")
@@ -588,7 +593,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/imghash", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.body) return res.status(400).send("Image data must be provided")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
             const buffer = Buffer.from(req.body, "binary")
             const hash = await phash(buffer).then((hash: any) => functions.binaryToHex(hash))
             res.status(200).send(hash)
@@ -600,8 +605,8 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/api-key", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const key = cryptoFunctions.generateAPIKey()
             const hashedKey = cryptoFunctions.hashAPIKey(key)
             await sql.token.insertAPIKey(req.session.username, hashedKey)
@@ -614,8 +619,8 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/api-key/status", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const apiKey = await sql.token.apiKeyByUsername(req.session.username)
             serverFunctions.sendEncrypted(apiKey ? true : false, req, res)
         } catch (e) {
@@ -626,8 +631,8 @@ const MiscRoutes = (app: Express) => {
 
     app.delete("/api/misc/api-key/delete", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             await sql.token.deleteAPIKey(req.session.username)
             res.status(200).send("Success")
         } catch (e) {
@@ -661,9 +666,9 @@ const MiscRoutes = (app: Express) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             const {current, rating} = req.body as SourceLookupParams
-            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
+            if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)
             const sourceLookup = await serverFunctions.sourceLookup(current, rating)
             processingQueue.delete(ip)
@@ -678,9 +683,9 @@ const MiscRoutes = (app: Express) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
-            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams
-            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
+            if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)
             const tagLookup = await serverFunctions.tagLookup(current, type, rating, style, hasUpscaled)
             processingQueue.delete(ip)

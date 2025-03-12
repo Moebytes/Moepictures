@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../structures/Functions"
@@ -36,7 +36,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteGroupHistoryID, revertGroupHistoryID, deleteGroupHistoryFlag, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setDeleteGroupHistoryID, setRevertGroupHistoryID, setDeleteGroupHistoryFlag, setRevertGroupHistoryFlag} = useGroupDialogActions()
-    const history = useHistory()
+    const navigate = useNavigate()
     const [groupPost, setGroupPost] = useState(null as PostFull | null)
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)
@@ -67,7 +67,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         await functions.put("/api/group/reorder", {slug: props.currentHistory.slug, posts: props.groupHistory.posts}, session, setSessionFlag)
         await functions.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
         if (props.currentHistory.slug !== props.groupHistory.slug) {
-            history.push(`/group/history/${props.groupHistory.slug}`)
+            navigate(`/group/history/${props.groupHistory.slug}`)
         } else {
             props.onEdit?.()
         }
@@ -143,7 +143,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/group/${props.currentHistory.slug}${historyIndex}`, "_blank")
         } else {
-            history.push(`/group/${props.currentHistory.slug}${historyIndex}`)
+            navigate(`/group/${props.currentHistory.slug}${historyIndex}`)
         }
     }
 
@@ -151,7 +151,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.groupHistory.user}`, "_blank")
         } else {
-            history.push(`/user/${props.groupHistory.user}`)
+            navigate(`/user/${props.groupHistory.user}`)
         }
     }
 
@@ -229,7 +229,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, history, session, setSessionFlag)
+        functions.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const postDiff = () => {

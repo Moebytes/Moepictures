@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
@@ -20,7 +20,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSession, setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const getSessionCookie = async () => {
         const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
@@ -76,7 +76,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                         </span>
                     </div>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="sitepage-button" onClick={() => history.push("/posts")}>{i18n.buttons.ok}</button>
+                        <button className="sitepage-button" onClick={() => navigate("/posts")}>{i18n.buttons.ok}</button>
                     </div></> : null}
                 </div>
                 <Footer/>

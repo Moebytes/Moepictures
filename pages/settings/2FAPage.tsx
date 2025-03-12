@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import Footer from "../../components/site/Footer"
@@ -21,7 +21,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const [token, setToken] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -48,7 +48,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (session.username) {
-            history.push("/profile")
+            navigate("/profile")
         }
     }, [session])
 
@@ -67,7 +67,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         try {
             await functions.post("/api/2fa", {token}, session, setSessionFlag)
             setSessionFlag(true)
-            history.push("/posts")
+            navigate("/posts")
             setError(false)
         } catch {
             errorRef.current!.innerText = i18n.pages.$2fa.badToken

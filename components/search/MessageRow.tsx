@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions} from "../../store"
 import functions from "../../structures/Functions"
 import adminCrown from "../../assets/icons/admin-crown.png"
@@ -35,7 +35,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const [recipientData, setRecipientData] = useState({} as PrunedUser)
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [recipientDefaultIcon, setRecipientDefaultIcon] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
     
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -67,7 +67,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/message/${props.message.messageID}`, "_blank")
         } else {
-            history.push(`/message/${props.message.messageID}`)
+            navigate(`/message/${props.message.messageID}`)
         }
     }
 
@@ -84,14 +84,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.message.creator}`, "_blank")
         } else {
-            history.push(`/user/${props.message.creator}`)
+            navigate(`/user/${props.message.creator}`)
         }
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(creatorData.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getRecipientPFP = () => {
@@ -107,14 +107,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${recipientData.username}`, "_blank")
         } else {
-            history.push(`/user/${recipientData.username}`)
+            navigate(`/user/${recipientData.username}`)
         }
     }
 
     const recipientImgClick = (event: React.MouseEvent) => {
         if (!recipientData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(recipientData.imagePost, event, history, session, setSessionFlag)
+        functions.openPost(recipientData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {
