@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 
 required_modules = [
     "torch", "opencv-python", "numpy", "Pillow", "manga-ocr", "text-detector",
@@ -8,7 +9,12 @@ required_modules = [
 
 for module in required_modules:
     try:
-        __import__(module.replace("-", "_"))
+        if module == "opencv-python":
+            import cv2
+        elif module == "Pillow":
+            import PIL
+        else:
+            __import__(module.replace("-", "_"))
     except ImportError:
         subprocess.check_call([sys.executable, "-m", "pip", "install", module])
 
@@ -25,6 +31,7 @@ import json
 import sys
 
 device = "mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu"
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 def convert_to_serializable(obj):
     if isinstance(obj, np.integer):
@@ -72,7 +79,7 @@ def split_into_chunks(img, mask_refined, block, line_index, textheight=64, max_r
         return np.split(line_crop, cut_points, axis=1), cut_points
 
 def ocr_image(img_path):
-    text_detector = TextDetector(model_path="assets/misc/comictextdetector.pt", input_size=1024, device=device, act="leaky")
+    text_detector = TextDetector(model_path=os.path.join(dirname, "comictextdetector.pt"), input_size=1024, device=device, act="leaky")
     manga_ocr = MangaOcr()
     translator = Translator(to_lang="en", from_lang="ja")
     img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)

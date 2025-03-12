@@ -7,7 +7,10 @@ required_modules = [
 
 for module in required_modules:
     try:
-        __import__(module.replace("-", "_"))
+        if module == "Pillow":
+            import PIL
+        else:
+            __import__(module.replace("-", "_"))
     except ImportError:
         subprocess.check_call([sys.executable, "-m", "pip", "install", module])
 
