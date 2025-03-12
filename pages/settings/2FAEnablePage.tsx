@@ -156,7 +156,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-row">
                         <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
-                        <button className="f2a-button" onClick={enable2FA}>{i18n.pages.enable2FA.enable}</button>
+                        <button className="sitepage-button" onClick={enable2FA}>{i18n.pages.enable2FA.enable}</button>
                     </div>
                     </> : null}
                 </div>

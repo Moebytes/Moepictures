@@ -262,6 +262,9 @@ const UserRoutes = (app: Express) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             await sql.user.destroyOtherSessions(req.session.username, req.sessionID)
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            await sql.user.updateUser(req.session.username, "ips", [ip])
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

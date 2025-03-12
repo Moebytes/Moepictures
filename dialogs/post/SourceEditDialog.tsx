@@ -337,7 +337,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row" style={{marginLeft: "0px"}}>
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button onClick={() => sourceLookup()} style={{backgroundColor: "var(--buttonBG)", marginLeft: "-5px"}} className="dialog-button">{i18n.buttons.fetch}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submit}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div>
                         </>}
                     </div>
