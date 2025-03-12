@@ -1234,7 +1234,7 @@ export default class ServerFunctions {
         const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
         let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${wdTaggerPath}"`
         const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-        const json = JSON.parse(str) as WDTaggerResponse
+        const json = JSON.parse(str.match(/{.*?}/gm)?.[0]) as WDTaggerResponse
         fs.unlinkSync(imagePath)
         return json
     }

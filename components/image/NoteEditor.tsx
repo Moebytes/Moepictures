@@ -440,7 +440,20 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         setSaveNoteID({post: props.post, unverified: props.unverified})
     }
 
+    const getCurrentLink = () => {
+        if (!props.post) return props.img
+        const image = props.post.images[(props.order || 1) - 1]
+        let img = ""
+        if (typeof image === "string") {
+            img = functions.getRawImageLink(image)
+        } else {
+            img = functions.getImageLink(image)
+        }
+        return img
+    }
+
     const ocrPage = async () => {
+        const img = getCurrentLink()
         const jpgURL = await functions.convertToFormat(img, "jpg")
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)

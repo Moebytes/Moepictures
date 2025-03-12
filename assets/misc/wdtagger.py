@@ -1,3 +1,16 @@
+import subprocess
+import sys
+
+required_modules = [
+    "pandas", "torch", "numpy", "Pillow", "timm"
+]
+
+for module in required_modules:
+    try:
+        __import__(module.replace("-", "_"))
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", module])
+
 import pandas as pd
 import torch
 import torch.nn.functional as F

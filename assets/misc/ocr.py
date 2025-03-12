@@ -1,3 +1,17 @@
+import subprocess
+import sys
+
+required_modules = [
+    "torch", "opencv-python", "numpy", "Pillow", "manga-ocr", "text-detector",
+    "translate", "argparse", "pyclipper", "shapely", "torchvision"
+]
+
+for module in required_modules:
+    try:
+        __import__(module.replace("-", "_"))
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", module])
+
 import torch
 import cv2
 import numpy as np
