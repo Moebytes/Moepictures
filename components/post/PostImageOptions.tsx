@@ -192,7 +192,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = -150
-        if (mobile) offset += 35
+        if (mobile) offset += 95
         return `${raw + offset}px`
     }
 

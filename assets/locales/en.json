@@ -236,7 +236,9 @@
         "join": "Join",
         "update": "Update",
         "updateAll": "Update All",
-        "autogenerate": "Auto-Generate"
+        "autogenerate": "Auto-Generate",
+        "light": "Light",
+        "dark": "Dark"
     },
     "history": {
         "post": "Post History",

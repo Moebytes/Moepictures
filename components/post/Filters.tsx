@@ -18,7 +18,7 @@ import delayIcon from "../../assets/icons/delay.png"
 import phaserIcon from "../../assets/icons/phaser.png"
 import bitcrushIcon from "../../assets/icons/bitcrush.png"
 import functions from "../../structures/Functions"
-import {useThemeSelector, useFilterActions, useFilterSelector, useSessionSelector, useActiveActions, useActiveSelector} from "../../store"
+import {useThemeSelector, useFilterActions, useFilterSelector, useSessionSelector, useActiveActions, useActiveSelector, useLayoutSelector} from "../../store"
 import "./styles/filters.less"
 
 interface Props {
@@ -32,6 +32,7 @@ interface Props {
 const Filters: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
+    const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
@@ -156,6 +157,7 @@ const Filters: React.FunctionComponent<Props> = (props) => {
         let raw = props.top
         let offset = 0
         if (props.origin === "bottom" && showMusicFilters) offset += 100
+        if (mobile) offset += 60
         return `${raw + offset}px`
     }
 

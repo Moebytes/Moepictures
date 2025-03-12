@@ -237,7 +237,9 @@
         "join": "参加",
         "update": "更新",
         "updateAll": "すべて更新",
-        "autogenerate": "自動生成"
+        "autogenerate": "自動生成",
+        "light": "ライト",
+        "dark": "暗い"
     },
     "history": {
         "post": "投稿履歴",

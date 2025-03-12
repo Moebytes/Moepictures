@@ -896,138 +896,160 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username ? 
                     <div className="mobileinfo-subcontainer-column">
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerTagEdit}>
-                                <img className="mobileinfo-icon" src={tagEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.tagEdit}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerTagEdit}>
+                                    <img className="mobileinfo-icon" src={tagEdit} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.tagEdit}</span>
+                                </span>
+                            </div>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerSourceEdit}>
+                                    <img className="mobileinfo-icon" src={sourceEdit} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.sourceEdit}</span>
+                                </span>
+                            </div>
                         </div>
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerSourceEdit}>
-                                <img className="mobileinfo-icon" src={sourceEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.sourceEdit}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified && !functions.isR18(props.post.rating) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerSetAvatar}>
+                                    <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.setAvatar}</span>
+                                </span>
+                            </div> : null}
+                            {!props.unverified ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerAddNote}>
+                                    <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.addNote}</span>
+                                </span>
+                            </div> : null}
                         </div>
-                        {!props.unverified && !functions.isR18(props.post.rating) ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerSetAvatar}>
-                                <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.setAvatar}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerParent}>
-                                <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.addParent}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerGroup}>
-                                <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.addGroup}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerAddNote}>
-                                <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.addNote}</span>
-                            </span>
-                        </div> : null}
-                        {permissions.isMod(session) ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={editThumbnail}>
-                                <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.editThumbnail}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerSplit}>
-                                <img className="mobileinfo-icon" src={splitIcon} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.splitVariations}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerJoin}>
-                                <img className="mobileinfo-icon" src={joinIcon} style={{filter: getFilter()}}/>
-                                <span className="tag">{i18n.sidebar.joinChildPosts}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={privatePost}>
-                                <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
-                                <span className="tag">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerTakedown}>
-                                <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
-                                <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
-                            </span>
-                        </div> : null}
-                        {props.unverified ? <>
-                        <div className="sidebar-row">
-                            <span className="tag-hover" onClick={compressingDialog}>
-                                <img className="sidebar-icon" src={compressIcon}/>
-                                <span className="tag">{i18n.buttons.compress}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerParent}>
+                                    <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.addParent}</span>
+                                </span>
+                            </div> : null}
+                            {!props.unverified ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerGroup}>
+                                    <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.addGroup}</span>
+                                </span>
+                            </div> : null}
                         </div>
-                        <div className="sidebar-row">
-                            <span className="tag-hover" onClick={upscalingDialog}>
-                                <img className="sidebar-icon" src={upscaleIcon}/>
-                                <span className="tag">{i18n.buttons.upscale}</span>
-                            </span>
-                        </div></> : null}
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={editPost}>
-                                <img className="mobileinfo-icon" src={edit}/>
-                                <span className="tag-red">{i18n.buttons.edit}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerSplit}>
+                                    <img className="mobileinfo-icon" src={splitIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.splitVariations}</span>
+                                </span>
+                            </div> : null}
+                            {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerJoin}>
+                                    <img className="mobileinfo-icon" src={joinIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.joinChildPosts}</span>
+                                </span>
+                            </div> : null}
                         </div>
-                        {props.unverified ? <>
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={approvePost}>
-                                <img className="mobileinfo-icon" src={approveGreen}/>
-                                <span className="tag-green">{i18n.buttons.approve}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={privatePost}>
+                                    <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
+                                </span>
+                            </div> : null}
+                            {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerTakedown}>
+                                    <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
+                                    <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
+                                </span>
+                            </div> : null}
                         </div>
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={rejectPost}>
-                                <img className="mobileinfo-icon" src={rejectRed}/>
-                                <span className="tag-red">{i18n.buttons.reject}</span>
-                            </span>
+                        <div className="mobileinfo-sub-row">
+                            {permissions.isMod(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={editThumbnail}>
+                                    <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.editThumbnail}</span>
+                                </span>
+                            </div> : null}
                         </div>
-                        </> : null}
-                        {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={lockPost}>
-                                <img className="mobileinfo-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
-                                <span className="tag-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified ? <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={postHistory}>
-                                <img className="mobileinfo-icon" src={historyIcon}/>
-                                <span className="tag-red">{i18n.sidebar.history}</span>
-                            </span>
-                        </div> : null}
-                        {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={appealPost}>
-                                <img className="mobileinfo-icon" src={appealIcon}/>
-                                <span className="tag-red">{i18n.buttons.appeal}</span>
-                            </span>
-                        </div> : null}
-                        {permissions.isMod(session) && props.post.deleted ?
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={undeletePost}>
-                                <img className="mobileinfo-icon" src={undeleteIcon}/>
-                                <span className="tag-red">{i18n.buttons.undelete}</span>
-                            </span>
-                        </div> : null}
-                        {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
-                        <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={deletePost}>
-                                <img className="mobileinfo-icon" src={deleteIcon}/>
-                                <span className="tag-red">{i18n.buttons.delete}</span>
-                            </span>
-                        </div> : null}
+                        <div className="mobileinfo-sub-row">
+                            {props.unverified ? <>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={compressingDialog}>
+                                    <img className="sidebar-icon" src={compressIcon}/>
+                                    <span className="tag">{i18n.buttons.compress}</span>
+                                </span>
+                            </div>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={upscalingDialog}>
+                                    <img className="sidebar-icon" src={upscaleIcon}/>
+                                    <span className="tag">{i18n.buttons.upscale}</span>
+                                </span>
+                            </div></> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            {props.unverified ? <>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={approvePost}>
+                                    <img className="mobileinfo-icon" src={approveGreen}/>
+                                    <span className="tag-green">{i18n.buttons.approve}</span>
+                                </span>
+                            </div>
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={rejectPost}>
+                                    <img className="mobileinfo-icon" src={rejectRed}/>
+                                    <span className="tag-red">{i18n.buttons.reject}</span>
+                                </span>
+                            </div>
+                            </> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={editPost}>
+                                    <img className="mobileinfo-icon" src={edit}/>
+                                    <span className="tag-red">{i18n.buttons.edit}</span>
+                                </span>
+                            </div>
+                            {!props.unverified ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={postHistory}>
+                                    <img className="mobileinfo-icon" src={historyIcon}/>
+                                    <span className="tag-red">{i18n.sidebar.history}</span>
+                                </span>
+                            </div> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={lockPost}>
+                                    <img className="mobileinfo-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
+                                    <span className="tag-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
+                                </span>
+                            </div> : null}
+                            {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={deletePost}>
+                                    <img className="mobileinfo-icon" src={deleteIcon}/>
+                                    <span className="tag-red">{i18n.buttons.delete}</span>
+                                </span>
+                            </div> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={appealPost}>
+                                    <img className="mobileinfo-icon" src={appealIcon}/>
+                                    <span className="tag-red">{i18n.buttons.appeal}</span>
+                                </span>
+                            </div> : null}
+                            {permissions.isMod(session) && props.post.deleted ?
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={undeletePost}>
+                                    <img className="mobileinfo-icon" src={undeleteIcon}/>
+                                    <span className="tag-red">{i18n.buttons.undelete}</span>
+                                </span>
+                            </div> : null}
+                        </div>
                     </div>
                 : null}
             </div>

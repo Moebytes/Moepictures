@@ -366,8 +366,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="title-dropdown-text">{i18n.filters.lightness}</span>
                     <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
                 </div>
-                <div className="title-dropdown-row">
+                <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
                     <button className="title-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
+                    <button className="title-dropdown-button" onClick={() => lightChange()} style={{backgroundColor: theme.includes("light") ? "#f536ac" : "#36eaf7"}}>{theme.includes("light") ? i18n.buttons.dark : i18n.buttons.light}</button>
                 </div>
             </div>
         )
@@ -398,7 +399,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
                     <button className="title-dropdown-button" onClick={() => resetParticles()}>{i18n.filters.reset}</button>
-                    <button style={particles ? {backgroundColor: "#f536ac"} : {backgroundColor: "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>{particles ? i18n.buttons.disable : i18n.buttons.enable}</button>
+                    <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>{particles ? i18n.buttons.disable : i18n.buttons.enable}</button>
                 </div>
             </div>
         )
@@ -452,7 +453,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
-                    <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/> */}
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
@@ -527,7 +528,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
-                    <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {/* <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/> */}
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>

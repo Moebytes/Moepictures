@@ -319,7 +319,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     const getSizeMargin = () => {
         const rect = sizeRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "100px"
+        if (!rect || mobile) return "150px"
         const raw = window.innerWidth - rect.x
         let offset = -60
         if (sizeType === "tiny") offset += -15
@@ -345,7 +345,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         } else if (sizeType === "small") {
             return mobile ? 160 : 170
         } else if (sizeType === "medium") {
-            return mobile ? 150 : 220
+            return mobile ? 170 : 220
         } else if (sizeType === "large") {
             return mobile ? 360 : 380
         } else if (sizeType === "massive") {
@@ -360,7 +360,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         } else if (sizeType === "small") {
             return mobile ? 150 : 180
         } else if (sizeType === "medium") {
-            return mobile ? 210 : 250
+            return mobile ? 240 : 250
         } else if (sizeType === "large") {
             return mobile ? 380 : 400
         } else if (sizeType === "massive") {
@@ -445,10 +445,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     let marginLeft = mobile ? 20 : 200
 
+    let paddingLeft = props.count ? 0 : mobile ? 20 : 40
+
     if (!related.length) return null
 
     return (
-        <div className="related" style={{paddingLeft: props.count ? "0px" : "40px", marginBottom: "10px"}}>
+        <div className="related" style={{paddingLeft: `${paddingLeft}px`, marginBottom: "10px"}}>
             {props.count ?
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="tag-label" onClick={searchTag} onAuxClick={searchTag}>{i18n.sort.posts}
