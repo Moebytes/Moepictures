@@ -8,6 +8,7 @@
         "lib": ["es2023", "dom"],
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
+        "allowImportingTsExtensions": true,
         "jsx": "react-jsx",
         "esModuleInterop": true,
         "strict": true,

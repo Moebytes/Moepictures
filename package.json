@@ -9,6 +9,7 @@
     "build": "webpack",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",
+    "sitemap": "node sitemap.ts",
     "clean": "del-cli ./dist"
   },
   "keywords": [
@@ -173,6 +174,7 @@
     "sharp": "^0.33.5",
     "sharp-phash": "^2.2.0",
     "snoowrap": "^1.23.0",
+    "ssh2-promise": "^1.0.3",
     "strtok3": "^10.2.2",
     "svg-captcha": "^1.4.0",
     "svgo": "^3.3.2",
