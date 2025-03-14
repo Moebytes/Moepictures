@@ -164,6 +164,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateFavoriteTags = async () => {
+        if (!session.username) return
         const favoriteTags = await functions.get("/api/tagfavorites", null, session, setSessionFlag)
         setFavoriteTags(favoriteTags)
     }

@@ -421,21 +421,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         <img className="quickedit-button-img" src={sketch}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
                     </button> : null}
-                    {!mobile && type !== "live2d" ? 
+                    {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
                         <img className="quickedit-button-img" src={lineart}/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
                     </button>
                     : null}
                 </div>
-                {mobile ?
-                <div className="dialog-row">
-                    {type !== "live2d" ? 
-                    <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
-                        <img className="quickedit-button-img" src={lineart}/>
-                        <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
-                    </button> : null}
-                </div> : null}
                 </>
             )
         }
@@ -459,42 +451,6 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.pages.upload.classification}: </span>
             </div>
-            {mobile ? <>
-            <div className="dialog-row">
-                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                    <img className="quickedit-button-img" src={image}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
-                </button>
-                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                    <img className="quickedit-button-img" src={animation}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
-                </button>
-                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                    <img className="quickedit-button-img" src={video}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
-                </button>
-            </div>
-            <div className="dialog-row">
-                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                    <img className="quickedit-button-img" src={comic}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
-                </button>
-                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                    <img className="quickedit-button-img" src={audio}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
-                </button>
-                <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
-                    <img className="quickedit-button-img" src={live2d}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
-                </button>
-            </div>
-            <div className="dialog-row">
-                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                    <img className="quickedit-button-img" src={model}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
-                </button>
-            </div>
-            </> : <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                     <img className="quickedit-button-img" src={image}/>
@@ -526,30 +482,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={model}/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
                 </button>
-            </div> </>}
-            {mobile ? <>
-            <div className="dialog-row">
-                <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
-                    <img className="quickedit-button-img" src={cute}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
-                </button>
-                <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="quickedit-button-img" src={sexy}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
-                </button>
-                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
-                    <img className="quickedit-button-img" src={ecchi}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
-                </button>
             </div>
-            <div className="dialog-row">
-                {session.showR18 ?
-                <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
-                    <img className="quickedit-button-img" src={hentai}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
-                </button> : null}
-            </div>
-            </> : <>
             <div className="dialog-row">
                 <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
                     <img className="quickedit-button-img" src={cute}/>
@@ -569,7 +502,6 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <span className="quickedit-button-text">{i18n.sortbar.rating.hentai}</span>
                 </button> : null}
             </div>
-            </>}
             {getStyleJSX()}
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>

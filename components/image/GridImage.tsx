@@ -7,6 +7,7 @@ import JSZip from "jszip"
 import path from "path"
 import functions from "../../structures/Functions"
 import privateIcon from "../../assets/icons/lock-opt.png"
+import emptyVideo from "../../assets/images/empty.mp4"
 import "./styles/gridimage.less"
 import {PostSearch, GIFFrame, CanvasDrawable} from "../../types/Types"
 
@@ -892,7 +893,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" 
-                ref={videoRef} src={liveImg} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
+                ref={videoRef} src={functions.isVideo(props.img) ? liveImg : emptyVideo} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
                 <img draggable={false} className="image" ref={ref} src={dynamicSrc()} 
                 onLoad={(event) => onLoad(event)} style={{...getDisplay()}}/>
                 </div>

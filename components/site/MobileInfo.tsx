@@ -953,6 +953,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
+                            {permissions.isMod(session) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={editThumbnail}>
+                                    <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">{i18n.sidebar.editThumbnail}</span>
+                                </span>
+                            </div> : null}
                             {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={privatePost}>
                                     <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
@@ -963,14 +969,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-hover" onClick={triggerTakedown}>
                                     <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
                                     <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
-                                </span>
-                            </div> : null}
-                        </div>
-                        <div className="mobileinfo-sub-row">
-                            {permissions.isMod(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={editThumbnail}>
-                                    <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
-                                    <span className="tag">{i18n.sidebar.editThumbnail}</span>
                                 </span>
                             </div> : null}
                         </div>
@@ -1012,25 +1010,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="tag-red">{i18n.buttons.edit}</span>
                                 </span>
                             </div>
-                            {!props.unverified ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={postHistory}>
-                                    <img className="mobileinfo-icon" src={historyIcon}/>
-                                    <span className="tag-red">{i18n.sidebar.history}</span>
-                                </span>
-                            </div> : null}
-                        </div>
-                        <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={lockPost}>
                                     <img className="mobileinfo-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
                                     <span className="tag-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
                                 </span>
                             </div> : null}
-                            {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
-                            <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={deletePost}>
-                                    <img className="mobileinfo-icon" src={deleteIcon}/>
-                                    <span className="tag-red">{i18n.buttons.delete}</span>
+                            {!props.unverified ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={postHistory}>
+                                    <img className="mobileinfo-icon" src={historyIcon}/>
+                                    <span className="tag-red">{i18n.sidebar.history}</span>
                                 </span>
                             </div> : null}
                         </div>
@@ -1040,6 +1029,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-hover" onClick={appealPost}>
                                     <img className="mobileinfo-icon" src={appealIcon}/>
                                     <span className="tag-red">{i18n.buttons.appeal}</span>
+                                </span>
+                            </div> : null}
+                            {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={deletePost}>
+                                    <img className="mobileinfo-icon" src={deleteIcon}/>
+                                    <span className="tag-red">{i18n.buttons.delete}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) && props.post.deleted ?

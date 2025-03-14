@@ -289,10 +289,19 @@ const FavoriteRoutes = (app: Express) => {
     app.get("/api/tagfavorites", favoriteLimiter, async (req: Request, res: Response) => {
         try {
             let username = req.query?.username as string | undefined
-            if (!username) username = req.session.username
+            let ownFavorites = false
+            if (!username) {
+                username = req.session.username
+                ownFavorites = true
+            }
             if (!username) return void res.status(400).send("Bad username")
-            const tagFavorites = await sql.favorite.tagFavorites(username)
-            serverFunctions.sendEncrypted(tagFavorites, req, res)
+            const user = await sql.user.user(username)
+            if (user?.publicTagFavorites || ownFavorites) {
+                const tagFavorites = await sql.favorite.tagFavorites(username)
+                serverFunctions.sendEncrypted(tagFavorites, req, res)
+            } else {
+                serverFunctions.sendEncrypted([], req, res)
+            }
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

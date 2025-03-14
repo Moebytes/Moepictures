@@ -5,6 +5,7 @@
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server/server.js",
+    "vite": "npm run clean && vite build --mode=client",
     "build": "webpack",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",

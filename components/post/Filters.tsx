@@ -157,7 +157,7 @@ const Filters: React.FunctionComponent<Props> = (props) => {
         let raw = props.top
         let offset = 0
         if (props.origin === "bottom" && showMusicFilters) offset += 100
-        if (mobile) offset += 60
+        if (mobile) offset += props.origin === "bottom" ? 60 : 0
         return `${raw + offset}px`
     }
 
