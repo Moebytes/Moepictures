@@ -186,7 +186,7 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
             {!functions.isVideo(getOriginal()) ? <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={dynamicSrc()}/> : null}
             <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
             <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-            <video draggable={false} autoPlay muted disablePictureInPicture className={className} src={functions.isVideo(getOriginal()) ? liveImg : emptyVideo} ref={ref as any} 
+            <video draggable={false} autoPlay muted playsInline disablePictureInPicture className={className} src={functions.isVideo(getOriginal()) ? liveImg : emptyVideo} ref={ref as any} 
             style={{...imageStyle, ...getDisplay(true)}} onContextMenu={updateIndex}></video>
             <img draggable={false} className={className} src={dynamicSrc()} ref={ref as any} style={{...imageStyle, ...getDisplay()}} onContextMenu={updateIndex}/>
         </div>

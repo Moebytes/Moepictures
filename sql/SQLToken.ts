@@ -7,7 +7,7 @@ export default class SQLToken {
     /** Insert email token. */
     public static insertEmailToken = async (email: string, token: string) => {
         let now = new Date() as any
-        now.setHours(now.getHours() + 1)
+        now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "email tokens" ("email", "token", "expires")
@@ -109,7 +109,7 @@ export default class SQLToken {
     /** Insert password token. */
     public static insertPasswordToken = async (username: string, token: string) => {
         let now = new Date() as any
-        now.setHours(now.getHours() + 1)
+        now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "password tokens" ("username", "token", "expires") 
@@ -160,7 +160,7 @@ export default class SQLToken {
     /** Insert ip token. */
     public static insertIPToken = async (username: string, token: string, ip: string) => {
         let now = new Date() as any
-        now.setHours(now.getHours() + 1)
+        now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "ip tokens" ("username", "token", "ip", "expires") 

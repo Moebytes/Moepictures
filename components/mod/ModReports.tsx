@@ -166,7 +166,6 @@ const ModReports: React.FunctionComponent = (props) => {
 
     const updateReports = async () => {
         const requests = await functions.get("/api/search/reports", null, session, setSessionFlag)
-        console.log(requests)
         setEnded(false)
         setRequests(requests)
     }
