@@ -10,6 +10,7 @@ __pycache__
 
 #Compiled folder
 dist
+dist2
 
 #IDE settings
 .vscode
