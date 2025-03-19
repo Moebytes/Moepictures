@@ -43,6 +43,7 @@ As often images might contain japanese text, adding and viewing notes for transl
 First you will need to download all of these.
 
 - Node.js v23: https://nodejs.org/en/
+- Python v3.11: https://www.python.org/
 - PostgreSQL v16: https://www.postgresql.org/
 - Redis v7: https://redis.io/
 
