@@ -1,4 +1,4 @@
-# Moepictures.moe
+# Moepictures
 
 Moepictures is an image board site for cute anime art, organized by tags.
 
@@ -49,7 +49,7 @@ First you will need to download all of these.
 
 Clone the project:
 ```
-git clone https://github.com/Moebits/Moepictures.moe.git
+git clone https://github.com/Moebits/Moepictures.git
 ```
 
 Rename the file `.env.example` to `.env` and put in your credentials. `COOKIE_SECRET` should be any string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
