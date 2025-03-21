@@ -1144,6 +1144,7 @@ export default class Functions {
     }
 
     public static getThumbnailImagePath = (folder: string, filename: string) => {
+        if (!filename) return ""
         return `thumbnail/${folder}/${filename}`
     }
 
@@ -1189,15 +1190,15 @@ export default class Functions {
         if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
-        if (forceLive) filename = originalFilename
+        if (forceLive) return Functions.getImageLink(image, false)
+        if (image.type === "image" || image.type === "comic") {
+            return Functions.getImageLink(image, false)
+        }
         if (image.type === "animation" || image.type === "video") {
-            if (session.liveAnimationPreview) filename = originalFilename
+            if (session.liveAnimationPreview) return Functions.getImageLink(image, false)
         }
         if (image.type === "model" || image.type === "live2d") {
-            if (session.liveModelPreview) filename = originalFilename
-        }
-        if (image.type === "image" || image.type === "comic") {
-            if (sizeType === "large" || sizeType === "massive") return Functions.getImageLink(image, false)
+            if (session.liveModelPreview) return Functions.getImageLink(image, false)
         }
         const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
         return Functions.appendURLParams(link, {hash: image.pixelHash})
@@ -1227,6 +1228,9 @@ export default class Functions {
         if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
+        if (image.type === "image" || image.type === "comic") {
+            return Functions.getUnverifiedImageLink(image, false)
+        }
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview) filename = originalFilename
         }

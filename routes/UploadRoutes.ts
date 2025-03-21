@@ -149,7 +149,7 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
       await sql.post.deleteImage(image.imageID)
       await serverFunctions.deleteFile(imagePath, r18)
       await serverFunctions.deleteFile(upscaledImagePath, r18)
-      await serverFunctions.deleteFile(thumbnailPath, r18)
+      if (thumbnailPath) await serverFunctions.deleteFile(thumbnailPath, r18)
     }
   }
   return {vanillaBuffers, upscaledVanillaBuffers}
@@ -158,7 +158,7 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
 export const insertImages = async (postID: string, data: {images: UploadImage[] | Image[], upscaledImages: UploadImage[] | Image[], type: PostType,
   rating: PostRating, source: SourceData, characters: UploadTag[] | MiniTag[], imgChanged: boolean, unverified?: boolean, unverifiedImages?: boolean,
   thumbnail?: string | null, thumbnailFilename?: string}) => {
-  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages, thumbnail, thumbnailFilename} = data
+  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages} = data
 
   if (images.length !== upscaledImages.length) {
     const maxLength = Math.max(images.length, upscaledImages.length)

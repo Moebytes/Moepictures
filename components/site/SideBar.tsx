@@ -1360,7 +1360,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">{i18n.sidebar.addNote}</span>
                             </span>
                         </div> : null}
-                        {permissions.isMod(session) ? <div className="sidebar-row">
+                        {permissions.isMod(session) && (props.post.type !== "image" && props.post.type !== "comic") ? 
+                        <div className="sidebar-row">
                             <span className="tag-hover" onClick={editThumbnail}>
                                 <img className="sidebar-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.editThumbnail}</span>

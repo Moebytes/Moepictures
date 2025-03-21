@@ -79,10 +79,11 @@ export default class ImageFunctions {
             thumbnailExt = "jpg"
             thumbnail = await functions.songCover(link)
         } else {
+            /* Disable thumbnails for images
             const bytes = await fetch(link).then((r) => r.arrayBuffer())
             const result = functions.bufferFileType(bytes)?.[0] || {}
             thumbnailExt = result.typename || "jpg"
-            thumbnail = link
+            thumbnail = link*/
         }
         thumbnail = await ImageFunctions.resize(thumbnail, thumbnailExt)
         return {thumbnail, thumbnailExt}
@@ -204,6 +205,7 @@ export default class ImageFunctions {
     }
 
     public static resize = async (image: string, ext = "png", size = 1000) => {
+        if (!image) return ""
         const img = new window.Image()
         await new Promise<void>((resolve, reject) => {
             img.onload = () => resolve()
