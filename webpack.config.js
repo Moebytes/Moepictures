@@ -27,7 +27,7 @@ module.exports = [
     mode: env.TESTING === "yes" ? "development" : "production",
     node: {__dirname: false},
     devtool: env.TESTING === "yes" ? "eval-cheap-source-map" : false,
-    output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist2/client")},
+    output: {publicPath: "/", globalObject: "this", filename: "script.[contenthash:8].js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist2/client")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
     fallback: {fs: false, "process/browser": require.resolve("process/browser.js"), path: require.resolve("path-browserify"), vm: require.resolve("vm-browserify"),
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
@@ -49,7 +49,7 @@ module.exports = [
       ...hmr,
       new Dotenv(),
       new MiniCssExtractPlugin({
-        filename: "styles.css",
+        filename: "styles.[contenthash:8].css",
         chunkFilename: "[id].css"
       }),
       new HtmlWebpackPlugin({
@@ -99,7 +99,7 @@ module.exports = [
       ...hmr,
       new Dotenv(),
       new MiniCssExtractPlugin({
-        filename: "styles.css",
+        filename: "styles.[contenthash:8].css",
         chunkFilename: "[id].css"
       }),
       new CopyPlugin({
