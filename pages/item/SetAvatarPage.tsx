@@ -12,6 +12,8 @@ import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "rea
 import "./styles/setavatarpage.less"
 import {TagCategories, PostSearch, GIFFrame, PostOrdered} from "../../types/Types"
 
+const preventScroll = (event: Event) => event.preventDefault()
+
 const SetAvatarPage: React.FunctionComponent = () => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -237,9 +239,17 @@ const SetAvatarPage: React.FunctionComponent = () => {
         functions.download(`${postID}-crop.${ext}`, croppedURL)
     }
 
+    const dragStart = () => {
+        document.addEventListener("touchmove", preventScroll, {passive: false})
+    }
+
+    const dragEnd = () => {
+        document.removeEventListener("touchmove", preventScroll)
+    }
+
     const toggleScroll = (on: boolean) => {
         if (on) {
-            document.body.style.overflowY = "visible"
+            document.body.style.overflowY = "auto"
         } else {
             document.body.style.overflowY = "hidden"
         }
@@ -276,7 +286,8 @@ const SetAvatarPage: React.FunctionComponent = () => {
                     <div className="set-avatar">
                         <span className="set-avatar-title">{i18n.sidebar.setAvatar}</span>
                         <div className="set-avatar-container">
-                            <ReactCrop className="set-avatar-crop" crop={crop} onChange={(crop, percentCrop) => {setCrop(percentCrop); setPixelCrop(crop); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
+                            <ReactCrop className="set-avatar-crop" crop={crop} onChange={(crop, percentCrop) => {setCrop(percentCrop); setPixelCrop(crop); toggleScroll(false)}}
+                            keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)} onDragStart={dragStart} onDragEnd={dragEnd}>
                                 <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/>
                             </ReactCrop>
                             <div className="set-avatar-preview-container">
