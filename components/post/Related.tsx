@@ -319,7 +319,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     const getSizeMargin = () => {
         const rect = sizeRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "160px"
+        if (!rect || mobile) return "150px"
         const raw = window.innerWidth - rect.x
         let offset = -60
         if (sizeType === "tiny") offset += -15
@@ -345,7 +345,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         } else if (sizeType === "small") {
             return mobile ? 160 : 170
         } else if (sizeType === "medium") {
-            return mobile ? 170 : 220
+            return mobile ? 160 : 220
         } else if (sizeType === "large") {
             return mobile ? 360 : 380
         } else if (sizeType === "massive") {

@@ -18,7 +18,9 @@
 
 .group-thumbnail-img-outlined {  
     width: auto;
-    height: 300px;
+    height: auto;
+    max-height: 300px;
+    max-width: 90vw;
     cursor: pointer;
     z-index: 1000;
     border: 2px solid var(--inputBG);
@@ -29,7 +31,9 @@
 
 .group-thumbnail-img {
     width: auto;
-    height: 250px;
+    height: auto;
+    max-height: 250px;
+    max-width: 90vw;
     pointer-events: all;
 }
 
@@ -50,11 +54,11 @@
 
 @media screen and (max-width: 500px) {
     .group-thumbnail-img-outlined {  
-        height: 200px;
+        max-height: 200px;
     }
     
     .group-thumbnail-img {
-        height: 190px;
+        max-height: 190px;
     }
 
     .group-thumbnail-text {
