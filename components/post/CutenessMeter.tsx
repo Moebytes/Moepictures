@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
+import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../../structures/Functions"
@@ -22,6 +22,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
     const [cuteness, setCuteness] = useState(0)
     const [averageCuteness, setAverageCuteness] = useState((props.post as PostSearch)?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
@@ -107,7 +108,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
                 <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={Number(getCutenessValue())} allowFraction={true} fullFraction={true} 
                 allowTitleTag={false} multiplier={200} showTooltip={true} tooltipClassName="cuteness-tooltip" tooltipDefaultText={`${averageCuteness}`}
-                iconsCount={5} size={80} snap={2} SVGstrokeColor="black" SVGstorkeWidth={1} fillColor="#4b22f0" emptyColor="black"/>
+                iconsCount={5} size={mobile ? 70 : 80} snap={2} SVGstrokeColor="black" SVGstorkeWidth={1} fillColor="#4b22f0" emptyColor="black"/>
                 {/* <Slider ref={sliderRef} renderTrack={(props, state) => <div {...props} className={`cuteness-track-${state.index}`}><span className="cuteness-text">{state.value}</span></div>} className="cuteness-slider" thumbClassName="cuteness-thumb" onChange={(value) => setCuteness(value)} min={0} max={1000} step={1} value={cuteness}/> */}
             </div>
         </div>

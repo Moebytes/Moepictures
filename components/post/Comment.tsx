@@ -236,7 +236,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                     {generateUsernameJSX()}
                 </div>
             </div>
-            <div className="comment-container" style={{width: "100%"}}>
+            <div className="comment-container" style={{width: "100%", marginTop: mobile && session.username ? "25px" : ""}}>
                 <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
                 {jsxFunctions.renderText(props.comment?.comment, emojis, "comment", goToComment)}
             </div>
