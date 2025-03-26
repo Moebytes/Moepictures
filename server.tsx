@@ -499,7 +499,9 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
       }
       if (post) {
         const img = post.images[0]
-        const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
+        const imagePath = img.thumbnail ? functions.getThumbnailImagePath(img.type, img.thumbnail)
+        : functions.getImagePath(img.type, img.postID, img.order, img.filename)
+        
         const imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
         body = await serverFunctions.squareCrop(imageBuffer, 200)
       }
