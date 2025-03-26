@@ -476,6 +476,43 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
   }
 })
 
+app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const postID = path.basename(req.params.id, path.extname(req.params.id))
+    
+    let body = Buffer.from("")
+
+    let r18 = false
+    if (postID) {
+      let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
+      if (!post) {
+        post = await sql.post.post(postID)
+        await sql.setCache(`cached-post/${postID}`, post)
+      }
+      if (post && functions.isR18(post.rating)) {
+        if (!req.session.showR18) return void res.status(403).end()
+        r18 = true
+      }
+      if (post && post.hidden) {
+        if (!permissions.isMod(req.session)) return void res.status(403).end()
+      }
+      if (post) {
+        const img = post.images[0]
+        const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
+        let imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
+        body = await serverFunctions.squareCrop(imageBuffer)
+      }
+    }
+  
+    const mimeType = mime.getType(req.path)
+    if (mimeType) res.setHeader("Content-Type", mimeType)
+    res.setHeader("Content-Length", body.byteLength)
+    res.status(200).send(body)
+  } catch {
+    res.status(400).end()
+  }
+})
+
 app.get("/*", async (req: Request, res: Response) => {
   try {
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {
@@ -497,7 +534,6 @@ app.get("/*", async (req: Request, res: Response) => {
     let image = "/assets/images/mainimg.png"
 
     const key = decodeURIComponent(req.path.slice(1))
-    let r18 = false
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]
     if (postID) {
         let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
@@ -507,7 +543,6 @@ app.get("/*", async (req: Request, res: Response) => {
         }
         if (post && functions.isR18(post.rating)) {
           if (!req.session.showR18) post = undefined
-          r18 = true
         }
         if (post && post.hidden) {
           if (!permissions.isMod(req.session)) post = undefined
@@ -516,10 +551,7 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
-          const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
-          let imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
-          const squareBuffer = await serverFunctions.squareCrop(imageBuffer)
-          image = functions.arrayBufferToBase64(squareBuffer)
+          image = `/social-preview/${post.postID}${path.extname(img.filename)}`
         }
     }
 
