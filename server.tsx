@@ -500,8 +500,8 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
       if (post) {
         const img = post.images[0]
         const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
-        body = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
-        //body = await serverFunctions.squareCrop(imageBuffer, 300)
+        const imageBuffer  = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
+        body = await serverFunctions.squareCrop(imageBuffer, 200)
       }
     }
   
@@ -552,7 +552,7 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
-          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}?hash=${img.pixelHash}&size=300`
+          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
         }
     }
 
