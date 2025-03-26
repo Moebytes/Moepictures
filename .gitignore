@@ -24,7 +24,8 @@ dump
 .DS_Store
 
 #Crypto
-structures/CryptoFunctions.ts
+structures/DecryptFunctions.ts
+structures/EncryptFunctions.ts
 
 #Live2D Cubism
 assets/live2d/*

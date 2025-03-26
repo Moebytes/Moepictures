@@ -7,7 +7,7 @@ import * as mm from "music-metadata"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
+import encryptFunctions from "./EncryptFunctions"
 import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
 import {S3} from "@aws-sdk/client-s3"
@@ -30,13 +30,8 @@ UnverifiedPost, Tag, PostRating, UploadTag, PixivResponse, SaucenaoResponse, WDT
 
 const csrf = new CSRF()
 const exec = util.promisify(child_process.exec)
-let pixiv: Pixiv
-let deviantart: DeviantArt
-const login = async () => {
-    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
-}
-login()
+let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -77,7 +72,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
     if (req.session.username) return next()
     const apiKey = req.headers["x-api-key"] as string
     if (apiKey) {
-        const hashedKey = cryptoFunctions.hashAPIKey(apiKey)
+        const hashedKey = encryptFunctions.hashAPIKey(apiKey)
         const apiToken = await sql.token.apiKey(hashedKey)
         if (apiToken) {
             const user = await sql.user.user(apiToken.username)
@@ -136,7 +131,7 @@ export default class ServerFunctions {
         if (req.session.apiKey) return res.status(200).send(data)
         if (permissions.noEncryption(req.session)) return res.status(200).send(data)
         if (!req.session.publicKey) return res.status(401).send("No public key")
-        const encrypted = cryptoFunctions.encryptAPI(data, req.session.publicKey, req.session)
+        const encrypted = encryptFunctions.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)
     }
 
@@ -886,11 +881,12 @@ export default class ServerFunctions {
         return result
     }
 
-    public static squareCrop = async (buffer: Buffer) => {
+    public static squareCrop = async (buffer: Buffer, resize = -1) => {
         const metadata = await sharp(buffer).metadata()
         const size = Math.min(metadata.width!, metadata.height!)
+        const resizeWidth = resize > 0 ? resize : size
         const centerPosition = Math.max(0, Math.floor((metadata.width! - size) / 2))
-        return sharp(buffer).extract({width: size, height: size, left: centerPosition, top: 0}).toBuffer()
+        return sharp(buffer).extract({width: size, height: size, left: centerPosition, top: 0}).resize(resizeWidth, resizeWidth).toBuffer()
     }
 
     public static booruLinks = async (bytes: number[], pixivID: string) => {

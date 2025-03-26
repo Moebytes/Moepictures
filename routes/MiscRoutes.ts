@@ -6,7 +6,7 @@ import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
 import snoowrap from "snoowrap"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
+import encryptFunctions from "../structures/EncryptFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
@@ -27,13 +27,9 @@ svgCaptcha.loadFont(dotline)
 let processingQueue = new Set<string>()
 
 const exec = util.promisify(child_process.exec)
-let pixiv: Pixiv
-let deviantart: DeviantArt
-const login = async () => {
-    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
-}
-login()
+let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+
 const reddit = new snoowrap({
     userAgent: "kisaragi bot v1.0",
     clientId: process.env.REDDIT_APP_ID,
@@ -607,8 +603,8 @@ const MiscRoutes = (app: Express) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
-            const key = cryptoFunctions.generateAPIKey()
-            const hashedKey = cryptoFunctions.hashAPIKey(key)
+            const key = encryptFunctions.generateAPIKey()
+            const hashedKey = encryptFunctions.hashAPIKey(key)
             await sql.token.insertAPIKey(req.session.username, hashedKey)
             res.status(200).send(key)
         } catch (e) {
@@ -654,7 +650,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/server-key", miscLimiter, async (req: Request, res: Response) => {
         try {
-            const publicKey = cryptoFunctions.serverPublicKey()
+            const publicKey = encryptFunctions.serverPublicKey()
             res.status(200).json({publicKey})
         } catch (e) {
             console.log(e)
