@@ -552,7 +552,7 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
-          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}?hash=${img.pixelHash}`
         }
     }
 
