@@ -1,7 +1,6 @@
 import {Express, NextFunction, Request, Response} from "express"
 import crypto from "crypto"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"

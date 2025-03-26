@@ -20,7 +20,7 @@ import {Provider} from "react-redux"
 import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./structures/Functions"
-import cryptoFunctions from "./structures/CryptoFunctions"
+import encryptFunctions from "./structures/EncryptFunctions"
 import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./structures/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
@@ -40,7 +40,7 @@ import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
 import torIPs from "./assets/json/tor-ip.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
-import {ServerSession, Storage} from "./types/Types"
+import {ServerSession, Storage, PostFull} from "./types/Types"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -225,7 +225,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
+        body = encryptFunctions.encrypt(body, req.session.publicKey, req.session)
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -294,8 +294,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = cryptoFunctions.encrypt(body, req.session.publicKey, req.session)
-        // contentLength = body.byteLength
+        body = encryptFunctions.encrypt(body, req.session.publicKey, req.session)
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -446,7 +445,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         if (!permissions.isMod(req.session)) return res.status(403).end()
       }
     }
-    const secret = cryptoFunctions.generateAPIKey(16)
+    const secret = encryptFunctions.generateAPIKey(16)
     storageMap.set(userKey, {secret, key, upscaled, r18, pixelHash, songCover})
     let ext = songCover ? ".jpg" : path.extname(key)
     const url = `${functions.getDomain()}/storage/${userKey}${ext}?secret=${secret}`
@@ -492,8 +491,50 @@ app.get("/*", async (req: Request, res: Response) => {
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
     const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
+
+    let title = "Moepictures: Anime Art Image Board"
+    let description = "Moepictures is an anime image board focusing on cute and moe content. Search for the cutest art, comics, animations, music, and 3d models with comprehensive tags."
+    let image = "/assets/images/mainimg.png"
+
+    const key = decodeURIComponent(req.path.slice(1))
+    let r18 = false
+    const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]
+    if (postID) {
+        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
+        if (!post) {
+          post = await sql.post.post(postID)
+          await sql.setCache(`cached-post/${postID}`, post)
+        }
+        if (post && functions.isR18(post.rating)) {
+          if (!req.session.showR18) post = undefined
+          r18 = true
+        }
+        if (post && post.hidden) {
+          if (!permissions.isMod(req.session)) post = undefined
+        }
+        if (post) {
+          title = `Moepictures: ${post.englishTitle || post.title}`
+          description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
+          const img = post.images[0]
+          const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
+          let imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
+          const squareBuffer = await serverFunctions.squareCrop(imageBuffer)
+          image = functions.arrayBufferToBase64(squareBuffer)
+        }
+    }
+
+    const newDocument = document
+      .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
+      .replace(/<meta property="og:title" content=".*?">/, `<meta property="og:title" content="${title}">`)
+      .replace(/<meta name="twitter:title" content=".*?">/, `<meta name="twitter:title" content="${title}">`)
+      .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${description}">`)
+      .replace(/<meta property="og:description" content=".*?">/, `<meta property="og:description" content="${description}">`)
+      .replace(/<meta property="twitter:description" content=".*?">/, `<meta property="twitter:description" content="${description}">`)
+      .replace(/<meta property="og:image" content=".*?">/, `<meta property="og:image" content="${image}">`)
+      .replace(/<meta name="twitter:image" content=".*?">/, `<meta name="twitter:image" content="${image}">`)
+
     const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
-    res.status(200).send(document.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
+    res.status(200).send(newDocument.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
   } catch (e) {
     console.log(e)
     return res.status(500).json({message: "Internal server error."})

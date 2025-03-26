@@ -13,7 +13,7 @@ import fileType from "magic-bytes.js"
 import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
-import cryptoFunctions from "./CryptoFunctions"
+import decryptFunctions from "./DecryptFunctions"
 import permissions from "./Permissions"
 import localforage from "localforage"
 import * as mm from "music-metadata"
@@ -113,7 +113,7 @@ export default class Functions {
                 await Functions.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
                 privateKey = savedPrivateKey
             } else {
-                const keys = cryptoFunctions.generateKeys()
+                const keys = decryptFunctions.generateKeys()
                 await Functions.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
                 await localforage.setItem("publicKey", keys.publicKey)
                 await localforage.setItem("privateKey", keys.privateKey)
@@ -165,7 +165,7 @@ export default class Functions {
                 cachedResponses.set(cacheKey, {data: json, expires: Date.now() + cacheDuration})
                 return json as GetEndpoint<T>["response"]
             }
-            let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey, session)?.toString()
+            let decrypted = decryptFunctions.decryptAPI(response, privateKey, serverPublicKey, session)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
@@ -2854,19 +2854,19 @@ export default class Functions {
 
             if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(imgBuffer)
-                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) imgBuffer = decryptFunctions.decrypt(imgBuffer, privateKey, serverPublicKey, session)
             }
             if (currentBuffer.byteLength && Functions.isImage(currentLink)) {
                 const isAnimated = Functions.isAnimatedWebp(currentBuffer)
-                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) currentBuffer = decryptFunctions.decrypt(currentBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledImgBuffer.byteLength && Functions.isImage(upscaledImgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledImgBuffer)
-                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) upscaledImgBuffer = decryptFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentUpscaledLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledCurrentBuffer)
-                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) upscaledCurrentBuffer = decryptFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session)
             }
 
             if (imgBuffer.byteLength) {
@@ -3114,7 +3114,7 @@ export default class Functions {
         if (cached) return cached
         let isAnimatedWebP = false
         let arrayBuffer = null as ArrayBuffer | null
-        let decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        let decryptedImg = await decryptFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
         if (forceImage && Functions.isVideo(img)) {
             const url = await Functions.videoThumbnail(img)
             let cacheUrl = `${url}#${path.extname(img)}`
@@ -3168,7 +3168,7 @@ export default class Functions {
         }
         let isAnimatedWebP = false
         let arrayBuffer = null as ArrayBuffer | null
-        let decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
+        let decrypted = await decryptFunctions.decryptedLink(img, privateKey, serverPublicKey, session)
         if (Functions.isWebP(img)) {
             arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
             isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
@@ -3193,7 +3193,7 @@ export default class Functions {
         if (Functions.isVideo(imageLink)) {
             return buffer
         }
-        let decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
+        let decrypted = decryptFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
         return decrypted
     }
 

@@ -1,8 +1,6 @@
-import e, {Express, NextFunction, Request, Response} from "express"
+import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const cutenessLimiter = rateLimit({
