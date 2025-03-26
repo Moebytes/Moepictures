@@ -500,7 +500,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
       if (post) {
         const img = post.images[0]
         const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
-        const imageBuffer  = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
+        const imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
         body = await serverFunctions.squareCrop(imageBuffer, 200)
       }
     }
@@ -533,6 +533,7 @@ app.get("/*", async (req: Request, res: Response) => {
     let title = "Moepictures: Anime Art Image Board"
     let description = "Moepictures is an anime image board focusing on cute and moe content. Search for the cutest art, comics, animations, music, and 3d models with comprehensive tags."
     let image = "/assets/images/mainimg.png"
+    let url = "https://moepictures.moe"
 
     const key = decodeURIComponent(req.path.slice(1))
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]
@@ -553,18 +554,17 @@ app.get("/*", async (req: Request, res: Response) => {
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
           image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          url = `${functions.getDomain()}/post/${post.postID}/${post.slug}`
         }
     }
 
     const newDocument = document
       .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
-      .replace(/<meta property="og:title" content=".*?">/, `<meta property="og:title" content="${title}">`)
-      .replace(/<meta name="twitter:title" content=".*?">/, `<meta name="twitter:title" content="${title}">`)
       .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${description}">`)
+      .replace(/<meta property="og:title" content=".*?">/, `<meta property="og:title" content="${title}">`)
       .replace(/<meta property="og:description" content=".*?">/, `<meta property="og:description" content="${description}">`)
-      .replace(/<meta property="twitter:description" content=".*?">/, `<meta property="twitter:description" content="${description}">`)
       .replace(/<meta property="og:image" content=".*?">/, `<meta property="og:image" content="${image}">`)
-      .replace(/<meta name="twitter:image" content=".*?">/, `<meta name="twitter:image" content="${image}">`)
+      .replace(/<meta property="og:url" content=".*?">/, `<meta property="og:url" content="${url}">`)
 
     const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
     res.status(200).send(newDocument.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
