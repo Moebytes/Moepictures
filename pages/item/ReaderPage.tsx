@@ -32,6 +32,7 @@ import Filters from "../../components/post/Filters"
 import "./styles/readerpage.less"
 
 const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
+    const {mobile} = useLayoutSelector()
     const {readerPage} = usePageSelector()
     const {setReaderPage} = usePageActions()
     const {readerHorizontal, readerThumbnails, readerInvert} = useSearchSelector()
@@ -53,7 +54,7 @@ const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
     }, [inView, loaded])
 
     return (
-        <div ref={ref} className="reader-image" style={{marginLeft: readerThumbnails && !readerHorizontal ? "100px" : "0px",
+        <div ref={ref} className="reader-image" style={{marginLeft: !mobile && readerThumbnails && !readerHorizontal ? "100px" : "0px",
         filter: readerInvert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}>
             <PostImage img={img} post={post} order={order}/>
         </div>
@@ -331,12 +332,13 @@ const ReaderPage: React.FunctionComponent = () => {
                 <div className="reader-controls-box">
                     {!mobile ? <img className="reader-controls-icon-small" src={hamburger} onClick={() => setReaderThumbnails(!readerThumbnails)} style={{filter: getFilter()}}/> : null}
                     <div className="reader-controls-page-container">
-                        <span className="reader-controls-page-text" style={{filter: getFilter()}}>{i18n.labels.page}:</span>
-                        <input className="reader-controls-page-input" type="number" spellCheck={false} value={readerPage} onChange={(event) => setReaderPage(Number(event.target.value))} onBlur={() => updatePage()} onMouseEnter={() => setEnableDrag(false)} style={{filter: getFilter()}}/>
+                        {!mobile ? <span className="reader-controls-page-text" style={{filter: getFilter()}}>{i18n.labels.page}:</span> : null}
+                        <input className="reader-controls-page-input" type="number" spellCheck={false} value={readerPage} onChange={(event) => setReaderPage(Number(event.target.value))} onBlur={() => updatePage()}
+                        onMouseEnter={() => setEnableDrag(false)} style={{filter: getFilter(), marginLeft: mobile ? "0px" : ""}}/>
                         <span className="reader-controls-page-text" style={{filter: getFilter()}}>/ {images.length}</span>
                     </div>
-                    <img className="reader-controls-icon-mid" src={rightToLeft} onClick={() => changeHorizontal(true)} style={{filter: getFilter()}}/>
-                    <img className="reader-controls-icon-mid" src={topToBottom} onClick={() => changeHorizontal(false)} style={{filter: getFilter()}}/>
+                    {!mobile ? <img className="reader-controls-icon-mid" src={rightToLeft} onClick={() => changeHorizontal(true)} style={{filter: getFilter()}}/> : null}
+                    {!mobile ? <img className="reader-controls-icon-mid" src={topToBottom} onClick={() => changeHorizontal(false)} style={{filter: getFilter()}}/> : null}
                 </div>
                 {!mobile ?
                 <div className="reader-controls-box">
@@ -374,7 +376,7 @@ const ReaderPage: React.FunctionComponent = () => {
                 </div>
             </div>
             <div className={`reader-renderer ${readerHorizontal ? "reader-renderer-horizontal" : ""}`} ref={rootRef} style={{maxHeight: readerHorizontal ? 773 : 1400}} onClick={((e) => e.currentTarget.focus())}>
-                {generateThumbnails()}
+                {!mobile && generateThumbnails()}
                 {generateImages()}
             </div>
             <Filters active={showFilterDropdown} right={getFiltersMargin()} top={40}/>

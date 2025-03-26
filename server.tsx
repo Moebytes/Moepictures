@@ -8,10 +8,10 @@ import sharp from "sharp"
 import express, {Request, Response, NextFunction} from "express"
 import session from "express-session"
 import PGSession from "connect-pg-simple"
-import webpack from "webpack"
 import middleware from "webpack-dev-middleware"
 import hot from "webpack-hot-middleware"
-import config from "./webpack.config.js"
+import {rspack} from "@rspack/core"
+import config from "./rspack.config"
 import dotenv from "dotenv"
 import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
@@ -51,9 +51,9 @@ app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 app.set("trust proxy", true)
 
-let compiler = webpack(config as any)
+let compiler = rspack(config as any)
 if (process.env.TESTING === "yes") {
-  app.use(middleware(compiler, {
+  app.use(middleware(compiler as any, {
     index: false,
     serverSideRender: false,
     writeToDisk: false,
