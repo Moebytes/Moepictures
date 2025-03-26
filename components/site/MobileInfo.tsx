@@ -313,7 +313,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (props.tagGroups?.length) return generateTagGroupJSX()
         let jsx = [] as React.ReactElement[]
         let currentTags = props.tags ? organizeTags([...(props.meta || []), ...props.tags]) : tags
-        let max = currentTags.length > maxTags ? maxTags : currentTags.length
+        let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
@@ -798,10 +798,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     </div> </>
                 : null}
 
-                {props.tags ?
-                    <div className="mobileinfo-subcontainer">
-                        {generateTagJSX()}
-                    </div>
+                {props.tags ? <>
+                     {!props.tagGroups?.length ? <div className="mobileinfo-title-container">
+                             <span className="mobileinfo-title">{i18n.navbar.tags}</span>
+                    </div> : null}
+                     <div className="mobileinfo-subcontainer">
+                         {generateTagJSX()}
+                     </div> </>
                 : null}
 
                 {props.tagGroups?.length && props.meta ? <>
