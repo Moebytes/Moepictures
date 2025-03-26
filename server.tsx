@@ -478,8 +478,9 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
 
 app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (req.session.captchaNeeded) return void res.status(403).end()
+
     const postID = path.basename(req.params.id, path.extname(req.params.id))
-    
     let body = Buffer.from("")
 
     let r18 = false
@@ -500,7 +501,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
         const img = post.images[0]
         const imagePath = functions.getImagePath(img.type, img.postID, img.order, img.filename)
         let imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
-        body = await serverFunctions.squareCrop(imageBuffer)
+        body = await serverFunctions.squareCrop(imageBuffer, 100)
       }
     }
   
@@ -551,7 +552,7 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
-          image = `/social-preview/${post.postID}${path.extname(img.filename)}`
+          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
         }
     }
 
