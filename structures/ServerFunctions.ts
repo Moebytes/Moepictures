@@ -21,7 +21,7 @@ import mime from "mime-types"
 import util from "util"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
-import googleTranslate from "@vitalets/google-translate-api"
+import {Translator} from "@vitalets/google-translate-api"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import tagConvert from "../assets/json/tag-convert.json"
@@ -838,7 +838,7 @@ export default class ServerFunctions {
     public static translate = async (words: string[]) => {
         const translate = async (text: string) => {
             try {
-                const translated = await googleTranslate.translate(text, {from: "ja", to: "en"})
+                const translated = await new Translator(text, {from: "ja", to: "en"}).translate()
                 return translated.text
             } catch {
                 return text
