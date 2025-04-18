@@ -617,9 +617,9 @@ export default class Functions {
                 const username = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 const text = piece.replace(username, "").replaceAll(">", "")
                 if (!text && !username) continue
-                if (gibberish(Functions.stripLinks(text))) return i18n.errors.comment.gibberish
+                //if (gibberish(Functions.stripLinks(text))) return i18n.errors.comment.gibberish
             } else {
-                if (gibberish(Functions.stripLinks(piece))) return i18n.errors.comment.gibberish
+                //if (gibberish(Functions.stripLinks(piece))) return i18n.errors.comment.gibberish
             }
         }
         if (Functions.isProfane(comment)) return i18n.errors.comment.profane
@@ -655,13 +655,13 @@ export default class Functions {
 
     public static validateReason = (reason: string | null | undefined, i18n: typeof enLocale) => {
         if (!reason) return i18n.errors.reason.empty
-        if (gibberish(reason)) return i18n.errors.reason.gibberish
+        //if (gibberish(reason)) return i18n.errors.reason.gibberish
         return null
     }
 
     public static validateBio = (bio: string, i18n: typeof enLocale) => {
         if (!bio) return i18n.errors.bio.empty
-        if (gibberish(Functions.stripLinks(bio))) return i18n.errors.bio.gibberish
+        //if (gibberish(Functions.stripLinks(bio))) return i18n.errors.bio.gibberish
         if (Functions.isProfane(bio)) return i18n.errors.bio.profane
         return null
     }
