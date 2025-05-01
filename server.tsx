@@ -476,6 +476,7 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
   }
 })
 
+/* - Small social previews
 app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.session.captchaNeeded) return void res.status(403).end()
@@ -514,7 +515,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   } catch {
     res.status(400).end()
   }
-})
+})*/
 
 app.get("/*", async (req: Request, res: Response) => {
   try {
@@ -554,8 +555,9 @@ app.get("/*", async (req: Request, res: Response) => {
         if (post) {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
-          const img = post.images[0]
-          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          //const img = post.images[0]
+          //image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          image = ""
           url = `${functions.getDomain()}/post/${post.postID}/${post.slug}`
         }
     }
