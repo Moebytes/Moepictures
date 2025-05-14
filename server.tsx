@@ -185,6 +185,7 @@ for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const pixelHash = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       let url = req.url.replace(/\?.*$/, "")
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -195,7 +196,7 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.slice(1))
-      let upscaled = req.session.upscaledImages as boolean
+      let upscaled = req.session.upscaledImages || upscaleParam === "true"
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       if (req.session.captchaNeeded) upscaled = false
       let r18 = false
@@ -318,6 +319,7 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
@@ -331,7 +333,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
-        upscaled = req.session.upscaledImages as boolean
+        upscaled = req.session.upscaledImages || upscaleParam === "true"
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
@@ -417,13 +419,14 @@ const storageMap = new Map<string, Storage>()
 
 app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
     const {link, songCover} = req.body as {link: string, songCover?: boolean}
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
     ip = ip?.toString().replace("::ffff:", "") || ""
     let userKey = req.session.username ? req.session.username : ip
     const pixelHash = new URL(link).searchParams.get("hash") ?? ""
     const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))
-    let upscaled = req.session.upscaledImages as boolean
+    let upscaled = req.session.upscaledImages || upscaleParam === "true"
     if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
     if (req.session.captchaNeeded) {
       storageMap.delete(userKey)
@@ -476,7 +479,6 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
   }
 })
 
-/* - Small social previews
 app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.session.captchaNeeded) return void res.status(403).end()
@@ -515,7 +517,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   } catch {
     res.status(400).end()
   }
-})*/
+})
 
 app.get("/*", async (req: Request, res: Response) => {
   try {
@@ -555,9 +557,8 @@ app.get("/*", async (req: Request, res: Response) => {
         if (post) {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
-          //const img = post.images[0]
-          //image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
-          image = ""
+          const img = post.images[0]
+          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
           url = `${functions.getDomain()}/post/${post.postID}/${post.slug}`
         }
     }
