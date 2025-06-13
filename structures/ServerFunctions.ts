@@ -904,19 +904,23 @@ export default class ServerFunctions {
 
         let promises = [] as Promise<any>[]
         const appendExtraLinks = async (link: string) => {
-            const post = await axios.get(`${link}.json`).then((r) => r.data)
-            const mediaId = post.media_asset.id
-            const html = await axios.get(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.data)
-            const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm)
-            for (let link of links) {
-                link = link.replaceAll("&amp;", "&")
-                if (link.includes("twitter") || link.includes("x.com")) mirrors.unshift(link)
-                if (link.includes("safebooru")) mirrors.push(link)
-            }
+            try {
+                const post = await axios.get(`${link}.json`).then((r) => r.data)
+                const mediaId = post.media_asset.id
+                const html = await axios.get(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.data)
+                const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm) || []
+                for (let link of links) {
+                    link = link.replaceAll("&amp;", "&")
+                    if (link.includes("twitter") || link.includes("x.com")) mirrors.unshift(link)
+                    if (link.includes("safebooru")) mirrors.push(link)
+                }
+            } catch {}
         }
         const appendRedirect = async (link: string) => {
-            const redirect = await axios.get(link)
-            mirrors.push(redirect.request.res.responseUrl)
+            try {
+                const redirect = await axios.get(link)
+                mirrors.push(redirect.request.res.responseUrl)
+            } catch {}
         }
 
         $("#pages > div").each((i, el) => {
