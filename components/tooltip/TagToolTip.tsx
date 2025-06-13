@@ -6,6 +6,7 @@ import functions from "../../structures/Functions"
 import jsxFunctions from "../../structures/JSXFunctions"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
@@ -93,6 +94,9 @@ const TagToolTip: React.FunctionComponent = (props) => {
             }
             if (tag.twitter) {
                 jsx.push(<img key="twitter" className="tag-tooltip-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
+            }
+            if (tag.wikipedia) {
+                jsx.push(<img key="wikipedia" className="tag-tooltip-social" src={wikipedia} onClick={() => window.open(tag.wikipedia!, "_blank", "noreferrer")}/>)
             }
         }
         return jsx

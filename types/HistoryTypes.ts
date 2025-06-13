@@ -101,6 +101,7 @@ export interface TagChanges {
     social?: string | null
     twitter?: string | null
     fandom?: string | null
+    wikipedia?: string | null
     featuredPost?: string | null
     r18?: boolean | null
 }
@@ -119,6 +120,7 @@ export interface TagHistory {
     social: string | null
     twitter: string | null
     fandom: string | null
+    wikipedia: string | null
     featuredPost: Post | null
     hidden: boolean | null
     banned: boolean | null

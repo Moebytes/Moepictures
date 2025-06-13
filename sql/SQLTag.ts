@@ -29,13 +29,13 @@ export default class SQLTag {
     /** Insert a new tag (all populated fields). */
     public static insertTagFromData = async (data: Tag) => {
         const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, pixivTags, banned, hidden, r18, featuredPost} = data
+            twitter, fandom, wikipedia, pixivTags, banned, hidden, r18, featuredPost} = data
         const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", 
-            "updater", "updatedDate", "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18", 
-            "featuredPost") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+            "updater", "updatedDate", "website", "social", "twitter", "fandom", "wikipedia", "pixivTags", "banned", "hidden", "r18", 
+            "featuredPost") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
             values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, pixivTags, banned, hidden, r18, featuredPost]
+            twitter, fandom, wikipedia, pixivTags, banned, hidden, r18, featuredPost]
         }
         try {
             await SQLQuery.invalidateCache("tag")
@@ -132,10 +132,10 @@ export default class SQLTag {
 
     /** Update a tag. */
     public static updateTag = async (tag: string, column: "tag" | "image" | "description" | "updater" | "updatedDate" 
-        | "type" | "featuredPost" | "r18" | "twitter" | "fandom" | "social" | "website" | "imageHash" | "pixivTags" 
+        | "type" | "featuredPost" | "r18" | "twitter" | "fandom" | "wikipedia" | "social" | "website" | "imageHash" | "pixivTags" 
         | "banned", value: string | boolean | string[] | null) => {
         let whitelist = ["tag", "image", "description", "updater", "updatedDate", "type", "featuredPost", "r18", "twitter", 
-        "fandom", "social", "website", "imageHash", "pixivTags", "banned"]
+        "fandom", "wikipedia", "social", "website", "imageHash", "pixivTags", "banned"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

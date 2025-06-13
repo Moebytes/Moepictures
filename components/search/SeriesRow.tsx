@@ -6,6 +6,7 @@ import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
 import website from "../../assets/icons/website.png"
 import twitter from "../../assets/icons/twitter.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import permissions from "../../structures/Permissions"
 import "./styles/seriesrow.less"
 import {TagCategorySearch} from "../../types/Types"
@@ -75,6 +76,9 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         }
         if (props.series.twitter) {
             jsx.push(<img key="twitter" className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter!, "_blank", "noreferrer")}/>)
+        }
+        if (props.series.wikipedia) {
+            jsx.push(<img key="wikipedia" className="artistrow-social" src={wikipedia} onClick={() => window.open(props.series.wikipedia!, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

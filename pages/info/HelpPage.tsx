@@ -535,6 +535,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     {i18n.help.bookmarklet.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://twitter.com/")}>Twitter</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.deviantart.com/")}>Deviantart</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.artstation.com/")}>Artstation</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.reddit.com/")}>Reddit</a><br/>

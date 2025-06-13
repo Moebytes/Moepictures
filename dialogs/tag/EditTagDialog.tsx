@@ -66,7 +66,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             }
             await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
             implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-            r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+            wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -177,6 +177,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-row">
                     <span className="dialog-text">{i18n.labels.twitter}: </span>
                     <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.twitter!} onChange={(event) => setEditTagObj({...editTagObj, twitter: event.target.value})}/>
+                </div>
+                <div className="dialog-row">
+                    <span className="dialog-text">{i18n.labels.wikipedia}: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.wikipedia!} onChange={(event) => setEditTagObj({...editTagObj, wikipedia: event.target.value})}/>
                 </div>
                 </>
             )

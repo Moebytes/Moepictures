@@ -12,6 +12,7 @@ import deleteIcon from "../../assets/icons/delete.png"
 import categoryIcon from "../../assets/icons/category.png"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
@@ -139,13 +140,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         try {
             await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
-            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+            website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+                wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: props.tag.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: props.tag.tag, failed: true})
@@ -176,6 +177,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             twitter: props.tag.twitter,
             website: props.tag.website,
             fandom: props.tag.fandom,
+            wikipedia: props.tag.wikipedia,
             r18: props.tag.r18,
             featuredPost: props.tag.featuredPost,
             reason: ""
@@ -237,6 +239,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             }
             if (props.tag.twitter) {
                 jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter!, "_blank", "noreferrer")}/>)
+            }
+            if (props.tag.wikipedia) {
+                jsx.push(<img className="tagrow-social" src={wikipedia} onClick={() => window.open(props.tag.wikipedia!, "_blank", "noreferrer")}/>)
             }
         }
         return jsx

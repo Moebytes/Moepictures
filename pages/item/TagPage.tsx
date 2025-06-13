@@ -19,6 +19,7 @@ import tagHearted from "../../assets/icons/tag-hearted.png"
 import restore from "../../assets/icons/restore.png"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
@@ -223,6 +224,9 @@ const TagPage: React.FunctionComponent = () => {
             if (tag.twitter) {
                 jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank", "noreferrer")}/>)
             }
+            if (tag.wikipedia) {
+                jsx.push(<img className="tag-social" src={wikipedia} onClick={() => window.open(tag.wikipedia!, "_blank", "noreferrer")}/>)
+            }
         }
         return jsx
     }
@@ -248,15 +252,15 @@ const TagPage: React.FunctionComponent = () => {
         try {
             await functions.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
-            social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18 ?? false, 
-            featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
+            social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, 
+            r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
             navigate(`/tag/${editTagObj.key}`)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+                wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: editTagObj.tag, failed: true})
@@ -291,6 +295,7 @@ const TagPage: React.FunctionComponent = () => {
             twitter: tag.twitter,
             website: tag.website,
             fandom: tag.fandom,
+            wikipedia: tag.wikipedia,
             r18: tag.r18,
             featuredPost: tag.featuredPost?.postID,
             reason: ""
@@ -451,7 +456,7 @@ const TagPage: React.FunctionComponent = () => {
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
-        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, type: tag.type, featuredPost: tag.featuredPost?.postID,
+        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, wikipedia: tag.wikipedia, type: tag.type, featuredPost: tag.featuredPost?.postID,
         r18: tag.r18 ?? false}, session, setSessionFlag)
         currentHistory(history.key)
     }

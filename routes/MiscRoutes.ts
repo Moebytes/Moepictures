@@ -20,6 +20,7 @@ import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
+import {Scraper} from "@the-convocation/twitter-scraper"
 import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(dotline)
@@ -112,7 +113,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, pixivID} = req.body as {bytes: number[], pixivID: string}
-            const mirrors = await serverFunctions.booruLinks(bytes, pixivID)
+            const mirrors = await serverFunctions.booruLinks(bytes)
             res.status(200).send(mirrors)
         } catch {
             res.status(400).end()
@@ -190,6 +191,22 @@ const MiscRoutes = (app: Express) => {
                     return void res.status(200).send([response])
                 }
             }
+            if (link.includes("twitter.com") || link.includes("x.com")) {
+                const twitter = new Scraper()
+                const id = link.match(/(?<=status\/)\d+/)?.[0] || ""
+                const tweet = await twitter.getTweet(id)
+                if (!tweet) return void res.status(200).send([])
+                let images = [] as ArrayBuffer[]
+                for (let i = 0; i < tweet.photos.length; i++) {
+                    const response = await axios.get(tweet.photos[i].url, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                    images.push(response)
+                }
+                for (let i = 0; i < tweet.videos.length; i++) {
+                    const response = await axios.get(tweet.videos[i].url || tweet.videos[i].preview, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                    images.push(response)
+                }
+                return void res.status(200).send(images)
+            }
             if (link.includes("deviantart.com")) {
                 const deviationRSS = await deviantart.rss.get(link)
                 const response = await axios.get(deviationRSS.content[0].url, {responseType: "arraybuffer", headers}).then((r) => r.data)
@@ -199,7 +216,7 @@ const MiscRoutes = (app: Express) => {
                 const id = link.match(/(?<=artwork\/)(.*?)(?=$|\/)/g)?.[0]
                 const apiLink = `https://www.artstation.com/projects/${id}.json`
                 const json = await axios.get(apiLink, {headers, responseType: "json"}).then((r) => r.data)
-                let images = [] as any[]
+                let images = [] as ArrayBuffer[]
                 for (let i = 0; i < json.assets.length; i++) {
                     const asset = json.assets[i]
                     if (asset.asset_type === "image") {

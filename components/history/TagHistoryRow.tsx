@@ -15,6 +15,7 @@ import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import website from "../../assets/icons/support.png"
 import fandom from "../../assets/icons/fandom.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
@@ -78,7 +79,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
-        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false,
+        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, wikipedia: props.tagHistory.wikipedia, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false,
         featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             navigate(`/tag/history/${props.tagHistory.key}`)
@@ -198,6 +199,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             }
             if (props.tagHistory.twitter) {
                 jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter!, "_blank")}/>)
+            }
+            if (props.tagHistory.wikipedia) {
+                jsx.push(<img className="historyrow-social" src={wikipedia} onClick={() => window.open(props.tagHistory.wikipedia!, "_blank")}/>)
             }
         }
         return jsx
@@ -353,6 +357,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if ((!prevHistory && props.tagHistory.fandom) || changes.fandom) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.fandom}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom!, "_blank")}>{props.tagHistory.fandom}</span></span>)
+        }
+        if ((!prevHistory && props.tagHistory.wikipedia) || changes.wikipedia) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.wikipedia}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.wikipedia!, "_blank")}>{props.tagHistory.wikipedia}</span></span>)
         }
         if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
