@@ -69,7 +69,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], social: string, twitter: string, website: string, fandom: string) => {
+    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], 
+        implications: string[], social: string, twitter: string, website: string, fandom: string, wikipedia: string) => {
         let bytes = null as number[] | ["delete"] | null
         if (image) {
             if (image === "delete") {
@@ -81,7 +82,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
-        await functions.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom}, session, setSessionFlag)
+        await functions.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom, wikipedia}, session, setSessionFlag)
         await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
@@ -382,6 +383,13 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom!, "_blank")}>{i18n.labels.newFandom}: {newTag.fandom}</span>)
             }
         }
+        if (changes.wikipedia) {
+            if (showOldTag && oldTag) {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.wikipedia!, "_blank")}>{i18n.labels.oldWikipedia}: {oldTag.wikipedia || i18n.labels.none}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.wikipedia!, "_blank")}>{i18n.labels.newWikipedia}: {newTag.wikipedia}</span>)
+            }
+        }
         if (changes.featuredPost) {
             if (showOldTag && oldTag) {
                 jsx.push(<span className="mod-post-text">{i18n.labels.oldFeatured}: {oldTag.featuredPost?.postID}</span>)
@@ -465,7 +473,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, 
-                            request.image!, request.aliases, request.implications, request.social!, request.twitter!, request.website!, request.fandom!)}>
+                            request.image!, request.aliases, request.implications, request.social!, request.twitter!, request.website!, request.fandom!, request.wikipedia!)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>

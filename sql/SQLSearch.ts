@@ -693,7 +693,8 @@ export default class SQLSearch {
                     LEFT JOIN implications ON implications."tag" = tags."tag"
                     JOIN "tag map" ON "tag map"."tag" = tags."tag"
                     AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
-                    OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%')
+                    OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%'
+                    OR tags.wikipedia LIKE '%' || $1 || '%')
                     JOIN posts ON posts."postID" = "tag map"."postID"
                     GROUP BY "tags"."tagID"
             `),

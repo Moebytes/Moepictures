@@ -14,6 +14,8 @@ export interface PostMirrors {
     yandere?: string
     konachan?: string
     zerochan?: string
+    eshuushuu?: string
+    animepictures?: string
     youtube?: string
     bandcamp?: string
 }

@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "social" text,
     "twitter" text,
     "fandom" text,
+    "wikipedia" text,
     "pixivTags" text[],
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "banned" boolean,
@@ -189,6 +190,7 @@ CREATE TABLE IF NOT EXISTS "unverified tags" (
     "social" text,
     "twitter" text,
     "fandom" text,
+    "wikipedia" text,
     "pixivTags" text[],
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL
 );
@@ -542,6 +544,7 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "social" text,
     "twitter" text,
     "fandom" text,
+    "wikipedia" text,
     "pixivTags" text[],
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
@@ -652,6 +655,7 @@ CREATE TABLE IF NOT EXISTS "tag history" (
     "social" text,
     "twitter" text,
     "fandom" text,
+    "wikipedia" text,
     "pixivTags" text[],
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,

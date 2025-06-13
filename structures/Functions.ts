@@ -1657,6 +1657,7 @@ export default class Functions {
                     obj.twitter = unverifiedTag.twitter
                     obj.website = unverifiedTag.website
                     obj.fandom = unverifiedTag.fandom
+                    obj.wikipedia = unverifiedTag.wikipedia
                     if (unverifiedTag.type === "artist") {
                         artists.push(obj)
                     } else if (unverifiedTag.type === "character") {
@@ -1682,6 +1683,7 @@ export default class Functions {
             obj.twitter = foundTag.twitter
             obj.website = foundTag.website
             obj.fandom = foundTag.fandom
+            obj.wikipedia = foundTag.wikipedia
             if (foundTag.type === "artist") {
                 artists.push(obj)
             } else if (foundTag.type === "character") {
@@ -2565,6 +2567,8 @@ export default class Functions {
             if (mirror.includes("yande.re")) json["yandere"] = mirror
             if (mirror.includes("konachan")) json["konachan"] = mirror
             if (mirror.includes("zerochan")) json["zerochan"] = mirror
+            if (mirror.includes("e-shuushuu")) json["eshuushuu"] = mirror
+            if (mirror.includes("anime-pictures")) json["animepictures"] = mirror
             if (mirror.includes("deviantart")) json["deviantart"] = mirror
             if (mirror.includes("artstation")) json["artstation"] = mirror
             if (mirror.includes("soundcloud")) json["soundcloud"] = mirror
@@ -3038,6 +3042,9 @@ export default class Functions {
         }
         if (oldTag.fandom !== newTag.fandom) {
             json.fandom = newTag.fandom
+        }
+        if (oldTag.wikipedia !== newTag.wikipedia) {
+            json.wikipedia = newTag.wikipedia
         }
         if (oldTag.featuredPost?.postID !== newTag.featuredPost?.postID) {
             json.featuredPost = newTag.featuredPost?.postID

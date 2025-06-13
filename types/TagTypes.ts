@@ -11,6 +11,7 @@ export interface MiniTag {
     twitter: string | null
     website: string | null
     fandom: string | null
+    wikipedia: string | null
     count?: string
 }
 
@@ -57,6 +58,7 @@ export interface Tag {
     social: string | null
     twitter: string | null
     fandom: string | null
+    wikipedia: string | null
     featuredPost: Post | null
     hidden: boolean | null
     banned: boolean | null
@@ -184,6 +186,7 @@ export interface TagEditParams {
     social?: string | null
     twitter?: string | null
     fandom?: string | null
+    wikipedia?: string | null
     featuredPost?: string | null
     r18?: boolean
     reason?: string | null

@@ -33,12 +33,15 @@ import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import fandom from "../../assets/icons/fandom.png"
+import wikipedia from "../../assets/icons/wikipedia.png"
 import danbooru from "../../assets/icons/danbooru.png"
 import gelbooru from "../../assets/icons/gelbooru.png"
 import safebooru from "../../assets/icons/safebooru.png"
 import yandere from "../../assets/icons/yandere.png"
 import konachan from "../../assets/icons/konachan.png"
 import zerochan from "../../assets/icons/zerochan.png"
+import eshuushuu from "../../assets/icons/eshuushuu.png"
+import animepictures from "../../assets/icons/animepictures.png"
 import group from "../../assets/icons/group.png"
 import parent from "../../assets/icons/parent.png"
 import compressIcon from "../../assets/icons/compress.png"
@@ -227,6 +230,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 }
                 if (props.series[i].twitter) {
                     jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.series?.[i].twitter!, "_blank")}/>)
+                }
+                if (props.series[i].wikipedia) {
+                    jsx.push(<img className="mobileinfo-social" src={wikipedia} onClick={() => window.open(props.series?.[i].wikipedia!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -497,6 +503,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (props.post.source.includes("zerochan")) {
                 jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
+            if (props.post.source.includes("eshuushuu")) {
+                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            }
+            if (props.post.source.includes("animepictures")) {
+                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            }
             if (props.post.source.includes("youtube")) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.source, "_blank")}/>)
             }
@@ -552,6 +564,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             if (props.post.mirrors.zerochan) {
                 jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.mirrors?.zerochan, "_blank")}/>)
+            }
+            if (props.post.mirrors.eshuushuu) {
+                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(props.post?.mirrors?.eshuushuu, "_blank")}/>)
+            }
+            if (props.post.mirrors.animepictures) {
+                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(props.post?.mirrors?.animepictures, "_blank")}/>)
             }
             if (props.post.mirrors.youtube) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.mirrors?.youtube, "_blank")}/>)

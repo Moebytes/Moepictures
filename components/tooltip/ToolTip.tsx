@@ -14,6 +14,8 @@ import safebooru from "../../assets/icons/safebooru.png"
 import yandere from "../../assets/icons/yandere.png"
 import konachan from "../../assets/icons/konachan.png"
 import zerochan from "../../assets/icons/zerochan.png"
+import eshuushuu from "../../assets/icons/eshuushuu.png"
+import animepictures from "../../assets/icons/animepictures.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
@@ -178,6 +180,8 @@ const ToolTip: React.FunctionComponent = (props) => {
             if (tooltipPost.mirrors.yandere) jsx.push(<img key="yandere" className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors?.yandere, "_blank")}/>)
             if (tooltipPost.mirrors.konachan) jsx.push(<img key="konachan" className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors?.konachan, "_blank")}/>)
             if (tooltipPost.mirrors.zerochan) jsx.push(<img key="zerochan" className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(tooltipPost.mirrors?.zerochan, "_blank")}/>)
+            if (tooltipPost.mirrors.eshuushuu) jsx.push(<img key="eshuushuu" className="tooltip-img" style={{cursor: "pointer"}} src={eshuushuu} onClick={() => window.open(tooltipPost.mirrors?.eshuushuu, "_blank")}/>)
+            if (tooltipPost.mirrors.animepictures) jsx.push(<img key="animepictures" className="tooltip-img" style={{cursor: "pointer"}} src={animepictures} onClick={() => window.open(tooltipPost.mirrors?.animepictures, "_blank")}/>)
             if (tooltipPost.mirrors.youtube) jsx.push(<img key="youtube" className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors?.youtube, "_blank")}/>)
             if (tooltipPost.mirrors.bandcamp) jsx.push(<img key="bandcamp" className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors?.bandcamp, "_blank")}/>)
         }
