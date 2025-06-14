@@ -1396,7 +1396,7 @@ export default class Functions {
         if (all) if (rating === "all" || rating === "all+h") return true
         if (rating === "cute" ||
             rating === "sexy" ||
-            rating === "ecchi" ||
+            rating === "erotic" ||
             rating === "hentai") return true 
         return false
     }
@@ -1410,7 +1410,7 @@ export default class Functions {
     }
 
     public static r17 = () => {
-        return "ecchi" as PostRating
+        return "erotic" as PostRating
     }
 
     public static r15 = () => {

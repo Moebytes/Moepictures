@@ -21,7 +21,7 @@ export type PostRating =
     | "all+h"
     | "cute" 
     | "sexy" 
-    | "ecchi" 
+    | "erotic" 
     | "hentai"
 
 export type PostStyle =

@@ -30,7 +30,7 @@ import model from "../../assets/icons/model.png"
 import audio from "../../assets/icons/audio.png"
 import cute from "../../assets/icons/cute.png"
 import sexy from "../../assets/icons/sexy.png"
-import ecchi from "../../assets/icons/ecchi.png"
+import erotic from "../../assets/icons/erotic.png"
 import hentai from "../../assets/icons/hentai.png"
 import $2d from "../../assets/icons/2d.png"
 import $3d from "../../assets/icons/3d.png"
@@ -229,7 +229,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const getRatingIcon = () => {
         if (tooltipPost.rating === "cute") return cute
         if (tooltipPost.rating === "sexy") return sexy
-        if (tooltipPost.rating === "ecchi") return ecchi
+        if (tooltipPost.rating === "erotic") return erotic
         if (tooltipPost.rating === "hentai") return hentai
         return cute
     }
