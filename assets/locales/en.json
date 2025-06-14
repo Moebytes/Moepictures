@@ -72,7 +72,7 @@
             "allH": "All+H",
             "cute": "Cute",
             "sexy": "Sexy",
-            "ecchi": "Ecchi",
+            "erotic": "Erotic",
             "hentai": "Hentai"
         },
         "style": {
@@ -1396,7 +1396,7 @@
                     "items": {
                         "cute": " - Cute and adorable, with little to no suggestiveness.",
                         "sexy": " - More sexy than cute, with provocative poses or tight clothing (eg. leggings).",
-                        "ecchi": " - Showing lots of skin (eg. bikinis), panty shots, and other borderline content."
+                        "erotic": " - Showing lots of skin (eg. bikinis), panty shots, and other borderline content."
                     }
                 },
                 "style": {
@@ -1564,7 +1564,7 @@
                 "header": "Moepictures has various user account levels that progressively give you more permissions and removes restrictions.",
                 "items": {
                     "No account": " - Can only view the site and the posts rated \"cute\".",
-                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/notes for approval. Can also view the \"sexy\" and \"ecchi\" posts.",
+                    "User": " - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/notes for approval. Can also view the \"sexy\" and \"erotic\" posts.",
                     "Premium": " - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.",
                     "Contributor": " - Can edit posts and tags without passing through the mod queue. Given to members with a great track record of contributions that we don't want to inhibit with the queue.",
                     "Curator": " - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts that we don't want to inhibit with the queue.",

@@ -11,7 +11,7 @@ import video from "../../assets/icons/video.png"
 import comic from "../../assets/icons/comic.png"
 import cute from "../../assets/icons/cute.png"
 import sexy from "../../assets/icons/sexy.png"
-import ecchi from "../../assets/icons/ecchi.png"
+import erotic from "../../assets/icons/erotic.png"
 import hentai from "../../assets/icons/hentai.png"
 import $2d from "../../assets/icons/2d.png"
 import $3d from "../../assets/icons/3d.png"
@@ -445,9 +445,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={sexy}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
-                    <img className="quickedit-button-img" src={ecchi}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
+                <button className={`quickedit-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
+                    <img className="quickedit-button-img" src={erotic}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.erotic}</span>
                 </button>
             </div>
             <div className="dialog-row">
@@ -470,9 +470,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                     <img className="quickedit-button-img" src={sexy}/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
-                <button className={`quickedit-button ${rating === "ecchi" ? "button-selected" : ""}`} onClick={() => setRating("ecchi")}>
-                    <img className="quickedit-button-img" src={ecchi}/>
-                    <span className="quickedit-button-text">{i18n.sortbar.rating.ecchi}</span>
+                <button className={`quickedit-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
+                    <img className="quickedit-button-img" src={erotic}/>
+                    <span className="quickedit-button-text">{i18n.sortbar.rating.erotic}</span>
                 </button>
                 {session.showR18 ?
                 <button className={`quickedit-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
