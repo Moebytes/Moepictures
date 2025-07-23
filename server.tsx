@@ -1,3 +1,4 @@
+import "dotenv/config"
 import path from "path"
 import cors from "cors"
 import mime from "mime"
@@ -11,8 +12,7 @@ import PGSession from "connect-pg-simple"
 import middleware from "webpack-dev-middleware"
 import hot from "webpack-hot-middleware"
 import {rspack} from "@rspack/core"
-import config from "./rspack.config"
-import dotenv from "dotenv"
+//import config from "./rspack.config"
 import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
@@ -43,7 +43,6 @@ import {imageLock, imageMissing} from "./structures/ImageLock"
 import {ServerSession, Storage, PostFull} from "./types/Types"
 const __dirname = path.resolve()
 
-dotenv.config()
 const app = express() as any
 app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}))
 app.use(express.json({limit: "1gb"}))
@@ -51,6 +50,7 @@ app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 app.set("trust proxy", true)
 
+/*
 let compiler = rspack(config as any)
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler as any, {
@@ -59,7 +59,7 @@ if (process.env.TESTING === "yes") {
     writeToDisk: false,
   }))
   app.use(hot(compiler))
-}
+}*/
 
 declare module "express-session" {
   interface SessionData extends ServerSession {}

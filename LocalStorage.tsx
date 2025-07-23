@@ -76,7 +76,7 @@ const lightColorList = {
     "--selectBorder": "#8373ff",
     "--progressText": "#000000",
     "--progressBG": "#ffffff",
-    "--audioPlayerColor": "#fbfaff",
+    "--audioPlayerColor": "#c2c2ff",
     "--buttonBG": "#ff92ff",
     "--previewBG": "#b2d0ff",
     "--editBG": "#afe6ff",

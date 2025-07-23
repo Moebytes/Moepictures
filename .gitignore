@@ -32,7 +32,3 @@ assets/live2d/*
 
 #WDTagger (large)
 assets/misc/wdtagger
-
-#unfinished
-rsbuild.client.ts
-rsbuild.server.ts

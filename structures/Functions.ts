@@ -21,8 +21,6 @@ import * as THREE from "three"
 import WebPXMux from "webpxmux"
 import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
-import avifJS from "../assets/misc/avif_enc"
-import jxlJS from "../assets/misc/jxl_enc"
 import crypto from "crypto"
 import {Live2DCubismModel} from "live2d-renderer"
 import JSZip from "jszip"
@@ -2781,7 +2779,8 @@ export default class Functions {
             return canvas.toDataURL("image/webp")
         } else if (format === "avif") {
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            const avif = await avifJS({locateFile: (path: string) => path.endsWith(".wasm") ? "avif_enc.wasm" : path})
+            const avifJS = await import("../assets/misc/avif_enc").then((r) => r.default)
+            const avif = await avifJS()
             const options = {quality: 80, qualityAlpha: -1, denoiseLevel: 0, tileColsLog2: 0, tileRowsLog2: 0, speed: 6, subsample: 1, 
             chromaDeltaQ: false, sharpness: 0, tune: 0, enableSharpYUV: false}
             const output = await avif.encode(pixels.data, pixels.width, pixels.height, options)
@@ -2789,7 +2788,8 @@ export default class Functions {
             return URL.createObjectURL(blob)
         } else if (format === "jxl") {
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            const jxl = await jxlJS({locateFile: (path: string) => path.endsWith(".wasm") ? "jxl_enc.wasm" : path})
+            const jxlJS = await import("../assets/misc/jxl_enc").then((r) => r.default)
+            const jxl = await jxlJS()
             const options = {effort: 7, quality: 95, progressive: true, epf: -1, lossyPalette: false, 
             decodingSpeedTier: 0, photonNoiseIso: 0, lossyModular: false}
             const output = await jxl.encode(pixels.data, pixels.width, pixels.height, options)
