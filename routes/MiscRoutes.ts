@@ -23,7 +23,7 @@ import {stripIndents} from "common-tags"
 import {Scraper} from "@the-convocation/twitter-scraper"
 import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
-svgCaptcha.loadFont(dotline)
+svgCaptcha.loadFont(path.join(__dirname, dotline))
 
 let processingQueue = new Set<string>()
 
