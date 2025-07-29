@@ -123,7 +123,9 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
-            const result = await serverFunctions.revdanbooru(req.body)
+            const booruLinks = await serverFunctions.booruLinks(req.body)
+            let result = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
+            if (result) result += ".json"
             res.status(200).send(result)
         } catch (e) {
             console.log(e)
@@ -294,7 +296,7 @@ const MiscRoutes = (app: Express) => {
                 return void res.status(200).send([response])
             }
             if (link.includes("konachan.com") || link.includes("konachan.net")) {
-                const apiLink = `https://${new URL(link).hostname}/post.json?tags=id:${link.match(/\d+/)?.[0]}`
+                const apiLink = `https://konachan.com/post.json?tags=id:${link.match(/\d+/)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data[0]?.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return void res.status(200).send([response])
