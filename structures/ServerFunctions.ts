@@ -990,12 +990,14 @@ export default class ServerFunctions {
         if (/^\d+(?=$|_p)/.test(basename)) {
             const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
             source = `https://www.pixiv.net/artworks/${pixivID}`
-            const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
-            if (result.length) {
-                danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                if (result[0].rating === "q") rating = functions.r17()
-                if (result[0].rating === "e") rating = functions.r18()
-            }
+            try {
+                const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+                if (result.length) {
+                    danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                    if (result[0].rating === "q") rating = functions.r17()
+                    if (result[0].rating === "e") rating = functions.r18()
+                }
+            } catch {}
             try {
                 const illust = await ServerFunctions.getPixivIllust(source)
                 commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
@@ -1171,28 +1173,6 @@ export default class ServerFunctions {
         }
     }
 
-    public static revdanbooru = async (bytes: number[]) => {
-        const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
-        const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
-        const cookie = html.headers["set-cookie"]?.[0] || ""
-        const oldBuffer = Buffer.from(bytes)
-        const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
-        const form = new FormData()
-        form.append("authenticity_token", csrfToken)
-        form.append("search[file]", oldBuffer, {filename: "image.png"})
-        const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
-        if (result[0]?.score < 70) return ""
-        const original = result[0].post.file_url
-        if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return ""
-        const buffer = await fetch(original).then((r) => r.arrayBuffer())
-        const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
-        if (dist(hash, oldHash) < 7) {
-            return `https://danbooru.donmai.us/posts/${result[0].post.id}.json`
-        } else {
-            return ""
-        }
-    }
-
     public static downloadWDTagger = async () => {
         const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
         if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
@@ -1232,6 +1212,53 @@ export default class ServerFunctions {
         return json
     }
 
+    public static testBooruLinks = async (booruLinks: string[], rating: PostRating) => {
+        let tagData = {} as {artists: string, characters: string, series: string, tags: string}
+
+        let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
+        if (danbooruLink) {
+            const json = await functions.fetch(`${danbooruLink}.json`)
+            if (json.rating === "q") rating = functions.r17()
+            if (json.rating === "e") rating = functions.r18()
+            tagData.tags = json.tag_string_general
+            tagData.artists = json.tag_string_artist
+            tagData.characters = json.tag_string_character
+            tagData.series = json.tag_string_copyright
+        }
+
+        let gelbooruLink = booruLinks.find((link) => link.includes("gelbooru.com"))
+        if (!Object.keys(tagData).length && gelbooruLink) {
+            let id = gelbooruLink.match(/\d+/g)?.[0]
+            let url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&id=${id}&json=1${process.env.GELBOORU_API_KEY}`
+            const json = await functions.fetch(url)
+            let post = json.post[0]
+            if (post) {
+                if (post.rating === "questionable") rating = functions.r17()
+                if (post.rating === "explicit") rating = functions.r18()
+                    tagData.tags = post.tags
+                    tagData.artists = ""
+                    tagData.characters = ""
+                    tagData.series = ""
+            }
+        }
+
+        let safebooruLink = booruLinks.find((link) => link.includes("safebooru.org"))
+        if (!Object.keys(tagData).length && safebooruLink) {
+            let id = safebooruLink.match(/\d+/g)?.[0]
+            let url = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${id}`
+            const json = await functions.fetch(url)
+            let post = json[0]
+            if (post) {
+                if (post.rating === "questionable") rating = functions.r17()
+                tagData.tags = post.tags
+                tagData.artists = ""
+                tagData.characters = ""
+                tagData.series = ""
+            }
+        }
+        return {tagData, danbooruLink, newRating: rating}
+    }
+
     public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
         let tagArr = [] as string[]
         let blockedTags = tagConvert.blockedTags
@@ -1251,18 +1278,17 @@ export default class ServerFunctions {
             bytes = current.bytes
         }
 
-        let danbooruLink = await ServerFunctions.revdanbooru(bytes)
+        let booruLinks = await ServerFunctions.booruLinks(bytes)
+        let {tagData, danbooruLink, newRating} = await ServerFunctions.testBooruLinks(booruLinks, rating)
+        rating = newRating
 
-        if (danbooruLink) {
-            const json = await functions.fetch(danbooruLink)
-            if (json.rating === "q") rating = functions.r17()
-            if (json.rating === "e") rating = functions.r18()
-            tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+        if (Object.keys(tagData).length) {
+            tagArr = tagData.tags.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             if (hasUpscaled) tagArr.push("upscaled")
-            let artistStrArr = json.tag_string_artist.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-            let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-            let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let artistStrArr = tagData.artists.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let charStrArr = tagData.characters.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let seriesStrArr = tagData.series.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             if (seriesStrArr?.includes("original")) {
                 charStrArr = ["original"]
                 seriesStrArr = ["no-series"]
@@ -1302,8 +1328,10 @@ export default class ServerFunctions {
             for (let i = 0; i < charStrArr.length; i++) {
                 characters[characters.length - 1].tag = charStrArr[i]
                 const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
-                seriesStrArr.push(seriesName)
-                characters.push({})
+                if (seriesName) {
+                    seriesStrArr.push(seriesName)
+                    characters.push({})
+                }
             }
 
             seriesStrArr = functions.removeDuplicates(seriesStrArr)
