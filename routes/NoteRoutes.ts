@@ -17,12 +17,41 @@ const noteLimiter = rateLimit({
     handler
 })
 
+const noteEquality = (a: Note, b: Note) => {
+    return (
+        a.transcript === b.transcript &&
+        a.translation === b.translation &&
+        a.x === b.x &&
+        a.y === b.y &&
+        a.width === b.width &&
+        a.height === b.height &&
+        a.rotation === b.rotation &&
+        a.imageWidth === b.imageWidth &&
+        a.imageHeight === b.imageHeight &&
+        a.overlay === b.overlay &&
+        a.fontSize === b.fontSize &&
+        a.backgroundColor === b.backgroundColor &&
+        a.textColor === b.textColor &&
+        a.fontFamily === b.fontFamily &&
+        a.backgroundAlpha === b.backgroundAlpha &&
+        a.bold === b.bold &&
+        a.italic === b.italic &&
+        a.strokeColor === b.strokeColor &&
+        a.strokeWidth === b.strokeWidth &&
+        a.breakWord === b.breakWord &&
+        a.borderRadius === b.borderRadius &&
+        a.character === b.character &&
+        a.characterTag === b.characterTag
+    )
+}
+
 const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: string, order: number, 
     username: string, unverified?: boolean, originalID?: string, addedEntries?: string[], 
     removedEntries?: string[], reason?: string}) => {
     const {postID, order, username, unverified, originalID, addedEntries, removedEntries, reason} = data
     if (!oldNotes?.[0]) {
         if (!newNotes.length) return
+        // If there are no oldNotes, insert every note
         for (const item of newNotes) {
             if (unverified) {
                 await sql.note.insertUnverifiedNote(postID, originalID || null, username, order, item.transcript, item.translation,
@@ -38,54 +67,53 @@ const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: st
             }
         }
     } else {
-        let noMatch = [] as Note[]
+        const matchIndexes = new Set<number>()
         for (const note of oldNotes) {
-            if (!newNotes.length) {
+            const matchIndex = newNotes.findIndex((n) => noteEquality(note, n))
+
+            if (matchIndex !== -1) {
+                // Update oldNotes that are already in newNotes
+                const match = newNotes[matchIndex]
+                matchIndexes.add(matchIndex)
+
+                if (unverified) {
+                    await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x,
+                    match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                    match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                    match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null, 
+                    reason)
+                } else {
+                    await sql.note.resaveNote(note.noteID, username, match.transcript, match.translation, match.x,
+                    match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
+                    match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
+                    match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null)
+                }
+            } else {
+                // Delete oldNotes not in newNotes
                 if (unverified) {
                     await sql.note.deleteUnverifiedNote(note.noteID)
                 } else {
                     await sql.note.deleteNote(note.noteID)
                 }
-            } else {
-                const match = newNotes.find((item) => item.noteID === note.noteID)
-                if (match) {
-                    if (unverified) {
-                        await sql.note.resaveUnverifiedNote(note.noteID, match.transcript, match.translation, match.x,
-                        match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                        match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                        match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null, 
-                        reason)
-                    } else {
-                        await sql.note.resaveNote(note.noteID, username, match.transcript, match.translation, match.x,
-                        match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
-                        match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
-                        match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null)
-                    }
-                } else {
-                    noMatch.push(note)
-                }
             }
         }
-        for (const item of noMatch) {
-            if (item.noteID) {
-                if (unverified) {
-                    await sql.note.deleteUnverifiedNote(item.noteID)
-                } else {
-                    await sql.note.deleteNote(item.noteID)
-                }
+
+        for (let i = 0; i < newNotes.length; i++) {
+            if (matchIndexes.has(i)) continue
+
+            // Insert newNotes not in oldNotes
+            const item = newNotes[i]
+            if (unverified) {
+                await sql.note.insertUnverifiedNote(postID, originalID || null, username, order, item.transcript, item.translation,
+                item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
+                addedEntries, removedEntries, reason)
             } else {
-                if (unverified) {
-                    await sql.note.insertUnverifiedNote(postID, originalID!, username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
-                    addedEntries, removedEntries, reason)
-                } else {
-                    await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
-                    item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-                    item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-                    item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
-                }
+                await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
+                item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
+                item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
+                item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
             }
         }
     }
