@@ -447,7 +447,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (typeof image === "string") {
             img = functions.getRawImageLink(image)
         } else {
-            img = functions.getImageLink(image)
+            img = functions.getImageLink(image, session.upscaledImages)
         }
         return img
     }
@@ -458,7 +458,18 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
-        if (result?.length) setItems(result.map((item) => ({...item, imageHash: targetHash} as Note)))
+        if (result?.length) {
+            const copy = structuredClone(result)
+            setItems(() => {
+                let currentID = id
+                const notes = copy.map((item) => {
+                    currentID += 1
+                    return {...item, id: currentID, imageHash: targetHash} as Note
+                })
+                setID(currentID)
+                return notes
+            })
+        }
     }
 
     useEffect(() => {
