@@ -637,7 +637,9 @@ const PostRoutes = (app: Express) => {
                 }
 
                 if (post.slug && post.slug !== newSlug) {
-                    await sql.report.insertRedirect(postID, post.slug)
+                    try {
+                        await sql.report.insertRedirect(postID, post.slug)
+                    } catch {}
                 }
             } 
             if (tagEdit) {
@@ -756,7 +758,7 @@ const PostRoutes = (app: Express) => {
                     addedTagGroups = resultGroups.addedTagGroups
                     removedTagGroups = resultGroups.removedTagGroups
                     
-                    await serverFunctions.migratePost(post as PostFull, oldType, newType, oldR18, newR18)
+                    await serverFunctions.migratePost(post.postID, oldType, newType, oldR18, newR18)
                 }
             }
 
@@ -777,7 +779,7 @@ const PostRoutes = (app: Express) => {
 
             const postHistory = await sql.history.postHistory(postID)
             if (!postHistory.length) {
-                const vanilla = structuredClone(post) as PostHistory & PostFull
+                const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
                 vanilla.date = vanilla.uploadDate 
                 vanilla.user = vanilla.uploader
                 const categories = await serverFunctions.tagCategories(vanilla.tags)
@@ -994,12 +996,19 @@ const PostRoutes = (app: Express) => {
                     const image = currentHistory.images[i]
                     if (image?.includes("history/")) {
                         await serverFunctions.deleteFile(image, r18)
-                        await serverFunctions.deleteFile(image.replace("original/", "upscaled/"), r18)
                     }
                 }
                 if (currentHistory.images?.[0]) {
                     await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0]), r18)
-                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0].replace("original/", "upscaled/")), r18)
+                }
+                for (let i = 0; i < currentHistory.upscaledImages?.length; i++) {
+                    const upscaledImage = currentHistory.upscaledImages[i]
+                    if (upscaledImage?.includes("history/")) {
+                        await serverFunctions.deleteFile(upscaledImage, r18)
+                    }
+                }
+                if (currentHistory.upscaledImages?.[0]) {
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.upscaledImages[0]), r18)
                 }
                 await sql.history.deletePostHistory(historyID)
             }

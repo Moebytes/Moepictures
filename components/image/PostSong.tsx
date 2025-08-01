@@ -486,12 +486,16 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const getCurrentLink = (forceOriginal?: boolean) => {
         if (!props.post) return props.audio
+        let showUpscaled = forceOriginal ? false : session.upscaledImages
         const image = props.post.images[(props.order || 1) - 1]
+        let upscaledImage = props.post.upscaledImages?.[(props.order || 1) - 1] || image
+        let currentImage = showUpscaled ? upscaledImage : image
+
         let img = ""
-        if (typeof image === "string") {
-            img = functions.getRawImageLink(image)
+        if (typeof currentImage === "string") {
+            img = functions.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(image)
+            img = functions.getImageLink(currentImage, showUpscaled)
         }
         if (forceOriginal) {
             return functions.appendURLParams(img, {upscaled: false})

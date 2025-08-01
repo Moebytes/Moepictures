@@ -443,11 +443,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const getCurrentLink = () => {
         if (!props.post) return props.img
         const image = props.post.images[(props.order || 1) - 1]
+        const upscaledImage = props.post.upscaledImages?.[(props.order || 1) - 1] || image
+        let currentImage = session.upscaledImages ? upscaledImage : image
         let img = ""
-        if (typeof image === "string") {
-            img = functions.getRawImageLink(image)
+        if (typeof currentImage === "string") {
+            img = functions.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(image, session.upscaledImages)
+            img = functions.getImageLink(currentImage, session.upscaledImages)
         }
         return img
     }
@@ -531,7 +533,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 return (
                     <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
                     minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>
-                        {bubbleData.characterTag}
+                        {bubbleData.characterTag?.replaceAll("-", " ")}
                     </div>
                 )
             } else {

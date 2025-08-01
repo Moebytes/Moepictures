@@ -78,7 +78,7 @@ const GroupPage: React.FunctionComponent = () => {
     const groupInfo = async () => {
         let group = null as GroupPosts | null
         if (historyID) {
-            const history = await functions.get("/api/group/history", {slug, historyID}, session, setSessionFlag).catch(() => null)
+            const history = await functions.get("/api/group/history", {slug, historyID}, session, setSessionFlag).then((r) => r[0])
             group = history as unknown as GroupPosts
             let posts = await functions.get("/api/posts", {postIDs: group.posts.map((p) => p.postID)}, session, setSessionFlag).catch(() => []) as PostOrdered[]
             group.posts = posts.map((post: PostOrdered, i: number) => ({...post, order: group?.posts[i].order || 1}))

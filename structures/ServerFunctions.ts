@@ -219,11 +219,11 @@ export default class ServerFunctions {
         if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
-            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${folder}/${decodeURIComponent(upscaledFile)}`
             if (file.includes("history/post")) {
                 originalKey = originalKey.replace("upscaled/", "original/")
-                upscaledKey = upscaledKey.replace("original/", "upscaled/")
+                upscaledKey = upscaledKey.replace("original/", "upscaled/").replace("history-upscaled", "history")
             }
             if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18, pixelHash)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
@@ -232,11 +232,11 @@ export default class ServerFunctions {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
             let originalKey = `${decodeURIComponent(file)}`
-            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
             if (file.includes("history/post")) {
                 originalKey = originalKey.replace("upscaled/", "original/")
-                upscaledKey = upscaledKey.replace("original/", "upscaled/")
+                upscaledKey = upscaledKey.replace("original/", "upscaled/").replace("history-upscaled", "history")
             }
             let body = null as Buffer | null
             if (upscaled) {
@@ -396,8 +396,13 @@ export default class ServerFunctions {
         const key = `history/${type}/${name}`
         if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
-            if (!fs.existsSync(`${folder}/${key}`)) return 1
-            const objects = fs.readdirSync(`${folder}/${key}`)
+            let targetFolder = `${folder}/${key}`
+            if (type === "post") {
+                targetFolder = fs.existsSync(`${folder}/${key}/original`) ?
+                `${folder}/${key}/original` : `${folder}/${key}/upscaled`
+            }
+            if (!fs.existsSync(targetFolder)) return 1
+            const objects = fs.readdirSync(targetFolder)
             let nextKey = 0
             for (let i = 0; i < objects.length; i++) {
                 const object = objects[i]
@@ -409,23 +414,28 @@ export default class ServerFunctions {
             return nextKey + 1
         } else {
             const bucket = r18 ? remoteR18 : remote
-            let isTruncated = true
-            let continuationToken: string | undefined = undefined
             let nextKey = 0
 
-            while (isTruncated) {
-                const objects = await r2.listObjectsV2({Bucket: bucket,
-                Prefix: `${key}/`, Delimiter: "/", ContinuationToken: continuationToken})
+            let prefixes = type === "post"  ?[`${key}/original`, `${key}/upscaled`] : [`${key}/`]
 
-                if (objects.Contents) {
-                    for (const {Key} of objects.Contents) {
-                        const keyMatch = Key?.replace(key + "/", "").match(/\d+/)?.[0]
-                        const keyNumber = Number(keyMatch)
-                        if (keyNumber >= nextKey) nextKey = keyNumber
+            for (const prefix of prefixes) {
+                let isTruncated = true
+                let continuationToken: string | undefined = undefined
+
+                while (isTruncated) {
+                    const objects = await r2.listObjectsV2({Bucket: bucket,
+                    Prefix: prefix, Delimiter: "/", ContinuationToken: continuationToken})
+    
+                    if (objects.Contents) {
+                        for (const {Key} of objects.Contents) {
+                            const keyMatch = Key?.replace(key + "/", "").match(/\d+/)?.[0]
+                            const keyNumber = Number(keyMatch)
+                            if (keyNumber >= nextKey) nextKey = keyNumber
+                        }
                     }
+                    isTruncated = objects.IsTruncated
+                    continuationToken = objects.NextContinuationToken
                 }
-                isTruncated = objects.IsTruncated
-                continuationToken = objects.NextContinuationToken
             }
             return nextKey + 1
         }
@@ -434,7 +444,7 @@ export default class ServerFunctions {
     public static getUnverifiedFile = async (file: string, upscaled?: boolean, pixelHash?: string) => {
         if (functions.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
-            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${localUnverified}/${decodeURIComponent(upscaledFile)}`
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
@@ -442,7 +452,7 @@ export default class ServerFunctions {
             let bucket = remoteUnverified
             let publicBucket = publicRemoteUnverified
             let originalKey = `${decodeURIComponent(file)}`
-            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/")[1]}`
+            let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
             let body = null as Buffer | null
             if (upscaled) {
@@ -624,24 +634,27 @@ export default class ServerFunctions {
         return false
     }
 
-    public static migratePost = async (post: PostFull, oldType: string, newType: string, oldR18: boolean, newR18: boolean) => {
+    public static migratePost = async (postID: string, oldType: string, newType: string, oldR18: boolean, newR18: boolean) => {
         if (oldType === newType && oldR18 === newR18) return
+
+        const post = await sql.post.post(postID) as PostFull
         for (let i = 0; i < post.images.length; i++) {
             if ((post.images[i].type === "image" || post.images[i].type === "comic") && 
             (newType === "image" || newType === "comic")) {
                 await sql.post.updateImage(post.images[i].imageID, "type", newType)
             }
         }
-        const updated = await sql.post.post(post.postID) as PostFull
+        const updated = await sql.post.post(postID) as PostFull
         for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
             const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
             const updatedImagePath = functions.getImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].filename)
             const updatedUpscaledImagePath = functions.getUpscaledImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename)
+
             if (oldR18 !== newR18 || imagePath !== updatedImagePath || upscaledImagePath !== updatedUpscaledImagePath) {
                 ServerFunctions.renameFile(imagePath, updatedImagePath, oldR18, newR18)
                 ServerFunctions.renameFile(upscaledImagePath, updatedUpscaledImagePath, oldR18, newR18)
-            } 
+            }
         }
         if (oldR18 !== newR18) {
             ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
