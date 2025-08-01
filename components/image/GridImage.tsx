@@ -118,7 +118,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         if (props.id === "46187") console.log(props.img)
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
-        const bufferTest = await functions.getBuffer(functions.appendURLParams(decryptedImg, {upscaled: false}), {"x-force-upscale": "false"})
+        const bufferTest = await fetch(decryptedImg).then((r => r.arrayBuffer()))
         const result = functions.bufferFileType(bufferTest)
         setLiveImg(liveImg)
         if (result[0].mime !== "application/json") {
