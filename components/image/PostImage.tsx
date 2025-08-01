@@ -1088,7 +1088,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         image = await functions.convertToFormat(image, format)
                     }
                     pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
-                    const data = await fetch(image).then((r) => r.arrayBuffer())
+                    let data = new ArrayBuffer(0)
+                    if (functions.isBase64(image)) {
+                        data = await fetch(image).then((r) => r.arrayBuffer())
+                    } else {
+                        data = await functions.getBuffer(functions.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
+                    }
                     zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
                 const decoded = decodeURIComponent(filename)
@@ -1296,12 +1301,16 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const getCurrentLink = (forceOriginal?: boolean) => {
         if (!props.post) return props.img
+        let showUpscaled = forceOriginal ? false : session.upscaledImages
         const image = props.post.images[(props.order || 1) - 1]
+        let upscaledImage = props.post.upscaledImages?.[(props.order || 1) - 1] || image
+        let currentImage = showUpscaled ? upscaledImage : image
+
         let img = ""
-        if (typeof image === "string") {
-            img = functions.getRawImageLink(image)
+        if (typeof currentImage === "string") {
+            img = functions.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(image)
+            img = functions.getImageLink(currentImage, showUpscaled)
         }
         if (forceOriginal) {
             return functions.appendURLParams(img, {upscaled: false})

@@ -115,9 +115,10 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     const loadImage = async () => {
+        if (props.id === "46187") console.log(props.img)
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
-        const bufferTest = await fetch(decryptedImg).then((r) => r.arrayBuffer())
+        const bufferTest = await functions.getBuffer(functions.appendURLParams(decryptedImg, {upscaled: false}), {"x-force-upscale": "false"})
         const result = functions.bufferFileType(bufferTest)
         setLiveImg(liveImg)
         if (result[0].mime !== "application/json") {
@@ -735,7 +736,12 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                         image = await functions.convertToFormat(image, format)
                     }
                     pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
-                    const data = await fetch(image).then((r) => r.arrayBuffer())
+                    let data = new ArrayBuffer(0)
+                    if (functions.isBase64(image)) {
+                        data = await fetch(image).then((r) => r.arrayBuffer())
+                    } else {
+                        data = await functions.getBuffer(functions.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
+                    }
                     zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
                 const decoded = decodeURIComponent(filename)

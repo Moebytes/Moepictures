@@ -68,6 +68,7 @@ export interface Post {
     locked: boolean | null
     private: boolean | null
     images: Image[]
+    upscaledImages: undefined
     deleted: boolean | null
     deletionDate: string | null
     postCount?: string

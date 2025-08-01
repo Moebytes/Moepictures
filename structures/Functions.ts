@@ -2841,14 +2841,14 @@ export default class Functions {
         for (let i = 0; i < revertPost.images.length; i++) {
             const revImage = revertPost.images[i]
             const currImage = currentPost.images[i]
+            const revUpscaledImage = revertPost.upscaledImages?.[i] || revImage
+            const currUpscaledImage = currentPost.upscaledImages?.[i] || currImage
             
             let imgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) : Functions.getImageLink(revImage)
-
             let currentLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) : Functions.getImageLink(currImage)
 
-            let upscaledImgLink = typeof revImage === "string" ? Functions.getRawImageLink(revImage) : Functions.getImageLink(revImage, true)
-
-            let currentUpscaledLink = typeof currImage === "string" ? Functions.getRawImageLink(currImage) : Functions.getImageLink(currImage, true)
+            let upscaledImgLink = typeof revUpscaledImage === "string" ? Functions.getRawImageLink(revUpscaledImage) : Functions.getImageLink(revUpscaledImage, true)
+            let currentUpscaledLink = typeof currUpscaledImage === "string" ? Functions.getRawImageLink(currUpscaledImage) : Functions.getImageLink(currUpscaledImage, true)
 
             
             let imgBuffer = await Functions.getBuffer(Functions.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
@@ -2911,11 +2911,14 @@ export default class Functions {
         let upscaledImages = [] as UploadImage[]
         for (let i = 0; i < post.images.length; i++) {
             const image = post.images[i]
+            const upscaledImage = post.upscaledImages?.[i] || image
+
             let imgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image)
-            let upscaledImgLink = typeof image === "string" ? Functions.getRawImageLink(image) : Functions.getImageLink(image, true)
+            let upscaledImgLink = typeof upscaledImage === "string" ? Functions.getRawImageLink(upscaledImage) : Functions.getImageLink(upscaledImage, true)
 
             let buffer = await Functions.getBuffer(Functions.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
             let upscaledBuffer = await Functions.getBuffer(Functions.appendURLParams(upscaledImgLink, {upscaled: true}), {"x-force-upscale": "true"})
+
             if (buffer.byteLength) {
                 let ext = path.extname(imgLink)
                 let link = await Functions.decryptItem(imgLink, session)

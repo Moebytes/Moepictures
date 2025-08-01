@@ -7,6 +7,7 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structu
 import path from "path"
 import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
 TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType} from "../types/Types"
+import ServerFunctions from "../structures/ServerFunctions"
 
 const tagLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -305,6 +306,9 @@ const TagRoutes = (app: Express) => {
             await sql.tag.updateTag(tag, "updatedDate", updatedDate)
             let targetTag = tag
             if (key && key.trim() !== tag) {
+                const exists = await sql.tag.tag(key.trim())
+                if (exists) return void res.status(400).send("Tag name conflict")
+
                 if (tagObj.image) {
                     let newFilename = `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
                     if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.fileExtension(image as number[])}`
@@ -313,14 +317,20 @@ const TagRoutes = (app: Express) => {
                     await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
                     await sql.tag.updateTag(tag, "image", newFilename)
                     imageFilename = newFilename
+                }
 
-                    const result = await sql.history.tagHistory(targetTag)
-                    for (const tagHistory of result) {
-                        if (!tagHistory.image?.startsWith("history/tag")) {
-                            await sql.history.updateTagHistory(tagHistory.historyID, "image", newFilename)
-                        }
+                const result = await sql.history.tagHistory(targetTag)
+                for (const tagHistory of result) {
+                    if (!tagHistory.image?.startsWith("history/tag")) {
+                        if (tagHistory.image) await sql.history.updateTagHistory(tagHistory.historyID, "image", imageFilename)
+                    } else {
+                        const parts = tagHistory.image.split("/")
+                        let keep = parts.slice(3).join("/")
+                        const newPath = `history/tag/${key.trim()}/${keep}`
+                        await sql.history.updateTagHistory(tagHistory.historyID, "image", newPath)
                     }
                 }
+                ServerFunctions.renameFolder(`history/tag/${tag}`, `history/tag/${key.trim()}`, false)
                 await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
@@ -362,7 +372,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
+                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
@@ -380,13 +390,13 @@ const TagRoutes = (app: Express) => {
                             const penultResult = result[result.length - 2]
                             const lastImage = lastResult.image
                             const penultImage = penultResult.image
-                            if (penultImage?.startsWith("history/tag") && !lastImage?.startsWith("history/tag")) {
+                            if (lastResult.image && penultImage?.startsWith("history/tag") && !lastImage?.startsWith("history/tag")) {
                                 await sql.history.updateTagHistory(lastResult.historyID, "image", penultImage)
                             }
                         }
                     }
                 }
-                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
+                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})

@@ -37,7 +37,7 @@ export default class SQLHistory {
     }
 
     /** Update tag history */
-    public static updateTagHistory = async (historyID: string, column: "image", value: string | number | boolean) => {
+    public static updateTagHistory = async (historyID: string, column: "image", value: string | number | boolean | null) => {
         let whitelist = ["image"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)

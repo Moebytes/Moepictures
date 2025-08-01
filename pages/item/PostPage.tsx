@@ -288,12 +288,9 @@ const PostPage: React.FunctionComponent = () => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                if ("upscaledImages" in post && post.upscaledImages.length) {
-                    images = post.upscaledImages.map((i) => functions.getRawImageLink(i))
-                } else {
-                    images = post.images.map((i: Image | string) => typeof i === "string" ? 
-                    functions.getRawImageLink(i) : functions.getImageLink(i, true))
-                }
+                let upscaledImages = post.upscaledImages || post.images
+                images = upscaledImages.map((i: Image | string) => typeof i === "string" ? 
+                functions.getRawImageLink(i) : functions.getImageLink(i, true))
             } else {
                 images = post.images.map((i: Image | string) => typeof i === "string" ? 
                 functions.getRawImageLink(i) : functions.getImageLink(i))
@@ -485,6 +482,7 @@ const PostPage: React.FunctionComponent = () => {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
+
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
             style: post.style, artists: functions.tagObject(historyPost.artists), characters: functions.tagObject(historyPost.characters), noImageUpdate: true,
             preserveChildren: Boolean(post.parentID), series: functions.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, 

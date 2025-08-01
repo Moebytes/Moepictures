@@ -458,7 +458,8 @@ const TagPage: React.FunctionComponent = () => {
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
         twitter: tag.twitter, website: tag.website, fandom: tag.fandom, wikipedia: tag.wikipedia, type: tag.type, featuredPost: tag.featuredPost?.postID,
         r18: tag.r18 ?? false}, session, setSessionFlag)
-        currentHistory(history.key)
+        if (tag.tag === history.key) setTagFlag(true)
+        navigate(`/tag/${history.key}`)
     }
 
     useEffect(() => {

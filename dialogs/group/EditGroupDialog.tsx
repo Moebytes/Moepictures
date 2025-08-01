@@ -56,6 +56,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             const newSlug = functions.generateSlug(name)
             navigate(`/group/${newSlug}`)
             setEditGroupObj(null)
+            if (editGroupObj.slug === newSlug) setGroupFlag(true)
         } else {
             if (!name) {
                 setError(true)

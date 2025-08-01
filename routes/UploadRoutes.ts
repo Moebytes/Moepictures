@@ -704,7 +704,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
   const postHistory = await sql.history.postHistory(post.postID)
   const nextKey = await serverFunctions.getNextKey("post", String(post.postID), r18)
   if (!postHistory.length) {
-      const vanilla = structuredClone(post) as unknown as PostHistory & PostFull
+      const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
       vanilla.date = vanilla.uploadDate
       vanilla.user = vanilla.uploader
       const categories = await serverFunctions.tagCategories(vanilla.tags)
@@ -991,7 +991,9 @@ const CreateRoutes = (app: Express) => {
         updater: req.session.username, updatedDate})
 
         if (post.slug && post.slug !== newSlug) {
-          await sql.report.insertRedirect(postID, post.slug)
+          try {
+            await sql.report.insertRedirect(postID, post.slug)
+          } catch {}
         }
 
         let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, tags, noImageUpdate, 
@@ -1004,7 +1006,7 @@ const CreateRoutes = (app: Express) => {
           if (unverifiedPost) await serverFunctions.deleteUnverifiedPost(unverifiedPost)
         }
 
-        await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
+        await serverFunctions.migratePost(post.postID, oldType, newType, oldR18, newR18)
 
         if (permissions.isMod(req.session)) {
           if (silent) return void res.status(200).send("Success")
@@ -1255,10 +1257,10 @@ const CreateRoutes = (app: Express) => {
         source: sourceData, uploader: unverified.uploader, updater: unverified.updater, uploadDate: unverified.uploadDate,
         parentID: unverified.parentID, updatedDate: unverified.updatedDate, approver: req.session.username})
 
-        if (post) {
-          if (post.slug && post.slug !== newSlug) {
+        if (post && post.slug && post.slug !== newSlug) {
+          try {
             await sql.report.insertRedirect(newPostID, post.slug)
-          }
+          } catch {}
         }
 
         let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: unverified.uploader, noImageUpdate})
@@ -1282,7 +1284,7 @@ const CreateRoutes = (app: Express) => {
         if (unverifiedPost) await serverFunctions.deleteUnverifiedPost(unverifiedPost)
 
         if (post) {
-          await serverFunctions.migratePost(post, oldType, newType, oldR18, newR18)
+          await serverFunctions.migratePost(post.postID, oldType, newType, oldR18, newR18)
         }
 
         if (post && unverified.originalID) {

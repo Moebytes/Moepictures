@@ -9,10 +9,6 @@ import sharp from "sharp"
 import express, {Request, Response, NextFunction} from "express"
 import session from "express-session"
 import PGSession from "connect-pg-simple"
-import middleware from "webpack-dev-middleware"
-import hot from "webpack-hot-middleware"
-import {rspack} from "@rspack/core"
-//import config from "./rspack.config"
 import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
@@ -48,18 +44,7 @@ app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}
 app.use(express.json({limit: "1gb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
-app.set("trust proxy", true)
-
-/*
-let compiler = rspack(config as any)
-if (process.env.TESTING === "yes") {
-  app.use(middleware(compiler as any, {
-    index: false,
-    serverSideRender: false,
-    writeToDisk: false,
-  }))
-  app.use(hot(compiler))
-}*/
+app.set("trust proxy", "loopback")
 
 declare module "express-session" {
   interface SessionData extends ServerSession {}

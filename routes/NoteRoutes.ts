@@ -136,7 +136,6 @@ const NoteRoutes = (app: Express) => {
 
             const notes = await sql.note.notes(postID, order)
             await insertNotes(notes, data, {postID, order, username: req.session.username})
-            if (!data.length) return void res.status(200).send("Success")
             const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
             await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason})
             res.status(200).send("Success")

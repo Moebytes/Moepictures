@@ -202,6 +202,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const diffText = () => {
+        if (!props.noteHistory.notes[0]) return []
         if (!prevHistory) {
             if (props.noteHistory.notes[0].transcript === "No data") return []
             return props.noteHistory.notes.map((item) => printNote(item))
