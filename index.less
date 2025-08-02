@@ -128,8 +128,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    scrollbar-width: thin;
-    scrollbar-color: var(--titlebarBG) var(--background);
+}
+
+@-moz-document url-prefix() {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--titlebarBG) var(--background);
+    }
 }
 
 .stop-transitions * { 
