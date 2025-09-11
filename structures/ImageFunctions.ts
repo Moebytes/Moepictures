@@ -2,6 +2,7 @@ import functions from "./Functions"
 import permissions from "./Permissions"
 import enLocale from "../assets/locales/en.json"
 import {UploadImage, Session, Dimensions} from "../types/Types"
+import {isLive2DZip} from "live2d-renderer"
 import JSZip from "jszip"
 import path from "path"
 
@@ -133,7 +134,7 @@ export default class ImageFunctions {
                 const MB = file.size / (1024 * 1024)
                 if (MB <= maxSize || permissions.isMod(session)) {
                     if (result.mime === "application/zip") {
-                        live2d = await functions.isLive2DZip(bytes)
+                        live2d = await isLive2DZip(bytes)
                         if (live2d) {
                             images.push({
                                 link, originalLink, ext: "zip", size,
