@@ -371,20 +371,6 @@ export default class Functions {
         return Functions.arrayIncludes(ext, live2dExtensions)
     }
 
-    public static isLive2DZip = async (buffer: ArrayBuffer) => {
-        try {
-            const reader = new JSZip()
-            const content = await reader.loadAsync(buffer)
-            for (const filename in content.files) {
-                if (filename.includes(".moc3")) return true
-                if (filename.includes(".model3.json")) return true
-            }
-            return false
-        } catch {
-            return false
-        }
-    }
-
     public static isGIF = (file?: string) => {
         if (!file) return false
         file = file.replace(/\?.*$/, "")
