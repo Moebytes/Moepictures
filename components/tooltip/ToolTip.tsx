@@ -29,7 +29,7 @@ import live2d from "../../assets/icons/live2d.png"
 import model from "../../assets/icons/model.png"
 import audio from "../../assets/icons/audio.png"
 import cute from "../../assets/icons/cute.png"
-import sexy from "../../assets/icons/sexy.png"
+import hot from "../../assets/icons/hot.png"
 import erotic from "../../assets/icons/erotic.png"
 import hentai from "../../assets/icons/hentai.png"
 import $2d from "../../assets/icons/2d.png"
@@ -228,7 +228,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     const getRatingIcon = () => {
         if (tooltipPost.rating === "cute") return cute
-        if (tooltipPost.rating === "sexy") return sexy
+        if (tooltipPost.rating === "hot") return hot
         if (tooltipPost.rating === "erotic") return erotic
         if (tooltipPost.rating === "hentai") return hentai
         return cute

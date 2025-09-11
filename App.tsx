@@ -76,8 +76,6 @@ import LocalStorage from "./LocalStorage"
 import DragScroll from "./components/site/DragScroll"
 import "./index.less"
 
-require.context("./assets/icons", true)
-
 let destroy2FATimeout = null as any
 
 const App: React.FunctionComponent = (props) => {

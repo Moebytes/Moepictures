@@ -19,10 +19,10 @@ export default class SQLSearch {
         if (type === "live2d") typeQuery = `posts.type = 'live2d'`
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
-        if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`
+        if (rating === "hot") ratingQuery = `posts.rating = 'hot'`
         if (rating === "erotic") ratingQuery = `posts.rating = 'erotic'`
         if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'erotic')`
+        if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'hot' OR posts.rating = 'erotic')`
         if (rating === "all+h") ratingQuery = ``
         if (rating === "all" && !username) ratingQuery = `posts.rating = 'cute'`
         let styleQuery = ""
@@ -707,10 +707,10 @@ export default class SQLSearch {
     public static groupSearch = async (search: string, sort: string, rating: string, limit?: number, offset?: number, username?: string) => {
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
-        if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
+        if (rating === "hot") ratingQuery = `groups.rating = 'hot'`
         if (rating === "erotic") ratingQuery = `groups.rating = 'erotic'`
         if (rating === "hentai") ratingQuery = `groups.rating = 'hentai'`
-        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'erotic')`
+        if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'hot' OR groups.rating = 'erotic')`
         if (rating === "all" && !username) ratingQuery = `groups.rating = 'cute'`
         let searchQuery = ""
         let values = [] as any

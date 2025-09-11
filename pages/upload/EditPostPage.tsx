@@ -21,7 +21,7 @@ import audio from "../../assets/icons/audio.png"
 import model from "../../assets/icons/model.png"
 import live2d from "../../assets/icons/live2d.png"
 import cute from "../../assets/icons/cute.png"
-import sexy from "../../assets/icons/sexy.png"
+import hot from "../../assets/icons/hot.png"
 import erotic from "../../assets/icons/erotic.png"
 import hentai from "../../assets/icons/hentai.png"
 import $2d from "../../assets/icons/2d.png"
@@ -1474,9 +1474,9 @@ const EditPostPage: React.FunctionComponent = () => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`upload-button ${rating === "hot" ? "button-selected" : ""}`} onClick={() => setRating("hot")}>
+                    <img className="upload-button-img" src={hot}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.hot}</span>
                 </button>
                 <button className={`upload-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
                     <img className="upload-button-img" src={erotic}/>
@@ -1496,9 +1496,9 @@ const EditPostPage: React.FunctionComponent = () => {
                     <img className="upload-button-img" src={cute}/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
-                <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
-                    <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
+                <button className={`upload-button ${rating === "hot" ? "button-selected" : ""}`} onClick={() => setRating("hot")}>
+                    <img className="upload-button-img" src={hot}/>
+                    <span className="upload-button-text">{i18n.sortbar.rating.hot}</span>
                 </button>
                 <button className={`upload-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
                     <img className="upload-button-img" src={erotic}/>

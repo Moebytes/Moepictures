@@ -1393,7 +1393,7 @@ export default class Functions {
     public static validRating = (rating: PostRating, all?: boolean) => {
         if (all) if (rating === "all" || rating === "all+h") return true
         if (rating === "cute" ||
-            rating === "sexy" ||
+            rating === "hot" ||
             rating === "erotic" ||
             rating === "hentai") return true 
         return false
@@ -1412,7 +1412,7 @@ export default class Functions {
     }
 
     public static r15 = () => {
-        return "sexy" as PostRating
+        return "hot" as PostRating
     }
 
     public static r13 = () => {
