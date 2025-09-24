@@ -787,7 +787,7 @@ CREATE INDEX IF NOT EXISTS "idx_posts" ON "posts" ("postID" DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS "idx_post_type" ON "posts" ("type");
 CREATE INDEX IF NOT EXISTS "idx_post_rating" ON "posts" ("rating");
 CREATE INDEX IF NOT EXISTS "idx_post_style" ON "posts" ("style");
-CREATE INDEX IF NOT EXISTS "idx_post_uploadDate" ON "posts" ("uploadDate");
+CREATE INDEX IF NOT EXISTS "idx_posts_uploadDate" ON "posts" ("uploadDate" DESC);
 CREATE INDEX IF NOT EXISTS "idx_post_posted" ON "posts" ("posted");
 CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" ON "posts" ("bookmarks");
 CREATE INDEX IF NOT EXISTS "idx_images" ON "images" ("imageID" DESC NULLS LAST);
@@ -822,3 +822,5 @@ CREATE INDEX IF NOT EXISTS "idx_unverified_tags" ON "unverified tags" ("tag" ASC
 CREATE INDEX IF NOT EXISTS "idx_unverified_aliases" ON "unverified aliases" ("tag", "alias");
 CREATE INDEX IF NOT EXISTS "idx_unverified_notes" ON "unverified notes" ("noteID" ASC NULLS LAST);
 CREATE INDEX IF NOT EXISTS "idx_sessions_expire" ON "sessions" ("expires");
+CREATE INDEX IF NOT EXISTS "idx_tag_map_tags_gin" ON "tag map tags" USING gin ("tags");
+CREATE INDEX IF NOT EXISTS "idx_tag_map_posts_gin" ON "tag map posts" USING gin ("posts");
