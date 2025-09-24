@@ -115,7 +115,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     const loadImage = async () => {
-        if (props.id === "46187") console.log(props.img)
         const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
         const bufferTest = await fetch(decryptedImg).then((r => r.arrayBuffer()))
