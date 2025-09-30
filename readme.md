@@ -14,7 +14,7 @@ Moepictures supports multiple images per post, which is great for comics and pos
 
 ### Image Filters
 
-<img src="assets/images/imagefilters.png">
+<img src="assets/images/imagefilters.png" height="500">
 
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
 can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
@@ -24,17 +24,9 @@ can make everything look like a pixel game. When playing audio, the pixelate fil
 Moepictures uses custom gif/video/music/3d/live2d players, so you can do many things that aren't normally possible like pausing/seeking 
 gifs, reverse playback, and modification of playback speed. 
 
-Video Player:
-
-<img src="assets/images/videoplayer.png">
-
-The video player has some additional controls for volume and pitch preservement. The 3d model player has 
-controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse. The 
-live2d player has controls for speed, parameters, and parts.
-
 ### Notes
 
-<img src="assets/images/notes.png" height="600">
+<img src="assets/images/notes.png" height="500">
 
 As often images might contain japanese text, adding and viewing notes for translations is also supported!
 
@@ -68,3 +60,4 @@ To enable live2d support, you need to download the proprietary Cubism Core libra
 https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
+
