@@ -74,7 +74,7 @@ const ResetPassword = (props: Props) => {
                         Hi {username}, <br/><br/>
             
                         You recently made a request to reset your password. The link 
-                        below will expire after one hour. *If the link doesn't work, take this email 
+                        below will expire after 24 hours. *If the link doesn't work, take this email 
                         out of the spam folder. <br/>
                     </Text>
                 </Container>
