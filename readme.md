@@ -41,7 +41,7 @@ First you will need to download all of these.
 
 Clone the project:
 ```
-git clone https://github.com/Moebits/Moepictures.git
+git clone https://github.com/Moebytes/Moepictures.git
 ```
 
 Rename the file `.env.example` to `.env` and put in your credentials. `COOKIE_SECRET` should be any string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
@@ -60,4 +60,5 @@ To enable live2d support, you need to download the proprietary Cubism Core libra
 https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
+
 
