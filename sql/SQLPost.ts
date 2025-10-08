@@ -10,8 +10,6 @@ export default class SQLPost {
             text: /*sql*/`INSERT INTO "posts" VALUES (default) RETURNING "postID"`,
             rowMode: "array"
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -37,8 +35,6 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
             values: [value, postID]
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -179,8 +175,6 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "posts" ${setQuery} WHERE "postID" = $${i}`,
             values: [...values, postID]
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -397,7 +391,6 @@ export default class SQLPost {
             values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
             size, upscaledSize, duration, thumbnail]
         }
-        await SQLQuery.invalidateCache("post")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -429,7 +422,6 @@ export default class SQLPost {
             text: /*sql*/`UPDATE "images" SET "${column}" = $1 WHERE "imageID" = $2`,
             values: [value, imageID]
         }
-        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 
@@ -452,7 +444,6 @@ export default class SQLPost {
         text: functions.multiTrim(/*sql*/`DELETE FROM images WHERE images."imageID" = $1`),
         values: [imageID]
         }
-        await SQLQuery.invalidateCache("post")
         await SQLQuery.run(query)
     }
 
@@ -549,8 +540,6 @@ export default class SQLPost {
         text: functions.multiTrim(/*sql*/`DELETE FROM posts WHERE posts."postID" = $1`),
         values: [postID]
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -570,8 +559,6 @@ export default class SQLPost {
             rowMode: "array",
             values: [postID, parentID]
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -593,8 +580,6 @@ export default class SQLPost {
         text: /*sql*/`DELETE FROM "child posts" WHERE "child posts"."postID" = $1`,
         values: [postID]
         }
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 

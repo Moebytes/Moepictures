@@ -15,9 +15,6 @@ let hashes = env.TESTING === "no"
 let hmr = env.TESTING === "yes"
 
 export default defineConfig({
-    dev: {
-        hmr
-    },
     tools: {
         rspack(config) {
             if (obfuscator) {
@@ -37,19 +34,25 @@ export default defineConfig({
     source: {
         entry: {index: "./index.tsx"}
     },
+    html: {
+        template: "./index.html"
+    },
     output: {
         target: "web",
         minify: minimize,
         filenameHash: hashes,
         sourceMap: false,
-        distPath: {root: "./dist2/client"},
+        legalComments: "none",
+        distPath: {root: "./dist/client"},
         copy: [
             {from: "assets/misc/bitcrusher.js", to: "[name][ext]"},
             {from: "assets/misc/soundtouch.js", to: "[name][ext]"},
             {from: "assets/misc/webpxmux.wasm", to: "[name][ext]"},
             {from: "assets/misc/avif_enc.wasm", to: "[name][ext]"},
             {from: "assets/misc/jxl_enc.wasm", to: "[name][ext]"},
-            {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"}
+            {from: "structures/build/nativefunctions.wasm", to: "[name][ext]"},
+            {from: "structures/build/nativefunctions.js", to: "[name][ext]"},
+            {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"},
         ]
     }
 })

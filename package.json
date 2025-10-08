@@ -5,12 +5,12 @@
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run build && node dist/server/server.js",
-    "build": "npm run rsbuild && npm run replace",
+    "build": "npm run clean && npm run rsbuild",
     "rsbuild": "rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
+    "wasm": "emcmake cmake -DCMAKE_BUILD_TYPE=Release -B structures/build -S structures && cmake --build structures/build",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",
     "sitemap": "node sitemap.ts",
-    "replace": "npm run clean && mv dist2 dist",
     "clean": "del-cli ./dist"
   },
   "keywords": [
