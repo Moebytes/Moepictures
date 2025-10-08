@@ -815,12 +815,17 @@ export default class ServerFunctions {
         return crypto.createHash("md5").update(rawBuffer).digest("hex")
     }
 
-    public static tagMap = async () => {
+    public static tagMap = async (cache?: boolean) => {
+        if (cache) {
+            let cached = await sql.getCache("tag-map")
+            if (cached) return cached as {[key: string]: Tag}
+        }
         let result = await sql.tag.tags([])
         const tagMap = {} as {[key: string]: Tag}
         for (const tag of result) {
             tagMap[tag.tag] = tag
         }
+        sql.setCache("tag-map", tagMap)
         return tagMap
     }
 

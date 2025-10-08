@@ -8,10 +8,14 @@
     "build": "npm run clean && npm run rsbuild",
     "rsbuild": "rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
     "wasm": "emcmake cmake -DCMAKE_BUILD_TYPE=Release -B structures/build -S structures && cmake --build structures/build",
+    "napi": "cmake-js compile",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",
     "sitemap": "node sitemap.ts",
     "clean": "del-cli ./dist"
+  },
+  "binary": {
+    "napi_versions": [8]
   },
   "keywords": [
     "moe",
@@ -129,6 +133,7 @@
     "mp4box": "^0.5.3",
     "music-metadata": "^11.0.2",
     "node-2fa": "github:Moestash/node-2fa#dist",
+    "node-addon-api": "^8.5.0",
     "nodemailer": "^6.10.0",
     "pace-js": "^1.2.4",
     "pg": "^8.13.3",
