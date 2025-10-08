@@ -1,12 +1,11 @@
-#include <simdjson.h>
-#include <vector>
+#include <napi.h>
 #include <unordered_map>
+#include <vector>
 #include <string>
-#include <algorithm>
-#include <functional>
 #include <regex>
+#include <functional>
+#include <algorithm>
 
-using namespace simdjson;
 using namespace std;
 
 struct Tag {
@@ -112,38 +111,28 @@ public:
     }
 };
 
-extern "C" auto parseSpaceEnabledSearch(const char* query, const char* tagMapStr) -> const char* {
-    static string result;
+Napi::Value ParseSpaceEnabledSearch(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
 
-    ondemand::parser parser;
-    padded_string json{string{tagMapStr}};
-    ondemand::document doc = parser.iterate(json);
+    string query = info[0].As<Napi::String>().Utf8Value();
+    Napi::Object obj = info[1].As<Napi::Object>();
 
     unordered_map<string, Tag> tagMap;
-    tagMap.reserve(50000);
+    Napi::Array keys = obj.GetPropertyNames();
+    tagMap.reserve(keys.Length());
 
-    for (auto field : doc.get_object()) {
-        string key = string(field.unescaped_key().value());
-
-        auto val = field.value();
+    for (uint32_t i = 0; i < keys.Length(); i++) {
+        string key = keys.Get(i).As<Napi::String>().Utf8Value();
+        Napi::Object val = obj.Get(key).As<Napi::Object>();
 
         Tag tag;
-        if (auto tag_field = val["tag"]; tag_field.error() == SUCCESS) {
-            if (auto tag_val = tag_field.get_string(); tag_val.error() == SUCCESS) {
-                tag.tag = string(tag_val.value());
-            } else {
-                tag.tag = key;
-            }
-        } else {
-            tag.tag = key;
-        }
-    
-        if (auto aliases = val["aliases"]; aliases.error() == SUCCESS) {
-            if (auto arr = aliases.get_array(); arr.error() == SUCCESS) {
-                for (auto alias : arr.value()) {
-                    if (auto alias_str = alias.get_string(); alias_str.error() == SUCCESS) {
-                        tag.aliases.emplace_back(alias_str.value());
-                    }
+        tag.tag = val.Has("tag") ? val.Get("tag").As<Napi::String>().Utf8Value() : key;
+
+        if (val.Has("aliases")) {
+            Napi::Array aliases = val.Get("aliases").As<Napi::Array>();
+            for (uint32_t j = 0; j < aliases.Length(); ++j) {
+                if (aliases.Get(j).IsString()) {
+                    tag.aliases.push_back(aliases.Get(j).As<Napi::String>().Utf8Value());
                 }
             }
         }
@@ -151,6 +140,13 @@ extern "C" auto parseSpaceEnabledSearch(const char* query, const char* tagMapStr
         tagMap.emplace(std::move(key), std::move(tag));
     }
 
-    result = NativeFunctions::parseSpaceEnabledSearch(query, tagMap);
-    return result.c_str();
+    string result = NativeFunctions::parseSpaceEnabledSearch(query, tagMap);
+    return Napi::String::New(env, result);
 }
+
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+    exports.Set("parseSpaceEnabledSearch", Napi::Function::New(env, ParseSpaceEnabledSearch));
+    return exports;
+}
+
+NODE_API_MODULE(addon, Init)

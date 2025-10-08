@@ -80,7 +80,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const searchPosts = async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
-        if (!query) query = await nativeFunctions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+        if (!query) query = search
+        if (query?.includes(" ")) {
+            query = await functions.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+        }
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
         if (tags.length > 3) {
             if (!session.username) {
@@ -366,7 +369,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
             result = await functions.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         } else {
-            const query = await nativeFunctions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+            let query = search
+            if (query.includes(" ")) {
+                query = await functions.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+            }
             result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
             sort: functions.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         }

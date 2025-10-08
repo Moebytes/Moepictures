@@ -6,6 +6,7 @@ dump.rdb
 
 # Build folders
 node_modules
+build
 __pycache__
 dist
 

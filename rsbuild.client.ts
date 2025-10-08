@@ -50,8 +50,6 @@ export default defineConfig({
             {from: "assets/misc/webpxmux.wasm", to: "[name][ext]"},
             {from: "assets/misc/avif_enc.wasm", to: "[name][ext]"},
             {from: "assets/misc/jxl_enc.wasm", to: "[name][ext]"},
-            {from: "structures/build/nativefunctions.wasm", to: "[name][ext]"},
-            {from: "structures/build/nativefunctions.js", to: "[name][ext]"},
             {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"},
         ]
     }

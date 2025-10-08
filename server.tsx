@@ -693,6 +693,7 @@ const runDaily = async () => {
   await deleteExpiredTokens()
   await deleteQueuedPosts()
   await deleteQueuedUnverifiedPosts()
+  sql.invalidateCache("tag-map")
 }
 
 const run = async () => {

@@ -5,12 +5,13 @@ import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
-import nativeFunctions from "../structures/NativeFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
-import {PostSearch, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
+import {PostSearch, Tag, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
 GroupSearchParams, Image, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
 SidebarTagParams, ThreadSearch, MessageSearchParams, MessageSearch} from "../types/Types"
+
+const nativeFunctions = require("../build/Release/NativeFunctions.node")
 
 const searchLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -23,6 +24,18 @@ const searchLimiter = rateLimit({
 })
 
 const SearchRoutes = (app: Express) => {
+    app.post("/api/search/parse-space-search", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let {query} = req.body as {query?: string}
+            const tagMap = await serverFunctions.tagMap(true)
+            const result = nativeFunctions.parseSpaceEnabledSearch(query ?? "", tagMap)
+            res.status(200).send(result)
+        } catch (e) {
+            console.log(e)
+            return void res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {query, type, rating, style, sort, offset, limit} = req.query as PostSearchParams
