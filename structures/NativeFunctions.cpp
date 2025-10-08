@@ -86,7 +86,7 @@ public:
             }
         }
 
-        for (size_t i = 0; i < perms.size(); ++i) {
+        for (size_t i = 0; i < perms.size(); i++) {
             for (const auto& tags : perms[i]) {
                 for (const auto& item : tagMap) {
                     const Tag& tag = item.second;
@@ -130,7 +130,7 @@ Napi::Value ParseSpaceEnabledSearch(const Napi::CallbackInfo& info) {
 
         if (val.Has("aliases")) {
             Napi::Array aliases = val.Get("aliases").As<Napi::Array>();
-            for (uint32_t j = 0; j < aliases.Length(); ++j) {
+            for (uint32_t j = 0; j < aliases.Length(); j++) {
                 if (aliases.Get(j).IsString()) {
                     tag.aliases.push_back(aliases.Get(j).As<Napi::String>().Utf8Value());
                 }
