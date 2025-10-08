@@ -16,9 +16,6 @@ export default class SQLTag {
         if (type) query.values?.push(type)
         if (creator) query.values?.push(creator)
         try {
-            await SQLQuery.invalidateCache("tag")
-            await SQLQuery.invalidateCache("post")
-            await SQLQuery.invalidateCache("search")
             await SQLQuery.run(query)
             return false
         } catch {
@@ -38,9 +35,6 @@ export default class SQLTag {
             twitter, fandom, wikipedia, pixivTags, banned, hidden, r18, featuredPost]
         }
         try {
-            await SQLQuery.invalidateCache("tag")
-            await SQLQuery.invalidateCache("post")
-            await SQLQuery.invalidateCache("search")
             await SQLQuery.run(query)
             return false
         } catch {
@@ -79,9 +73,6 @@ export default class SQLTag {
             ),
             values: [...rawValues]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         return SQLQuery.run(query)
     }
 
@@ -143,8 +134,6 @@ export default class SQLTag {
         text: /*sql*/`UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
         values: [value, tag]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
     
@@ -162,9 +151,6 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
             values: [postID, ...tags]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -176,9 +162,6 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM "tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
             values: [postID, ...tags]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -328,9 +311,6 @@ export default class SQLTag {
         text: functions.multiTrim(/*sql*/`DELETE FROM tags WHERE tags."tag" = $1`),
         values: [tag]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -351,8 +331,6 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO "aliases" ("tag", "alias") VALUES ${placeholders}`,
             values: [tag, ...aliases]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -364,8 +342,6 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM "aliases" WHERE "tag" = $1 AND "alias" IN (${placeholders})`,
             values: [tag, ...aliases]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -421,8 +397,6 @@ export default class SQLTag {
             text: /*sql*/`INSERT INTO implications ("tag", "implication") VALUES ${placeholders}`,
             values: [tag, ...implications]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -434,8 +408,6 @@ export default class SQLTag {
             text: /*sql*/`DELETE FROM implications WHERE "tag" = $1 AND "implication" IN (${placeholders})`,
             values: [tag, ...implications]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -459,9 +431,6 @@ export default class SQLTag {
             text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
             values: [newTag, tag]
         }
-        await SQLQuery.invalidateCache("tag")
-        await SQLQuery.invalidateCache("post")
-        await SQLQuery.invalidateCache("search")
         await SQLQuery.run(query)
     }
 
@@ -514,8 +483,6 @@ export default class SQLTag {
             rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, sourceData, reason]
         }
-        await SQLQuery.invalidateCache("history")
-        await SQLQuery.invalidateCache("tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -526,8 +493,6 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`DELETE FROM "alias history" WHERE "alias history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.invalidateCache("history")
-        await SQLQuery.invalidateCache("tag")
         await SQLQuery.run(query)
     }
 
@@ -541,8 +506,6 @@ export default class SQLTag {
             rowMode: "array",
             values: [username, now, source, target, type, affectedPosts, reason]
         }
-        await SQLQuery.invalidateCache("history")
-        await SQLQuery.invalidateCache("tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -553,8 +516,6 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`DELETE FROM "implication history" WHERE "implication history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.invalidateCache("history")
-        await SQLQuery.invalidateCache("tag")
         await SQLQuery.run(query)
     }
 
@@ -652,8 +613,6 @@ export default class SQLTag {
             rowMode: "array",
             values: [postID, name]
         }
-        await SQLQuery.invalidateCache("history")
-        await SQLQuery.invalidateCache("tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }

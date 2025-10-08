@@ -1,34 +1,36 @@
-#Sensitive data
+# Sensitive data
 .env
 .ssh
 dump.rdb
 *.pem
 
-#Node modules
+# Build folders
 node_modules
 __pycache__
-
-#Compiled folder
 dist
-dist2
 
-#IDE settings
+# IDE settings
 .vscode
-.idea
 
-#Downloaded Files
+# Downloaded Files
 files
 dump
 
-#Other
+# Other
 .DS_Store
+.cache
 
-#Crypto
+# Crypto
 structures/DecryptFunctions.ts
 structures/EncryptFunctions.ts
 
-#Live2D Cubism
+# Live2D Cubism
 assets/live2d/*
 
-#WDTagger (large)
+# WDTagger
 assets/misc/wdtagger
+
+# WASM
+structures/build/*
+!structures/build/NativeFunctions.js
+!structures/build/NativeFunctions.wasm

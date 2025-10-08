@@ -16,9 +16,6 @@ let hashes = env.TESTING === "no"
 let hmr = env.TESTING === "yes"
 
 export default defineConfig({
-    dev: {
-        hmr
-    },
     tools: {
         rspack(config) {
             config.module = config.module || {}
@@ -52,7 +49,7 @@ export default defineConfig({
         target: "node",
         minify: minimize,
         filenameHash: hashes,
-        distPath: {root: "./dist2/server"},
+        distPath: {root: "./dist/server"},
         copy: [
             {from: "index.html", to: "[name][ext]"}
         ]

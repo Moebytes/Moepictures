@@ -5,6 +5,7 @@ import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
+import nativeFunctions from "../structures/NativeFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 import {PostSearch, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 

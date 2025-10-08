@@ -21,7 +21,6 @@ export default class SQLHistory {
             values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
             twitter, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason]
         }
-        await SQLQuery.invalidateCache("history/tag")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -32,7 +31,6 @@ export default class SQLHistory {
         text: functions.multiTrim(/*sql*/`DELETE FROM "tag history" WHERE "tag history"."historyID" = $1`),
         values: [historyID]
         }
-        await SQLQuery.invalidateCache("history/tag")
         await SQLQuery.run(query)
     }
 
@@ -46,7 +44,6 @@ export default class SQLHistory {
             text: /*sql*/`UPDATE "tag history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]
         }
-        await SQLQuery.invalidateCache("history/tag")
         await SQLQuery.run(query)
     }
 
@@ -168,7 +165,6 @@ export default class SQLHistory {
             title, englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
             artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageChanged, changes, reason]
         }
-        await SQLQuery.invalidateCache("history/post")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -179,7 +175,6 @@ export default class SQLHistory {
         text: functions.multiTrim(/*sql*/`DELETE FROM "post history" WHERE "post history"."historyID" = $1`),
         values: [historyID]
         }
-        await SQLQuery.invalidateCache("history/post")
         await SQLQuery.run(query)
     }
 
@@ -193,7 +188,6 @@ export default class SQLHistory {
             text: /*sql*/`UPDATE "post history" SET "${column}" = $1 WHERE "historyID" = $2`,
             values: [value, historyID]
         }
-        await SQLQuery.invalidateCache("history/post")
         await SQLQuery.run(query)
     }
 
@@ -418,7 +412,6 @@ export default class SQLHistory {
             values: [groupID, username, date, slug, name, rating, description, posts, addedPosts, removedPosts, orderChanged, 
             changes, reason]
         }
-        await SQLQuery.invalidateCache("history/group")
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
@@ -429,7 +422,6 @@ export default class SQLHistory {
             text: functions.multiTrim(/*sql*/`DELETE FROM "group history" WHERE "group history"."historyID" = $1`),
             values: [historyID]
         }
-        await SQLQuery.invalidateCache("history/group")
         await SQLQuery.run(query)
     }
 

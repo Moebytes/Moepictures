@@ -9,6 +9,7 @@ import GridSong from "../image/GridSong"
 import GridLive2D from "../image/GridLive2D"
 import noresults from "../../assets/images/noresults.png"
 import functions from "../../structures/Functions"
+import nativeFunctions from "../../structures/NativeFunctions"
 import permissions from "../../structures/Permissions"
 import "./styles/imagegrid.less"
 import {PostSearch, Post} from "../../types/Types"
@@ -79,7 +80,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const searchPosts = async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
-        if (!query) query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+        if (!query) query = await nativeFunctions.parseSpaceEnabledSearch(search, session, setSessionFlag)
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
         if (tags.length > 3) {
             if (!session.username) {
@@ -101,7 +102,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
-        setSearch(query)
+        setSearch(query ?? "")
         const result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
@@ -365,7 +366,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             result = await functions.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         } else {
-            const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+            const query = await nativeFunctions.parseSpaceEnabledSearch(search, session, setSessionFlag)
             result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
             sort: functions.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         }
