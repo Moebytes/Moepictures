@@ -33,7 +33,7 @@ import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, PostType, PostRa
 CategorySort, MiniTag, TagSort, GroupSort, TagType, CommentSort, UserRole, TagCount, Post, PostChanges, PostFull, TagHistory,
 PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, GIFFrame, UploadTag, PostSearch, UnverifiedPost,
 PostHistory, PostSearchParams, SplatterOptions, PixelateOptions, CanvasDrawable, FileFormat, TagGroupCategory,
-MiniTagGroup, Image} from "../types/Types"
+MiniTagGroup, Image, TrackablePromise} from "../types/Types"
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
@@ -3516,5 +3516,28 @@ export default class Functions {
             if (typeof value !== "undefined") obj.searchParams.set(key, value.toString())
         }
         return hash ? `${baseUrl}#${hash.split("?")[0]}?${obj.searchParams.toString()}` : obj.toString()
+    }
+
+    public static trackablePromise = <T>() => {
+        let state = "pending"
+        let resolveFn!: (value: T | PromiseLike<T>) => void
+        let rejectFn!: (reason?: string) => void
+
+        const promise = new Promise<T>((resolve, reject) => {
+            resolveFn = (value) => {
+                state = "fulfilled"
+                resolve(value)
+            }
+            rejectFn = (error) => {
+                state = "rejected"
+                reject(error)
+            }
+        }) as TrackablePromise<T>
+
+        promise.getState = () => state as "pending" | "fulfilled" | "rejected"
+        promise.resolve = resolveFn
+        promise.reject = rejectFn
+
+        return promise
     }
 }

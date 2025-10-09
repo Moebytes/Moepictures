@@ -28,6 +28,7 @@ interface Props {
     borderRadius?: number
     autoLoad?: boolean
     reupdate?: () => void
+    onLoad?: () => void
 }
 
 interface Ref {
@@ -262,6 +263,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
 
         animate()
         setRef(renderer.domElement)
+        props.onLoad?.()
     }
 
     useEffect(() => {
@@ -645,6 +647,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
             setImageLoaded(true)
             currentRef.style.opacity = "1"
+            props.onLoad?.()
         }
     }
 

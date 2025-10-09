@@ -24,6 +24,7 @@ interface Props {
     borderRadius?: number
     autoLoad?: boolean
     reupdate?: () => void
+    onLoad?: () => void
 }
 
 interface Ref {
@@ -135,6 +136,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         const model = new Live2DCubismModel(rendererRef.current)
         await model.load(decrypted)
         setModel(model)
+        props.onLoad?.()
     }
 
     useEffect(() => {
@@ -501,6 +503,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
             setImageLoaded(true)
             currentRef.style.opacity = "1"
+            props.onLoad?.()
         }
     }
 
