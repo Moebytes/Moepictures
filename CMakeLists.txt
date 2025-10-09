@@ -4,11 +4,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(NativeFunctions)
+project(NodeFunctions)
 
 add_compile_definitions(-DNAPI_VERSION=8)
 
-file(GLOB SOURCE_FILES "structures/NativeFunctions.cpp")
+file(GLOB SOURCE_FILES "structures/NodeFunctions.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")

@@ -10,7 +10,6 @@ import GridSong from "../image/GridSong"
 import GridLive2D from "../image/GridLive2D"
 import noresults from "../../assets/images/noresults.png"
 import functions from "../../functions/Functions"
-import nativeFunctions from "../../structures/NativeFunctions"
 import permissions from "../../structures/Permissions"
 import "./styles/imagegrid.less"
 import {PostSearch, Post} from "../../types/Types"
@@ -85,7 +84,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (searchFlag) setSearchFlag(false)
         if (!query) query = search
         if (query?.includes(" ")) {
-            query = await functions.http.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+            query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
         }
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
         if (tags.length > 3) {
@@ -374,7 +373,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         } else {
             let query = search
             if (query.includes(" ")) {
-                query = await functions.http.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+                query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
             }
             result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
             sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
