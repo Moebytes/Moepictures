@@ -13,7 +13,7 @@ struct Tag {
     vector<string> aliases;
 };
 
-class NativeFunctions {
+class NodeFunctions {
 public:
     static auto permutations(const string& query) -> vector<vector<string>> {
         regex regex{"\\s+"};
@@ -140,7 +140,7 @@ Napi::Value ParseSpaceEnabledSearch(const Napi::CallbackInfo& info) {
         tagMap.emplace(std::move(key), std::move(tag));
     }
 
-    string result = NativeFunctions::parseSpaceEnabledSearch(query, tagMap);
+    string result = NodeFunctions::parseSpaceEnabledSearch(query, tagMap);
     return Napi::String::New(env, result);
 }
 
