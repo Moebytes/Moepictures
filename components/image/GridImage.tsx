@@ -30,6 +30,7 @@ interface Props {
     borderRadius?: number
     autoLoad?: boolean
     reupdate?: () => void
+    onLoad?: () => void
 }
 
 interface Ref {
@@ -625,6 +626,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             setNaturalHeight(element.naturalHeight)
         }
         setImageLoaded(true)
+        props.onLoad?.()
     }
 
     const render = <T extends boolean>(frame: HTMLImageElement | HTMLCanvasElement | ImageBitmap, buffer?: T) => {

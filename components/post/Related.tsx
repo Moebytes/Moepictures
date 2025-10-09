@@ -1,8 +1,9 @@
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
+import {TrackablePromise} from "../../structures/TrackablePromise"
 import functions from "../../structures/Functions"
 import permissions from "../../structures/Permissions"
 import pageIcon from "../../assets/icons/page.png"
@@ -31,6 +32,7 @@ interface Props {
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {related} = useCacheSelector()
@@ -52,7 +54,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [init, setInit] = useState(true)
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
+    const [allImagesLoaded, setAllImagesLoaded] = useState(false)
     const sizeRef = useRef<HTMLImageElement>(null)
+    const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
 
     let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
@@ -368,6 +372,25 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    useEffect(() => {
+        if (!visiblePromisesRef.current.length) return
+        setAllImagesLoaded(false)
+        const poll = async () => {
+            const notFulfilled = () => {
+                return visiblePromisesRef.current.filter((p) => p.state === "pending").length > 0
+            }
+            let timer = 0
+            while (notFulfilled()) {
+                await functions.timeout(50)
+                timer += 50
+                if (timer >= 1000) break
+            }
+            await functions.timeout(100)
+            setAllImagesLoaded(true)
+        }
+        poll()
+    }, [visibleRelated, relatedPage])
+
     const generateImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as PostSearch[]
@@ -377,28 +400,33 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const postOffset = (relatedPage - 1) * getPageAmount()
             visible = related.slice(postOffset, postOffset + getPageAmount())
         }
+        visiblePromisesRef.current.splice(0, visiblePromisesRef.current.length)
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]
             if (post.fake) continue
             if (!session.username) if (post.rating !== functions.r13()) continue
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
+
+            const promise = new TrackablePromise<void>()
+            visiblePromisesRef.current.push(promise)
+
             const image = post.images[0]
             const thumb = functions.getThumbnailLink(image, "medium", session, mobile)
             const liveThumb = functions.getThumbnailLink(image, "medium", session, mobile, true)
             const images = post.images.map((image) => functions.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post} onLoad={promise.resolve}/>)
             } else {
-                jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
-                comicPages={post.type === "comic" ? images : null}/>)
+                jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
+                    comicPages={post.type === "comic" ? images : null} onLoad={promise.resolve}/>)
             }
         }
         // jsx.push(<div key="ad" style={{width: "100%"}}><AdBanner/></div>)
@@ -444,7 +472,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     let marginLeft = mobile ? 20 : 200
-
     let paddingLeft = props.count ? 0 : mobile ? 20 : 40
 
     if (!related.length) return null
@@ -465,7 +492,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)} style={{filter: "brightness(110%) hue-rotate(60deg)"}}/>
                 <img className="related-icon" ref={sizeRef} src={sizeIcon} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div>}
-            <div className="related-container" style={{width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
+            <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/> */}
             </div>

@@ -25,6 +25,7 @@ interface Props {
     borderRadius?: number
     autoLoad?: boolean
     reupdate?: () => void
+    onLoad?: () => void
 }
 
 interface Ref {
@@ -464,6 +465,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         setNaturalHeight(element.naturalHeight)
         setImageLoaded(true)
         element.style.opacity = "1"
+        props.onLoad?.()
     }
 
     const songClick = (event: React.MouseEvent) => {

@@ -3,6 +3,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
+import {TrackablePromise} from "../../structures/TrackablePromise"
 import GridImage from "../image/GridImage"
 import GridModel from "../image/GridModel"
 import GridSong from "../image/GridSong"
@@ -56,6 +57,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
+    const [allImagesLoaded, setAllImagesLoaded] = useState(true)
+    const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -595,6 +598,25 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
     }, [pageFlag])
 
+    useEffect(() => {
+        if (!visiblePromisesRef.current.length) return
+        setAllImagesLoaded(false)
+        const poll = async () => {
+            const notFulfilled = () => {
+                return visiblePromisesRef.current.filter((p) => p.state === "pending").length > 0
+            }
+            let timer = 0
+            while (notFulfilled()) {
+                await functions.timeout(50)
+                timer += 50
+                if (timer >= 1000) break
+            }
+            await functions.timeout(100)
+            setAllImagesLoaded(true)
+        }
+        poll()
+    }, [visiblePosts, page])
+
     const generatePageButtonsJSX = () => {
         const jsx = [] as React.ReactElement[]
         let buttonAmount = 7
@@ -631,6 +653,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const postOffset = (page - 1) * getPageAmount()
             visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
         }
+
+        visiblePromisesRef.current.splice(0, visiblePromisesRef.current.length)
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]
             if (post.fake) continue
@@ -638,6 +662,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
             const image = post.images?.[0]
             if (!image) continue
+
+            const promise = new TrackablePromise<void>()
+            visiblePromisesRef.current.push(promise)
+
             const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
             const liveThumbnail = functions.getThumbnailLink(image, sizeType, session, mobile, true)
             const original = functions.getImageLink(image, session.upscaledImages)
@@ -645,14 +673,18 @@ const ImageGrid: React.FunctionComponent = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
+                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
+                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
+                    ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.getImageLink(image, session.upscaledImages)) : null
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                    comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }
         if (!jsx.length && noResults) {
@@ -679,7 +711,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     return (
         <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
-            <div className="image-container">
+            <div className="image-container" style={{visibility: allImagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
             </div>
         </div>
