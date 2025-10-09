@@ -118,7 +118,7 @@ const ReaderPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [post, session])
 
     useEffect(() => {

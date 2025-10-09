@@ -1165,7 +1165,7 @@ const PostRoutes = (app: Express) => {
                     const tempDest = path.join(tempDir, basename)
                     fs.writeFileSync(tempDest, new Uint8Array(buffer))
                     let isAnimatedWebp = false
-                    if (functions.isWebP(basename)) isAnimatedWebp = functions.isAnimatedWebp(buffer)
+                    if (functions.isWebP(basename)) isAnimatedWebp = functions.isAnimatedWebp(new Uint8Array(buffer).buffer)
 
                     if (post.type === "image" || post.type === "comic") {
                         await waifu2x.upscaleImage(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})

@@ -98,7 +98,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             }
             setSourceEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(sourceEditID.post.postID)
             setActionBanner("source-edit")
         } else {
             const badReason = functions.validateReason(reason, i18n)

@@ -23,7 +23,7 @@ export default class DecryptFunctions {
         if (!functions.isEncrypted(buffer, link)) return link
         try {
             let decrypted = DecryptFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
-            if (!decrypted.byteLength) decrypted = Buffer.from(buffer)
+            if (!decrypted.byteLength) decrypted = buffer
             const blob = new Blob([new Uint8Array(decrypted)])
             return URL.createObjectURL(blob)
         } catch {

@@ -150,8 +150,9 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const updatePost = async () => {
-            setPostFlag(false)
-            let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => null)
+            let targetID = !Number.isNaN(Number(postFlag)) ? postFlag! : postID
+            setPostFlag(null)
+            let post = await functions.get("/api/post/unverified", {postID: targetID}, session, setSessionFlag).catch(() => null)
             if (post) {
                 const images = post.images.map((image) => functions.getUnverifiedImageLink(image))
                 setImages(images)

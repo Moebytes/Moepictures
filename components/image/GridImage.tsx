@@ -48,7 +48,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {sizeType, square, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
     const {setSelectionItems, setSelectionPosts} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
-    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setPostFlag, setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
     const {setPost} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
@@ -674,9 +674,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
         if (buffer) {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            return img.data.buffer as T extends true ? Buffer : string
+            return img.data.buffer as T extends true ? ArrayBuffer : string
         }
-        return canvas.toDataURL("image/png") as T extends true ? Buffer : string
+        return canvas.toDataURL("image/png") as T extends true ? ArrayBuffer : string
     }
 
     const filtersOn = () => {
@@ -816,9 +816,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
-                    if (!location.pathname.includes("/post/")) setPost(null)
-                    navigate(`/post/${props.id}/${props.post.slug}`)
-                    window.scrollTo(0, 0)
+                    if (location.pathname.includes("/post/")) {
+                        navigate(`/post/${props.id}/${props.post.slug}`, {replace: true})
+                        setPostFlag(props.id)
+                        window.scrollTo(0, 0)
+                    } else {
+                        setPost(null)
+                        navigate(`/post/${props.id}/${props.post.slug}`)
+                        window.scrollTo(0, 0)
+                    }
                 }
             }
         }
@@ -892,16 +898,19 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
                 ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
                 {functions.isVideo(props.original) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={liveImg}></video> : null}
+
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={dynamicSrc()}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={dynamicSrc()}/>
                 {functions.isVideo(props.original) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
+
                 <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
+
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} 
                 src={functions.isVideo(props.original) ? liveImg : emptyVideo} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
                 <img draggable={false} className="image" ref={ref} src={dynamicSrc()} 
                 onLoad={(event) => onLoad(event)} style={{...getDisplay()}}/>
-                </div>
+            </div>
         </div>
     )
 })

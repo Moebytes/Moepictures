@@ -274,7 +274,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
     if (type === "comic") {
       kind = "comic"
     } else if (functions.isWebP(`.${ext}`)) {
-      const animated = functions.isAnimatedWebp(bufferFallback)
+      const animated = functions.isAnimatedWebp(new Uint8Array(bufferFallback).buffer)
       if (animated) {
         kind = "animation"
       } else {
@@ -753,7 +753,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             let newImagePath = ""
             let newUpscaledImagePath = ""
             if (upscaledImage) {
-              let buffer = Buffer.from("")
+              let buffer = Buffer.from("") as Buffer<ArrayBufferLike>
               if ("bytes" in upscaledImage) {
                 buffer = Buffer.from(Object.values(upscaledImage.bytes))
               } else {
@@ -768,7 +768,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               await serverFunctions.uploadFile(newUpscaledImagePath, buffer, r18)
             }
             if (image) {
-              let buffer = Buffer.from("")
+              let buffer = Buffer.from("") as Buffer<ArrayBufferLike>
               if ("bytes" in image) {
                 buffer = Buffer.from(Object.values(image.bytes))
               } else {
@@ -808,7 +808,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
           let newImagePath = ""
           let newUpscaledImagePath = ""
           if (upscaledImage) {
-            let buffer = Buffer.from("")
+            let buffer = Buffer.from("") as Buffer<ArrayBufferLike>
             if ("bytes" in upscaledImage) {
               buffer = Buffer.from(Object.values(upscaledImage.bytes))
             } else {
@@ -823,7 +823,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             await serverFunctions.uploadFile(newUpscaledImagePath, buffer, r18)
           }
           if (image) {
-            let buffer = Buffer.from("")
+            let buffer = Buffer.from("") as Buffer<ArrayBufferLike>
             if ("bytes" in image) {
               buffer = Buffer.from(Object.values(image.bytes))
             } else {

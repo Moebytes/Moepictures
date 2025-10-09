@@ -38,7 +38,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
         if (!takedownPostID) return
         if (permissions.isMod(session)) {
             await functions.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(takedownPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")

@@ -46,7 +46,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const processRedirects = async () => {
         if (!postID || !session.cookie) return
         const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
-        if (postObject) functions.processRedirects(postObject, postID, slug, history, session, setSessionFlag)
+        if (postObject) functions.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
     }
 
     useEffect(() => {

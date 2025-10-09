@@ -84,7 +84,7 @@ export default class Functions {
     }
 
     public static getBuffer = async (link: string, headers?: any) => {
-        return axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers}).then((r) => r.data) as Promise<Buffer>
+        return axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers}).then((r) => r.data) as Promise<ArrayBuffer>
     }
 
     public static noCacheURL = (image: string) => {
@@ -1054,7 +1054,7 @@ export default class Functions {
         return buffer
     }
 
-    public static encodeGIF = async (frames: Buffer[], delays: number[], width: number, height: number, options?: {transparentColor?: string}) => {
+    public static encodeGIF = async (frames: ArrayBuffer[], delays: number[], width: number, height: number, options?: {transparentColor?: string}) => {
         if (!options) options = {} as {transparentColor?: string}
         const gif = new GifEncoder(width, height, {highWaterMark: 5 * 1024 * 1024})
         gif.setQuality(10)
@@ -1063,7 +1063,7 @@ export default class Functions {
         if (options?.transparentColor) gif.setTransparent(Functions.parseTransparentColor(options.transparentColor))
         let counter = 0
 
-        const addToGif = async (frames: Buffer[]) => {
+        const addToGif = async (frames: ArrayBuffer[]) => {
             if (!frames[counter]) {
                 gif.finish()
             } else {
@@ -1697,27 +1697,27 @@ export default class Functions {
     }
 
     public static tagsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
-        const cache = await localforage.getItem("tags") as string
+        const cache = await localforage.getItem("tags")
         if (cache) {
-            return JSON.parse(cache) as {[key: string]: Tag}
+            return cache as {[key: string]: Tag}
         } else {
             let tagMap = await Functions.get("/api/tag/map", {tags: []}, session, setSessionFlag)
-            localforage.setItem("tags", JSON.stringify(tagMap))
+            localforage.setItem("tags", tagMap)
             return tagMap
         }
     }
     
     public static tagCountsCache = async (tags: string[], session: Session, setSessionFlag: (value: boolean) => void) => {
         let tagCountMap = {} as {[key: string]: TagCount}
-        const cache = await localforage.getItem("tagCounts") as string
+        const cache = await localforage.getItem("tagCounts")
         if (cache) {
-            tagCountMap = JSON.parse(cache) as {[key: string]: TagCount}
+            tagCountMap = cache as {[key: string]: TagCount}
         } else {
             let tagCounts = await Functions.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
             for (const tagCount of tagCounts) {
                 tagCountMap[tagCount.tag] = tagCount
             }
-            localforage.setItem("tagCounts", JSON.stringify(tagCountMap))
+            localforage.setItem("tagCounts", tagCountMap)
         }
         let result = [] as TagCount[]
         for (const tag of tags) {
@@ -1727,12 +1727,12 @@ export default class Functions {
     }
 
     public static emojisCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
-        const cache = await localforage.getItem("emojis") as string
+        const cache = await localforage.getItem("emojis")
         if (cache) {
-            return JSON.parse(cache) as {[key: string]: string}
+            return cache as {[key: string]: string}
         } else {
             let emojis = await Functions.get("/api/misc/emojis", null, session, setSessionFlag)
-            localforage.setItem("emojis", JSON.stringify(emojis))
+            localforage.setItem("emojis", cache)
             return emojis
         }
     }
@@ -2015,7 +2015,7 @@ export default class Functions {
     }
 
     public static crop = async <T extends boolean | undefined>(url: string, aspectRatio: number, buffer?: T, jpeg?: boolean) => {
-        type CropReturn = T extends true ? Buffer : string
+        type CropReturn = T extends true ? ArrayBuffer : string
         return new Promise<CropReturn>((resolve) => {
             const inputImage = new window.Image()
             inputImage.onload = () => {
@@ -2692,7 +2692,7 @@ export default class Functions {
         } else if (format === "avif") {
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
             const avifJS = await import("../assets/misc/avif_enc").then((r) => r.default)
-            const avif = await avifJS()
+            const avif = await avifJS({})
             const options = {quality: 80, qualityAlpha: -1, denoiseLevel: 0, tileColsLog2: 0, tileRowsLog2: 0, speed: 6, subsample: 1, 
             chromaDeltaQ: false, sharpness: 0, tune: 0, enableSharpYUV: false}
             const output = await avif.encode(pixels.data, pixels.width, pixels.height, options)
@@ -3354,7 +3354,7 @@ export default class Functions {
         }
     }
 
-    public static processRedirects = async (post: PostFull | PostSearch | PostHistory | null, postID: string, slug: string, history: any, 
+    public static processRedirects = async (post: PostFull | PostSearch | PostHistory | null, postID: string, slug: string, navigate: NavigateFunction, 
         session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!post || postID !== post.postID) return
         slug = decodeURIComponent(slug).trim()
@@ -3365,14 +3365,14 @@ export default class Functions {
                     if (redirect.oldSlug === slug) {
                         const searchParams = new URLSearchParams(window.location.search)
                         const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
-                        return history.replace(`${newPath}?${searchParams}`)
+                        return navigate(`${newPath}?${searchParams}`, {replace: true})
                     }
                 }
                 Functions.replaceLocation("/404")
             } else {
                 const searchParams = new URLSearchParams(window.location.search)
                 const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
-                history.replace(`${newPath}?${searchParams}`)
+                navigate(`${newPath}?${searchParams}`, {replace: true})
             }
         }
     }

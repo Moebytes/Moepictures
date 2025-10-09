@@ -49,7 +49,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             await functions.post("/api/post/upscale",  {postID: upscalePostID.post.postID, upscaler, 
             scaleFactor: functions.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(upscalePostID.post.postID)
             history.go(0)
         }
     }

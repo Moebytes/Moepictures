@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector} from "../../store"
+import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector, useFlagActions} from "../../store"
 import functions from "../../structures/Functions"
 import Carousel from "../site/Carousel"
 import "./styles/related.less"
@@ -15,6 +15,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setPosts} = useCacheActions()
+    const {setPostFlag} = useFlagActions()
     const navigate = useNavigate()
 
     const getImages = () => {
@@ -23,8 +24,11 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
 
     const click = (img: string, index: number) => {
         const post = props.posts[index]
-        navigate(`/post/${post.postID}/${post.slug}`)
-        setPosts(props.posts)
+        navigate(`/post/${post.postID}/${post.slug}`, {replace: true})
+        setPostFlag(post.postID)
+        setTimeout(() => {
+            setPosts(props.posts)
+        }, 500)
     }
 
     let marginLeft = mobile ? 20 : 200

@@ -164,7 +164,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             }
             setTagEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(tagEditID.post.postID)
             setActionBanner("tag-edit")
         } else {
             let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))

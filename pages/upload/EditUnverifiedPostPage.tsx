@@ -1267,7 +1267,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                             <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span>
                         </div> 
                         <div className="upload-container-row" style={{marginTop: "10px"}}>
-                            <button className="upload-button" onClick={() => {navigate(`/unverified/post/${postID}`); setPostFlag(true)}}>
+                            <button className="upload-button" onClick={() => {navigate(`/unverified/post/${postID}`); setPostFlag(postID)}}>
                                     <span className="upload-button-text">←{i18n.buttons.back}</span>
                             </button>
                         </div>

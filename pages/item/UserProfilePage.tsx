@@ -266,7 +266,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         let croppedURL = ""
                         if (gif) {
                             const gifData = await functions.extractGIFFrames(bytes.buffer)
-                            let frameArray = [] as Buffer[] 
+                            let frameArray = [] as ArrayBuffer[] 
                             let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
                                 const canvas = gifData[i].frame as HTMLCanvasElement
@@ -277,7 +277,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                             const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
                             const {width, height} = await functions.imageDimensions(firstURL)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                            const blob = new Blob([buffer])
+                            const blob = new Blob([new Uint8Array(buffer)])
                             croppedURL = URL.createObjectURL(blob)
                         } else {
                             croppedURL = await functions.crop(url, 1, false)
