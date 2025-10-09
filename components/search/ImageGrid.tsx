@@ -599,6 +599,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
+        if (scroll) return
         if (!visiblePromisesRef.current.length) return
         setAllImagesLoaded(false)
         const poll = async () => {
@@ -615,7 +616,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setAllImagesLoaded(true)
         }
         poll()
-    }, [visiblePosts, page])
+    }, [scroll, visiblePosts, page])
 
     const generatePageButtonsJSX = () => {
         const jsx = [] as React.ReactElement[]

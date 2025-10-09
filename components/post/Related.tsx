@@ -54,7 +54,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [init, setInit] = useState(true)
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
-    const [allImagesLoaded, setAllImagesLoaded] = useState(false)
+    const [allImagesLoaded, setAllImagesLoaded] = useState(true)
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
@@ -373,6 +373,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (scroll) return
         if (!visiblePromisesRef.current.length) return
         setAllImagesLoaded(false)
         const poll = async () => {
@@ -389,7 +390,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             setAllImagesLoaded(true)
         }
         poll()
-    }, [visibleRelated, relatedPage])
+    }, [scroll, visibleRelated, relatedPage])
 
     const generateImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
