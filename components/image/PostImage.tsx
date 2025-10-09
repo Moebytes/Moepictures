@@ -4,7 +4,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlayback
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
 useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions} from "../../store"
 import {FFmpeg} from "@ffmpeg/ffmpeg"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import loading from "../../assets/icons/loading.gif"
 import Slider from "react-slider"
@@ -160,14 +160,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const decryptImage = async () => {
         if (!props.img) return
-        const decryptedImage = await functions.decryptItem(props.img, session)
+        const decryptedImage = await functions.crypto.decryptItem(props.img, session)
         if (!decryptedImage) return
         const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
         let isAnimatedWebp = false
-        if (functions.isWebP(props.img)) {
-            isAnimatedWebp = functions.isAnimatedWebp(arrayBuffer)
+        if (functions.file.isWebP(props.img)) {
+            isAnimatedWebp = functions.file.isAnimatedWebp(arrayBuffer)
         }
-        if (functions.isGIF(props.img) || isAnimatedWebp) {
+        if (functions.file.isGIF(props.img) || isAnimatedWebp) {
             setBackFrame(decryptedImage)
         }
         setDecrypted(decryptedImage)
@@ -282,17 +282,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         let observer = null as ResizeObserver | null
-        if (functions.isImage(props.img)) {
+        if (functions.file.isImage(props.img)) {
             if (!ref.current) return
             observer = new ResizeObserver(resizeImageCanvas)
             observer.observe(ref.current)
         }
-        if (functions.isGIF(props.img) || functions.isWebP(props.img)) {
+        if (functions.file.isGIF(props.img) || functions.file.isWebP(props.img)) {
             if (!ref.current) return
             observer = new ResizeObserver(resizeGIFCanvas)
             observer.observe(ref.current)
         }
-        if (functions.isVideo(props.img)) {
+        if (functions.file.isVideo(props.img)) {
             if (!videoRef.current) return
             observer = new ResizeObserver(resizeVideoCanvas)
             observer.observe(videoRef.current)
@@ -313,7 +313,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const parseGIF = async () => {
             const start = new Date()
             const arrayBuffer = await getCurrentBuffer()
-            const frames = await functions.extractGIFFrames(arrayBuffer)
+            const frames = await functions.video.extractGIFFrames(arrayBuffer)
             setGIFData(frames)
             const end = new Date()
             const seconds = (end.getTime() - start.getTime()) / 1000
@@ -322,18 +322,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const parseAnimatedWebP = async () => {
             const start = new Date()
             const arrayBuffer = await getCurrentBuffer()
-            const animated = functions.isAnimatedWebp(arrayBuffer)
+            const animated = functions.file.isAnimatedWebp(arrayBuffer)
             if (!animated) return 
-            const frames = await functions.extractAnimatedWebpFrames(arrayBuffer)
+            const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
             setGIFData(frames)
             const end = new Date()
             const seconds = (end.getTime() - start.getTime()) / 1000
             setSeekTo(seconds)
         }
-        if (imageLoaded && functions.isGIF(props.img)) {
+        if (imageLoaded && functions.file.isGIF(props.img)) {
             parseGIF()
         }
-        if (imageLoaded && functions.isWebP(props.img)) {
+        if (imageLoaded && functions.file.isWebP(props.img)) {
             parseAnimatedWebP()
         }
     }, [imageLoaded])
@@ -342,10 +342,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const parseVideo = async () => {
             if (!videoRef.current) return
             let frames = [] as ImageBitmap[]
-            if (functions.isMP4(props.img)) {
-                frames = await functions.extractMP4Frames(props.img)
-            } else if (functions.isWebM(props.img)) {
-                frames = await functions.extractWebMFrames(props.img)
+            if (functions.file.isMP4(props.img)) {
+                frames = await functions.video.extractMP4Frames(props.img)
+            } else if (functions.file.isWebM(props.img)) {
+                frames = await functions.video.extractWebMFrames(props.img)
             }
             let canvasFrames = [] as HTMLCanvasElement[] 
             for (let i = 0; i < frames.length; i++) {
@@ -381,8 +381,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             ffmpeg.deleteFile(output)
         }
         
-        if (!videoData && videoLoaded && functions.isVideo(props.img)) {
-            functions.videoThumbnail(props.img).then((thumbnail) => {
+        if (!videoData && videoLoaded && functions.file.isVideo(props.img)) {
+            functions.video.videoThumbnail(props.img).then((thumbnail) => {
                 setBackFrame(thumbnail)
                 if (backFrameRef.current && videoRef.current) {
                     backFrameRef.current.style.display = "flex"
@@ -396,9 +396,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             })
         }
 
-        if (!videoData && videoLoaded && reverse && functions.isVideo(props.img)) {
+        if (!videoData && videoLoaded && reverse && functions.file.isVideo(props.img)) {
             parseVideo().then(() => {
-                if (functions.isMP4(props.img)) reverseAudioStream()
+                if (functions.file.isMP4(props.img)) reverseAudioStream()
             })
         }
     }, [videoLoaded, reverse, videoData])
@@ -407,7 +407,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!ref.current || !gifRef.current) return
         if (gifData) {
             if (paused && !dragging) return clearTimeout(timeout)
-            const adjustedData = functions.gifSpeed(gifData, speed)
+            const adjustedData = functions.video.gifSpeed(gifData, speed)
             const gifCanvas = gifRef.current
             gifCanvas.style.opacity = "1"
             const landscape = gifCanvas.width >= gifCanvas.height
@@ -503,7 +503,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!videoRef.current || !videoCanvasRef.current || !videoOverlayRef.current) return
-        if (videoLoaded && functions.isVideo(props.img)) {
+        if (videoLoaded && functions.file.isVideo(props.img)) {
             if (paused) {
                 videoRef.current.pause()
                 setSeekTo(null)
@@ -526,7 +526,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 // @ts-ignore
                 videoRef.current.webkitPreservesPitch = false 
             }
-            const adjustedData = videoData ? functions.videoSpeed(videoData, speed) : null
+            const adjustedData = videoData ? functions.video.videoSpeed(videoData, speed) : null
             videoRef.current.playbackRate = speed 
             const videoCanvas = videoCanvasRef.current
             const sharpenOverlay = videoOverlayRef.current
@@ -656,7 +656,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }, [videoLoaded, videoData, reverse, seekTo, pixelate, paused, speed, preservePitch, dragging, dragProgress, sharpen, fullscreen])
 
     useEffect(() => {
-        if (!functions.isVideo(props.img)) return
+        if (!functions.file.isVideo(props.img)) return
         if (!videoRef.current || !videoCanvasRef.current || !reverseVideo) return
         if (reverse) {
             if (videoRef.current.src !== reverseVideo) {
@@ -754,7 +754,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         } else {
             videoRef.current.muted = true
         }
-        videoRef.current.volume = functions.logSlider(value)
+        videoRef.current.volume = functions.audio.logSlider(value)
         setVolume(value)
         setPreviousVolume(value)
     }
@@ -771,7 +771,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setVolume(0)
         } else {
             const newVol = previousVolume ? previousVolume : 1
-            videoRef.current.volume = functions.logSlider(newVol)
+            videoRef.current.volume = functions.audio.logSlider(newVol)
             videoRef.current.muted = false
             setVolume(newVol)
         }
@@ -799,8 +799,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const element = fullscreenRef.current
         let newContrast = contrast
         const image = props.img
-        const sharpenOverlay = functions.isVideo(props.img) ? videoOverlayRef.current : (functions.isGIF(props.img) || gifData) ? gifOverlayRef.current : overlayRef.current
-        const lightnessOverlay = functions.isVideo(props.img) ? videoLightnessRef.current : (functions.isGIF(props.img) || gifData) ? gifLightnessRef.current : lightnessRef.current
+        const sharpenOverlay = functions.file.isVideo(props.img) ? videoOverlayRef.current : (functions.file.isGIF(props.img) || gifData) ? gifOverlayRef.current : overlayRef.current
+        const lightnessOverlay = functions.file.isVideo(props.img) ? videoLightnessRef.current : (functions.file.isGIF(props.img) || gifData) ? gifLightnessRef.current : lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
@@ -829,25 +829,25 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         setTimeout(() => {
-            functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
-            {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
-            functions.splatterEffect(effectRef.current, ref.current, splatter, {imageExpand,
-            isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
+            functions.image.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+            {isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.img)})
+            functions.image.splatterEffect(effectRef.current, ref.current, splatter, {imageExpand,
+            isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.img)})
         }, 800)
     }, [imageLoaded, imageExpand, fullscreen])
 
     useEffect(() => {
-        functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
-        {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
+        functions.image.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+        {isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.img)})
     }, [pixelate])
 
     useEffect(() => {
-        functions.splatterEffect(effectRef.current, ref.current, splatter, {imageExpand,
-        isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.img)})
+        functions.image.splatterEffect(effectRef.current, ref.current, splatter, {imageExpand,
+        isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.img)})
     }, [splatter, imageExpand])
 
     const onLoad = (event: React.SyntheticEvent) => {
-        if (functions.isVideo(props.img)) {
+        if (functions.file.isVideo(props.img)) {
             const element = event.target as HTMLVideoElement
             setImageWidth(element.clientWidth)
             setImageHeight(element.clientHeight)
@@ -879,14 +879,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
             let pixelateCanvas = document.createElement("canvas")
-            functions.pixelateEffect(pixelateCanvas, frame, pixelate, {directWidth: true})
+            functions.image.pixelateEffect(pixelateCanvas, frame, pixelate, {directWidth: true})
             ctx.imageSmoothingEnabled = false
             ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
             ctx.imageSmoothingEnabled = true
         }
         if (splatter !== 0) {
             const splatterCanvas = document.createElement("canvas")
-            functions.splatterEffect(splatterCanvas, frame, splatter)
+            functions.image.splatterEffect(splatterCanvas, frame, splatter)
             ctx.drawImage(splatterCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (sharpen !== 0) {
@@ -945,17 +945,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const renderImage = async (image?: string) => {
         if (filtersOn()) {
             if (image) {
-                const decrypted = await functions.decryptItem(image, session)
-                const img = await functions.createImage(decrypted)
+                const decrypted = await functions.crypto.decryptItem(image, session)
+                const img = await functions.image.createImage(decrypted)
                 return render(img, false)
             } else {
                 return render(ref.current!, false)
             }
         } else {
             if (image) {
-                return functions.decryptItem(image, session)
+                return functions.crypto.decryptItem(image, session)
             } else {
-                return functions.decryptItem(props.img, session)
+                return functions.crypto.decryptItem(props.img, session)
             }
 
         }
@@ -967,7 +967,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setEncodingOverlay(true)
             setPaused(true)
             await functions.timeout(50)
-            const adjustedData = functions.gifSpeed(gifData, speed)
+            const adjustedData = functions.video.gifSpeed(gifData, speed)
             let frames = [] as Buffer[]
             let delays = [] as number[]
             for (let i = 0; i < adjustedData.length; i++) {
@@ -978,7 +978,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 frames = frames.reverse()
                 delays = delays.reverse()
             }
-            const buffer = await functions.encodeGIF(frames, delays, gifData[0].frame.width, gifData[0].frame.height, {transparentColor: "#000000"})
+            const buffer = await functions.video.encodeGIF(frames, delays, gifData[0].frame.width, gifData[0].frame.height, {transparentColor: "#000000"})
             const blob = new Blob([buffer])
             setEncodingOverlay(false)
             setPaused(false)
@@ -1045,8 +1045,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (encodingOverlay) return
             setEncodingOverlay(true)
             setPaused(true)
-            let audio = await functions.videoToWAV(props.img).then((a) => audioSpeed(a))
-            const adjustedData = functions.videoSpeed(videoData, speed)
+            let audio = await functions.audio.videoToWAV(props.img).then((a) => audioSpeed(a))
+            const adjustedData = functions.video.videoSpeed(videoData, speed)
             let frames = adjustedData.map((a) => render(a, false))
             if (reverse) frames = frames.reverse()
             const url = await encodeVideo(frames, audio)
@@ -1063,15 +1063,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
             filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
         }
-        if (functions.isVideo(props.img)) {
+        if (functions.file.isVideo(props.img)) {
             const video = await renderVideo()
             if (!video) return
-            functions.download(filename, video)
+            functions.dom.download(filename, video)
             window.URL.revokeObjectURL(video)
-        } else if (functions.isGIF(props.img) || gifData) {
+        } else if (functions.file.isGIF(props.img) || gifData) {
             const gif = await renderGIF()
             if (!gif) return
-            functions.download(filename, gif)
+            functions.dom.download(filename, gif)
             window.URL.revokeObjectURL(gif)
         } else {
             if (props.comicPages && props.comicPages?.length > 1) {
@@ -1082,17 +1082,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
                         pageName = `${props.post.source.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
-                    const decryptedPage = await functions.decryptItem(page, session)
+                    const decryptedPage = await functions.crypto.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)
                     if (filtersOn() || path.extname(pageName) !== `.${format}`) {
-                        image = await functions.convertToFormat(image, format)
+                        image = await functions.image.convertToFormat(image, format)
                     }
                     pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
                     let data = new ArrayBuffer(0)
-                    if (functions.isBase64(image)) {
+                    if (functions.byte.isBase64(image)) {
                         data = await fetch(image).then((r) => r.arrayBuffer())
                     } else {
-                        data = await functions.getBuffer(functions.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
+                        data = await functions.http.getBuffer(functions.util.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
                     }
                     zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
@@ -1102,15 +1102,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 const downloadName = basename ? `${id}-${basename}.zip` : `${path.basename(filename, path.extname(filename))}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
-                functions.download(downloadName , url)
+                functions.dom.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
                 let image = await renderImage()
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
-                    image = await functions.convertToFormat(image, format)
+                    image = await functions.image.convertToFormat(image, format)
                 }
                 filename = path.basename(filename, path.extname(filename)) + `.${format}`
-                functions.download(filename, image)
+                functions.dom.download(filename, image)
                 window.URL.revokeObjectURL(image)
             }
         }
@@ -1197,17 +1197,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (ref.current) {
                 ref.current.style.maxWidth = ""
                 ref.current.style.maxHeight = ""
-                if (functions.isGIF(props.img) || gifData) {
+                if (functions.file.isGIF(props.img) || gifData) {
                     gifRef.current!.style.marginTop = "0px"
                     gifRef.current!.style.marginBottom = "0px"
                 }
             }
             setTimeout(() => {
-                if (functions.isImage(props.img)) {
+                if (functions.file.isImage(props.img)) {
                     resizeImageCanvas()
-                } else if (functions.isGIF(props.img) || gifData) {
+                } else if (functions.file.isGIF(props.img) || gifData) {
                     resizeGIFCanvas()
-                } else if (functions.isVideo(props.img)) {
+                } else if (functions.file.isVideo(props.img)) {
                     resizeVideoCanvas()
                 }
             }, 100)
@@ -1233,17 +1233,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (ref.current) {
                 ref.current.style.maxWidth = "100vw"
                 ref.current.style.maxHeight = "100vh"
-                if (functions.isGIF(props.img) || gifData) {
+                if (functions.file.isGIF(props.img) || gifData) {
                     gifRef.current!.style.marginTop = "auto"
                     gifRef.current!.style.marginBottom = "auto"
                 }
             }
             setTimeout(() => {
-                if (functions.isImage(props.img)) {
+                if (functions.file.isImage(props.img)) {
                     resizeImageCanvas()
-                } else if (functions.isGIF(props.img) || gifData) {
+                } else if (functions.file.isGIF(props.img) || gifData) {
                     resizeGIFCanvas()
-                } else if (functions.isVideo(props.img)) {
+                } else if (functions.file.isVideo(props.img)) {
                     resizeVideoCanvas()
                 }
             }, 100)
@@ -1262,7 +1262,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const dragImgDown = (event: React.MouseEvent) => {
-        if (!functions.isImage(props.img)) return
+        if (!functions.file.isImage(props.img)) return
         if (zoom !== 1 && !disableZoom) {
             if (enableDrag !== false) setEnableDrag(false)
         } else {
@@ -1271,11 +1271,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const dragImg = (event: React.MouseEvent) => {
-        if (!functions.isImage(props.img)) return
+        if (!functions.file.isImage(props.img)) return
     }
 
     const dragImgUp = () => {
-        if (!functions.isImage(props.img)) return
+        if (!functions.file.isImage(props.img)) return
         setEnableDrag(true)
     }
 
@@ -1287,8 +1287,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             return setSidebarText(i18n.sidebar.loginRequired)
         }
         if (permissions.isPremium(session)) {
-            functions.clearResponseCacheKey("/api/user/session")
-            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/session")
+            await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
             setSessionFlag(true)
         } else {
             setPremiumRequired(true)
@@ -1308,12 +1308,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
         let img = ""
         if (typeof currentImage === "string") {
-            img = functions.getRawImageLink(currentImage)
+            img = functions.link.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(currentImage, showUpscaled)
+            img = functions.link.getImageLink(currentImage, showUpscaled)
         }
         if (forceOriginal) {
-            return functions.appendURLParams(img, {upscaled: false})
+            return functions.util.appendURLParams(img, {upscaled: false})
         } else {
             return img
         }
@@ -1324,22 +1324,22 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return encryptedBuffer
         const img = getCurrentLink(forceOriginal)
         if (forceOriginal) {
-            encryptedBuffer = await fetch(functions.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
         } else {
             encryptedBuffer = await fetch(img).then((r) => r.arrayBuffer())
         }
-        return functions.decryptBuffer(encryptedBuffer, img, session)
+        return functions.crypto.decryptBuffer(encryptedBuffer, img, session)
     }
 
     const noAuthURL = async () => {
         const arrayBuffer = await getCurrentBuffer(true)
-        let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        let url = await functions.http.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
         return url
     }
 
     const generateTempLink = async () => {
         const link = getCurrentLink()
-        let url = await functions.post("/storage", {link}, session, setSessionFlag)
+        let url = await functions.http.post("/storage", {link}, session, setSessionFlag)
         localStorage.setItem("reverseSearchLink", url)
         setTempLink(url)
         return url
@@ -1354,7 +1354,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const sharePost = async (site: string) => {
         if (!props.post || !props.artists) return
-        let url = `${functions.getDomain()}${window.location.pathname}`
+        let url = `${functions.config.getDomain()}${window.location.pathname}`
         let text = `${props.post.englishTitle} (${props.post.title}) by ${props.artists[0].tag} (${props.post.artist})\n\n`
         if (site === "pinterest") {
             let img = await generateTempLink()
@@ -1406,19 +1406,19 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
                         <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
                     </div>
-                    {functions.isVideo(props.img) ? 
+                    {functions.file.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
                     <img draggable={false} className="dummy-post-image" src={decrypted}/>}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
-                        <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
+                        <span className="encoding-overlay-text">{functions.file.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
-                    {functions.isVideo(props.img) ? <>
+                    {functions.file.isVideo(props.img) ? <>
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         {duration >= 1 ?
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <p className="video-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
+                            <p className="video-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
                             <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                            <p className="video-control-text">{functions.formatSeconds(duration)}</p>
+                            <p className="video-control-text">{functions.date.formatSeconds(duration)}</p>
                         </div> : null}
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="video-control-row-container">
@@ -1485,13 +1485,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
                     <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`}/>
                     </> : <>
-                    {functions.isGIF(props.img) || gifData ? <>
+                    {functions.file.isGIF(props.img) || gifData ? <>
                     <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         {duration >= 1 ?
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <p className="gif-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
+                            <p className="gif-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
                             <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                            <p className="gif-control-text">{functions.formatSeconds(duration)}</p>
+                            <p className="gif-control-text">{functions.date.formatSeconds(duration)}</p>
                         </div> : null}
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="gif-control-row-container">
@@ -1549,7 +1549,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
-                        {functions.isImage(props.img) && !gifData ?
+                        {functions.file.isImage(props.img) && !gifData ?
                         <>
                         <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions, useCacheSelector, usePageSelector,
 useCacheActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {TagCount, PostSearch} from "../../types/Types"
 import "./styles/tagbanner.less"
 
@@ -114,7 +114,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     const getVisibleSlice = () => {
         let visible = [] as PostSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visiblePosts)
+            visible = functions.util.removeDuplicates(visiblePosts)
         } else {
             const postOffset = (page - 1) * getPageAmount()
             visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
@@ -124,7 +124,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const updateBannerTags = async () => {
         const visibleSlice = getVisibleSlice()
-        const visibleTags = await functions.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p) => p.postID)}, session, setSessionFlag)
+        const visibleTags = await functions.http.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p) => p.postID)}, session, setSessionFlag)
         const characterTags = [] as TagCount[]
         const characterTagsImg = [] as TagCount[]
         const seriesTags = [] as TagCount[]
@@ -166,7 +166,7 @@ const TagBanner: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <div className="tagbanner-box" key={bannerTag.tag}>
-                    {bannerTag.image ? <img className="tagbanner-img" src={functions.getTagLink(bannerTag.type, bannerTag.image, bannerTag.imageHash)}/> : null}
+                    {bannerTag.image ? <img className="tagbanner-img" src={functions.link.getTagLink(bannerTag.type, bannerTag.image, bannerTag.imageHash)}/> : null}
                     <span className="tagbanner-tag" onClick={tagClick} onContextMenu={tagPage}>{bannerTag.tag}</span>
                 </div>
             )
@@ -178,7 +178,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const getWidth = () => {
         if (trackPad) return mobile ? "100%" : ""
-        return mobile ? `calc(100vw + ${Math.abs(marginLeft)}px)` : `calc(100vw - ${functions.sidebarWidth()}px + ${Math.abs(marginLeft)}px)`
+        return mobile ? `calc(100vw + ${Math.abs(marginLeft)}px)` : `calc(100vw - ${functions.dom.sidebarWidth()}px + ${Math.abs(marginLeft)}px)`
     }
 
     return (

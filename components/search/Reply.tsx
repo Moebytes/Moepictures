@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useThreadDialogActions, 
 useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions,
 useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import reportOptIcon from "../../assets/icons/report-opt.png"
@@ -18,7 +18,6 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import "./styles/reply.less"
 import {ThreadUser, ThreadReply} from "../../types/Types"
 
@@ -51,7 +50,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const getReplyPFP = () => {
         if (props.reply.image) {
-            return functions.getTagLink("pfp", props.reply.image, props.reply.imageHash)
+            return functions.link.getTagLink("pfp", props.reply.image, props.reply.imageHash)
         } else {
             return favicon
         }
@@ -60,13 +59,13 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.reply.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.reply.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.reply.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const triggerQuote = () => {
-        const cleanReply = functions.parsePieces(props.reply.content).filter((s: string) => !s.includes(">>>")).join(" ")
+        const cleanReply = functions.render.parsePieces(props.reply.content).filter((s: string) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.reply.replyID}] ${functions.toProperCase(props.reply.creator)} said:
+            >>>[${props.reply.replyID}] ${functions.util.toProperCase(props.reply.creator)} said:
             > ${cleanReply}
         `))
     }
@@ -77,7 +76,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await functions.delete("/api/reply/delete", {threadID: props.reply.threadID, replyID: props.reply.replyID}, session, setSessionFlag)
+        await functions.http.delete("/api/reply/delete", {threadID: props.reply.threadID, replyID: props.reply.replyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -95,9 +94,9 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const editReply = async () => {
         if (!editReplyContent) return
-        const badReply = functions.validateReply(editReplyContent, i18n)
+        const badReply = functions.validation.validateReply(editReplyContent, i18n)
         if (badReply) return
-        await functions.put("/api/reply/edit", {replyID: props.reply.replyID, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
+        await functions.http.put("/api/reply/edit", {replyID: props.reply.replyID, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -171,61 +170,61 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         if (props.reply.role === "admin") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="reply-user-text admin-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <span className="reply-user-text admin-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (props.reply.role === "mod") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text mod-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text mod-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={modCrown}/>
                 </div>
             )
         } else if (props.reply.role === "system") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text system-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text system-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (props.reply.role === "premium-curator") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text curator-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text curator-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (props.reply.role === "curator") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text curator-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text curator-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (props.reply.role === "premium-contributor") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text premium-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text premium-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (props.reply.role === "contributor") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text contributor-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text contributor-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.reply.role === "premium") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text premium-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text premium-color">{functions.util.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator) || i18n.user.deleted}</span>
+        return <span className={`reply-user-text ${props.reply.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.util.toProperCase(props.reply.creator) || i18n.user.deleted}</span>
     }
 
     const getBGColor = () => {
@@ -248,15 +247,15 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
-                    <span className="reply-date-text">{functions.timeAgo(props.reply.createDate, i18n)}</span>
+                    <span className="reply-date-text">{functions.date.timeAgo(props.reply.createDate, i18n)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                     <span className="reply-mini-link" onClick={viewThreads}>{props.reply.postCount} {Number(props.reply.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
-                    <span className="reply-mini-text">{i18n.labels.joined} {functions.prettyDate(props.reply.joinDate, i18n, true)}</span>
+                    <span className="reply-mini-text">{i18n.labels.joined} {functions.date.prettyDate(props.reply.joinDate, i18n, true)}</span>
                 </div>
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>
                 {session.username && !mobile ? replyOptions() : null}
-                {jsxFunctions.renderText(props.reply.content, emojis, "reply", goToReply, props.reply.r18)}
+                {functions.jsx.renderText(props.reply.content, emojis, "reply", goToReply, props.reply.r18)}
             </div>
             {session.username && mobile ? replyOptions() : null}
         </div>

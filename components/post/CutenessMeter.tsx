@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import cuteness1 from "../../assets/images/cuteness1.png"
 import cuteness2 from "../../assets/images/cuteness2.png"
 import cuteness3 from "../../assets/images/cuteness3.png"
@@ -40,7 +40,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCuteness = async () => {
-        const cuteness = await functions.get("/api/cuteness", {postID: props.post.postID}, session, setSessionFlag)
+        const cuteness = await functions.http.get("/api/cuteness", {postID: props.post.postID}, session, setSessionFlag)
         if ((props.post as PostSearch)?.cuteness) setAverageCuteness((props.post as PostSearch).cuteness)
         if (cuteness?.cuteness) {
             setCuteness(Number(cuteness.cuteness))
@@ -52,12 +52,12 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
 
     const updateCuteness = async () => {
         if (!cuteness) return
-        await functions.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
         if (cuteness) setIsAverage(false)
     }
 
     const deleteRating = async () => {
-        await functions.delete("/api/cuteness/delete", {postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.delete("/api/cuteness/delete", {postID: props.post.postID}, session, setSessionFlag)
         setIsAverage(true)
     }
 

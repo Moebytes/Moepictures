@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -43,14 +43,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
 
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
-        const recipient = await functions.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
+        const recipient = await functions.http.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
         if (recipient) setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.message) return
-        const creator = await functions.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
+        const creator = await functions.http.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
         if (creator) setCreatorData(creator)
         setCreatorDefaultIcon(creator?.image ? false : true)
     }
@@ -73,7 +73,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (creatorData?.image) {
-            return functions.getTagLink("pfp", creatorData.image, creatorData.imageHash)
+            return functions.link.getTagLink("pfp", creatorData.image, creatorData.imageHash)
         } else {
             return favicon
         }
@@ -91,12 +91,12 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getRecipientPFP = () => {
         if (recipientData?.image) {
-            return functions.noCacheURL(functions.getTagLink("pfp", recipientData.image, recipientData.imageHash))
+            return functions.cache.noCacheURL(functions.link.getTagLink("pfp", recipientData.image, recipientData.imageHash))
         } else {
             return favicon
         }
@@ -114,7 +114,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const recipientImgClick = (event: React.MouseEvent) => {
         if (!recipientData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(recipientData.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(recipientData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {
@@ -123,7 +123,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text admin-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text admin-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={adminCrown}/>
                 </div>
             )
@@ -131,7 +131,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text mod-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text mod-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={modCrown}/>
                 </div>
             )
@@ -139,7 +139,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text system-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text system-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={systemCrown}/>
                 </div>
             )
@@ -147,7 +147,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={premiumCuratorStar}/>
                 </div>
             )
@@ -155,7 +155,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={curatorStar}/>
                 </div>
             )
@@ -163,7 +163,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={premiumContributorPencil}/>
                 </div>
             )
@@ -171,7 +171,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text contributor-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text contributor-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={contributorPencil}/>
                 </div>
             )
@@ -179,7 +179,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.creator)}</span>
+                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.creator)}</span>
                     <img className="message-user-label" src={premiumStar}/>
                 </div>
             )
@@ -187,7 +187,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.message?.creator) || i18n.user.deleted}</span>
+                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.util.toProperCase(props.message?.creator) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -198,7 +198,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text admin-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text admin-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={adminCrown}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -207,7 +207,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text mod-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text mod-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={modCrown}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -216,7 +216,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text system-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text system-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={systemCrown}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -225,7 +225,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumCuratorStar}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -234,7 +234,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={curatorStar}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -243,7 +243,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumContributorPencil}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -252,7 +252,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text contributor-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text contributor-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={contributorPencil}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -261,7 +261,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipients[0])}</span>
+                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumStar}/>
                     {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
@@ -270,14 +270,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message?.recipients[0] || i18n.user.deleted)}</span>
+                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.util.toProperCase(props.message?.recipients[0] || i18n.user.deleted)}</span>
                 {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
             </div>
         )
     }
 
     const checkMail = async () => {
-        const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
+        const result = await functions.http.get("/api/user/checkmail", null, session, setSessionFlag)
         setHasNotification(result)
     }
 
@@ -296,8 +296,8 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
 
     const toggleRead = async () => {
         if (!props.message) return
-        functions.clearResponseCacheKey("/api/search/messages")
-        await functions.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/search/messages")
+        await functions.http.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
         props.onEdit?.()
         checkMail()
     }
@@ -310,7 +310,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const dateTextJSX = () => {
         if (!props.message) return
         const targetDate = props.message.updatedDate
-        return <span className="message-date-text">{functions.timeAgo(targetDate, i18n)}</span>
+        return <span className="message-date-text">{functions.date.timeAgo(targetDate, i18n)}</span>
     }
 
     if (props.titlePage) {

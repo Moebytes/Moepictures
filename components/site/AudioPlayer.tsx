@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useLocation, useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Slider from "react-slider"
 import musicplaying from "../../assets/icons/musicplaying.gif"
 import playerRewind from "../../assets/icons/player-rewind.png"
@@ -119,7 +119,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
     
     const loadAudio = async () => {
-        if (!functions.isAudio(audio)) return
+        if (!functions.file.isAudio(audio)) return
         stop()
         await player.load(audio)
         await Tone.loaded()
@@ -211,12 +211,12 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const updateMute = () => {
         if (Number.isFinite(Tone.getDestination().volume.value)) {
-            Tone.getDestination().volume.value = functions.linearToDecibels(0)
+            Tone.getDestination().volume.value = functions.audio.linearToDecibels(0)
             Tone.getDestination().mute = true
             setAudioVolume(0)
         } else {
             const newVol = audioPreviousVolume ? audioPreviousVolume : 1
-            Tone.getDestination().volume.value = functions.linearToDecibels(functions.logSlider(newVol))
+            Tone.getDestination().volume.value = functions.audio.linearToDecibels(functions.audio.logSlider(newVol))
             Tone.getDestination().mute = false
             setAudioVolume(newVol)
         }
@@ -234,7 +234,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (value > 1) value = 1
         if (value < 0) value = 0
         if (Number.isNaN(value)) value = 0
-        Tone.getDestination().volume.value = functions.linearToDecibels(functions.logSlider(value))
+        Tone.getDestination().volume.value = functions.audio.linearToDecibels(functions.audio.logSlider(value))
         if (value > 0) {
             Tone.getDestination().mute = false
         } else {
@@ -295,7 +295,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             return soundtouchParams.get("pitch").value = 1 * pitchCorrect
         }
         const pitchCorrect = 1 / audioSpeed
-        soundtouchParams.get("pitch").value = functions.semitonesToScale(pitch) * pitchCorrect
+        soundtouchParams.get("pitch").value = functions.audio.semitonesToScale(pitch) * pitchCorrect
     }
 
     useEffect(() => {
@@ -305,7 +305,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const updateBitcrush = async () => {
         if (!bitcrusherNode) return
         const bitcrushParams = bitcrusherNode.parameters as unknown as {get: (key: string) => AudioParam}
-        bitcrushParams.get("sampleRate").value = functions.logSlider2(bitcrush, 44100, 100)
+        bitcrushParams.get("sampleRate").value = functions.audio.logSlider2(bitcrush, 44100, 100)
         if (bitcrush === 0) {
             removeEffect("bitcrush")
         } else {
@@ -322,7 +322,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (lowpass === 100) {
             removeEffect("lowpass")
         } else {
-            const lowpassFilter = new Tone.Filter({type: "lowpass", frequency: functions.logSlider2(lowpass, 100, 20000), Q: 5, rolloff: -12})
+            const lowpassFilter = new Tone.Filter({type: "lowpass", frequency: functions.audio.logSlider2(lowpass, 100, 20000), Q: 5, rolloff: -12})
             pushEffect("lowpass", lowpassFilter)
         }
         applyEffects()
@@ -336,7 +336,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (highpass === 0) {
             removeEffect("highpass")
         } else {
-            const lowpassFilter = new Tone.Filter({type: "highpass", frequency: functions.logSlider2(highpass, 100, 20000), Q: 5, rolloff: -12})
+            const lowpassFilter = new Tone.Filter({type: "highpass", frequency: functions.audio.logSlider2(highpass, 100, 20000), Q: 5, rolloff: -12})
             pushEffect("highpass", lowpassFilter)
         }
         applyEffects()
@@ -617,9 +617,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             return (
                 <div className="audio-player-row">
                     <div className="audio-player-container" style={{width: "100%"}}>
-                        <p className="audio-player-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                        <p className="audio-player-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
                         <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                        <p className="audio-player-text">{functions.formatSeconds(audioDuration)}</p>
+                        <p className="audio-player-text">{functions.date.formatSeconds(audioDuration)}</p>
                     </div>
                     <div className="audio-player-container">
                         <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>
@@ -645,9 +645,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <img draggable={false} style={{filter: getFilter(), marginRight: "10px"}} className="audio-player-icon-small" src={playerFastforward} onClick={() => fastforward()}/>
                 </div>
                 <div className="audio-player-container" style={{width: "100%"}}>
-                    <p className="audio-player-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                    <p className="audio-player-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
                     <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                    <p className="audio-player-text">{functions.formatSeconds(audioDuration)}</p>
+                    <p className="audio-player-text">{functions.date.formatSeconds(audioDuration)}</p>
                 </div>
                 <div className="audio-player-container">
                     <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>

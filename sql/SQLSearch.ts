@@ -1,6 +1,6 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch} from "../types/Types"
 
 export default class SQLSearch {

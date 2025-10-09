@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -30,7 +30,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
     }
 
     const updateStatus = async () => {
-        const status = await functions.get("/api/misc/api-key/status", null, session, setSessionFlag)
+        const status = await functions.http.get("/api/misc/api-key/status", null, session, setSessionFlag)
         setStatus(status)
     }
 
@@ -59,19 +59,19 @@ const APIKeyPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isAdmin(session)) {
-            return functions.replaceLocation("/403")
+            return functions.dom.replaceLocation("/403")
         }
         updateStatus()
     }, [session])
 
     const generateKey = async () => {
-        const apiKey = await functions.post("/api/misc/api-key", null, session, setSessionFlag)
+        const apiKey = await functions.http.post("/api/misc/api-key", null, session, setSessionFlag)
         setAPIKey(apiKey)
         updateStatus()
     }
 
     const deleteKey = async () => {
-        await functions.delete("/api/misc/api-key/delete", null, session, setSessionFlag)
+        await functions.http.delete("/api/misc/api-key/delete", null, session, setSessionFlag)
         setAPIKey("")
         updateStatus()
     }

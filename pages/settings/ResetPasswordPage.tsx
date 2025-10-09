@@ -7,7 +7,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import show from "../../assets/icons/show.png"
 import hide from "../../assets/icons/hide.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -79,7 +79,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badPassword = functions.validatePassword(username, newPassword.trim(), i18n)
+        const badPassword = functions.validation.validatePassword(username, newPassword.trim(), i18n)
         if (badPassword) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -92,7 +92,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/resetpassword", {username, token, password: newPassword}, session, setSessionFlag)
+            await functions.http.post("/api/user/resetpassword", {username, token, password: newPassword}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

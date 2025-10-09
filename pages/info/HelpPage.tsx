@@ -40,7 +40,7 @@ import musicImg from "../../assets/images/audioplayer.png"
 import mangaReaderImg from "../../assets/images/mangareader.png"
 import bookmarkletImg from "../../assets/icons/bookmarklet.png"
 import tooltipsImg from "../../assets/images/tooltips.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "./styles/helppage.less"
 
@@ -97,7 +97,7 @@ const HelpPage: React.FunctionComponent = (props) => {
     }
 
     const getBookmarklet = () => {
-        return `javascript:location.href="${functions.getDomain()}/upload?link="+encodeURIComponent(location.href)`
+        return `javascript:location.href="${functions.config.getDomain()}/upload?link="+encodeURIComponent(location.href)`
     }
 
     const getContainerJSX = () => {
@@ -790,7 +790,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.copyrightRemoval.line1}<br/><br/>
 
                     {i18n.help.copyrightRemoval.submitForm}
-                    <a className="help-link" onClick={() => navigate("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.getDomain()}/copyright-removal`}</a>
+                    <a className="help-link" onClick={() => navigate("/copyright-removal")}>{mobile ? i18n.help.copyrightRemoval.copyrightForm : `${functions.config.getDomain()}/copyright-removal`}</a>
                     {i18n.help.copyrightRemoval.emailUs}<span style={{color: "var(--text-alt)"}}>{i18n.email}{i18n.period}</span><br/><br/>
 
                     {i18n.help.copyrightRemoval.line2}<br/><br/>

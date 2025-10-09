@@ -5,7 +5,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import XButton from "../../assets/icons/x-button.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
@@ -87,7 +87,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badEmail = functions.validateEmail(email, i18n)
+        const badEmail = functions.validation.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -140,7 +140,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, files}, session, setSessionFlag)
+            await functions.http.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, files}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions,
 useLayoutSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/editnotedialog.less"
 import Draggable from "react-draggable"
 import bold from "../../assets/icons/edit-note-bold.png"
@@ -87,7 +87,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     }, [charactersActive])
 
     const handleCharacterClick = (tag: string) => {
-        const parts = functions.cleanHTML(editNoteData.characterTag).split(/ +/g)
+        const parts = functions.util.cleanHTML(editNoteData.characterTag).split(/ +/g)
         parts[parts.length - 1] = tag
         const characterTag = parts.join(" ")
         setEditNoteData({...editNoteData, characterTag})
@@ -103,7 +103,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                 <span className="edit-note-dialog-text">{i18n.labels.characterTag}</span>
             </div>
             <div className="edit-note-dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.cleanHTML(editNoteData.characterTag)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.util.cleanHTML(editNoteData.characterTag)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <textarea className="edit-note-textarea character-tag-color" spellCheck={false} value={editNoteData.characterTag} onChange={(event) => setEditNoteData({...editNoteData, characterTag: event.target.value?.trim()})}
                 onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}></textarea>
             </div>

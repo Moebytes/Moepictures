@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useCommentDialogSelector, useCommentDialogActions, useCacheSelector} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
 import commentQuote from "../../assets/icons/commentquote.png"
 import commentReport from "../../assets/icons/commentreport.png"
@@ -18,7 +18,6 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import "./styles/comment.less"
 import {UserComment} from "../../types/Types"
 
@@ -48,7 +47,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
 
     const getCommentPFP = () => {
         if (props.comment?.image) {
-            return functions.getTagLink("pfp", props.comment.image, props.comment.imageHash)
+            return functions.link.getTagLink("pfp", props.comment.image, props.comment.imageHash)
         } else {
             return favicon
         }
@@ -57,13 +56,13 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const triggerQuote = () => {
-        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join(" ")
+        const cleanComment = functions.render.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
+            >>>[${props.comment?.commentID}] ${functions.util.toProperCase(props.comment?.username)} said:
             > ${cleanComment}
         `))
     }
@@ -74,7 +73,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await functions.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
+        await functions.http.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -92,9 +91,9 @@ const Comment: React.FunctionComponent<Props> = (props) => {
 
     const editComment = async () => {
         if (!editCommentText) return
-        const badComment = functions.validateComment(editCommentText, i18n)
+        const badComment = functions.validation.validateComment(editCommentText, i18n)
         if (badComment) return
-        await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
+        await functions.http.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -167,61 +166,61 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         if (props.comment?.role === "admin") {
             return (
                 <div className="comment-username-container">
-                    <span className="comment-user-text admin-color">{functions.toProperCase(props.comment.username)}</span>
+                    <span className="comment-user-text admin-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "mod") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text mod-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={modCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "system") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text system-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "premium-curator") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (props.comment?.role === "curator") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (props.comment?.role === "premium-contributor") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (props.comment?.role === "contributor") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text contributor-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text contributor-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.comment?.role === "premium") {
             return (
                 <div className="comment-username-container">
-                <span className="comment-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="comment-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`comment-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
+        return <span className={`comment-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
     }
 
     const commentJump = () => {
@@ -237,8 +236,8 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="comment-container" style={{width: "100%", marginTop: mobile && session.username ? "25px" : ""}}>
-                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
-                {jsxFunctions.renderText(props.comment?.comment, emojis, "comment", goToComment)}
+                <span className="comment-date-text" onClick={commentJump}>{functions.date.timeAgo(props.comment?.postDate, i18n)}:</span>
+                {functions.jsx.renderText(props.comment?.comment, emojis, "comment", goToComment)}
             </div>
             {session.username ? commentOptions() : null}
         </div>

@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import commentQuote from "../../assets/icons/commentquote.png"
@@ -17,7 +17,6 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import EffectImage from "../image/EffectImage"
 import "./styles/commentrow.less"
 import {CommentSearch} from "../../types/Types"
@@ -50,7 +49,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const getCommentPFP = () => {
         if (props.comment?.image) {
-            return functions.getTagLink("pfp", props.comment.image, props.comment.imageHash)
+            return functions.link.getTagLink("pfp", props.comment.image, props.comment.imageHash)
         } else {
             return favicon
         }
@@ -67,7 +66,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.comment?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.comment.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const goToComment = (commentID: string) => {
@@ -77,15 +76,15 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         navigate(`/post/${props.comment?.postID}/${props.comment.post.slug}`)
-        const cleanComment = functions.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join("")
+        const cleanComment = functions.render.parsePieces(props.comment?.comment).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
+            >>>[${props.comment?.commentID}] ${functions.util.toProperCase(props.comment?.username)} said:
             > ${cleanComment}
         `))
     }
 
     const deleteComment = async () => {
-        await functions.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
+        await functions.http.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -103,9 +102,9 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const editComment = async () => {
         if (!editCommentText) return
-        const badComment = functions.validateComment(editCommentText, i18n)
+        const badComment = functions.validation.validateComment(editCommentText, i18n)
         if (badComment) return
-        await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
+        await functions.http.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -179,61 +178,61 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (props.comment?.role === "admin") {
             return (
                 <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.comment.username)}</span>
+                    <span className="commentrow-user-text admin-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "mod") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text mod-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "system") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text system-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (props.comment?.role === "premium-curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (props.comment?.role === "curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (props.comment?.role === "premium-contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (props.comment?.role === "contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text contributor-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.comment?.role === "premium") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
+        return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
     }
 
     const commentJump = () => {
@@ -256,8 +255,8 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-link" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate, i18n)}:</span>
-                    {jsxFunctions.renderText(props.comment?.comment, emojis, "comment", goToComment)}
+                    <span className="commentrow-date-link" onClick={commentJump}>{functions.date.timeAgo(props.comment?.postDate, i18n)}:</span>
+                    {functions.jsx.renderText(props.comment?.comment, emojis, "comment", goToComment)}
                 </div>
             </div>
             {session.username ? commentOptions() : null}

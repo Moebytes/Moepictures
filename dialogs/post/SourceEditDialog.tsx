@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useActiveActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
 import {UploadImage} from "../../types/Types"
@@ -39,7 +39,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setCommentary(sourceEditID.post.commentary || "")
         setEnglishCommentary(sourceEditID.post.englishCommentary || "")
         setMirrors(sourceEditID.post.mirrors ? Object.values(sourceEditID.post.mirrors).join("\n") : "")
-        if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
+        if (sourceEditID.post.posted) setPosted(functions.date.formatDate(new Date(sourceEditID.post.posted), true))
         setSource(sourceEditID.post.source || "")
         setBookmarks(String(sourceEditID.post.bookmarks) || "")
         setBuyLink(sourceEditID.post.buyLink || "")
@@ -90,18 +90,18 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
-                    bookmarks: functions.safeNumber(bookmarks),
+                    bookmarks: functions.util.safeNumber(bookmarks),
                     buyLink,
                     mirrors
                 },
                 reason
             }
             setSourceEditID(null)
-            await functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(sourceEditID.post.postID)
             setActionBanner("source-edit")
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -123,13 +123,13 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
-                    bookmarks: functions.safeNumber(bookmarks),
+                    bookmarks: functions.util.safeNumber(bookmarks),
                     buyLink,
                     mirrors
                 },
                 reason
             }
-            await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -142,13 +142,13 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         try {
             let image = sourceEditID.post.images[sourceEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
-            let link = functions.getImageLink(image)
-            let response = await fetch(functions.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let link = functions.link.getImageLink(image)
+            let response = await fetch(functions.util.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             let current = null as UploadImage | null
             if (response.byteLength) {
-                const decrypted = await functions.decryptBuffer(response, link, session)
+                const decrypted = await functions.crypto.decryptBuffer(response, link, session)
                 const bytes = new Uint8Array(decrypted)
-                const result = functions.bufferFileType(bytes)?.[0] || {}
+                const result = functions.byte.bufferFileType(bytes)?.[0] || {}
                 const pixivID = sourceEditID.post.source?.match(/\d+/)?.[0] || "image"
                 const ext = result.typename === "mkv" ? "webm" : result.typename
                 current = {
@@ -165,7 +165,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 }
             }
             if (!current) throw new Error("Bad image")
-            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating: functions.r13()}, session, setSessionFlag)
+            const sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating: functions.r13()}, session, setSessionFlag)
 
             setTitle(sourceLookup.source.title)
             setEnglishTitle(sourceLookup.source.englishTitle)
@@ -173,7 +173,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             setCommentary(sourceLookup.source.commentary)
             setEnglishCommentary(sourceLookup.source.englishCommentary)
             setMirrors(sourceLookup.source.mirrors)
-            setPosted(functions.formatDate(new Date(sourceLookup.source.posted), true))
+            setPosted(functions.date.formatDate(new Date(sourceLookup.source.posted), true))
             setSource(sourceLookup.source.source)
             setBookmarks(sourceLookup.source.bookmarks)
         } catch (e) {

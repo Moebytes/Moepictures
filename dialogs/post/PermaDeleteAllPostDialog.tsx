@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogActions, usePostDialogSelector, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Draggable from "react-draggable"
 import "../dialog.less"
@@ -34,7 +34,7 @@ const PermaDeleteAllPostDialog: React.FunctionComponent = (props) => {
 
     const emptyRecycleBin = async () => {
         if (permissions.isAdmin(session)) {
-            await functions.delete("/api/post/emptybin", null, session, setSessionFlag)
+            await functions.http.delete("/api/post/emptybin", null, session, setSessionFlag)
         }
         setHistoryFlag(true)
         setPermaDeleteAllDialog(false)

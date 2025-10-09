@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useFlagActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -35,7 +35,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
     const lockPost = async () => {
         if (!lockPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
+            await functions.http.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
             setPostFlag(lockPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")

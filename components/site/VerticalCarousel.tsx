@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useCacheSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import CommentRow from "../search/CommentRow"
 import ForumPostRow from "../search/ForumPostRow"
 import {CommentSearch, ForumPostSearch} from "../../types/Types"

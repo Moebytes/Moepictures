@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -53,7 +53,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            await functions.post("/api/message/forward", {messageID: forwardMessageObj.messageID, recipients: cleanedRecipients}, session, setSessionFlag)
+            await functions.http.post("/api/message/forward", {messageID: forwardMessageObj.messageID, recipients: cleanedRecipients}, session, setSessionFlag)
             setForwardMessageObj(null)
             setMessageFlag(true)
         } catch (err) {

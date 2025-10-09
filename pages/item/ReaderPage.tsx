@@ -20,7 +20,7 @@ import japaneseToEnglish from "../../assets/icons/reader-japaneseToEnglish.png"
 import color from "../../assets/icons/reader-color.png"
 import waifu2x from "../../assets/icons/reader-waifu2x.png"
 import fx from "../../assets/icons/reader-fx.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import DragScroll from "../../components/site/DragScroll"
 import LocalStorage from "../../LocalStorage"
@@ -94,15 +94,15 @@ const ReaderPage: React.FunctionComponent = () => {
 
     const loadImages = async () => {
         if (!postID) return
-        const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
         if (!post) return
         let images = [] as string[]
         let thumbnails = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
-            const imageLink = functions.getImageLink(post.images[i], session.upscaledImages)
-            const thumbLink = functions.getThumbnailLink(post.images[i], "tiny", session, mobile)
-            const decrypted = await functions.decryptItem(imageLink, session)
-            const decryptedThumb = await functions.decryptThumb(thumbLink, session)
+            const imageLink = functions.link.getImageLink(post.images[i], session.upscaledImages)
+            const thumbLink = functions.link.getThumbnailLink(post.images[i], "tiny", session, mobile)
+            const decrypted = await functions.crypto.decryptItem(imageLink, session)
+            const decryptedThumb = await functions.crypto.decryptThumb(thumbLink, session)
             images.push(decrypted)
             thumbnails.push(decryptedThumb)
         }
@@ -118,7 +118,7 @@ const ReaderPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
+        functions.post.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [post, session])
 
     useEffect(() => {
@@ -228,8 +228,8 @@ const ReaderPage: React.FunctionComponent = () => {
             return setSidebarText(i18n.sidebar.loginRequired)
         }
         if (permissions.isPremium(session)) {
-            functions.clearResponseCacheKey("/api/user/session")
-            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/session")
+            await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
             setSessionFlag(true)
         } else {
             setPremiumRequired(true)

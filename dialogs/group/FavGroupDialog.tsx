@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import deleteIcon from "../../assets/icons/delete.png"
@@ -31,7 +31,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
 
     const updateFavGroups = async () => {
         if (!favGroupID) return
-        const favgroups = await functions.get("/api/favgroups", {postID: favGroupID}, session, setSessionFlag)
+        const favgroups = await functions.http.get("/api/favgroups", {postID: favGroupID}, session, setSessionFlag)
         setFavGroups(favgroups)
         setSessionFlag(true)
     }
@@ -66,7 +66,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
 
     const addFavGroup = async () => {
         if (!favGroupID) return
-        await functions.post("/api/favgroup/update", {postID: favGroupID, name, isPrivate}, session, setSessionFlag)
+        await functions.http.post("/api/favgroup/update", {postID: favGroupID, name, isPrivate}, session, setSessionFlag)
         setFavGroupID(null)
         setSessionFlag(true)
     }
@@ -85,7 +85,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
         for (let i = 0; i < favGroups.length; i++) {
             const favgroup = favGroups[i]
             const deleteFromFavGroup = async () => {
-                await functions.delete("/api/favgroup/post/delete", {postID: favGroupID, name: favgroup.name}, session, setSessionFlag)
+                await functions.http.delete("/api/favgroup/post/delete", {postID: favGroupID, name: favgroup.name}, session, setSessionFlag)
                 updateFavGroups()
             }
             jsx.push(

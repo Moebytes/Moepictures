@@ -1,6 +1,6 @@
 import React from "react"
 import {useNavigate} from "react-router-dom"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useLayoutSelector, useSessionSelector, useThemeSelector, useFlagActions} from "../../store"
 import "./styles/parent.less"
 import Carousel from "../site/Carousel"
@@ -17,7 +17,7 @@ const Parent: React.FunctionComponent<Props> = (props) => {
     const {setPostFlag} = useFlagActions()
     const navigate = useNavigate()
     const post = props.post.post
-    const image = functions.getThumbnailLink(post.images[0], "tiny", session, mobile)
+    const image = functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile)
 
     const click = (img: string, index: number) => {
         navigate(`/post/${post.postID}/${post.slug}`, {replace: true})

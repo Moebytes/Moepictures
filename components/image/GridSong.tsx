@@ -4,7 +4,7 @@ import loading from "../../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../../store"
 import path from "path"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/gridimage.less"
 import musicNote from "../../assets/icons/music-note.png"
 import privateIcon from "../../assets/icons/lock-opt.png"
@@ -82,10 +82,10 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     const loadImage = async () => {
-        const decrypted = await functions.decryptItem(props.audio, session)
+        const decrypted = await functions.crypto.decryptItem(props.audio, session)
         setDecrypted(decrypted)
         if (!coverArt) {
-            const decryptedImage = await functions.decryptThumb(props.img, session, `${props.audio}-${sizeType}`)
+            const decryptedImage = await functions.crypto.decryptThumb(props.img, session, `${props.audio}-${sizeType}`)
             setCoverArt(decryptedImage)
         }
     }
@@ -182,7 +182,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         if (square || props.square) {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
-            const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
+            const containerWidth = Math.floor(width / (mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
@@ -346,7 +346,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.audio), decrypted)
+                functions.dom.download(path.basename(props.audio), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
@@ -438,13 +438,13 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
             }
         }
     }

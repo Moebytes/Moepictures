@@ -4,8 +4,7 @@ import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
-import functions from "../structures/Functions"
-import jsxFunctions from "../structures/JSXFunctions"
+import functions from "../functions/Functions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
@@ -107,9 +106,9 @@ const UserRoutes = (app: Express) => {
             username = username.trim().toLowerCase()
             email = email.trim()
             password = password.trim()
-            const badUsername = functions.validateUsername(username, enLocale)
-            const badEmail = functions.validateEmail(email, enLocale)
-            const badPassword = functions.validatePassword(username, password, enLocale)
+            const badUsername = functions.validation.validateUsername(username, enLocale)
+            const badEmail = functions.validation.validateEmail(email, enLocale)
+            const badPassword = functions.validation.validatePassword(username, password, enLocale)
             if (badUsername || badEmail || badPassword) return void res.status(400).send("Bad username, password, or email.")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
@@ -147,10 +146,10 @@ const UserRoutes = (app: Express) => {
                 const token = crypto.randomBytes(32).toString("hex")
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                 await sql.token.insertEmailToken(email, hashToken)
-                const user = functions.toProperCase(username)
-                const link = `${functions.getDomain()}/api/user/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(user, link))
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const user = functions.util.toProperCase(username)
+                const link = `${functions.config.getDomain()}/api/user/verifyemail?token=${token}`
+                await serverFunctions.email(email, "Moepictures Email Address Verification", functions.jsx.verifyEmailJSX(user, link))
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "account created", ip, device, region)
                 res.status(200).send("Success")
@@ -174,7 +173,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad request")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            const device = functions.parseUserAgent(req.headers["user-agent"])
+            const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
             const matches = await bcrypt.compare(password, user.password!)
             if (matches) {
@@ -187,9 +186,9 @@ const UserRoutes = (app: Express) => {
                         const token = crypto.randomBytes(32).toString("hex")
                         const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                         await sql.token.insertIPToken(user.username, hashToken, ip)
-                        const username = functions.toProperCase(user.username)
-                        const link = `${functions.getDomain()}/api/user/verifylogin?token=${token}`
-                        await serverFunctions.email(user.email!, "Moepictures New Login Location", jsxFunctions.verifyLoginJSX(username, link, ip, region))
+                        const username = functions.util.toProperCase(user.username)
+                        const link = `${functions.config.getDomain()}/api/user/verifylogin?token=${token}`
+                        await serverFunctions.email(user.email!, "Moepictures New Login Location", functions.jsx.verifyLoginJSX(username, link, ip, region))
                         return void res.status(403).send("new IP login location")
                     }
                 }
@@ -208,7 +207,7 @@ const UserRoutes = (app: Express) => {
                 req.session.publicTagFavorites = user.publicTagFavorites
                 req.session.role = user.role
                 req.session.banned = user.banned
-                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                const ips = functions.util.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips
                 const {secret, token} = serverFunctions.generateCSRF()
@@ -316,7 +315,7 @@ const UserRoutes = (app: Express) => {
                         } else {
                             await sql.user.updateUser(req.session.username, "role", "user")
                         }
-                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.getDomain()}/premium#purchase`
+                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.config.getDomain()}/premium#purchase`
                         await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
                     }
                 }
@@ -348,7 +347,7 @@ const UserRoutes = (app: Express) => {
         try {
             const {bytes, postID} = req.body as UserPfpParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
-            const result = functions.bufferFileType(bytes)?.[0]
+            const result = functions.byte.bufferFileType(bytes)?.[0]
             const jpg = result?.mime === "image/jpeg"
             const png = result?.mime === "image/png"
             const webp = result?.mime === "image/webp"
@@ -359,12 +358,12 @@ const UserRoutes = (app: Express) => {
             }
             if (jpg || png || gif || webp || avif) {
                 if (req.session.image) {
-                    let oldImagePath = functions.getTagPath("pfp", req.session.image)
+                    let oldImagePath = functions.link.getTagPath("pfp", req.session.image)
                     await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
                 }
                 if (jpg) result.extension = "jpg"
                 const filename = `${req.session.username}.${result.extension}`
-                let imagePath = functions.getTagPath("pfp", filename)
+                let imagePath = functions.link.getTagPath("pfp", filename)
                 const buffer = Buffer.from(Object.values(bytes) as any)
                 const hash = serverFunctions.md5(buffer)
                 await serverFunctions.uploadFile(imagePath, buffer, false)
@@ -388,7 +387,7 @@ const UserRoutes = (app: Express) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.image) {
-                let oldImagePath = functions.getTagPath("pfp", req.session.image)
+                let oldImagePath = functions.link.getTagPath("pfp", req.session.image)
                 await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
             }
             await sql.user.updateUser(req.session.username, "image", null)
@@ -689,7 +688,7 @@ const UserRoutes = (app: Express) => {
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
             if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             newUsername = newUsername.trim().toLowerCase()
-            const badUsername = functions.validateUsername(newUsername, enLocale)
+            const badUsername = functions.validation.validateUsername(newUsername, enLocale)
             if (badUsername) return void res.status(400).send("Bad username")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
@@ -707,12 +706,12 @@ const UserRoutes = (app: Express) => {
             req.session.lastNameChange = lastNameChange
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            const device = functions.parseUserAgent(req.headers["user-agent"])
+            const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
-                let oldImagePath = functions.getTagPath("pfp", user.image)
-                let newImagePath = functions.getTagPath("pfp", newFilename)
+                let oldImagePath = functions.link.getTagPath("pfp", user.image)
+                let newImagePath = functions.link.getTagPath("pfp", newFilename)
                 await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
                 await sql.user.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
@@ -732,7 +731,7 @@ const UserRoutes = (app: Express) => {
             if (!oldPassword || !newPassword) return void res.status(400).send("Bad oldPassword or newPassword")
             oldPassword = oldPassword.trim()
             newPassword = newPassword.trim()
-            const badPassword = functions.validatePassword(req.session.username, newPassword, enLocale)
+            const badPassword = functions.validation.validatePassword(req.session.username, newPassword, enLocale)
             if (badPassword) return void res.status(400).send("Bad newPassword")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
@@ -742,12 +741,12 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(req.session.username, "password", newHash)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
-                const username = functions.toProperCase(req.session.username)
-                const link = `${functions.getDomain()}/forgot-password`
-                await serverFunctions.email(user.email!, "Moepictures Password Changed", jsxFunctions.changedPasswordJSX(username, link))
+                const username = functions.util.toProperCase(req.session.username)
+                const link = `${functions.config.getDomain()}/forgot-password`
+                await serverFunctions.email(user.email!, "Moepictures Password Changed", functions.jsx.changedPasswordJSX(username, link))
                 return void res.status(200).send("Success")
             } else {
                 return void res.status(400).send("Bad oldPassword")
@@ -768,7 +767,7 @@ const UserRoutes = (app: Express) => {
             const expireDate = new Date(tokenData.expires)
             const user = await sql.user.user(tokenData.username)
             if (user && new Date() <= expireDate) {
-                const ips = functions.removeDuplicates([tokenData.ip, ...(user.ips || [])].filter(Boolean))
+                const ips = functions.util.removeDuplicates([tokenData.ip, ...(user.ips || [])].filter(Boolean))
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips
                 await sql.token.deleteIPToken(tokenData.username)
@@ -798,7 +797,7 @@ const UserRoutes = (app: Express) => {
                 await sql.token.deleteEmailToken(tokenData.email)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device, region)
                 res.status(200).redirect("/change-email-success")
@@ -817,7 +816,7 @@ const UserRoutes = (app: Express) => {
             let {newEmail, captchaResponse} = req.body as ChangeEmailParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
-            const badEmail = functions.validateEmail(newEmail, enLocale)
+            const badEmail = functions.validation.validateEmail(newEmail, enLocale)
             if (badEmail) return void res.status(400).send("Bad newEmail")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
@@ -828,9 +827,9 @@ const UserRoutes = (app: Express) => {
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.token.insertEmailToken(newEmail, hashToken)
-            const username = functions.toProperCase(req.session.username)
-            const link = `${functions.getDomain()}/api/user/changeemail?token=${token}`
-            await serverFunctions.email(newEmail, "Moepictures Email Address Change", jsxFunctions.changeEmailJSX(username, link))
+            const username = functions.util.toProperCase(req.session.username)
+            const link = `${functions.config.getDomain()}/api/user/changeemail?token=${token}`
+            await serverFunctions.email(newEmail, "Moepictures Email Address Change", functions.jsx.changeEmailJSX(username, link))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -857,7 +856,7 @@ const UserRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(user.username, "Welcome to Moepictures!", message)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "email verified", ip, device, region)
                 res.status(200).redirect("/verify-email-success")
@@ -876,7 +875,7 @@ const UserRoutes = (app: Express) => {
             let {email, captchaResponse} = req.body as VerifyEmailParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
-            const badEmail = functions.validateEmail(email, enLocale)
+            const badEmail = functions.validation.validateEmail(email, enLocale)
             if (badEmail) return void res.status(400).send("Bad email")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
@@ -887,9 +886,9 @@ const UserRoutes = (app: Express) => {
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.token.insertEmailToken(email, hashToken)
-            const username = functions.toProperCase(req.session.username)
-            const link = `${functions.getDomain()}/api/user/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
+            const username = functions.util.toProperCase(req.session.username)
+            const link = `${functions.config.getDomain()}/api/user/verifyemail?token=${token}`
+            await serverFunctions.email(email, "Moepictures Email Address Verification", functions.jsx.verifyEmailJSX(username, link))
             await sql.user.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
@@ -936,12 +935,12 @@ const UserRoutes = (app: Express) => {
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken =  await bcrypt.hash(token, 13)
             await sql.token.insertPasswordToken(user.username, hashToken)
-            const username = functions.toProperCase(user.username)
-            const link = `${functions.getDomain()}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email!, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
+            const username = functions.util.toProperCase(user.username)
+            const link = `${functions.config.getDomain()}/reset-password?token=${token}&username=${user.username}`
+            await serverFunctions.email(user.email!, "Moepictures Password Reset", functions.jsx.resetPasswordJSX(username, link))
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            const device = functions.parseUserAgent(req.headers["user-agent"])
+            const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
             await sql.user.insertLoginHistory(user.username, "password reset request", ip, device, region)
             res.status(200).send("Success")
@@ -956,7 +955,7 @@ const UserRoutes = (app: Express) => {
             const {username, password, token} = req.body as ResetPasswordParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!username || !token || !password) return void res.status(400).send("Bad username, token, or password")
-            const badPassword = functions.validatePassword(username, password, enLocale)
+            const badPassword = functions.validation.validatePassword(username, password, enLocale)
             if (badPassword) return void res.status(400).send("Bad password")
             const tokenData = await sql.token.passwordToken(username)
             if (!tokenData) return void res.status(400).send("Bad token")
@@ -969,7 +968,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "password", passwordHash)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "password reset", ip, device, region)
                 res.status(200).send("Success")
@@ -990,7 +989,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad username")
             try {
                 await sql.token.deleteEmailToken(user.email!)
-                if (user.image) await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image, user.imageHash), false)
+                if (user.image) await serverFunctions.deleteFile(functions.link.getTagLink("pfp", user.image, user.imageHash), false)
             } catch (e) {
                 console.log(e)
                 // ignore
@@ -1025,7 +1024,7 @@ const UserRoutes = (app: Express) => {
                 favorites = favorites.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                favorites = favorites.filter((p) => !functions.isR18(p.rating))
+                favorites = favorites.filter((p) => !functions.post.isR18(p.rating))
             }
             for (let i = favorites.length - 1; i >= 0; i--) {
                 const post = favorites[i]
@@ -1034,7 +1033,7 @@ const UserRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) favorites.splice(i, 1)
                 }
             }
-            favorites = functions.stripTags(favorites)
+            favorites = functions.post.stripTags(favorites)
             serverFunctions.sendEncrypted(favorites, req, res)
         } catch (e) {
             console.log(e)
@@ -1059,7 +1058,7 @@ const UserRoutes = (app: Express) => {
                 uploads = uploads.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                uploads = uploads.filter((p) => !functions.isR18(p.rating))
+                uploads = uploads.filter((p) => !functions.post.isR18(p.rating))
             }
             for (let i = uploads.length - 1; i >= 0; i--) {
                 const post = uploads[i]
@@ -1068,7 +1067,7 @@ const UserRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) uploads.splice(i, 1)
                 }
             }
-            uploads = functions.stripTags(uploads)
+            uploads = functions.post.stripTags(uploads)
             serverFunctions.sendEncrypted(uploads, req, res)
         } catch (e) {
             console.log(e)
@@ -1115,7 +1114,7 @@ const UserRoutes = (app: Express) => {
                     if (comment.post.hidden) comments.splice(i, 1)
                 }
                 if (!req.session.showR18) {
-                    if (functions.isR18(comment.post.rating)) comments.splice(i, 1)
+                    if (functions.post.isR18(comment.post.rating)) comments.splice(i, 1)
                 }
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
@@ -1148,7 +1147,7 @@ const UserRoutes = (app: Express) => {
                 for (const unverified of unverifiedPosts) {
                     await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
-                        const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                        const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                         await serverFunctions.deleteUnverifiedFile(file)
                     }
                 }
@@ -1157,7 +1156,7 @@ const UserRoutes = (app: Express) => {
                 for (const unverified of unverifiedPostEdits) {
                     await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
-                        const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                        const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                         await serverFunctions.deleteUnverifiedFile(file)
                     }
                 }
@@ -1252,7 +1251,7 @@ const UserRoutes = (app: Express) => {
                 for (const history of postHistory) {
                     for (const image of history.images) {
                         if (image?.startsWith("history/")) {
-                            let r18 = functions.isR18(history.rating)
+                            let r18 = functions.post.isR18(history.rating)
                             await serverFunctions.deleteFile(image, r18)
                         }
                     }
@@ -1287,7 +1286,7 @@ const UserRoutes = (app: Express) => {
             if (days) {
                 let expiration = new Date()
                 expiration.setDate(expiration.getDate() + Number(days))
-                banDuration = functions.timeUntil(expiration.toISOString(), enLocale)
+                banDuration = functions.date.timeUntil(expiration.toISOString(), enLocale)
                 await sql.user.updateUser(username, "banExpiration", expiration.toISOString())
             }
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
@@ -1341,7 +1340,7 @@ const UserRoutes = (app: Express) => {
         try {
             const {username, role} = req.body as {username: string, role: UserRole}
             if (!username) return void res.status(400).send("Bad username")
-            if (!functions.validRole(role)) return void res.status(400).send("Bad role")
+            if (!functions.validation.validRole(role)) return void res.status(400).send("Bad role")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const user = await sql.user.user(username)
@@ -1369,7 +1368,7 @@ const UserRoutes = (app: Express) => {
             }
             await sql.user.updateUser(username, "role", role)
 
-            let isDemotion = functions.isDemotion(user.role, role)
+            let isDemotion = functions.validation.isDemotion(user.role, role)
             if (isDemotion) {
                 const message = `You have been demoted to ${role}.`
                 await serverFunctions.systemMessage(username, `Notice: Your account was demoted to ${role}`, message)
@@ -1383,7 +1382,7 @@ const UserRoutes = (app: Express) => {
                     await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
                 } 
                 if (premiumPromotion) {
-                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration, enLocale)}.`
+                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
                 } 
                 if (curatorPromotion) {
@@ -1497,7 +1496,7 @@ const UserRoutes = (app: Express) => {
             if (!sort) sort = "random"
             if (!username) username = req.session.username!
             if (!username) return void res.status(400).send("Bad username")
-            if (!functions.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let result = await sql.thread.forumPosts(username, search, sort, Number(offset))
             if (!req.session.showR18) {

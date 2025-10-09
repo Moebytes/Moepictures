@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -34,9 +34,9 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
     const undeletePost = async () => {
         if (!undeletePostID?.postID) return
         if (undeletePostID.unverified) {
-            await functions.put("/api/post/undelete/unverified", {postID: undeletePostID.postID}, session, setSessionFlag)
+            await functions.http.put("/api/post/undelete/unverified", {postID: undeletePostID.postID}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/undelete", {postID: undeletePostID.postID}, session, setSessionFlag)
+            await functions.http.put("/api/post/undelete", {postID: undeletePostID.postID}, session, setSessionFlag)
         }
         setUndeletePostID(null)
         setPostFlag(undeletePostID.postID)

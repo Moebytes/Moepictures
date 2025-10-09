@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"

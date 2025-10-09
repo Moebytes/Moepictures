@@ -2,8 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, 
 useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
-import functions from "../../structures/Functions"
-import jsxFunctions from "../../structures/JSXFunctions"
+import functions from "../../functions/Functions"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
@@ -33,15 +32,15 @@ const TagToolTip: React.FunctionComponent = (props) => {
     const updateTag = async () => {
         if (session?.username && !session?.showTagTooltips) return
         if (!tagTooltipTag) return
-        const tag = await functions.get("/api/tag", {tag: tagTooltipTag}, session, setSessionFlag)
+        const tag = await functions.http.get("/api/tag", {tag: tagTooltipTag}, session, setSessionFlag)
         if (!tag) return
         setTag(tag)
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        let posts = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 32}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        let posts = await functions.http.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "random", limit: 32}, session, setSessionFlag)
         let items = [] as {post: PostSearch, image: string, ref: React.RefObject<HTMLImageElement | null>}[]
         await Promise.all(posts.map(async (post) => {
-            let thumbnail = functions.getThumbnailLink(post.images[0], "tiny", session, mobile)
-            let image = await functions.decryptThumb(thumbnail, session, `tooltip-${thumbnail}`, true)
+            let thumbnail = functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile)
+            let image = await functions.crypto.decryptThumb(thumbnail, session, `tooltip-${thumbnail}`, true)
             items.push({post, image, ref: React.createRef<HTMLImageElement>()})
         }))
         setItems(items)
@@ -214,13 +213,13 @@ const TagToolTip: React.FunctionComponent = (props) => {
     }
 
     const openPost = (event: React.MouseEvent, post: PostSearch) => {
-        functions.openPost(post, event, navigate, session, setSessionFlag)
+        functions.post.openPost(post, event, navigate, session, setSessionFlag)
         setTagToolTipEnabled(false)
     }
 
     const getTagName = () => {
         if (!tag) return
-        return functions.toProperCase(tag.tag.replaceAll("-", " "))
+        return functions.util.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
     const getStyle = () => {
@@ -229,7 +228,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         return {
             opacity: tagTooltipEnabled ? "1" : "0", 
             pointerEvents: tagTooltipEnabled ? "all" : "none",
-            left: `${functions.sidebarWidth()}px`, 
+            left: `${functions.dom.sidebarWidth()}px`, 
             top: `${constrainedTop}px`
         } as React.CSSProperties
     }
@@ -243,16 +242,16 @@ const TagToolTip: React.FunctionComponent = (props) => {
             <div className="tag-tooltip-row">
                 {tag.image ?
                 <div className="tag-tooltip-img-container">
-                    <img className="tag-tooltip-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                    <img className="tag-tooltip-img" src={functions.link.getTagLink(tag.type, tag.image, tag.imageHash)}/>
                 </div> : null}
-                <span className={`tag-tooltip-heading ${functions.getTagColor(tag)}`} onClick={tagInfo} onAuxClick={tagInfo}>{getTagName()}</span>
+                <span className={`tag-tooltip-heading ${functions.tag.getTagColor(tag)}`} onClick={tagInfo} onAuxClick={tagInfo}>{getTagName()}</span>
                 {tagSocialJSX()}
             </div>
             {pixivTagsJSX()}
             {tagAliasJSX()}
             <div className="tag-tooltip-row">
                 <div className="tag-tooltip-text-container">
-                    <span className="tag-tooltip-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>
+                    <span className="tag-tooltip-text">{functions.jsx.renderCommentaryText(tag.description)}</span>
                 </div>
             </div>
             {tagImagesJSX()}

@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -88,8 +88,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async (query?: string) => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, rating, limit}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/search/groups", {sort: functions.validation.parseSort(sortType, sortReverse), query: query ? query : searchQuery, rating, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleGroups([])
@@ -147,7 +147,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleGroups(functions.removeDuplicates(newVisibleGroups))
+            setVisibleGroups(functions.util.removeDuplicates(newVisibleGroups))
         }
         if (scroll) updateGroups()
     }, [scroll, groups, ratingType, session])
@@ -166,8 +166,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        let result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, rating, limit, offset: newOffset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        let result = await functions.http.get("/api/search/groups", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, rating, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanGroups = groups.filter((t) => !t.fake)
         if (!scroll) {
@@ -181,14 +181,14 @@ const GroupsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setGroups(result)
             } else {
-                setGroups((prev) => functions.removeDuplicates([...prev, ...result]))
+                setGroups((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setGroups(result)
                 } else {
-                    setGroups((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setGroups((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -197,7 +197,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!groups[currentIndex]) return updateOffset()
                 const newVisibleGroups = visibleGroups
@@ -207,7 +207,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleGroups(functions.removeDuplicates(newVisibleGroups))
+                setVisibleGroups(functions.util.removeDuplicates(newVisibleGroups))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -366,7 +366,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as GroupSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleGroups)
+            visible = functions.util.removeDuplicates(visibleGroups)
         } else {
             const postOffset = (groupsPage - 1) * getPageAmount()
             visible = groups.slice(postOffset, postOffset + getPageAmount())
@@ -376,7 +376,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
             if (group.fake) continue
             if (!session.username) if (group.rating !== functions.r13()) continue
             if (!session.username) if (group.posts[0].rating !== functions.r13()) continue
-            if (!functions.isR18(ratingType)) if (functions.isR18(group.rating)) continue
+            if (!functions.post.isR18(ratingType)) if (functions.post.isR18(group.rating)) continue
             jsx.push(<GroupThumbnail key={group.groupID} group={group}/>)
         }
         if (!scroll) {

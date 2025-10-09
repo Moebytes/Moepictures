@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
@@ -37,7 +37,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             setDeleteTagFlag(true)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -46,7 +46,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/tag/delete/request", {tag: deleteTagID, reason}, session, setSessionFlag)
+            await functions.http.post("/api/tag/delete/request", {tag: deleteTagID, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

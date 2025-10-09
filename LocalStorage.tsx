@@ -3,7 +3,7 @@ import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
 usePageSelector, usePageActions, useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
 import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
-import functions from "./structures/Functions"
+import functions from "./functions/Functions"
 import localforage from "localforage"
 
 const darkColorList = {
@@ -127,7 +127,7 @@ const LocalStorage: React.FunctionComponent = (props) => {
             if (noRotation.includes(key)) {
                 document.documentElement.style.setProperty(key, color)
             } else {
-                document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
+                document.documentElement.style.setProperty(key, functions.color.rotateColor(color, siteHue, siteSaturation, targetLightness))
             }
         }
     }, [theme, siteHue, siteSaturation, siteLightness])

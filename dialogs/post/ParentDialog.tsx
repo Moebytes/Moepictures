@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useInteractionActions, usePostDialogSelector, usePostDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import deleteIcon from "../../assets/icons/delete.png"
 import Draggable from "react-draggable"
@@ -55,10 +55,10 @@ const ParentDialog: React.FunctionComponent = (props) => {
                 parentID
             }
             setChildPostObj(null)
-            await functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(childPostObj.post.postID)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -76,7 +76,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
                 parentID,
                 reason
             }
-            await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
         }
     }

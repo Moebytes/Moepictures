@@ -1,8 +1,7 @@
 import React from "react"
 import {useInteractionActions, useThemeSelector} from "../../store"
-import jsxFunctions from "../../structures/JSXFunctions"
 import buyLinkIcon from "../../assets/icons/buy-link.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/commentary.less"
 
 interface Props {
@@ -25,7 +24,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {jsxFunctions.renderCommentaryText(props.link)}   
+                    {functions.jsx.renderCommentaryText(props.link)}   
                 </span>
             </div>
         </div>

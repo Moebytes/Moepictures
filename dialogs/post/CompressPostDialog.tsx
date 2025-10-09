@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -52,9 +52,9 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const compressPost = async () => {
         if (!compressPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/compress",  {postID: compressPostID.post.postID, 
-            quality: functions.safeNumber(quality) || 95, format, maxDimension: functions.safeNumber(maxDimension) || 2000, 
-            maxUpscaledDimension: functions.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
+            await functions.http.post("/api/post/compress",  {postID: compressPostID.post.postID, 
+            quality: functions.util.safeNumber(quality) || 95, format, maxDimension: functions.util.safeNumber(maxDimension) || 2000, 
+            maxUpscaledDimension: functions.util.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
             setPostFlag(compressPostID.post.postID)
         }
     }

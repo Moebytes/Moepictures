@@ -3,7 +3,7 @@ import {useInteractionActions, useLayoutSelector,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useCacheSelector, useGroupDialogActions,
 useCacheActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import star from "../../assets/icons/star.png"
 import starFavorited from "../../assets/icons/starFavorited.png"
 import starGroup from "../../assets/icons/stargroup.png"
@@ -13,7 +13,6 @@ import filters from "../../assets/icons/filters.png"
 import nextIcon from "../../assets/icons/next.png"
 import prevIcon from "../../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
-import imageFunctions from "../../structures/ImageFunctions"
 import Filters from "./Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 
@@ -68,33 +67,33 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const getDLText = async () => {
         let decrypted = props.img || ""
         if (props.img) {
-            if (!functions.isVideo(props.img)) {
-                decrypted = await functions.decryptItem(props.img, session)
+            if (!functions.file.isVideo(props.img)) {
+                decrypted = await functions.crypto.decryptItem(props.img, session)
             }
             if (props.comicPages) {
                 let sizeTotal = 0
                 for (let i = 0; i < props.comicPages.length; i++) {
-                    const miniDecrypt = await functions.decryptItem(props.comicPages[i], session)
-                    let {size} = await imageFunctions.dimensions(miniDecrypt)
+                    const miniDecrypt = await functions.crypto.decryptItem(props.comicPages[i], session)
+                    let {size} = await functions.image.dimensions(miniDecrypt)
                     sizeTotal += size
                 }
-                setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.readableFileSize(sizeTotal)})`)
+                setDownloadText(`${props.comicPages.length} ${i18n.sortbar.pages.toLowerCase()} (${functions.util.readableFileSize(sizeTotal)})`)
             } else {
-                let {width, height, size} = await imageFunctions.dimensions(decrypted)
-                setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
+                let {width, height, size} = await functions.image.dimensions(decrypted)
+                setDownloadText(`${width}x${height} (${functions.util.readableFileSize(size)})`)
             }
         } else if (props.model) {
-            decrypted = await functions.decryptItem(props.model, session)
-            let {polycount, size} = await imageFunctions.dimensions(decrypted)
-            setDownloadText(`${functions.readablePolycount(polycount!)} (${functions.readableFileSize(size)})`)
+            decrypted = await functions.crypto.decryptItem(props.model, session)
+            let {polycount, size} = await functions.image.dimensions(decrypted)
+            setDownloadText(`${functions.model.readablePolycount(polycount!)} (${functions.util.readableFileSize(size)})`)
         } else if (props.audio) {
-            decrypted = await functions.decryptItem(props.audio, session)
-            let {duration, size} = await imageFunctions.dimensions(decrypted)
-            setDownloadText(`${functions.formatSeconds(duration!)} (${functions.readableFileSize(size)})`)
+            decrypted = await functions.crypto.decryptItem(props.audio, session)
+            let {duration, size} = await functions.image.dimensions(decrypted)
+            setDownloadText(`${functions.date.formatSeconds(duration!)} (${functions.util.readableFileSize(size)})`)
         } else if (props.live2d) {
-            decrypted = await functions.decryptItem(props.live2d, session)
-            let {width, height, size} = await imageFunctions.dimensions(decrypted)
-            setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
+            decrypted = await functions.crypto.decryptItem(props.live2d, session)
+            let {width, height, size} = await functions.image.dimensions(decrypted)
+            setDownloadText(`${width}x${height} (${functions.util.readableFileSize(size)})`)
         }
     }
 
@@ -107,13 +106,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const getFavorite = async () => {
         if (!props.post || !session.username) return
-        const favorite = await functions.get("/api/favorite", {postID: props.post.postID}, session, setSessionFlag)
+        const favorite = await functions.http.get("/api/favorite", {postID: props.post.postID}, session, setSessionFlag)
         setFavorited(favorite ? true : false)
     }
 
     const getFavgroup = async () => {
         if (!props.post || !session.username) return
-        const favgroups = await functions.get("/api/favgroups", {postID: props.post.postID}, session, setSessionFlag)
+        const favgroups = await functions.http.get("/api/favgroups", {postID: props.post.postID}, session, setSessionFlag)
         setFavGrouped(favgroups?.length ? true : false)
     }
 
@@ -198,8 +197,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
-        await functions.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
-        functions.updateLocalFavorite(props.post.postID, value, posts, setPosts)
+        await functions.http.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
+        functions.post.updateLocalFavorite(props.post.postID, value, posts, setPosts)
         setFavorited(value)
     }
 

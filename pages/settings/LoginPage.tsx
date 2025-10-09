@@ -11,7 +11,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"
 import "./styles/sitepage.less"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
@@ -43,7 +43,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -97,7 +97,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            const result = await functions.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
+            const result = await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)

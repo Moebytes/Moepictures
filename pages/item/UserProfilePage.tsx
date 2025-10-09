@@ -10,7 +10,7 @@ import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
 useCacheSelector, useCacheActions, useInteractionActions, useMiscDialogSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
 import adminLabel from "../../assets/icons/admin-label.png"
@@ -37,7 +37,6 @@ import link from "../../assets/icons/link-purple.png"
 import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
@@ -103,12 +102,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const updateBanReason = async () => {
-        const ban = await functions.get("/api/user/ban", {username: session.username}, session, setSessionFlag)
+        const ban = await functions.http.get("/api/user/ban", {username: session.username}, session, setSessionFlag)
         if (ban?.reason) setBanReason(ban.reason)
     }
 
     const checkHiddenBanner = async () => {
-        const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
+        const banner = await functions.http.get("/api/misc/banner", null, session, setSessionFlag)
         const bannerHideDate = localStorage.getItem("bannerHideDate")
         if (bannerHideDate && new Date(bannerHideDate) > new Date(banner?.date || "")) {
             if (banner?.text) setBannerHidden(true)
@@ -120,9 +119,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateUploads = async () => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const uploads = await functions.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const uploads = await functions.http.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
+        const images = uploads.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -130,18 +129,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploadOffset = async () => {
         const newUploads = uploads
         let offset = newUploads.length
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+        const images = result.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
 
     const updateFavorites = async () => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const favorites = await functions.get("/api/user/favorites", {limit, rating}, session, setSessionFlag)
-        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const favorites = await functions.http.get("/api/user/favorites", {limit, rating}, session, setSessionFlag)
+        const images = favorites.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -149,50 +148,50 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavoriteOffset = async () => {
         const newFavorites = favorites
         let offset = newFavorites.length
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+        const images = result.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
 
     const updateFavgroups = async () => {
-        const favgroups = await functions.get("/api/user/favgroups", null, session, setSessionFlag)
+        const favgroups = await functions.http.get("/api/user/favgroups", null, session, setSessionFlag)
         setFavgroups(favgroups)
     }
 
     const updateComments = async () => {
-        const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
-        let filtered = comments.filter((c) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
+        const comments = await functions.http.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
+        let filtered = comments.filter((c) => functions.post.isR18(ratingType) ? functions.post.isR18(c.post?.rating) : !functions.post.isR18(c.post?.rating))
         setComments(filtered)
     }
 
     const updateForumPosts = async () => {
-        const forumPosts = await functions.get("/api/user/forumposts", {sort: "date"}, session, setSessionFlag)
+        const forumPosts = await functions.http.get("/api/user/forumposts", {sort: "date"}, session, setSessionFlag)
         setForumPosts(forumPosts)
     }
 
     const updateCounts = async () => {
-        const counts = await functions.get("/api/user/edit/counts", null, session, setSessionFlag)
+        const counts = await functions.http.get("/api/user/edit/counts", null, session, setSessionFlag)
         setCounts(counts)
     }
 
     const updateFavoriteTags = async () => {
-        const favoriteTags = await functions.get("/api/tagfavorites", null, session, setSessionFlag)
+        const favoriteTags = await functions.http.get("/api/tagfavorites", null, session, setSessionFlag)
         setFavoriteTags(favoriteTags)
     }
 
     const updatePending = async () => {
-         const pending = await functions.get("/api/post/pending", null, session, setSessionFlag)
-         const images = pending.map((p) => functions.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
+         const pending = await functions.http.get("/api/post/pending", null, session, setSessionFlag)
+         const images = pending.map((p) => functions.link.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
          setPending(pending)
          setPendingImages(images)
     }
 
     const updateDeleted = async () => {
-        const deleted = await functions.get("/api/post/rejected", null, session, setSessionFlag)
-        const images = deleted.map((p) => functions.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
+        const deleted = await functions.http.get("/api/post/rejected", null, session, setSessionFlag)
+        const images = deleted.map((p) => functions.link.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
         setDeleted(pending)
         setDeletedImages(images)
    }
@@ -252,7 +251,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         await new Promise<void>((resolve) => {
             fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
                 const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                const result = functions.bufferFileType(bytes)?.[0]
+                const result = functions.byte.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
@@ -260,30 +259,30 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 const avif = result?.mime === "image/avif"
                 if (jpg || png || gif || webp || avif) {
                     const MB = file.size / (1024*1024)
-                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
+                    const maxSize = functions.validation.maxTagFileSize({jpg, png, gif, webp, avif})
                     if (MB <= maxSize) {
                         const url = URL.createObjectURL(file)
                         let croppedURL = ""
                         if (gif) {
-                            const gifData = await functions.extractGIFFrames(bytes.buffer)
+                            const gifData = await functions.video.extractGIFFrames(bytes.buffer)
                             let frameArray = [] as ArrayBuffer[] 
                             let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
                                 const canvas = gifData[i].frame as HTMLCanvasElement
-                                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
+                                const cropped = await functions.image.crop(canvas.toDataURL(), 1, true)
                                 frameArray.push(cropped)
                                 delayArray.push(gifData[i].delay)
                             }
-                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                            const {width, height} = await functions.imageDimensions(firstURL)
-                            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+                            const firstURL = await functions.image.crop(gifData[0].frame.toDataURL(), 1, false)
+                            const {width, height} = await functions.image.imageDimensions(firstURL)
+                            const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([new Uint8Array(buffer)])
                             croppedURL = URL.createObjectURL(blob)
                         } else {
-                            croppedURL = await functions.crop(url, 1, false)
+                            croppedURL = await functions.image.crop(url, 1, false)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                        await functions.post("/api/user/pfp", {bytes: Object.values(new Uint8Array(arrayBuffer))}, session, setSessionFlag)
+                        await functions.http.post("/api/user/pfp", {bytes: Object.values(new Uint8Array(arrayBuffer))}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -295,69 +294,69 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const favoritesPrivacy = async () => {
-        await functions.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const tagFavoritesPrivacy = async () => {
-        await functions.post("/api/user/tagfavoritesprivacy", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/tagfavoritesprivacy", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showRelated = async () => {
-        await functions.post("/api/user/showrelated", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/showrelated", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTooltips = async () => {
-        await functions.post("/api/user/showtooltips", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/showtooltips", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTagTooltips = async () => {
-        await functions.post("/api/user/showtagtooltips", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/showtagtooltips", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTagBanner = async () => {
-        await functions.post("/api/user/showtagbanner", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/showtagbanner", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const downloadPixivID = async () => {
-        await functions.post("/api/user/downloadpixivid", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/downloadpixivid", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const forceNoteBubbles = async () => {
-        await functions.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const liveAnimationPreview = async () => {
-        await functions.post("/api/user/liveanimationpreview", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/liveanimationpreview", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
     
     const liveModelPreview = async () => {
-        await functions.post("/api/user/livemodelpreview", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/livemodelpreview", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showR18 = async () => {
         if (session.showR18) {
-            await functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
-            functions.clearResponseCacheKey("/api/user/session")
+            await functions.http.post("/api/user/r18", {r18: false}, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
         } else {
             setR18Confirmation(true)
@@ -366,8 +365,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const upscaledImages = async () => {
         if (permissions.isPremium(session)) {
-            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
-            functions.clearResponseCacheKey("/api/user/session")
+            await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
         } else {
             setPremiumRequired(true)
@@ -378,8 +377,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const autosearchInterval = async () => {
             clearTimeout(intervalTimer) 
             intervalTimer = setTimeout(() => {
-                functions.clearResponseCacheKey("/api/user/session")
-                functions.post("/api/user/autosearchinterval", {interval: functions.safeNumber(interval)}, session, setSessionFlag)
+                functions.cache.clearResponseCacheKey("/api/user/session")
+                functions.http.post("/api/user/autosearchinterval", {interval: functions.util.safeNumber(interval)}, session, setSessionFlag)
                 .then(() => setSessionFlag(true))
             }, 1000)
         }
@@ -390,8 +389,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const updateBlacklist = async () => {
             clearTimeout(blacklistTimer) 
             blacklistTimer = setTimeout(() => {
-                functions.clearResponseCacheKey("/api/user/session")
-                functions.post("/api/user/blacklist", {blacklist}, session, setSessionFlag)
+                functions.cache.clearResponseCacheKey("/api/user/session")
+                functions.http.post("/api/user/blacklist", {blacklist}, session, setSessionFlag)
                 .then(() => setSessionFlag(true))
             }, 1000)
         }
@@ -399,7 +398,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }, [blacklist])
 
     const changeBio = async () => {
-        const badBio = functions.validateBio(bio, i18n)
+        const badBio = functions.validation.validateBio(bio, i18n)
         if (badBio) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -412,8 +411,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/changebio", {bio}, session, setSessionFlag)
-            functions.clearResponseCacheKey("/api/user/session")
+            await functions.http.post("/api/user/changebio", {bio}, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
             setError(false)
             setShowBioInput(false)
@@ -432,7 +431,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
     }
 
@@ -444,7 +443,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
     }
 
@@ -456,7 +455,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             navigate(`/unverified/post/${post.postID}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
     }
 
     const setDel = (img: string, index: number, newTab: boolean) => {
@@ -467,7 +466,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             navigate(`/unverified/post/${post.postID}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
     }
 
     const deleteAccountDialog = () => {
@@ -498,68 +497,68 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!userImgPost) return
         event.stopPropagation()
-        functions.openPost(userImgPost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(userImgPost, event, navigate, session, setSessionFlag)
     }
 
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain admin-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain admin-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={adminLabel}/>
                 </div>
             )
         } else if (session.role === "mod") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain mod-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain mod-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={modLabel}/>
                 </div>
             )
         } else if (session.role === "system") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain system-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain system-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={systemLabel}/>
                 </div>
             )
         } else if (session.role === "premium-curator") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain curator-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={premiumCuratorLabel}/>
                 </div>
             )
         } else if (session.role === "curator") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain curator-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={curatorLabel}/>
                 </div>
             )
         } else if (session.role === "premium-contributor") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain premium-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={premiumContributorLabel}/>
                 </div>
             )
         } else if (session.role === "contributor") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain contributor-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain contributor-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={contributorLabel}/>
                 </div>
             )
         } else if (session.role === "premium") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <span className="user-name-plain premium-color">{functions.util.toProperCase(session.username)}</span>
                     <img className="user-name-label" src={premiumLabel}/>
                 </div>
             )
         } 
-        return <span className={`user-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
+        return <span className={`user-name ${session.banned ? "banned" : ""}`}>{functions.util.toProperCase(session.username)}</span>
     }
 
     const getBanText = () => {
@@ -576,21 +575,21 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const clearPfp = async () => {
-        await functions.delete("/api/user/pfp", null, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.delete("/api/user/pfp", null, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setUserImg("")
         setSessionFlag(true)
     }
 
     const clearCookieConsent = async () => {
-        await functions.post("/api/user/cookieconsent", {consent: null}, session, setSessionFlag)
-        functions.clearResponseCacheKey("/api/user/session")
+        await functions.http.post("/api/user/cookieconsent", {consent: null}, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showBanner = async () => {
         localStorage.removeItem("bannerHideDate")
-        functions.clearResponseCacheKey("/api/user/session")
+        functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
@@ -599,13 +598,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (new Date(session.premiumExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text" style={{color: "var(--premiumColor)"}}>{i18n.user.premiumUntil} {functions.prettyDate(session.premiumExpiration, i18n)}</span>
+                    <span className="user-text" style={{color: "var(--premiumColor)"}}>{i18n.user.premiumUntil} {functions.date.prettyDate(session.premiumExpiration, i18n)}</span>
                 </div>
             )
         } else if (new Date(session.premiumExpiration) < new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text">{i18n.user.premiumExpired} {functions.prettyDate(session.premiumExpiration, i18n)}</span>
+                    <span className="user-text">{i18n.user.premiumExpired} {functions.date.prettyDate(session.premiumExpiration, i18n)}</span>
                 </div>
             )
         }
@@ -616,7 +615,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (new Date(session.banExpiration || "") > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-text" style={{color: "var(--banText)"}}>{i18n.user.banExpires} {functions.timeUntil(session.banExpiration, i18n)}</span>
+                    <span className="user-text" style={{color: "var(--banText)"}}>{i18n.user.banExpires} {functions.date.timeUntil(session.banExpiration, i18n)}</span>
                 </div>
             )
         }
@@ -652,12 +651,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
-            if (functions.isR18(ratingType)) {
-                if (!functions.isR18(favgroup.rating)) continue
+            if (functions.post.isR18(ratingType)) {
+                if (!functions.post.isR18(favgroup.rating)) continue
             } else {
-                if (functions.isR18(favgroup.rating)) continue
+                if (functions.post.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+            const images = favgroup.posts.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
                 navigate(`/favgroup/${session.username}/${favgroup.slug}`)
             }
@@ -668,7 +667,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 } else {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
                 setPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
@@ -742,18 +741,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             <>
             <div className="user-column">
                 <div className="dialog-textarea-buttons" style={{width: "50%"}}>
-                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter: getFilter()}}/></button>
                 </div>
-                {previewMode ? <div className="comments-preview" style={{width: "50%", minHeight: "100px"}}>{jsxFunctions.renderText(bio, emojis, "reply")}</div> : 
+                {previewMode ? <div className="comments-preview" style={{width: "50%", minHeight: "100px"}}>{functions.jsx.renderText(bio, emojis, "reply")}</div> : 
                 <div style={{marginTop: "0px"}} className="user-column">
                     <textarea ref={textRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
                     onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
@@ -796,10 +795,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="user-text">{i18n.labels.email}: {session.email}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(session.joinDate, i18n)}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.date.prettyDate(session.joinDate, i18n)}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
+                        <span className="user-text">{i18n.user.bio}: {functions.jsx.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>{i18n.user.updateBio}</span>
@@ -814,7 +813,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         className="user-text-action" onClick={tagFavoritesPrivacy}>{session.publicTagFavorites ? i18n.labels.public : i18n.sort.private}</span></span>
                     </div>
                     {Number.isFinite(permissions.getUploadLimit(session)) ? <div className="user-row">
-                        <span className="user-text">{i18n.labels.uploadLimit}: <span className="user-text-action">{functions.currentUploads(pending)} / {permissions.getUploadLimit(session)}</span></span>
+                        <span className="user-text">{i18n.labels.uploadLimit}: <span className="user-text-action">{functions.post.currentUploads(pending)} / {permissions.getUploadLimit(session)}</span></span>
                     </div> : null}
                     <div className="user-row">
                         <span className="user-text">{i18n.user.showRelated}: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? i18n.buttons.yes : i18n.buttons.no}</span></span>
@@ -916,7 +915,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div> : null}
                     {deleted.length ?
                     <div className="user-column">
-                        <span className="user-title">{functions.toProperCase(i18n.user.deleted)} <span className="user-text-alt">{deleted[0].postCount}</span></span>
+                        <span className="user-title">{functions.util.toProperCase(i18n.user.deleted)} <span className="user-text-alt">{deleted[0].postCount}</span></span>
                         <Carousel images={deletedImages} noKey={true} set={setDel} index={deletedIndex} unverified={true}/>
                     </div> : null}
                     {permissions.isMod(session) && session.deletedPosts?.length ? <div className="user-row">

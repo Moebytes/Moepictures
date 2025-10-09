@@ -2,7 +2,7 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useMiscDialogSelector, useMiscDialogActions, useActiveActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 
@@ -30,7 +30,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     }, [showDeleteAccountDialog])
 
     const deleteAccount = async () => {
-        await functions.delete("/api/user/delete", null, session, setSessionFlag)
+        await functions.http.delete("/api/user/delete", null, session, setSessionFlag)
         setSessionFlag(true)
         navigate("/posts")
         setSidebarText(i18n.sidebar.accountDeleted)

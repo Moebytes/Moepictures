@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions} from "../../store"
-import functions from "../../structures/Functions"
-import imageFunctions from "../../structures/ImageFunctions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import historyIcon from "../../assets/icons/history-state.png"
 import uploadIcon from "../../assets/icons/upload.png"
@@ -38,8 +37,8 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
         for (let i = 0; i < editThumbnailID.post.images.length; i++) {
             let image = editThumbnailID.post.images[i]
             if (typeof image === "string") throw new Error("History state")
-            let thumbnail = functions.getThumbnailLink(image, "massive", session)
-            const decrypted = await functions.decryptThumb(thumbnail, session)
+            let thumbnail = functions.link.getThumbnailLink(image, "massive", session)
+            const decrypted = await functions.crypto.decryptThumb(thumbnail, session)
             images.push(decrypted)
         }
         setImages(images)
@@ -66,11 +65,11 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
             for (let i = 0; i < images.length; i++) {
                 if (!updateAll) if (i !== order - 1) continue
                 const bytes = await fetch(images[i]).then((r) => r.arrayBuffer())
-                const result = functions.bufferFileType(bytes)?.[0] || {}
+                const result = functions.byte.bufferFileType(bytes)?.[0] || {}
                 const thumbnailExt = result.typename || "jpg"
                 thumbnails.push({order: i + 1, thumbnail: images[i], thumbnailExt})
             }
-            await functions.put("/api/post/thumbnail", {postID: editThumbnailID.post.postID, 
+            await functions.http.put("/api/post/thumbnail", {postID: editThumbnailID.post.postID, 
             unverified: editThumbnailID.unverified, thumbnails}, session, setSessionFlag)
             setActionBanner("edit-thumbnail")
         }
@@ -86,8 +85,8 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const uploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
-        const bytes = await imageFunctions.readFileBytes(file)
-        const base64 = functions.arrayBufferToBase64(bytes)
+        const bytes = await functions.image.readFileBytes(file)
+        const base64 = functions.byte.arrayBufferToBase64(bytes)
         images[order - 1] = base64
         setImages(structuredClone(images))
         setThumbnail(base64)
@@ -96,9 +95,9 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const autoGenerate = async () => {
         if (!editThumbnailID) return
         let image = editThumbnailID.post.images[order - 1]
-        const imageLink = typeof image === "string" ? functions.getRawImageLink(image) : functions.getImageLink(image)
-        const decrypted = await functions.decryptItem(imageLink, session)
-        const {thumbnail} = await imageFunctions.thumbnail(decrypted)
+        const imageLink = typeof image === "string" ? functions.link.getRawImageLink(image) : functions.link.getImageLink(image)
+        const decrypted = await functions.crypto.decryptItem(imageLink, session)
+        const {thumbnail} = await functions.image.thumbnail(decrypted)
         images[order - 1] = thumbnail
         setImages(structuredClone(images))
         setThumbnail(thumbnail)

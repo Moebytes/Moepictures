@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/tooltip.less"
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
@@ -60,7 +60,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const updateTags = async () => {
         if (session?.username && !session?.showTooltips) return
         if (!tooltipPost) return
-        const result = await functions.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
+        const result = await functions.http.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
         const artists = result.filter((t) => t.type === "artist")
         const characters = result.filter((t) => t.type === "character")
         const series = result.filter((t) => t.type === "series")
@@ -141,11 +141,11 @@ const ToolTip: React.FunctionComponent = (props) => {
         const postImage = tooltipPost.images[0]
         let img = ""
         if (session.upscaledImages) {
-            img = functions.getImageLink(postImage, true)
+            img = functions.link.getImageLink(postImage, true)
         } else {
-            img = functions.getImageLink(postImage)
+            img = functions.link.getImageLink(postImage)
         }
-        const decrypted = await functions.decryptItem(img, session)
+        const decrypted = await functions.crypto.decryptItem(img, session)
         window.open(decrypted, "_blank")
     }
 
@@ -257,7 +257,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
-                    <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image, artist.imageHash)}/>
+                    <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>
@@ -274,7 +274,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 </div>
                 <div className="tooltip-tag-container">
                     <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle || i18n.labels.noTitle}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.date.formatDate(new Date(tooltipPost.posted))}</span>
                 </div>
                 <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {getTagsJSX()}

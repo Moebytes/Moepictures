@@ -1,6 +1,6 @@
 import {Express, NextFunction, Request, Response} from "express"
 import crypto from "crypto"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
@@ -47,18 +47,18 @@ const SearchRoutes = (app: Express) => {
             let withTags = req.query.withTags === "true"
             let favoriteMode = req.query.favoriteMode === "true"
             if (!query) query = ""
-            if (!functions.validType(type, true)) return void res.status(400).send("Invalid type")
-            if (!functions.validRating(rating, true)) return void res.status(400).send("Invalid rating")
-            if (functions.isR18(rating)) if (!req.session.showR18) return void res.status(403).end()
-            if (!functions.validStyle(style, true)) return void res.status(400).send("Invalid style")
-            if (!functions.validSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validType(type, true)) return void res.status(400).send("Invalid type")
+            if (!functions.validation.validRating(rating, true)) return void res.status(400).send("Invalid rating")
+            if (functions.post.isR18(rating)) if (!req.session.showR18) return void res.status(403).end()
+            if (!functions.validation.validStyle(style, true)) return void res.status(400).send("Invalid style")
+            if (!functions.validation.validSort(sort)) return void res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags?.length; i++) {
                 const tag = await sql.tag.tag(tags[i])
                 if (!tag) {
                     const alias = await sql.tag.alias(tags[i])
                     if (alias) tags[i] = alias.tag
-                    if (!alias && functions.isJapaneseText(tags[i])) {
+                    if (!alias && functions.util.isJapaneseText(tags[i])) {
                         const pixivTag = await sql.tag.tagFromPixivTag(tags[i])
                         if (pixivTag) tags[i] = pixivTag.tag
                     }
@@ -78,12 +78,12 @@ const SearchRoutes = (app: Express) => {
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (req.session.blacklist) {
-                const negated = functions.negateBlacklist(req.session.blacklist)
+                const negated = functions.tag.negateBlacklist(req.session.blacklist)
                 tags.unshift(...negated)
             }
             if (favoriteMode && req.session.username) {
                 const favoriteTags = await sql.favorite.tagFavorites(req.session.username)
-                const appended = functions.appendFavoriteTags(favoriteTags.map((t) => t.tag))
+                const appended = functions.tag.appendFavoriteTags(favoriteTags.map((t) => t.tag))
                 tags.unshift(...appended)
             }
             if (query.startsWith("id:")) {
@@ -121,7 +121,7 @@ const SearchRoutes = (app: Express) => {
                 result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("group:")) {
                 const [g, name] = query.split(":")
-                let group = await sql.group.group(functions.generateSlug(name))
+                let group = await sql.group.group(functions.post.generateSlug(name))
                 if (!group) return void res.status(400).send("Bad group")
                 result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, showChildren, req.session.username)
             } else if (query.startsWith("favgroup:")) {
@@ -150,10 +150,10 @@ const SearchRoutes = (app: Express) => {
             result = result.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 result = result.filter((p) => !p.hidden)
-                result = functions.stripTags(result)
+                result = functions.post.stripTags(result)
             }
             if (!req.session.showR18) {
-                result = result.filter((p) => !functions.isR18(p.rating))
+                result = result.filter((p) => !functions.post.isR18(p.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
@@ -178,7 +178,7 @@ const SearchRoutes = (app: Express) => {
             if (useMD5) {
                 hash = crypto.createHash("md5").update(buffer).digest("hex")
             } else {
-                hash = await phash(buffer).then((hash: any) => functions.binaryToHex(hash))
+                hash = await phash(buffer).then((hash: any) => functions.byte.binaryToHex(hash))
             }
             const query = {
                 text: `SELECT * FROM "images" WHERE "images".hash = $1`,
@@ -196,7 +196,7 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = await sql.search.posts(Array.from(postIDs))
-            result = functions.stripTags(result)
+            result = functions.post.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -208,18 +208,18 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("artists", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
                 const artist = result[i]
-                artist.posts = functions.stripTags(artist.posts)
+                artist.posts = functions.post.stripTags(artist.posts)
                 artist.posts = artist.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     artist.posts = artist.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    artist.posts = artist.posts.filter((p: any) => !functions.isR18(p?.rating))
+                    artist.posts = artist.posts.filter((p: any) => !functions.post.isR18(p?.rating))
                 }
                 for (let i = artist.posts.length - 1; i >= 0; i--) {
                     const post = artist.posts[i]
@@ -241,18 +241,18 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("characters", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
                 const character = result[i]
-                character.posts = functions.stripTags(character.posts)
+                character.posts = functions.post.stripTags(character.posts)
                 character.posts = character.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     character.posts = character.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    character.posts = character.posts.filter((p: any) => !functions.isR18(p?.rating))
+                    character.posts = character.posts.filter((p: any) => !functions.post.isR18(p?.rating))
                 }
                 for (let i = character.posts.length - 1; i >= 0; i--) {
                     const post = character.posts[i]
@@ -274,18 +274,18 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, limit, offset} = req.query as CategorySearchParams
             if (!sort) sort = "random"
-            if (!functions.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("series", sort, search, limit, offset)
             for (let i = 0; i < result.length; i++) {
                 const series = result[i]
-                series.posts = functions.stripTags(series.posts)
+                series.posts = functions.post.stripTags(series.posts)
                 series.posts = series.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     series.posts = series.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    series.posts = series.posts.filter((p: any) => !functions.isR18(p?.rating))
+                    series.posts = series.posts.filter((p: any) => !functions.post.isR18(p?.rating))
                 }
                 for (let i = series.posts.length - 1; i >= 0; i--) {
                     const post = series.posts[i]
@@ -308,8 +308,8 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, type, limit, offset} = req.query as TagSearchParams
             if (!sort) sort = "random"
             if (!type) type = "all"
-            if (!functions.validTagSort(sort)) return void res.status(400).send("Invalid sort")
-            if (!functions.validTagType(type)) return void res.status(400).send("Invalid type")
+            if (!functions.validation.validTagSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validTagType(type)) return void res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = [] as TagSearch[]
             if (search.startsWith("social:")) {
@@ -335,7 +335,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -361,7 +361,7 @@ const SearchRoutes = (app: Express) => {
                     if (comment.post.hidden) result.splice(i, 1)
                 }
                 if (!req.session.showR18) {
-                    if (functions.isR18(comment.post.rating)) result.splice(i, 1)
+                    if (functions.post.isR18(comment.post.rating)) result.splice(i, 1)
                 }
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
@@ -380,7 +380,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -406,7 +406,7 @@ const SearchRoutes = (app: Express) => {
                     if (note.post.hidden) result.splice(i, 1)
                 }
                 if (!req.session.showR18) {
-                    if (functions.isR18(note.post.rating)) result.splice(i, 1)
+                    if (functions.post.isR18(note.post.rating)) result.splice(i, 1)
                 }
                 if (note.post.private) {
                     const tags = await sql.post.postTags(note.post.postID)
@@ -426,11 +426,11 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, rating, limit, offset} = req.query as GroupSearchParams
             if (!sort) sort = "random"
             if (!rating) rating = "all"
-            if (!functions.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username)
             if (!req.session.showR18) {
-                result = result.filter((g: any) => !functions.isR18(g.rating))
+                result = result.filter((g: any) => !functions.post.isR18(g.rating))
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -444,8 +444,8 @@ const SearchRoutes = (app: Express) => {
             let {query, type} = req.query as SearchSuggestionsParams
             if (!query) query = ""
             if (!type) type = "all"
-            if (!functions.validTagType(type)) return void res.status(400).send("Invalid type")
-            query = functions.trimSpecialCharacters(query)
+            if (!functions.validation.validTagType(type)) return void res.status(400).send("Invalid type")
+            query = functions.tag.trimSpecialCharacters(query)
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type, 100).then((r) => r.slice(0, 100))
             if (!result?.[0]) {
@@ -515,7 +515,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {query, sort, offset} = req.query as CommentSearchParams
             if (!sort) sort = "random"
-            if (!functions.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
             let usernames = [] as any 
@@ -533,15 +533,15 @@ const SearchRoutes = (app: Express) => {
                 let unsorted = await sql.thread.searchThreadsByUsername(usernames, parsedSearch.trim(), sort, Number(offset), req.session.username)
                 let stickyThreads = unsorted.filter((thread) => thread.sticky)
                 const rulesThread = stickyThreads.find((thread) => thread.title.toLowerCase().includes("rules"))
-                if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
+                if (rulesThread) stickyThreads = functions.util.removeItem(stickyThreads, rulesThread)
                 let threadResult = unsorted.filter((thread) => !thread.sticky)
-                result = functions.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
+                result = functions.util.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
             } else {
                 let stickyThreads = await sql.thread.stickyThreads(req.session.username)
                 const rulesThread = stickyThreads.find((thread) => thread.title.toLowerCase().includes("rules"))
-                if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
+                if (rulesThread) stickyThreads = functions.util.removeItem(stickyThreads, rulesThread)
                 let threadResult = await sql.thread.searchThreads(parsedSearch.trim(), sort, Number(offset), req.session.username)
-                result = functions.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
+                result = functions.util.filterNulls([rulesThread, ...stickyThreads, ...threadResult])
                 const newThreadCount = (Number(stickyThreads[0]?.threadCount) || 0) + (Number(threadResult[0]?.threadCount) || 0)
                 result = result.map((t) => ({...t, threadCount: String(newThreadCount)}))
             }
@@ -560,7 +560,7 @@ const SearchRoutes = (app: Express) => {
             let {query, sort, offset} = req.query as MessageSearchParams
             if (!sort) sort = "random"
             const hideSystem = req.query.hideSystem === "true"
-            if (!functions.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
+            if (!functions.validation.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, Number(offset))

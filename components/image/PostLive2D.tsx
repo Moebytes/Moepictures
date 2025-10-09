@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Slider from "react-slider"
 import live2dZoomInIcon from "../../assets/icons/live2d-zoom-in.png"
 import live2dZoomOutIcon from "../../assets/icons/live2d-zoom-out.png"
@@ -95,7 +95,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
 
     const decryptLive2D = async () => {
         if (!props.live2d) return
-        const decryptedLive2D = await functions.decryptItem(props.live2d, session)
+        const decryptedLive2D = await functions.crypto.decryptItem(props.live2d, session)
         if (decryptedLive2D) setDecrypted(decryptedLive2D)
     }
 
@@ -273,7 +273,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.live2d), decrypted)
+                functions.dom.download(path.basename(props.live2d), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }

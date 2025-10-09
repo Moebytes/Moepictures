@@ -6,8 +6,8 @@ import FormData from "form-data"
 import * as mm from "music-metadata"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
-import encryptFunctions from "./EncryptFunctions"
+import functions from "../functions/Functions"
+import encryption from "./Encryption"
 import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
 import {S3} from "@aws-sdk/client-s3"
@@ -73,7 +73,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
     if (req.session.username) return next()
     const apiKey = req.headers["x-api-key"] as string
     if (apiKey) {
-        const hashedKey = encryptFunctions.hashAPIKey(apiKey)
+        const hashedKey = encryption.hashAPIKey(apiKey)
         const apiToken = await sql.token.apiKey(hashedKey)
         if (apiToken) {
             const user = await sql.user.user(apiToken.username)
@@ -93,7 +93,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
             req.session.imagePost = user.imagePost
             req.session.role = user.role
             req.session.banned = user.banned
-            const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+            const ips = functions.util.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
             await sql.user.updateUser(user.username, "ips", ips)
             req.session.ips = ips
             const {secret, token} = ServerFunctions.generateCSRF()
@@ -132,7 +132,7 @@ export default class ServerFunctions {
         if (req.session.apiKey) return res.status(200).send(data)
         if (permissions.noEncryption(req.session)) return res.status(200).send(data)
         if (!req.session.publicKey) return res.status(401).send("No public key")
-        const encrypted = encryptFunctions.encryptAPI(data, req.session.publicKey, req.session)
+        const encrypted = encryption.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)
     }
 
@@ -181,13 +181,13 @@ export default class ServerFunctions {
         await sql.message.bulkInsertRecipients(messageID, [username])
     }
 
-    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string): Promise<Buffer<ArrayBuffer>> => {
+    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
         const defaultBuffer = Buffer.from("") 
         const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
         const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
         if (!id) return defaultBuffer
 
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             const historyFolder = isTag ? `${folder}/history/tag/${id}` : `${folder}/history/post/${id}/${upscaled ? "upscaled" : "original"}`
             if (!fs.existsSync(historyFolder)) return defaultBuffer
@@ -196,7 +196,7 @@ export default class ServerFunctions {
             let firstHistory = `${historyFolder}/${folders[0]}`
             let files = fs.readdirSync(firstHistory).filter(f => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
             if (!files.length) return defaultBuffer
-            return fs.readFileSync(`${firstHistory}/${files[0]}`) as Buffer<ArrayBuffer>
+            return fs.readFileSync(`${firstHistory}/${files[0]}`)
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
@@ -206,7 +206,7 @@ export default class ServerFunctions {
             for (let i = 0; i < 10; i++) {
                 let testKey = `${prefix}/${i}/${fileName}`
                 try {
-                    const body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(testKey)}`, 
+                    const body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(testKey)}`, 
                     {hash: pixelHash}), {responseType: "arraybuffer"}).then(r => r.data)
                     return Buffer.from(body)
                 } catch {}
@@ -216,7 +216,7 @@ export default class ServerFunctions {
     }
 
     public static getFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
@@ -240,10 +240,10 @@ export default class ServerFunctions {
             }
             let body = null as Buffer | null
             if (upscaled) {
-                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             } else {
-                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             }
             if (!body) return ServerFunctions.getFirstHistoryFile(file, upscaled, r18, pixelHash)
@@ -252,7 +252,7 @@ export default class ServerFunctions {
     }
 
     public static uploadFile = async (file: string, content: any, r18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             const dir = path.dirname(`${folder}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
@@ -267,7 +267,7 @@ export default class ServerFunctions {
     }
 
     public static deleteFile = async (file: string, r18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             try {
                 let folder = r18 ? localR18 : local
                 fs.unlinkSync(`${folder}/${file}`)
@@ -281,7 +281,7 @@ export default class ServerFunctions {
     }
 
     public static deleteIfEmpty = async (folderPath: string, r18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             try {
                 let folder = r18 ? localR18 : local
                 fs.rmdirSync(`${folder}/${folderPath}`)
@@ -315,7 +315,7 @@ export default class ServerFunctions {
     }
 
     public static deleteFolder = async (folderPath: string, r18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             const dir = `${folder}/${folderPath}`
             return ServerFunctions.removeLocalDirectory(dir)
@@ -341,7 +341,7 @@ export default class ServerFunctions {
     }
 
     public static renameFile = async (oldFile: string, newFile: string, oldR18: boolean, newR18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let oldFolder = oldR18 ? localR18 : local
             let newFolder = newR18 ? localR18 : local
             try {
@@ -359,7 +359,7 @@ export default class ServerFunctions {
     }
 
     public static renameFolder = async (oldFolder: string, newFolder: string, r18: boolean) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             try {
                 fs.renameSync(`${folder}/${oldFolder}`, `${folder}/${newFolder}`)
@@ -394,7 +394,7 @@ export default class ServerFunctions {
 
     public static getNextKey = async (type: string, name: string, r18: boolean) => {
         const key = `history/${type}/${name}`
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let targetFolder = `${folder}/${key}`
             if (type === "post") {
@@ -442,7 +442,7 @@ export default class ServerFunctions {
     }
 
     public static getUnverifiedFile = async (file: string, upscaled?: boolean, pixelHash?: string) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${localUnverified}/${decodeURIComponent(upscaledFile)}`
@@ -456,10 +456,10 @@ export default class ServerFunctions {
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
             let body = null as Buffer | null
             if (upscaled) {
-                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             } else {
-                body = await axios.get(functions.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             }
             if (!body) return Buffer.from("")
@@ -468,7 +468,7 @@ export default class ServerFunctions {
     }
 
     public static uploadUnverifiedFile = async (file: string, content: any) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             const dir = path.dirname(`${localUnverified}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
             fs.writeFileSync(`${localUnverified}/${file}`, content)
@@ -482,7 +482,7 @@ export default class ServerFunctions {
     }
 
     public static deleteUnverifiedFile = async (file: string) => {
-        if (functions.useLocalFiles()) {
+        if (functions.config.useLocalFiles()) {
             const dir = path.dirname(`${localUnverified}/${file}`)
             try {
                 fs.unlinkSync(`${localUnverified}/${file}`)
@@ -575,9 +575,9 @@ export default class ServerFunctions {
             const oldImage = oldImages[i]
             let oldPath = ""
             if (upscaled) {
-                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
+                oldPath = functions.link.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
             } else {
-                oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+                oldPath = functions.link.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
             const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash)
             if (!oldBuffer) continue
@@ -598,9 +598,9 @@ export default class ServerFunctions {
             if (!oldImage || !newImage) continue
             let oldPath = ""
             if (upscaled) {
-                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
+                oldPath = functions.link.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
             } else {
-                oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+                oldPath = functions.link.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
             const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false, oldImage.pixelHash) : await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash)
             if (!oldBuffer) continue
@@ -611,9 +611,9 @@ export default class ServerFunctions {
                 let newPath = ""
                 let postImage = newImage as Image
                 if (upscaled) {
-                    newPath = functions.getUpscaledImagePath(postImage.type, postImage.postID, postImage.order, postImage.upscaledFilename || postImage.filename)
+                    newPath = functions.link.getUpscaledImagePath(postImage.type, postImage.postID, postImage.order, postImage.upscaledFilename || postImage.filename)
                 } else {
-                    newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
+                    newPath = functions.link.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
                 }
                 newBuffer = await ServerFunctions.getUnverifiedFile(newPath, false, newImage.pixelHash)
             }
@@ -646,10 +646,10 @@ export default class ServerFunctions {
         }
         const updated = await sql.post.post(postID) as PostFull
         for (let i = 0; i < post.images.length; i++) {
-            const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
-            const updatedImagePath = functions.getImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].filename)
-            const updatedUpscaledImagePath = functions.getUpscaledImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename)
+            const imagePath = functions.link.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+            const upscaledImagePath = functions.link.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            const updatedImagePath = functions.link.getImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].filename)
+            const updatedUpscaledImagePath = functions.link.getUpscaledImagePath(updated.images[i].type, updated.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename)
 
             if (oldR18 !== newR18 || imagePath !== updatedImagePath || upscaledImagePath !== updatedUpscaledImagePath) {
                 ServerFunctions.renameFile(imagePath, updatedImagePath, oldR18, newR18)
@@ -668,7 +668,7 @@ export default class ServerFunctions {
             const oldImage = oldImages[i]
             const newImage = newImages[i]
             if (!oldImage || !newImage) continue
-            let oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            let oldPath = functions.link.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             const oldBuffer = unverified ? await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash)
             : await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash)
             let newBuffer = null as Buffer | null
@@ -676,12 +676,12 @@ export default class ServerFunctions {
                 newBuffer = Buffer.from(newImage.bytes)
             } else {
                 let postImage = newImage as Image
-                let newPath = functions.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
+                let newPath = functions.link.getImagePath(postImage.type, postImage.postID, postImage.order, postImage.filename)
                 newBuffer = unverified ? await ServerFunctions.getUnverifiedFile(newPath, false, newImage.pixelHash)
                 : await ServerFunctions.getFile(newPath, false, r18, newImage.pixelHash)
             }
-            let oldHash = await phash(oldBuffer).then((hash: string) => functions.binaryToHex(hash))
-            let newHash = await phash(newBuffer).then((hash: string) => functions.binaryToHex(hash))
+            let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
+            let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
             oldHashes.push({hash: oldHash, order: oldImages[i].order})
             newHashes.push({hash: newHash, order: (newImages[i] as Image)?.order || i + 1})
         }
@@ -727,12 +727,12 @@ export default class ServerFunctions {
     }
 
     public static deletePost = async (post: DeletedPost | PostCuteness) => {
-        let r18 = functions.isR18(post.rating)
+        let r18 = functions.post.isR18(post.rating)
         await sql.post.deletePost(post.postID)
         for (let i = 0; i < post.images.length; i++) {
-            const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-            const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
-            const thumbnail = functions.getThumbnailImagePath(post.images[i].type, post.images[i].thumbnail)
+            const file = functions.link.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+            const upscaledFile = functions.link.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            const thumbnail = functions.link.getThumbnailImagePath(post.images[i].type, post.images[i].thumbnail)
             await ServerFunctions.deleteFile(file, r18)
             await ServerFunctions.deleteFile(upscaledFile, r18)
             await ServerFunctions.deleteFile(thumbnail, r18)
@@ -743,9 +743,9 @@ export default class ServerFunctions {
     public static deleteUnverifiedPost = async (unverified: UnverifiedPost) => {
         await sql.post.deleteUnverifiedPost(unverified.postID)
         for (let i = 0; i < unverified.images.length; i++) {
-            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
-            const thumbnail = functions.getThumbnailImagePath(unverified.images[i].type, unverified.images[i].thumbnail)
+            const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.link.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
+            const thumbnail = functions.link.getThumbnailImagePath(unverified.images[i].type, unverified.images[i].thumbnail)
             await ServerFunctions.deleteUnverifiedFile(file)
             await ServerFunctions.deleteUnverifiedFile(upscaledFile)
             await ServerFunctions.deleteUnverifiedFile(thumbnail)
@@ -755,7 +755,7 @@ export default class ServerFunctions {
     public static deleteTag = async (tag: Tag) => {
         await ServerFunctions.deleteFolder(`history/tag/${tag.tag}`, false).catch(() => null)
         if (tag.image) {
-            await ServerFunctions.deleteFile(functions.getTagPath(tag.type, tag.image), false).catch(() => null)
+            await ServerFunctions.deleteFile(functions.link.getTagPath(tag.type, tag.image), false).catch(() => null)
         }
         await sql.tag.deleteTag(tag.tag)
     }
@@ -780,7 +780,7 @@ export default class ServerFunctions {
                 const implications = await sql.tag.implications(tagMap[i])
                 if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
-            tagMap = functions.removeDuplicates(tagMap)
+            tagMap = functions.util.removeDuplicates(tagMap)
             //await sql.tag.purgeTagMap(postID)
             //await sql.tag.insertTagMap(postID, tagMap)
         }
@@ -796,7 +796,7 @@ export default class ServerFunctions {
             const post = posts[i]
             for (let j = 0; j < post.images.length; j++) {
                 const image = post.images[j]
-                const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
+                const imgPath = functions.link.getImagePath(image.type, post.postID, image.order, image.filename)
                 const buffer = await ServerFunctions.getFile(imgPath, false, false, image.pixelHash)
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 await sql.post.updateImage(image.imageID, "hash", md5)
@@ -890,7 +890,7 @@ export default class ServerFunctions {
         form.append("db", "999")
         form.append("api_key", process.env.SAUCENAO_KEY)
         form.append("output_type", 2)
-        const inputType = functions.bufferFileType(bytes)?.[0]
+        const inputType = functions.byte.bufferFileType(bytes)?.[0]
         form.append("file", Buffer.from(bytes), {
             filename: `file.${inputType.extension}`,
             contentType: inputType.mime
@@ -987,7 +987,7 @@ export default class ServerFunctions {
     public static sourceLookup = async (current: UploadImage, rating: PostRating) => {
         let bytes = [] as number[]
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
+            bytes = await functions.byte.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
         } else {
             bytes = current.bytes
         }
@@ -1009,7 +1009,7 @@ export default class ServerFunctions {
             const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
             source = `https://www.pixiv.net/artworks/${pixivID}`
             try {
-                const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+                const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
                 if (result.length) {
                     danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                     if (result[0].rating === "q") rating = functions.r17()
@@ -1018,8 +1018,8 @@ export default class ServerFunctions {
             } catch {}
             try {
                 const illust = await ServerFunctions.getPixivIllust(source)
-                commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                posted = functions.formatDate(new Date(illust.create_date), true)
+                commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                posted = functions.date.formatDate(new Date(illust.create_date), true)
                 source = illust.url!
                 title = illust.title
                 artist = illust.user.name
@@ -1032,7 +1032,7 @@ export default class ServerFunctions {
                 if (illust.x_restrict !== 0) {
                     if (rating === functions.r13()) rating = functions.r17()
                 }
-                artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
+                artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
                 artistIcon = illust.user.profile_image_urls.medium
                 artists.push({})
             } catch (e) {
@@ -1088,7 +1088,7 @@ export default class ServerFunctions {
                 if (pixiv.length) {
                     source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
                     if (!danbooru.length) {
-                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
+                        const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                         if (result.length) {
                             danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                             if (result[0].rating === "q") rating = functions.r17()
@@ -1099,8 +1099,8 @@ export default class ServerFunctions {
                     title = pixiv[0].data.title || ""
                     try {
                         const illust = await ServerFunctions.getPixivIllust(source)
-                        commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        posted = functions.formatDate(new Date(illust.create_date), true)
+                        commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                        posted = functions.date.formatDate(new Date(illust.create_date), true)
                         source = illust.url!
                         title = illust.title
                         artist = illust.user.name 
@@ -1113,7 +1113,7 @@ export default class ServerFunctions {
                         if (illust.x_restrict !== 0) {
                             if (rating === functions.r13()) rating = functions.r17()
                         }
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
                         artistIcon = illust.user.profile_image_urls.medium
                         artists.push({})
                     } catch (e) {
@@ -1135,7 +1135,7 @@ export default class ServerFunctions {
                         artist = deviation.author.user.username
                         source = deviation.url
                         commentary = deviation.description
-                        posted = functions.formatDate(new Date(deviation.date), true)
+                        posted = functions.date.formatDate(new Date(deviation.date), true)
                         if (deviation.rating === "adult") {
                             if (rating === functions.r13()) rating = functions.r17()
                         }
@@ -1169,7 +1169,7 @@ export default class ServerFunctions {
                     title = konachan[0].data.characters || ""
                 }
             }
-            mirrors = functions.removeItem(mirrors, source)
+            mirrors = functions.util.removeItem(mirrors, source)
             const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 rating,
@@ -1192,7 +1192,7 @@ export default class ServerFunctions {
     }
 
     public static downloadWDTagger = async () => {
-        const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
+        const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
         if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
         const configPath = path.join(wdTaggerPath, "config.json")
         const modelPath = path.join(wdTaggerPath, "model.safetensors")
@@ -1221,8 +1221,8 @@ export default class ServerFunctions {
         const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
         const imagePath = path.join(folder, filename)
         fs.writeFileSync(imagePath, buffer)
-        const scriptPath = path.join(__dirname, "../../assets/misc/wdtagger.py")
-        const wdTaggerPath = path.join(__dirname, "../../assets/misc/wdtagger")
+        const scriptPath = path.join(__dirname, "../../assets/python/wdtagger.py")
+        const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
         let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${wdTaggerPath}"`
         const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
         const json = JSON.parse(str.match(/{.*?}/gm)?.[0]) as WDTaggerResponse
@@ -1235,7 +1235,7 @@ export default class ServerFunctions {
 
         let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
         if (danbooruLink) {
-            const json = await functions.fetch(`${danbooruLink}.json`)
+            const json = await functions.http.fetch(`${danbooruLink}.json`)
             if (json.rating === "q") rating = functions.r17()
             if (json.rating === "e") rating = functions.r18()
             tagData.tags = json.tag_string_general
@@ -1248,7 +1248,7 @@ export default class ServerFunctions {
         if (!Object.keys(tagData).length && gelbooruLink) {
             let id = gelbooruLink.match(/\d+/g)?.[0]
             let url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&id=${id}&json=1${process.env.GELBOORU_API_KEY}`
-            const json = await functions.fetch(url)
+            const json = await functions.http.fetch(url)
             let post = json.post[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.r17()
@@ -1264,7 +1264,7 @@ export default class ServerFunctions {
         if (!Object.keys(tagData).length && safebooruLink) {
             let id = safebooruLink.match(/\d+/g)?.[0]
             let url = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${id}`
-            const json = await functions.fetch(url)
+            const json = await functions.http.fetch(url)
             let post = json[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.r17()
@@ -1291,7 +1291,7 @@ export default class ServerFunctions {
 
         let bytes = [] as number[]
         if (current.thumbnail) {
-            bytes = await functions.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
+            bytes = await functions.byte.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
         } else {
             bytes = current.bytes
         }
@@ -1322,7 +1322,7 @@ export default class ServerFunctions {
                 if (type === "image") type = "comic"
             }
 
-            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
                 const value = Object.values(tagReplaceMap)[i]
@@ -1334,9 +1334,9 @@ export default class ServerFunctions {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
 
-            artistStrArr = artistStrArr.map((tag: string) => functions.cleanTag(tag))
-            charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
-            seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
+            artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
 
             for (let i = 0; i < artistStrArr.length; i++) {
                 artists[artists.length - 1].tag = artistStrArr[i]
@@ -1352,14 +1352,14 @@ export default class ServerFunctions {
                 }
             }
 
-            seriesStrArr = functions.removeDuplicates(seriesStrArr)
+            seriesStrArr = functions.util.removeDuplicates(seriesStrArr)
 
             for (let i = 0; i < seriesStrArr.length; i++) {
                 series[series.length - 1].tag = seriesStrArr[i]
                 series.push({})
             }
 
-            tagArr = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            tagArr = functions.util.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
 
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tagArr.length; i++) {
@@ -1372,7 +1372,7 @@ export default class ServerFunctions {
                     }
                 } else {
                     tags.push(tagArr[i])
-                    notExists.push({tag: tagArr[i], description: `${functions.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
+                    notExists.push({tag: tagArr[i], description: `${functions.util.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
                 }
             }
             newTags = notExists
@@ -1392,7 +1392,7 @@ export default class ServerFunctions {
                 if (type === "image") type = "comic"
             }
 
-            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
                 const value = Object.values(tagReplaceMap)[i]
@@ -1403,7 +1403,7 @@ export default class ServerFunctions {
             }
             tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
-            characterArr = characterArr.map((tag: string) => functions.cleanTag(tag))
+            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
                 const value = Object.values(tagReplaceMap)[i]
@@ -1425,7 +1425,7 @@ export default class ServerFunctions {
                 seriesArr.push(seriesName)
             }
 
-            seriesArr = functions.removeDuplicates(seriesArr)
+            seriesArr = functions.util.removeDuplicates(seriesArr)
 
             for (let i = 0; i < characterArr.length; i++) {
                 characters[characters.length - 1].tag = characterArr[i]
@@ -1436,7 +1436,7 @@ export default class ServerFunctions {
                 series[series.length - 1].tag = seriesArr[i]
                 series.push({})
             }
-            tagArr = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            tagArr = functions.util.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
 
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tagArr.length; i++) {
@@ -1449,7 +1449,7 @@ export default class ServerFunctions {
                     }
                 } else {
                     tags.push(tagArr[i])
-                    notExists.push({tag: tagArr[i], description: `${functions.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
+                    notExists.push({tag: tagArr[i], description: `${functions.util.toProperCase(tagArr[i]).replaceAll("-", " ")}.`})
                 }
             }
             newTags = notExists

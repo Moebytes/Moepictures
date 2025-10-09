@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -37,7 +37,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)){
             setAliasTagFlag(true)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -47,7 +47,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                 return
             }
             try {
-                await functions.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, session, setSessionFlag)
+                await functions.http.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } catch {
                 setError(true)

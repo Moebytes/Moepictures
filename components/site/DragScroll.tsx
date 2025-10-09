@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useInteractionSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 
 let inertia = false
 let mouseDown = false
@@ -23,7 +23,7 @@ const DragScroll = ({children}) => {
 
         const onMouseDown = (event: MouseEvent) => {
             if (event.button === 2) return
-            functions.clearSelection()
+            functions.dom.clearSelection()
             mouseDown = true
             inertia = false
             time = new Date()
@@ -55,7 +55,7 @@ const DragScroll = ({children}) => {
 
         const onMouseMove = (event: MouseEvent) => {
             if (!mouseDown) return
-            functions.clearSelection()
+            functions.dom.clearSelection()
             let newScrollY = (event.clientY - lastClientY) * 12
             element.scrollTop -= newScrollY
             lastClientY = event.clientY

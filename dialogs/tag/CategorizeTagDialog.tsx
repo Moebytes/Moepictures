@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useTagDialogSelector, useTagDialogActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -44,11 +44,11 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const categorize = async () => {
         if (!categorizeTag) return
         if (permissions.isContributor(session)) {
-            await functions.put("/api/tag/edit", {tag: categorizeTag.tag, type: category}, session, setSessionFlag)
+            await functions.http.put("/api/tag/edit", {tag: categorizeTag.tag, type: category}, session, setSessionFlag)
             setTagFlag(categorizeTag.tag)
             setCategorizeTag(null)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -57,7 +57,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/tag/edit/request", {tag: categorizeTag.tag, type: category, reason}, session, setSessionFlag)
+            await functions.http.post("/api/tag/edit/request", {tag: categorizeTag.tag, type: category, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

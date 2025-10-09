@@ -1,6 +1,6 @@
 import React from "react"
 import {useNavigate} from "react-router-dom"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useLayoutSelector, useSessionSelector, useThemeSelector, useFlagActions} from "../../store"
 import "./styles/children.less"
 import Carousel from "../site/Carousel"
@@ -16,7 +16,7 @@ const Children: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {setPostFlag} = useFlagActions()
     const navigate = useNavigate()
-    const images = props.posts.map((child) => functions.getThumbnailLink(child.post.images[0], "tiny", session, mobile))
+    const images = props.posts.map((child) => functions.link.getThumbnailLink(child.post.images[0], "tiny", session, mobile))
 
     const click = (img: string, index: number) => {
         const post = props.posts[index].post

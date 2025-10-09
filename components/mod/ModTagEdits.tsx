@@ -5,7 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
 import tagDiff from "../../assets/icons/tagdiff.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {TagEditRequest, Tag} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -39,10 +39,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await functions.get("/api/tag/edit/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/tag/edit/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
-        const tags = await functions.get("/api/tag/list", {tags: requests.map((r) => r.tag)}, session, setSessionFlag)
+        const tags = await functions.http.get("/api/tag/list", {tags: requests.map((r) => r.tag)}, session, setSessionFlag)
         for (const tag of tags) {
             oldTags.set(tag.tag, tag)
         }
@@ -59,7 +59,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
     }
 
     useEffect(() => {
@@ -82,14 +82,14 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
-        await functions.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom, wikipedia}, session, setSessionFlag)
-        await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
+        await functions.http.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom, wikipedia}, session, setSessionFlag)
+        await functions.http.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
-        await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, session, setSessionFlag)
+        await functions.http.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
@@ -108,7 +108,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         }
         if (scroll) updateRequests()
     }, [requests, scroll])
@@ -127,7 +127,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -141,9 +141,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const tags = await functions.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
+            const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
             for (const tag of tags) {
                 oldTags.set(tag.tag, tag)
             }
@@ -153,9 +153,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const tags = await functions.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
+                const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
                 for (const tag of tags) {
                     oldTags.set(tag.tag, tag)
                 }
@@ -168,7 +168,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests
@@ -178,7 +178,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                setVisibleRequests(functions.util.removeDuplicates(newPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -322,9 +322,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         if (changes.type) {
             if (showOldTag && oldTag) {
-                jsx.push(<span className={`mod-post-text ${functions.getTagColor(oldTag)}`}>{i18n.labels.oldCategory}: {oldTag.type}</span>)
+                jsx.push(<span className={`mod-post-text ${functions.tag.getTagColor(oldTag)}`}>{i18n.labels.oldCategory}: {oldTag.type}</span>)
             } else {
-                jsx.push(<span className={`mod-post-text ${functions.getTagColor(newTag)}`}>{i18n.labels.newCategory}: {newTag.type}</span>)
+                jsx.push(<span className={`mod-post-text ${functions.tag.getTagColor(newTag)}`}>{i18n.labels.newCategory}: {newTag.type}</span>)
             }
         }
         if (changes.description) {
@@ -411,7 +411,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as TagEditRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -440,7 +440,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             let parts = request.image?.split("/") ?? null
             if (request.image === "delete") parts = null
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
-            const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image, oldTag.imageHash) : ""
+            const oldImg = oldTag ? functions.link.getTagLink(oldTag.type, oldTag.image, oldTag.imageHash) : ""
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldTags[i] && oldTag ? <>
@@ -449,7 +449,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={oldImg}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag, request, showOldTags[i])}
                     </div>
@@ -459,7 +459,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={img}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldTag!, request, showOldTags[i])}
                     </div> </>}

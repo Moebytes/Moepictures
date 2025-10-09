@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import groupHistoryRevert from "../../assets/icons/revert.png"
 import groupHistoryDelete from "../../assets/icons/delete.png"
 import adminCrown from "../../assets/icons/admin-crown.png"
@@ -47,13 +47,13 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const updatePost = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
         props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
-        const post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag)
         if (!post) return
         setGroupPost(post)
     }
 
     const updateUserRole = async () => {
-        const user = await functions.get("/api/user", {username: props.groupHistory.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.groupHistory.user}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -64,8 +64,8 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertGroupHistory = async () => {
         if (props.current) return Promise.reject()
-        await functions.put("/api/group/reorder", {slug: props.currentHistory.slug, posts: props.groupHistory.posts}, session, setSessionFlag)
-        await functions.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
+        await functions.http.put("/api/group/reorder", {slug: props.currentHistory.slug, posts: props.groupHistory.posts}, session, setSessionFlag)
+        await functions.http.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
         if (props.currentHistory.slug !== props.groupHistory.slug) {
             navigate(`/group/history/${props.groupHistory.slug}`)
         } else {
@@ -87,7 +87,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const deleteGroupHistory = async () => {
         if (props.current) return Promise.reject()
-        await functions.delete("/api/group/history/delete", {slug: props.currentHistory.slug, historyID: props.groupHistory.historyID}, session, setSessionFlag)
+        await functions.http.delete("/api/group/history/delete", {slug: props.currentHistory.slug, historyID: props.groupHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -163,54 +163,54 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.groupHistory.user) || i18n.user.deleted}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.groupHistory.user) || i18n.user.deleted}</span>
     }
 
     const updateImg = async (event: React.MouseEvent) => {
@@ -218,18 +218,18 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.groupHistory.posts.length > 1) {
             let newPostIndex = postIndex + 1 
             if (newPostIndex > props.groupHistory.posts.length - 1) newPostIndex = 0
-            const post = await functions.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
+            const post = await functions.http.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
             if (!post) return
             const filename = post.images[0]?.filename
-            const newImgLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
-            const newImg = await functions.decryptThumb(newImgLink, session)
+            const newImgLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const newImg = await functions.crypto.decryptThumb(newImgLink, session)
             setImg(newImg)
             setPostIndex(newPostIndex)
         }
     }
 
     const openPost = (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const postDiff = () => {

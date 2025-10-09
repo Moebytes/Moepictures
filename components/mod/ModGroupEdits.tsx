@@ -5,7 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
 import tagDiff from "../../assets/icons/tagdiff.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {Group, GroupEditRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -39,10 +39,10 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async () => {
-        const requests = await functions.get("/api/group/edit/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
-        const groups = await functions.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag)
+        const groups = await functions.http.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag)
         for (const group of groups) {
             oldGroups.set(group.name, group)
         }
@@ -59,7 +59,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
     }
 
     useEffect(() => {
@@ -70,14 +70,14 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const editGroup = async (username: string, slug: string, name: string, description: string, reason: string | null) => {
-        await functions.put("/api/group/edit", {username, slug, name, description, reason}, session, setSessionFlag)
-        await functions.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
+        await functions.http.put("/api/group/edit", {username, slug, name, description, reason}, session, setSessionFlag)
+        await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, slug: string) => {
-        await functions.post("/api/group/edit/request/fulfill", {username, slug, accepted: false}, session, setSessionFlag)
+        await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: false}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
     }
@@ -96,7 +96,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         }
         if (scroll) updateRequests()
     }, [requests, scroll])
@@ -115,7 +115,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -129,9 +129,9 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const groups = await functions.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
+            const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
             for (const group of groups) {
                 oldGroups.set(group.name, group)
             }
@@ -141,9 +141,9 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const groups = await functions.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
+                const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
                 for (const group of groups) {
                     oldGroups.set(group.name, group)
                 }
@@ -156,7 +156,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests
@@ -166,7 +166,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                setVisibleRequests(functions.util.removeDuplicates(newPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -320,7 +320,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as GroupEditRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -350,12 +350,12 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldGroups[i] && oldGroup ?
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldGroup, request, showOldGroups[i])}
                     </div> :
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         {diffJSX(oldGroup!, request, showOldGroups[i])}
                     </div>}

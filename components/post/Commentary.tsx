@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
-import jsxFunctions from "../../structures/JSXFunctions"
 import commentaryTranslate from "../../assets/icons/commentarytranslate.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/commentary.less"
 
 interface Props {
@@ -37,7 +36,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
                 setText(props.translated)
             } else {
                 if (!translatedText) {
-                    functions.post("/api/misc/translate", [props.text], session, setSessionFlag).then((r) => {
+                    functions.http.post("/api/misc/translate", [props.text], session, setSessionFlag).then((r) => {
                         setTranslatedText(r[0])
                         setText(r[0])
                     })
@@ -58,7 +57,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {jsxFunctions.renderCommentaryText(text)}   
+                    {functions.jsx.renderCommentaryText(text)}   
                 </span>
             </div>
         </div>

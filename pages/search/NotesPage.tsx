@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -89,7 +89,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     }
 
     const updateNotes = async (query?: string) => {
-        const result = await functions.get("/api/search/notes", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/notes", {sort: functions.validation.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleNotes([])
@@ -147,7 +147,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
+            setVisibleNotes(functions.util.removeDuplicates(newVisibleNotes))
         }
         if (scroll) updateNotes()
     }, [scroll, notes, session])
@@ -166,7 +166,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/notes", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/notes", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanNotes = notes.filter((t) => !t.fake)
         if (!scroll) {
@@ -180,14 +180,14 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setNotes(result)
             } else {
-                setNotes((prev) => functions.removeDuplicates([...prev, ...result]))
+                setNotes((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setNotes(result)
                 } else {
-                    setNotes((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setNotes((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -196,7 +196,7 @@ const NotesPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!notes[currentIndex]) return updateOffset()
                 const newVisibleNotes = visibleNotes
@@ -206,7 +206,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
+                setVisibleNotes(functions.util.removeDuplicates(newVisibleNotes))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -364,7 +364,7 @@ const NotesPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as NoteSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleNotes)
+            visible = functions.util.removeDuplicates(visibleNotes)
         } else {
             const postOffset = (notesPage - 1) * getPageAmount()
             visible = notes.slice(postOffset, postOffset + getPageAmount())
@@ -373,7 +373,7 @@ const NotesPage: React.FunctionComponent = (props) => {
             const noteGroup = visible[i]
             if (noteGroup.fake) continue
             if (!session.username) if (noteGroup.post.rating !== functions.r13()) continue
-            if (!functions.isR18(ratingType)) if (functions.isR18(noteGroup.post.rating)) continue
+            if (!functions.post.isR18(ratingType)) if (functions.post.isR18(noteGroup.post.rating)) continue
             jsx.push(<NoteRow key={noteGroup.noteID} note={noteGroup} onDelete={updateNotes} onEdit={updateNotes}/>)
         }
         if (!scroll) {

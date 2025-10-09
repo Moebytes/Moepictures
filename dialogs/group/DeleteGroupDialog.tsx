@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
@@ -37,10 +37,10 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
     const deleteGroup = async () => {
         if (!deleteGroupObj) return
         if (permissions.isMod(session)) {
-            await functions.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
+            await functions.http.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
             navigate("/groups")
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -49,7 +49,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/group/delete/request", {slug: deleteGroupObj.slug, reason}, session, setSessionFlag)
+            await functions.http.post("/api/group/delete/request", {slug: deleteGroupObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
         setDeleteGroupObj(null)

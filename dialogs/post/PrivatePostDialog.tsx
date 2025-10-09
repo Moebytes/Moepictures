@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useFlagActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -36,7 +36,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
     const privatePost = async () => {
         if (!privatePostID) return
         if (permissions.canPrivate(session, privatePostID.artists)) {
-            await functions.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
+            await functions.http.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
             setPostFlag(privatePostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")

@@ -6,8 +6,8 @@ dump.rdb
 
 # Build folders
 node_modules
-build
 __pycache__
+build
 dist
 
 # IDE settings
@@ -22,16 +22,11 @@ dump
 .cache
 
 # Crypto
-structures/DecryptFunctions.ts
-structures/EncryptFunctions.ts
+structures/Decryption.ts
+structures/Encryption.ts
 
 # Live2D Cubism
 assets/live2d/*
 
 # WDTagger
-assets/misc/wdtagger
-
-# WASM
-structures/build/*
-!structures/build/NativeFunctions.js
-!structures/build/NativeFunctions.wasm
+assets/python/wdtagger

@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag} from "../types/Types"
@@ -136,7 +136,7 @@ const NoteRoutes = (app: Express) => {
 
             const notes = await sql.note.notes(postID, order)
             await insertNotes(notes, data, {postID, order, username: req.session.username})
-            const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
+            const {addedEntries, removedEntries, styleChanged} = functions.compare.parseNoteChanges(notes, data)
             await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason})
             res.status(200).send("Success")
         } catch (e) {
@@ -165,7 +165,7 @@ const NoteRoutes = (app: Express) => {
                 if (silent) return void res.status(200).send("Success")
             }
         
-            const {addedEntries, removedEntries, styleChanged} = functions.parseNoteChanges(notes, data)
+            const {addedEntries, removedEntries, styleChanged} = functions.compare.parseNoteChanges(notes, data)
             await sql.history.insertNoteHistory({postID, order, updater: req.session.username, notes: JSON.stringify(data), styleChanged, addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
         } catch (e) {
@@ -209,7 +209,7 @@ const NoteRoutes = (app: Express) => {
                 title: post.title,
                 englishTitle: post.englishTitle,
                 artist: post.artist,
-                posted: post.posted ? functions.formatDate(new Date(post.posted), true) : null,
+                posted: post.posted ? functions.date.formatDate(new Date(post.posted), true) : null,
                 source: post.source,
                 commentary: post.commentary,
                 englishCommentary: post.englishCommentary,
@@ -234,7 +234,7 @@ const NoteRoutes = (app: Express) => {
             await updateTagGroups(postID, {unverified: true, oldTagGroups: [], newTagGroups: post.tagGroups})
 
             const notes = await sql.note.notes(postID, order)
-            let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+            let {addedEntries, removedEntries} = functions.compare.parseNoteChanges(notes, data)
             for (const item of data) {
                 await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
                 item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize, item.backgroundColor,
@@ -275,7 +275,7 @@ const NoteRoutes = (app: Express) => {
             if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).end()
 
             const notes = await sql.note.unverifiedNotes(postID, order)
-            let {addedEntries, removedEntries} = functions.parseNoteChanges(notes, data)
+            let {addedEntries, removedEntries} = functions.compare.parseNoteChanges(notes, data)
 
             let originalID = "" as any
             for (const note of notes) {
@@ -317,8 +317,8 @@ const NoteRoutes = (app: Express) => {
             if (!unverified) return void res.status(400).send("Bad postID")
             await sql.post.deleteUnverifiedPost(postID)
             for (let i = 0; i < unverified.images.length; i++) {
-                const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
+                const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.link.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
@@ -331,7 +331,7 @@ const NoteRoutes = (app: Express) => {
                 await sql.note.deleteUnverifiedNote(unverifiedNote.noteID)
             }
 
-            let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
+            let message = `Notes you added on ${functions.config.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
             await serverFunctions.systemMessage(username, "Notice: Notes have been approved", message)
 
             res.status(200).send("Success")
@@ -350,8 +350,8 @@ const NoteRoutes = (app: Express) => {
             if (!unverified) return void res.status(400).send("Bad postID")
             await sql.post.deleteUnverifiedPost(postID)
             for (let i = 0; i < unverified.images.length; i++) {
-                const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
+                const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.link.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
@@ -360,7 +360,7 @@ const NoteRoutes = (app: Express) => {
                 await sql.note.deleteUnverifiedNote(unverifiedNote.noteID)
             }
 
-            let message = `Notes you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
+            let message = `Notes you added on ${functions.config.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
             // await serverFunctions.systemMessage(username, "Notice: Notes have been rejected", message)
             
             res.status(200).send("Success")

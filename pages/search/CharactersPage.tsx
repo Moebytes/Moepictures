@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -93,7 +93,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const updateCharacters = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/characters", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/characters", {sort: functions.validation.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleCharacters([])
@@ -142,7 +142,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
+            setVisibleCharacters(functions.util.removeDuplicates(newVisibleCharacters))
         }
         if (scroll) updateCharacters()
     }, [scroll, characters, session])
@@ -161,7 +161,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/characters", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/characters", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanCharacters = characters.filter((t) => !t.fake)
         if (!scroll) {
@@ -175,14 +175,14 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setCharacters(result)
             } else {
-                setCharacters(functions.removeDuplicates([...characters, ...result]))
+                setCharacters(functions.util.removeDuplicates([...characters, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setCharacters(result)
                 } else {
-                    setCharacters(functions.removeDuplicates([...characters, ...result]))
+                    setCharacters(functions.util.removeDuplicates([...characters, ...result]))
                 }
             }
             setEnded(true)
@@ -191,7 +191,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!characters[currentIndex]) return updateOffset()
                 const newVisibleCharacters = visibleCharacters
@@ -201,7 +201,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
+                setVisibleCharacters(functions.util.removeDuplicates(newVisibleCharacters))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -361,7 +361,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleCharacters)
+            visible = functions.util.removeDuplicates(visibleCharacters)
         } else {
             const postOffset = (charactersPage - 1) * getPageAmount()
             visible = characters.slice(postOffset, postOffset + getPageAmount())

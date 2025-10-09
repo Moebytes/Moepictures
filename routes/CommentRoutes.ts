@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
@@ -36,7 +36,7 @@ const CommentRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!comment || !postID) return void res.status(400).send("Bad comment or post ID")
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            const badComment = functions.validateComment(comment, enLocale)
+            const badComment = functions.validation.validateComment(comment, enLocale)
             if (badComment) return void res.status(400).send("Bad comment")
             await sql.comment.insertComment(postID, req.session.username, comment)
             res.status(200).send("Success")
@@ -69,7 +69,7 @@ const CommentRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!comment || !commentID) return void res.status(400).send("Bad comment or comment ID")
             if (Number.isNaN(Number(commentID))) return void res.status(400).send("Invalid commentID")
-            const badComment = functions.validateComment(comment as string, enLocale)
+            const badComment = functions.validation.validateComment(comment as string, enLocale)
             if (badComment) return void res.status(400).send("Bad comment")
             const com = await sql.comment.comment(commentID)
             if (com?.username !== req.session.username) {
@@ -109,13 +109,13 @@ const CommentRoutes = (app: Express) => {
 
             await sql.report.deleteCommentReport(reportID)
             if (accepted) {
-                let message = `Comment report on ${functions.getDomain()}/post/${id} was accepted. The comment made by ${username} has been removed.`
+                let message = `Comment report on ${functions.config.getDomain()}/post/${id} was accepted. The comment made by ${username} has been removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Comment report has been accepted", message)
 
-                let message2 = `A comment you posted on ${functions.getDomain()}/post/${id} was removed for breaking the rules.`
+                let message2 = `A comment you posted on ${functions.config.getDomain()}/post/${id} was removed for breaking the rules.`
                 await serverFunctions.systemMessage(username, "Notice: Comment has been removed", message2)
             } else {
-                let message = `Comment report on ${functions.getDomain()}/post/${id} has been dismissed. The comment made by ${username} is ok.`
+                let message = `Comment report on ${functions.config.getDomain()}/post/${id} has been dismissed. The comment made by ${username} is ok.`
                 // await serverFunctions.systemMessage(reporter, "Report: Comment report has been dismissed", message)
             }
             res.status(200).send("Success")

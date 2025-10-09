@@ -20,7 +20,7 @@ import ModGroupEdits from "../../components/mod/ModGroupEdits"
 import ModGroupDeletions from "../../components/mod/ModGroupDeletions"
 import ModReports from "../../components/mod/ModReports"
 import ModRejected from "../../components/mod/ModRejected"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import modPostUploadIcon from "../../assets/icons/mod-post-upload.png"
 import modPostEditIcon from "../../assets/icons/mod-post-edit.png"
 import modPostDeleteIcon from "../../assets/icons/mod-post-delete.png"
@@ -149,23 +149,23 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isMod(session)) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }, [session])
 
     const checkNotifications = async () => {
-        const posts = await functions.get("/api/post/list/unverified", null, session, setSessionFlag)
-        const postEdits = await functions.get("/api/post-edits/list/unverified", null, session, setSessionFlag)
-        const postDeletions = await functions.get("/api/post/delete/request/list", null, session, setSessionFlag)
-        const tagEdits = await functions.get("/api/tag/edit/request/list", null, session, setSessionFlag)
-        const tagDeletions = await functions.get("/api/tag/delete/request/list", null, session, setSessionFlag)
-        const tagAliases = await functions.get("/api/tag/aliasto/request/list", null, session, setSessionFlag)
-        const groups = await functions.get("/api/group/request/list", null, session, setSessionFlag)
-        const groupEdits = await functions.get("/api/group/edit/request/list", null, session, setSessionFlag)
-        const groupDeletions = await functions.get("/api/group/delete/request/list", null, session, setSessionFlag)
-        const notes = await functions.get("/api/note/list/unverified", null, session, setSessionFlag)
-        const reports = await functions.get("/api/search/reports", null, session, setSessionFlag)
-        const rejected = await functions.get("/api/post/deleted/unverified", null, session, setSessionFlag)
+        const posts = await functions.http.get("/api/post/list/unverified", null, session, setSessionFlag)
+        const postEdits = await functions.http.get("/api/post-edits/list/unverified", null, session, setSessionFlag)
+        const postDeletions = await functions.http.get("/api/post/delete/request/list", null, session, setSessionFlag)
+        const tagEdits = await functions.http.get("/api/tag/edit/request/list", null, session, setSessionFlag)
+        const tagDeletions = await functions.http.get("/api/tag/delete/request/list", null, session, setSessionFlag)
+        const tagAliases = await functions.http.get("/api/tag/aliasto/request/list", null, session, setSessionFlag)
+        const groups = await functions.http.get("/api/group/request/list", null, session, setSessionFlag)
+        const groupEdits = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag)
+        const groupDeletions = await functions.http.get("/api/group/delete/request/list", null, session, setSessionFlag)
+        const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag)
+        const reports = await functions.http.get("/api/search/reports", null, session, setSessionFlag)
+        const rejected = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag)
         const items = {
             "posts": posts,
             "post-edits": postEdits,

@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import uploadIcon from "../../assets/icons/upload.png"
 import "../dialog.less"
@@ -45,7 +45,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             setEditTagFlag(true)
         } else {
-            const badReason = functions.validateReason(editTagObj.reason, i18n)
+            const badReason = functions.validation.validateReason(editTagObj.reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -64,7 +64,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = bytes
                 }
             }
-            await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+            await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
             implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
             wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             setSubmitted(true)
@@ -92,7 +92,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         await new Promise<void>((resolve) => {
             fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
                 let bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                const result = functions.bufferFileType(bytes)?.[0]
+                const result = functions.byte.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
@@ -100,27 +100,27 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 const avif = result?.mime === "image/avif"
                 if (jpg || png || webp || gif || avif) {
                     const MB = file.size / (1024*1024)
-                    const maxSize = functions.maxTagFileSize({jpg, png, gif, webp, avif})
+                    const maxSize = functions.validation.maxTagFileSize({jpg, png, gif, webp, avif})
                     if (MB <= maxSize) {
                         let url = URL.createObjectURL(file)
                         let croppedURL = ""
                         if (gif) {
-                            const gifData = await functions.extractGIFFrames(bytes.buffer)
+                            const gifData = await functions.video.extractGIFFrames(bytes.buffer)
                             let frameArray = [] as ArrayBuffer[] 
                             let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
                                 const canvas = gifData[i].frame as HTMLCanvasElement
-                                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
+                                const cropped = await functions.image.crop(canvas.toDataURL(), 1, true)
                                 frameArray.push(cropped)
                                 delayArray.push(gifData[i].delay)
                             }
-                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                            const {width, height} = await functions.imageDimensions(firstURL)
-                            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+                            const firstURL = await functions.image.crop(gifData[0].frame.toDataURL(), 1, false)
+                            const {width, height} = await functions.image.imageDimensions(firstURL)
+                            const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([new Uint8Array(buffer)])
                             croppedURL = URL.createObjectURL(blob)
                         } else {
-                            croppedURL = await functions.crop(url, 1, false)
+                            croppedURL = await functions.image.crop(url, 1, false)
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         bytes = new Uint8Array(arrayBuffer)
@@ -288,7 +288,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason || ""} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
             </div>
-            {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
+            {!functions.util.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
             <div className="dialog-row">
                 <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter: getFilter()}}/>
                 <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>

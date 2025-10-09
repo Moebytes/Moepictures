@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import cookieIcon from "../../assets/icons/cookie.png"
 import "./styles/cookiebanner.less"
 
@@ -28,7 +28,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
     }, [session])
 
     const click = async (button: "accept" | "reject") => {
-        await functions.post("/api/user/cookieconsent", {consent: button === "accept"}, session, setSessionFlag)
+        await functions.http.post("/api/user/cookieconsent", {consent: button === "accept"}, session, setSessionFlag)
         setShowCookieBanner(false)
     }
 

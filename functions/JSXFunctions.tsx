@@ -1,4 +1,4 @@
-import functions from "./Functions"
+import functions from "../functions/Functions"
 import VerifyEmail from "../emails/VerifyEmail"
 import ChangeEmail from "../emails/ChangeEmail"
 import ResetPassword from "../emails/ResetPassword"
@@ -257,17 +257,18 @@ export default class JSXFunctions {
                 }
             } else if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
-                if (name.includes(`${functions.getDomain()}/post`)) name = `Post #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/thread`)) name = `Thread #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
+                let domain = functions.config.getDomain()
+                if (name.includes(`${domain}/post`)) name = `Post #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${domain}/thread`)) name = `Thread #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${domain}/message`)) name = `Message #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${domain}/user`)) name = `User ${name.replace(domain, "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
+                if (name.includes(`${domain}/tag`)) name = `Tag ${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
 
-                if (functions.arrayIncludes(name, ["Post", "Thread", "Message", "User", "Tag"])) {
+                if (functions.util.arrayIncludes(name, ["Post", "Thread", "Message", "User", "Tag"])) {
                     items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener">{name}</a>})
-                } else if (functions.isImage(part) || functions.isGIF(part)) {
+                } else if (functions.file.isImage(part) || functions.file.isGIF(part)) {
                     items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
-                } else if (functions.isVideo(part)) {
+                } else if (functions.file.isVideo(part)) {
                     items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
                 } else {
                     items.push({text: null, jsx: (
@@ -348,7 +349,7 @@ export default class JSXFunctions {
             "message": JSXFunctions.renderMessageText
         }[type]
         if (type === "message") type = "reply"
-        const pieces = functions.parsePieces(text)
+        const pieces = functions.render.parsePieces(text)
         let jsx = [] as React.ReactElement[]
         if (r18) jsx.push(<span key={-1} className={`${type}-text`} style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
         for (let i = 0; i < pieces.length; i++) {
@@ -360,7 +361,7 @@ export default class JSXFunctions {
                 let username = ""
                 let said = ""
                 if (userPart) {
-                    username = functions.toProperCase(userPart.split(/ +/g)[0])
+                    username = functions.util.toProperCase(userPart.split(/ +/g)[0])
                     said = userPart.split(/ +/g).slice(1).join(" ")
                 }
                 const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")

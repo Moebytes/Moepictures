@@ -4,7 +4,7 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {PostDeleteRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -37,7 +37,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const requests = await functions.get("/api/post/delete/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/post/delete/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
@@ -52,7 +52,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
         setImagesRef(newImagesRef)
     }
@@ -65,14 +65,14 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const deletePost = async (username: string, postID: string) => {
-        await functions.delete("/api/post/delete", {postID}, session, setSessionFlag)
-        await functions.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, session, setSessionFlag)
+        await functions.http.delete("/api/post/delete", {postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, postID: string) => {
-        await functions.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, session, setSessionFlag)
+        await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisibleRequestFlag(true)
     }
@@ -91,7 +91,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            newVisibleRequests = functions.removeDuplicates(newVisibleRequests)
+            newVisibleRequests = functions.util.removeDuplicates(newVisibleRequests)
             setVisibleRequests(newVisibleRequests)
             const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
@@ -113,7 +113,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/post/delete/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/post/delete/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -127,14 +127,14 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -143,7 +143,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 let newPosts = visibleRequests
@@ -153,7 +153,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                newPosts = functions.removeDuplicates(newPosts)
+                newPosts = functions.util.removeDuplicates(newPosts)
                 setVisibleRequests(newPosts)
                 const newImagesRef = newPosts.map(() => React.createRef<HTMLCanvasElement>())
                 setImagesRef(newImagesRef)
@@ -169,9 +169,9 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         for (let i = 0; i < visibleRequests.length; i++) {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
-            let src = await functions.decryptThumb(img, session)
+            let src = await functions.crypto.decryptThumb(img, session)
             const imgElement = document.createElement("img")
             imgElement.src = src 
             imgElement.onload = () => {
@@ -316,7 +316,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as PostDeleteRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -336,18 +336,18 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const imgClick = (event: React.MouseEvent) => {
-                functions.openPost(request.post, event, navigate, session, setSessionFlag)
+                functions.post.openPost(request.post, event, navigate, session, setSessionFlag)
             }
-            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
-                        {functions.isVideo(img) ? 
+                        {functions.file.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></video> :
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                     </div>
                     <div className="mod-post-options">

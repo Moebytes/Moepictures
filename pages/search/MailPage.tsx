@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -103,7 +103,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const updateMessages = async (query?: string) => {
-        const result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, hideSystem}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/messages", {sort: functions.validation.parseSort(sortType, sortReverse), query: query ? query : searchQuery, hideSystem}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleMessages([])
@@ -112,7 +112,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const softDeleteMessage = async () => {
         if (!softDeleteMessageID) return
-        await functions.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
+        await functions.http.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
         updateMessages()
     }
 
@@ -160,7 +160,7 @@ const MailPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }, [session])
 
@@ -182,7 +182,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleMessages(functions.removeDuplicates(newVisibleMessages))
+            setVisibleMessages(functions.util.removeDuplicates(newVisibleMessages))
         }
         if (scroll) updateMessages()
     }, [scroll, messages, session, hideSystem])
@@ -201,7 +201,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, hideSystem, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/messages", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, hideSystem, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanMessages = messages.filter((t) => !t.fake)
         if (!scroll) {
@@ -215,14 +215,14 @@ const MailPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setMessages(result)
             } else {
-                setMessages((prev) => functions.removeDuplicates([...prev, ...result]))
+                setMessages((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setMessages(result)
                 } else {
-                    setMessages((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setMessages((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -231,7 +231,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!messages[currentIndex]) return updateOffset()
                 const newVisibleMessages = visibleMessages
@@ -241,7 +241,7 @@ const MailPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleMessages(functions.removeDuplicates(newVisibleMessages))
+                setVisibleMessages(functions.util.removeDuplicates(newVisibleMessages))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -400,7 +400,7 @@ const MailPage: React.FunctionComponent = (props) => {
         jsx.push(<MessageRow key={"0"} titlePage={true}/>)
         let visible = [] as MessageSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleMessages)
+            visible = functions.util.removeDuplicates(visibleMessages)
         } else {
             const postOffset = (mailPage - 1) * getPageAmount()
             visible = messages.slice(postOffset, postOffset + getPageAmount())
@@ -430,13 +430,13 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const readAll = async () => {
-        await functions.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
+        await functions.http.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
         updateMessages()
         setHasNotification(false)
     }
 
     const unreadAll = async () => {
-        await functions.post("/api/message/bulkread", {readStatus: false}, session, setSessionFlag)
+        await functions.http.post("/api/message/bulkread", {readStatus: false}, session, setSessionFlag)
         updateMessages()
         setHasNotification(true)
     }

@@ -4,7 +4,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
 useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import noteDelete from "../../assets/icons/note-delete.png"
 import noteEdit from "../../assets/icons/note-edit.png"
@@ -263,12 +263,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         let notes = [] as Note[]
         if (props.unverified) {
-            notes = await functions.get("/api/notes/unverified", {postID: props.post.postID}, session, setSessionFlag)
+            notes = await functions.http.get("/api/notes/unverified", {postID: props.post.postID}, session, setSessionFlag)
         } else if (props.noteID) {
-            const history = await functions.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
+            const history = await functions.http.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
             notes = history.flatMap((h) => h.notes)
         } else {
-            notes = await functions.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
+            notes = await functions.http.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
         }
         notes = notes?.filter((n) => n.order === undefined || n.order === (props.order || 1))
         if (notes?.length) {
@@ -313,10 +313,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             if (!props.post) return
             const currentImg = props.post.images[(props.order || 1) - 1]
             if (typeof currentImg === "string") {
-                const imgLink = functions.getRawThumbnailLink(currentImg, "massive")
-                const decrypted = await functions.decryptThumb(imgLink, session)
+                const imgLink = functions.link.getRawThumbnailLink(currentImg, "massive")
+                const decrypted = await functions.crypto.decryptThumb(imgLink, session)
                 const arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
-                const hash = await functions.post("/api/misc/imghash", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+                const hash = await functions.http.post("/api/misc/imghash", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
                 setTargetHash(hash)
             } else {
                 setTargetHash(currentImg.hash)
@@ -329,7 +329,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     let maxHeight = 1000
 
     if (typeof window !== "undefined") {
-        maxWidth = mobile ? window.innerWidth - 20 : window.innerWidth - functions.sidebarWidth() - 70
+        maxWidth = mobile ? window.innerWidth - 20 : window.innerWidth - functions.dom.sidebarWidth() - 70
     }
 
     if (imageExpand) {
@@ -362,7 +362,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const deleteFocused = () => {
         if (!noteDrawingEnabled) return
-        setItems((prev) => functions.insertAtIndex(prev, activeIndex, null).filter(Boolean))
+        setItems((prev) => functions.util.insertAtIndex(prev, activeIndex, null).filter(Boolean))
     }
 
     const editTextDialog = () => {
@@ -447,19 +447,19 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         let currentImage = session.upscaledImages ? upscaledImage : image
         let img = ""
         if (typeof currentImage === "string") {
-            img = functions.getRawImageLink(currentImage)
+            img = functions.link.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(currentImage, session.upscaledImages)
+            img = functions.link.getImageLink(currentImage, session.upscaledImages)
         }
         return img
     }
 
     const ocrPage = async () => {
         const img = getCurrentLink()
-        const jpgURL = await functions.convertToFormat(img, "jpg")
+        const jpgURL = await functions.image.convertToFormat(img, "jpg")
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
-        let result = await functions.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
+        let result = await functions.http.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
         if (result?.length) {
             const copy = structuredClone(result)
             setItems(() => {
@@ -592,12 +592,12 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
                         const insertItem = (newRect: BubbleData) => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev) => functions.insertAtIndex(prev, index, {...item, ...newRect}))
+                            setItems((prev) => functions.util.insertAtIndex(prev, index, {...item, ...newRect}))
                         }
 
                         const deleteItem = () => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev) => functions.insertAtIndex(prev, index, null).filter(Boolean))
+                            setItems((prev) => functions.util.insertAtIndex(prev, index, null).filter(Boolean))
                         }
 
                         const onContextMenu = (event: React.MouseEvent) => {

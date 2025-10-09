@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useActiveSelector, useActiveActions, useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/actionbanner.less"
 
 let timeout = null as any

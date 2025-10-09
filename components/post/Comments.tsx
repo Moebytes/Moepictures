@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useActiveSelector, 
 useActiveActions, useLayoutSelector, useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import emojiSelect from "../../assets/icons/emoji-select.png"
 import highlight from "../../assets/icons/highlight.png"
 import bold from "../../assets/icons/bold.png"
@@ -15,7 +15,6 @@ import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
 import Comment from "./Comment"
-import jsxFunctions from "../../structures/JSXFunctions"
 import "./styles/comments.less"
 import {PostSearch, PostHistory, UserComment} from "../../types/Types"
 
@@ -89,7 +88,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [commentID])
 
     const updateComments = async () => {
-        const comments = await functions.get("/api/post/comments", {postID: props.post.postID}, session, setSessionFlag)
+        const comments = await functions.http.get("/api/post/comments", {postID: props.post.postID}, session, setSessionFlag)
         setComments(comments || [])
     }
 
@@ -118,7 +117,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [quoteText])
 
     const post = async () => {
-        const badComment = functions.validateComment(text, i18n)
+        const badComment = functions.validation.validateComment(text, i18n)
         if (badComment) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -131,7 +130,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/comment/create", {postID: props.post.postID, comment: text}, session, setSessionFlag)
+            await functions.http.post("/api/comment/create", {postID: props.post.postID, comment: text}, session, setSessionFlag)
             errorRef.current!.innerText = i18n.errors.comment.added
             setCommentFlag(true)
             setText("")
@@ -215,18 +214,18 @@ const Comments: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comments-input-container">
                     <div className="comments-textarea-buttons">
-                        <button className="comments-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
-                        <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
+                        <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
                     </div>
-                    {previewMode ? <div className="comments-preview">{jsxFunctions.renderText(text, emojis, "comment")}</div> : 
+                    {previewMode ? <div className="comments-preview">{functions.jsx.renderText(text, emojis, "comment")}</div> : 
                     <div style={{marginTop: "0px"}} className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <textarea ref={textRef} className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
                     </div>}

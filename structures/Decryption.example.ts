@@ -1,8 +1,8 @@
-import functions from "./Functions"
+import functions from "../functions/Functions"
 import permissions from "./Permissions"
 import {ServerSession} from "../types/Types"
 
-export default class DecryptFunctions {
+export default class Decryption {
     public static generateKeys = () => {
         return {publicKey: "", privateKey: ""}
     }
@@ -18,11 +18,11 @@ export default class DecryptFunctions {
      public static decryptedLink = async (link: string, privateKey: string, serverPublicKey: string, session: ServerSession) => {
         if (permissions.noEncryption(session)) return link
         if (link.includes("/unverified")) return link
-        if (functions.isVideo(link)) return link
+        if (functions.file.isVideo(link)) return link
         const buffer = await fetch(link, {credentials: "include"}).then((r) => r.arrayBuffer())
-        if (!functions.isEncrypted(buffer, link)) return link
+        if (!functions.crypto.isEncrypted(buffer, link)) return link
         try {
-            let decrypted = DecryptFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
+            let decrypted = Decryption.decrypt(buffer, privateKey, serverPublicKey, session)
             if (!decrypted.byteLength) decrypted = buffer
             const blob = new Blob([new Uint8Array(decrypted)])
             return URL.createObjectURL(blob)
@@ -35,9 +35,9 @@ export default class DecryptFunctions {
         const buffer = await fetch(link, {credentials: "include"}).then((r) => r.arrayBuffer())
         if (permissions.noEncryption(session)) return buffer
         if (link.includes("/unverified")) return buffer
-        if (functions.isVideo(link)) return buffer
-        if (!functions.isEncrypted(buffer, link)) return buffer
-        const decrypted = DecryptFunctions.decrypt(buffer, privateKey, serverPublicKey, session)
+        if (functions.file.isVideo(link)) return buffer
+        if (!functions.crypto.isEncrypted(buffer, link)) return buffer
+        const decrypted = Decryption.decrypt(buffer, privateKey, serverPublicKey, session)
         return decrypted
      }
 }

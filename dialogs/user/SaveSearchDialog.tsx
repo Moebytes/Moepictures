@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
 useSessionActions, useSearchSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -84,7 +84,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/user/savesearch", {name, tags}, session, setSessionFlag)
+        await functions.http.post("/api/user/savesearch", {name, tags}, session, setSessionFlag)
         setSessionFlag(true)
     }
 
@@ -113,7 +113,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
 
     const handleTagClick = (tag: string) => {
         setTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -136,7 +136,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">{i18n.navbar.tags}: </span>
                         </div>
                         <div className="dialog-row">
-                            <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="all"/>
+                            <SearchSuggestions active={tagActive} text={functions.util.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="all"/>
                             <ContentEditable innerRef={tagRef} className="dialog-textarea-small" spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}

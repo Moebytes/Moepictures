@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Slider from "react-slider"
 import modelReverseIcon from "../../assets/icons/model-reverse.png"
 import modelSpeedIcon from "../../assets/icons/model-speed.png"
@@ -107,7 +107,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     const decryptModel = async () => {
         if (!props.model) return
-        const decryptedModel = await functions.decryptItem(props.model, session)
+        const decryptedModel = await functions.crypto.decryptItem(props.model, session)
         if (decryptedModel) setDecrypted(decryptedModel)
     }
 
@@ -134,11 +134,11 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
-        let width = window.innerWidth - functions.sidebarWidth() - 400
+        let width = window.innerWidth - functions.dom.sidebarWidth() - 400
         if (mobile) width = window.innerWidth - 10
-        let height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
+        let height = window.innerHeight - functions.dom.titlebarHeight() - functions.dom.navbarHeight() - 150
         if (imageExpand) {
-            width = window.innerWidth - functions.sidebarWidth() - 200
+            width = window.innerWidth - functions.dom.sidebarWidth() - 200
             height = window.innerHeight
         }
         const scene = new THREE.Scene()
@@ -161,18 +161,18 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         element?.appendChild(renderer.domElement)
 
         let model = null as unknown as THREE.Object3D
-        if (functions.isGLTF(props.model)) {
+        if (functions.file.isGLTF(props.model)) {
             const loader = new GLTFLoader()
             const gltf = await loader.loadAsync(decrypted)
             model = gltf.scene
             model.animations = gltf.animations
-        } else if (functions.isOBJ(props.model)) {
+        } else if (functions.file.isOBJ(props.model)) {
             const loader = new OBJLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.isFBX(props.model)) {
+        } else if (functions.file.isFBX(props.model)) {
             const loader = new FBXLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.isVRM(props.model)) {
+        } else if (functions.file.isVRM(props.model)) {
             const loader = new GLTFLoader()
             loader.register((parser: any) => {
                 return new VRMLoaderPlugin(parser) as any
@@ -312,10 +312,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setRef(renderer.domElement)
 
         window.addEventListener("resize", () => {
-            let width = window.innerWidth - functions.sidebarWidth() - 400
-            let height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
+            let width = window.innerWidth - functions.dom.sidebarWidth() - 400
+            let height = window.innerHeight - functions.dom.titlebarHeight() - functions.dom.navbarHeight() - 150
             if (imageExpand) {
-                width = window.innerWidth - functions.sidebarWidth() - 200
+                width = window.innerWidth - functions.dom.sidebarWidth() - 200
                 height = window.innerHeight
             }
             // @ts-ignore
@@ -586,7 +586,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.model), decrypted)
+                functions.dom.download(path.basename(props.model), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
@@ -779,9 +779,9 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <p className="model-control-text">{dragging ? functions.formatSeconds(dragProgress || 0) : functions.formatSeconds(secondsProgress)}</p>
+                                <p className="model-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
                                 <Slider ref={modelSliderRef} className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                                <p className="model-control-text">{functions.formatSeconds(duration)}</p>
+                                <p className="model-control-text">{functions.date.formatSeconds(duration)}</p>
                             </div> : null}
                             <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 {animations ? <>

@@ -5,7 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
 import tagDiff from "../../assets/icons/tagdiff.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {GroupRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -37,7 +37,7 @@ const ModGroups: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async () => {
-        const requests = await functions.get("/api/group/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/group/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
@@ -52,7 +52,7 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
         setImagesRef(newImagesRef)
     }
@@ -65,14 +65,14 @@ const ModGroups: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const addGroup = async (username: string, name: string, slug: string, postID: string, ) => {
-        await functions.post("/api/group", {username, postID, name}, session, setSessionFlag)
-        await functions.post("/api/group/request/fulfill", {username, slug, postID, accepted: true}, session, setSessionFlag)
+        await functions.http.post("/api/group", {username, postID, name}, session, setSessionFlag)
+        await functions.http.post("/api/group/request/fulfill", {username, slug, postID, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, slug: string, postID: string) => {
-        await functions.post("/api/group/request/fulfill", {username, slug, postID, accepted: false}, session, setSessionFlag)
+        await functions.http.post("/api/group/request/fulfill", {username, slug, postID, accepted: false}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
     }
@@ -91,7 +91,7 @@ const ModGroups: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
             const newImagesRef = newVisibleRequests.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
         }
@@ -112,7 +112,7 @@ const ModGroups: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/group/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/group/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -126,14 +126,14 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -143,7 +143,7 @@ const ModGroups: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests
@@ -153,7 +153,7 @@ const ModGroups: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                setVisibleRequests(functions.util.removeDuplicates(newPosts))
                 const newImagesRef = newPosts.map(() => React.createRef<HTMLCanvasElement>())
                 setImagesRef(newImagesRef)
             }
@@ -168,9 +168,9 @@ const ModGroups: React.FunctionComponent = (props) => {
         for (let i = 0; i < visibleRequests.length; i++) {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
-            let src = await functions.decryptThumb(img, session)
+            let src = await functions.crypto.decryptThumb(img, session)
             const imgElement = document.createElement("img")
             imgElement.src = src 
             imgElement.onload = () => {
@@ -315,7 +315,7 @@ const ModGroups: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as GroupRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -335,23 +335,23 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const imgClick = (event: React.MouseEvent) => {
-                functions.openPost(request.post, event, navigate, session, setSessionFlag)
+                functions.post.openPost(request.post, event, navigate, session, setSessionFlag)
             }
             const groupClick = (event: React.MouseEvent, middle?: boolean) => {
                 if (!request.exists) return
                 if (middle) return window.open(`/group/${request.slug}`, "_blank")
                 navigate(`/group/${request.slug}`)
             }
-            const img = functions.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
-                        {functions.isVideo(img) ? 
+                        {functions.file.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></video> :
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         <span className="mod-post-link" onClick={groupClick} onAuxClick={(event) => groupClick(event, true)}>{i18n.labels.groupName}: {request.name}</span>
                     </div>

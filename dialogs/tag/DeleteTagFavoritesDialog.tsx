@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
@@ -31,7 +31,7 @@ const DeleteTagFavoritesDialog: React.FunctionComponent = (props) => {
     }, [deleteTagFavoritesDialog])
 
     const deleteTagFavorites = async () => {
-        await functions.delete("/api/tagfavorites/delete", null, session, setSessionFlag)
+        await functions.http.delete("/api/tagfavorites/delete", null, session, setSessionFlag)
         setTagFavoriteFlag(true)
     }
 

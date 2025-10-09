@@ -5,7 +5,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
 import downloadIcon from "../../assets/icons/download.png"
 import xIcon from "../../assets/icons/x.png"
@@ -46,7 +46,6 @@ import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../../structures/Permissions"
 import xButton from "../../assets/icons/x-button-magenta.png"
-import imageFunctions from "../../structures/ImageFunctions"
 import path from "path"
 import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UnverifiedPost} from "../../types/Types"
 import "./styles/uploadpage.less"
@@ -131,7 +130,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         const linkParam = new URLSearchParams(window.location.search).get("link")
         if (linkParam) {
             const url = window.location.href.match(/(?<=\?link=)(.*)/)?.[0] || ""
-            const files = await functions.proxyImage(url, session, setSessionFlag)
+            const files = await functions.http.proxyImage(url, session, setSessionFlag)
             await validate(files, new Array(files.length).fill(url))
             reset()
         }
@@ -170,7 +169,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const updatePending = async () => {
-        const pending = await functions.get("/api/post/pending", null, session, setSessionFlag)
+        const pending = await functions.http.get("/api/post/pending", null, session, setSessionFlag)
         setPending(pending)
    }
 
@@ -190,10 +189,10 @@ const UploadPage: React.FunctionComponent = (props) => {
             const img = currentFiles[currentIndex]
             let dupes = [] as Post[]
             if (img.thumbnail) {
-                const bytes = await functions.base64toUint8Array(img.thumbnail).then((r) => Object.values(r))
-                dupes = await functions.post("/api/search/similar", {bytes}, session, setSessionFlag)
+                const bytes = await functions.byte.base64toUint8Array(img.thumbnail).then((r) => Object.values(r))
+                dupes = await functions.http.post("/api/search/similar", {bytes}, session, setSessionFlag)
             } else {
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(img.bytes)}, session, setSessionFlag)
+                dupes = await functions.http.post("/api/search/similar", {bytes: Object.values(img.bytes)}, session, setSessionFlag)
             }
             setDupPosts(dupes)
         }
@@ -211,7 +210,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        let {images, error} = await imageFunctions.validateImages(files, links, session, i18n)
+        let {images, error} = await functions.image.validateImages(files, links, session, i18n)
         if (error) {
             setUploadError(true)
             if (!uploadErrorRef.current) await functions.timeout(20)
@@ -262,7 +261,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const uploadTagImg = async (event: File | React.ChangeEvent<HTMLInputElement>, type: string, index: number) => {
         const file = event instanceof File ? event : event.target.files?.[0]
         if (!file) return
-        const item = await imageFunctions.validateTagImage(file)
+        const item = await functions.image.validateTagImage(file)
         if (item) {
             if (type === "artist") {
                 artists[index].image = item.image
@@ -291,10 +290,10 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const handleTagClick = async (tag: string, index: number) => {
-        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
+        const tagDetail = await functions.http.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
         if (!tagDetail) return
         if (tagDetail.image) {
-            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+            const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")
@@ -370,7 +369,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="artist"/>
+                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={functions.render.getTypingWord(artistInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.artistTag}: </span>
                     <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} 
@@ -455,7 +454,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={functions.getTypingWord(characterInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="character"/>
+                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={functions.render.getTypingWord(characterInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.characterTag}: </span>
                     <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -538,7 +537,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={functions.getTypingWord(seriesInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="series"/>
+                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={functions.render.getTypingWord(seriesInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.seriesTag}: </span>
                     <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -587,13 +586,13 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
+        const links = functions.util.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
         enterLinksTimer = setTimeout(async () => {
             let files = [] as File[]
             for (let i = 0; i < links.length; i++) {
-                const fileArr = await functions.proxyImage(links[i], session, setSessionFlag)
+                const fileArr = await functions.http.proxyImage(links[i], session, setSessionFlag)
                 files.push(...fileArr)
             }
             await validate(files, links)
@@ -660,7 +659,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
-        let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+        let {tags, tagGroups} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
         if (metaTags) tags.push(...metaTags.split(/[\n\r\s]+/g).filter(Boolean))
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
@@ -674,7 +673,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
             submitErrorRef.current!.innerText = i18n.pages.upload.spaceSeparation
-            const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+            const splitTags = functions.util.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
             setRawTags(splitTags.join(" "))
             await functions.timeout(3000)
             return setSubmitError(false)
@@ -711,7 +710,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 source: sourceLink,
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
-                bookmarks: functions.safeNumber(sourceBookmarks),
+                bookmarks: functions.util.safeNumber(sourceBookmarks),
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -728,9 +727,9 @@ const UploadPage: React.FunctionComponent = (props) => {
         submitErrorRef.current!.innerText = i18n.buttons.submitting
         try {
             if (permissions.isCurator(session)) {
-                await functions.post("/api/post/upload", data, session, setSessionFlag)
+                await functions.http.post("/api/post/upload", data, session, setSessionFlag)
             } else {
-                await functions.post("/api/post/upload/unverified", data, session, setSessionFlag)
+                await functions.http.post("/api/post/upload/unverified", data, session, setSessionFlag)
             }
             setSubmitted(true)
             return setSubmitError(false)
@@ -758,12 +757,12 @@ const UploadPage: React.FunctionComponent = (props) => {
             const currentFiles = getCurrentFiles()
             let current = currentFiles[currentIndex]
     
-            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            const sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
             if (sourceLookup.danbooruLink) setDanbooruLink(sourceLookup.danbooruLink)
             if (sourceLookup.artists[0]?.tag) {
                 artists[artists.length - 1].tag = sourceLookup.artists[0].tag
                 if (sourceLookup.artistIcon) {
-                    const pfp = await functions.proxyImage(sourceLookup.artistIcon, session, setSessionFlag).then((r) => r[0])
+                    const pfp = await functions.http.proxyImage(sourceLookup.artistIcon, session, setSessionFlag).then((r) => r[0])
                     await uploadTagImg(pfp, "artist", artists.length - 1)
                 }
                 artists.push({})
@@ -805,7 +804,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             const currentFiles = getCurrentFiles()
             let current = currentFiles[currentIndex]
             let hasUpscaled = upscaledFiles.length ? true : false
-            const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
+            const tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
             if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
@@ -814,9 +813,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (!tagLookup.characters[i]?.tag) continue
                 characters[characters.length - 1].tag = tagLookup.characters[i].tag
                 characters[characters.length - 1].image = ""
-                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
+                const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")
@@ -839,9 +838,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (!tagLookup.series[i]?.tag) continue
                 series[series.length - 1].tag = tagLookup.series[i].tag
                 series[series.length - 1].image = ""
-                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
+                const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")
@@ -885,15 +884,15 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [rawTags, session])
 
     const updateTags = async () => {
-        const {tags} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+        const {tags} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const tagMap = await functions.tagsCache(session, setSessionFlag)
+            const tagMap = await functions.cache.tagsCache(session, setSessionFlag)
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.util.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
@@ -950,39 +949,39 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        const tagX = functions.getTagX()
-        const tagY = functions.getTagY()
+        const tagX = functions.render.getTagX()
+        const tagY = functions.render.getTagY()
         setTagX(tagX)
         setTagY(tagY)
     }, [metaTags, rawTags])
 
     useEffect(() => {
         if (metaActive || tagActive) {
-            const tagX = functions.getTagX()
-            const tagY = functions.getTagY()
+            const tagX = functions.render.getTagX()
+            const tagY = functions.render.getTagY()
             setTagX(tagX)
             setTagY(tagY)
         }
     }, [metaActive, tagActive])
 
     const setCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
-        caretPosition = functions.getCaretPosition(ref)
+        caretPosition = functions.render.getCaretPosition(ref)
     }
 
     const handleRawTagClick = (tag: string) => {
-        setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const handleMetaTagClick = (tag: string) => {
-        setMetaTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setMetaTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getPostJSX = () => {
-        if (functions.isLive2D(currentImg)) {
+        if (functions.file.isLive2D(currentImg)) {
             return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isModel(currentImg)) {
+        } else if (functions.file.isModel(currentImg)) {
             return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isAudio(currentImg)) {
+        } else if (functions.file.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
@@ -1166,7 +1165,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             )
         }
 
-        if (functions.currentUploads(pending) >= permissions.getUploadLimit(session)) {
+        if (functions.post.currentUploads(pending) >= permissions.getUploadLimit(session)) {
             return (
                 <>
                 <span className="upload-text" style={{marginTop: "10px", 
@@ -1417,7 +1416,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             {dupPosts.length ? <>
             <span className="upload-heading">{i18n.pages.upload.possibleDuplicates}</span>
             <div className="upload-row">
-                <Carousel images={dupPosts.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session))} set={setDup} index={currentDupIndex}/>
+                <Carousel images={dupPosts.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session))} set={setDup} index={currentDupIndex}/>
             </div>
             </> : null}
             <div className="upload-container">
@@ -1496,14 +1495,14 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <span className="upload-heading">{i18n.tag.meta}</span>
             </div>
             <div className="upload-container" style={{marginBottom: "5px"}}>
-                <SearchSuggestions active={metaActive} text={functions.getTypingWord(metaTagRef.current)} x={tagX} y={tagY} width={200} click={handleMetaTagClick} type="meta"/>
+                <SearchSuggestions active={metaActive} text={functions.render.getTypingWord(metaTagRef.current)} x={tagX} y={tagY} width={200} click={handleMetaTagClick} type="meta"/>
                 <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
                     <input style={{width: "40%"}} ref={metaTagRef} className="upload-input meta-tag-color" spellCheck={false} value={metaTags} onChange={(event) => {setCaretPosition(metaTagRef.current); setMetaTags(event.target.value)}} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
                 </div>
             </div>
             {displayImage && getCurrentFiles().length ?
             <div className="upload-row">
-                {functions.isVideo(currentImg) ? 
+                {functions.file.isVideo(currentImg) ? 
                 <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video> :
                 <img className="tag-img-preview" src={getCurrentFiles()[currentIndex]?.thumbnail ? getCurrentFiles()[currentIndex].thumbnail : currentImg}/>}
             </div>
@@ -1526,7 +1525,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             {i18n.pages.upload.organizeTags}
             <Link className="upload-bold-link" target="_blank" to="/help#tag-groups">{i18n.pages.upload.tagGroups}</Link></span>
             <div className="upload-container">
-                <SearchSuggestions active={tagActive} text={functions.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
+                <SearchSuggestions active={tagActive} text={functions.render.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
                 <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
                     <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(rawTagRef.current); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                 </div>

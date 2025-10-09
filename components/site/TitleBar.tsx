@@ -7,7 +7,7 @@ import favicon4 from "../../assets/icons/favicon4.png"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
 useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import hamburger from "../../assets/icons/hamburger.png"
 import lockIcon from "../../assets/icons/lock-red.png"
 import privateIcon from "../../assets/icons/private.png"
@@ -44,7 +44,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (headerFlag) {
             setHeaderFlag(false)
-            const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => {
+            const text = functions.util.toProperCase(search.trim().split(/ +/g).map((t: string) => {
                 if (t.startsWith("+-")) return `+-${t.replaceAll("+-", " ").trim()}`
                 if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
                 return t.replaceAll("-", " ")
@@ -96,16 +96,16 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const getFavicon = () => {
         if (typeof window === "undefined") return favicon
         if (siteHue >= 240) {
-            functions.changeFavicon(favicon2)
+            functions.dom.changeFavicon(favicon2)
             return favicon2
         } else if (siteHue >= 160) {
-            functions.changeFavicon(favicon)
+            functions.dom.changeFavicon(favicon)
             return favicon
         } else if (siteHue >= 100) {
-            functions.changeFavicon(favicon3)
+            functions.dom.changeFavicon(favicon3)
             return favicon3
         } else {
-            functions.changeFavicon(favicon4)
+            functions.dom.changeFavicon(favicon4)
             return favicon4
         }
     }
@@ -143,10 +143,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={lockIcon}/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.unverified && !props.post?.deleted ? <span style={{color: "var(--pendingColor)", marginRight: "10px"}}>[{i18n.labels.pending}]</span> : null}
-                    {props.post?.deleted ? <span style={{color: "var(--deletedColor)", marginRight: "10px"}}>[{i18n.time.deleted} {functions.timeUntil(props.post.deletionDate, i18n)}]</span> : null}
+                    {props.post?.deleted ? <span style={{color: "var(--deletedColor)", marginRight: "10px"}}>[{i18n.time.deleted} {functions.date.timeUntil(props.post.deletionDate, i18n)}]</span> : null}
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[${i18n.sidebar.history}: ${props.historyID}]`}</span> : null}
                     {props.noteID ? <span style={{color: "var(--noteColor)", marginRight: "10px"}}>{`[${i18n.labels.note}: ${props.noteID}]`}</span> : null}
-                    {functions.isR18(ratingType) ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                    {functions.post.isR18(ratingType) ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup.name}]</span> : null}
                     {activeFavgroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeFavgroup.name}]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[{i18n.labels.autoSearch}]</span> : null}

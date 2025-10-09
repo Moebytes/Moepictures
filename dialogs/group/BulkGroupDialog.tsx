@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions,
 useSearchSelector, useSearchActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radiobuttonChecked from "../../assets/icons/radiobutton-checked.png"
 import permissions from "../../structures/Permissions"
@@ -54,7 +54,7 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
         if (!permissions.isContributor(session)) return setBulkGroupDialog(false)
         if (!selectionMode) return setBulkGroupDialog(false)
         for (const postID of selectionItems.values()) {
-            await functions.post("/api/group", {postID, name}, session, setSessionFlag)
+            await functions.http.post("/api/group", {postID, name}, session, setSessionFlag)
         }
         setBulkGroupDialog(false)
         setSelectionMode(false)

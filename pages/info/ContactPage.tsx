@@ -5,7 +5,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import XButton from "../../assets/icons/x-button.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import {FileUpload} from "../../types/Types"
@@ -72,7 +72,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     }
     
     const submit = async () => {
-        const badEmail = functions.validateEmail(email, i18n)
+        const badEmail = functions.validation.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -81,7 +81,7 @@ const ContactPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badMessage = functions.validateMessage(message, i18n)
+        const badMessage = functions.validation.validateMessage(message, i18n)
         if (badMessage) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -94,7 +94,7 @@ const ContactPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await functions.post("/api/misc/contact", {email, subject, message, files}, session, setSessionFlag)
+            await functions.http.post("/api/misc/contact", {email, subject, message, files}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

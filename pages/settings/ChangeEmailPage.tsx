@@ -5,7 +5,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -38,7 +38,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -79,7 +79,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const submit = async () => {
-        const badEmail = functions.validateEmail(newEmail, i18n)
+        const badEmail = functions.validation.validateEmail(newEmail, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -92,7 +92,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/changeemail", {newEmail, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/changeemail", {newEmail, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch (err: any) {

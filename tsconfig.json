@@ -3,7 +3,7 @@
         "outDir": "dist",
         "noImplicitAny": false,
         "moduleResolution": "node",
-        "target": "es2017",
+        "target": "es2023",
         "module": "esnext",
         "lib": ["es2023", "dom"],
         "allowJs": true,

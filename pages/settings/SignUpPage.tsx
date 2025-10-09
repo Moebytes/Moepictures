@@ -7,7 +7,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import show from "../../assets/icons/show.png"
 import hide from "../../assets/icons/hide.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -43,7 +43,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -98,7 +98,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badPassword = functions.validatePassword(username.trim(), password.trim(), i18n)
+        const badPassword = functions.validation.validatePassword(username.trim(), password.trim(), i18n)
         if (badPassword) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -107,7 +107,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badEmail = functions.validateEmail(email.trim(), i18n)
+        const badEmail = functions.validation.validateEmail(email.trim(), i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -116,7 +116,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badUsername = functions.validateUsername(username.trim(), i18n)
+        const badUsername = functions.validation.validateUsername(username.trim(), i18n)
         if (badUsername) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -136,7 +136,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch (err: any) {

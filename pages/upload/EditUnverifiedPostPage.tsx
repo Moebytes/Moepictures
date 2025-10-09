@@ -5,7 +5,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
 import xIcon from "../../assets/icons/x.png"
 import rightIcon from "../../assets/icons/right.png"
@@ -45,7 +45,6 @@ import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import permissions from "../../structures/Permissions"
 import xButton from "../../assets/icons/x-button-magenta.png"
-import imageFunctions from "../../structures/ImageFunctions"
 import {PostType, PostRating, PostStyle, UploadTag, UploadImage, UnverifiedPost} from "../../types/Types"
 import path from "path"
 import "./styles/uploadpage.less"
@@ -127,8 +126,8 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
 
     const updatePost = async () => {
-        const post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
-        if (!post) return functions.replaceLocation("/404")
+        const post = await functions.http.get("/api/post/unverified", {postID}, session, setSessionFlag)
+        if (!post) return functions.dom.replaceLocation("/404")
         setPost(post)
     }
 
@@ -144,11 +143,11 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         setSourceCommentary(post.commentary || "")
         setSourceEnglishCommentary(post.englishCommentary || "")
         setSourceMirrors(post.mirrors ? Object.values(post.mirrors).join("\n") : "")
-        if (post.posted) setSourceDate(functions.formatDate(new Date(post.posted), true))
+        if (post.posted) setSourceDate(functions.date.formatDate(new Date(post.posted), true))
         setSourceLink(post.source || "")
         setSourceBookmarks(String(post.bookmarks) || "")
         setSourceBuyLink(post.buyLink || "")
-        const parentPost = await functions.get("/api/post/parent/unverified", {postID}, session, setSessionFlag)
+        const parentPost = await functions.http.get("/api/post/parent/unverified", {postID}, session, setSessionFlag)
         if (parentPost) setParentID(parentPost.parentID)
 
         let files = [] as File[]
@@ -156,16 +155,16 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         let upscaledFiles = [] as File[]
         let upscaledLinks = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
-            let imageLink = functions.getUnverifiedImageLink(post.images[i])
-            const response = await fetch(functions.appendURLParams(imageLink, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let imageLink = functions.link.getUnverifiedImageLink(post.images[i])
+            const response = await fetch(functions.util.appendURLParams(imageLink, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
                 const file = new File([blob], path.basename(imageLink))
                 files.push(file)
                 links.push(imageLink)
             }
-            let upscaledImageLink = functions.getUnverifiedImageLink(post.images[i], true)
-            const upscaledResponse = await fetch(functions.appendURLParams(upscaledImageLink, {upscaled: true}), {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            let upscaledImageLink = functions.link.getUnverifiedImageLink(post.images[i], true)
+            const upscaledResponse = await fetch(functions.util.appendURLParams(upscaledImageLink, {upscaled: true}), {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
                 const upscaledFile = new File([upscaledBlob], path.basename(upscaledImageLink))
@@ -176,8 +175,8 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         await validate(files, links, false)
         validate(upscaledFiles, upscaledLinks, true)
 
-        const parsedTags = await functions.parseTagsUnverified([post])
-        const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag)
+        const parsedTags = await functions.tag.parseTagsUnverified([post])
+        const tagCategories = await functions.tag.tagCategories(parsedTags, session, setSessionFlag)
 
         let artists = [{}] as UploadTag[]
         for (let i = 0; i < tagCategories.artists.length; i++) {
@@ -185,14 +184,14 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
                 try {
-                    const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image!, tagCategories.artists[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("artist", tagCategories.artists[i].image!, tagCategories.artists[i].imageHash))
                     artists[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     artists[i].ext = path.extname(imageLink).replace(".", "")
                     artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
-                    const imageLink = functions.getUnverifiedTagLink("artist", tagCategories.artists[i].image!)
+                    const imageLink = functions.link.getUnverifiedTagLink("artist", tagCategories.artists[i].image!)
                     artists[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     artists[i].ext = path.extname(imageLink).replace(".", "")
@@ -208,14 +207,14 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
                 try {
-                    const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image!, tagCategories.characters[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("character", tagCategories.characters[i].image!, tagCategories.characters[i].imageHash))
                     characters[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     characters[i].ext = path.extname(imageLink).replace(".", "")
                     characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
-                    const imageLink = functions.getUnverifiedTagLink("character", tagCategories.characters[i].image!)
+                    const imageLink = functions.link.getUnverifiedTagLink("character", tagCategories.characters[i].image!)
                     characters[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -231,14 +230,14 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
                 try {
-                    const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image!, tagCategories.series[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("series", tagCategories.series[i].image!, tagCategories.series[i].imageHash))
                     series[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
                     series[i].ext = path.extname(imageLink).replace(".", "")
                     series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
-                    const imageLink = functions.getUnverifiedTagLink("series", tagCategories.series[i].image!)
+                    const imageLink = functions.link.getUnverifiedTagLink("series", tagCategories.series[i].image!)
                     series[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     series[i].ext = path.extname(imageLink).replace(".", "")
@@ -248,7 +247,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         }
         setSeries(series)
         setMetaTags(tagCategories.meta.map((m) => m.tag).join(" "))
-        setRawTags(functions.parseTagGroupsField(tagCategories.tags.map((t) => t.tag), post.tagGroups))
+        setRawTags(functions.tag.parseTagGroupsField(tagCategories.tags.map((t) => t.tag), post.tagGroups))
         setEdited(false)
     }
 
@@ -299,12 +298,12 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!session.cookie || !post) return
         if (post.uploader !== session.username && !permissions.isMod(session)) {
-            functions.replaceLocation("/403")
+            functions.dom.replaceLocation("/403")
         }
     }, [post, session])
 
     const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
-        let {images, error} = await imageFunctions.validateImages(files, links, session, i18n)
+        let {images, error} = await functions.image.validateImages(files, links, session, i18n)
         if (error) {
             setEditPostError(true)
             if (!editPostErrorRef.current) await functions.timeout(20)
@@ -363,7 +362,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const uploadTagImg = async (event: File | React.ChangeEvent<HTMLInputElement>, type: string, index: number) => {
         const file = event instanceof File ? event : event.target.files?.[0]
         if (!file) return
-        const item = await imageFunctions.validateTagImage(file)
+        const item = await functions.image.validateTagImage(file)
         if (item) {
             if (type === "artist") {
                 artists[index].image = item.image
@@ -392,10 +391,10 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     const handleTagClick = async (tag: string, index: number) => {
-        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
+        const tagDetail = await functions.http.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
         if (!tagDetail) return
         if (tagDetail.image) {
-            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+            const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")
@@ -471,7 +470,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="artist"/>
+                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={functions.render.getTypingWord(artistInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.artistTag}: </span>
                     <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -554,7 +553,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={functions.getTypingWord(characterInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="character"/>
+                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={functions.render.getTypingWord(characterInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.characterTag}: </span>
                     <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -637,7 +636,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             }
             jsx.push(
                 <>
-                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={functions.getTypingWord(seriesInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="series"/>
+                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={functions.render.getTypingWord(seriesInputRefs[i]?.current)} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.upload.seriesTag}: </span>
                     <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
@@ -686,13 +685,13 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
+        const links = functions.util.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
         enterLinksTimer = setTimeout(async () => {
             let files = [] as File[]
             for (let i = 0; i < links.length; i++) {
-                const fileArr = await functions.proxyImage(links[i], session, setSessionFlag)
+                const fileArr = await functions.http.proxyImage(links[i], session, setSessionFlag)
                 files.push(...fileArr)
             }
             await validate(files, links)
@@ -748,7 +747,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     const submit = async () => {
-        let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+        let {tags, tagGroups} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
         if (metaTags) tags.push(...metaTags.split(/[\n\r\s]+/g).filter(Boolean))
         if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
             setSubmitError(true)
@@ -762,7 +761,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
             submitErrorRef.current!.innerText = i18n.pages.upload.spaceSeparation
-            const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+            const splitTags = functions.util.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
             setRawTags(splitTags.join(" "))
             await functions.timeout(3000)
             return setSubmitError(false)
@@ -808,7 +807,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                 source: sourceLink,
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
-                bookmarks: functions.safeNumber(sourceBookmarks),
+                bookmarks: functions.util.safeNumber(sourceBookmarks),
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -823,9 +822,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         if (!submitErrorRef.current) await functions.timeout(20)
         submitErrorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.put("/api/post/edit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
-            functions.clearCache()
+            functions.cache.clearCache()
             return setSubmitError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.upload.error
@@ -852,12 +851,12 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             const pixivID = post?.source?.match(/\d+/)?.[0] || path.basename(current.name, path.extname(current.name))
             current.name = `${pixivID}${path.extname(current.name)}`
 
-            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            const sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
             if (sourceLookup.danbooruLink) setDanbooruLink(sourceLookup.danbooruLink)
             if (sourceLookup.artists[0]?.tag) {
                 artists[artists.length - 1].tag = sourceLookup.artists[0].tag
                 if (sourceLookup.artistIcon) {
-                    const pfp = await functions.proxyImage(sourceLookup.artistIcon, session, setSessionFlag).then((r) => r[0])
+                    const pfp = await functions.http.proxyImage(sourceLookup.artistIcon, session, setSessionFlag).then((r) => r[0])
                     await uploadTagImg(pfp, "artist", artists.length - 1)
                 }
                 artists.push({})
@@ -899,7 +898,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             const currentFiles = getCurrentFiles()
             let current = currentFiles[currentIndex]
             let hasUpscaled = upscaledFiles.length ? true : false
-            const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
+            const tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
             if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
@@ -908,9 +907,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                 if (!tagLookup.characters[i]?.tag) continue
                 characters[characters.length - 1].tag = tagLookup.characters[i].tag
                 characters[characters.length - 1].image = ""
-                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
+                const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")
@@ -933,9 +932,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                 if (!tagLookup.series[i]?.tag) continue
                 series[series.length - 1].tag = tagLookup.series[i].tag
                 series[series.length - 1].image = ""
-                const tagDetail = await functions.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
+                const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")
@@ -978,15 +977,15 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }, [rawTags, session])
 
     const updateTags = async () => {
-        const {tags} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+        const {tags} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const tagMap = await functions.tagsCache(session, setSessionFlag)
+            const tagMap = await functions.cache.tagsCache(session, setSessionFlag)
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
-                if (!exists) notExists.push({tag: tags[i], description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+                if (!exists) notExists.push({tag: tags[i], description: `${functions.util.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t) => t.tag === notExists[i].tag)
@@ -1043,39 +1042,39 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     useEffect(() => {
-        const tagX = functions.getTagX()
-        const tagY = functions.getTagY()
+        const tagX = functions.render.getTagX()
+        const tagY = functions.render.getTagY()
         setTagX(tagX)
         setTagY(tagY)
     }, [metaTags, rawTags])
 
     useEffect(() => {
         if (metaActive || tagActive) {
-            const tagX = functions.getTagX()
-            const tagY = functions.getTagY()
+            const tagX = functions.render.getTagX()
+            const tagY = functions.render.getTagY()
             setTagX(tagX)
             setTagY(tagY)
         }
     }, [metaActive, tagActive])
     
     const setCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
-        caretPosition = functions.getCaretPosition(ref)
+        caretPosition = functions.render.getCaretPosition(ref)
     }
 
     const handleRawTagClick = (tag: string) => {
-        setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const handleMetaTagClick = (tag: string) => {
-        setMetaTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setMetaTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getPostJSX = () => {
-        if (functions.isLive2D(currentImg)) {
+        if (functions.file.isLive2D(currentImg)) {
             return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isModel(currentImg)) {
+        } else if (functions.file.isModel(currentImg)) {
             return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isAudio(currentImg)) {
+        } else if (functions.file.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
@@ -1537,14 +1536,14 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                     <span className="upload-heading">{i18n.tag.meta}</span>
                 </div>
                 <div className="upload-container" style={{marginBottom: "5px"}}>
-                    <SearchSuggestions active={metaActive} text={functions.getTypingWord(metaTagRef.current)} x={tagX} y={tagY} width={200} click={handleMetaTagClick} type="meta"/>
+                    <SearchSuggestions active={metaActive} text={functions.render.getTypingWord(metaTagRef.current)} x={tagX} y={tagY} width={200} click={handleMetaTagClick} type="meta"/>
                     <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
                         <input style={{width: "40%"}} ref={metaTagRef} className="upload-input meta-tag-color" spellCheck={false} value={metaTags} onChange={(event) => {setCaretPosition(metaTagRef.current); setMetaTags(event.target.value)}} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
                     </div>
                 </div>
                 {displayImage && getCurrentFiles().length ?
                 <div className="upload-row">
-                    {functions.isVideo(currentImg) ? 
+                    {functions.file.isVideo(currentImg) ? 
                     <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video>:
                     <img className="tag-img-preview" src={currentImg}/>}
                 </div>
@@ -1567,7 +1566,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             {i18n.pages.upload.organizeTags}
             <Link className="upload-bold-link" target="_blank" to="/help#tag-groups">{i18n.pages.upload.tagGroups}</Link></span>
                 <div className="upload-container">
-                    <SearchSuggestions active={tagActive} text={functions.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
+                    <SearchSuggestions active={tagActive} text={functions.render.getTypingWord(rawTagRef.current)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tags"/>
                     <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
                         <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(rawTagRef.current); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>

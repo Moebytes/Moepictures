@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -35,7 +35,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const unban = async () => {
         if (!unbanName) return
         if (!permissions.isMod(session)) return setUnbanName(null)
-        await functions.post("/api/user/unban", {username: unbanName}, session, setSessionFlag)
+        await functions.http.post("/api/user/unban", {username: unbanName}, session, setSessionFlag)
         setUnbanName(null)
         setUpdateUserFlag(true)
     }

@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import r18 from "../../assets/icons/r18.png"
 import "../dialog.less"
@@ -34,7 +34,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
 
     const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
-            await functions.post("/api/user/r18", {r18: true}, session, setSessionFlag)
+            await functions.http.post("/api/user/r18", {r18: true}, session, setSessionFlag)
             setSessionFlag(true)
         }
         setR18Confirmation(false)

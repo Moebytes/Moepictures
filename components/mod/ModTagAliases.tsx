@@ -4,7 +4,7 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {AliasRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -35,7 +35,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await functions.get("/api/tag/aliasto/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/tag/aliasto/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
@@ -50,7 +50,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
     }
 
     useEffect(() => {
@@ -61,14 +61,14 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const aliasTag = async (username: string, tag: string, aliasTo: string, reason: string | null) => {
-        await functions.post("/api/tag/aliasto", {tag, aliasTo, username, reason}, session, setSessionFlag)
-        await functions.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: true}, session, setSessionFlag)
+        await functions.http.post("/api/tag/aliasto", {tag, aliasTo, username, reason}, session, setSessionFlag)
+        await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string, aliasTo: string) => {
-        await functions.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: false}, session, setSessionFlag)
+        await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: false}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
@@ -87,7 +87,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         }
         if (scroll) updateRequests()
     }, [requests, scroll])
@@ -106,7 +106,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/tag/aliasto/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/tag/aliasto/request/list", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -120,14 +120,14 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -136,7 +136,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests
@@ -146,7 +146,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                setVisibleRequests(functions.util.removeDuplicates(newPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -273,7 +273,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as AliasRequest[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())
@@ -299,7 +299,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     navigate(`/tag/${request.tag}`)
                 }
             }
-            const img = functions.getTagLink(request.type, request.image, request.imageHash)
+            const img = functions.link.getTagLink(request.type, request.image, request.imageHash)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     {img ?
@@ -307,7 +307,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={img}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.toProperCase(request?.username) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         <span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>{i18n.tag.tag}: {request.tag}</span>
                         <span className="mod-post-text">{i18n.labels.aliasTo}: {request.aliasTo}</span>

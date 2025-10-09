@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import postHistoryRevert from "../../assets/icons/revert.png"
 import postHistoryDelete from "../../assets/icons/delete.png"
 import adminCrown from "../../assets/icons/admin-crown.png"
@@ -45,14 +45,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateUserRole = async () => {
-        const user = await functions.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
     const updateTagCategories = async () => {
         if (!props.postHistory.addedTags || !props.postHistory.removedTags) return
         let tagMap = [...props.postHistory.addedTags, ...props.postHistory.removedTags]
-        const tagCategories = await functions.tagCategories(tagMap, session, setSessionFlag)
+        const tagCategories = await functions.tag.tagCategories(tagMap, session, setSessionFlag)
         setTagCategories(tagCategories)
     }
 
@@ -63,16 +63,16 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertPostHistory = async () => {
         if (props.current) return Promise.reject()
-        const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory, session)
-        const tagsChanged = functions.tagsChanged(props.postHistory, props.currentHistory)
-        const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
+        const imgChanged = await functions.compare.imagesChanged(props.postHistory, props.currentHistory, session)
+        const tagsChanged = functions.compare.tagsChanged(props.postHistory, props.currentHistory)
+        const srcChanged = functions.compare.sourceChanged(props.postHistory, props.currentHistory)
         let source = null as SourceData | null
         if (imgChanged || srcChanged) {
             source = {
                 title: props.postHistory.title,
                 englishTitle: props.postHistory.englishTitle,
                 artist: props.postHistory.artist,
-                posted: props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted), true) : "",
+                posted: props.postHistory.posted ? functions.date.formatDate(new Date(props.postHistory.posted), true) : "",
                 source: props.postHistory.source,
                 commentary: props.postHistory.commentary,
                 englishCommentary: props.postHistory.englishCommentary,
@@ -83,17 +83,17 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (imgChanged || (srcChanged && tagsChanged)) {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await functions.parseImages(props.postHistory, session)
-            const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
+            const {images, upscaledImages} = await functions.post.parseImages(props.postHistory, session)
+            const newTags = await functions.post.parseNewTags(props.postHistory, session, setSessionFlag)
 
-            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, 
+            await functions.http.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, 
             type: props.postHistory.type, rating: props.postHistory.rating, source: source!, style: props.postHistory.style, 
-            artists: functions.tagObject(props.postHistory.artists), characters: functions.tagObject(props.postHistory.characters), 
-            preserveChildren: Boolean(props.postHistory.parentID), series: functions.tagObject(props.postHistory.series), 
+            artists: functions.tag.tagObject(props.postHistory.artists), characters: functions.tag.tagObject(props.postHistory.characters), 
+            preserveChildren: Boolean(props.postHistory.parentID), series: functions.tag.tagObject(props.postHistory.series), 
             parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, tagGroups: props.postHistory.tagGroups, 
             newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
+            await functions.http.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
             rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
             characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, 
             tagGroups: props.postHistory.tagGroups, parentID: props.postHistory.parentID, reason: props.postHistory.reason}, 
@@ -116,7 +116,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
-        await functions.delete("/api/post/history/delete", {postID, historyID: props.postHistory.historyID}, session, setSessionFlag)
+        await functions.http.delete("/api/post/history/delete", {postID, historyID: props.postHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -133,7 +133,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deletePostHistoryFlag, deletePostHistoryID, session, props.current])
 
     const revertPostHistoryDialog = async () => {
-        const post = await functions.get("/api/post", {postID: props.postHistory.postID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID: props.postHistory.postID}, session, setSessionFlag)
         if (!post) return
         if (post.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID: props.postHistory.historyID})
         setRevertPostHistoryID({failed: false, historyID: props.postHistory.historyID})
@@ -172,7 +172,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?history=${props.postHistory.historyID}`
-        functions.openPost(props.postHistory, event, navigate, session, setSessionFlag, historyIndex)
+        functions.post.openPost(props.postHistory, event, navigate, session, setSessionFlag, historyIndex)
     }
 
     const userClick = (event: React.MouseEvent) => {
@@ -191,54 +191,54 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.postHistory.user) || i18n.user.deleted}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.postHistory.user) || i18n.user.deleted}</span>
     }
 
     const calculateDiff = (addedTags: string[], removedTags: string[]) => {
@@ -301,12 +301,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const mapped = Object.values(props.postHistory.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.util.getSiteName(m, i18n) + append}</span>
         })
     }
 
     const openPost = (postID: string | null, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const diffJSX = () => {
@@ -324,13 +324,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}: </span><span className="historyrow-label-link" onClick={(event) => openPost(props.postHistory.parentID, event)}>{props.postHistory.parentID}</span></span>)
         }
         if (!prevHistory || changes.type) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}: </span>{functions.toProperCase(props.postHistory.type)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}: </span>{functions.util.toProperCase(props.postHistory.type)}</span>)
         }
         if (!prevHistory || changes.rating) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}: </span>{functions.toProperCase(props.postHistory.rating)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}: </span>{functions.util.toProperCase(props.postHistory.rating)}</span>)
         }
         if (!prevHistory || changes.style) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}: </span>{functions.toProperCase(props.postHistory.style)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}: </span>{functions.util.toProperCase(props.postHistory.style)}</span>)
         }
         if (!prevHistory || tagChanges) {
             if (artistsDiff()) {
@@ -367,10 +367,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}: </span>{props.postHistory.artist || i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.posted) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}: </span>{props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}: </span>{props.postHistory.posted ? functions.date.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
         }
         if (!prevHistory || changes.source) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.getSiteName(props.postHistory.source, i18n)}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.util.getSiteName(props.postHistory.source, i18n)}</span></span>)
         }
         if (!prevHistory || changes.mirrors) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}: </span>{printMirrors()}</span>)

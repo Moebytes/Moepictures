@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useSearchDialogSelector, useSearchDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 
@@ -29,7 +29,7 @@ const DeleteAllSaveSearchDialog: React.FunctionComponent = (props) => {
     }, [deleteAllSaveSearchDialog])
 
     const deleteAllSavedSearches = async () => {
-        await functions.delete("/api/user/savesearch/delete", {all: true}, session, setSessionFlag)
+        await functions.http.delete("/api/user/savesearch/delete", {all: true}, session, setSessionFlag)
         setSessionFlag(true)
     }
 

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -37,7 +37,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const takedownPost = async () => {
         if (!takedownPostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
+            await functions.http.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
             setPostFlag(takedownPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")

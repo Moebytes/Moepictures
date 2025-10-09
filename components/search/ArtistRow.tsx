@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import website from "../../assets/icons/website.png"
 import pixiv from "../../assets/icons/pixiv.png"
@@ -43,14 +43,14 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 return navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
-        let filtered = props.artist.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+        let filtered = props.artist.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(props.artist.posts)
     }
 
@@ -58,10 +58,10 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         let images = [] as string[]
         if (!session.username) {
             let filtered = props.artist.posts.filter((p) => p.rating === functions.r13())
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         } else {
-            let filtered = props.artist.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            let filtered = props.artist.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         }
         setImages(images)
     }
@@ -91,9 +91,9 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="artistrow">
             <div className="artistrow-row">
-                {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image, props.artist.imageHash)}/> : null}
+                {props.artist.image ? <img className="artistrow-img" src={functions.link.getTagLink("artist", props.artist.image, props.artist.imageHash)}/> : null}
                 <span className="artistrow-text-hover">
-                    <span className="artistrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
+                    <span className="artistrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
                     {artistSocialJSX()}
                     <span className="artistrow-text-alt">{props.artist.postCount}</span>
                 </span>

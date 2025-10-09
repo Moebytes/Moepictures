@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
@@ -41,7 +41,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
         if (!splitPostID) return
         if (permissions.isAdmin(session)) {
             let order = currentOnly ? splitPostID.order : null
-            await functions.post("/api/post/split", {postID: splitPostID.post.postID, order}, session, setSessionFlag)
+            await functions.http.post("/api/post/split", {postID: splitPostID.post.postID, order}, session, setSessionFlag)
             setPostFlag(splitPostID.post.postID)
         }
     }

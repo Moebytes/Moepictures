@@ -75,7 +75,7 @@ import infoIcon from "../../assets/icons/info.png"
 import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount, TagGroupCategory} from "../../types/Types"
 import "./styles/sidebar.less"
@@ -149,26 +149,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTags = async () => {
-        const tags = await functions.parseTags(posts, session, setSessionFlag)
+        const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
         setTags(tags)
     }
 
     const updateUserImg = async () => {
         if (props.post) {
-            const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
+            const uploader = await functions.http.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
+            setUploaderImage(uploader?.image ? functions.link.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
             setUploaderImagePost(uploader?.imagePost || "")
             if (uploader?.role) setUploaderRole(uploader.role)
-            const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
+            const updater = await functions.http.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
-            const approver = await functions.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
+            const approver = await functions.http.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
             if (approver?.role) setApproverRole(approver.role)
         }
     }
 
     const updateFavoriteTags = async () => {
         if (!session.username) return
-        const favoriteTags = await functions.get("/api/tagfavorites", null, session, setSessionFlag)
+        const favoriteTags = await functions.http.get("/api/tagfavorites", null, session, setSessionFlag)
         setFavoriteTags(favoriteTags)
     }
 
@@ -188,7 +188,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     useEffect(() => {
-        functions.linkToBase64(uploaderImage).then((uploaderImage) => {
+        functions.link.linkToBase64(uploaderImage).then((uploaderImage) => {
             localStorage.setItem("uploaderImage", uploaderImage)
         })
     }, [uploaderImage])
@@ -207,30 +207,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
             if (!sidebar && !mobileSidebar) return
             if (mobile) {
-                mobileSidebar.style.top = `${functions.titlebarHeight()}px`
+                mobileSidebar.style.top = `${functions.dom.titlebarHeight()}px`
                 mobileSidebar.style.height = "auto"
                 return
             }
             if (!sidebar) return
             if (!relative) {
                 if (!hideTitlebar) {
-                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
-                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    sidebar.style.top = `${functions.dom.navbarHeight() + functions.dom.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px - ${functions.dom.titlebarHeight()}px)`
                     if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 } else {
                     if (window.scrollY !== 0) {
-                        if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
+                        if (hideNavbar && window.scrollY > functions.dom.titlebarHeight()) {
                             sidebar.style.top = "0px"
                             sidebar.style.height = "100vh"
                             if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
                         } else {
-                            sidebar.style.top = `${functions.navbarHeight()}px`
-                            sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                            sidebar.style.top = `${functions.dom.navbarHeight()}px`
+                            sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px)`
                             if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                         }
                     } else {
-                        sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
-                        sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                        sidebar.style.top = `${functions.dom.navbarHeight() + functions.dom.titlebarHeight()}px`
+                        sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px - ${functions.dom.titlebarHeight()}px)`
                         if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                     }
                 }
@@ -253,30 +253,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
         if (!sidebar && !mobileSidebar) return
         if (mobile) {
-            mobileSidebar.style.top = `${functions.titlebarHeight()}px`
+            mobileSidebar.style.top = `${functions.dom.titlebarHeight()}px`
             mobileSidebar.style.height = "auto"
             return
         }
         if (!sidebar) return
         if (!relative) {
             if (!hideTitlebar) {
-                sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
-                sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                sidebar.style.top = `${functions.dom.navbarHeight() + functions.dom.titlebarHeight()}px`
+                sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px - ${functions.dom.titlebarHeight()}px)`
                 if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
             } else {
                 if (window.scrollY !== 0) {
-                    if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
+                    if (hideNavbar && window.scrollY > functions.dom.titlebarHeight()) {
                         sidebar.style.top = "0px"
                         sidebar.style.height = "100vh"
                         if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
                     } else {
-                        sidebar.style.top = `${functions.navbarHeight()}px`
-                        sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                        sidebar.style.top = `${functions.dom.navbarHeight()}px`
+                        sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px)`
                         if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                     }
                 } else {
-                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
-                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    sidebar.style.top = `${functions.dom.navbarHeight() + functions.dom.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px - ${functions.dom.titlebarHeight()}px)`
                     if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 }
             }
@@ -292,7 +292,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
         if (!sidebar && !mobileSidebar) return
         if (mobile) {
-            mobileSidebar.style.top = `${functions.titlebarHeight()}px`
+            mobileSidebar.style.top = `${functions.dom.titlebarHeight()}px`
             mobileSidebar.style.height = "auto"
             return
         }
@@ -300,24 +300,24 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!relative) {
             if (!hideNavbar) {
                 if (!hideTitlebar) {
-                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
-                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    sidebar.style.top = `${functions.dom.navbarHeight() + functions.dom.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px - ${functions.dom.titlebarHeight()}px)`
                     if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 } else {
-                    sidebar.style.top = `${functions.navbarHeight()}px`
-                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                    sidebar.style.top = `${functions.dom.navbarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px)`
                     if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                 }
                 return
             }
             if (!hideSortbar) {
                 if (sidebar.style.top === "0px") {
-                    sidebar.style.top = `${functions.navbarHeight()}px`
-                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                    sidebar.style.top = `${functions.dom.navbarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.dom.navbarHeight()}px)`
                     if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                 }
             } else {
-                if (sidebar.style.top === `${functions.navbarHeight()}px`) {
+                if (sidebar.style.top === `${functions.dom.navbarHeight()}px`) {
                     sidebar.style.top = "0px"
                     sidebar.style.height = "100vh"
                     if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
@@ -384,7 +384,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.artists.length; i++) {
             if (!props.artists[i]) break
-            const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
+            const link = functions.link.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             const tagClick = () => {
                 if (!props.artists) return
                 navigate(`/posts`)
@@ -432,7 +432,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.characters.length; i++) {
             if (!props.characters[i]) break
-            const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
+            const link = functions.link.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             const tagClick = () => {
                 if (!props.characters) return
                 navigate(`/posts`)
@@ -470,7 +470,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.series.length; i++) {
             if (!props.series[i]) break
-            const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
+            const link = functions.link.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             const tagClick = () => {
                 if (!props.series) return
                 navigate(`/posts`)
@@ -547,7 +547,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, favoriteTags[i].tag)}>
                         <img className="tag-info" src={favSearchActiveIcon} onClick={(event) => tagInfo(event, favoriteTags[i].tag)} onAuxClick={(event) => tagInfo(event, favoriteTags[i].tag)}/>
-                        <span className={`tag ${functions.getTagColor(favoriteTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, favoriteTags[i].tag)}>{favoriteTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.tag.getTagColor(favoriteTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, favoriteTags[i].tag)}>{favoriteTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${favoriteTags[i].count === "1" ? "artist-tag-color" : ""}`}>{favoriteTags[i].count}</span>
                     </span>
                 </div>
@@ -605,7 +605,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             if (!currentTags.length) continue
             jsx.push(
                 <div key={`tagGroup-${tagGroup.name}`} className="sidebar-row">
-                    <span className="sidebar-title">{functions.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
+                    <span className="sidebar-title">{functions.util.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
                 </div>
             )
             for (let i = 0; i < currentTags.length; i++) {
@@ -619,7 +619,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                            <span className={`tag ${functions.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                            <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                             <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                         </span>
                     </div>
@@ -654,7 +654,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                        <span className={`tag ${functions.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
@@ -719,7 +719,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="sidebar-row">
                 <span className="tag">{i18n.labels.source}:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.getSiteName(props.post.source, i18n)}</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.util.getSiteName(props.post.source, i18n)}</span>
                 {jsx}
             </div>
         )
@@ -796,7 +796,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const randomSearch = async () => {
         if (props.post && location.pathname.includes("/post/")) {
-            const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random"}, session, setSessionFlag)
+            const posts = await functions.http.get("/api/search/posts", {type: "all", rating: functions.post.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random"}, session, setSessionFlag)
             navigate(`/post/${posts[0].postID}/${posts[0].slug}`)
         } else {
             navigate(`/posts`)
@@ -807,7 +807,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const imageSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
-        const result = await functions.imageSearch(file, session, setSessionFlag)
+        const result = await functions.image.imageSearch(file, session, setSessionFlag)
         setImageSearchFlag(result)
         navigate("/posts")
         event.target.value = ""
@@ -868,13 +868,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const approvePost = async () => {
         if (!props.post) return
-        await functions.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
     const rejectPost = async () => {
         if (!props.post) return
-        await functions.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
@@ -963,19 +963,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (role === "admin") {
             return (
                 <div className="sidebar-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                     <span className="tag-alt admin-color">{functions.toProperCase(username) || "deleted"}</span>
+                     <span className="tag-alt admin-color">{functions.util.toProperCase(username) || "deleted"}</span>
                     <img className="sidebar-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (role === "mod") {
             return (
                 <div className="sidebar-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                    <span className="tag-alt mod-color">{functions.toProperCase(username) || "deleted"}</span>
+                    <span className="tag-alt mod-color">{functions.util.toProperCase(username) || "deleted"}</span>
                     <img className="sidebar-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
+        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.util.toProperCase(username) || "deleted"}</span>
     }
 
     const copyTags = (replaceDash?: boolean, commas?: boolean) => {
@@ -1039,8 +1039,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const filetypeJSX = () => {
         if (props.post && props.unverified) {
             const image = (props.post as UnverifiedPost).images[(props.order || 1) - 1]
-            const originalSize = image.size ? functions.readableFileSize(image.size) : ""
-            const upscaledSize = image.upscaledSize ? functions.readableFileSize(image.upscaledSize) : ""
+            const originalSize = image.size ? functions.util.readableFileSize(image.size) : ""
+            const upscaledSize = image.upscaledSize ? functions.util.readableFileSize(image.upscaledSize) : ""
             const originalExt = path.extname(image?.filename || "").replace(".", "")
             const upscaledExt = path.extname(image?.upscaledFilename || "").replace(".", "")
             return (
@@ -1087,7 +1087,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (autoSearch && location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!props.post || !autoSearch) return
-                const posts = await functions.get("/api/search/posts", {type: "all", rating: functions.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
+                const posts = await functions.http.get("/api/search/posts", {type: "all", rating: functions.post.isR18(props.post.rating) ? functions.r18() : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
                 navigate(`/post/${posts[0].postID}/${posts[0].slug}`)
             }
             if (autoSearch) {
@@ -1116,7 +1116,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = async (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const changeSearchType = (type: "savesearch" | "favsearch") => {
@@ -1220,7 +1220,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {props.post.englishTitle ? 
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.english}:</span>
-                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.englishTitle)}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.util.toProperCase(props.post.englishTitle)}</span>
                         </div>
                         : null}
                         <div className="sidebar-row">
@@ -1229,7 +1229,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sort.posted}:</span>
-                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.formatDate(new Date(props.post.posted)) : "Unknown"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.date.formatDate(new Date(props.post.posted)) : "Unknown"}</span>
                         </div>
                         {generateSourceJSX()}
                         <div className="sidebar-row">
@@ -1285,7 +1285,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.uploaded}:</span>
-                            <span className="tag-alt">{functions.formatDate(new Date(props.post.uploadDate))}</span>
+                            <span className="tag-alt">{functions.date.formatDate(new Date(props.post.uploadDate))}</span>
                         </div>
                         {props.post.uploadDate !== props.post.updatedDate ? <>
                         <div className="sidebar-row">
@@ -1294,7 +1294,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.updated}:</span>
-                            <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
+                            <span className="tag-alt">{functions.date.formatDate(new Date(props.post.updatedDate))}</span>
                         </div> </> : null}
                         {props.post.approver && props.post.uploader !== props.post.approver ? <>
                         <div className="sidebar-row">
@@ -1303,7 +1303,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div> 
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.approved}:</span>
-                            <span className="tag-alt">{functions.formatDate(new Date(props.post.approveDate))}</span>
+                            <span className="tag-alt">{functions.date.formatDate(new Date(props.post.approveDate))}</span>
                         </div> </> : null}
                         <div className="sidebar-row">
                             <span className="tag">{i18n.sidebar.type}:</span>
@@ -1354,7 +1354,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">{i18n.sidebar.sourceEdit}</span>
                             </span>
                         </div>
-                        {!props.unverified && !functions.isR18(props.post.rating) ? <div className="sidebar-row">
+                        {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.setAvatar}</span>

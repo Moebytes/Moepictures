@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions, useLayoutSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
 import xIcon from "../../assets/icons/x.png"
@@ -111,29 +111,29 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         for (const postID of selectionItems.values()) {
             const promise = new Promise<PostQuickEditParams>(async (resolve) => {
                 const post = selectionPosts.get(String(postID)) as PostSearch
-                const parsedTags = await functions.parseTagsSingle(post, session, setSessionFlag)
-                const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag, true)
+                const parsedTags = await functions.tag.parseTagsSingle(post, session, setSessionFlag)
+                const tagCategories = await functions.tag.tagCategories(parsedTags, session, setSessionFlag, true)
 
                 let artistData = tagCategories.artists.map((a) => a.tag)
                 let characterData = tagCategories.characters.map((c) => c.tag)
                 let seriesData = tagCategories.series.map((s) => s.tag)
                 let tagData = [...tagCategories.tags.map((t) => t.tag), ...tagCategories.meta.map((m) => m.tag)]
 
-                if (functions.cleanHTML(artists)?.trim()) {
-                    artistData = functions.cleanHTML(artists).trim().split(/[\n\r\s]+/g)
+                if (functions.util.cleanHTML(artists)?.trim()) {
+                    artistData = functions.util.cleanHTML(artists).trim().split(/[\n\r\s]+/g)
                 }
-                if (functions.cleanHTML(characters)?.trim()) {
-                    characterData = functions.cleanHTML(characters).trim().split(/[\n\r\s]+/g)
+                if (functions.util.cleanHTML(characters)?.trim()) {
+                    characterData = functions.util.cleanHTML(characters).trim().split(/[\n\r\s]+/g)
                 }
-                if (functions.cleanHTML(series)?.trim()) {
-                    seriesData = functions.cleanHTML(series).trim().split(/[\n\r\s]+/g)
+                if (functions.util.cleanHTML(series)?.trim()) {
+                    seriesData = functions.util.cleanHTML(series).trim().split(/[\n\r\s]+/g)
                 }
-                if (functions.cleanHTML(metaTags)?.trim()) {
-                    tagData = functions.removeDuplicates([...tagData, ...functions.cleanHTML(metaTags).trim().split(/[\n\r\s]+/g)])
+                if (functions.util.cleanHTML(metaTags)?.trim()) {
+                    tagData = functions.util.removeDuplicates([...tagData, ...functions.util.cleanHTML(metaTags).trim().split(/[\n\r\s]+/g)])
                 }
                 
-                if (functions.cleanHTML(appendTags)?.trim()) {
-                    const appendData = functions.cleanHTML(appendTags).trim().split(/[\n\r\s]+/g)
+                if (functions.util.cleanHTML(appendTags)?.trim()) {
+                    const appendData = functions.util.cleanHTML(appendTags).trim().split(/[\n\r\s]+/g)
                     let toAppend = [] as string[]
                     let toRemove = [] as string[]
                     for (const tag of appendData) {
@@ -173,9 +173,9 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         await Promise.all(promiseArray)
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
-            functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
         }
-        functions.clearCache()
+        functions.cache.clearCache()
     }
 
     const click = (button: "accept" | "reject") => {
@@ -204,7 +204,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
 
     const handleArtistClick = (tag: string) => {
         setArtists((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -212,7 +212,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
 
     const handleCharacterClick = (tag: string) => {
         setCharacters((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -220,7 +220,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     
     const handleSeriesClick = (tag: string) => {
         setSeries((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -228,7 +228,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
 
     const handleMetaClick = (tag: string) => {
         setMetaTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -246,7 +246,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     }
 
     const handleTagClick = (tag: string) => {
-        setAppendTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setAppendTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getStyleJSX = () => {
@@ -483,22 +483,22 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
             </>}
             {getStyleJSX()}
             <div className="dialog-row">
-                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                 <span className="dialog-text">{i18n.navbar.artists}: </span>
                 <input ref={artistRef} className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <span className="dialog-text">{i18n.navbar.characters}: </span>
                 <input ref={characterRef} className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                 <span className="dialog-text">{i18n.tag.series}: </span>
                 <input ref={seriesRef} className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
                 <span className="dialog-text">{i18n.tag.meta}: </span>
                 <input ref={metaRef} className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
             </div>
@@ -506,7 +506,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 <span className="dialog-text">{i18n.pages.bulkUpload.appendTags}: </span>
             </div>
             <div className="dialog-row">
-                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(tagRef.current)} click={(tag) => handleTagClick(tag)} type="tags"/>
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(tagRef.current)} click={(tag) => handleTagClick(tag)} type="tags"/>
                 <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => {setCaretPosition(); setAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
             </>

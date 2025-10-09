@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -50,11 +50,11 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.post("/api/group", {postID, name: addGroupPostObj.slug}, session, setSessionFlag)
+            await functions.http.post("/api/group", {postID, name: addGroupPostObj.slug}, session, setSessionFlag)
             setAddGroupPostObj(null)
             setGroupFlag(true)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -70,7 +70,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.post("/api/group/request", {postID, name: addGroupPostObj.slug, reason}, session, setSessionFlag)
+            await functions.http.post("/api/group/request", {postID, name: addGroupPostObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

@@ -1,6 +1,6 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import {Tag, MiniTag, BulkTag, TagCount, Implication, Alias, PostTagged, 
 AliasHistory, ImplicationHistory, AliasHistorySearch, TagGroup} from "../types/Types"
 

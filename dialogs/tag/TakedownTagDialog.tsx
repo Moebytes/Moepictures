@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
@@ -33,7 +33,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const takedown = async () => {
         if (!takedownTag) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/tag/takedown", {tag: takedownTag.tag}, session, setSessionFlag)
+            await functions.http.post("/api/tag/takedown", {tag: takedownTag.tag}, session, setSessionFlag)
             history.go(0)
         }
     }

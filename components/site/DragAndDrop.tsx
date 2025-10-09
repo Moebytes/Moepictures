@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {Post, Note} from "../../types/Types"
 import "./styles/draganddrop.less"
 
@@ -127,7 +127,7 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         if (!files?.length) return
         let result = [] as Post[]
         for (let i = 0; i < files.length; i++) {
-            result.push(...await functions.imageSearch(files[i], session, setSessionFlag))
+            result.push(...await functions.image.imageSearch(files[i], session, setSessionFlag))
         }
         setImageSearchFlag(result)
         navigate("/posts")

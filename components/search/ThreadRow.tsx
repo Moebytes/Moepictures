@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -43,14 +43,14 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const updateUpdater = async () => {
         if (!props.thread) return
-        const updater = await functions.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
+        const updater = await functions.http.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
         if (updater) setUpdaterData(updater)
         setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.thread) return
-        const creator = await functions.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
+        const creator = await functions.http.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
         if (creator) setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
             if (creator) setUpdaterData(creator)
@@ -79,7 +79,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (creatorData?.image) {
-            return functions.getTagLink("pfp", creatorData.image, creatorData.imageHash)
+            return functions.link.getTagLink("pfp", creatorData.image, creatorData.imageHash)
         } else {
             return favicon
         }
@@ -97,12 +97,12 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!creatorData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getUpdaterPFP = () => {
         if (updaterData?.image) {
-            return functions.getTagLink("pfp", updaterData.image, updaterData.imageHash)
+            return functions.link.getTagLink("pfp", updaterData.image, updaterData.imageHash)
         } else {
             return favicon
         }
@@ -120,7 +120,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const updaterImgClick = (event: React.MouseEvent) => {
         if (!updaterData?.imagePost) return
         event.stopPropagation()
-        functions.openPost(updaterData.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(updaterData.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const generateCreatorJSX = () => {
@@ -129,7 +129,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text admin-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text admin-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
@@ -137,7 +137,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text mod-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text mod-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
@@ -145,7 +145,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text system-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text system-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={systemCrown}/>
                 </div>
             )
@@ -153,7 +153,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={premiumCuratorStar}/>
                 </div>
             )
@@ -161,7 +161,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={curatorStar}/>
                 </div>
             )
@@ -169,7 +169,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={premiumContributorPencil}/>
                 </div>
             )
@@ -177,7 +177,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text contributor-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text contributor-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={contributorPencil}/>
                 </div>
             )
@@ -185,7 +185,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.creator)}</span>
                     <img className="thread-user-label" src={premiumStar}/>
                 </div>
             )
@@ -193,7 +193,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread?.creator) || i18n.user.deleted}</span>
+                <span className={`thread-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.util.toProperCase(props.thread?.creator) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -204,7 +204,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                     <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text admin-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text admin-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
@@ -212,7 +212,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text mod-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text mod-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
@@ -220,7 +220,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text system-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text system-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={systemCrown}/>
                 </div>
             )
@@ -228,7 +228,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={premiumCuratorStar}/>
                 </div>
             )
@@ -236,7 +236,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={curatorStar}/>
                 </div>
             )
@@ -244,7 +244,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={premiumContributorPencil}/>
                 </div>
             )
@@ -252,7 +252,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text contributor-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text contributor-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={contributorPencil}/>
                 </div>
             )
@@ -260,7 +260,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={premiumStar}/>
                 </div>
             )
@@ -268,7 +268,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${updaterData?.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread?.updater) || i18n.user.deleted}</span>
+                <span className={`thread-user-text ${updaterData?.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.util.toProperCase(props.thread?.updater) || i18n.user.deleted}</span>
             </div>
         )
     }
@@ -279,8 +279,8 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const toggleRead = async () => {
         if (!props.thread) return
-        functions.clearResponseCacheKey("/api/search/threads")
-        await functions.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
+        functions.cache.clearResponseCacheKey("/api/search/threads")
+        await functions.http.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -293,7 +293,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const dateTextJSX = () => {
         if (!props.thread) return
         const targetDate = props.thread.updatedDate
-        return <span className="thread-date-text">{functions.timeAgo(targetDate, i18n)}</span>
+        return <span className="thread-date-text">{functions.date.timeAgo(targetDate, i18n)}</span>
     }
 
     if (props.titlePage) {

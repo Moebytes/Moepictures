@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
 useSessionActions, useMiscDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../../assets/icons/audio-reverse.png"
 import audioSpeedIcon from "../../assets/icons/audio-speed.png"
@@ -108,12 +108,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const decryptAudio = async () => {
         if (!props.audio) return
-        const decryptedAudio = await functions.decryptItem(props.audio, session)
+        const decryptedAudio = await functions.crypto.decryptItem(props.audio, session)
         if (decryptedAudio) setDecrypted(decryptedAudio)
     }
 
     useEffect(() => {
-        if (!functions.isAudio(props.audio)) return
+        if (!functions.file.isAudio(props.audio)) return
         if (ref.current) ref.current.style.opacity = "1"
         if (props.audio) {
             setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
@@ -126,7 +126,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [props.audio, session])
 
     const updateSongCover = async () => {
-        const songCover = await functions.songCover(decrypted)
+        const songCover = await functions.audio.songCover(decrypted)
         setCoverImg(songCover)
     }
 
@@ -175,7 +175,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         let observer = null as ResizeObserver | null
-        if (functions.isImage(coverImg)) {
+        if (functions.file.isImage(coverImg)) {
             observer = new ResizeObserver(resizeImageCanvas)
             observer.observe(ref.current!)
         }
@@ -370,7 +370,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         if (!props.post) return
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.audio), decrypted)
+                functions.dom.download(path.basename(props.audio), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
                 setDownloadFlag(false)
             }
@@ -427,7 +427,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 ref.current.style.maxHeight = ""
             }
             setTimeout(() => {
-                if (functions.isImage(coverImg)) {
+                if (functions.file.isImage(coverImg)) {
                     resizeImageCanvas()
                 }
             }, 100)
@@ -444,7 +444,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 ref.current.style.maxHeight = "100vh"
             }
             setTimeout(() => {
-                if (functions.isImage(coverImg)) {
+                if (functions.file.isImage(coverImg)) {
                     resizeImageCanvas()
                 }
             }, 100)
@@ -493,12 +493,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
         let img = ""
         if (typeof currentImage === "string") {
-            img = functions.getRawImageLink(currentImage)
+            img = functions.link.getRawImageLink(currentImage)
         } else {
-            img = functions.getImageLink(currentImage, showUpscaled)
+            img = functions.link.getImageLink(currentImage, showUpscaled)
         }
         if (forceOriginal) {
-            return functions.appendURLParams(img, {upscaled: false})
+            return functions.util.appendURLParams(img, {upscaled: false})
         } else {
             return img
         }
@@ -506,13 +506,13 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const noAuthURL = async (audio?: boolean) => {
         const arrayBuffer = await fetch(audio ? decrypted : coverImg).then((r) => r.arrayBuffer())
-        let url = await functions.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
+        let url = await functions.http.post("/api/misc/litterbox", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
         return url
     }
 
     const generateTempLink = async (audio?: boolean) => {
         const link = getCurrentLink()
-        let url = await functions.post("/storage", {link, songCover: !audio}, session, setSessionFlag)
+        let url = await functions.http.post("/storage", {link, songCover: !audio}, session, setSessionFlag)
         if (audio) {
             setAudioTempLink(url)
         } else {
@@ -531,7 +531,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const sharePost = async (site: string) => {
         if (!props.post || !props.artists) return
-        let url = `${functions.getDomain()}${window.location.pathname}`
+        let url = `${functions.config.getDomain()}${window.location.pathname}`
         let text = `${props.post.englishTitle || props.post.title} by ${props.artists[0].tag}\n\n`
         if (site === "pinterest") {
             let img = await generateTempLink()
@@ -586,9 +586,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                     <div className="relative-ref">
                         <div className="audio-controls" ref={audioControls} onMouseUp={() => setAudioDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <p className="audio-control-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                                <p className="audio-control-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
                                 <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                                <p className="audio-control-text">{functions.formatSeconds(audioDuration)}</p>
+                                <p className="audio-control-text">{functions.date.formatSeconds(audioDuration)}</p>
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
