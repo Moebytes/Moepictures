@@ -41,7 +41,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
         if (!joinPostID) return
         if (permissions.isAdmin(session)) {
             await functions.post("/api/post/join", {postID: joinPostID.post.postID, nested: nestedChildren}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(joinPostID.post.postID)
         }
     }
 

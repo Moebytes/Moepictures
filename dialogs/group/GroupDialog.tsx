@@ -76,7 +76,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             }
             await functions.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
             setGroupPostID(null)
-            setPostFlag(true)
+            setPostFlag(groupPostID)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {

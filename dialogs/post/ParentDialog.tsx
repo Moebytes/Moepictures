@@ -56,7 +56,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
             }
             setChildPostObj(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(childPostObj.post.postID)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {

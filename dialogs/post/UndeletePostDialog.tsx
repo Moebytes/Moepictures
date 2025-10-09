@@ -39,7 +39,7 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
             await functions.put("/api/post/undelete", {postID: undeletePostID.postID}, session, setSessionFlag)
         }
         setUndeletePostID(null)
-        setPostFlag(true)
+        setPostFlag(undeletePostID.postID)
         setHistoryFlag(true)
     }
 

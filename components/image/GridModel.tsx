@@ -46,7 +46,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {sizeType, square, scroll, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
     const {setSelectionItems, setSelectionPosts} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
-    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setPostFlag, setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
     const {setPost} = useCacheActions()
     const [imageSize, setImageSize] = useState(240)
@@ -557,9 +557,15 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
                     return
                 } else {
-                    if (!location.pathname.includes("/post/")) setPost(null)
-                    navigate(`/post/${props.id}/${props.post.slug}`)
-                    window.scrollTo(0, 0)
+                    if (location.pathname.includes("/post/")) {
+                        navigate(`/post/${props.id}/${props.post.slug}`, {replace: true})
+                        setPostFlag(props.id)
+                        window.scrollTo(0, 0)
+                    } else {
+                        setPost(null)
+                        navigate(`/post/${props.id}/${props.post.slug}`)
+                        window.scrollTo(0, 0)
+                    }
                 }
             }
         }
@@ -655,9 +661,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
                 ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
+                
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
                 <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
+
                 {session.liveModelPreview && !mobile ? null : <canvas className="image" ref={imageRef}></canvas>}
                 <div className="grid-model-renderer" ref={rendererRef} style={mobile || !session.liveModelPreview ? {display: "none"} : {}}></div>
             </div>

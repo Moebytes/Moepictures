@@ -36,7 +36,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
         if (!lockPostID) return
         if (permissions.isMod(session)) {
             await functions.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(lockPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")

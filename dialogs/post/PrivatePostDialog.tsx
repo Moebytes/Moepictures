@@ -37,7 +37,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
         if (!privatePostID) return
         if (permissions.canPrivate(session, privatePostID.artists)) {
             await functions.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(privatePostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")

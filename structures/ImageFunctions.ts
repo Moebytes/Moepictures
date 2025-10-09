@@ -102,7 +102,7 @@ export default class ImageFunctions {
                 if (file.dir || filename.startsWith("__MACOSX/")) continue
                 const contents = await file.async("uint8array")
                 const {allowed, result} = ImageFunctions.allowedFileType(file, contents, true)
-                let url = URL.createObjectURL(new Blob([contents]))
+                let url = URL.createObjectURL(new Blob([new Uint8Array(contents)]))
                 let ext = result.typename
                 let link = `${url}#.${ext}`
                 let {thumbnail, thumbnailExt} = await ImageFunctions.thumbnail(link)
@@ -134,7 +134,7 @@ export default class ImageFunctions {
                 const MB = file.size / (1024 * 1024)
                 if (MB <= maxSize || permissions.isMod(session)) {
                     if (result.mime === "application/zip") {
-                        live2d = await isLive2DZip(bytes)
+                        live2d = await isLive2DZip(new Uint8Array(bytes).buffer)
                         if (live2d) {
                             images.push({
                                 link, originalLink, ext: "zip", size,
@@ -176,8 +176,8 @@ export default class ImageFunctions {
                 let url = URL.createObjectURL(file)
                 let croppedURL = ""
                 if (gif) {
-                    const gifData = await functions.extractGIFFrames(bytes.buffer)
-                    let frameArray = [] as Buffer[] 
+                    const gifData = await functions.extractGIFFrames(new Uint8Array(bytes).buffer)
+                    let frameArray = [] as ArrayBuffer[] 
                     let delayArray = [] as number[]
                     for (let i = 0; i < gifData.length; i++) {
                         const canvas = gifData[i].frame as HTMLCanvasElement
@@ -188,14 +188,14 @@ export default class ImageFunctions {
                     const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
                     const {width, height} = await functions.imageDimensions(firstURL)
                     const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                    const blob = new Blob([buffer])
+                    const blob = new Blob([new Uint8Array(buffer)])
                     croppedURL = URL.createObjectURL(blob)
                 } else {
                     croppedURL = await functions.crop(url, 1, false)
                 }
                 const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                 bytes = new Uint8Array(arrayBuffer)
-                const blob = new Blob([bytes])
+                const blob = new Blob([new Uint8Array(bytes)])
                 url = URL.createObjectURL(blob)
                 let ext = result.typename
                 let image = `${url}#.${ext}`

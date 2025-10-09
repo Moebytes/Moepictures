@@ -63,7 +63,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
         if (functions.isR18(post.rating)) {
             functions.replaceLocation("/403")
         }
-        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [session, post])
 
     useEffect(() => {
@@ -101,11 +101,12 @@ const SetAvatarPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const updatePost = async () => {
-            setPostFlag(false)
+            let targetID = !Number.isNaN(Number(postFlag)) ? postFlag! : postID
+            setPostFlag(null)
             let post = null as PostSearch | null
             let $401Error = false
             try {
-                post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
+                post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag) as PostSearch
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
@@ -192,7 +193,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
             } else if (functions.isWebP(images[0])) {
                 gifData = await functions.extractAnimatedWebpFrames(arrayBuffer)
             }
-            let frameArray = [] as Buffer[] 
+            let frameArray = [] as ArrayBuffer[] 
             let delayArray = [] as number[]
             let firstURL = ""
             for (let i = 0; i < gifData.length; i++) {
@@ -211,7 +212,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
             }
             const {width, height} = await functions.imageDimensions(firstURL)
             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-            const blob = new Blob([buffer])
+            const blob = new Blob([new Uint8Array(buffer)])
             croppedURL = URL.createObjectURL(blob)
         } else {
             croppedURL = await functions.crop(url, 1, false, true)

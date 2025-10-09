@@ -41,11 +41,11 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
         if (!deletePostID) return
         if (deletePostID.unverified) {
             await functions.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
-            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(true)
+            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         }
         if (permissions.isAdmin(session)) {
             await functions.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
-            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(true)
+            return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         } else {
             const badReason = functions.validateReason(reason, i18n)
             if (badReason) {

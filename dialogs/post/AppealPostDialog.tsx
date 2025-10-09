@@ -37,7 +37,7 @@ const AppealPostDialog: React.FunctionComponent = (props) => {
         if (!appealPostID) return
         await functions.post("/api/post/appeal", {postID: appealPostID, reason}, session, setSessionFlag)
         setAppealPostID(null)
-        setPostFlag(true)
+        setPostFlag(appealPostID)
     }
 
     const click = (button: "accept" | "reject", keep?: boolean) => {

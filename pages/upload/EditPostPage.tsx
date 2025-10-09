@@ -130,7 +130,7 @@ const EditPostPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [post, session])
 
     const updatePost = async () => {
@@ -1317,7 +1317,7 @@ const EditPostPage: React.FunctionComponent = () => {
                         <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span>}
                     </div> 
                     <div className="upload-container-row" style={{marginTop: "10px"}}>
-                        <button className="upload-button" onClick={(event) => {openPost(event); setPostFlag(true)}}>
+                        <button className="upload-button" onClick={(event) => {openPost(event); setPostFlag(postID)}}>
                                 <span className="upload-button-text">←{i18n.buttons.back}</span>
                         </button>
                     </div>

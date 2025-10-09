@@ -55,7 +55,7 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
             await functions.post("/api/post/compress",  {postID: compressPostID.post.postID, 
             quality: functions.safeNumber(quality) || 95, format, maxDimension: functions.safeNumber(maxDimension) || 2000, 
             maxUpscaledDimension: functions.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(compressPostID.post.postID)
         }
     }
 

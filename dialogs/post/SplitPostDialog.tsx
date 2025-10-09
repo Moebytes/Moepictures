@@ -42,7 +42,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             let order = currentOnly ? splitPostID.order : null
             await functions.post("/api/post/split", {postID: splitPostID.post.postID, order}, session, setSessionFlag)
-            setPostFlag(true)
+            setPostFlag(splitPostID.post.postID)
         }
     }
 

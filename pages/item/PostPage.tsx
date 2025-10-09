@@ -83,7 +83,7 @@ const PostPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        functions.processRedirects(post, postID, slug, history, session, setSessionFlag)
+        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [post, session])
 
     useEffect(() => {
@@ -224,6 +224,7 @@ const PostPage: React.FunctionComponent = () => {
             } else {
                 images = historyPost.images.map((i) => functions.getHistoryImageLink(i))
             }
+            setPost(historyPost)
             setImages(images)
             if (images[order-1]) {
                 setImage(images[order-1])
@@ -238,7 +239,6 @@ const PostPage: React.FunctionComponent = () => {
             setTagGroupCategories(groupCategories)
             setTagCategories(categories)
             setTags(tags)
-            setPost(historyPost)
         }
         updateHistory()
     }, [postID, historyID, order, session])
@@ -259,13 +259,13 @@ const PostPage: React.FunctionComponent = () => {
                 return
             }
             if (post) {
+                setPost(post)
                 const tags = await functions.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
-                setPost(post)
                 if (!post.tags) {
                     try {
                         post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
@@ -302,12 +302,6 @@ const PostPage: React.FunctionComponent = () => {
                 setImage(images[0])
                 setOrder(1)
             }
-            /*
-            if (functions.isR18(ratingType)) {
-                if (!functions.isR18(post.rating)) setRatingType("all")
-            } else {
-                if (functions.isR18(post.rating)) setRatingType(functions.r18())
-            }*/
         }
     }, [post, order, session.upscaledImages])
 
@@ -315,11 +309,12 @@ const PostPage: React.FunctionComponent = () => {
         const historyParam = new URLSearchParams(window.location.search).get("history")
         if (historyParam) return
         const updatePost = async () => {
+            let targetID = !Number.isNaN(Number(postFlag)) ? postFlag! : postID
             setLoaded(false)
-            setPostFlag(false)
+            setPostFlag(null)
             let post = null as PostSearch | null
             try {
-                post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | null
+                post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag) as PostSearch | null
             } catch (err: any) {
                 if (err.response?.status === 404) functions.replaceLocation("/404")
                 if (err.response?.status === 403) functions.replaceLocation("/403")
@@ -332,6 +327,7 @@ const PostPage: React.FunctionComponent = () => {
                 } else {
                     images = post.images.map((image) => functions.getImageLink(image))
                 }
+                setPost(post)
                 setImages(images)
                 if (images[order-1]) {
                     setImage(images[order-1])
@@ -345,7 +341,6 @@ const PostPage: React.FunctionComponent = () => {
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
-                setPost(post)
                 setSessionFlag(true)
             } else {
                 //functions.replaceLocation("/404")
@@ -517,7 +512,7 @@ const PostPage: React.FunctionComponent = () => {
     const currentHistory = () => {
         setHistoryID(null)
         setNoteID(null)
-        setPostFlag(true)
+        setPostFlag(postID)
         navigate(`/post/${postID}/${slug}`)
     }
 
@@ -562,7 +557,8 @@ const PostPage: React.FunctionComponent = () => {
             const images = activeFavgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
-                navigate(`/post/${postID}/${slug}`)
+                navigate(`/post/${postID}/${slug}`, {replace: true})
+                setPostFlag(postID)
             }
             return (
                 <div className="post-item">
@@ -585,9 +581,10 @@ const PostPage: React.FunctionComponent = () => {
             const images = group.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
-                navigate(`/post/${postID}/${slug}`)
-                setPosts(group.posts)
+                navigate(`/post/${postID}/${slug}`, {replace: true})
+                setPostFlag(postID)
                 setTimeout(() => {
+                    setPosts(group.posts)
                     setActiveGroup(group)
                 }, 200)
             }

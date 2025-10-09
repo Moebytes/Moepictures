@@ -181,8 +181,8 @@ export default class ServerFunctions {
         await sql.message.bulkInsertRecipients(messageID, [username])
     }
 
-    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
-        const defaultBuffer = Buffer.from("")
+    public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string): Promise<Buffer<ArrayBuffer>> => {
+        const defaultBuffer = Buffer.from("") 
         const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
         const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
         if (!id) return defaultBuffer
@@ -196,7 +196,7 @@ export default class ServerFunctions {
             let firstHistory = `${historyFolder}/${folders[0]}`
             let files = fs.readdirSync(firstHistory).filter(f => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
             if (!files.length) return defaultBuffer
-            return fs.readFileSync(`${firstHistory}/${files[0]}`)
+            return fs.readFileSync(`${firstHistory}/${files[0]}`) as Buffer<ArrayBuffer>
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
@@ -579,7 +579,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash) as any
+            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18, oldImage.pixelHash)
             if (!oldBuffer) continue
             const newImage = newImages[i]
             const newBuffer = Buffer.from(newImage.bytes) as any
@@ -602,7 +602,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false, oldImage.pixelHash) : await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash) as any
+            const oldBuffer = isEdit ? await ServerFunctions.getFile(oldPath, false, r18 ?? false, oldImage.pixelHash) : await ServerFunctions.getUnverifiedFile(oldPath, false, oldImage.pixelHash)
             if (!oldBuffer) continue
             let newBuffer = null as Buffer | null
             if ("bytes" in newImage) {
@@ -797,7 +797,7 @@ export default class ServerFunctions {
             for (let j = 0; j < post.images.length; j++) {
                 const image = post.images[j]
                 const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
-                const buffer = await ServerFunctions.getFile(imgPath, false, false, image.pixelHash) as any
+                const buffer = await ServerFunctions.getFile(imgPath, false, false, image.pixelHash)
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 await sql.post.updateImage(image.imageID, "hash", md5)
             }
