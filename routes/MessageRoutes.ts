@@ -26,13 +26,13 @@ const messageUpdateLimiter = rateLimit({
     handler
 })
 
-let connections = [] as {username: string, response: Response}[]
+let connections = [] as {username: string, res: Response}[]
 
 const pushNotification = (username: string) => {
     const connection = connections.find((c) => c.username === username)
     if (!connection) return
-    connection.response.write(`event: message\n`)
-    connection.response.write(`data: new message!\n\n`)
+    connection.res.write(`event: message\n`)
+    connection.res.write(`data: new message!\n\n`)
 }
 
 const MessageRoutes = (app: Express) => {
@@ -398,13 +398,13 @@ const MessageRoutes = (app: Express) => {
                 "Connection": "keep-alive",
                 "Cache-Control": "no-cache"
             })
-            res.write("\n")
-            
+            res.flushHeaders()
+
             const index = connections.findIndex((c) => c.username === req.session.username)
             if (index !== -1) {
-                connections[index].response = res
+                connections[index].res = res
             } else {
-                connections.push({username: req.session.username, response: res})
+                connections.push({username: req.session.username, res})
             }
             req.on("close", () => {
                 connections = connections.filter((c) => c.username !== req.session.username)
