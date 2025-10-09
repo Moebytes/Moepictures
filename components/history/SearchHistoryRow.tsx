@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import searchHistoryDelete from "../../assets/icons/delete.png"
 import {SearchHistory} from "../../types/Types"
 import EffectImage from "../image/EffectImage"
@@ -24,7 +24,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const deleteSearchHistory = async () => {
-        await functions.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
+        await functions.http.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -52,14 +52,14 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        functions.openPost(props.history.post, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.history.post, event, navigate, session, setSessionFlag)
     }
 
     const printMirrors = () => {
         const mapped = Object.values(props.history.post.mirrors || {}) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m, i18n) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.util.getSiteName(m, i18n) + append}</span>
         })
     }
 
@@ -72,12 +72,12 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
                     <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="historyrow-user-text" onClick={imgClick}>{i18n.time.viewed} {functions.prettyDate(props.history.viewDate, i18n)}</span>
+                        <span className="historyrow-user-text" onClick={imgClick}>{i18n.time.viewed} {functions.date.prettyDate(props.history.viewDate, i18n)}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.title}: </span>{props.history.post.title || i18n.labels.none}</span>
                         {props.history.post.englishTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sidebar.english}: </span>{props.history.post.englishTitle}</span> : null}
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}: </span>{props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.sort.posted}: </span>{props.history.post.posted ? functions.date.formatDate(new Date(props.history.post.posted)) : i18n.labels.unknown}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.tag.artist}: </span>{props.history.post.artist ? props.history.post.artist : i18n.labels.unknown}</span>
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.history.post.source, "_blank")}>{functions.getSiteName(props.history.post.source, i18n)}</span></span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.history.post.source, "_blank")}>{functions.util.getSiteName(props.history.post.source, i18n)}</span></span>
                         {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">{i18n.labels.mirrors}: </span>{printMirrors()}</span> : null}
                     </div>
                 </div>

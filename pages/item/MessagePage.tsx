@@ -4,14 +4,13 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import MessageReply from "../../components/search/MessageReply"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
 useMiscDialogActions, useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
-import jsxFunctions from "../../structures/JSXFunctions"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
 import systemCrown from "../../assets/icons/system-crown.png"
@@ -117,19 +116,19 @@ const MessagePage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const updateRead = async () => {
-            await functions.post("/api/message/read", {messageID, forceRead: true}, session, setSessionFlag)
-            const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
+            await functions.http.post("/api/message/read", {messageID, forceRead: true}, session, setSessionFlag)
+            const result = await functions.http.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }
         updateRead()
     }, [session])
 
     const updateMessage = async () => {
-        const message = await functions.get("/api/message", {messageID}, session, setSessionFlag).catch(() => null)
-        if (!message) return functions.replaceLocation("/404")
+        const message = await functions.http.get("/api/message", {messageID}, session, setSessionFlag).catch(() => null)
+        if (!message) return functions.dom.replaceLocation("/404")
         if (message.r18) {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/404")
+            if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
         setMessage(message)
         document.title = `${message.title}`
@@ -137,7 +136,7 @@ const MessagePage: React.FunctionComponent = () => {
     }
 
     const updateReplies = async () => {
-        const result = await functions.get("/api/message/replies", {messageID}, session, setSessionFlag)
+        const result = await functions.http.get("/api/message/replies", {messageID}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleReplies([])
@@ -178,7 +177,7 @@ const MessagePage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
         if (message && message.creator !== session.username) {
             let canRead = false
@@ -188,7 +187,7 @@ const MessagePage: React.FunctionComponent = () => {
                 }
             }
 
-            if (!canRead) functions.replaceLocation("/401")
+            if (!canRead) functions.dom.replaceLocation("/401")
         }
     }, [session, message])
 
@@ -206,14 +205,14 @@ const MessagePage: React.FunctionComponent = () => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleReplies(functions.removeDuplicates(newVisibleReplies))
+            setVisibleReplies(functions.util.removeDuplicates(newVisibleReplies))
         }
         if (scroll) updateReplies()
     }, [scroll, replies])
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!replies[currentIndex]) return
                 const newVisibleReplies = visibleReplies
@@ -223,7 +222,7 @@ const MessagePage: React.FunctionComponent = () => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleReplies(functions.removeDuplicates(newVisibleReplies))
+                setVisibleReplies(functions.util.removeDuplicates(newVisibleReplies))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -370,7 +369,7 @@ const MessagePage: React.FunctionComponent = () => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as MessageUserReply[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleReplies)
+            visible = functions.util.removeDuplicates(visibleReplies)
         } else {
             const postOffset = (messagePage - 1) * getPageAmount()
             visible = replies.slice(postOffset, postOffset + getPageAmount())
@@ -385,7 +384,7 @@ const MessagePage: React.FunctionComponent = () => {
     const getCreatorPFP = () => {
         if (!message) return
         if (message.image) {
-            return functions.getTagLink("pfp", message.image, message.imageHash)
+            return functions.link.getTagLink("pfp", message.image, message.imageHash)
         } else {
             return favicon
         }
@@ -403,7 +402,7 @@ const MessagePage: React.FunctionComponent = () => {
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!message?.imagePost) return
         event.stopPropagation()
-        functions.openPost(message.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(message.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const getCreatorJSX = () => {
@@ -411,69 +410,69 @@ const MessagePage: React.FunctionComponent = () => {
         if (message.role === "admin") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                    <span className="thread-page-user-text admin-color">{functions.toProperCase(message.creator)}</span>
+                    <span className="thread-page-user-text admin-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (message.role === "mod") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text mod-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text mod-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={modCrown}/>
                 </div>
             )
         } else if (message.role === "system") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text system-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text system-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (message.role === "premium-curator") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text curator-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (message.role === "curator") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text curator-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (message.role === "premium-contributor") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text premium-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (message.role === "contributor") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text contributor-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text contributor-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (message.role === "premium") {
             return (
                 <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                <span className="thread-page-user-text premium-color">{functions.util.toProperCase(message.creator)}</span>
                     <img className="thread-page-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`thread-page-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message?.creator) || "deleted"}</span>
+        return <span className={`thread-page-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.util.toProperCase(message?.creator) || "deleted"}</span>
     }
 
     const editMessage = async () => {
-        const badTitle = functions.validateTitle(editMessageTitle, i18n)
+        const badTitle = functions.validation.validateTitle(editMessageTitle, i18n)
         if (badTitle) return
-        const badContent = functions.validateThread(editMessageContent, i18n)
+        const badContent = functions.validation.validateThread(editMessageContent, i18n)
         if (badContent) return
-        await functions.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent, r18: editMessageR18}, session, setSessionFlag)
+        await functions.http.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent, r18: editMessageR18}, session, setSessionFlag)
         updateMessage()
     }
 
@@ -494,7 +493,7 @@ const MessagePage: React.FunctionComponent = () => {
     }
 
     const deleteMessage = async () => {
-        await functions.delete("/api/message/delete", {messageID}, session, setSessionFlag)
+        await functions.http.delete("/api/message/delete", {messageID}, session, setSessionFlag)
         navigate("/mail")
     }
 
@@ -518,9 +517,9 @@ const MessagePage: React.FunctionComponent = () => {
 
     const triggerQuote = () => {
         if (!message) return
-        const cleanReply = functions.parsePieces(message.content).filter((s: string) => !s.includes(">>>")).join("")
+        const cleanReply = functions.render.parsePieces(message.content).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[0] ${functions.toProperCase(message.creator)} said:
+            >>>[0] ${functions.util.toProperCase(message.creator)} said:
             > ${cleanReply}
         `))
     }
@@ -553,7 +552,7 @@ const MessagePage: React.FunctionComponent = () => {
     }, [quoteText])
 
     const reply = async () => {
-        const badReply = functions.validateReply(text, i18n)
+        const badReply = functions.validation.validateReply(text, i18n)
         if (badReply) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -561,7 +560,7 @@ const MessagePage: React.FunctionComponent = () => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
+        await functions.http.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
         updateReplies()
         setText("")
     }
@@ -632,18 +631,18 @@ const MessagePage: React.FunctionComponent = () => {
                 <div className="thread-page-reply-box">
                     <div className="thread-page-input-container">
                         <div className="thread-page-textarea-buttons">
-                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
+                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
                         </div>
-                        {previewMode ? <div className="thread-page-preview">{jsxFunctions.renderText(text, emojis, "message", undefined, r18)}</div> : 
+                        {previewMode ? <div className="thread-page-preview">{functions.jsx.renderText(text, emojis, "message", undefined, r18)}</div> : 
                         <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
                             <textarea ref={textRef} className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
                         </div>}
@@ -708,11 +707,11 @@ const MessagePage: React.FunctionComponent = () => {
                     <div className="thread-page-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="thread-page-user-container">
                             {getCreatorJSX()}
-                            <span className="thread-page-date-text">{functions.timeAgo(message.createDate, i18n)}</span>
+                            <span className="thread-page-date-text">{functions.date.timeAgo(message.createDate, i18n)}</span>
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="thread-page-text-container">
-                            <p className="thread-page-text">{jsxFunctions.renderMessageText(message.content, emojis)}</p>
+                            <p className="thread-page-text">{functions.jsx.renderMessageText(message.content, emojis)}</p>
                         </div>
                     </div>
                     <div className="thread-page-container">

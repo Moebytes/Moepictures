@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useInteractionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import aliasHistoryUndo from "../../assets/icons/revert.png"
 import aliasHistoryRedo from "../../assets/icons/unrevert.png"
@@ -34,7 +34,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const updateUserRole = async () => {
-        const user = await functions.get("/api/user", {username: props.history.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.history.user}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -44,13 +44,13 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertAliasHistory = async () => {
         if (props.history.type === "alias") {
-            await functions.post("/api/tag/aliasto/undo", {historyID: props.history.historyID}, session, setSessionFlag)
+            await functions.http.post("/api/tag/aliasto/undo", {historyID: props.history.historyID}, session, setSessionFlag)
         } else if (props.history.type === "undo alias") {
-            await functions.post("/api/tag/aliasto", {tag: props.history.source, aliasTo: props.history.target}, session, setSessionFlag)
+            await functions.http.post("/api/tag/aliasto", {tag: props.history.source, aliasTo: props.history.target}, session, setSessionFlag)
         } else if (props.history.type === "implication") {
-            await functions.post("/api/tag/implication/undo", {historyID: props.history.historyID}, session, setSessionFlag)
+            await functions.http.post("/api/tag/implication/undo", {historyID: props.history.historyID}, session, setSessionFlag)
         } else if (props.history.type === "undo implication") {
-            await functions.post("/api/tag/implication/redo", {historyID: props.history.historyID}, session, setSessionFlag)
+            await functions.http.post("/api/tag/implication/redo", {historyID: props.history.historyID}, session, setSessionFlag)
         }
         props.onEdit?.()
     }
@@ -68,7 +68,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [revertAliasHistoryFlag, revertAliasHistoryID, session])
 
     const deleteAliasHistory = async () => {
-        await functions.delete("/api/alias/history/delete", {historyID: props.history.historyID, type: props.history.type}, session, setSessionFlag)
+        await functions.http.delete("/api/alias/history/delete", {historyID: props.history.historyID, type: props.history.type}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -130,54 +130,54 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.toProperCase(props.history.user) || i18n.user.deleted}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user) || i18n.user.deleted}</span>
     }
 
     const getJSX = () => {

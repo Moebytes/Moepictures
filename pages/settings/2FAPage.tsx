@@ -6,7 +6,7 @@ import Footer from "../../components/site/Footer"
 import SideBar from "../../components/site/SideBar"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
 const $2FAPage: React.FunctionComponent = (props) => {
@@ -65,7 +65,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/2fa", {token}, session, setSessionFlag)
+            await functions.http.post("/api/2fa", {token}, session, setSessionFlag)
             setSessionFlag(true)
             navigate("/posts")
             setError(false)

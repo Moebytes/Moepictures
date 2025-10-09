@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useActiveSelector, useActiveActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/newsbanner.less"
 
 const NewsBanner: React.FunctionComponent = (props) => {
@@ -12,7 +12,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const updateBanner = async () => {
-        const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
+        const banner = await functions.http.get("/api/misc/banner", null, session, setSessionFlag)
         if (!banner) return
         const bannerHideDate = localStorage.getItem("bannerHideDate")
         if (!bannerHideDate || new Date(bannerHideDate) <= new Date(banner.date || "")) {

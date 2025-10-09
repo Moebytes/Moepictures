@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
@@ -32,7 +32,7 @@ const pushMentionNotification = async (content: string, threadID: string, replyI
         const notified = new Set<string>()
         const thread = await sql.thread.thread(threadID)
         if (!thread) return
-        const pieces = functions.parsePieces(content)
+        const pieces = functions.render.parsePieces(content)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
@@ -44,10 +44,10 @@ const pushMentionNotification = async (content: string, threadID: string, replyI
                     if (notified.has(username)) return
                     notified.add(username)
                     if (replyID) {
-                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.config.getDomain()}/thread/${threadID}?reply=${replyID}`
                         await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
                     } else {
-                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.config.getDomain()}/thread/${threadID}`
                         await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
                     }
                 }
@@ -62,10 +62,10 @@ const pushMentionNotification = async (content: string, threadID: string, replyI
                     if (notified.has(username)) return
                     notified.add(username)
                     if (replyID) {
-                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.config.getDomain()}/thread/${threadID}?reply=${replyID}`
                         await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
                     } else {
-                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.config.getDomain()}/thread/${threadID}`
                         await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
                     }
                 }
@@ -83,9 +83,9 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!title || !content) return void res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title, enLocale)
+            const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content, enLocale)
+            const badContent = functions.validation.validateThread(content, enLocale)
             if (badContent) return void res.status(400).send("Bad content")
             const threadID = await sql.thread.insertThread(req.session.username, title, content, r18)
             pushMentionNotification(content, threadID)
@@ -104,9 +104,9 @@ const ThreadRoutes = (app: Express) => {
             const {threadID, title, content, r18} = req.body as ThreadEditParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!title || !content) return void res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title, enLocale)
+            const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content, enLocale)
+            const badContent = functions.validation.validateThread(content, enLocale)
             if (badContent) return void res.status(400).send("Bad content")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return void res.status(400).send("Invalid threadID")
@@ -195,7 +195,7 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!threadID || !content) return void res.status(400).send("Bad threadID or content")
-            const badReply = functions.validateReply(content, enLocale)
+            const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return void res.status(400).send("Invalid threadID")
@@ -247,7 +247,7 @@ const ThreadRoutes = (app: Express) => {
             const {replyID, content, r18} = req.body as ReplyEditParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!replyID || !content) return void res.status(400).send("Bad replyID or content")
-            const badReply = functions.validateReply(content, enLocale)
+            const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
             const reply = await sql.thread.reply(replyID)
             if (!reply) return void res.status(400).send("Invalid replyID")
@@ -342,13 +342,13 @@ const ThreadRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.report.deleteThreadReport(reportID)
             if (accepted) {
-                let message = `Thread report on ${functions.getDomain()}/thread/${id} was accepted. The thread posted by ${username} was removed.`
+                let message = `Thread report on ${functions.config.getDomain()}/thread/${id} was accepted. The thread posted by ${username} was removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Thread report has been accepted", message)
                 
-                let message2 = `The thread you posted on ${functions.getDomain()}/thread/${id} was removed for breaking the rules.`
+                let message2 = `The thread you posted on ${functions.config.getDomain()}/thread/${id} was removed for breaking the rules.`
                 await serverFunctions.systemMessage(username, "Notice: Thread has been removed", message2)
             } else {
-                let message = `Thread report on ${functions.getDomain()}/thread/${id} has been dismissed. The thread posted by ${username} is ok.`
+                let message = `Thread report on ${functions.config.getDomain()}/thread/${id} has been dismissed. The thread posted by ${username} is ok.`
                 // await serverFunctions.systemMessage(reporter, "Report: Thread report has been dismissed", message)
             }
             res.status(200).send("Success")
@@ -366,13 +366,13 @@ const ThreadRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.report.deleteReplyReport(reportID)
             if (accepted) {
-                let message = `Reply report on ${functions.getDomain()}/thread/${id} was accepted. The reply posted by ${username} was removed.`
+                let message = `Reply report on ${functions.config.getDomain()}/thread/${id} was accepted. The reply posted by ${username} was removed.`
                 await serverFunctions.systemMessage(reporter, "Report: Reply report has been accepted", message)
                 
-                let message2 = `The reply you posted on ${functions.getDomain()}/thread/${id} was removed for breaking the rules.`
+                let message2 = `The reply you posted on ${functions.config.getDomain()}/thread/${id} was removed for breaking the rules.`
                 await serverFunctions.systemMessage(username, "Notice: Reply has been removed", message2)
             } else {
-                let message = `Reply report on ${functions.getDomain()}/thread/${id} has been dismissed. The reply posted by ${username} is ok.`
+                let message = `Reply report on ${functions.config.getDomain()}/thread/${id} has been dismissed. The reply posted by ${username} is ok.`
                 // await serverFunctions.systemMessage(reporter, "Report: Reply report has been dismissed", message)
             }
             res.status(200).send("Success")

@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
@@ -44,9 +44,9 @@ const MessageRoutes = (app: Express) => {
             if (!title || !content) return void res.status(400).send("Bad title or content")
             if (recipients?.length < 1) return void res.status(400).send("Bad recipients")
             if (recipients.length > 5 && !permissions.isMod(req.session)) return void res.status(403).send("Recipient limit exceeded")
-            const badTitle = functions.validateTitle(title, enLocale)
+            const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content, enLocale)
+            const badContent = functions.validation.validateThread(content, enLocale)
             if (badContent) return void res.status(400).send("Bad content")
             for (const recipient of recipients) {
                 if (req.session.username === recipient) return void res.status(400).send("Cannot send message to yourself")
@@ -71,9 +71,9 @@ const MessageRoutes = (app: Express) => {
             const {messageID, title, content, r18} = req.body as MessageEditParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!title || !content) return void res.status(400).send("Bad title or content")
-            const badTitle = functions.validateTitle(title, enLocale)
+            const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
-            const badContent = functions.validateThread(content, enLocale)
+            const badContent = functions.validation.validateThread(content, enLocale)
             if (badContent) return void res.status(400).send("Bad content")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
@@ -137,7 +137,7 @@ const MessageRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!messageID || !content) return void res.status(400).send("Bad messageID or content")
-            const badReply = functions.validateReply(content, enLocale)
+            const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
@@ -206,7 +206,7 @@ const MessageRoutes = (app: Express) => {
             const {replyID, content, r18} = req.body as MessageReplyEditParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!replyID || !content) return void res.status(400).send("Bad replyID or content")
-            const badReply = functions.validateReply(content, enLocale)
+            const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
             const reply = await sql.message.messageReply(replyID)
             if (!reply) return void res.status(400).send("Invalid replyID")
@@ -378,7 +378,7 @@ const MessageRoutes = (app: Express) => {
             }
             let toAdd = recipients.filter((r: string) => !message.recipients.includes(r))
             let toRemove = message.recipients.filter((r) => r !== null && !recipients.includes(r))
-            await sql.message.bulkDeleteRecipients(messageID, functions.filterNulls(toRemove))
+            await sql.message.bulkDeleteRecipients(messageID, functions.util.filterNulls(toRemove))
             await sql.message.bulkInsertRecipients(messageID, toAdd)
             for (const recipient of toAdd) {
                 pushNotification(recipient)

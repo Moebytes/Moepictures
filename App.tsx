@@ -44,7 +44,7 @@ import PostHistoryPage from "./pages/history/PostHistoryPage"
 import GroupHistoryPage from "./pages/history/GroupHistoryPage"
 import HistoryPage from "./pages/history/HistoryPage"
 import UnverifiedPostPage from "./pages/item/UnverifiedPostPage"
-import functions from "./structures/Functions"
+import functions from "./functions/Functions"
 import ModQueuePage from "./pages/search/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/upload/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/item/SetAvatarPage"
@@ -98,22 +98,22 @@ const App: React.FunctionComponent = (props) => {
     const location = useLocation()
 
     const getSessionCookie = async () => {
-        const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
+        const cookie = await functions.http.get("/api/user/session", null, session, setSessionFlag)
         setSession(cookie)
         if (cookie.username && !permissions.isPremium(cookie)) {
-            await functions.post("/api/user/upscaledimages", {reset: true}, session, setSessionFlag)
+            await functions.http.post("/api/user/upscaledimages", {reset: true}, session, setSessionFlag)
         }
     }
 
     const cacheEmojis = async () => {
-        const emojis = await functions.emojisCache(session, setSessionFlag)
+        const emojis = await functions.cache.emojisCache(session, setSessionFlag)
         setEmojis(emojis)
     }
 
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
-        functions.clearCache()
+        functions.cache.clearCache()
         cacheEmojis()
         const onDOMLoaded = () => {
             setLoaded(true)
@@ -142,7 +142,7 @@ const App: React.FunctionComponent = (props) => {
 
     const getImg = () => {
         if (session.username) {
-            return session.image ? functions.getTagLink("pfp", session.image, session.imageHash) : favicon
+            return session.image ? functions.link.getTagLink("pfp", session.image, session.imageHash) : favicon
         } else {
             return ""
         }
@@ -172,7 +172,7 @@ const App: React.FunctionComponent = (props) => {
 
     const destroy2FA = async () => {
         try {
-            await functions.delete("/api/2fa/delete", null, session, setSessionFlag)
+            await functions.http.delete("/api/2fa/delete", null, session, setSessionFlag)
             setSessionFlag(true)
         } catch {
             // ignore
@@ -208,7 +208,7 @@ const App: React.FunctionComponent = (props) => {
     }, [sessionFlag])
 
     useEffect(() => {
-        functions.preventDragging()
+        functions.dom.preventDragging()
     })
 
     useEffect(() => {
@@ -222,7 +222,7 @@ const App: React.FunctionComponent = (props) => {
                 setMobileScrolling(false)
                 return setHideSortbar(false)
             }
-            if (functions.scrolledToTop()) return setHideSortbar(false)
+            if (functions.dom.scrolledToTop()) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             setActiveDropdown("none")
             return setHideSortbar(true)
@@ -233,10 +233,10 @@ const App: React.FunctionComponent = (props) => {
                 return setHideSortbar(false)
             }
             if (activeDropdown !== "none") return setHideSortbar(false)
-            if (functions.scrolledToTop()) return setHideSortbar(false)
+            if (functions.dom.scrolledToTop()) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             const sortbar = document.querySelector(".sortbar")
-            const amt = hideTitlebar ? (sortbar ? (functions.navbarHeight() + functions.sortbarHeight()) : functions.navbarHeight()) : (functions.titlebarHeight() + functions.navbarHeight() + functions.sortbarHeight())
+            const amt = hideTitlebar ? (sortbar ? (functions.dom.navbarHeight() + functions.dom.sortbarHeight()) : functions.dom.navbarHeight()) : (functions.dom.titlebarHeight() + functions.dom.navbarHeight() + functions.dom.sortbarHeight())
             if (event.clientY < amt) return setHideSortbar(false)
             return setHideSortbar(true)
         }
@@ -249,7 +249,7 @@ const App: React.FunctionComponent = (props) => {
     }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
-        functions.changeFavicon(theme)
+        functions.dom.changeFavicon(theme)
     }, [theme])
 
     useEffect(() => {

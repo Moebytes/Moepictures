@@ -4,7 +4,7 @@ import loading from "../../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import path from "path"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/gridimage.less"
 import * as THREE from "three"
 import privateIcon from "../../assets/icons/lock-opt.png"
@@ -131,12 +131,12 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [])
 
     const loadImage = async () => {
-        const img = await functions.decryptThumb(props.img, session)
+        const img = await functions.crypto.decryptThumb(props.img, session)
         setScreenshot(img)
     }
 
     const loadModel = async () => {
-        const decrypted = await functions.decryptItem(props.model, session)
+        const decrypted = await functions.crypto.decryptItem(props.model, session)
         setDecrypted(decrypted)
 
         const element = rendererRef.current
@@ -163,18 +163,18 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         element?.appendChild(renderer.domElement)
 
         let model = null as unknown as THREE.Object3D
-        if (functions.isGLTF(props.model)) {
+        if (functions.file.isGLTF(props.model)) {
             const loader = new GLTFLoader()
             const gltf = await loader.loadAsync(decrypted)
             model = gltf.scene
             model.animations = gltf.animations
-        } else if (functions.isOBJ(props.model)) {
+        } else if (functions.file.isOBJ(props.model)) {
             const loader = new OBJLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.isFBX(props.model)) {
+        } else if (functions.file.isFBX(props.model)) {
             const loader = new FBXLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.isVRM(props.model)) {
+        } else if (functions.file.isVRM(props.model)) {
             const loader = new GLTFLoader()
             loader.register((parser: any) => {
                 return new VRMLoaderPlugin(parser) as any
@@ -344,9 +344,9 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         const refWidth = currentRef.clientWidth
         const refHeight = currentRef.clientHeight
         if (square || props.square) {
-            const sidebarWidth = functions.sidebarWidth()
+            const sidebarWidth = functions.dom.sidebarWidth()
             const width = window.innerWidth - sidebarWidth
-            const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
+            const containerWidth = Math.floor(width / (mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
@@ -509,7 +509,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.model), decrypted)
+                functions.dom.download(path.basename(props.model), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
@@ -602,13 +602,13 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
             }
         }
     }

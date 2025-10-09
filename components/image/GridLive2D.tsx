@@ -4,7 +4,7 @@ import loading from "../../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useCacheActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import path from "path"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/gridimage.less"
 import {Live2DCubismModel} from "live2d-renderer"
 import privateIcon from "../../assets/icons/lock-opt.png"
@@ -122,13 +122,13 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     }, [])
 
     const loadImage = async () => {
-        const img = await functions.decryptThumb(props.img, session)
+        const img = await functions.crypto.decryptThumb(props.img, session)
         setScreenshot(img)
     }
 
     const loadModel = async () => {
         if (!props.live2d || !rendererRef.current) return
-        const decrypted = await functions.decryptItem(props.live2d, session)
+        const decrypted = await functions.crypto.decryptItem(props.live2d, session)
         setDecrypted(decrypted)
 
         rendererRef.current.width = 500
@@ -200,9 +200,9 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
         const refWidth = currentRef.clientWidth
         const refHeight = currentRef.clientHeight
         if (square || props.square) {
-            const sidebarWidth = functions.sidebarWidth()
+            const sidebarWidth = functions.dom.sidebarWidth()
             const width = window.innerWidth - sidebarWidth
-            const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
+            const containerWidth = Math.floor(width / (mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
@@ -365,7 +365,7 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (downloadFlag) {
             if (downloadIDs.includes(props.post.postID)) {
-                functions.download(path.basename(props.live2d), decrypted)
+                functions.dom.download(path.basename(props.live2d), decrypted)
                 setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
@@ -458,13 +458,13 @@ const GridLive2D = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
             }
         }
     }

@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {Group, GroupHistory, GroupPosts, GroupParams, GroupEditParams, GroupPostDeleteParams,
@@ -28,7 +28,7 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid post")
-            const slug = functions.generateSlug(name)
+            const slug = functions.post.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
             const group = await sql.group.group(slug)
@@ -53,7 +53,7 @@ const GroupRoutes = (app: Express) => {
 
                 const groupHistory = await sql.history.groupHistory(group.groupID)
                 const updated = await sql.group.group(slug) as GroupPosts
-                const changes = functions.parseGroupChanges(group, updated)
+                const changes = functions.compare.parseGroupChanges(group, updated)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
                 if (!date) date = new Date().toISOString()
                 if (!groupHistory.length) {
@@ -86,7 +86,7 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             const group = await sql.group.group(slug)
             if (!group) return void res.status(400).send("Invalid group")
-            const newSlug = functions.generateSlug(name)
+            const newSlug = functions.post.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
             if (group.name === name && group.slug === newSlug 
@@ -98,7 +98,7 @@ const GroupRoutes = (app: Express) => {
             }
         
             const updated = await sql.group.group(newSlug) as GroupPosts
-            const changes = functions.parseGroupChanges(group, updated)
+            const changes = functions.compare.parseGroupChanges(group, updated)
             const groupHistory = await sql.history.groupHistory(group.groupID)
             let posts = group.posts.map((post: any) => ({postID: post.postID, order: post.order}))
             if (!date) date = new Date().toISOString()
@@ -140,14 +140,14 @@ const GroupRoutes = (app: Express) => {
         try {
             const name = req.query.name as string
             if (!name) return void res.status(400).send("Invalid name")
-            const slug = functions.generateSlug(name)
+            const slug = functions.post.generateSlug(name)
             const group = await sql.group.group(slug) as GroupPosts
             group.posts = group.posts.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 group.posts = group.posts.filter((p) => !p.hidden)
             }
             if (!req.session.showR18) {
-                if (functions.isR18(group.rating)) return void res.status(403).end()
+                if (functions.post.isR18(group.rating)) return void res.status(403).end()
             }
             for (let i = group.posts.length - 1; i >= 0; i--) {
                 const post = group.posts[i]
@@ -177,7 +177,7 @@ const GroupRoutes = (app: Express) => {
                     group.posts = group.posts.filter((p) => !p.hidden)
                 }
                 if (!req.session.showR18) {
-                    if (functions.isR18(group.rating)) continue
+                    if (functions.post.isR18(group.rating)) continue
                 }
                 for (let i = group.posts.length - 1; i >= 0; i--) {
                     const post = group.posts[i]
@@ -205,7 +205,7 @@ const GroupRoutes = (app: Express) => {
             for (let i = 0; i < result.length; i++) {
                 const group = result[i]
                 if (!req.session.showR18) {
-                    if (functions.isR18(group.rating)) continue
+                    if (functions.post.isR18(group.rating)) continue
                 }
                 newGroups.push(group)
             }
@@ -226,7 +226,7 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid post")
-            const slug = functions.generateSlug(name)
+            const slug = functions.post.generateSlug(name)
             const group = await sql.group.group(slug)
             if (!group) return void res.status(400).send("Invalid group")
             let filteredPosts = group.posts.filter((p: any) => p.postID !== post.postID)
@@ -246,7 +246,7 @@ const GroupRoutes = (app: Express) => {
 
                 const groupHistory = await sql.history.groupHistory(group.groupID)
                 const updated = await sql.group.group(slug) as GroupPosts
-                const changes = functions.parseGroupChanges(group, updated)
+                const changes = functions.compare.parseGroupChanges(group, updated)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
                 if (!date) date = new Date().toISOString()
                 if (!groupHistory.length) {
@@ -317,7 +317,7 @@ const GroupRoutes = (app: Express) => {
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
             const updated = await sql.group.group(slug) as GroupPosts
-            const changes = functions.parseGroupChanges(group, updated)
+            const changes = functions.compare.parseGroupChanges(group, updated)
             const date = new Date().toISOString()
             if (!groupHistory.length) {
                 let vanilla = group as unknown as GroupHistory
@@ -348,7 +348,7 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid post")
-            const slug = functions.generateSlug(name)
+            const slug = functions.post.generateSlug(name)
             await sql.request.insertGroupRequest(req.session.username, slug, name, postID, reason)
             res.status(200).send("Success")
         } catch (e) {
@@ -379,10 +379,10 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupRequest(username, slug, postID)
             if (accepted) {
-                let message = `Group request on ${functions.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
+                let message = `Group request on ${functions.config.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
                 await serverFunctions.systemMessage(username, "Notice: Group request has been approved", message)
             } else {
-                let message = `Group request on ${functions.getDomain()}/group/${slug} has been rejected. Sorry!`
+                let message = `Group request on ${functions.config.getDomain()}/group/${slug} has been rejected. Sorry!`
                 // await serverFunctions.systemMessage(username, "Notice: Group request has been rejected", message)
             }
             res.status(200).send("Success")
@@ -449,10 +449,10 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupDeleteRequest(username, slug)
             if (accepted) {
-                let message = `Group deletion request on ${functions.getDomain()}/group/${slug} has been approved. Thanks!`
+                let message = `Group deletion request on ${functions.config.getDomain()}/group/${slug} has been approved. Thanks!`
                 await serverFunctions.systemMessage(username, "Notice: Group deletion request has been approved", message)
             } else {
-                let message = `Group deletion request on ${functions.getDomain()}/group/${slug} has been rejected. This group can stay up. Thanks!`
+                let message = `Group deletion request on ${functions.config.getDomain()}/group/${slug} has been rejected. This group can stay up. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Group deletion request has been rejected", message)
             }
             res.status(200).send("Success")
@@ -470,10 +470,10 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupPostDeleteRequest(username, slug, postID)
             if (accepted) {
-                let message = `Group post deletion request on ${functions.getDomain()}/group/${slug} has been approved. Thanks!`
+                let message = `Group post deletion request on ${functions.config.getDomain()}/group/${slug} has been approved. Thanks!`
                 await serverFunctions.systemMessage(username, "Notice: Group post deletion request has been approved", message)
             } else {
-                let message = `Group post deletion request on ${functions.getDomain()}/group/${slug} has been rejected. This post can remain up. Thanks!`
+                let message = `Group post deletion request on ${functions.config.getDomain()}/group/${slug} has been rejected. This post can remain up. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Group post deletion request has been rejected", message)
             }
             res.status(200).send("Success")
@@ -490,7 +490,7 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
             if (!group) return void res.status(400).send("Invalid group")
-            const changes = functions.parseGroupChanges(group, {name, description, posts: group.posts} as GroupPosts)
+            const changes = functions.compare.parseGroupChanges(group, {name, description, posts: group.posts} as GroupPosts)
             await sql.request.insertGroupEditRequest(req.session.username, slug, name, description, [], [], false, changes, reason)
             res.status(200).send("Success")
         } catch (e) {
@@ -521,10 +521,10 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteGroupEditRequest(username, slug)
             if (accepted) {
-                let message = `Group edit request on ${functions.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
+                let message = `Group edit request on ${functions.config.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
                 await serverFunctions.systemMessage(username, "Notice: Group edit request has been approved", message)
             } else {
-                let message = `Group edit request on ${functions.getDomain()}/group/${slug} has been rejected. The original group details can stay. Thanks!`
+                let message = `Group edit request on ${functions.config.getDomain()}/group/${slug} has been rejected. The original group details can stay. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Group edit request has been rejected", message)
             }
             res.status(200).send("Success")

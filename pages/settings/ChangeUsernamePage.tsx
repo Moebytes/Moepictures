@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -38,7 +38,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -77,12 +77,12 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             setSidebarText(i18n.sidebar.loginRequired)
         }
         if (!permissions.isPremium(session)) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }, [session])
 
     const submit = async () => {
-        const badUsername = functions.validateUsername(newUsername, i18n)
+        const badUsername = functions.validation.validateUsername(newUsername, i18n)
         if (badUsername) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -95,7 +95,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/changeusername", {newUsername, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/changeusername", {newUsername, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
@@ -122,7 +122,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
 
     const changeText = () => {
         if (timeRemaining) {
-            return <span className="sitepage-link" style={{fontWeight: "bold"}}>{i18n.pages.changeUsername.changeIn} {functions.timeUntil(timeRemaining, i18n)}</span>
+            return <span className="sitepage-link" style={{fontWeight: "bold"}}>{i18n.pages.changeUsername.changeIn} {functions.date.timeUntil(timeRemaining, i18n)}</span>
         } else {
             return <span className="sitepage-link">{i18n.pages.changeUsername.heading}</span>
         }

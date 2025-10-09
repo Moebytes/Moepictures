@@ -55,7 +55,7 @@ import infoIcon from "../../assets/icons/info.png"
 import splitIcon from "../../assets/icons/split.png"
 import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../../types/Types"
 import "./styles/mobileinfo.less"
@@ -102,19 +102,19 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTags = async () => {
-        const tags = await functions.parseTags(posts, session, setSessionFlag)
+        const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
         setTags(tags)
     }
 
     const updateUserImg = async () => {
         if (props.post) {
-            const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
+            const uploader = await functions.http.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
+            setUploaderImage(uploader?.image ? functions.link.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
             setUploaderImagePost(uploader?.imagePost || "")
             if (uploader?.role) setUploaderRole(uploader.role)
-            const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
+            const updater = await functions.http.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
-            const approver = await functions.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
+            const approver = await functions.http.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
             if (approver?.role) setApproverRole(approver.role)
         }
     }
@@ -136,7 +136,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!props.artists) return
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.artists.length; i++) {
-            const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
+            const link = functions.link.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             if (!props.artists[i]) break
             const tagClick = () => {
                 if (!props.artists) return
@@ -181,7 +181,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!props.characters) return
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.characters.length; i++) {
-            const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
+            const link = functions.link.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             if (!props.characters[i]) break
             const tagClick = () => {
                 if (!props.characters) return
@@ -216,7 +216,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!props.series) return
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < props.series.length; i++) {
-            const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
+            const link = functions.link.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             if (!props.series[i]) break
             const tagClick = () => {
                 if (!props.series) return
@@ -294,7 +294,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!currentTags.length) continue
             jsx.push(
                 <div key={`tagGroup-${tagGroup.name}`} className="mobileinfo-title-container">
-                    <span className="mobileinfo-title">{functions.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
+                    <span className="mobileinfo-title">{functions.util.toProperCase(tagGroup.name.replaceAll("-", " "))}</span>
                 </div>
             )
             for (let i = 0; i < currentTags.length; i++) {
@@ -305,7 +305,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={() => tagClick()}>
-                            <span className={`tag ${functions.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                            <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                             <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                         </span>
                     </div>
@@ -328,7 +328,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className={`tag ${functions.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
@@ -370,7 +370,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const imageSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
-        const result = await functions.imageSearch(file, session, setSessionFlag)
+        const result = await functions.image.imageSearch(file, session, setSessionFlag)
         setImageSearchFlag(result)
         navigate("/posts")
         event.target.value = ""
@@ -431,13 +431,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const approvePost = async () => {
         if (!props.post) return
-        await functions.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
     const rejectPost = async () => {
         if (!props.post) return
-        await functions.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
@@ -519,7 +519,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="mobileinfo-row">
                 <span className="tag">{i18n.labels.source}:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.getSiteName(props.post.source, i18n)}</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.util.getSiteName(props.post.source, i18n)}</span>
                 {jsx}
             </div>
         )
@@ -652,19 +652,19 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (role === "admin") {
             return (
                 <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                     <span className="tag-alt admin-color">{functions.toProperCase(username) || "deleted"}</span>
+                     <span className="tag-alt admin-color">{functions.util.toProperCase(username) || "deleted"}</span>
                     <img className="mobileinfo-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (role === "mod") {
             return (
                 <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                    <span className="tag-alt mod-color">{functions.toProperCase(username) || "deleted"}</span>
+                    <span className="tag-alt mod-color">{functions.util.toProperCase(username) || "deleted"}</span>
                     <img className="mobileinfo-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
+        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.util.toProperCase(username) || "deleted"}</span>
     }
 
     const copyTagsJSX = () => {
@@ -708,8 +708,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const filetypeJSX = () => {
         if (props.post && props.unverified) {
             const image = (props.post as UnverifiedPost).images[(props.order || 1) - 1]
-            const originalSize = image.size ? functions.readableFileSize(image.size) : ""
-            const upscaledSize = image.upscaledSize ? functions.readableFileSize(image.upscaledSize) : ""
+            const originalSize = image.size ? functions.util.readableFileSize(image.size) : ""
+            const upscaledSize = image.upscaledSize ? functions.util.readableFileSize(image.upscaledSize) : ""
             const originalExt = path.extname(image?.filename || "").replace(".", "")
             const upscaledExt = path.extname(image?.upscaledFilename || "").replace(".", "")
             return (
@@ -752,7 +752,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const openPost = async (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     return (
@@ -778,7 +778,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         {props.post.englishTitle ? 
                         <div className="mobileinfo-row">
                             <span className="tag">{i18n.sidebar.english}:</span>
-                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.englishTitle)}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.util.toProperCase(props.post.englishTitle)}</span>
                         </div>
                         : null}
                         <div className="mobileinfo-row">
@@ -787,7 +787,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag">{i18n.sort.posted}:</span>
-                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.formatDate(new Date(props.post.posted)) : "Unknown"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.posted ? functions.date.formatDate(new Date(props.post.posted)) : "Unknown"}</span>
                         </div>
                         {generateSourceJSX()}
                         <div className="mobileinfo-row">
@@ -849,7 +849,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sidebar.uploaded}:</span>
-                                <span className="tag-alt">{functions.formatDate(new Date(props.post.uploadDate))}</span>
+                                <span className="tag-alt">{functions.date.formatDate(new Date(props.post.uploadDate))}</span>
                             </div>
                         </div>
                         {props.post.uploadDate !== props.post.updatedDate ? 
@@ -860,7 +860,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sidebar.updated}:</span>
-                                <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
+                                <span className="tag-alt">{functions.date.formatDate(new Date(props.post.updatedDate))}</span>
                             </div>
                         </div> : null}
                         {props.post.uploader !== props.post.approver ?
@@ -871,7 +871,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">{i18n.sidebar.approved}:</span>
-                                <span className="tag-alt">{functions.formatDate(new Date(props.post.approveDate))}</span>
+                                <span className="tag-alt">{functions.date.formatDate(new Date(props.post.approveDate))}</span>
                             </div>
                         </div> : null}
                         <div className="mobileinfo-sub-row">
@@ -932,7 +932,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div>
                         </div>
                         <div className="mobileinfo-sub-row">
-                            {!props.unverified && !functions.isR18(props.post.rating) ? <div className="mobileinfo-row">
+                            {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSetAvatar}>
                                     <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                     <span className="tag">{i18n.sidebar.setAvatar}</span>

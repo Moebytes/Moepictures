@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import path from "path"
@@ -38,7 +38,7 @@ const TagRoutes = (app: Express) => {
             if (!result) {
                 const alias = await sql.tag.alias(tag)
                 if (alias) result = await sql.tag.tag(alias.tag)
-                if (!alias && functions.isJapaneseText(tag)) {
+                if (!alias && functions.util.isJapaneseText(tag)) {
                     const pixivTag = await sql.tag.tagFromPixivTag(tag)
                     if (pixivTag) result = await sql.tag.tag(pixivTag.tag)
                 }
@@ -166,7 +166,7 @@ const TagRoutes = (app: Express) => {
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!tag) return void res.status(400).send("Bad tag")
-            if (type && !functions.validTagType(type, true)) return void res.status(400).send("Bad type")
+            if (type && !functions.validation.validTagType(type, true)) return void res.status(400).send("Bad type")
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return void res.status(400).send("Bad tag")
             let imageFilename = tagObj.image
@@ -236,7 +236,7 @@ const TagRoutes = (app: Express) => {
             if (image?.[0]) {
                 if (tagObj.image) {
                     try {
-                        const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
+                        const imagePath = functions.link.getTagPath(tagObj.type, tagObj.image)
                         vanillaImageBuffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.deleteFile(imagePath, false)
                         tagObj.image = null
@@ -247,8 +247,8 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 if (image[0] !== "delete") {
-                    const filename = `${tag}.${functions.fileExtension(image as number[])}`
-                    const imagePath = functions.getTagPath(tagObj.type, filename)
+                    const filename = `${tag}.${functions.byte.fileExtension(image as number[])}`
+                    const imagePath = functions.link.getTagPath(tagObj.type, filename)
                     const newBuffer = Buffer.from(Object.values(image) as any)
                     imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
                     await serverFunctions.uploadFile(imagePath, newBuffer, false)
@@ -311,9 +311,9 @@ const TagRoutes = (app: Express) => {
 
                 if (tagObj.image) {
                     let newFilename = `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
-                    if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.fileExtension(image as number[])}`
-                    const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
-                    const newImagePath = functions.getTagPath(tagObj.type, newFilename)
+                    if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.byte.fileExtension(image as number[])}`
+                    const oldImagePath = functions.link.getTagPath(tagObj.type, tagObj.image)
+                    const newImagePath = functions.link.getTagPath(tagObj.type, newFilename)
                     await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
                     await sql.tag.updateTag(tag, "image", newFilename)
                     imageFilename = newFilename
@@ -342,7 +342,7 @@ const TagRoutes = (app: Express) => {
             const updated = await sql.tag.tag(targetTag) as Tag
             const updatedAliases = updated.aliases?.filter(Boolean).map((a: any) => a.alias)
             const updatedImplications = updated.implications?.filter(Boolean).map((i: any) => i.implication)
-            const changes = functions.parseTagChanges(tagObj, updated)
+            const changes = functions.compare.parseTagChanges(tagObj, updated)
 
             const tagHistory = await sql.history.tagHistory(targetTag)
             const nextKey = await serverFunctions.getNextKey("tag", key, false)
@@ -354,7 +354,7 @@ const TagRoutes = (app: Express) => {
                 vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
                 if (vanilla.image && vanillaImageBuffer) {
                     if (imgChange) {
-                        const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
+                        const newImagePath = functions.link.getTagHistoryPath(targetTag, 1, vanilla.image)
                         await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer, false)
                         vanilla.image = newImagePath
                     }
@@ -362,24 +362,24 @@ const TagRoutes = (app: Express) => {
                     vanilla.image = null
                 }
                 await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: vanilla.tag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
-                    description: vanilla.description, aliases: functions.filterNulls(vanilla.aliases), implications: functions.filterNulls(vanilla.implications), pixivTags: functions.filterNulls(vanilla.pixivTags), 
+                    description: vanilla.description, aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), pixivTags: functions.util.filterNulls(vanilla.pixivTags), 
                     website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, wikipedia: vanilla.wikipedia, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
-                        const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
+                        const imagePath = functions.link.getTagHistoryPath(key, 2, imageFilename)
                         const buffer = Buffer.from(Object.values(image) as any)
                         await serverFunctions.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
                     }
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
-                description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
+                description: updated.description, aliases: functions.util.filterNulls(updatedAliases), implications: functions.util.filterNulls(updatedImplications), pixivTags: functions.util.filterNulls(updated.pixivTags), 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
             } else {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
-                        const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
+                        const imagePath = functions.link.getTagHistoryPath(key, nextKey, imageFilename)
                         const buffer = Buffer.from(Object.values(image) as any)
                         await serverFunctions.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
@@ -397,7 +397,7 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
-                description: updated.description, aliases: functions.filterNulls(updatedAliases), implications: functions.filterNulls(updatedImplications), pixivTags: functions.filterNulls(updated.pixivTags), 
+                description: updated.description, aliases: functions.util.filterNulls(updatedAliases), implications: functions.util.filterNulls(updatedImplications), pixivTags: functions.util.filterNulls(updated.pixivTags), 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
             }
@@ -573,10 +573,10 @@ const TagRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
             if (accepted) {
-                let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks!`
+                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${tag} has been approved. Thanks!`
                 await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been approved", message)
             } else {
-                let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
+                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been rejected", message)
             }
             res.status(200).send("Success")
@@ -665,8 +665,8 @@ const TagRoutes = (app: Express) => {
             let imageChanged = false
             if (image?.[0]) {
                 if (image[0] !== "delete") {
-                    const filename = `${tag}.${functions.fileExtension(image as number[])}`
-                    imagePath = functions.getTagPath(tagObj.type, filename)
+                    const filename = `${tag}.${functions.byte.fileExtension(image as number[])}`
+                    imagePath = functions.link.getTagPath(tagObj.type, filename)
                     const buffer = Buffer.from(Object.values(image))
                     await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                     imageHash = serverFunctions.md5(buffer)
@@ -678,7 +678,7 @@ const TagRoutes = (app: Express) => {
             }
             let featuredObj = null as Post | null
             if (featuredPost) featuredObj = await sql.post.post(featuredPost) ?? null
-            const changes = functions.parseTagChanges(tagObj, {tag: key, type, description, aliases, implications, 
+            const changes = functions.compare.parseTagChanges(tagObj, {tag: key, type, description, aliases, implications, 
             pixivTags, website, social, twitter, fandom, wikipedia, featuredObj, r18} as unknown as Tag)
             aliases = aliases?.[0] ? aliases : []
             implications = implications?.[0] ? implications : []
@@ -716,10 +716,10 @@ const TagRoutes = (app: Express) => {
             if (image) await serverFunctions.deleteUnverifiedFile(image)
             await sql.request.deleteTagEditRequest(username, tag)
             if (accepted) {
-                let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
+                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
                 await serverFunctions.systemMessage(username, "Notice: Tag edit request has been approved", message)
             } else {
-                let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
+                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Tag edit request has been rejected", message)
             }
             res.status(200).send("Success")

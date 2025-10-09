@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
@@ -50,8 +50,8 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.put("/api/favgroup/edit", {key: editFavGroupObj.name, name, isPrivate}, session, setSessionFlag)
-        const newSlug = functions.generateSlug(name)
+        await functions.http.put("/api/favgroup/edit", {key: editFavGroupObj.name, name, isPrivate}, session, setSessionFlag)
+        const newSlug = functions.post.generateSlug(name)
         navigate(`/favgroup/${session.username}/${newSlug}`)
         setEditFavGroupObj(null)
     }

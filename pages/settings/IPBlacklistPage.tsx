@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -56,18 +56,18 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isAdmin(session)) {
-            functions.replaceLocation("/403")
+            functions.dom.replaceLocation("/403")
         }
     }, [session])
 
     const blacklist = async () => {
-        await functions.post("/api/misc/blacklistip", {ip, reason}, session, setSessionFlag)
+        await functions.http.post("/api/misc/blacklistip", {ip, reason}, session, setSessionFlag)
         setActionBanner("blacklist")
         setIP("")
     }
 
     const unblacklist = async () => {
-        await functions.delete("/api/misc/unblacklistip", {ip}, session, setSessionFlag)
+        await functions.http.delete("/api/misc/unblacklistip", {ip}, session, setSessionFlag)
         setActionBanner("unblacklist")
         setIP("")
     }

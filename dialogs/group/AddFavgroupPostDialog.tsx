@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -47,7 +47,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/favgroup/update", {postID, name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
+        await functions.http.post("/api/favgroup/update", {postID, name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
         setAddFavgroupPostObj(null)
         setGroupFlag(true)
     }

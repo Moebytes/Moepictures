@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import PostHistoryRow from "../../components/history/PostHistoryRow"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
@@ -45,8 +45,8 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     const processRedirects = async () => {
         if (!postID || !session.cookie) return
-        const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
-        if (postObject) functions.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
+        const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.post.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
     }
 
     useEffect(() => {
@@ -57,17 +57,17 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as PostHistory[]
         if (props.all) {
-            result = await functions.get("/api/post/history", null, session, setSessionFlag)
+            result = await functions.http.get("/api/post/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/post/history", {postID, username}, session, setSessionFlag)
+            result = await functions.http.get("/api/post/history", {postID, username}, session, setSessionFlag)
             if (!result.length) {
-                const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
+                const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
                 if (!postObject) return
                 const historyObject = postObject as unknown as PostHistory
                 historyObject.date = postObject.uploadDate
                 historyObject.user = postObject.uploader
-                historyObject.images = postObject.images.map((i) => functions.getThumbnailLink(i, "medium", session, mobile))
-                let categories = await functions.tagCategories(postObject.tags, session, setSessionFlag)
+                historyObject.images = postObject.images.map((i) => functions.link.getThumbnailLink(i, "medium", session, mobile))
+                let categories = await functions.tag.tagCategories(postObject.tags, session, setSessionFlag)
                 historyObject.artists = categories.artists.map((a) => a.tag)
                 historyObject.characters = categories.characters.map((c) => c.tag)
                 historyObject.series = categories.series.map((s) => s.tag)
@@ -109,7 +109,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as PostHistory[]
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (functions.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
+            if (functions.post.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
                 currentIndex++
                 continue
             }
@@ -117,16 +117,16 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
+        setVisibleRevisions(functions.util.removeDuplicates(newVisibleRevisions))
     }, [revisions, session])
 
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.http.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev) => functions.removeDuplicates([...prev, ...result]))
+            setRevisions((prev) => functions.util.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }
@@ -135,13 +135,13 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!revisions[currentIndex]) return updateOffset()
                 const newRevisions = visibleRevisions
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (functions.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
+                    if (functions.post.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
                         currentIndex++
                         continue
                     }
@@ -149,7 +149,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(functions.removeDuplicates(newRevisions))
+                setVisibleRevisions(functions.util.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -160,7 +160,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.removeDuplicates(visibleRevisions)
+        let visible = functions.util.removeDuplicates(visibleRevisions)
         let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
@@ -185,7 +185,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.post}` : i18n.history.post}</span>
+                    <span className="history-heading">{username ? `${functions.util.toProperCase(username)}'s ${i18n.history.post}` : i18n.history.post}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

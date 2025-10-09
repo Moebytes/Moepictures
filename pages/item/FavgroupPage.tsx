@@ -7,12 +7,9 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
-import cryptoFunctions from "../../structures/DecryptFunctions"
-import permissions from "../../structures/Permissions"
+import functions from "../../functions/Functions"
 import groupReorder from "../../assets/icons/group-reorder.png"
 import groupReorderActive from "../../assets/icons/group-reorder-active.png"
-import groupHistory from "../../assets/icons/tag-history.png"
 import groupAdd from "../../assets/icons/group-add.png"
 import groupEdit from "../../assets/icons/tag-edit.png"
 import groupDelete from "../../assets/icons/tag-delete.png"
@@ -65,7 +62,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }, [session])
 
@@ -74,11 +71,11 @@ const FavgroupPage: React.FunctionComponent = () => {
     }, [mobile])
 
     const favgroupInfo = async () => {
-        let favgroup = await functions.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
-        if (!favgroup) return functions.replaceLocation("/404")
-        if (functions.isR18(favgroup.rating)) {
+        let favgroup = await functions.http.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
+        if (!favgroup) return functions.dom.replaceLocation("/404")
+        if (functions.post.isR18(favgroup.rating)) {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/404")
+            if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
         setFavgroup(favgroup)
     }
@@ -101,11 +98,11 @@ const FavgroupPage: React.FunctionComponent = () => {
         let items = [] as GroupItem[]
         for (let i = 0; i < favgroup.posts.length; i++) {
             const post = favgroup.posts[i]
-            if (functions.isR18(post.rating)) if (!session.showR18) continue
-            const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
-            const liveLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile, true)
-            let img = await functions.decryptThumb(imageLink, session)
-            let live = await functions.decryptThumb(liveLink, session)
+            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
+            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
+            let img = await functions.crypto.decryptThumb(imageLink, session)
+            let live = await functions.crypto.decryptThumb(liveLink, session)
             items.push({id: post.order, image: img, live, post})
         }
         setItems(items)
@@ -116,7 +113,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             document.title = favgroup.name
             setHeaderText(favgroup.name)
             if (favgroup.private) {
-                if (session.username !== username) return functions.replaceLocation("/403")
+                if (session.username !== username) return functions.dom.replaceLocation("/403")
             }
             updateItems()
         }
@@ -145,11 +142,11 @@ const FavgroupPage: React.FunctionComponent = () => {
             const item = items[i]
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
-                    await functions.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
+                    await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
                     return setGroupFlag(true)
                 }
                 if (reorderState) return
-                functions.openPost(item.post, event, navigate, session, setSessionFlag)
+                functions.post.openPost(item.post, event, navigate, session, setSessionFlag)
                 setPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
@@ -176,7 +173,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        functions.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
+        functions.http.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
         setReorderState(false)
     }
 

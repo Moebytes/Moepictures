@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import {ServerSession} from "../types/Types"
 
-export default class EncryptFunctions {
+export default class Encryption {
     public static generateAPIKey = (length = 64) => {
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         const randomBytes = crypto.randomBytes(length)

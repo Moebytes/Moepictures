@@ -8,9 +8,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
-import cryptoFunctions from "../../structures/DecryptFunctions"
-import permissions from "../../structures/Permissions"
+import functions from "../../functions/Functions"
 import groupReorder from "../../assets/icons/group-reorder.png"
 import groupReorderActive from "../../assets/icons/group-reorder-active.png"
 import groupHistory from "../../assets/icons/tag-history.png"
@@ -23,7 +21,6 @@ import groupAccept from "../../assets/icons/group-accept.png"
 import Reorder from "react-reorder"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import "./styles/grouppage.less"
 import {GroupPosts, GroupHistory, GroupItem, PostOrdered} from "../../types/Types"
@@ -78,17 +75,17 @@ const GroupPage: React.FunctionComponent = () => {
     const groupInfo = async () => {
         let group = null as GroupPosts | null
         if (historyID) {
-            const history = await functions.get("/api/group/history", {slug, historyID}, session, setSessionFlag).then((r) => r[0])
+            const history = await functions.http.get("/api/group/history", {slug, historyID}, session, setSessionFlag).then((r) => r[0])
             group = history as unknown as GroupPosts
-            let posts = await functions.get("/api/posts", {postIDs: group.posts.map((p) => p.postID)}, session, setSessionFlag).catch(() => []) as PostOrdered[]
+            let posts = await functions.http.get("/api/posts", {postIDs: group.posts.map((p) => p.postID)}, session, setSessionFlag).catch(() => []) as PostOrdered[]
             group.posts = posts.map((post: PostOrdered, i: number) => ({...post, order: group?.posts[i].order || 1}))
         } else {
-            group = await functions.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null) as GroupPosts
+            group = await functions.http.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null) as GroupPosts
         }
-        if (!group) return functions.replaceLocation("/404")
-        if (functions.isR18(group.rating)) {
+        if (!group) return functions.dom.replaceLocation("/404")
+        if (functions.post.isR18(group.rating)) {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/404")
+            if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
         setGroup(group)
     }
@@ -110,11 +107,11 @@ const GroupPage: React.FunctionComponent = () => {
         for (let i = 0; i < group.posts.length; i++) {
             const post = group.posts[i]
             if (!session.username) if (post.rating !== functions.r13()) continue
-            if (functions.isR18(post.rating)) if (!session.showR18) continue
-            const imageLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile)
-            const liveLink = functions.getThumbnailLink(post.images[0], "medium", session, mobile, true)
-            let img = await functions.decryptThumb(imageLink, session)
-            let live = await functions.decryptThumb(liveLink, session)
+            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
+            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
+            let img = await functions.crypto.decryptThumb(imageLink, session)
+            let live = await functions.crypto.decryptThumb(liveLink, session)
             items.push({id: post.order, image: img, live, post})
         }
         setItems(items)
@@ -154,7 +151,7 @@ const GroupPage: React.FunctionComponent = () => {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})
                 }
                 if (reorderState) return
-                functions.openPost(item.post, event, navigate, session, setSessionFlag)
+                functions.post.openPost(item.post, event, navigate, session, setSessionFlag)
                 setPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)
@@ -180,7 +177,7 @@ const GroupPage: React.FunctionComponent = () => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        functions.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
+        functions.http.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
         setReorderState(false)
     }
 
@@ -246,9 +243,9 @@ const GroupPage: React.FunctionComponent = () => {
 
     const revertGroupHistory = async () => {
         if (!group) return
-        await functions.put("/api/group/reorder", {slug, posts: group.posts}, session, setSessionFlag)
-        await functions.put("/api/group/edit", {slug, name: group.name, description: group.description}, session, setSessionFlag)
-        currentHistory(functions.generateSlug(group.name))
+        await functions.http.put("/api/group/reorder", {slug, posts: group.posts}, session, setSessionFlag)
+        await functions.http.put("/api/group/edit", {slug, name: group.name, description: group.description}, session, setSessionFlag)
+        currentHistory(functions.post.generateSlug(group.name))
     }
 
     useEffect(() => {
@@ -300,7 +297,7 @@ const GroupPage: React.FunctionComponent = () => {
                         {groupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="group-text">{group.description ? jsxFunctions.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
+                        <span className="group-text">{group.description ? functions.jsx.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>

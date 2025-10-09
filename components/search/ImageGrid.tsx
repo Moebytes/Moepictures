@@ -9,7 +9,7 @@ import GridModel from "../image/GridModel"
 import GridSong from "../image/GridSong"
 import GridLive2D from "../image/GridLive2D"
 import noresults from "../../assets/images/noresults.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import nativeFunctions from "../../structures/NativeFunctions"
 import permissions from "../../structures/Permissions"
 import "./styles/imagegrid.less"
@@ -77,7 +77,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const getLoadAmount = () => {
-        const loadAmount = mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
+        const loadAmount = mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType)
         return loadAmount * 5
     }
 
@@ -85,7 +85,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (searchFlag) setSearchFlag(false)
         if (!query) query = search
         if (query?.includes(" ")) {
-            query = await functions.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+            query = await functions.http.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
         }
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
         if (tags.length > 3) {
@@ -109,8 +109,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setIndex(0)
         setVisiblePosts([])
         setSearch(query ?? "")
-        const result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
-        sort: functions.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
+        sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -124,7 +124,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        const result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
+        const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: "random", showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
@@ -340,7 +340,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 newVisiblePosts.push(post)
             }
             setIndex(currentIndex)
-            setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+            setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
             setUpdatePostFlag(false)
         }
         if (updatePostFlag) updatePosts()
@@ -369,15 +369,15 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         let result = null as unknown as PostSearch[]
         if (isRandomSearch) {
-            result = await functions.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
+            result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         } else {
             let query = search
             if (query.includes(" ")) {
-                query = await functions.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
+                query = await functions.http.post("/api/search/parse-space-search", {query}, session, setSessionFlag)
             }
-            result = await functions.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
-            sort: functions.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
+            result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
+            sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         }
         let hasMore = result?.length >= limit
         const cleanPosts = posts.filter((p) => !p.fake)
@@ -392,14 +392,14 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (padded) {
                 setPosts(result)
             } else {
-                setPosts(functions.removeDuplicates([...posts, ...result]))
+                setPosts(functions.util.removeDuplicates([...posts, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setPosts(result)
                 } else {
-                    setPosts(functions.removeDuplicates([...posts, ...result]))
+                    setPosts(functions.util.removeDuplicates([...posts, ...result]))
                 }
             }
             setEnded(true)
@@ -420,7 +420,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                     newVisiblePosts.push(post)
                 }
                 setIndex(currentIndex)
-                setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+                setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
             }
         }
         if (scroll) updatePosts()
@@ -430,7 +430,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         const scrollHandler = async () => {
             if (!loaded) return
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!posts[currentIndex]) return updateOffset()
                 const newVisiblePosts = structuredClone(visiblePosts)
@@ -441,7 +441,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                     newVisiblePosts.push(post)
                 }
                 setIndex(currentIndex)
-                setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+                setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -538,8 +538,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             for (const post of posts) {
                 const image = post.images?.[0]
                 if (!image) continue
-                const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
-                functions.decryptThumb(thumbnail, session, `${thumbnail}-${sizeType}`)
+                const thumbnail = functions.link.getThumbnailLink(image, sizeType, session, mobile)
+                functions.crypto.decryptThumb(thumbnail, session, `${thumbnail}-${sizeType}`)
             }
         }
         populateCache()
@@ -649,7 +649,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as PostSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visiblePosts)
+            visible = functions.util.removeDuplicates(visiblePosts)
         } else {
             const postOffset = (page - 1) * getPageAmount()
             visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
@@ -660,17 +660,17 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const post = visible[i]
             if (post.fake) continue
             // if (!showChildren) if (post.parentID) continue
-            if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
+            if (!functions.post.isR18(ratingType)) if (functions.post.isR18(post.rating)) continue
             const image = post.images?.[0]
             if (!image) continue
 
             const promise = new TrackablePromise<void>()
             visiblePromisesRef.current.push(promise)
 
-            const thumbnail = functions.getThumbnailLink(image, sizeType, session, mobile)
-            const liveThumbnail = functions.getThumbnailLink(image, sizeType, session, mobile, true)
-            const original = functions.getImageLink(image, session.upscaledImages)
-            let img = functions.getThumbCache(`${thumbnail}-${sizeType}`)
+            const thumbnail = functions.link.getThumbnailLink(image, sizeType, session, mobile)
+            const liveThumbnail = functions.link.getThumbnailLink(image, sizeType, session, mobile, true)
+            const original = functions.link.getImageLink(image, session.upscaledImages)
+            let img = functions.cache.getThumbCache(`${thumbnail}-${sizeType}`)
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
@@ -683,7 +683,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
-                const comicPages = post.type === "comic" ? post.images.map((image) => functions.getImageLink(image, session.upscaledImages)) : null
+                const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null
                 jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }

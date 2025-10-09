@@ -1,4 +1,4 @@
-import functions from "./Functions"
+import functions from "../functions/Functions"
 import {Session} from "../types/Types"
 
 export default class NativeFunctions {
@@ -41,7 +41,7 @@ export default class NativeFunctions {
     public static parseSpaceEnabledSearch = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
-        let savedTags = await functions.tagsCache(session, setSessionFlag)
+        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
         let permutations = NativeFunctions.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
         let specialFlagsArray = new Array(permutations.length).fill("")
@@ -88,7 +88,7 @@ export default class NativeFunctions {
 
     public static parseSpaceEnabledSearchNative = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
-        let savedTags = await functions.tagsCache(session, setSessionFlag)
+        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
         const nativeFunctions = await NativeFunctions.getWasmModule()
         return nativeFunctions.ccall("parseSpaceEnabledSearch", "string", ["string", "string"], [query, JSON.stringify(savedTags)])
     }

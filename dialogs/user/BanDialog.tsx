@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -53,14 +53,14 @@ const BanDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days: functions.safeNumber(days)!, reason}, session, setSessionFlag)
+        const revertData = await functions.http.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days: functions.util.safeNumber(days)!, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
-                const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
+                const result = await functions.http.get("/api/post/history", {postID}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                const {images, upscaledImages} = await functions.parseImages(currentHistory, session)
-                const newTags = await functions.parseNewTags(currentHistory, session, setSessionFlag)
+                const {images, upscaledImages} = await functions.post.parseImages(currentHistory, session)
+                const newTags = await functions.post.parseNewTags(currentHistory, session, setSessionFlag)
                 const source = {
                     title: currentHistory.title,
                     englishTitle: currentHistory.englishTitle,
@@ -73,28 +73,28 @@ const BanDialog: React.FunctionComponent = (props) => {
                     buyLink: currentHistory.buyLink,
                     mirrors: currentHistory.mirrors ? Object.values(currentHistory.mirrors).join("\n") : null
                 }
-                await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
-                rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tagObject(currentHistory.artists), 
-                characters: functions.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
-                series: functions.tagObject(currentHistory.series), tags: currentHistory.tags, tagGroups: currentHistory.tagGroups, newTags, 
+                await functions.http.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
+                rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tag.tagObject(currentHistory.artists), 
+                characters: functions.tag.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
+                series: functions.tag.tagObject(currentHistory.series), tags: currentHistory.tags, tagGroups: currentHistory.tagGroups, newTags, 
                 updatedDate: currentHistory.date, parentID: currentHistory.parentID, noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {
             for (const tag of revertData.revertTagIDs) {
-                const result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
+                const result = await functions.http.get("/api/tag/history", {tag}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
                 let image = null as number[] | ["delete"] | null
                 if (!currentHistory.image) {
                     image = ["delete"]
                 } else {
-                    const imageLink = functions.getTagLink(currentHistory.type, currentHistory.image, currentHistory.imageHash)
+                    const imageLink = functions.link.getTagLink(currentHistory.type, currentHistory.image, currentHistory.imageHash)
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     image = Object.values(bytes)
                 }
-                await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
+                await functions.http.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image: image!, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
                 website: currentHistory.website, fandom: currentHistory.fandom, wikipedia: currentHistory.wikipedia, pixivTags: currentHistory.pixivTags, featuredPost: currentHistory.featuredPost?.postID,
                 r18: currentHistory.r18 ?? false, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
@@ -102,19 +102,19 @@ const BanDialog: React.FunctionComponent = (props) => {
         }
         if (revertData.revertGroupIDs?.length) {
             for (const slug of revertData.revertGroupIDs) {
-                const result = await functions.get("/api/group/history", {slug}, session, setSessionFlag)
+                const result = await functions.http.get("/api/group/history", {slug}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                await functions.put("/api/group/reorder", {silent: true, slug: currentHistory.slug, posts: currentHistory.posts}, session, setSessionFlag)
-                await functions.put("/api/group/edit", {silent: true, slug: currentHistory.slug, name: currentHistory.name, description: currentHistory.description}, session, setSessionFlag)
+                await functions.http.put("/api/group/reorder", {silent: true, slug: currentHistory.slug, posts: currentHistory.posts}, session, setSessionFlag)
+                await functions.http.put("/api/group/edit", {silent: true, slug: currentHistory.slug, name: currentHistory.name, description: currentHistory.description}, session, setSessionFlag)
             }
         }
         if (revertData.revertNoteIDs?.length) {
             for (const item of revertData.revertNoteIDs) {
-                const result = await functions.get("/api/note/history", {postID: item.postID, order: item.order}, session, setSessionFlag)
+                const result = await functions.http.get("/api/note/history", {postID: item.postID, order: item.order}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                await functions.put("/api/note/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
+                await functions.http.put("/api/note/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
                 data: currentHistory.notes}, session, setSessionFlag)
             }
         }

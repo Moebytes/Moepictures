@@ -5,7 +5,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -38,7 +38,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -83,7 +83,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
 
     const submit = async () => {
         let email = newEmail ? newEmail : session.email
-        const badEmail = functions.validateEmail(email, i18n)
+        const badEmail = functions.validation.validateEmail(email, i18n)
         if (badEmail) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -96,7 +96,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/verifyemail", {email, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/verifyemail", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)

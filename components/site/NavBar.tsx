@@ -25,7 +25,7 @@ import userHistory from "../../assets/icons/user-history.png"
 import userHistoryLight from "../../assets/icons/user-history-light.png"
 import darkLight from "../../assets/icons/dark-light.png"
 import permissions from "../../structures/Permissions"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import SearchSuggestions from "../tooltip/SearchSuggestions"
 import scrollIcon from "../../assets/icons/scroll-mobile.png"
 import pageIconLight from "../../assets/icons/page-mobile-light.png"
@@ -90,8 +90,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.username) return 
         const checkMail = async () => {
-            functions.clearResponseCacheKey("/api/user/checkmail")
-            const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
+            functions.cache.clearResponseCacheKey("/api/user/checkmail")
+            const result = await functions.http.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }
         checkMail()
@@ -100,7 +100,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const scrollHandler = () => {
             if (hideTitlebar) {
-                if (window.scrollY < functions.titlebarHeight()) {
+                if (window.scrollY < functions.dom.titlebarHeight()) {
                     setShowMiniTitle(false)
                 } else {
                     setShowMiniTitle(true)
@@ -119,7 +119,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         if (!hideTitlebar) {
                 setShowMiniTitle(false)
         } else {
-            if (window.scrollY > functions.titlebarHeight()) {
+            if (window.scrollY > functions.dom.titlebarHeight()) {
                 setShowMiniTitle(true)
             }
         }
@@ -199,7 +199,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const logout = async () => {
-        await functions.post("/api/user/logout", null, session, setSessionFlag)
+        await functions.http.post("/api/user/logout", null, session, setSessionFlag)
         setSessionFlag(true)
         history.go(0)
     }
@@ -226,55 +226,55 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const generateMobileUsernameJSX = () => {
         if (session.role === "admin") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutAdminIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "mod") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutModIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "system") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium-curator") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "curator") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium-contributor") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "contributor") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutContributorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium") {
             return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else {
             return (<>
-                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
                     <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
                 </>
             )
@@ -284,55 +284,55 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (<>
-                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutAdminIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "mod") {
             return (<>
-                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "system") {
             return (<>
-                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-contributor") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "contributor") {
             return (<>
-                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutContributorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else {
             return (<>
-                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
             </>
             )
@@ -351,7 +351,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getColorDropdownJSX = () => {
         let style = mobile ? {top: "500px"} : {top: "40px"}
-        if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
+        if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
         return (
             <div className={`title-dropdown ${activeColorDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">
@@ -382,7 +382,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getParticleDropdownJSX = () => {
         let style = mobile ? {top: "500px"} : {top: "40px"}
-        if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
+        if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
         return (
             <div className={`title-dropdown ${activeParticleDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">

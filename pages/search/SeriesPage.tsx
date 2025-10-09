@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -93,7 +93,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const updateSeries = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/series", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/series", {sort: functions.validation.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleSeries([])
@@ -142,7 +142,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleSeries(functions.removeDuplicates(newVisibleSeries))
+            setVisibleSeries(functions.util.removeDuplicates(newVisibleSeries))
         }
         if (scroll) updateSeries()
     }, [scroll, series, session])
@@ -161,7 +161,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/series", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/series", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanSeries = series.filter((t) => !t.fake)
         if (!scroll) {
@@ -175,14 +175,14 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setSeries(result)
             } else {
-                setSeries(functions.removeDuplicates([...series, ...result]))
+                setSeries(functions.util.removeDuplicates([...series, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setSeries(result)
                 } else {
-                    setSeries(functions.removeDuplicates([...series, ...result]))
+                    setSeries(functions.util.removeDuplicates([...series, ...result]))
                 }
             }
             setEnded(true)
@@ -191,7 +191,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!series[currentIndex]) return updateOffset()
                 const newVisibleSeries = visibleSeries
@@ -201,7 +201,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleSeries(functions.removeDuplicates(newVisibleSeries))
+                setVisibleSeries(functions.util.removeDuplicates(newVisibleSeries))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -361,7 +361,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleSeries)
+            visible = functions.util.removeDuplicates(visibleSeries)
         } else {
             const postOffset = (seriesPage - 1) * getPageAmount()
             visible = series.slice(postOffset, postOffset + getPageAmount())

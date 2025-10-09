@@ -5,7 +5,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
@@ -34,7 +34,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -70,7 +70,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/forgotpassword", {email, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/forgotpassword", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
             setEmail("")

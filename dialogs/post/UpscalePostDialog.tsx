@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -47,8 +47,8 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const upscalePost = async () => {
         if (!upscalePostID) return
         if (permissions.isMod(session)) {
-            await functions.post("/api/post/upscale",  {postID: upscalePostID.post.postID, upscaler, 
-            scaleFactor: functions.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
+            await functions.http.post("/api/post/upscale",  {postID: upscalePostID.post.postID, upscaler, 
+            scaleFactor: functions.util.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
             setPostFlag(upscalePostID.post.postID)
             history.go(0)
         }

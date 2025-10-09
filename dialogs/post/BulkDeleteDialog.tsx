@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
@@ -35,7 +35,7 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
         if (!permissions.isAdmin(session)) return setShowBulkDeleteDialog(false)
         if (!selectionMode) return setShowBulkDeleteDialog(false)
         for (const postID of selectionItems.values()) {
-            await functions.delete("/api/post/delete", {postID}, session, setSessionFlag)
+            await functions.http.delete("/api/post/delete", {postID}, session, setSessionFlag)
         }
         history.go(0)
         setShowBulkDeleteDialog(false)

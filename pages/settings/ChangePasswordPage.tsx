@@ -6,7 +6,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import show from "../../assets/icons/show.png"
 import hide from "../../assets/icons/hide.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
@@ -87,7 +87,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        const badPassword = functions.validatePassword(session.username.trim(), newPassword.trim(), i18n)
+        const badPassword = functions.validation.validatePassword(session.username.trim(), newPassword.trim(), i18n)
         if (badPassword) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -100,7 +100,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/user/changepassword", {oldPassword, newPassword}, session, setSessionFlag)
+            await functions.http.post("/api/user/changepassword", {oldPassword, newPassword}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

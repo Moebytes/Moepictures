@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useSessionActions, useFilterSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import noteHistory from "../../assets/icons/history.png"
@@ -39,7 +39,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const getNotePFP = () => {
         if (props.note?.image) {
-            return functions.getTagLink("pfp", props.note.image, props.note.imageHash)
+            return functions.link.getTagLink("pfp", props.note.image, props.note.imageHash)
         } else {
             return favicon
         }
@@ -56,7 +56,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.note?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.note.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.note.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const parseText = () => {
@@ -104,61 +104,61 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         if (props.note?.role === "admin") {
             return (
                 <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.note.updater)}</span>
+                    <span className="commentrow-user-text admin-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (props.note?.role === "mod") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text mod-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (props.note?.role === "system") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text system-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (props.note?.role === "premium-curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (props.note?.role === "curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (props.note?.role === "premium-contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (props.note?.role === "contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text contributor-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.note?.role === "premium") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.note.updater)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.note.updater)}</span>
                     <img className="commentrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`commentrow-user-text ${props.note?.banned ? "banned" : ""}`}>{functions.toProperCase(props.note?.updater) || i18n.user.deleted}</span>
+        return <span className={`commentrow-user-text ${props.note?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.note?.updater) || i18n.user.deleted}</span>
     }
 
     return (
@@ -175,7 +175,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-text" onClick={imgClick}>{functions.timeAgo(props.note?.updatedDate, i18n)}:</span>
+                    <span className="commentrow-date-text" onClick={imgClick}>{functions.date.timeAgo(props.note?.updatedDate, i18n)}:</span>
                     {parseText()}
                 </div>
             </div>

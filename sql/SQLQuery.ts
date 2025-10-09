@@ -1,7 +1,7 @@
 import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import {pgDump} from "pg-dump-restore"
 import * as Redis from "redis"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import path from "path"
 import fs from "fs"
@@ -31,7 +31,7 @@ const jsonStringIDs = (json: string) => {
 types.setTypeParser(types.builtins.JSON, jsonStringIDs)
 types.setTypeParser(types.builtins.JSONB, jsonStringIDs)
 
-const pgPool = functions.useLocalDB() ? new Pool({
+const pgPool = functions.config.useLocalDB() ? new Pool({
   user: process.env.PG_LOCAL_USER,
   host: process.env.PG_LOCAL_HOST,
   database: process.env.PG_LOCAL_DATABASE,
@@ -46,7 +46,7 @@ const pgPool = functions.useLocalDB() ? new Pool({
 })
 
 const redis = Redis.createClient({
-  url: functions.useLocalDB() ? process.env.LOCAL_REDIS_URL : process.env.REDIS_URL
+  url: functions.config.useLocalDB() ? process.env.LOCAL_REDIS_URL : process.env.REDIS_URL
 })
 
 if (process.env.REDIS === "on") redis.connect()
@@ -133,14 +133,14 @@ export default class SQLQuery {
 
   /** Backup the database */
   public static backupDB = async () => {
-    if (!functions.backupsEnabled()) return
+    if (!functions.config.backupsEnabled()) return
     const folder = path.join(__dirname, "./dump")
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
     const filename = `Moepictures-${timestamp}.dump`
     const backupPath = path.join(folder, filename)
 
-    let connection = functions.useLocalDB() ? {
+    let connection = functions.config.useLocalDB() ? {
         username: process.env.PG_LOCAL_USER!,
         host: process.env.PG_LOCAL_HOST!,
         database: process.env.PG_LOCAL_DATABASE!,

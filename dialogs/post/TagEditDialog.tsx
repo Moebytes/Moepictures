@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useLayoutSelector, useActiveActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
 import image from "../../assets/icons/image.png"
@@ -76,7 +76,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setCharacters(tagEditID.characters.map((t) => t.tag).join(" "))
         setSeries(tagEditID.series.map((t) => t.tag).join(" "))
         setMetaTags(tagEditID.meta.map((t) => t.tag).join(" "))
-        setRawTags(functions.parseTagGroupsField(tagEditID.tags.map((t) => t.tag), tagEditID.tagGroups))
+        setRawTags(functions.tag.parseTagGroupsField(tagEditID.tags.map((t) => t.tag), tagEditID.tagGroups))
     }
 
     const reset = () => {
@@ -121,7 +121,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const tagEdit = async () => {
         if (!tagEditID) return
         if (tagEditID.unverified || permissions.isContributor(session)) {
-            let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+            let {tags, tagGroups} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
             const joined = `${characters} ${series} ${tags.join(" ")} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
@@ -135,7 +135,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
-                const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                const splitTags = functions.util.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setRawTags(splitTags.join(" "))
                 await functions.timeout(3000)
                 return setError(false)
@@ -155,19 +155,19 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 type,
                 rating,
                 style,
-                artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
-                characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
-                series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
+                artists: functions.util.cleanHTML(artists).split(/[\n\r\s]+/g),
+                characters: functions.util.cleanHTML(characters).split(/[\n\r\s]+/g),
+                series: functions.util.cleanHTML(series).split(/[\n\r\s]+/g),
+                tags: functions.util.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
                 tagGroups,
                 reason
             }
             setTagEditID(null)
-            await functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(tagEditID.post.postID)
             setActionBanner("tag-edit")
         } else {
-            let {tags, tagGroups} = functions.parseTagGroups(functions.cleanHTML(rawTags))
+            let {tags, tagGroups} = functions.tag.parseTagGroups(functions.util.cleanHTML(rawTags))
             const joined = `${characters} ${series} ${tags.join(" ")} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
@@ -182,7 +182,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 if (!errorRef.current) await functions.timeout(20)
                 errorRef.current!.innerText = i18n.pages.upload.spaceSeparation
                 await functions.timeout(3000)
-                const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                const splitTags = functions.util.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
                 setRawTags(splitTags.join(" "))
                 return setError(false)
             }
@@ -193,7 +193,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(3000)
                 return setError(false)
             }
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -206,16 +206,16 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 type,
                 rating,
                 style,
-                artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
-                characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
-                series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
+                artists: functions.util.cleanHTML(artists).split(/[\n\r\s]+/g),
+                characters: functions.util.cleanHTML(characters).split(/[\n\r\s]+/g),
+                series: functions.util.cleanHTML(series).split(/[\n\r\s]+/g),
+                tags: functions.util.cleanHTML(`${tags.join(" ")} ${metaTags}`).split(/[\n\r\s]+/g),
                 tagGroups,
                 reason
             }
-            await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
-            functions.clearCache()
+            functions.cache.clearCache()
         }
     }
 
@@ -227,13 +227,13 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         try {
             let image = tagEditID.post.images[tagEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
-            let link = functions.getImageLink(image)
-            let response = await fetch(functions.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let link = functions.link.getImageLink(image)
+            let response = await fetch(functions.util.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             let current = null as UploadImage | null
             if (response.byteLength) {
-                const decrypted = await functions.decryptBuffer(response, link, session)
+                const decrypted = await functions.crypto.decryptBuffer(response, link, session)
                 const bytes = new Uint8Array(decrypted)
-                const result = functions.bufferFileType(bytes)?.[0] || {}
+                const result = functions.byte.bufferFileType(bytes)?.[0] || {}
                 const pixivID = tagEditID.post.source?.match(/\d+/)?.[0] || "image"
                 const ext = result.typename === "mkv" ? "webm" : result.typename
                 current = {
@@ -251,8 +251,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             }
             if (!current) throw new Error("Bad image")
             let hasUpscaled = image.upscaledFilename ? true : false
-            const sourceLookup = await functions.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
-            const tagLookup = await functions.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
+            const sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            const tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
             let artistArr = sourceLookup.artists.length ? sourceLookup.artists : tagLookup.artists
             const newArtists = artistArr?.map((a) => a.tag) || []
@@ -304,7 +304,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const handleArtistClick = (tag: string) => {
         setArtists((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -312,7 +312,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const handleCharacterClick = (tag: string) => {
         setCharacters((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -320,7 +320,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     
     const handleSeriesClick = (tag: string) => {
         setSeries((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -328,7 +328,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const handleMetaClick = (tag: string) => {
         setMetaTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.util.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ")
         })
@@ -346,7 +346,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     }
 
     const handleTagClick = (tag: string) => {
-        setRawTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const getStyleJSX = () => {
@@ -504,22 +504,22 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             </div>
             {getStyleJSX()}
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(artistRef.current)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                 <span className="dialog-text">{i18n.navbar.artists}: </span>
                 <input ref={artistRef} className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(characterRef.current)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                 <span className="dialog-text">{i18n.navbar.characters}: </span>
                 <input ref={characterRef} className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(seriesRef.current)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                 <span className="dialog-text">{i18n.tag.series}: </span>
                 <input ref={seriesRef} className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} text={functions.render.getTypingWord(metaRef.current)} click={(tag) => handleMetaClick(tag)} type="meta"/>
                 <span className="dialog-text">{i18n.tag.meta}: </span>
                 <input ref={metaRef} className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
             </div>
@@ -527,7 +527,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <span className="dialog-text tag-color">{i18n.navbar.tags}: </span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <SearchSuggestions active={tagActive} text={functions.getTypingWord(tagRef.current)} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} click={handleTagClick} type="tags"/>
+                <SearchSuggestions active={tagActive} text={functions.render.getTypingWord(tagRef.current)} x={tagX} y={tagY} width={mobile ? 100 : 200} fontSize={17} click={handleTagClick} type="tags"/>
                 <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

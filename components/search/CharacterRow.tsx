@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import fandom from "../../assets/icons/fandom.png"
 import permissions from "../../structures/Permissions"
@@ -40,14 +40,14 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
                 return navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
-        let filtered = props.character.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+        let filtered = props.character.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(props.character.posts)
     }
 
@@ -55,10 +55,10 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
         let images = [] as string[]
         if (!session.username) {
             let filtered = props.character.posts.filter((p) => p.rating === functions.r13())
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         } else {
-            let filtered = props.character.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            let filtered = props.character.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         }
         setImages(images)
     }
@@ -78,9 +78,9 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="characterrow">
             <div className="characterrow-row">
-                {props.character.image ? <img className="characterrow-img" src={functions.getTagLink("character", props.character.image, props.character.imageHash)}/> : null}
+                {props.character.image ? <img className="characterrow-img" src={functions.link.getTagLink("character", props.character.image, props.character.imageHash)}/> : null}
                 <span className="characterrow-text-hover">
-                    <span className="characterrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
+                    <span className="characterrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
                     {characterSocialJSX()}
                     <span className="characterrow-text-alt">{props.character.postCount}</span>
                 </span>

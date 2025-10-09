@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -40,14 +40,14 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
     const deletePost = async () => {
         if (!deletePostID) return
         if (deletePostID.unverified) {
-            await functions.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            await functions.http.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
             return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         }
         if (permissions.isAdmin(session)) {
-            await functions.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            await functions.http.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
             return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -56,7 +56,7 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/post/delete/request", {postID: deletePostID.post.postID, reason}, session, setSessionFlag)
+            await functions.http.post("/api/post/delete/request", {postID: deletePostID.post.postID, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector,
 useLayoutSelector, useCacheSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 import emojiSelect from "../../assets/icons/emoji-select.png"
@@ -15,7 +15,6 @@ import link from "../../assets/icons/link-purple.png"
 import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import permissions from "../../structures/Permissions"
 import lewdIcon from "../../assets/icons/lewd.png"
 import radioButton from "../../assets/icons/radiobutton.png"
@@ -137,18 +136,18 @@ const EditMessageReplyDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
                         <div className="dialog-textarea-buttons">
-                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "highlight")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "bold")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "italic")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "underline")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "strikethrough")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "spoiler")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "link")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "details")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "color")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "code")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "highlight")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "bold")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "italic")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "underline")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "strikethrough")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "spoiler")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "link")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "details")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "color")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditMsgReplyContent, "code")} style={{filter: getFilter()}}/></button>
                         </div>
-                        {previewMode ? <div className="dialog-textarea-preview">{jsxFunctions.renderText(editMsgReplyContent, emojis, "message")}</div> : 
+                        {previewMode ? <div className="dialog-textarea-preview">{functions.jsx.renderText(editMsgReplyContent, emojis, "message")}</div> : 
                         <div style={{marginTop: "0px"}} className="dialog-row">
                             <textarea className="dialog-textarea" ref={textRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={editMsgReplyContent} onChange={(event) => setEditMsgReplyContent(event.target.value)}></textarea>
                         </div>}

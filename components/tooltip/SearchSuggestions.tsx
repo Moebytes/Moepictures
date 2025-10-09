@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions} from "../../store"
 import "./styles/searchsuggestions.less"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {TagType, TagCount} from "../../types/Types"
 
@@ -39,7 +39,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 return setActiveIndex(-1)
             }
             const parts = search.split(/ +/g)
-            parts[parts.length - 1] = functions.appendSpecialCharacters(parts, suggestions[activeIndex]?.tag)
+            parts[parts.length - 1] = functions.tag.appendSpecialCharacters(parts, suggestions[activeIndex]?.tag)
             const newSearch = parts.join(" ") + " "
             setSearch(newSearch)
             setSearchFlag(true)
@@ -77,13 +77,13 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     }, [props.active])
 
     const updateSearchSuggestions = async () => {
-        const query = props.text ? functions.parseTagGroups(props.text).tags.join(" ") : search
+        const query = props.text ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
         if (!query) return setSuggestions([])
-        let suggestions = await functions.get("/api/search/suggestions", {query, type: props.type}, session, setSessionFlag)
+        let suggestions = await functions.http.get("/api/search/suggestions", {query, type: props.type}, session, setSessionFlag)
         if (!suggestions?.length) {
             const newQuery = query.split(/ +/g).slice(-1).join("")
             if (!newQuery) return setSuggestions([])
-            suggestions = await functions.get("/api/search/suggestions", {query: newQuery, type: props.type}, session, setSessionFlag)
+            suggestions = await functions.http.get("/api/search/suggestions", {query: newQuery, type: props.type}, session, setSessionFlag)
         }
         setSuggestions(suggestions)
     }
@@ -104,7 +104,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 if (props.click) return props.click(suggestions[i].tag)
                 navigate(`/posts`)
                 const parts = search.split(/ +/g)
-                parts[parts.length - 1] = functions.appendSpecialCharacters(parts, suggestions[i].tag)
+                parts[parts.length - 1] = functions.tag.appendSpecialCharacters(parts, suggestions[i].tag)
                 const newSearch = parts.join(" ")
                 setSearch(newSearch)
                 setSearchFlag(true)

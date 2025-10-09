@@ -1,7 +1,7 @@
 import React, {useContext, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import "./styles/related.less"
 import {PostFull} from "../../types/Types"
@@ -19,7 +19,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const getImages = () => {
-        return props.posts.map((post) => functions.getThumbnailLink(post.images[0], "tiny", session, mobile))
+        return props.posts.map((post) => functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile))
     }
 
     const click = (img: string, index: number) => {

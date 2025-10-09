@@ -17,7 +17,7 @@ import reverbIcon from "../../assets/icons/reverb.png"
 import delayIcon from "../../assets/icons/delay.png"
 import phaserIcon from "../../assets/icons/phaser.png"
 import bitcrushIcon from "../../assets/icons/bitcrush.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useFilterActions, useFilterSelector, useSessionSelector, useActiveActions, useActiveSelector, useLayoutSelector} from "../../store"
 import "./styles/filters.less"
 

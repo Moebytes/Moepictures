@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "./styles/newtags.less"
 import {PostFull, Tag, UnverifiedPost} from "../../types/Types"
 
@@ -17,7 +17,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
 
     const updateNewTags = async () => {
         if (!rawNewTags.length) return setNewTags([])
-        const tags = await functions.get("/api/tag/list/unverified", {tags: rawNewTags}, session, setSessionFlag)
+        const tags = await functions.http.get("/api/tag/list/unverified", {tags: rawNewTags}, session, setSessionFlag)
         setNewTags(tags)
     }
 
@@ -26,7 +26,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
     }, [rawNewTags])
 
     const updateRawNewTags = async () => {
-        const tagMap = await functions.tagsCache(session, setSessionFlag)
+        const tagMap = await functions.cache.tagsCache(session, setSessionFlag)
         let notExists = [] as string[]
         for (let i = 0; i < props.post.tags.length; i++) {
             const exists = tagMap[props.post.tags[i]]
@@ -53,7 +53,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {newTags[i].image ?
                     <div className="new-tags-row">
-                        <img className="new-tags-img" src={functions.getUnverifiedTagLink(newTags[i].type, newTags[i].image)}/>
+                        <img className="new-tags-img" src={functions.link.getUnverifiedTagLink(newTags[i].type, newTags[i].image)}/>
                     </div> : null}
                     <div className="new-tags-row">
                         <span className="new-tags-text">{i18n.labels.description}: {newTags[i].description || i18n.labels.none}</span>

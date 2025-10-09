@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -23,10 +23,10 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const getSessionCookie = async () => {
-        const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
+        const cookie = await functions.http.get("/api/user/session", null, session, setSessionFlag)
         setSession(cookie)
         if (!permissions.isPremium(cookie)) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }
 
@@ -72,7 +72,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text" style={{color: "var(--premiumColor)"}}>
                             {i18n.pages.premiumSuccess.thankYou}<br/><br/>
 
-                            {i18n.pages.premiumSuccess.lastUntil} {functions.prettyDate(session.premiumExpiration, i18n)}.
+                            {i18n.pages.premiumSuccess.lastUntil} {functions.date.prettyDate(session.premiumExpiration, i18n)}.
                         </span>
                     </div>
                     <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>

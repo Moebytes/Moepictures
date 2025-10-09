@@ -1,6 +1,6 @@
 import React, {useEffect} from "react"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 

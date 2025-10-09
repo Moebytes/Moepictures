@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import alias from "../../assets/icons/alias.png"
 import edit from "../../assets/icons/edit.png"
@@ -102,7 +102,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteTag = async () => {
-        await functions.delete("/api/tag/delete", {tag: props.tag.tag}, session, setSessionFlag)
+        await functions.http.delete("/api/tag/delete", {tag: props.tag.tag}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -138,13 +138,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             }
         }
         try {
-            await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
+            await functions.http.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
             website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
-                await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+                await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: props.tag.tag, failed: "implication"})
@@ -168,7 +168,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             tag: props.tag.tag,
             key: props.tag.tag,
             description: props.tag.description,
-            image: props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
+            image: props.tag.image ? functions.link.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
             aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias || "") : [],
             implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication || "s") : [],
             pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
@@ -185,7 +185,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const aliasTag = async () => {
-        await functions.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, session, setSessionFlag)
+        await functions.http.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -251,12 +251,12 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         <div className="tagrow">
             {props.tag.image ?
             <div className="tagrow-img-container">
-                <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash)}/>
+                <img className="tagrow-img" src={functions.link.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash)}/>
             </div> : null}
             <div className="tagrow-content-container">
                 <div className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className={`tagrow-tag ${functions.getTagColor(props.tag)}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={`tagrow-tag ${functions.tag.getTagColor(props.tag)}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>

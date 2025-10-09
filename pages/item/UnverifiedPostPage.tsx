@@ -11,7 +11,7 @@ import PostSong from "../../components/image/PostSong"
 import PostImageOptions from "../../components/post/PostImageOptions"
 import Commentary from "../../components/post/Commentary"
 import BuyLink from "../../components/post/BuyLink"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import Children from "../../components/post/Children"
 import Parent from "../../components/post/Parent"
@@ -64,13 +64,13 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!session.cookie || !post) return
         if (post.uploader !== session.username && !permissions.isMod(session)) {
-            functions.replaceLocation("/403")
+            functions.dom.replaceLocation("/403")
         }
     }, [post, session])
 
     const updateChildren = async () => {
         if (post) {
-            const childPosts = await functions.get("/api/post/children/unverified", {postID: post.postID}, session, setSessionFlag)
+            const childPosts = await functions.http.get("/api/post/children/unverified", {postID: post.postID}, session, setSessionFlag)
             if (childPosts?.[0]) {
                 setChildPosts(childPosts)
             } else {
@@ -81,7 +81,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
 
     const updateParent = async () => {
         if (post) {
-            const parentPost = await functions.get("/api/post/parent/unverified", {postID: post.postID}, session, setSessionFlag)
+            const parentPost = await functions.http.get("/api/post/parent/unverified", {postID: post.postID}, session, setSessionFlag)
             if (parentPost) {
                 setParentPost(parentPost)
             } else {
@@ -102,7 +102,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
             if (language === "ja") {
                 title = post.title ? post.title : "Post"
             } else {
-                title = post.englishTitle ? functions.toProperCase(post.englishTitle) : 
+                title = post.englishTitle ? functions.util.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
             document.title = `${title}`
@@ -114,17 +114,17 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
     useEffect(() => {
         const updatePost = async () => {
             let post = unverifiedPosts.find((p) => p.postID === postID)
-            if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => undefined)
+            if (!post?.tags) post = await functions.http.get("/api/post/unverified", {postID}, session, setSessionFlag).catch(() => undefined)
             if (post) {
-                const tags = await functions.parseTagsUnverified([post])
-                const categories = await functions.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const tags = await functions.tag.parseTagsUnverified([post])
+                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
             } else {
-                functions.replaceLocation("/404")
+                functions.dom.replaceLocation("/404")
             }
         }
         updatePost()
@@ -134,9 +134,9 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
         if (post) {
             let images = [] as string[]
             if (session.upscaledImages) {
-                images = post.images.map((image) => functions.getUnverifiedImageLink(image, true))
+                images = post.images.map((image) => functions.link.getUnverifiedImageLink(image, true))
             } else {
-                images = post.images.map((image) => functions.getUnverifiedImageLink(image))
+                images = post.images.map((image) => functions.link.getUnverifiedImageLink(image))
             }
             setImages(images)
             if (images[order-1]) {
@@ -152,9 +152,9 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
         const updatePost = async () => {
             let targetID = !Number.isNaN(Number(postFlag)) ? postFlag! : postID
             setPostFlag(null)
-            let post = await functions.get("/api/post/unverified", {postID: targetID}, session, setSessionFlag).catch(() => null)
+            let post = await functions.http.get("/api/post/unverified", {postID: targetID}, session, setSessionFlag).catch(() => null)
             if (post) {
-                const images = post.images.map((image) => functions.getUnverifiedImageLink(image))
+                const images = post.images.map((image) => functions.link.getUnverifiedImageLink(image))
                 setImages(images)
                 if (images[order-1]) {
                     setImage(images[order-1])
@@ -162,15 +162,15 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                     setImage(images[0])
                     setOrder(1)
                 }
-                const tags = await functions.parseTagsUnverified([post])
-                const categories = await functions.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const tags = await functions.tag.parseTagsUnverified([post])
+                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
             } else {
-                functions.replaceLocation("/404")
+                functions.dom.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()
@@ -250,7 +250,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
         } else {
             let img = image
             if (session.cookie) {
-                img = functions.appendURLParams(img, {upscaled: session.upscaledImages})
+                img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
             }
             return (
                 <>

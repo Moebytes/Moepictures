@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions,  useThemeSelector,
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../../store"
 import permissions from "../../structures/Permissions"
@@ -60,10 +60,10 @@ const SetAvatarPage: React.FunctionComponent = () => {
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
-        if (functions.isR18(post.rating)) {
-            functions.replaceLocation("/403")
+        if (functions.post.isR18(post.rating)) {
+            functions.dom.replaceLocation("/403")
         }
-        functions.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
+        functions.post.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
     }, [session, post])
 
     useEffect(() => {
@@ -71,29 +71,29 @@ const SetAvatarPage: React.FunctionComponent = () => {
             let post = posts.find((p) => p.postID === postID) as PostSearch | undefined
             let $401Error = false
             try {
-                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
+                if (!post) post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((image) => functions.getImageLink(image, true))
+                    images = post.images.map((image) => functions.link.getImageLink(image, true))
                 } else {
-                    images = post.images.map((image) => functions.getImageLink(image))
+                    images = post.images.map((image) => functions.link.getImageLink(image))
                 }
                 setImages(images)
-                const thumb = await functions.decryptThumb(images[0], session, undefined, true)
+                const thumb = await functions.crypto.decryptThumb(images[0], session, undefined, true)
                 setImage(thumb)
-                const tags = await functions.parseTags([post], session, setSessionFlag)
-                const categories = await functions.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const tags = await functions.tag.parseTags([post], session, setSessionFlag)
+                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
             } else {
-                if (!$401Error) functions.replaceLocation("/404")
+                if (!$401Error) functions.dom.replaceLocation("/404")
             }
         }
         updatePost()
@@ -106,29 +106,29 @@ const SetAvatarPage: React.FunctionComponent = () => {
             let post = null as PostSearch | null
             let $401Error = false
             try {
-                post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag) as PostSearch
+                post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag) as PostSearch
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
                 let images = [] as string[]
                 if (session.upscaledImages) {
-                    images = post.images.map((image) => functions.getImageLink(image, true))
+                    images = post.images.map((image) => functions.link.getImageLink(image, true))
                 } else {
-                    images = post.images.map((image) => functions.getImageLink(image))
+                    images = post.images.map((image) => functions.link.getImageLink(image))
                 }
                 setImages(images) 
-                const thumb = await functions.decryptThumb(images[0], session, undefined, true)
+                const thumb = await functions.crypto.decryptThumb(images[0], session, undefined, true)
                 setImage(thumb)
-                const tags = await functions.parseTags([post], session, setSessionFlag)
-                const categories = await functions.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const tags = await functions.tag.parseTags([post], session, setSessionFlag)
+                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
             } else {
-                if (!$401Error) functions.replaceLocation("/404")
+                if (!$401Error) functions.dom.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()
@@ -188,10 +188,10 @@ const SetAvatarPage: React.FunctionComponent = () => {
         if (isAnimated && permissions.isPremium(session)) {
             let gifData = [] as GIFFrame[]
             const arrayBuffer = await fetch(image).then((r) => r.arrayBuffer())
-            if (functions.isGIF(images[0])) {
-                gifData = await functions.extractGIFFrames(arrayBuffer)
-            } else if (functions.isWebP(images[0])) {
-                gifData = await functions.extractAnimatedWebpFrames(arrayBuffer)
+            if (functions.file.isGIF(images[0])) {
+                gifData = await functions.video.extractGIFFrames(arrayBuffer)
+            } else if (functions.file.isWebP(images[0])) {
+                gifData = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
             }
             let frameArray = [] as ArrayBuffer[] 
             let delayArray = [] as number[]
@@ -205,17 +205,17 @@ const SetAvatarPage: React.FunctionComponent = () => {
                     image.onload = () => resolve()
                 })
                 drawCanvas(image, canvas, crop)
-                const cropped = await functions.crop(canvas.toDataURL("image/png"), 1, true, false)
-                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/png"), 1, false, false)
+                const cropped = await functions.image.crop(canvas.toDataURL("image/png"), 1, true, false)
+                if (!firstURL) firstURL = await functions.image.crop(canvas.toDataURL("image/png"), 1, false, false)
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
-            const {width, height} = await functions.imageDimensions(firstURL)
-            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+            const {width, height} = await functions.image.imageDimensions(firstURL)
+            const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
             const blob = new Blob([new Uint8Array(buffer)])
             croppedURL = URL.createObjectURL(blob)
         } else {
-            croppedURL = await functions.crop(url, 1, false, true)
+            croppedURL = await functions.image.crop(url, 1, false, true)
         }
         return croppedURL
     }
@@ -227,7 +227,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)
-        await functions.post("/api/user/pfp", {postID, bytes: Object.values(bytes)}, session, setSessionFlag)
+        await functions.http.post("/api/user/pfp", {postID, bytes: Object.values(bytes)}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
         navigate(`/post/${post.postID}/${post.slug}`)
@@ -237,7 +237,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
         const croppedURL = await getCroppedURL()
         if (!croppedURL) return
         let ext = isAnimated && permissions.isPremium(session) ? "gif" : "jpg"
-        functions.download(`${postID}-crop.${ext}`, croppedURL)
+        functions.dom.download(`${postID}-crop.${ext}`, croppedURL)
     }
 
     const dragStart = () => {
@@ -258,10 +258,10 @@ const SetAvatarPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const checkImage = async () => {
-            if (functions.isGIF(images[0])) return setIsAnimated(true)
-            if (functions.isWebP(images[0])) {
+            if (functions.file.isGIF(images[0])) return setIsAnimated(true)
+            if (functions.file.isWebP(images[0])) {
                 const buffer = await fetch(image).then((r) => r.arrayBuffer())
-                const animatedWebp = functions.isAnimatedWebp(buffer)
+                const animatedWebp = functions.file.isAnimatedWebp(buffer)
                 if (animatedWebp) return setIsAnimated(true)
             }
             setIsAnimated(false)
@@ -270,7 +270,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
     }, [image])
 
     const openPost = async (event: React.MouseEvent) => {
-        functions.openPost(post, event, navigate, session, setSessionFlag)
+        functions.post.openPost(post, event, navigate, session, setSessionFlag)
     }
 
 

@@ -9,7 +9,7 @@ import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
 useCacheSelector, useCacheActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
@@ -25,7 +25,6 @@ import banIcon from "../../assets/icons/ban.png"
 import unbanIcon from "../../assets/icons/unban.png"
 import promoteIcon from "../../assets/icons/promote.png"
 import dmIcon from "../../assets/icons/dm.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
@@ -75,17 +74,17 @@ const UserPage: React.FunctionComponent = () => {
     }
 
     const fetchUser = async () => {
-        const user = await functions.get("/api/user", {username}, session, setSessionFlag)
-        if (!user) return functions.replaceLocation("/404")
+        const user = await functions.http.get("/api/user", {username}, session, setSessionFlag)
+        if (!user) return functions.dom.replaceLocation("/404")
         setUser(user)
         setDefaultIcon(user.image ? false : true)
         forceUpdate()
     }
 
     const updateUploads = async () => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const uploads = await functions.get("/api/user/uploads", {username, rating}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const uploads = await functions.http.get("/api/user/uploads", {username, rating}, session, setSessionFlag)
+        const images = uploads.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(uploads)
         setUploadImages(images)
     }
@@ -93,18 +92,18 @@ const UserPage: React.FunctionComponent = () => {
     const updateUploadOffset = async () => {
         const newUploads = uploads
         let offset = newUploads.length
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+        const images = result.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         setUploads(newUploads)
         setAppendUploadImages(images)
     }
 
     const updateFavorites = async () => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const favorites = await functions.get("/api/user/favorites", {username, rating}, session, setSessionFlag)
-        const images = favorites.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const favorites = await functions.http.get("/api/user/favorites", {username, rating}, session, setSessionFlag)
+        const images = favorites.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(favorites)
         setFavoriteImages(images)
     }
@@ -112,37 +111,37 @@ const UserPage: React.FunctionComponent = () => {
     const updateFavoriteOffset = async () => {
         const newFavorites = favorites
         let offset = newFavorites.length
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        const images = result.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+        const images = result.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
         setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
 
     const updateFavgroups = async () => {
-        const favgroups = await functions.get("/api/user/favgroups", null, session, setSessionFlag)
+        const favgroups = await functions.http.get("/api/user/favgroups", null, session, setSessionFlag)
         setFavgroups(favgroups)
     }
 
     const updateComments = async () => {
-        const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
-        let filtered = comments.filter((c) => functions.isR18(ratingType) ? functions.isR18(c.post?.rating) : !functions.isR18(c.post?.rating))
+        const comments = await functions.http.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
+        let filtered = comments.filter((c) => functions.post.isR18(ratingType) ? functions.post.isR18(c.post?.rating) : !functions.post.isR18(c.post?.rating))
         setComments(filtered)
     }
 
     const updateForumPosts = async () => {
-        const forumPosts = await functions.get("/api/user/forumposts", {username, sort: "date"}, session, setSessionFlag)
+        const forumPosts = await functions.http.get("/api/user/forumposts", {username, sort: "date"}, session, setSessionFlag)
         setForumPosts(forumPosts)
     }
 
     const updateCounts = async () => {
-        const counts = await functions.get("/api/user/edit/counts", {username}, session, setSessionFlag)
+        const counts = await functions.http.get("/api/user/edit/counts", {username}, session, setSessionFlag)
         setCounts(counts)
     }
 
     const updateFavoriteTags = async () => {
-        const favoriteTags = await functions.get("/api/tagfavorites", {username}, session, setSessionFlag)
+        const favoriteTags = await functions.http.get("/api/tagfavorites", {username}, session, setSessionFlag)
         setFavoriteTags(favoriteTags)
     }
 
@@ -153,7 +152,7 @@ const UserPage: React.FunctionComponent = () => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = `${functions.toProperCase(username)}`
+        document.title = `${functions.util.toProperCase(username)}`
     }, [])
 
     useEffect(() => {
@@ -183,7 +182,7 @@ const UserPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
     }
 
@@ -195,19 +194,19 @@ const UserPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
     }
 
     const getUserImg = () => {
         if (!user) return ""
-        return user.image ? functions.getTagLink("pfp", user.image, user.imageHash) : favicon
+        return user.image ? functions.link.getTagLink("pfp", user.image, user.imageHash) : favicon
     }
 
     const userImgClick = (event: React.MouseEvent) => {
         if (!user?.imagePost) return
         event.stopPropagation()
-        functions.openPost(user.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(user.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const viewFavorites = () => {
@@ -293,61 +292,61 @@ const UserPage: React.FunctionComponent = () => {
         if (user?.role === "admin") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain admin-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain admin-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={adminLabel}/>
                 </div>
             )
         } else if (user?.role === "mod") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain mod-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain mod-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={modLabel}/>
                 </div>
             )
         } else if (user?.role === "system") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain system-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain system-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={systemLabel}/>
                 </div>
             )
         } else if (user?.role === "premium-curator") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain curator-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={premiumCuratorLabel}/>
                 </div>
             )
         } else if (user?.role === "curator") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain curator-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={curatorLabel}/>
                 </div>
             )
         } else if (user?.role === "premium-contributor") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain premium-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={premiumContributorLabel}/>
                 </div>
             )
         } else if (user?.role === "contributor") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain contributor-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain contributor-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={contributorLabel}/>
                 </div>
             )
         } else if (user?.role === "premium") {
             return (
                 <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.toProperCase(username)}</span>
+                    <span className="user-name-plain premium-color">{functions.util.toProperCase(username)}</span>
                     <img className="user-name-label" src={premiumLabel}/>
                 </div>
             )
         }
-        return <span className={`user-name ${user.banned ? "banned" : ""}`}>{functions.toProperCase(username)}</span>
+        return <span className={`user-name ${user.banned ? "banned" : ""}`}>{functions.util.toProperCase(username)}</span>
     }
 
     const banDialog = () => {
@@ -379,7 +378,7 @@ const UserPage: React.FunctionComponent = () => {
         if (user.banExpiration && new Date(user.banExpiration) > new Date()) {
             return (
                 <div className="user-row">
-                    <span className="user-ban-text">{i18n.user.banReason} {functions.timeUntil(user.banExpiration, i18n)}</span>
+                    <span className="user-ban-text">{i18n.user.banReason} {functions.date.timeUntil(user.banExpiration, i18n)}</span>
                 </div>
             )
         } else {
@@ -392,12 +391,12 @@ const UserPage: React.FunctionComponent = () => {
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
             if (favgroup.private) continue
-            if (functions.isR18(ratingType)) {
-                if (!functions.isR18(favgroup.rating)) continue
+            if (functions.post.isR18(ratingType)) {
+                if (!functions.post.isR18(favgroup.rating)) continue
             } else {
-                if (functions.isR18(favgroup.rating)) continue
+                if (functions.post.isR18(favgroup.rating)) continue
             }
-            const images = favgroup.posts.map((f) => functions.getThumbnailLink(f.images[0], "tiny", session, mobile))
+            const images = favgroup.posts.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
             const viewFavgroup = () => {
                 navigate(`/favgroup/${username}/${favgroup.slug}`)
             }
@@ -408,7 +407,7 @@ const UserPage: React.FunctionComponent = () => {
                 } else {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
                 setPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
@@ -444,10 +443,10 @@ const UserPage: React.FunctionComponent = () => {
                     </div>
                     {banJSX()}
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {jsxFunctions.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
+                        <span className="user-text">{i18n.user.bio}: {functions.jsx.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.joinDate}: {functions.prettyDate(user.joinDate, i18n)}</span>
+                        <span className="user-text">{i18n.user.joinDate}: {functions.date.prettyDate(user.joinDate, i18n)}</span>
                     </div>
                     {counts?.postEdits || counts?.tagEdits || counts?.noteEdits || counts?.groupEdits ? 
                     <div className="user-row">

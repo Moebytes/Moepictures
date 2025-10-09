@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 
@@ -23,7 +23,7 @@ const $2FARoutes = (app: Express) => {
             const enabled = !Boolean(user.$2fa)
             if (enabled) {
                 await sql.token.delete2faToken(req.session.username)
-                const token = await generateSecret({name: "Moepictures", account: functions.toProperCase(req.session.username)})
+                const token = await generateSecret({name: "Moepictures", account: functions.util.toProperCase(req.session.username)})
                 await sql.token.insert2faToken(req.session.username, token.secret, token.qr)
                 res.status(200).json(token.qr)
             } else {
@@ -32,7 +32,7 @@ const $2FARoutes = (app: Express) => {
                 await sql.token.delete2faToken(req.session.username)
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
                 res.status(200).send("Success")
@@ -71,7 +71,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.$2fa = true
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
-                const device = functions.parseUserAgent(req.headers["user-agent"])
+                const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device, region)
                 res.status(200).send("Success")
@@ -94,7 +94,7 @@ const $2FARoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad email")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            const device = functions.parseUserAgent(req.headers["user-agent"])
+            const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken?.token || "", token, 60)
@@ -135,7 +135,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
                 req.session.lastNameChange = user.lastNameChange
-                const ips = functions.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                const ips = functions.util.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())

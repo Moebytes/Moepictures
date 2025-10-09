@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector, 
 useSearchSelector, useFilterSelector, useFlagSelector, useCacheActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import arrowLeft from "../../assets/icons/carousel-left.png"
 import arrowRight from "../../assets/icons/carousel-right.png"
 import "./styles/carousel.less"
@@ -79,7 +79,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCombinedImages = () => {
-        return functions.removeDuplicates([...props.images, ...(props.appendImages || [])])
+        return functions.util.removeDuplicates([...props.images, ...(props.appendImages || [])])
     }
 
     useEffect(() => {
@@ -102,7 +102,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         const decryptImages = async () => {
             const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
             const newImages = visibleImages.slice(startIndex)
-            let decrypted = await Promise.all(newImages.map((image) => functions.decryptThumb(image, session, `carousel-${image}`)))
+            let decrypted = await Promise.all(newImages.map((image) => functions.crypto.decryptThumb(image, session, `carousel-${image}`)))
             if (startIndex === 0) {
                 setImages(decrypted)
             } else {
@@ -121,7 +121,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             newVisibleImages.push(images[currentIndex])
             currentIndex++
         }
-        setVisibleImages(functions.removeDuplicates(newVisibleImages))
+        setVisibleImages(functions.util.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
         updateRefs(newVisibleImages.length)
     }, [props.images, props.appendImages, visibleIndex])
@@ -440,7 +440,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < pixelateRefs.length; i++) {
             const pixelateRef = pixelateRefs[i]
             const imageRef = imageRefs[i]
-            functions.pixelateEffect(pixelateRef.current, imageRef.current, pixelate)
+            functions.image.pixelateEffect(pixelateRef.current, imageRef.current, pixelate)
         }
     }, [pixelateRefs, pixelate])
 
@@ -448,7 +448,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < effectRefs.length; i++) {
             const effectRef = effectRefs[i]
             const imageRef = imageRefs[i]
-            functions.splatterEffect(effectRef.current, imageRef.current, splatter, {lineMultiplier: 3, maxLineWidth: 3})
+            functions.image.splatterEffect(effectRef.current, imageRef.current, splatter, {lineMultiplier: 3, maxLineWidth: 3})
         }
     }, [effectRefs, splatter])
 
@@ -459,7 +459,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const generateJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.removeDuplicates(images)
+        let visible = functions.util.removeDuplicates(images)
         for (let i = 0; i < visible.length; i++) {
             const img = visible[i] as string
             const set = (event: React.MouseEvent) => {
@@ -471,7 +471,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} ref={sharpenRefs[i]} className="carousel-sharpen-overlay" src={img}/>
                     <canvas draggable={false} ref={effectRefs[i]} className="carousel-effect-canvas"></canvas>
                     <canvas draggable={false} ref={pixelateRefs[i]} className="carousel-pixelate-canvas"></canvas>
-                    {functions.isVideo(img) ? 
+                    {functions.file.isVideo(img) ? 
                     <video draggable={false} autoPlay muted loop disablePictureInPicture ref={imageRefs[i] as any} className="carousel-img" src={img} style={props.height ? {height: `${props.height}px`} : {}}></video> :
                     <img draggable={false} ref={imageRefs[i] as any} className="carousel-img" src={img} style={props.height ? {height: `${props.height}px`} : {}}/>}
                 </div>
@@ -480,7 +480,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    let maxWidth = props.marginLeft !== undefined ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`
+    let maxWidth = props.marginLeft !== undefined ? `calc(100vw - ${functions.dom.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.dom.sidebarWidth()}px - 120px)`
     if (mobile) maxWidth = props.marginLeft !== undefined ? `calc(100vw - 10px - ${props.marginLeft}px)` : `calc(100vw - 10px)`
     let marginTop = props.marginTop !== undefined ? `${props.marginTop}px` : ""
 

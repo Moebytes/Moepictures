@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
@@ -34,7 +34,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
 
     const updateGroups = async () => {
         if (!groupPostID) return
-        const groups = await functions.get("/api/groups", {postID: groupPostID}, session, setSessionFlag)
+        const groups = await functions.http.get("/api/groups", {postID: groupPostID}, session, setSessionFlag)
         setGroups(groups)
     }
 
@@ -74,11 +74,11 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
+            await functions.http.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
             setGroupPostID(null)
             setPostFlag(groupPostID)
         } else {
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -88,7 +88,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 return
             }
             if (removalItems.length) {
-                await functions.post("/api/group/post/delete/request", {reason, removalItems}, session, setSessionFlag)
+                await functions.http.post("/api/group/post/delete/request", {reason, removalItems}, session, setSessionFlag)
                 setSubmitted(true)
             } else {
                 if (!name) {
@@ -98,7 +98,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                     await functions.timeout(2000)
                     return setError(false)
                 }
-                await functions.post("/api/group/request", {postID: groupPostID, name, reason}, session, setSessionFlag)
+                await functions.http.post("/api/group/request", {postID: groupPostID, name, reason}, session, setSessionFlag)
                 setSubmitted(true)
             }
         }
@@ -125,7 +125,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             const group = groups[i]
             const deleteFromGroup = async () => {
                 if (permissions.isContributor(session)) {
-                    await functions.delete("/api/group/post/delete", {postID: groupPostID, name: group.name}, session, setSessionFlag)
+                    await functions.http.delete("/api/group/post/delete", {postID: groupPostID, name: group.name}, session, setSessionFlag)
                     updateGroups()
                 } else {
                     removalItems.push({postID: groupPostID, slug: group.slug})

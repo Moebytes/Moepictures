@@ -5,8 +5,8 @@ import path from "path"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
 import snoowrap from "snoowrap"
-import functions from "../structures/Functions"
-import encryptFunctions from "../structures/EncryptFunctions"
+import functions from "../functions/Functions"
+import encryption from "../structures/Encryption"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
@@ -17,7 +17,7 @@ import child_process from "child_process"
 import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
-import dotline from "../assets/misc/Dotline.ttf"
+import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
 import {Scraper} from "@the-convocation/twitter-scraper"
@@ -356,9 +356,9 @@ const MiscRoutes = (app: Express) => {
             let {email, subject, message, files} = req.body as ContactParams
             if (!files) files = []
             if (!email || !subject || !message) return void res.status(400).send("Bad email, subejct, or message.")
-            const badEmail = functions.validateEmail(email, enLocale)
+            const badEmail = functions.validation.validateEmail(email, enLocale)
             if (badEmail) return void res.status(400).send("Bad email")
-            const badMessage = functions.validateMessage(message, enLocale)
+            const badMessage = functions.validation.validateMessage(message, enLocale)
             if (badMessage) return void res.status(400).send("Bad message")
             const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
@@ -386,7 +386,7 @@ const MiscRoutes = (app: Express) => {
             if (!files) files = []
             if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return void res.status(400).send("Bad fields.")
             if (!files.length && !proofLinks) return void res.status(400).send("Bad proof links.")
-            const badEmail = functions.validateEmail(email, enLocale)
+            const badEmail = functions.validation.validateEmail(email, enLocale)
             if (badEmail) return void res.status(400).send("Bad email")
             const attachments = [] as Attachment[]
             for (let i = 0; i < files.length; i++) {
@@ -459,7 +459,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../../assets/misc/ocr.py")
+            const scriptPath = path.join(__dirname, "../../assets/python/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str.match(/\[.*?\]/gm)?.[0]) as OCRResponse[]
@@ -505,7 +505,7 @@ const MiscRoutes = (app: Express) => {
                 pricing_type: "fixed_price",
                 name: "Moepictures Premium",
                 description: "Moepictures premium account upgrade",
-                redirect_url: `${functions.getDomain()}/premium-success`,
+                redirect_url: `${functions.config.getDomain()}/premium-success`,
                 metadata: {
                     username: req.session.username,
                     email: req.session.email
@@ -554,7 +554,7 @@ const MiscRoutes = (app: Express) => {
 
                 await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
 
-                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration, enLocale)}.`
+                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
                 await serverFunctions.systemMessage(metadata.username, "Notice: Your account was upgraded to premium", message)
             }
             res.status(200).send("Success")
@@ -593,7 +593,7 @@ const MiscRoutes = (app: Express) => {
             const form = new FormData()
             form.append("time", "1h")
             form.append("reqtype", "fileupload")
-            const inputType = functions.bufferFileType(req.body)?.[0]
+            const inputType = functions.byte.bufferFileType(req.body)?.[0]
             form.append("fileToUpload", Buffer.from(req.body, "binary"), {
                 filename: `file.${inputType.extension}`,
                 contentType: inputType.mime
@@ -610,7 +610,7 @@ const MiscRoutes = (app: Express) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             const buffer = Buffer.from(req.body, "binary")
-            const hash = await phash(buffer).then((hash: any) => functions.binaryToHex(hash))
+            const hash = await phash(buffer).then((hash: any) => functions.byte.binaryToHex(hash))
             res.status(200).send(hash)
         } catch (e) {
             console.log(e)
@@ -622,8 +622,8 @@ const MiscRoutes = (app: Express) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
-            const key = encryptFunctions.generateAPIKey()
-            const hashedKey = encryptFunctions.hashAPIKey(key)
+            const key = encryption.generateAPIKey()
+            const hashedKey = encryption.hashAPIKey(key)
             await sql.token.insertAPIKey(req.session.username, hashedKey)
             res.status(200).send(key)
         } catch (e) {
@@ -669,7 +669,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/server-key", miscLimiter, async (req: Request, res: Response) => {
         try {
-            const publicKey = encryptFunctions.serverPublicKey()
+            const publicKey = encryption.serverPublicKey()
             res.status(200).json({publicKey})
         } catch (e) {
             console.log(e)

@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
 import xIcon from "../../assets/icons/x.png"
 import rightIcon from "../../assets/icons/right.png"
@@ -44,7 +44,6 @@ import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../../structures/Permissions"
-import imageFunctions from "../../structures/ImageFunctions"
 import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage} from "../../types/Types"
 import path from "path"
 import "./styles/uploadpage.less"
@@ -131,7 +130,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isAdmin(session)) {
-            functions.replaceLocation("/403")
+            functions.dom.replaceLocation("/403")
         }
     }, [session])
 
@@ -143,7 +142,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [uploadDropFiles])
 
     const validate = async (files: File[], links?: string[]) => {
-        let {images, error} = await imageFunctions.validateImages(files, links, session, i18n)
+        let {images, error} = await functions.image.validateImages(files, links, session, i18n)
         if (error) {
             setUploadError(true)
             if (!uploadErrorRef.current) await functions.timeout(20)
@@ -174,58 +173,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         event.target.value = ""
     }
 
-    const readImage = async (image: string) => {
-        const arrayBuffer = await functions.proxyImage(image, session, setSessionFlag).then((r) => r[0].arrayBuffer())
-        let bytes = new Uint8Array(arrayBuffer)
-        let blob = new Blob([bytes])
-        const result = functions.bufferFileType(bytes)?.[0]
-        const jpg = result?.mime === "image/jpeg"
-        const png = result?.mime === "image/png"
-        const gif = result?.mime === "image/gif"
-        const webp = result?.mime === "image/webp"
-        const avif = result?.mime === "image/avif"
-        let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : avif ? "avif" : null
-        if (jpg || png || gif || webp || avif) {
-            let url = URL.createObjectURL(blob)
-            let croppedURL = ""
-            if (gif) {
-                const gifData = await functions.extractGIFFrames(bytes.buffer)
-                let frameArray = [] as ArrayBuffer[] 
-                let delayArray = [] as number[]
-                for (let i = 0; i < gifData.length; i++) {
-                    const canvas = gifData[i].frame as HTMLCanvasElement
-                    const cropped = await functions.crop(canvas.toDataURL(), 1, true)
-                    frameArray.push(cropped)
-                    delayArray.push(gifData[i].delay)
-                }
-                const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1, false)
-                const {width, height} = await functions.imageDimensions(firstURL)
-                const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                const blob = new Blob([new Uint8Array(buffer)])
-                croppedURL = URL.createObjectURL(blob)
-            } else {
-                croppedURL = await functions.crop(url, 1, false)
-            }
-            const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-            bytes = new Uint8Array(arrayBuffer)
-            blob = new Blob([bytes])
-            url = URL.createObjectURL(blob)
-            return {
-                image: `${url}#.${ext}`,
-                ext: result.typename,
-                bytes
-            }
-        }
-    }
-
     const linkUpload = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
+        const links = functions.util.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
         enterLinksTimer = setTimeout(async () => {
             let files = [] as File[]
             for (let i = 0; i < links.length; i++) {
-                const fileArr = await functions.proxyImage(links[i], session, setSessionFlag)
+                const fileArr = await functions.http.proxyImage(links[i], session, setSessionFlag)
                 files.push(...fileArr)
             }
             await validate(files, links)
@@ -288,10 +243,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const upscaledCurrent = upscaledFiles[i]
             let dupes = [] as Post[]
             if (current.thumbnail) {
-                const bytes = await functions.base64toUint8Array(current.thumbnail)
-                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
+                const bytes = await functions.byte.base64toUint8Array(current.thumbnail)
+                dupes = await functions.http.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
             } else {
-                dupes = await functions.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
+                dupes = await functions.http.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
             }
             if (dupes.length) continue
             let id = current.name.includes("_s") ? current.name : current.name.split("_")[0]
@@ -325,8 +280,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const upscaledCurrentArr = upscaledSubmitData[i]
 
             let hasUpscaled = upscaledFiles.length ? true : false
-            const sourceData = await functions.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
-            const tagData = await functions.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+            const sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
+            const tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
@@ -345,7 +300,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     source: sourceData.source.source,
                     commentary: sourceData.source.commentary,
                     englishCommentary: sourceData.source.englishCommentary,
-                    bookmarks: functions.safeNumber(sourceData.source.bookmarks),
+                    bookmarks: functions.util.safeNumber(sourceData.source.bookmarks),
                     buyLink: "",
                     mirrors: sourceData.source.mirrors
                 },
@@ -360,7 +315,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
 
             if (rawArtist?.trim()) {
-                const artistArr = functions.cleanHTML(rawArtist).trim().split(/[\n\r\s]+/g)
+                const artistArr = functions.util.cleanHTML(rawArtist).trim().split(/[\n\r\s]+/g)
                 let newArtists = [] as UploadTag[]
                 for (let i = 0; i < artistArr.length; i++) {
                     newArtists.push({tag: artistArr[i]})
@@ -368,7 +323,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.artists = newArtists
             }
             if (rawCharacter?.trim()) {
-                const characterArr = functions.cleanHTML(rawCharacter).trim().split(/[\n\r\s]+/g)
+                const characterArr = functions.util.cleanHTML(rawCharacter).trim().split(/[\n\r\s]+/g)
                 let newCharacters = [] as UploadTag[]
                 for (let i = 0; i < characterArr.length; i++) {
                     newCharacters.push({tag: characterArr[i]})
@@ -378,10 +333,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else {
                     data.characters.push(...newCharacters)
                 }
-                data.characters = functions.removeDuplicates(data.characters)
+                data.characters = functions.util.removeDuplicates(data.characters)
             }
             if (rawSeries?.trim()) {
-                const seriesArr = functions.cleanHTML(rawSeries).trim().split(/[\n\r\s]+/g)
+                const seriesArr = functions.util.cleanHTML(rawSeries).trim().split(/[\n\r\s]+/g)
                 let newSeries = [] as UploadTag[]
                 for (let i = 0; i < seriesArr.length; i++) {
                     newSeries.push({tag: seriesArr[i]})
@@ -391,10 +346,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else {
                     data.series.push(...newSeries)
                 }
-                data.series = functions.removeDuplicates(data.series)
+                data.series = functions.util.removeDuplicates(data.series)
             }
             if (rawAppendTags?.trim()) {
-                const appendData = functions.cleanHTML(rawAppendTags).trim().split(/[\n\r\s]+/g)
+                const appendData = functions.util.cleanHTML(rawAppendTags).trim().split(/[\n\r\s]+/g)
                 let toAppend = [] as string[]
                 let toRemove = [] as string[]
                 for (const tag of appendData) {
@@ -410,18 +365,18 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.tags = Array.from(tagSet)
             }
             if (rawMetaTags?.trim()) {
-                const newMeta = functions.cleanHTML(rawMetaTags).trim().split(/[\n\r\s]+/g)
+                const newMeta = functions.util.cleanHTML(rawMetaTags).trim().split(/[\n\r\s]+/g)
                 if (data.tags.filter(Boolean).length === 1) {
                     data.tags = newMeta
                 } else {
                     data.tags.push(...newMeta)
                 }
-                data.tags = functions.removeDuplicates(data.tags)
+                data.tags = functions.util.removeDuplicates(data.tags)
             }
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
-                await functions.post("/api/post/upload", data, session, setSessionFlag)
+                await functions.http.post("/api/post/upload", data, session, setSessionFlag)
             } catch (e) {
                 console.log(e)
                 setSubmitError(true)
@@ -448,11 +403,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const getPostJSX = () => {
-        if (functions.isLive2D(currentImg)) {
+        if (functions.file.isLive2D(currentImg)) {
             return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isModel(currentImg)) {
+        } else if (functions.file.isModel(currentImg)) {
             return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.isAudio(currentImg)) {
+        } else if (functions.file.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
@@ -732,40 +687,40 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }, [type, style])
 
     const handleArtistClick = (tag: string) => {
-        setRawArtist((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawArtist((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const handleCharacterClick = (tag: string) => {
-        setRawCharacter((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawCharacter((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
     
     const handleSeriesClick = (tag: string) => {
-        setRawSeries((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawSeries((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const handleMetaClick = (tag: string) => {
-        setRawMetaTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawMetaTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     const setCaretPosition = (ref: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | null) => {
-        caretPosition = functions.getCaretPosition(ref)
+        caretPosition = functions.render.getCaretPosition(ref)
     }
 
     const handleTagsClick = (tag: string) => {
-        setRawAppendTags((prev: string) => functions.insertAtCaret(prev, caretPosition, tag))
+        setRawAppendTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
     useEffect(() => {
-        const tagX = functions.getTagX()
-        const tagY = functions.getTagY()
+        const tagX = functions.render.getTagX()
+        const tagY = functions.render.getTagY()
         setTagX(tagX)
         setTagY(tagY)
     }, [rawArtist, rawCharacter, rawSeries, rawMetaTags, rawAppendTags])
 
     useEffect(() => {
         if (artistActive || characterActive || seriesActive || metaActive || tagActive) {
-            const tagX = functions.getTagX()
-            const tagY = functions.getTagY()
+            const tagX = functions.render.getTagX()
+            const tagY = functions.render.getTagY()
             setTagX(tagX)
             setTagY(tagY)
         }
@@ -774,7 +729,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const updateProgressColor = () => {
         const progressBar = progressBarRef.current?.querySelector(".progress-bar") as HTMLElement
         if (progressBar) {
-            const color = functions.rotateColor("#5a56ff", siteHue, siteSaturation, siteLightness)
+            const color = functions.color.rotateColor("#5a56ff", siteHue, siteSaturation, siteLightness)
             progressBar.style.backgroundColor = color
         }
     }
@@ -915,35 +870,35 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             {getRatingJSX()}
             {getStyleJSX()}
             <div className="upload-container">
-                <SearchSuggestions active={artistActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(artistInputRef.current)} click={handleArtistClick} type="artist"/>
+                <SearchSuggestions active={artistActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.render.getTypingWord(artistInputRef.current)} click={handleArtistClick} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonArtist}: </span>
                     <input ref={artistInputRef} className="upload-input-wide2 artist-tag-color" type="text" value={rawArtist} onChange={(event) => {setCaretPosition(artistInputRef.current); setRawArtist(event.target.value)}} spellCheck={false} onFocus={() => setArtistActive(true)} onBlur={() => setArtistActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={characterActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(characterInputRef.current)} click={handleCharacterClick} type="character"/>
+                <SearchSuggestions active={characterActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.render.getTypingWord(characterInputRef.current)} click={handleCharacterClick} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonCharacter}: </span>
                     <input ref={characterInputRef} className="upload-input-wide2 character-tag-color" type="text" value={rawCharacter} onChange={(event) => {setCaretPosition(characterInputRef.current); setRawCharacter(event.target.value)}} spellCheck={false} onFocus={() => setCharacterActive(true)} onBlur={() => setCharacterActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(seriesInputRef.current)} click={handleSeriesClick} type="series"/>
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.render.getTypingWord(seriesInputRef.current)} click={handleSeriesClick} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonSeries}: </span>
                     <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => {setCaretPosition(seriesInputRef.current); setRawSeries(event.target.value)}} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(metaInputRef.current)} click={handleMetaClick} type="meta"/>
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.render.getTypingWord(metaInputRef.current)} click={handleMetaClick} type="meta"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">{i18n.pages.bulkUpload.commonMeta}: </span>
                     <input ref={metaInputRef} className="upload-input-wide2 meta-tag-color" type="text" value={rawMetaTags} onChange={(event) => {setCaretPosition(metaInputRef.current); setRawMetaTags(event.target.value)}} spellCheck={false} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <div className="upload-container">
-                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.getTypingWord(appendTagsRef.current)} click={handleTagsClick} type="tags"/>
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={functions.render.getTypingWord(appendTagsRef.current)} click={handleTagsClick} type="tags"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text" style={{marginRight: "10px"}}>{i18n.pages.bulkUpload.appendTags}: </span>
                     <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => {setCaretPosition(appendTagsRef.current); setRawAppendTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>

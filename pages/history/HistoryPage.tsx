@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import PostHistoryRow from "../../components/history/PostHistoryRow"
 import TagHistoryRow from "../../components/history/TagHistoryRow"
 import NoteHistoryRow from "../../components/history/NoteHistoryRow"
@@ -246,25 +246,25 @@ const HistoryPage: React.FunctionComponent = () => {
     const updateHistory = async () => {
         let result = [] as History[]
         if (historyTab === "post") {
-            result = await functions.get("/api/post/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/post/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "tag") {
-            result = await functions.get("/api/tag/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/tag/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "note") {
-            result = await functions.get("/api/note/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/note/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "group") {
-            result = await functions.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "alias") {
-            result = await functions.get("/api/alias/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/alias/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "search") {
-            result = await functions.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "delete") {
-            result = await functions.get("/api/post/deleted", {query: searchQuery}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/deleted", {query: searchQuery}, session, setSessionFlag).catch(() => [])
         }
         setEnded(false)
         setIndex(0)
@@ -324,7 +324,7 @@ const HistoryPage: React.FunctionComponent = () => {
                             continue
                         }
                     } else {
-                        if (functions.isR18((historyStates[currentIndex] as PostHistory).rating)) {
+                        if (functions.post.isR18((historyStates[currentIndex] as PostHistory).rating)) {
                             continue
                         }
                     }
@@ -333,7 +333,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleHistory(functions.removeDuplicates(newVisibleHistory))
+            setVisibleHistory(functions.util.removeDuplicates(newVisibleHistory))
         }
         if (scroll) updateHistory()
     }, [historyStates, scroll, session])
@@ -354,25 +354,25 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         let result = [] as History[]
         if (historyTab === "post") {
-            result = await functions.get("/api/post/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "tag") {
-            result = await functions.get("/api/tag/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/tag/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "note") {
-            result = await functions.get("/api/note/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/note/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "group") {
-            result = await functions.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "alias") {
-            result = await functions.get("/api/alias/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/alias/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "search") {
-            result = await functions.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "delete") {
-            result = await functions.get("/api/post/deleted", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/deleted", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         let hasMore = result?.length >= 100
         const cleanHistory = historyStates.filter((t) => !t.fake)
@@ -387,14 +387,14 @@ const HistoryPage: React.FunctionComponent = () => {
             if (padded) {
                 setHistoryStates(result)
             } else {
-                setHistoryStates(functions.removeDuplicates([...historyStates, ...result]))
+                setHistoryStates(functions.util.removeDuplicates([...historyStates, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setHistoryStates(result)
                 } else {
-                    setHistoryStates(functions.removeDuplicates([...historyStates, ...result]))
+                    setHistoryStates(functions.util.removeDuplicates([...historyStates, ...result]))
                 }
             }
             setEnded(true)
@@ -403,7 +403,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!historyStates[currentIndex]) return updateOffset()
                 const newHistory = visibleHistory
@@ -416,7 +416,7 @@ const HistoryPage: React.FunctionComponent = () => {
                                 continue
                             }
                         } else {
-                            if (functions.isR18((historyStates[currentIndex] as PostHistory).rating)) {
+                            if (functions.post.isR18((historyStates[currentIndex] as PostHistory).rating)) {
                                 continue
                             }
                         }
@@ -425,7 +425,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleHistory(functions.removeDuplicates(newHistory))
+                setVisibleHistory(functions.util.removeDuplicates(newHistory))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -568,13 +568,13 @@ const HistoryPage: React.FunctionComponent = () => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as History[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleHistory)
+            visible = functions.util.removeDuplicates(visibleHistory)
         } else {
             const postOffset = (historyPage - 1) * getPageAmount()
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
             if (!session.showR18) {
                 visible = visible.filter((item) => historyTab === "tag" ||  historyTab === "alias" ? 
-                !(item as TagHistory).r18 : !functions.isR18((item as PostHistory).rating))
+                !(item as TagHistory).r18 : !functions.post.isR18((item as PostHistory).rating))
             }
         }
         let currentIndex = 0

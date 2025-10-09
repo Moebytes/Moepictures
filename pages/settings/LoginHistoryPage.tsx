@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import {LoginHistory} from "../../types/Types"
@@ -30,7 +30,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     }
 
     const updateLoginHistory = async () => {
-        const result = await functions.get("/api/user/login/history", null, session, setSessionFlag)
+        const result = await functions.http.get("/api/user/login/history", null, session, setSessionFlag)
         setLoginHistory(result)
     }
 
@@ -67,7 +67,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const logoutOtherSessions = async () => {
-        await functions.post("/api/user/logout-sessions", null, session, setSessionFlag)
+        await functions.http.post("/api/user/logout-sessions", null, session, setSessionFlag)
         setActionBanner("logout-sessions")
     }
 
@@ -104,7 +104,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-table-name">{log.region}</span>
                     </div>
                     <div className="sitepage-table-column">
-                        <span className="sitepage-table-name-strong">{functions.prettyDate(log.timestamp, i18n)}</span>
+                        <span className="sitepage-table-name-strong">{functions.date.prettyDate(log.timestamp, i18n)}</span>
                     </div>
                 </div>
             )

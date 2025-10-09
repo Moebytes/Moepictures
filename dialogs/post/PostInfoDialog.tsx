@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {PostMetadata} from "../../types/PostTypes"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -36,7 +36,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
 
     const getPostInfo = async () => {
         if (postInfoID?.post) {
-            const info = await functions.post("/api/post/metadata", {postID: postInfoID.post.postID, order: postInfoID.order}, session, setSessionFlag)
+            const info = await functions.http.post("/api/post/metadata", {postID: postInfoID.post.postID, order: postInfoID.order}, session, setSessionFlag)
             setInfo(info)
         } else {
             setInfo(null)
@@ -106,7 +106,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <div key="duration" className="dialog-row2">
                     <span className="dialog-text-small" style={{marginRight: "10px"}}>{i18n.dialogs.postInfo.duration}:</span>
-                    <span className="dialog-text-small">{functions.formatSeconds(info.duration)}</span>
+                    <span className="dialog-text-small">{functions.date.formatSeconds(info.duration)}</span>
                 </div>
             )
         }
@@ -114,7 +114,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <div key="size" className="dialog-row2">
                     <span className="dialog-text-small" style={{marginRight: "10px"}}>{i18n.labels.size}:</span>
-                    <span className="dialog-text-small">{functions.readableFileSize(info.size)}</span>
+                    <span className="dialog-text-small">{functions.util.readableFileSize(info.size)}</span>
                 </div>
             )
         }
@@ -178,7 +178,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <div key="sampleRate" className="dialog-row2">
                     <span className="dialog-text-small" style={{marginRight: "10px"}}>{i18n.dialogs.postInfo.sampleRate}:</span>
-                    <span className="dialog-text-small">{functions.formatBitrate(info.sampleRate)}</span>
+                    <span className="dialog-text-small">{functions.audio.formatBitrate(info.sampleRate)}</span>
                 </div>
             )
         }
@@ -186,7 +186,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <div key="bitrate" className="dialog-row2">
                     <span className="dialog-text-small" style={{marginRight: "10px"}}>{i18n.dialogs.postInfo.bitrate}:</span>
-                    <span className="dialog-text-small">{functions.formatBitrate(info.bitrate)}</span>
+                    <span className="dialog-text-small">{functions.audio.formatBitrate(info.bitrate)}</span>
                 </div>
             )
         }

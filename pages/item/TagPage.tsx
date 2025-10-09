@@ -7,7 +7,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import takedown from "../../assets/icons/takedown.png"
 import tagHistory from "../../assets/icons/tag-history.png"
@@ -27,7 +27,6 @@ import twitter from "../../assets/icons/twitter.png"
 import Carousel from "../../components/site/Carousel"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
@@ -74,8 +73,8 @@ const TagPage: React.FunctionComponent = () => {
         setRelative(false)
         setActiveDropdown("none")
         setSidebarText("")
-        document.title = `${functions.toProperCase(tagName.replaceAll("-", " "))}`
-        setHeaderText(`${functions.toProperCase(tagName.replaceAll("-", " "))}`)
+        document.title = `${functions.util.toProperCase(tagName.replaceAll("-", " "))}`
+        setHeaderText(`${functions.util.toProperCase(tagName.replaceAll("-", " "))}`)
         const historyParam = new URLSearchParams(window.location.search).get("history")
         setHistoryID(historyParam)
     }, [location])
@@ -87,25 +86,25 @@ const TagPage: React.FunctionComponent = () => {
     const tagInfo = async () => {
         let tag = null as Tag | TagHistory | null
         if (historyID) {
-            tag = await functions.get("/api/tag/history", {tag: tagName, historyID}, session, setSessionFlag).then((r) => r[0])
+            tag = await functions.http.get("/api/tag/history", {tag: tagName, historyID}, session, setSessionFlag).then((r) => r[0])
         } else {
-            tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag) as Tag
+            tag = await functions.http.get("/api/tag", {tag: tagName}, session, setSessionFlag) as Tag
         }
-        if (!tag) return functions.replaceLocation("/404")
+        if (!tag) return functions.dom.replaceLocation("/404")
         if (tag.hidden) {
             if (!session.cookie) return
-            if (!permissions.isMod(session)) return functions.replaceLocation("/404")
+            if (!permissions.isMod(session)) return functions.dom.replaceLocation("/404")
         }
         if (tag.r18) {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/403")
+            if (!session.showR18) return functions.dom.replaceLocation("/403")
         }
-        const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
+        const tagCount = await functions.http.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
         if (tag.featuredPost) {
-            const featuredImage = functions.getThumbnailLink(tag.featuredPost.images[0], "massive", session, mobile)
-            const decrypted = await functions.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
+            const featuredImage = functions.link.getThumbnailLink(tag.featuredPost.images[0], "massive", session, mobile)
+            const decrypted = await functions.crypto.decryptThumb(featuredImage, session, `featured-${featuredImage}`, true)
             if ((!session.username && tag.featuredPost.rating !== functions.r13()) || 
                 (!session.showR18 && tag.featuredPost.rating !== functions.r18()) ||
                 tag.featuredPost.deleted) {
@@ -119,20 +118,20 @@ const TagPage: React.FunctionComponent = () => {
     }
 
     const updateRelatedTags = async () => {
-        const related = await functions.get("/api/tag/related", {tag: tagName}, session, setSessionFlag)
+        const related = await functions.http.get("/api/tag/related", {tag: tagName}, session, setSessionFlag)
         setRelatedTags(related)
     }
 
     const getFavorite = async () => {
         if (!session.username) return
-        const tagFavorite = await functions.get("/api/tagfavorite", {tag: tagName}, session, setSessionFlag)
+        const tagFavorite = await functions.http.get("/api/tagfavorite", {tag: tagName}, session, setSessionFlag)
         setFavorited(tagFavorite ? true : false)
     }
 
     const updatePosts = async () => {
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
-        const images = uploads.map((p) => functions.getThumbnailLink(p.images[0], "medium", session, mobile))
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        let uploads = await functions.http.get("/api/search/posts", {query: tagName, type: "all", rating, style: "all", sort: "date", limit}, session, setSessionFlag)
+        const images = uploads.map((p) => functions.link.getThumbnailLink(p.images[0], "medium", session, mobile))
         setTagPosts(uploads)
         setPostImages(images)
     }
@@ -141,10 +140,10 @@ const TagPage: React.FunctionComponent = () => {
         if (!tag) return
         let uploads = tagPosts
         let offset = tagPosts.length
-        let rating = functions.isR18(ratingType) ? functions.r18() : "all"
-        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
+        let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
+        const result = await functions.http.get("/api/search/posts", {query: tag.tag, type: "all", rating, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
-        const images = result.map((p) => functions.getThumbnailLink(p.images[0], "medium", session, mobile))
+        const images = result.map((p) => functions.link.getThumbnailLink(p.images[0], "medium", session, mobile))
         setTagPosts(uploads)
         setAppendImages(images)
     }
@@ -179,7 +178,7 @@ const TagPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(tagPosts)
     }
 
@@ -250,7 +249,7 @@ const TagPage: React.FunctionComponent = () => {
             }
         }
         try {
-            await functions.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
+            await functions.http.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, 
             r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
@@ -258,7 +257,7 @@ const TagPage: React.FunctionComponent = () => {
             navigate(`/tag/${editTagObj.key}`)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
-                await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+                await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
@@ -284,7 +283,7 @@ const TagPage: React.FunctionComponent = () => {
             tag: tag.tag,
             key: tag.tag,
             description: tag.description,
-            image: tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null,
+            image: tag.image ? functions.link.getTagLink(tag.type, tag.image, tag.imageHash) : null,
             aliases: tag.aliases?.[0] ? tag.aliases.map((a: Alias | string | null) => 
             typeof a === "string" ? a as string : a?.alias || "") : [],
             implications: tag.implications?.[0] ? tag.implications.map((i: Implication | string | null) => 
@@ -304,7 +303,7 @@ const TagPage: React.FunctionComponent = () => {
 
     const deleteTag = async () => {
         if (!tag) return
-        await functions.delete("/api/tag/delete", {tag: tag.tag}, session, setSessionFlag)
+        await functions.http.delete("/api/tag/delete", {tag: tag.tag}, session, setSessionFlag)
         navigate("/tags")
     }
 
@@ -329,7 +328,7 @@ const TagPage: React.FunctionComponent = () => {
 
     const favoriteTag = async () => {
         if (!tag) return
-        await functions.post("/api/tagfavorite/toggle", {tag: tag.tag}, session, setSessionFlag)
+        await functions.http.post("/api/tagfavorite/toggle", {tag: tag.tag}, session, setSessionFlag)
         getFavorite()
         setTagFavoriteFlag(true)
     }
@@ -449,12 +448,12 @@ const TagPage: React.FunctionComponent = () => {
         if (!tag.image) {
             image = ["delete"]
         } else {
-            const imageLink = functions.getTagLink(tag.type, tag.image, tag.imageHash)
+            const imageLink = functions.link.getTagLink(tag.type, tag.image, tag.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
         }
-        await functions.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
+        await functions.http.put("/api/tag/edit", {tag: tag.tag, key: history.key, description: tag.description, image,
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
         twitter: tag.twitter, website: tag.website, fandom: tag.fandom, wikipedia: tag.wikipedia, type: tag.type, featuredPost: tag.featuredPost?.postID,
         r18: tag.r18 ?? false}, session, setSessionFlag)
@@ -505,13 +504,13 @@ const TagPage: React.FunctionComponent = () => {
 
     const getTagName = () => {
         if (!tag) return
-        if (historyID && (tag as TagHistory).key) return functions.toProperCase((tag as TagHistory).key.replaceAll("-", " "))
-        return functions.toProperCase(tag.tag.replaceAll("-", " "))
+        if (historyID && (tag as TagHistory).key) return functions.util.toProperCase((tag as TagHistory).key.replaceAll("-", " "))
+        return functions.util.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
     const featuredClick = (event: React.MouseEvent) => {
         if (!tag || !tag.featuredPost) return
-        functions.openPost(tag.featuredPost.postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(tag.featuredPost.postID, event, navigate, session, setSessionFlag)
     }
 
     return (
@@ -533,9 +532,9 @@ const TagPage: React.FunctionComponent = () => {
                             <div className="tag-row">
                                 {tag.image ?
                                 <div className="tag-img-container">
-                                    <img className="tag-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                                    <img className="tag-img" src={functions.link.getTagLink(tag.type, tag.image, tag.imageHash)}/>
                                 </div> : null}
-                                <span className={`tag-heading ${functions.getTagColor(tag)}`}>{getTagName()}</span>
+                                <span className={`tag-heading ${functions.tag.getTagColor(tag)}`}>{getTagName()}</span>
                                 {tagSocialJSX()}
                                 {tagOptionsJSX()}
                             </div>
@@ -545,7 +544,7 @@ const TagPage: React.FunctionComponent = () => {
                                 <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
                             </div> : null}
                             <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <span className="tag-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>
+                                <span className="tag-text">{functions.jsx.renderCommentaryText(tag.description)}</span>
                             </div>
                             {tagImplicationJSX()}
                             {relatedTagJSX()}

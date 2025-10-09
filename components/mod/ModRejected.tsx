@@ -4,7 +4,7 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import restore from "../../assets/icons/revert-purple.png"
 import reject from "../../assets/icons/reject.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {UnverifiedPost} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -36,7 +36,7 @@ const ModRejected: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const posts = await functions.get("/api/post/deleted/unverified", null, session, setSessionFlag)
+        const posts = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedPosts(posts)
     }
@@ -51,7 +51,7 @@ const ModRejected: React.FunctionComponent = (props) => {
             if (!unverifiedPosts[i]) break
             newVisiblePosts.push(unverifiedPosts[i])
         }
-        setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+        setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
         const newImagesRef = newVisiblePosts.map(() => React.createRef<HTMLCanvasElement>())
         setImagesRef(newImagesRef)
     }
@@ -64,13 +64,13 @@ const ModRejected: React.FunctionComponent = (props) => {
     }, [unverifiedPosts, index, updateVisiblePostFlag])
 
     const restorePost = async (postID: string) => {
-        await functions.put("/api/post/undelete/unverified", {postID}, session, setSessionFlag)
+        await functions.http.put("/api/post/undelete/unverified", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
 
     const rejectPost = async (postID: string) => {
-        await functions.post("/api/post/reject", {postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/reject", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
@@ -89,7 +89,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+            setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
             const newImagesRef = newVisiblePosts.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
         }
@@ -110,7 +110,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedPosts.filter((t) => !t.fake)
         if (!scroll) {
@@ -124,14 +124,14 @@ const ModRejected: React.FunctionComponent = (props) => {
             if (padded) {
                 setUnverifiedPosts(result)
             } else {
-                setUnverifiedPosts((prev) => functions.removeDuplicates([...prev, ...result]))
+                setUnverifiedPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setUnverifiedPosts(result)
                 } else {
-                    setUnverifiedPosts((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setUnverifiedPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -140,7 +140,7 @@ const ModRejected: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!unverifiedPosts[currentIndex]) return updateOffset()
                 const newPosts = visiblePosts
@@ -150,7 +150,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisiblePosts(functions.removeDuplicates(newPosts))
+                setVisiblePosts(functions.util.removeDuplicates(newPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -277,15 +277,15 @@ const ModRejected: React.FunctionComponent = (props) => {
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
             const ref = imagesRef[i]
-            const img = functions.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
+            const img = functions.link.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
             if (!ref.current) continue
             let src = img
-            if (functions.isModel(img)) {
-                src = await functions.modelImage(img, img)
-            } else if (functions.isLive2D(img)) {
-                src = await functions.live2dScreenshot(img)
-            } else if (functions.isAudio(img)) {
-                src = await functions.songCover(img)
+            if (functions.file.isModel(img)) {
+                src = await functions.model.modelImage(img, img)
+            } else if (functions.file.isLive2D(img)) {
+                src = await functions.model.live2dScreenshot(img)
+            } else if (functions.file.isAudio(img)) {
+                src = await functions.audio.songCover(img)
             }
             const imgElement = document.createElement("img")
             imgElement.src = src 
@@ -314,14 +314,14 @@ const ModRejected: React.FunctionComponent = (props) => {
     }, [scroll, modPage, unverifiedPosts])
 
     const openPost = (postID: string | null, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const generatePostsJSX = () => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as UnverifiedPost[]
         if (scroll) {
-            visible = functions.removeDuplicates(visiblePosts)
+            visible = functions.util.removeDuplicates(visiblePosts)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = unverifiedPosts.slice(offset, offset + getPageAmount())
@@ -344,20 +344,20 @@ const ModRejected: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
                 navigate(`/unverified/post/${post.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
-            let canvasImg = functions.isModel(img) || functions.isLive2D(img) || functions.isAudio(img)
+            const img = functions.link.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
+            let canvasImg = functions.file.isModel(img) || functions.file.isLive2D(img) || functions.file.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} key={i}>
                     <div className="mod-post-img-container">
-                        {functions.isVideo(img) ? 
+                        {functions.file.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
                         !canvasImg ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.toProperCase(post?.uploader) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${post.uploader}`)}>{i18n.sidebar.uploader}: {functions.util.toProperCase(post?.uploader) || i18n.user.deleted}</span>
                         {post.parentID ? <span className="mod-post-link" onClick={(event) => openPost(post.parentID, event)}>{i18n.labels.parentID}: {post.parentID}</span> : null}
-                        <span className="mod-post-text">{i18n.tag.artist}: {functions.toProperCase(post.artist || i18n.labels.none)}</span>
+                        <span className="mod-post-text">{i18n.tag.artist}: {functions.util.toProperCase(post.artist || i18n.labels.none)}</span>
                         <span className="mod-post-text">{i18n.navbar.tags}: {post.tags?.length}</span>
                         <span className="mod-post-text">{i18n.labels.newTags}: {post.newTags || 0}</span>
                     </div>
@@ -365,7 +365,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">{i18n.labels.source}: {post.source ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.similarPosts}: {post.duplicates ? i18n.buttons.yes : i18n.buttons.no}</span>
                         <span className="mod-post-text">{i18n.labels.resolution}: {post.images[0].width}x{post.images[0].height}</span>
-                        <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc, obj) => acc + obj.size, 0))}</span>
+                        <span className="mod-post-text">{i18n.labels.size}: {post.images.length}→{functions.util.readableFileSize(post.images.reduce((acc, obj) => acc + obj.size, 0))}</span>
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-text">{i18n.labels.upscaled}: {post.hasUpscaled ? i18n.buttons.yes : i18n.buttons.no}</span>

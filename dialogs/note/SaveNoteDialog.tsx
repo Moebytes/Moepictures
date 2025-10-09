@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -35,14 +35,14 @@ const SaveNoteDialog: React.FunctionComponent = (props) => {
     const saveNote = async () => {
         if (!saveNoteID || !saveNoteData) return
         if (saveNoteID.unverified) {
-            await functions.put("/api/note/save/unverified", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+            await functions.http.put("/api/note/save/unverified", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
             return setSubmitted(true)
         } else {
             if (permissions.isContributor(session)) {
-                await functions.post("/api/note/save", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                await functions.http.post("/api/note/save", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } else {
-                const badReason = functions.validateReason(reason, i18n)
+                const badReason = functions.validation.validateReason(reason, i18n)
                 if (badReason) {
                     setError(true)
                     if (!errorRef.current) await functions.timeout(20)
@@ -50,7 +50,7 @@ const SaveNoteDialog: React.FunctionComponent = (props) => {
                     await functions.timeout(2000)
                     setError(false)
                 }
-                functions.post("/api/note/save/request", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                functions.http.post("/api/note/save/request", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             }
         }

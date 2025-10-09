@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import GroupHistoryRow from "../../components/history/GroupHistoryRow"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
@@ -46,11 +46,11 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as GroupHistory[]
         if (props.all) {
-            result = await functions.get("/api/group/history", null, session, setSessionFlag)
+            result = await functions.http.get("/api/group/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/group/history", {slug, username}, session, setSessionFlag)
+            result = await functions.http.get("/api/group/history", {slug, username}, session, setSessionFlag)
             if (!result.length) {
-                const groupObject = await functions.get("/api/group", {name: slug}, session, setSessionFlag)
+                const groupObject = await functions.http.get("/api/group", {name: slug}, session, setSessionFlag)
                 if (!groupObject) return
                 const historyObject = groupObject as unknown as GroupHistory
                 historyObject.date = groupObject.createDate
@@ -96,7 +96,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as GroupHistory[]
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
+            if (functions.post.isR18(revisions[currentIndex].rating)) if (!functions.post.isR18(ratingType)) {
                 currentIndex++
                 continue
             }
@@ -104,16 +104,16 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRevisions(functions.removeDuplicates(newVisibleRevisions))
+        setVisibleRevisions(functions.util.removeDuplicates(newVisibleRevisions))
     }, [revisions, session])
 
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/group/history", {slug, username, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.http.get("/api/group/history", {slug, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
-            setRevisions((prev) => functions.removeDuplicates([...prev, ...result]))
+            setRevisions((prev) => functions.util.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }
@@ -122,13 +122,13 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!revisions[currentIndex]) return updateOffset()
                 const newRevisions = visibleRevisions
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (functions.isR18(revisions[currentIndex].rating)) if (!functions.isR18(ratingType)) {
+                    if (functions.post.isR18(revisions[currentIndex].rating)) if (!functions.post.isR18(ratingType)) {
                         currentIndex++
                         continue
                     }
@@ -136,7 +136,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRevisions(functions.removeDuplicates(newRevisions))
+                setVisibleRevisions(functions.util.removeDuplicates(newRevisions))
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -147,7 +147,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.removeDuplicates(visibleRevisions)
+        let visible = functions.util.removeDuplicates(visibleRevisions)
         let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
@@ -172,7 +172,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s ${i18n.history.group}` : i18n.history.group}</span>
+                    <span className="history-heading">{username ? `${functions.util.toProperCase(username)}'s ${i18n.history.group}` : i18n.history.group}</span>
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

@@ -4,7 +4,7 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import {UnverifiedNoteSearch, Note} from "../../types/Types"
 import "./styles/modposts.less"
 
@@ -35,7 +35,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     }
 
     const updateNotes = async () => {
-        const notes = await functions.get("/api/note/list/unverified", null, session, setSessionFlag)
+        const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedNotes(notes)
     }
@@ -50,7 +50,7 @@ const ModNotes: React.FunctionComponent = (props) => {
             if (!unverifiedNotes[i]) break
             newVisibleNotes.push(unverifiedNotes[i])
         }
-        setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
+        setVisibleNotes(functions.util.removeDuplicates(newVisibleNotes))
     }
 
     const refreshNotes = async () => {
@@ -59,13 +59,13 @@ const ModNotes: React.FunctionComponent = (props) => {
     }
 
     const approveNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
-        await functions.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
+        await functions.http.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
 
     const rejectNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
-        await functions.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
+        await functions.http.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
         await updateNotes()
         refreshNotes()
     }
@@ -84,7 +84,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleNotes(functions.removeDuplicates(newVisibleNotes))
+            setVisibleNotes(functions.util.removeDuplicates(newVisibleNotes))
             const newImagesRef = newVisibleNotes.map(() => React.createRef<HTMLCanvasElement>())
             setImagesRef(newImagesRef)
         }
@@ -105,7 +105,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedNotes.filter((t) => !t.fake)
         if (!scroll) {
@@ -119,14 +119,14 @@ const ModNotes: React.FunctionComponent = (props) => {
             if (padded) {
                 setUnverifiedNotes(result)
             } else {
-                setUnverifiedNotes((prev) => functions.removeDuplicates([...prev, ...result]))
+                setUnverifiedNotes((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setUnverifiedNotes(result)
                 } else {
-                    setUnverifiedNotes((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setUnverifiedNotes((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -135,7 +135,7 @@ const ModNotes: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!unverifiedNotes[currentIndex]) return updateOffset()
                 const newNotes = visibleNotes
@@ -145,7 +145,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleNotes(functions.removeDuplicates(newNotes))
+                setVisibleNotes(functions.util.removeDuplicates(newNotes))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -272,7 +272,7 @@ const ModNotes: React.FunctionComponent = (props) => {
         let noteChanges = unverifiedNote.addedEntries?.length || unverifiedNote.removedEntries?.length
         if (!noteChanges) return null
 
-        const replaceKey = (i: string) => i.replace("Character", functions.toProperCase(i18n.tag.character))
+        const replaceKey = (i: string) => i.replace("Character", functions.util.toProperCase(i18n.tag.character))
         const addedJSX = unverifiedNote.addedEntries.map((i: string) => <span className="tag-add">+{replaceKey(i)}</span>)
         const removedJSX = unverifiedNote.removedEntries.map((i: string) => <span className="tag-remove">-{replaceKey(i)}</span>)
 
@@ -284,7 +284,7 @@ const ModNotes: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as UnverifiedNoteSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleNotes)
+            visible = functions.util.removeDuplicates(visibleNotes)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = unverifiedNotes.slice(offset, offset + getPageAmount())
@@ -307,16 +307,16 @@ const ModNotes: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/unverified/post/${noteGroup.postID}`, "_blank")
                 navigate(`/unverified/post/${noteGroup.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(noteGroup.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getUnverifiedThumbnailLink(noteGroup.post.images[0], "tiny", session, mobile)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
-                        {functions.isVideo(img) ? 
+                        {functions.file.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
                         <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => navigate(`/user/${noteGroup.updater}`)}>{i18n.sidebar.updater}: {functions.toProperCase(noteGroup?.updater) || i18n.user.deleted}</span>
+                        <span className="mod-post-link" onClick={() => navigate(`/user/${noteGroup.updater}`)}>{i18n.sidebar.updater}: {functions.util.toProperCase(noteGroup?.updater) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {noteGroup.reason}</span>
                         {noteDataJSX(noteGroup)}
                     </div>

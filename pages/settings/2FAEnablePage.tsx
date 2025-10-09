@@ -7,7 +7,7 @@ import SideBar from "../../components/site/SideBar"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -51,7 +51,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const get2FAQRCode = async () => {
-        const qrcode = await functions.post("/api/2fa/qr", null, session, setSessionFlag)
+        const qrcode = await functions.http.post("/api/2fa/qr", null, session, setSessionFlag)
         if (qrcode) setQR(qrcode)
     }
 
@@ -68,7 +68,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const qr = await functions.post("/api/2fa/create", null, session, setSessionFlag)
+        const qr = await functions.http.post("/api/2fa/create", null, session, setSessionFlag)
         if (qr) {
             setQR(qr)
             setShowValidation(true)
@@ -107,7 +107,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.post("/api/2fa/enable", {token}, session, setSessionFlag)
+            await functions.http.post("/api/2fa/enable", {token}, session, setSessionFlag)
             setSessionFlag(true)
             setShowValidation(false)
             setError(false)

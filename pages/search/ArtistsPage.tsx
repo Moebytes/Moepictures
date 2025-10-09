@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -93,7 +93,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const updateArtists = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/artists", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/artists", {sort: functions.validation.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleArtists([])
@@ -141,7 +141,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleArtists(functions.removeDuplicates(newVisibleArtists))
+            setVisibleArtists(functions.util.removeDuplicates(newVisibleArtists))
         }
         if (scroll) updateArtists()
     }, [scroll, artists, session])
@@ -160,7 +160,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/artists", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/artists", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanArtists = artists.filter((t) => !t.fake)
         if (!scroll) {
@@ -174,14 +174,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setArtists(result)
             } else {
-                setArtists(functions.removeDuplicates([...artists, ...result]))
+                setArtists(functions.util.removeDuplicates([...artists, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setArtists(result)
                 } else {
-                    setArtists(functions.removeDuplicates([...artists, ...result]))
+                    setArtists(functions.util.removeDuplicates([...artists, ...result]))
                 }
             }
             setEnded(true)
@@ -190,7 +190,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!artists[currentIndex]) return updateOffset()
                 const newVisibleArtists = visibleArtists
@@ -200,7 +200,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleArtists(functions.removeDuplicates(newVisibleArtists))
+                setVisibleArtists(functions.util.removeDuplicates(newVisibleArtists))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -360,7 +360,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as TagCategorySearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleArtists)
+            visible = functions.util.removeDuplicates(visibleArtists)
         } else {
             const postOffset = (artistsPage - 1) * getPageAmount()
             visible = artists.slice(postOffset, postOffset + getPageAmount())

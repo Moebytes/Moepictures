@@ -45,11 +45,11 @@ export default defineConfig({
         legalComments: "none",
         distPath: {root: "./dist/client"},
         copy: [
-            {from: "assets/misc/bitcrusher.js", to: "[name][ext]"},
-            {from: "assets/misc/soundtouch.js", to: "[name][ext]"},
-            {from: "assets/misc/webpxmux.wasm", to: "[name][ext]"},
-            {from: "assets/misc/avif_enc.wasm", to: "[name][ext]"},
-            {from: "assets/misc/jxl_enc.wasm", to: "[name][ext]"},
+            {from: "assets/audio worklet/bitcrusher.js", to: "[name][ext]"},
+            {from: "assets/audio worklet/soundtouch.js", to: "[name][ext]"},
+            {from: "assets/wasm/webpxmux.wasm", to: "[name][ext]"},
+            {from: "assets/wasm/avif_enc.wasm", to: "[name][ext]"},
+            {from: "assets/wasm/jxl_enc.wasm", to: "[name][ext]"},
             {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"},
         ]
     }

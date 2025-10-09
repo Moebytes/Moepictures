@@ -1,7 +1,7 @@
 import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 
@@ -31,7 +31,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
 
     const deleteFavgroup = async () => {
         if (!deleteFavGroupObj) return
-        await functions.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
+        await functions.http.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
         setDeleteFavGroupObj(null)
         setSessionFlag(true)
         navigate("/profile")

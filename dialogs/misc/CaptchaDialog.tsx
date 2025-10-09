@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 
@@ -26,7 +26,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -70,7 +70,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            await functions.post("/api/misc/captcha", {captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/misc/captcha", {captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
             setNeedsVerification(false)
             history.go(0)

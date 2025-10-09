@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import website from "../../assets/icons/website.png"
 import twitter from "../../assets/icons/twitter.png"
@@ -42,14 +42,14 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
                 return navigate(`/post/${post.postID}/${post.slug}`)
             }
         }
-        let filtered = props.series.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
+        let filtered = props.series.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(props.series.posts)
     }
 
@@ -57,10 +57,10 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         let images = [] as string[]
         if (!session.username) {
             let filtered = props.series.posts.filter((p) => p.rating === functions.r13())
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         } else {
-            let filtered = props.series.posts.filter((p) => functions.isR18(ratingType) ? functions.isR18(p.rating) : !functions.isR18(p.rating))
-            images = filtered.map((p) => functions.getThumbnailLink(p.images[0], "tiny", session, mobile))
+            let filtered = props.series.posts.filter((p) => functions.post.isR18(ratingType) ? functions.post.isR18(p.rating) : !functions.post.isR18(p.rating))
+            images = filtered.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
         }
         setImages(images)
     }
@@ -86,9 +86,9 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="seriesrow">
             <div className="seriesrow-row">
-                {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image, props.series.imageHash)}/> : null}
+                {props.series.image ? <img className="seriesrow-img" src={functions.link.getTagLink("series", props.series.image, props.series.imageHash)}/> : null}
                 <span className="seriesrow-text-hover">
-                    <span className="seriesrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
+                    <span className="seriesrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     {seriesSocialJSX()}
                     <span className="seriesrow-text-alt">{props.series.postCount}</span>
                 </span>

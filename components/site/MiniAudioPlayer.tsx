@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useLocation, useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Slider from "react-slider"
 import playerRewind from "../../assets/icons/player-rewind.png"
 import playerFastforward from "../../assets/icons/player-fastforward.png"
@@ -59,8 +59,8 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
 
     const updateSongCover = async () => {
         if (!audio) return
-        let decrypted = await functions.decryptItem(audio, session)
-        const songCover = await functions.songCover(decrypted)
+        let decrypted = await functions.crypto.decryptItem(audio, session)
+        const songCover = await functions.audio.songCover(decrypted)
         setCoverImg(songCover)
     }
 
@@ -222,9 +222,9 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
         return (<>
             <div className="mini-audio-player-row">
                 <div className="mini-audio-player-container" style={{width: "100%"}}>
-                    <p className="mini-audio-player-text">{audioDragging ? functions.formatSeconds(audioDragProgress || 0) : functions.formatSeconds(audioSecondsProgress)}</p>
+                    <p className="mini-audio-player-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
                     <Slider ref={audioSliderRef} className="mini-audio-player-slider" trackClassName="mini-audio-player-slider-track" thumbClassName="mini-audio-player-slider-thumb" min={0} max={100} value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                    <p className="mini-audio-player-text">{functions.formatSeconds(audioDuration)}</p>
+                    <p className="mini-audio-player-text">{functions.date.formatSeconds(audioDuration)}</p>
                 </div>
             </div>
             <div className="mini-audio-player-row">
@@ -260,7 +260,7 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     }
 
     let style = mobile ? {top: "500px"} : {top: "40px"}
-    if (typeof window !== "undefined") style = {top: `${functions.navbarHeight()}px`}
+    if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
 
     if (audio) {
         return (

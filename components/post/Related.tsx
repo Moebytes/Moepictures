@@ -4,7 +4,7 @@ import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelecto
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import pageIcon from "../../assets/icons/page.png"
 import scrollIcon from "../../assets/icons/scroll.png"
@@ -65,13 +65,13 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (props.post?.type === "model" || props.post?.type === "live2d") {
             if (session.liveModelPreview) return []
         }
-        let result = await functions.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
-        rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        let result = await functions.http.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
+        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
 
         if (result.length < 50 && props.fallback?.[0]) {
-            let interResult = await functions.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
-            rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            let interResult = await functions.http.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
+            rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -79,8 +79,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
 
         if (result.length < 50 && props.fallback?.[1]) {
-            let interResult = await functions.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
-            rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+            let interResult = await functions.http.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
+            rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
             sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
             const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
             result.push(...filtered)
@@ -134,7 +134,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRelated(functions.removeDuplicates(newVisibleRelated))
+            setVisibleRelated(functions.util.removeDuplicates(newVisibleRelated))
         }
         if (scroll) updateRelated()
     }, [scroll, related, session])
@@ -155,8 +155,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
-        rating: functions.isR18(rating) ? rating : "all", style: functions.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        let result = await functions.http.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
+        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
         sort: props.count ? "date" : "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
 
         let hasMore = result?.length >= limit
@@ -171,16 +171,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
         if (hasMore) {
             setOffset(newOffset)
             if (padded) {
-                setRelated(functions.removeDuplicates([...related, ...result]))
+                setRelated(functions.util.removeDuplicates([...related, ...result]))
             } else {
-                setRelated(functions.removeDuplicates([...related, ...result]))
+                setRelated(functions.util.removeDuplicates([...related, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
-                    setRelated(functions.removeDuplicates([...related, ...result]))
+                    setRelated(functions.util.removeDuplicates([...related, ...result]))
                 } else {
-                    setRelated(functions.removeDuplicates([...related, ...result]))
+                    setRelated(functions.util.removeDuplicates([...related, ...result]))
                 }
             }
             setEnded(true)
@@ -189,7 +189,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!related[currentIndex]) return updateOffset()
                 const newVisibleRelated = visibleRelated
@@ -199,7 +199,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRelated(functions.removeDuplicates(newVisibleRelated))
+                setVisibleRelated(functions.util.removeDuplicates(newVisibleRelated))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -396,7 +396,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as PostSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRelated)
+            visible = functions.util.removeDuplicates(visibleRelated)
         } else {
             const postOffset = (relatedPage - 1) * getPageAmount()
             visible = related.slice(postOffset, postOffset + getPageAmount())
@@ -406,15 +406,15 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const post = visible[i]
             if (post.fake) continue
             if (!session.username) if (post.rating !== functions.r13()) continue
-            if (!functions.isR18(ratingType)) if (functions.isR18(post.rating)) continue
+            if (!functions.post.isR18(ratingType)) if (functions.post.isR18(post.rating)) continue
 
             const promise = new TrackablePromise<void>()
             visiblePromisesRef.current.push(promise)
 
             const image = post.images[0]
-            const thumb = functions.getThumbnailLink(image, "medium", session, mobile)
-            const liveThumb = functions.getThumbnailLink(image, "medium", session, mobile, true)
-            const images = post.images.map((image) => functions.getImageLink(image, session.upscaledImages))
+            const thumb = functions.link.getThumbnailLink(image, "medium", session, mobile)
+            const liveThumb = functions.link.getThumbnailLink(image, "medium", session, mobile, true)
+            const images = post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post} onLoad={promise.resolve}/>)
@@ -463,7 +463,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        return related.map((post) => functions.getThumbnailLink(post.images[0], "tiny", session, mobile))
+        return related.map((post) => functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile))
     }
 
     const click = (img: string, index: number) => {

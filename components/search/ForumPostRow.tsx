@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useFilterSelector, useThreadDialogSelector, useThreadDialogActions, useFlagActions, useCacheSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
@@ -17,7 +17,6 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import jsxFunctions from "../../structures/JSXFunctions"
 import "./styles/commentrow.less"
 import {ForumPostSearch} from "../../types/Types"
 
@@ -52,7 +51,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const getUserPFP = () => {
         if (props.forumPost?.image) {
-            return functions.getTagLink("pfp", props.forumPost.image, props.forumPost.imageHash)
+            return functions.link.getTagLink("pfp", props.forumPost.image, props.forumPost.imageHash)
         } else {
             return favicon
         }
@@ -61,7 +60,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const userImgClick = (event: React.MouseEvent) => {
         if (!props.forumPost?.imagePost) return
         event.stopPropagation()
-        functions.openPost(props.forumPost.imagePost, event, navigate, session, setSessionFlag)
+        functions.post.openPost(props.forumPost.imagePost, event, navigate, session, setSessionFlag)
     }
 
     const goToPost = (id: string) => {
@@ -72,16 +71,16 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const triggerQuote = () => {
         if (!props.forumPost.thread) return
         navigate(`/thread/${props.forumPost.thread.threadID}`)
-        const cleanComment = functions.parsePieces(props.forumPost?.content).filter((s: string) => !s.includes(">>>")).join("")
+        const cleanComment = functions.render.parsePieces(props.forumPost?.content).filter((s: string) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.forumPost?.id}] ${functions.toProperCase(props.forumPost?.creator)} said:
+            >>>[${props.forumPost?.id}] ${functions.util.toProperCase(props.forumPost?.creator)} said:
             > ${cleanComment}
         `))
     }
 
     const deleteThread = async () => {
         if (props.forumPost.type === "thread") {
-            await functions.delete("/api/thread/delete", {threadID: props.forumPost.id}, session, setSessionFlag)
+            await functions.http.delete("/api/thread/delete", {threadID: props.forumPost.id}, session, setSessionFlag)
             navigate("/forum")
         }
     }
@@ -89,7 +88,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const deleteReply = async () => {
         if (!props.forumPost.thread) return
         if (props.forumPost.type === "reply") {
-            await functions.delete("/api/reply/delete", {threadID: props.forumPost.thread.threadID, replyID: props.forumPost.id}, session, setSessionFlag)
+            await functions.http.delete("/api/reply/delete", {threadID: props.forumPost.thread.threadID, replyID: props.forumPost.id}, session, setSessionFlag)
             props.onDelete?.()
         }
     }
@@ -120,11 +119,11 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const editThread = async () => {
         if (props.forumPost.type === "thread") {
-            const badTitle = functions.validateTitle(editThreadTitle, i18n)
+            const badTitle = functions.validation.validateTitle(editThreadTitle, i18n)
             if (badTitle) return
-            const badContent = functions.validateThread(editThreadContent, i18n)
+            const badContent = functions.validation.validateThread(editThreadContent, i18n)
             if (badContent) return
-            await functions.put("/api/thread/edit", {threadID: props.forumPost.id, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
+            await functions.http.put("/api/thread/edit", {threadID: props.forumPost.id, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
             props.onEdit?.()
         }
     }
@@ -132,9 +131,9 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const editReply = async () => {
         if (props.forumPost.type === "reply") {
             if (!editReplyContent) return
-            const badReply = functions.validateReply(editReplyContent, i18n)
+            const badReply = functions.validation.validateReply(editReplyContent, i18n)
             if (badReply) return
-            await functions.put("/api/reply/edit", {replyID: props.forumPost.id, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
+            await functions.http.put("/api/reply/edit", {replyID: props.forumPost.id, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
             props.onEdit?.()
         }
     }
@@ -231,61 +230,61 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
         if (props.forumPost?.role === "admin") {
             return (
                 <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                    <span className="commentrow-user-text admin-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (props.forumPost?.role === "mod") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text mod-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (props.forumPost?.role === "system") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text system-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (props.forumPost?.role === "premium-curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (props.forumPost?.role === "curator") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (props.forumPost?.role === "premium-contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (props.forumPost?.role === "contributor") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text contributor-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.forumPost?.role === "premium") {
             return (
                 <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.forumPost.creator)}</span>
+                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
                     <img className="commentrow-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`commentrow-user-text ${props.forumPost?.banned ? "banned" : ""}`}>{functions.toProperCase(props.forumPost?.creator) || i18n.user.deleted}</span>
+        return <span className={`commentrow-user-text ${props.forumPost?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.forumPost?.creator) || i18n.user.deleted}</span>
     }
 
     const titleClick = (event: React.MouseEvent) => {
@@ -309,8 +308,8 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
                     <span className="commentrow-title" onClick={titleClick}>{props.forumPost.thread?.title}</span>
-                    <span className="commentrow-date-text">{functions.timeAgo(props.forumPost?.createDate, i18n)}:</span>
-                    {jsxFunctions.renderText(props.forumPost?.content, emojis, "comment", goToPost)}
+                    <span className="commentrow-date-text">{functions.date.timeAgo(props.forumPost?.createDate, i18n)}:</span>
+                    {functions.jsx.renderText(props.forumPost?.content, emojis, "comment", goToPost)}
                 </div>
             </div>
             {session.username ? forumPostOptions() : null}

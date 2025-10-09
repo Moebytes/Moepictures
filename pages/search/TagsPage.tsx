@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
@@ -92,7 +92,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const updateTags = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/tags", {sort: functions.parseSort(sortType, sortReverse), type: typeType, query, limit}, session, setSessionFlag)
+        const result = await functions.http.get("/api/search/tags", {sort: functions.validation.parseSort(sortType, sortReverse), type: typeType, query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleTags([])
@@ -147,7 +147,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleTags(functions.removeDuplicates(newVisibleTags))
+            setVisibleTags(functions.util.removeDuplicates(newVisibleTags))
         }
         if (scroll) updateTags()
     }, [scroll, tags])
@@ -166,7 +166,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/tags", {sort: functions.parseSort(sortType, sortReverse), type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/tags", {sort: functions.validation.parseSort(sortType, sortReverse), type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanTags = tags.filter((t) => !t.fake)
         if (!scroll) {
@@ -180,14 +180,14 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (padded) {
                 setTags(result)
             } else {
-                setTags((prev) => functions.removeDuplicates([...prev, ...result]))
+                setTags((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setTags(result)
                 } else {
-                    setTags((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setTags((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -196,7 +196,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!tags[currentIndex]) return updateOffset()
                 const newVisibleTags = visibleTags
@@ -206,7 +206,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleTags(functions.removeDuplicates(newVisibleTags))
+                setVisibleTags(functions.util.removeDuplicates(newVisibleTags))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -392,7 +392,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as TagSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleTags)
+            visible = functions.util.removeDuplicates(visibleTags)
         } else {
             const postOffset = (tagsPage - 1) * getPageAmount()
             visible = tags.slice(postOffset, postOffset + getPageAmount())
@@ -400,7 +400,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
-            if (!functions.isR18(ratingType)) if (visible[i].r18) continue
+            if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
             jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         if (!scroll) {

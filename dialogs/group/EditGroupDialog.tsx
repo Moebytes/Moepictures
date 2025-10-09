@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Draggable from "react-draggable"
 import "../dialog.less"
@@ -52,8 +52,8 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
-            const newSlug = functions.generateSlug(name)
+            await functions.http.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
+            const newSlug = functions.post.generateSlug(name)
             navigate(`/group/${newSlug}`)
             setEditGroupObj(null)
             if (editGroupObj.slug === newSlug) setGroupFlag(true)
@@ -65,7 +65,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            const badReason = functions.validateReason(reason, i18n)
+            const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -74,7 +74,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await functions.post("/api/group/edit/request", {slug: editGroupObj.slug, name, description, reason}, session, setSessionFlag)
+            await functions.http.post("/api/group/edit/request", {slug: editGroupObj.slug, name, description, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
         setEditGroupObj(null)

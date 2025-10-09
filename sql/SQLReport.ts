@@ -1,6 +1,6 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
-import functions from "../structures/Functions"
+import functions from "../functions/Functions"
 import {Report, Ban, Blacklist, Redirect} from "../types/Types"
 
 export default class SQLReport {

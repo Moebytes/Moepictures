@@ -5,7 +5,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlayback
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import JSZip from "jszip"
 import path from "path"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import privateIcon from "../../assets/icons/lock-opt.png"
 import emptyVideo from "../../assets/images/empty.mp4"
 import "./styles/gridimage.less"
@@ -90,11 +90,11 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     useImperativeHandle(componentRef, () => ({
         shouldWait: async () => {
             let isAnimatedWebP = false
-            if (functions.isWebP(props.original)) {
+            if (functions.file.isWebP(props.original)) {
                 const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
+                isAnimatedWebP = functions.file.isAnimatedWebp(arraybuffer)
             }
-            if (functions.isVideo(props.original) || functions.isGIF(props.original) || isAnimatedWebP) {
+            if (functions.file.isVideo(props.original) || functions.file.isGIF(props.original) || isAnimatedWebP) {
                 return true
             } else {
                 return false
@@ -106,20 +106,20 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         update: async () => {
             if (!shouldUpdate()) return
             if (!gifData) {
-                if (functions.isGIF(props.original)) return parseGIF()
-                if (functions.isWebP(props.original)) return parseAnimatedWebP()
+                if (functions.file.isGIF(props.original)) return parseGIF()
+                if (functions.file.isWebP(props.original)) return parseAnimatedWebP()
             }
             if (!videoData) {
-                if (functions.isVideo(props.original)) return getVideoData()
+                if (functions.file.isVideo(props.original)) return getVideoData()
             }
         }
     }))
 
     const loadImage = async () => {
-        const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
-        const liveImg = await functions.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
+        const decryptedImg = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
+        const liveImg = await functions.crypto.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
         const bufferTest = await fetch(decryptedImg).then((r => r.arrayBuffer()))
-        const result = functions.bufferFileType(bufferTest)
+        const result = functions.byte.bufferFileType(bufferTest)
         setLiveImg(liveImg)
         if (result[0].mime !== "application/json") {
             setImg(decryptedImg)
@@ -144,10 +144,10 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [hover, liveImg, staticImg, session, mobile])
 
     const shouldUpdate = () => {
-        if (functions.isVideo(props.original)) {
+        if (functions.file.isVideo(props.original)) {
             if (reverse !== false) return true
         }
-        if (functions.isGIF(props.original) || functions.isWebP(props.original)) {
+        if (functions.file.isGIF(props.original) || functions.file.isWebP(props.original)) {
             if (reverse !== false || speed !== 1 || pixelate !== 1) return true
         }
         return false
@@ -211,7 +211,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         let observer = null as ResizeObserver | null
-        if (functions.isImage(props.img) || functions.isGIF(props.original) || functions.isWebP(props.original)) {
+        if (functions.file.isImage(props.img) || functions.file.isGIF(props.original) || functions.file.isWebP(props.original)) {
             observer = new ResizeObserver(resizePixelateCanvas)
             observer.observe(ref.current!)
         }
@@ -223,7 +223,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const parseGIF = async () => {
         const start = new Date()
         const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
-        const frames = await functions.extractGIFFrames(arrayBuffer)
+        const frames = await functions.video.extractGIFFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -232,9 +232,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const parseAnimatedWebP = async () => {
         const start = new Date()
         const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
-        const animated = functions.isAnimatedWebp(arrayBuffer)
+        const animated = functions.file.isAnimatedWebp(arrayBuffer)
         if (!animated) return 
-        const frames = await functions.extractAnimatedWebpFrames(arrayBuffer)
+        const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -243,13 +243,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const getVideoData = async () => {
         if (!videoRef.current) return
-        if (functions.isVideo(props.original) && !mobile) {
+        if (functions.file.isVideo(props.original) && !mobile) {
             let frames = [] as ImageBitmap[]
-            if (functions.isMP4(props.img)) {
-                frames = await functions.extractMP4Frames(props.img)
+            if (functions.file.isMP4(props.img)) {
+                frames = await functions.video.extractMP4Frames(props.img)
                 if (!frames) return
-            } else if (functions.isWebM(props.img)) {
-                frames = await functions.extractWebMFrames(props.img)
+            } else if (functions.file.isWebM(props.img)) {
+                frames = await functions.video.extractWebMFrames(props.img)
                 if (!frames) return
             }
             setVideoData(frames)
@@ -259,19 +259,19 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         const parseVideo = async () => {
             if (backFrame) return 
-            const thumb = await functions.videoThumbnail(props.img)
+            const thumb = await functions.video.videoThumbnail(props.img)
             setBackFrame(thumb)
         }
-        if (functions.isVideo(props.original)) parseVideo()
+        if (functions.file.isVideo(props.original)) parseVideo()
     }, [imageLoaded])
 
     useEffect(() => {
-        if (!functions.isVideo(props.original) && !gifData) return
+        if (!functions.file.isVideo(props.original) && !gifData) return
         const animationLoop = async () => {
             if (imageLoaded) {
-                if (reverse && functions.isVideo(props.original) && !videoData) return
-                const adjustedData = gifData ? functions.gifSpeed(gifData, speed) : 
-                                    videoData ? functions.videoSpeed(videoData, speed) : null
+                if (reverse && functions.file.isVideo(props.original) && !videoData) return
+                const adjustedData = gifData ? functions.video.gifSpeed(gifData, speed) : 
+                                    videoData ? functions.video.videoSpeed(videoData, speed) : null
                 if (videoRef.current) videoRef.current.playbackRate = speed 
                 const pixelateCanvas = pixelateRef.current
                 if (gifData) {
@@ -418,7 +418,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [imageLoaded, gifData, videoData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
 
     const resizeOverlay = () => {
-        if (functions.isVideo(props.original) && !mobile) {
+        if (functions.file.isVideo(props.original) && !mobile) {
             if (!videoRef.current || !videoOverlayRef.current || !pixelateRef.current || !effectRef.current) return
             if (videoRef.current.clientWidth === 0) return
             videoOverlayRef.current.width = videoRef.current.clientWidth
@@ -437,7 +437,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     useEffect(() => {
-        const element = functions.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
+        const element = functions.file.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
         new ResizeObserver(resizeOverlay).observe(element)
         setTimeout(() => {
             setPageBuffering(false)
@@ -462,13 +462,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const updateSquare = () => {
         if (!containerRef.current) return
-        const currentRef = functions.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
-        const refWidth = functions.isVideo(props.original) && !mobile ? videoRef.current!.clientWidth : ref.current!.width
-        const refHeight = functions.isVideo(props.original) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
+        const currentRef = functions.file.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
+        const refWidth = functions.file.isVideo(props.original) && !mobile ? videoRef.current!.clientWidth : ref.current!.width
+        const refHeight = functions.file.isVideo(props.original) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
         if (square || props.square) {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
-            const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
+            const containerWidth = Math.floor(width / (mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.height = props.height ? `${props.height}px` : `${containerWidth}px`
             containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
@@ -533,7 +533,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         const element = imageFiltersRef.current
         let newContrast = contrast
         let image = props.img
-        if (functions.isVideo(props.original) && mobile && backFrame) image = backFrame
+        if (functions.file.isVideo(props.original) && mobile && backFrame) image = backFrame
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
@@ -563,26 +563,26 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         setTimeout(() => {
-            functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
-            {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.original)})
-            functions.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
-            maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.original)})
+            functions.image.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+            {isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.original)})
+            functions.image.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
+            maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.original)})
         }, 50)
     }, [imageLoaded, hover])
 
     useEffect(() => {
-        functions.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
-        {isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.original)})
+        functions.image.pixelateEffect(pixelateRef.current, ref.current, pixelate, 
+        {isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.original)})
     }, [pixelate, square, imageSize])
 
     useEffect(() => {
-        functions.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
-        maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.isVideo(props.original)})
+        functions.image.splatterEffect(effectRef.current, ref.current, splatter, {lineMultiplier: 4, 
+        maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: functions.file.isVideo(props.original)})
     }, [splatter])
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
         if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !effectRef.current) return
-        const currentRef = functions.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
+        const currentRef = functions.file.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
         const rect = currentRef.getBoundingClientRect()
         const width = rect?.width
         const height = rect?.height
@@ -601,7 +601,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     const cancelImageAnimation = () => {
         if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !effectRef.current) return
-        const currentRef = functions.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
+        const currentRef = functions.file.isVideo(props.original) && !mobile ? videoRef.current! : ref.current!
         currentRef.style.transform = "scale(1)"
         overlayRef.current.style.transform = "scale(1)"
         lightnessRef.current.style.transform = "scale(1)"
@@ -612,7 +612,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const onLoad = (event: React.SyntheticEvent) => {
-        if (functions.isVideo(props.original) && !mobile) {
+        if (functions.file.isVideo(props.original) && !mobile) {
             const element = event.target as HTMLVideoElement
             setImageWidth(element.clientWidth)
             setImageHeight(element.clientHeight)
@@ -639,14 +639,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
             let pixelateCanvas = document.createElement("canvas")
-            functions.pixelateEffect(pixelateCanvas, frame, pixelate, {directWidth: true})
+            functions.image.pixelateEffect(pixelateCanvas, frame, pixelate, {directWidth: true})
             ctx.imageSmoothingEnabled = false
             ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
             ctx.imageSmoothingEnabled = true
         }
         if (splatter !== 0) {
             const splatterCanvas = document.createElement("canvas")
-            functions.splatterEffect(splatterCanvas, frame, splatter)
+            functions.image.splatterEffect(splatterCanvas, frame, splatter)
             ctx.drawImage(splatterCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (sharpen !== 0) {
@@ -699,17 +699,17 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const renderImage = async (image?: string) => {
         if (filtersOn()) {
             if (image) {
-                const decrypted = await functions.decryptItem(image, session)
-                const img = await functions.createImage(decrypted)
+                const decrypted = await functions.crypto.decryptItem(image, session)
+                const img = await functions.image.createImage(decrypted)
                 return render(img, false)
             } else {
                 return render(ref.current!, false)
             }
         } else {
             if (image) {
-                return functions.decryptItem(image, session)
+                return functions.crypto.decryptItem(image, session)
             } else {
-                return functions.decryptItem(props.original, session)
+                return functions.crypto.decryptItem(props.original, session)
             }
 
         }
@@ -720,8 +720,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
             filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
         }
-        if (gifData || functions.isGIF(props.original) || functions.isVideo(props.original)) {
-            functions.download(filename, props.original)
+        if (gifData || functions.file.isGIF(props.original) || functions.file.isVideo(props.original)) {
+            functions.dom.download(filename, props.original)
         } else {
             if (props.comicPages && props.comicPages.length > 1) {
                 const zip = new JSZip()
@@ -731,17 +731,17 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                     if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
                         pageName = `${props.post.source.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
-                    const decryptedPage = await functions.decryptItem(page, session)
+                    const decryptedPage = await functions.crypto.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)
                     if (filtersOn() || path.extname(pageName) !== `.${format}`) {
-                        image = await functions.convertToFormat(image, format)
+                        image = await functions.image.convertToFormat(image, format)
                     }
                     pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
                     let data = new ArrayBuffer(0)
-                    if (functions.isBase64(image)) {
+                    if (functions.byte.isBase64(image)) {
                         data = await fetch(image).then((r) => r.arrayBuffer())
                     } else {
-                        data = await functions.getBuffer(functions.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
+                        data = await functions.http.getBuffer(functions.util.appendURLParams(image, {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
                     }
                     zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
@@ -751,15 +751,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 const downloadName = basename ? `${id}-${basename}.zip` : `${path.basename(filename, path.extname(filename))}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
-                functions.download(downloadName , url)
+                functions.dom.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
                 let image = await renderImage()
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
-                    image = await functions.convertToFormat(image, format)
+                    image = await functions.image.convertToFormat(image, format)
                 }
                 filename = path.basename(filename, path.extname(filename)) + `.${format}`
-                functions.download(filename, image)
+                functions.dom.download(filename, image)
                 window.URL.revokeObjectURL(image)
             }
         }
@@ -861,13 +861,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
+                return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
             }
         }
     }
@@ -881,14 +881,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [selectionMode])
 
     const getDisplay = (invert?: boolean) => {
-        let condition = hover && functions.isVideo(props.original) && !mobile
-        if (session.liveAnimationPreview && functions.isVideo(props.original) && !mobile) condition = true
+        let condition = hover && functions.file.isVideo(props.original) && !mobile
+        if (session.liveAnimationPreview && functions.file.isVideo(props.original) && !mobile) condition = true
         if (invert) condition = !condition
         return condition ? {opacity: "0", zIndex: 100, position: "absolute", width: "100%", height: "100%"} as React.CSSProperties : {opacity: "1"}
     }
 
     const dynamicSrc = () => {
-        return functions.isVideo(props.original) && !mobile ? staticImg : img
+        return functions.file.isVideo(props.original) && !mobile ? staticImg : img
     }
     
     const refWidth = ref.current?.width
@@ -899,17 +899,17 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
                 ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
-                {functions.isVideo(props.original) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={liveImg}></video> : null}
+                {functions.file.isVideo(props.original) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={liveImg}></video> : null}
 
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={dynamicSrc()}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={dynamicSrc()}/>
-                {functions.isVideo(props.original) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
+                {functions.file.isVideo(props.original) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
 
                 <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} 
-                src={functions.isVideo(props.original) ? liveImg : emptyVideo} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
+                src={functions.file.isVideo(props.original) ? liveImg : emptyVideo} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
                 <img draggable={false} className="image" ref={ref} src={dynamicSrc()} 
                 onLoad={(event) => onLoad(event)} style={{...getDisplay()}}/>
             </div>

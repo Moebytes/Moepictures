@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -55,12 +55,12 @@ const NewsBannerPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isAdmin(session)) {
-            functions.replaceLocation("/403")
+            functions.dom.replaceLocation("/403")
         }
     }, [session])
 
     const setBanner = async () => {
-        await functions.post("/api/misc/setbanner", {text, link}, session, setSessionFlag)
+        await functions.http.post("/api/misc/setbanner", {text, link}, session, setSessionFlag)
         setText("")
         setLink("")
         setSessionFlag(true)

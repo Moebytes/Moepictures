@@ -5,8 +5,7 @@ useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useAc
 import favicon from "../../assets/icons/favicon.png"
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
-import functions from "../../structures/Functions"
-import jsxFunctions from "../../structures/JSXFunctions"
+import functions from "../../functions/Functions"
 import "./styles/modposts.less"
 import {Report, ThreadReply, ThreadUser, UserComment} from "../../types/Types"
 
@@ -30,13 +29,13 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     const updateAsset = async () => {
         if (props.request.type === "comment") {
-            const asset = await functions.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag)
             setAsset(asset as UserComment)
         } else if (props.request.type === "thread") {
-            const asset = await functions.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag)
             setAsset(asset as ThreadUser)
         } else if (props.request.type === "reply") {
-            const asset = await functions.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag)
             setAsset(asset as ThreadReply)
         }
     }
@@ -46,7 +45,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const openPost = (postID: string, event: React.MouseEvent) => {
-        functions.openPost(postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     const imgClick = (event: React.MouseEvent) => {
@@ -72,26 +71,26 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     const approveRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
-            await functions.delete("/api/comment/delete", {commentID: props.request.id}, session, setSessionFlag)
-            await functions.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            await functions.http.delete("/api/comment/delete", {commentID: props.request.id}, session, setSessionFlag)
+            await functions.http.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         } else if (props.request.type === "thread") {
-            await functions.delete("/api/thread/delete", {threadID: props.request.id}, session, setSessionFlag)
-            await functions.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            await functions.http.delete("/api/thread/delete", {threadID: props.request.id}, session, setSessionFlag)
+            await functions.http.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         } else if (props.request.type === "reply") {
             if (!asset) return
-            await functions.delete("/api/reply/delete", {threadID: (asset as ThreadReply).threadID, replyID: props.request.id}, session, setSessionFlag)
-            await functions.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            await functions.http.delete("/api/reply/delete", {threadID: (asset as ThreadReply).threadID, replyID: props.request.id}, session, setSessionFlag)
+            await functions.http.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         }
         props.updateReports?.()
     }
 
     const rejectRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
-            await functions.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            await functions.http.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         } else if (props.request.type === "thread") {
-            await functions.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            await functions.http.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         } else if (props.request.type === "reply") {
-            await functions.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            await functions.http.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         }
         props.updateReports?.()
     }
@@ -102,19 +101,19 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     let text = [] as React.ReactElement[]
     let id = ""
     if (asset) {
-        img = asset.image ? functions.getTagLink("pfp", asset.image, asset.imageHash) : favicon
+        img = asset.image ? functions.link.getTagLink("pfp", asset.image, asset.imageHash) : favicon
         username = (asset as UserComment).username ? (asset as UserComment).username : (asset as ThreadUser).creator
         if (props.request.type === "comment") {
             textType = `${i18n.labels.comment}: `
-            text = jsxFunctions.renderCommentText((asset as UserComment).comment, emojis)
+            text = functions.jsx.renderCommentText((asset as UserComment).comment, emojis)
             id = (asset as UserComment).postID
         } else if (props.request.type === "thread") {
             textType = `${i18n.labels.thread}: `
-            text = jsxFunctions.renderReplyText((asset as ThreadUser).title, emojis)
+            text = functions.jsx.renderReplyText((asset as ThreadUser).title, emojis)
             id = (asset as ThreadUser).threadID
         } else if (props.request.type === "reply") {
             textType = `${i18n.buttons.reply}: `
-            text = jsxFunctions.renderReplyText((asset as ThreadReply).content, emojis)
+            text = functions.jsx.renderReplyText((asset as ThreadReply).content, emojis)
             id = (asset as ThreadReply).threadID
         }
     }
@@ -125,7 +124,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
                 <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
             </div>
             <div className="mod-post-text-column">
-                <span className="mod-post-link" onClick={() => navigate(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
+                <span className="mod-post-link" onClick={() => navigate(`/user/${props.request.reporter}`)}>{i18n.labels.requester}: {functions.util.toProperCase(props.request?.reporter) || i18n.user.deleted}</span>
                 <span className="mod-post-text">{i18n.labels.reason}: {props.request.reason}</span>
                 <span className="mod-post-link" onClick={() => navigate(`/user/${username}`)}>{i18n.roles.user}: {username}</span>
                 <span className="mod-post-text">{textType}{text}</span>
@@ -165,7 +164,7 @@ const ModReports: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
 
     const updateReports = async () => {
-        const requests = await functions.get("/api/search/reports", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/search/reports", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
@@ -180,7 +179,7 @@ const ModReports: React.FunctionComponent = (props) => {
             if (!requests[i]) break
             newVisibleRequests.push(requests[i])
         }
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
     }
 
     const refreshReports = async () => {
@@ -202,7 +201,7 @@ const ModReports: React.FunctionComponent = (props) => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
         }
         if (scroll) updateRequests()
     }, [requests, scroll])
@@ -221,7 +220,7 @@ const ModReports: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -235,14 +234,14 @@ const ModReports: React.FunctionComponent = (props) => {
             if (padded) {
                 setRequests(result)
             } else {
-                setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setRequests(result)
                 } else {
-                    setRequests((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -251,7 +250,7 @@ const ModReports: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests
@@ -261,7 +260,7 @@ const ModReports: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                setVisibleRequests(functions.util.removeDuplicates(newPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -388,7 +387,7 @@ const ModReports: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         let visible = [] as Report[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleRequests)
+            visible = functions.util.removeDuplicates(visibleRequests)
         } else {
             const offset = (modPage - 1) * getPageAmount()
             visible = requests.slice(offset, offset + getPageAmount())

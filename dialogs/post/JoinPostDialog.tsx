@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
@@ -40,7 +40,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const joinPost = async () => {
         if (!joinPostID) return
         if (permissions.isAdmin(session)) {
-            await functions.post("/api/post/join", {postID: joinPostID.post.postID, nested: nestedChildren}, session, setSessionFlag)
+            await functions.http.post("/api/post/join", {postID: joinPostID.post.postID, nested: nestedChildren}, session, setSessionFlag)
             setPostFlag(joinPostID.post.postID)
         }
     }

@@ -59,7 +59,7 @@ import multiplier2xIcon from "../../assets/icons/2x.png"
 import multiplier3xIcon from "../../assets/icons/3x.png"
 import multiplier4xIcon from "../../assets/icons/4x.png"
 import multiplier5xIcon from "../../assets/icons/5x.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import checkbox from "../../assets/icons/checkbox2.png"
 import checkboxChecked from "../../assets/icons/checkbox2-checked.png"
@@ -114,11 +114,11 @@ const SortBar: React.FunctionComponent = (props) => {
                 if (filterDropActive) setFilterDropActive(false)
             }
             if (mobile) setDropTop(21)
-            if (functions.scrolledToTop()) setDropTop(-2)
+            if (functions.dom.scrolledToTop()) setDropTop(-2)
             if (activeDropdown === "none") return
         }
         const scrollHandler = () => {
-            if (functions.scrolledToTop()) return setDropTop(-2)
+            if (functions.dom.scrolledToTop()) return setDropTop(-2)
             let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
             if (mobile) newDropTop = 23
             if (dropTop === newDropTop) return
@@ -144,7 +144,7 @@ const SortBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         setActiveDropdown("none")
         if (hideTitlebar) {
-            if (functions.scrolledToTop()) return setDropTop(-2)
+            if (functions.dom.scrolledToTop()) return setDropTop(-2)
             setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 4)
         } else {
             setDropTop(-2)
@@ -705,9 +705,9 @@ const SortBar: React.FunctionComponent = (props) => {
     const bulkFavorite = async () => {
         if (!selectionItems.size) return
         for (const postID of selectionItems.values()) {
-            await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
-            functions.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
-                functions.updateLocalFavorite(postID, favorite ? true : false, posts, setPosts)
+            await functions.http.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
+            functions.http.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
+                functions.post.updateLocalFavorite(postID, favorite ? true : false, posts, setPosts)
             })
         }
         setSelectionMode(false)

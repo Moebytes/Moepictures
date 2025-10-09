@@ -4,7 +4,7 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import search from "../../assets/icons/search.png"
 import sort from "../../assets/icons/sort.png"
 import sortRev from "../../assets/icons/sort-reverse.png"
@@ -90,7 +90,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
     }
 
     const updateForumPosts = async (query?: string) => {
-        const result = await functions.get("/api/user/forumposts", {username, sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.http.get("/api/user/forumposts", {username, sort: functions.validation.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleForumPosts([])
@@ -119,7 +119,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = `${functions.toProperCase(username)}'s ${i18n.user.forumPosts}`
+        document.title = `${functions.util.toProperCase(username)}'s ${i18n.user.forumPosts}`
     }, [i18n, username])
 
     useEffect(() => {
@@ -148,7 +148,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
                 currentIndex++
             }
             setIndex(currentIndex)
-            setVisibleForumPosts(functions.removeDuplicates(newVisibleForumPosts))
+            setVisibleForumPosts(functions.util.removeDuplicates(newVisibleForumPosts))
         }
         if (scroll) updateForumPosts()
     }, [scroll, forumPosts, session])
@@ -167,7 +167,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
                 }
             }
         }
-        let result = await functions.get("/api/user/forumposts", {username, sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/user/forumposts", {username, sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanForumPosts = forumPosts.filter((t) => !t.fake)
         if (!scroll) {
@@ -181,14 +181,14 @@ const ForumPostsPage: React.FunctionComponent = () => {
             if (padded) {
                 setForumPosts(result)
             } else {
-                setForumPosts((prev) => functions.removeDuplicates([...prev, ...result]))
+                setForumPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setForumPosts(result)
                 } else {
-                    setForumPosts((prev) => functions.removeDuplicates([...prev, ...result]))
+                    setForumPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
             }
             setEnded(true)
@@ -197,7 +197,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const scrollHandler = async () => {
-            if (functions.scrolledToBottom()) {
+            if (functions.dom.scrolledToBottom()) {
                 let currentIndex = index
                 if (!forumPosts[currentIndex]) return updateOffset()
                 const newVisibleForumPosts = visibleForumPosts
@@ -207,7 +207,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleForumPosts(functions.removeDuplicates(newVisibleForumPosts))
+                setVisibleForumPosts(functions.util.removeDuplicates(newVisibleForumPosts))
             }
         }
         if (scroll) window.addEventListener("scroll", scrollHandler)
@@ -365,7 +365,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
         const jsx = [] as React.ReactElement[]
         let visible = [] as ForumPostSearch[]
         if (scroll) {
-            visible = functions.removeDuplicates(visibleForumPosts)
+            visible = functions.util.removeDuplicates(visibleForumPosts)
         } else {
             const postOffset = (forumPostsPage - 1) * getPageAmount()
             visible = forumPosts.slice(postOffset, postOffset + getPageAmount())
@@ -373,7 +373,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
         for (let i = 0; i < visible.length; i++) {
             const forumPost = visible[i]
             if (forumPost.fake) continue
-            if (!functions.isR18(ratingType)) if (forumPost.r18) continue
+            if (!functions.post.isR18(ratingType)) if (forumPost.r18) continue
             jsx.push(<ForumPostRow key={`${forumPost.type}-${forumPost.id}`} forumPost={forumPost} onDelete={updateForumPosts} onEdit={updateForumPosts}/>)
         }
         if (!scroll) {
@@ -404,7 +404,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="items">
-                    <span className="items-heading">{`${functions.toProperCase(username)}'s ${i18n.user.forumPosts}`}</span>
+                    <span className="items-heading">{`${functions.util.toProperCase(username)}'s ${i18n.user.forumPosts}`}</span>
                     {/*<div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateForumPosts() : null}/>

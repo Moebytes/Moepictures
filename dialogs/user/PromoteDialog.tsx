@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 import Draggable from "react-draggable"
@@ -36,7 +36,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
 
     const updateRole = async () => {
         if (!promoteName) return
-        const user = await functions.get("/api/user", {username: promoteName}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: promoteName}, session, setSessionFlag)
         if (user) setRole(user.role)
     }
 
@@ -57,7 +57,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const promote = async () => {
         if (!promoteName) return
         if (!permissions.isAdmin(session)) return setPromoteName(null)
-        await functions.post("/api/user/promote", {username: promoteName, role}, session, setSessionFlag)
+        await functions.http.post("/api/user/promote", {username: promoteName, role}, session, setSessionFlag)
         setPromoteName(null)
         setUpdateUserFlag(true)
     }

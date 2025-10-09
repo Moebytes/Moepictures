@@ -23,7 +23,7 @@ import bookmarkSort from "../../assets/images/premium-bookmark-sort.png"
 import animatedAvatar from "../../assets/images/premium-animated-avatar.png"
 import changeUsername from "../../assets/images/premium-change-username.png"
 import noAds from "../../assets/images/premium-no-ads.png"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import bitcoin from "../../assets/icons/bitcoin.png"
 import "./styles/premiumpage.less"
@@ -37,7 +37,7 @@ const PaymentButton: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const createCharge = async () => {
-        const result = await functions.post("/api/premium/paymentlink", null, session, setSessionFlag)
+        const result = await functions.http.post("/api/premium/paymentlink", null, session, setSessionFlag)
         setPaymentLink(result.hosted_url)
     }
 
@@ -72,7 +72,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         let condition = permissions.isPremiumEnabled() ? session.username : permissions.isAdmin(session)
         if (!condition) {
-            functions.replaceLocation("/401")
+            functions.dom.replaceLocation("/401")
         }
     }, [session])
 

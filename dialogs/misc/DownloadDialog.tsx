@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector, useSearchSelector} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 
@@ -23,7 +23,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setTimeout(() => {
-            let offset = Math.floor(functions.round(postAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType)))
+            let offset = Math.floor(functions.util.round(postAmount * functions.dom.getScrollPercentAdjusted(sizeType), functions.render.getImagesPerRow(sizeType)))
             if (offset < 0) offset = 0
             let amount = postAmount - offset
             if (amount < 0) amount = 0
@@ -31,7 +31,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
             setAmountField(String(amount))
         }, 500)
         const scrollHandler = () => {
-            let offset = functions.round(postAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType))
+            let offset = functions.util.round(postAmount * functions.dom.getScrollPercentAdjusted(sizeType), functions.render.getImagesPerRow(sizeType))
             if (offset < 0) offset = 0
             let amount = postAmount - offset
             if (amount < 0) amount = 0

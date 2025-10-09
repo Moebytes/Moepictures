@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
@@ -35,7 +35,7 @@ const AppealPostDialog: React.FunctionComponent = (props) => {
 
     const appealPost = async () => {
         if (!appealPostID) return
-        await functions.post("/api/post/appeal", {postID: appealPostID, reason}, session, setSessionFlag)
+        await functions.http.post("/api/post/appeal", {postID: appealPostID, reason}, session, setSessionFlag)
         setAppealPostID(null)
         setPostFlag(appealPostID)
     }

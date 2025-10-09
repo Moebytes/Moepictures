@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, useSessionActions} from "../../store"
-import functions from "../../structures/Functions"
+import functions from "../../functions/Functions"
 import "../dialog.less"
 import Draggable from "react-draggable"
 
@@ -32,7 +32,7 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
 
     const reportThread = async () => {
         if (!reportThreadID) return
-        const badReason = functions.validateReason(reason, i18n)
+        const badReason = functions.validation.validateReason(reason, i18n)
         if (badReason) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -41,7 +41,7 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        await functions.post("/api/thread/report", {threadID: reportThreadID, reason}, session, setSessionFlag)
+        await functions.http.post("/api/thread/report", {threadID: reportThreadID, reason}, session, setSessionFlag)
         setSubmitted(true)
     }
 

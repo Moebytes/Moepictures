@@ -15,8 +15,8 @@ import {StaticRouter as Router} from "react-router-dom"
 import {Provider} from "react-redux"
 import store from "./store"
 import permissions from "./structures/Permissions"
-import functions from "./structures/Functions"
-import encryptFunctions from "./structures/EncryptFunctions"
+import functions from "./functions/Functions"
+import encryption from "./structures/Encryption"
 import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./structures/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
@@ -50,7 +50,7 @@ declare module "express-session" {
   interface SessionData extends ServerSession {}
 }
 
-const pgPool = functions.isLocalHost() ? new Pool({
+const pgPool = functions.config.isLocalHost() ? new Pool({
   user: process.env.PG_LOCAL_USER,
   host: process.env.PG_LOCAL_HOST,
   database: process.env.PG_LOCAL_DATABASE,
@@ -169,8 +169,8 @@ const lastModified = new Date().toUTCString()
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
-      const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
+      const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       let url = req.url.replace(/\?.*$/, "")
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -192,7 +192,7 @@ for (let i = 0; i < folders.length; i++) {
           post = await sql.post.post(postID)
           await sql.setCache(`cached-post/${postID}`, post)
         }
-        if (post && functions.isR18(post.rating)) {
+        if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
@@ -211,7 +211,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = encryptFunctions.encrypt(body, req.session.publicKey, req.session)
+        body = encryption.encrypt(body, req.session.publicKey, req.session)
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -234,7 +234,7 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pixelHash = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
+      const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
@@ -248,7 +248,7 @@ for (let i = 0; i < folders.length; i++) {
           post = await sql.post.post(postID)
           await sql.setCache(`cached-post/${postID}`, post)
         }
-        if (post && functions.isR18(post.rating)) {
+        if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
@@ -280,7 +280,7 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!req.session.publicKey) return res.status(401).end()
-        body = encryptFunctions.encrypt(body, req.session.publicKey, req.session)
+        body = encryption.encrypt(body, req.session.publicKey, req.session)
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -304,7 +304,7 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
+      const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
@@ -404,7 +404,7 @@ const storageMap = new Map<string, Storage>()
 
 app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const upscaleParam = new URL(`${functions.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
+    const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
     const {link, songCover} = req.body as {link: string, songCover?: boolean}
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
     ip = ip?.toString().replace("::ffff:", "") || ""
@@ -425,7 +425,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         post = await sql.post.post(postID)
         await sql.setCache(`cached-post/${postID}`, post)
       }
-      if (post && functions.isR18(post.rating)) {
+      if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return res.status(403).end()
         r18 = true
       }
@@ -433,10 +433,10 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         if (!permissions.isMod(req.session)) return res.status(403).end()
       }
     }
-    const secret = encryptFunctions.generateAPIKey(16)
+    const secret = encryption.generateAPIKey(16)
     storageMap.set(userKey, {secret, key, upscaled, r18, pixelHash, songCover})
     let ext = songCover ? ".jpg" : path.extname(key)
-    const url = `${functions.getDomain()}/storage/${userKey}${ext}?secret=${secret}`
+    const url = `${functions.config.getDomain()}/storage/${userKey}${ext}?secret=${secret}`
     res.status(200).send(url)
   } catch {
     res.status(400).end()
@@ -478,7 +478,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
         post = await sql.post.post(postID)
         await sql.setCache(`cached-post/${postID}`, post)
       }
-      if (post && functions.isR18(post.rating)) {
+      if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return void res.status(403).end()
         r18 = true
       }
@@ -487,8 +487,8 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
       }
       if (post) {
         const img = post.images[0]
-        const imagePath = img.thumbnail ? functions.getThumbnailImagePath(img.type, img.thumbnail)
-        : functions.getImagePath(img.type, img.postID, img.order, img.filename)
+        const imagePath = img.thumbnail ? functions.link.getThumbnailImagePath(img.type, img.thumbnail)
+        : functions.link.getImagePath(img.type, img.postID, img.order, img.filename)
         
         const imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
         body = await serverFunctions.squareCrop(imageBuffer, 200)
@@ -534,7 +534,7 @@ app.get("/*", async (req: Request, res: Response) => {
           post = await sql.post.post(postID)
           await sql.setCache(`cached-post/${postID}`, post)
         }
-        if (post && functions.isR18(post.rating)) {
+        if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) post = undefined
         }
         if (post && post.hidden) {
@@ -544,8 +544,8 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `Moepictures: ${post.englishTitle || post.title}`
           description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
           const img = post.images[0]
-          image = `${functions.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
-          url = `${functions.getDomain()}/post/${post.postID}/${post.slug}`
+          image = `${functions.config.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          url = `${functions.config.getDomain()}/post/${post.postID}/${post.slug}`
         }
     }
 
