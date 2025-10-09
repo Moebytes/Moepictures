@@ -398,6 +398,8 @@ const MessageRoutes = (app: Express) => {
                 "Connection": "keep-alive",
                 "Cache-Control": "no-cache"
             })
+            res.write("\n")
+            
             const index = connections.findIndex((c) => c.username === req.session.username)
             if (index !== -1) {
                 connections[index].response = res
