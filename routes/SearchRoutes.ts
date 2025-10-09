@@ -11,7 +11,7 @@ import {PostSearch, Tag, TagSearch, TagCount, PostSearchParams, CategorySearchPa
 GroupSearchParams, Image, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
 SidebarTagParams, ThreadSearch, MessageSearchParams, MessageSearch} from "../types/Types"
 
-const nativeFunctions = require("../build/Release/NativeFunctions.node")
+// const nodeFunctions = require("../build/Release/NodeFunctions.node")
 
 const searchLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -24,17 +24,18 @@ const searchLimiter = rateLimit({
 })
 
 const SearchRoutes = (app: Express) => {
+    /* This has potential to be faster than client-side but our server is slow at processing
     app.post("/api/search/parse-space-search", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {query} = req.body as {query?: string}
             const tagMap = await serverFunctions.tagMap(true)
-            const result = nativeFunctions.parseSpaceEnabledSearch(query ?? "", tagMap)
+            const result = nodeFunctions.parseSpaceEnabledSearch(query ?? "", tagMap)
             res.status(200).send(result)
         } catch (e) {
             console.log(e)
             return void res.status(400).send("Bad request")
         }
-    })
+    })*/
 
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {

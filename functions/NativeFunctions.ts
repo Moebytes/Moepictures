@@ -1,4 +1,4 @@
-import functions from "../functions/Functions"
+import functions from "./Functions"
 import {Session} from "../types/Types"
 
 export default class NativeFunctions {
@@ -10,6 +10,14 @@ export default class NativeFunctions {
             this.wasmModule = await window.Module()
         }
         return this.wasmModule
+    }
+
+    // Unused... The JS version is actually faster since it avoids expensive conversion to and from JSON strings.
+    public static parseSpaceEnabledSearchNative = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
+        if (!query) return query
+        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
+        const nativeFunctions = await this.getWasmModule()
+        return nativeFunctions.ccall("parseSpaceEnabledSearch", "string", ["string", "string"], [query, JSON.stringify(savedTags)])
     }
 
     public static permutations(query: string) {
@@ -42,7 +50,7 @@ export default class NativeFunctions {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
         let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
-        let permutations = NativeFunctions.permutations(query)
+        let permutations = this.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
         let specialFlagsArray = new Array(permutations.length).fill("")
         for (let i = 0; i < permutations.length; i++) {
@@ -75,7 +83,7 @@ export default class NativeFunctions {
                 }
             }
         }
-        const index = NativeFunctions.indexOfMax(matchesArray)
+        const index = this.indexOfMax(matchesArray)
         if (index !== -1 && matchesArray[index] !== 0) {
             let queries = [] as string[] 
             for (let j = 0; j < permutations[index].length; j++) {
@@ -84,12 +92,5 @@ export default class NativeFunctions {
             return queries.join(" ")
         }
         return query
-    }
-
-    public static parseSpaceEnabledSearchNative = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
-        if (!query) return query
-        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
-        const nativeFunctions = await NativeFunctions.getWasmModule()
-        return nativeFunctions.ccall("parseSpaceEnabledSearch", "string", ["string", "string"], [query, JSON.stringify(savedTags)])
     }
 }
