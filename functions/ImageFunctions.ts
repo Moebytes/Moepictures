@@ -396,11 +396,12 @@ export default class ImageFunctions {
         })
     }
 
-    public static pixelateEffect = (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
+    public static pixelateEffect = async (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
         pixelate: number, opt?: PixelateOptions) => {
         if (!opt) opt = {}
         if (!canvas || !image) return canvas
         if (opt.isAnimation || opt.isVideo) return canvas
+
         const ctx = canvas.getContext("2d")!
         const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
         const imageHeight = (image instanceof ImageBitmap ? image.height : image.clientHeight)

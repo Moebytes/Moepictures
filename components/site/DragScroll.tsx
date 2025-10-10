@@ -1,81 +1,92 @@
-import React, {useEffect, useState} from "react"
+import React, {useEffect} from "react"
 import {useInteractionSelector} from "../../store"
-import functions from "../../functions/Functions"
 
 let inertia = false
 let mouseDown = false
 let lastClientY = 0
-let lastScrollTop = 0
+let lastScrollY = 0
+let lastGoodDelta = 0
 let time = new Date()
 let id = 0
 
-const DragScroll = ({children}) => {
+const DragScroll = () => {
     const {enableDrag} = useInteractionSelector()
 
     useEffect(() => {
         const element = document.documentElement
         if (!element) return
 
-        const onScroll = (event: Event) => {
+        const onScroll = () => {
             cancelAnimationFrame(id)
-            return false
         }
 
-        const onMouseDown = (event: MouseEvent) => {
+        const onPointerDown = (event: PointerEvent) => {
             if (event.button === 2) return
-            functions.dom.clearSelection()
+            window.getSelection()?.removeAllRanges()
             mouseDown = true
             inertia = false
             time = new Date()
             lastClientY = event.clientY
-            lastScrollTop = element.scrollTop
+            lastScrollY = window.scrollY
         }
 
-        const onMouseUp = () => {
+        const onPointerUp = (event: PointerEvent) => {
             mouseDown = false
             const timeDiff = (new Date().getTime() - time.getTime())
-            let speedY = (element.scrollTop - lastScrollTop) / timeDiff * 25
+            let speedY = (window.scrollY - lastScrollY) / timeDiff * 25
             let speedYAbsolute = Math.abs(speedY)
-            const animateInertia = () => {
+
+            const animate = () => {
+                if (!inertia) return
                 if (speedYAbsolute > 0) {
                     if (speedY > 0) {
-                        element.scrollTop += speedYAbsolute--
+                        window.scrollBy(0, speedYAbsolute--)
                     } else {
-                        element.scrollTop -= speedYAbsolute--
+                        window.scrollBy(0, -speedYAbsolute--)
                     }
-                    id = requestAnimationFrame(animateInertia)
+                    id = requestAnimationFrame(animate)
                 } else {
                     inertia = false
                     cancelAnimationFrame(id)
                 }
             }
             inertia = true
-            animateInertia()
+            animate()
         }
 
-        const onMouseMove = (event: MouseEvent) => {
+        const onPointerMove = (event: PointerEvent) => {
             if (!mouseDown) return
-            functions.dom.clearSelection()
-            let newScrollY = (event.clientY - lastClientY) * 12
-            element.scrollTop -= newScrollY
+            window.getSelection()?.removeAllRanges()
+
+            const dy = event.clientY - lastClientY
             lastClientY = event.clientY
-            lastScrollTop = element.scrollTop
+
+            let scrollDelta = -dy * 12
+
+            if (scrollDelta === 0) {
+                scrollDelta = lastGoodDelta
+            } else {
+                lastGoodDelta = scrollDelta
+            }
+
+            window.scrollBy(0, scrollDelta)
+            lastScrollY = window.scrollY
         }
 
         const enable = () => {
-            window.addEventListener("mousedown", onMouseDown, false)
-            window.addEventListener("mousemove", onMouseMove, false)
-            window.addEventListener("mouseup", onMouseUp, false)
-            window.addEventListener("scroll", onScroll, false)
-            window.addEventListener("dragstart", onScroll, false)
+            element.addEventListener("pointerdown", onPointerDown)
+            window.addEventListener("pointermove", onPointerMove)
+            window.addEventListener("pointerup", onPointerUp)
+            window.addEventListener("scroll", onScroll)
+            window.addEventListener("dragstart", onScroll)
         }
 
         const disable = () => {
-            window.removeEventListener("mousedown", onMouseDown, false)
-            window.removeEventListener("mousemove", onMouseMove, false)
-            window.removeEventListener("mouseup", onMouseUp, false)
-            window.removeEventListener("scroll", onScroll, false)
-            window.removeEventListener("dragstart", onScroll, false)
+            element.removeEventListener("pointerdown", onPointerDown)
+            window.removeEventListener("pointermove", onPointerMove)
+            window.removeEventListener("pointerup", onPointerUp)
+            window.removeEventListener("scroll", onScroll)
+            window.removeEventListener("dragstart", onScroll)
         }
 
         enableDrag ? enable() : disable()
@@ -85,8 +96,7 @@ const DragScroll = ({children}) => {
         }
     }, [enableDrag])
 
-
-  return <>{children}</>
+  return null
 }
 
 export default DragScroll

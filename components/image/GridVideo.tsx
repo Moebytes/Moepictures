@@ -48,7 +48,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
 
     const loadImage = async () => {
         const thumb = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`, true)
-        const liveImg = await functions.crypto.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
+        const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)
         setLiveImg(liveImg)
         setBackFrame(thumb)
     }

@@ -15,9 +15,7 @@
     "clean": "del-cli ./dist"
   },
   "binary": {
-    "napi_versions": [
-      8
-    ]
+    "napi_versions": [8]
   },
   "keywords": [
     "moe",
