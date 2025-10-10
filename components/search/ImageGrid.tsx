@@ -5,6 +5,8 @@ useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFla
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import GridImage from "../image/GridImage"
+import GridAnimation from "../image/GridAnimation"
+import GridVideo from "../image/GridVideo"
 import GridModel from "../image/GridModel"
 import GridSong from "../image/GridSong"
 import GridLive2D from "../image/GridLive2D"
@@ -12,7 +14,7 @@ import noresults from "../../assets/images/noresults.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import "./styles/imagegrid.less"
-import {PostSearch, Post} from "../../types/Types"
+import {PostSearch} from "../../types/Types"
 
 interface Ref {
     shouldWait: () => Promise<boolean>
@@ -681,6 +683,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+            } else if (post.type === "video") {
+                jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+            } else if (post.type === "animation") {
+                jsx.push(<GridAnimation key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null
                 jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 

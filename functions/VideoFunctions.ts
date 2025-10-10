@@ -242,13 +242,13 @@ export default class VideoFunctions {
         return new Promise<string>((resolve) => {
             const video = document.createElement("video")
             video.src = link 
-            video.addEventListener("loadeddata", (event) => {
+            video.addEventListener("loadedmetadata", (event) => {
                 video.currentTime = 0.001
             })
             video.addEventListener("seeked", () => {
                 const canvas = document.createElement("canvas")
                 const ctx = canvas.getContext("2d")!
-                canvas.width = video.videoWidth 
+                canvas.width = video.videoWidth
                 canvas.height = video.videoHeight
                 ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
                 resolve(canvas.toDataURL())

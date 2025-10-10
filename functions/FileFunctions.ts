@@ -129,11 +129,11 @@ export default class FileFunctions {
 
     public static isAnimatedWebp = (buffer: ArrayBuffer) => {
         let str = ""
-        const byteArray = new Uint8Array(buffer)
+        const byteArray = new Uint8Array(Buffer.from(buffer))
         for (let i = 0; i < byteArray.length; i++) {
             str += String.fromCharCode(byteArray[i])
         }
-        return str.indexOf("ANMF") !== -1
+        return str.indexOf("ANIM") !== -1
     }
 
     public static isVideo = (file?: string) => {
