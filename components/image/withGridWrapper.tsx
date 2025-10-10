@@ -4,6 +4,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector, useCacheAct
 useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import functions from "../../functions/Functions"
 import privateIcon from "../../assets/icons/lock-opt.png"
+import musicNote from "../../assets/icons/music-note.png"
 import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
@@ -14,7 +15,7 @@ interface Props {
     post: PostSearch
     img: string
     original: string
-    live: string
+    live?: string
     cached?: boolean
     comicPages?: string[] | null
     square?: boolean
@@ -41,6 +42,7 @@ interface AddonProps {
     animationRef: React.RefObject<HTMLImageElement | null>
     videoRef: React.RefObject<HTMLVideoElement | null>
     audioRef: React.RefObject<HTMLImageElement | null>
+    rendererRef: React.RefObject<HTMLCanvasElement | null>
     modelRef: React.RefObject<HTMLDivElement | null>
     live2DRef: React.RefObject<HTMLCanvasElement | null>
     lightnessRef: React.RefObject<HTMLImageElement | null>
@@ -69,6 +71,7 @@ interface AddonProps {
 
 export interface GridWrapperRef {
     download: () => Promise<void>
+    songClick?: (event: React.MouseEvent) => void
 }
 
 export type GridWrapperProps = Props & AddonProps
@@ -91,7 +94,6 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const [selected, setSelected] = useState(false)
         const navigate = useNavigate()
         const location = useLocation()
-        const privateIconRef = useRef<HTMLImageElement>(null)
         const childRef = useRef<GridWrapperRef | null>(null)
         
         /* State passed to children */
@@ -102,6 +104,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const videoRef = useRef<HTMLVideoElement>(null)
         const audioRef = useRef<HTMLImageElement>(null)
         const modelRef = useRef<HTMLDivElement>(null)
+        const rendererRef = useRef<HTMLCanvasElement>(null)
         const live2DRef = useRef<HTMLCanvasElement>(null)
         const overlayRef = useRef<HTMLImageElement>(null)
         const lightnessRef = useRef<HTMLImageElement>(null)
@@ -303,26 +306,28 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             }
             element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
+
+        const getDrawableRef = () => {
+            return imageRef.current || animationRef.current || audioRef.current 
+                || rendererRef.current || live2DRef.current
+        }
     
         useEffect(() => {
             setTimeout(() => {
-                let drawableRef = imageRef.current || animationRef.current
-                functions.image.pixelateEffect(pixelateRef.current, drawableRef, pixelate, 
+                functions.image.pixelateEffect(pixelateRef.current, getDrawableRef(), pixelate, 
                 {isAnimation: Number(gifData?.length) > 0, isVideo: Boolean(videoRef.current)})
-                functions.image.splatterEffect(effectRef.current, drawableRef, splatter, {lineMultiplier: 4, 
+                functions.image.splatterEffect(effectRef.current, getDrawableRef(), splatter, {lineMultiplier: 4, 
                 maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: Boolean(videoRef.current)})
             }, 50)
         }, [imageLoaded, hover])
     
         useEffect(() => {
-            let drawableRef = imageRef.current || animationRef.current
-            functions.image.pixelateEffect(pixelateRef.current, drawableRef, pixelate, 
+            functions.image.pixelateEffect(pixelateRef.current, getDrawableRef(), pixelate, 
             {isAnimation: Number(gifData?.length) > 0, isVideo: Boolean(videoRef.current)})
         }, [pixelate, square, imageSize])
     
         useEffect(() => {
-            let drawableRef = imageRef.current || animationRef.current
-            functions.image.splatterEffect(effectRef.current, drawableRef, splatter, {lineMultiplier: 4, 
+            functions.image.splatterEffect(effectRef.current, getDrawableRef(), splatter, {lineMultiplier: 4, 
             maxLineWidth: 3, isAnimation: Number(gifData?.length) > 0, isVideo: Boolean(videoRef.current)})
         }, [splatter])
     
@@ -471,6 +476,12 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 selectionPosts.delete(props.post.postID)
             }
         }, [selectionMode])
+
+        const cornerIcon = () => {
+            if (props.post.private) return privateIcon
+            if (audioRef.current) return musicNote
+            return null
+        }
         
         const refWidth = getRef()?.clientWidth
     
@@ -478,8 +489,8 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                    {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
-                    ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
+                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={cornerIcon()} 
+                    onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
     
                     <WrappedComponent 
                         {...props}
@@ -491,6 +502,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                         animationRef={animationRef}
                         videoRef={videoRef}
                         audioRef={audioRef}
+                        rendererRef={rendererRef}
                         modelRef={modelRef}
                         live2DRef={live2DRef}
                         lightnessRef={lightnessRef}

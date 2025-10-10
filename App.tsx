@@ -208,10 +208,6 @@ const App: React.FunctionComponent = (props) => {
     }, [sessionFlag])
 
     useEffect(() => {
-        functions.dom.preventDragging()
-    })
-
-    useEffect(() => {
         setActiveGroup(null)
         setActiveFavgroup(null)
     }, [posts])
@@ -236,7 +232,9 @@ const App: React.FunctionComponent = (props) => {
             if (functions.dom.scrolledToTop()) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             const sortbar = document.querySelector(".sortbar")
-            const amt = hideTitlebar ? (sortbar ? (functions.dom.navbarHeight() + functions.dom.sortbarHeight()) : functions.dom.navbarHeight()) : (functions.dom.titlebarHeight() + functions.dom.navbarHeight() + functions.dom.sortbarHeight())
+            const amt = hideTitlebar ? (sortbar ? (functions.dom.navbarHeight() + functions.dom.sortbarHeight()) : 
+            functions.dom.navbarHeight()) : (functions.dom.titlebarHeight() + functions.dom.navbarHeight() + 
+            functions.dom.sortbarHeight())
             if (event.clientY < amt) return setHideSortbar(false)
             return setHideSortbar(true)
         }
@@ -277,87 +275,86 @@ const App: React.FunctionComponent = (props) => {
     }, [])
 
     return (
-        <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
-            <DragScroll>
-                <ParticleEffect/>
-                <DragAndDrop/>
-                <NewsBanner/>
-                <ActionBanner/>
-                <CookieBanner/>
-                <Dialogs/>
-                <LocalStorage/>
-                <TagToolTip/>
-                <ToolTip/>
-                <Routes>
-                    <Route path="/" element={<PostsPage/>}/>
-                    <Route path="/posts" element={<PostsPage/>}/>
-                    <Route path="/home" element={<PostsPage/>}/>
-                    <Route path="/profile" element={<UserProfilePage/>}/>
-                    <Route path="/upload" element={<UploadPage/>}/>
-                    <Route path="/bulk-upload" element={<BulkUploadPage/>}/>
-                    <Route path="/tags" element={<TagsPage/>}/>
-                    <Route path="/series" element={<SeriesPage/>}/>
-                    <Route path="/characters" element={<CharactersPage/>}/>
-                    <Route path="/artists" element={<ArtistsPage/>}/>
-                    <Route path="/comments" element={<CommentsPage/>}/>
-                    <Route path="/notes" element={<NotesPage/>}/>
-                    <Route path="/groups" element={<GroupsPage/>}/>
-                    <Route path="/history" element={<HistoryPage/>}/>
-                    <Route path="/premium" element={<PremiumPage/>}/>
-                    <Route path="/user/:username" element={<UserPage/>}/>
-                    <Route path="/tag/history/:tag" element={<TagHistoryPage/>}/>
-                    <Route path="/user/:username/tag/history" element={<TagHistoryPage/>}/>
-                    <Route path="/tag/:tag" element={<TagPage/>}/>
-                    <Route path="/group/:group" element={<GroupPage/>}/>
-                    <Route path="/group/history/:group" element={<GroupHistoryPage/>}/>
-                    <Route path="/user/:username/group/history" element={<GroupHistoryPage/>}/>
-                    <Route path="/favgroup/:username/:favgroup" element={<FavgroupPage/>}/>
-                    <Route path="/note/history/:id/:slug/:order" element={<NoteHistoryPage/>}/>
-                    <Route path="/user/:username/note/history" element={<NoteHistoryPage/>}/>
-                    <Route path="/post/history/:id/:slug" element={<PostHistoryPage/>}/>
-                    <Route path="/user/:username/post/history" element={<PostHistoryPage/>}/>
-                    <Route path="/post/:id" element={<PostPage/>}/>
-                    <Route path="/post/:id/:slug" element={<PostPage/>}/>
-                    <Route path="/post/:id/:slug/reader" element={<ReaderPage/>}/>
-                    <Route path="/unverified/post/:id" element={<UnverifiedPostPage/>}/>
-                    <Route path="/edit-post/:id/:slug" element={<EditPostPage/>}/>
-                    <Route path="/unverified/edit-post/:id" element={<EditUnverifiedPostPage/>}/>
-                    <Route path="/set-avatar/:id/:slug" element={<SetAvatarPage/>}/>
-                    <Route path="/help" element={<HelpPage/>}/>
-                    <Route path="/forum" element={<ForumPage/>}/>
-                    <Route path="/posts/:username" element={<ForumPostsPage/>}/>
-                    <Route path="/thread/:id" element={<ThreadPage/>}/>
-                    <Route path="/mail" element={<MailPage/>}/>
-                    <Route path="/message/:id" element={<MessagePage/>}/>
-                    <Route path="/change-username" element={<ChangeUsernamePage/>}/>
-                    <Route path="/change-email" element={<ChangeEmailPage/>}/>
-                    <Route path="/change-email-success" element={<ChangeEmailSuccessPage/>}/>
-                    <Route path="/verify-email" element={<VerifyEmailPage/>}/>
-                    <Route path="/verify-email-success" element={<VerifyEmailSuccessPage/>}/>
-                    <Route path="/verify-login-success" element={<VerifyLoginSuccessPage/>}/>
-                    <Route path="/premium-success" element={<PremiumSuccessPage/>}/>
-                    <Route path="/reset-password" element={<ResetPasswordPage/>}/>
-                    <Route path="/change-password" element={<ChangePasswordPage/>}/>
-                    <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
-                    <Route path="/signup" element={<SignUpPage/>}/>
-                    <Route path="/login" element={<LoginPage/>}/>
-                    <Route path="/2fa" element={<$2FAPage/>}/>
-                    <Route path="/enable-2fa" element={<$2FAEnablePage/>}/>
-                    <Route path="/login-history" element={<LoginHistoryPage/>}/>
-                    <Route path="/contact" element={<ContactPage/>}/>
-                    <Route path="/copyright-removal" element={<CopyrightRemovalPage/>}/>
-                    <Route path="/mod-queue" element={<ModQueuePage/>}/>
-                    <Route path="/privacy" element={<Navigate to="/terms#privacy" replace/>}/>
-                    <Route path="/terms" element={<TermsPage/>}/>
-                    <Route path="/news-banner" element={<NewsBannerPage/>}/>
-                    <Route path="/ip-blacklist" element={<IPBlacklistPage/>}/>
-                    <Route path="/api-key" element={<APIKeyPage/>}/>
-                    <Route path="/401" element={<$401Page/>}/>
-                    <Route path="/403" element={<$403Page/>}/>
-                    <Route path="*" element={<$404Page/>}/>
-                </Routes>
-                <AudioPlayer/>
-            </DragScroll>
+        <div className={`app ${!loaded ? " stop-transitions" : ""}`}>
+            <DragScroll/>
+            <ParticleEffect/>
+            <DragAndDrop/>
+            <NewsBanner/>
+            <ActionBanner/>
+            <CookieBanner/>
+            <Dialogs/>
+            <LocalStorage/>
+            <TagToolTip/>
+            <ToolTip/>
+            <Routes>
+                <Route path="/" element={<PostsPage/>}/>
+                <Route path="/posts" element={<PostsPage/>}/>
+                <Route path="/home" element={<PostsPage/>}/>
+                <Route path="/profile" element={<UserProfilePage/>}/>
+                <Route path="/upload" element={<UploadPage/>}/>
+                <Route path="/bulk-upload" element={<BulkUploadPage/>}/>
+                <Route path="/tags" element={<TagsPage/>}/>
+                <Route path="/series" element={<SeriesPage/>}/>
+                <Route path="/characters" element={<CharactersPage/>}/>
+                <Route path="/artists" element={<ArtistsPage/>}/>
+                <Route path="/comments" element={<CommentsPage/>}/>
+                <Route path="/notes" element={<NotesPage/>}/>
+                <Route path="/groups" element={<GroupsPage/>}/>
+                <Route path="/history" element={<HistoryPage/>}/>
+                <Route path="/premium" element={<PremiumPage/>}/>
+                <Route path="/user/:username" element={<UserPage/>}/>
+                <Route path="/tag/history/:tag" element={<TagHistoryPage/>}/>
+                <Route path="/user/:username/tag/history" element={<TagHistoryPage/>}/>
+                <Route path="/tag/:tag" element={<TagPage/>}/>
+                <Route path="/group/:group" element={<GroupPage/>}/>
+                <Route path="/group/history/:group" element={<GroupHistoryPage/>}/>
+                <Route path="/user/:username/group/history" element={<GroupHistoryPage/>}/>
+                <Route path="/favgroup/:username/:favgroup" element={<FavgroupPage/>}/>
+                <Route path="/note/history/:id/:slug/:order" element={<NoteHistoryPage/>}/>
+                <Route path="/user/:username/note/history" element={<NoteHistoryPage/>}/>
+                <Route path="/post/history/:id/:slug" element={<PostHistoryPage/>}/>
+                <Route path="/user/:username/post/history" element={<PostHistoryPage/>}/>
+                <Route path="/post/:id" element={<PostPage/>}/>
+                <Route path="/post/:id/:slug" element={<PostPage/>}/>
+                <Route path="/post/:id/:slug/reader" element={<ReaderPage/>}/>
+                <Route path="/unverified/post/:id" element={<UnverifiedPostPage/>}/>
+                <Route path="/edit-post/:id/:slug" element={<EditPostPage/>}/>
+                <Route path="/unverified/edit-post/:id" element={<EditUnverifiedPostPage/>}/>
+                <Route path="/set-avatar/:id/:slug" element={<SetAvatarPage/>}/>
+                <Route path="/help" element={<HelpPage/>}/>
+                <Route path="/forum" element={<ForumPage/>}/>
+                <Route path="/posts/:username" element={<ForumPostsPage/>}/>
+                <Route path="/thread/:id" element={<ThreadPage/>}/>
+                <Route path="/mail" element={<MailPage/>}/>
+                <Route path="/message/:id" element={<MessagePage/>}/>
+                <Route path="/change-username" element={<ChangeUsernamePage/>}/>
+                <Route path="/change-email" element={<ChangeEmailPage/>}/>
+                <Route path="/change-email-success" element={<ChangeEmailSuccessPage/>}/>
+                <Route path="/verify-email" element={<VerifyEmailPage/>}/>
+                <Route path="/verify-email-success" element={<VerifyEmailSuccessPage/>}/>
+                <Route path="/verify-login-success" element={<VerifyLoginSuccessPage/>}/>
+                <Route path="/premium-success" element={<PremiumSuccessPage/>}/>
+                <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+                <Route path="/change-password" element={<ChangePasswordPage/>}/>
+                <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+                <Route path="/signup" element={<SignUpPage/>}/>
+                <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/2fa" element={<$2FAPage/>}/>
+                <Route path="/enable-2fa" element={<$2FAEnablePage/>}/>
+                <Route path="/login-history" element={<LoginHistoryPage/>}/>
+                <Route path="/contact" element={<ContactPage/>}/>
+                <Route path="/copyright-removal" element={<CopyrightRemovalPage/>}/>
+                <Route path="/mod-queue" element={<ModQueuePage/>}/>
+                <Route path="/privacy" element={<Navigate to="/terms#privacy" replace/>}/>
+                <Route path="/terms" element={<TermsPage/>}/>
+                <Route path="/news-banner" element={<NewsBannerPage/>}/>
+                <Route path="/ip-blacklist" element={<IPBlacklistPage/>}/>
+                <Route path="/api-key" element={<APIKeyPage/>}/>
+                <Route path="/401" element={<$401Page/>}/>
+                <Route path="/403" element={<$403Page/>}/>
+                <Route path="*" element={<$404Page/>}/>
+            </Routes>
+            <AudioPlayer/>
         </div>
     )
 }

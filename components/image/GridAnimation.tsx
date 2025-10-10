@@ -50,7 +50,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
 
     const loadImage = async () => {
         const decryptedImg = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
-        const liveImg = await functions.crypto.decryptThumb(props.live, session, `${props.live}-${sizeType}`)
+        const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)
         setLiveImg(liveImg)
         setImg(decryptedImg)
         setStaticImg(decryptedImg)

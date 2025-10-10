@@ -675,13 +675,13 @@ const ImageGrid: React.FunctionComponent = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} original={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} original={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
+                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} original={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
                 jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 

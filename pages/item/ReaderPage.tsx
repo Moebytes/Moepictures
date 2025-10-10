@@ -326,7 +326,7 @@ const ReaderPage: React.FunctionComponent = () => {
     return (
         <>
         <LocalStorage/>
-        <DragScroll>
+        <DragScroll/>
         <div className="reader-page">
             <div className="reader-controls" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="reader-controls-box">
@@ -381,7 +381,6 @@ const ReaderPage: React.FunctionComponent = () => {
             </div>
             <Filters active={showFilterDropdown} right={getFiltersMargin()} top={40}/>
         </div>
-        </DragScroll>
         </>
     )
 }
