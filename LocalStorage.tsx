@@ -382,9 +382,9 @@ const LocalStorage: React.FunctionComponent = (props) => {
     }, [hideSidebar, hideTitlebar, hideNavbar, hideSortbar])
 
     useEffect(() => {
-        localforage.setItem("savedPosts", JSON.stringify(posts))
-        localforage.setItem("savedTags", JSON.stringify(tags))
-        localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
+        if (posts.length) localforage.setItem("savedPosts", JSON.stringify(posts))
+        if (tags.length) localforage.setItem("savedTags", JSON.stringify(tags))
+        if (bannerTags.length) localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
         localStorage.setItem("savedSession", JSON.stringify(session))
     }, [posts, tags, bannerTags, session])
 

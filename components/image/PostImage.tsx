@@ -322,7 +322,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const parseAnimatedWebP = async () => {
             const start = new Date()
             const arrayBuffer = await getCurrentBuffer()
-            const animated = functions.file.isAnimatedWebp(arrayBuffer)
+            const animated = functions.file.isAnimatedWebp(structuredClone(arrayBuffer))
             if (!animated) return 
             const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
             setGIFData(frames)
@@ -373,7 +373,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             await ffmpeg.exec(["-i", input, "-map", "0", "-c:v", "copy", "-af", "areverse", output])
             const binary = await ffmpeg.readFile(output) as Uint8Array
             if (binary) {
-                const blob = new Blob([new DataView(binary.buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
+                const blob = new Blob([new DataView(new Uint8Array(binary).buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
                 const url = URL.createObjectURL(blob)
                 setReverseVideo(`${url}#${ext}`)
                 localStorage.setItem("reverseVideo", `${url}#${ext}`)
@@ -1320,8 +1320,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCurrentBuffer = async (forceOriginal?: boolean) => {
-        let encryptedBuffer = new ArrayBuffer(0)
-        if (!props.post) return encryptedBuffer
+        let encryptedBuffer = new ArrayBuffer(0) 
+        if (!props.post) return fetch(props.img).then((r) => r.arrayBuffer())
         const img = getCurrentLink(forceOriginal)
         if (forceOriginal) {
             encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())

@@ -11,6 +11,8 @@ import scrollIcon from "../../assets/icons/scroll.png"
 import squareIcon from "../../assets/icons/square.png"
 import sizeIcon from "../../assets/icons/size.png"
 import GridImage from "../image/GridImage"
+import GridAnimation from "../image/GridAnimation"
+import GridVideo from "../image/GridVideo"
 import GridSong from "../image/GridSong"
 import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
@@ -424,6 +426,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post} onLoad={promise.resolve}/>)
+            } else if (post.type === "video") {
+                jsx.push(<GridVideo key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+            } else if (post.type === "animation") {
+                jsx.push(<GridAnimation key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
