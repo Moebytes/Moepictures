@@ -160,6 +160,8 @@ export interface PixelateOptions {
     isAnimation?: boolean
     isVideo?: boolean
     directWidth?: boolean
+    clientWidth?: number
+    clientHeight?: number
 }
 
 export interface SplatterOptions {
@@ -174,10 +176,12 @@ export interface SplatterOptions {
     maxLineLength?: number
     maxAngle?: number
     imageExpand?: boolean
+    clientWidth?: number
+    clientHeight?: number
 }
 
 export type MiscGetEndpoint<T extends string> = 
-    T extends "/api/misc/captcha/create" ? {params: {color: string}, response: string} :
+    T extends "/api/misc/captcha/create" ? {params: {color: string}, response: {captcha: string}} :
     T extends "/api/misc/pixiv" ? {params: {url: string}, response: PixivResponse} :
     T extends "/api/misc/deviantart" ? {params: {url: string}, response: DeviationRSSExtended} :
     T extends "/api/misc/redirect" ? {params: {url: string}, response: string} :

@@ -32,12 +32,11 @@ export default class VideoFunctions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFrames = async (videoFile: string, vp9?: boolean) => {
+    public static extractWebMFrames = async (videoBuffer: ArrayBuffer, vp9?: boolean) => {
         let frames = [] as ImageBitmap[]
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()
-            const arrayBuffer = await fetch(videoFile).then((r) => r.arrayBuffer())
-            demuxer.queueData(arrayBuffer)
+            demuxer.queueData(videoBuffer)
             let timeout = null as any
             let decoder = new VideoDecoder({
                 output: async (frame: VideoFrame) => {
@@ -270,5 +269,11 @@ export default class VideoFunctions {
             }
         }
         return 0
+    }
+
+    public static rateOn = (effects: {speed: number, reverse: boolean}) => {
+        let {speed, reverse} = effects
+        if ((speed !== 1) || (reverse !== false)) return true 
+        return false
     }
 }

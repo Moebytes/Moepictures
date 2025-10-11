@@ -41,8 +41,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {scrollY} = useInteractionSelector()
     const {setScrollY, setEnableDrag, setMobileScrolling} = useInteractionActions()
     const {setSidebarText} = useActiveActions()
-    const {randomFlag, imageSearchFlag, pageFlag, reloadPostFlag} = useFlagSelector()
-    const {setRandomFlag, setImageSearchFlag, setPostAmount, setHeaderFlag, setPageFlag} = useFlagActions()
+    const {randomFlag, imageSearchFlag, pageFlag, reloadPostFlag, saveSearchFlag} = useFlagSelector()
+    const {setRandomFlag, setImageSearchFlag, setPostAmount, setHeaderFlag, setPageFlag, setSaveSearchFlag} = useFlagActions()
     const {setPremiumRequired, setShowPageDialog} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -59,6 +59,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
     const [allImagesLoaded, setAllImagesLoaded] = useState(true)
+    const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
     const location = useLocation()
@@ -82,10 +83,22 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return loadAmount * 5
     }
 
+    const saveSearchSkip = () => {
+        if (saveSearchFlag) {
+            if (removeSaveSearchFlag) {
+                setSaveSearchFlag(false)
+                setRemoveSaveSearchFlag(false)
+            } else {
+                setRemoveSaveSearchFlag(true)
+            }
+        }
+    }
+
     const searchPosts = async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
+        saveSearchSkip()
         if (!query) query = search
-        if (query?.includes(" ")) {
+        if (query?.includes(" ") && !saveSearchFlag) {
             query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
         }
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
@@ -374,7 +387,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
         } else {
             let query = search
-            if (query.includes(" ")) {
+            if (query.includes(" ") && !saveSearchFlag) {
                 query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
             }
             result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
@@ -675,19 +688,19 @@ const ImageGrid: React.FunctionComponent = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} original={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} original={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} original={original} post={post} 
+                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
-                jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
-                jsx.push(<GridAnimation key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                jsx.push(<GridAnimation key={post.postID} id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null

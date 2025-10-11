@@ -38,8 +38,8 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
-        setCaptcha(captcha)
+        const data = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        setCaptcha(data.captcha)
         setCaptchaResponse("")
     }
 

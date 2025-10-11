@@ -11,11 +11,7 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
     const [coverArt, setCoverArt] = useState(props.cached ? props.img : "")
     const [song, setSong] = useState("")
     const {imageLoaded, setImageLoaded} = props
-    const {imageWidth, setImageWidth} = props
-    const {imageHeight, setImageHeight} = props
-    const {naturalWidth, setNaturalWidth} = props
-    const {naturalHeight, setNaturalHeight} = props
-    const {audioRef, lightnessRef, overlayRef, effectRef, pixelateRef} = props
+    const {audioRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
 
     useImperativeHandle(props.componentRef, () => ({
         shouldWait: async () => {
@@ -33,7 +29,7 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
     }))
 
     const loadImage = async () => {
-        const decrypted = await functions.crypto.decryptItem(props.original, session)
+        const decrypted = await functions.crypto.decryptItem(props.audio!, session)
         setSong(decrypted)
         if (!coverArt) {
             const decryptedImage = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
@@ -48,22 +44,11 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
         setAudioSeekTo(null)
         if (audioRef.current) audioRef.current.style.opacity = "1"
         if (props.autoLoad) loadImage()
-    }, [props.original])
+    }, [props.audio])
 
     const download = async () => {
-        let filename = path.basename(props.original).replace(/\?.*$/, "")
+        let filename = path.basename(props.audio!).replace(/\?.*$/, "")
         functions.dom.download(filename, song)
-    }
-
-    const onLoad = (event: React.SyntheticEvent) => {
-        let element = event.target as HTMLImageElement
-        setImageWidth(element.width)
-        setImageHeight(element.height)
-        setNaturalWidth(element.naturalWidth)
-        setNaturalHeight(element.naturalHeight)
-        setImageLoaded(true)
-        element.style.opacity = "1"
-        props.onLoad?.()
     }
 
     const songClick = (event: React.MouseEvent) => {
@@ -82,7 +67,7 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
         <img draggable={false} className="image" ref={audioRef} src={coverArt} 
-        onLoad={(event) => onLoad(event)} style={{opacity: "1"}}/>
+        onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )
 })

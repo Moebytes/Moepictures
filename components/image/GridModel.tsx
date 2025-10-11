@@ -19,15 +19,11 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     const {setEnableDrag} = useInteractionActions()
     const {sizeType, format} = useSearchSelector()
     const {imageLoaded, setImageLoaded} = props
-    const {imageWidth, setImageWidth} = props
-    const {imageHeight, setImageHeight} = props
-    const {naturalWidth, setNaturalWidth} = props
-    const {naturalHeight, setNaturalHeight} = props
     const {imageSize, setImageSize} = props
     const [screenshot, setScreenshot] = useState(props.cached ? props.img : "")
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
-    const {modelRef, imageRef, rendererRef, imageFiltersRef, lightnessRef, overlayRef, effectRef, pixelateRef} = props
+    const {modelRef, imageRef, rendererRef, imageFiltersRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
 
     useImperativeHandle(props.componentRef, () => ({
         shouldWait: async () => {
@@ -63,7 +59,7 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         setProgress(0)
         setSeekTo(null)
         if (props.autoLoad) load()
-    }, [props.original])
+    }, [props.model])
 
     const loadImage = async () => {
         const img = await functions.crypto.decryptThumb(props.img, session)
@@ -71,7 +67,7 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     }
 
     const loadModel = async () => {
-        const decrypted = await functions.crypto.decryptItem(props.original, session)
+        const decrypted = await functions.crypto.decryptItem(props.model!, session)
 
         const element = modelRef.current
         window.cancelAnimationFrame(id)
@@ -97,18 +93,18 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         element?.appendChild(renderer.domElement)
 
         let model = null as unknown as THREE.Object3D
-        if (functions.file.isGLTF(props.original)) {
+        if (functions.file.isGLTF(props.model)) {
             const loader = new GLTFLoader()
             const gltf = await loader.loadAsync(decrypted)
             model = gltf.scene
             model.animations = gltf.animations
-        } else if (functions.file.isOBJ(props.original)) {
+        } else if (functions.file.isOBJ(props.model)) {
             const loader = new OBJLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.file.isFBX(props.original)) {
+        } else if (functions.file.isFBX(props.model)) {
             const loader = new FBXLoader()
             model = await loader.loadAsync(decrypted)
-        } else if (functions.file.isVRM(props.original)) {
+        } else if (functions.file.isVRM(props.model)) {
             const loader = new GLTFLoader()
             loader.register((parser: any) => {
                 return new VRMLoaderPlugin(parser) as any
@@ -214,20 +210,9 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     }, [mixer, speed, reverse, duration])
 
     const download = async () => {
-        const decrypted = await functions.crypto.decryptItem(props.original, session)
-        let filename = path.basename(props.original).replace(/\?.*$/, "")
+        const decrypted = await functions.crypto.decryptItem(props.model!, session)
+        let filename = path.basename(props.model!).replace(/\?.*$/, "")
         functions.dom.download(filename, decrypted)
-    }
-
-    const onLoad = (event: React.SyntheticEvent) => {
-        let element = event.target as HTMLImageElement
-        setImageWidth(element.width)
-        setImageHeight(element.height)
-        setNaturalWidth(element.naturalWidth)
-        setNaturalHeight(element.naturalHeight)
-        setImageLoaded(true)
-        element.style.opacity = "1"
-        props.onLoad?.()
     }
 
     return (
@@ -239,7 +224,7 @@ const GridModel = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
         {session.liveModelPreview && !mobile ? null : 
-        <img draggable={false} className="image" ref={imageRef} src={screenshot} onLoad={(event) => onLoad(event)}/>}
+        <img draggable={false} className="image" ref={imageRef} src={screenshot} onLoad={(event) => onLoaded(event)}/>}
         <div className="grid-model-renderer" ref={modelRef} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
         style={mobile || !session.liveModelPreview ? {display: "none"} : {opacity: "1"}}></div>
         </>

@@ -419,19 +419,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const images = post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
-                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
                 jsx.push(<GridVideo key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
-                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} video={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
                 jsx.push(<GridAnimation key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
-                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} onLoad={promise.resolve}/>)
+                    marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} anim={images[0]} post={post} onLoad={promise.resolve}/>)
             } else {
                 jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}

@@ -13,7 +13,7 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/commentrow.less"
 import {NoteSearch} from "../../types/Types"
 
@@ -164,7 +164,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentrow" note-id={props.note?.noteID}>
             <div className="commentrow-container" style={{justifyContent: "center"}}>
-                <EffectImage className="commentrow-img" post={props.note.post} order={props.note.order}
+                <TinyImage className="commentrow-img" post={props.note.post} order={props.note.order}
                 onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">

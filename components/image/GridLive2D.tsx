@@ -9,13 +9,9 @@ const GridLive2D = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRe
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {imageLoaded, setImageLoaded} = props
-    const {imageWidth, setImageWidth} = props
-    const {imageHeight, setImageHeight} = props
-    const {naturalWidth, setNaturalWidth} = props
-    const {naturalHeight, setNaturalHeight} = props
     const {imageSize, setImageSize} = props
     const [screenshot, setScreenshot] = useState(props.cached ? props.img : "")
-    const {live2DRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef} = props
+    const {live2DRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
 
     useImperativeHandle(props.componentRef, () => ({
         shouldWait: async () => {
@@ -47,16 +43,16 @@ const GridLive2D = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRe
     useEffect(() => {
         setImageLoaded(false)
         if (props.autoLoad) load()
-    }, [props.original])
+    }, [props.live2d])
 
     const loadImage = async () => {
-        const img = await functions.crypto.decryptThumb(props.img, session)
+        const img = await functions.crypto.decryptThumb(props.img!, session)
         setScreenshot(img)
     }
 
     const loadModel = async () => {
         if (!live2DRef.current) return
-        const decrypted = await functions.crypto.decryptItem(props.original, session)
+        const decrypted = await functions.crypto.decryptItem(props.live2d!, session)
         live2DRef.current.width = 500
         live2DRef.current.height = 500
         const model = new Live2DCubismModel(live2DRef.current, {enablePan: true, zoomEnabled: true})
@@ -66,20 +62,9 @@ const GridLive2D = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRe
     }
 
     const download = async () => {
-        const decrypted = await functions.crypto.decryptItem(props.original, session)
-        let filename = path.basename(props.original).replace(/\?.*$/, "")
+        const decrypted = await functions.crypto.decryptItem(props.live2d!, session)
+        let filename = path.basename(props.live2d!).replace(/\?.*$/, "")
         functions.dom.download(filename, decrypted)
-    }
-
-    const onLoad = (event: React.SyntheticEvent) => {
-        let element = event.target as HTMLImageElement
-        setImageWidth(element.width)
-        setImageHeight(element.height)
-        setNaturalWidth(element.naturalWidth)
-        setNaturalHeight(element.naturalHeight)
-        setImageLoaded(true)
-        element.style.opacity = "1"
-        props.onLoad?.()
     }
 
     return (
@@ -91,7 +76,7 @@ const GridLive2D = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRe
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
         {session.liveModelPreview && !mobile ? null : 
-        <img draggable={false} className="image" ref={imageRef} src={screenshot} onLoad={(event) => onLoad(event)}/>}
+        <img draggable={false} className="image" ref={imageRef} src={screenshot} onLoad={(event) => onLoaded(event)}/>}
         <canvas className="grid-model-renderer" ref={live2DRef} style={mobile || !session.liveModelPreview ? {display: "none"} : {opacity: "1"}}></canvas>
         </>
     )

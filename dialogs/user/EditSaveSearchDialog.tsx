@@ -69,7 +69,8 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.http.put("/api/user/savesearch", {name: editSaveSearchName, key: editSaveSearchKey, tags: editSaveSearchTags}, session, setSessionFlag)
+        let parsedTags = await functions.native.parseSpaceEnabledSearch(editSaveSearchTags, session, setSessionFlag)
+        await functions.http.put("/api/user/savesearch", {name: editSaveSearchName, key: editSaveSearchKey, tags: parsedTags}, session, setSessionFlag)
         setSessionFlag(true)
     }
 

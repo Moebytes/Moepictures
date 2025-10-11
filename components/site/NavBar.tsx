@@ -38,6 +38,16 @@ import snowflakeOn from "../../assets/icons/snowflake-on.png"
 import music from "../../assets/icons/music.png"
 import musicLight from "../../assets/icons/music-light.png"
 import musicActive from "../../assets/icons/music-active.png"
+import multiplier1xIcon from "../../assets/icons/1x-mobile.png"
+import multiplier2xIcon from "../../assets/icons/2x-mobile.png"
+import multiplier3xIcon from "../../assets/icons/3x-mobile.png"
+import multiplier4xIcon from "../../assets/icons/4x-mobile.png"
+import multiplier5xIcon from "../../assets/icons/5x-mobile.png"
+import multiplier1xIconLight from "../../assets/icons/1x-mobile-light.png"
+import multiplier2xIconLight from "../../assets/icons/2x-mobile-light.png"
+import multiplier3xIconLight from "../../assets/icons/3x-mobile-light.png"
+import multiplier4xIconLight from "../../assets/icons/4x-mobile-light.png"
+import multiplier5xIconLight from "../../assets/icons/5x-mobile-light.png"
 import MiniAudioPlayer from "./MiniAudioPlayer"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
@@ -58,8 +68,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {audio, showMiniPlayer} = usePlaybackSelector()
     const {setShowMiniPlayer} = usePlaybackActions()
-    const {search, scroll} = useSearchSelector()
-    const {setSearch, setSearchFlag, setScroll} = useSearchActions()
+    const {search, scroll, pageMultiplier} = useSearchSelector()
+    const {setSearch, setSearchFlag, setScroll, setPageMultiplier} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
     const {session, userImg, hasNotification} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
@@ -196,6 +206,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const getScrollIcon = () => {
         if (theme.includes("light")) return scroll ? scrollIconLight : pageIconLight
         return scroll ? scrollIcon : pageIcon
+    }
+
+    const getPageMultiplierIcon = () => {
+        if (pageMultiplier === 1) return theme.includes("light") ? multiplier1xIconLight : multiplier1xIcon
+        if (pageMultiplier === 2) return theme.includes("light") ? multiplier2xIconLight : multiplier2xIcon
+        if (pageMultiplier === 3) return theme.includes("light") ? multiplier3xIconLight : multiplier3xIcon
+        if (pageMultiplier === 4) return theme.includes("light") ? multiplier4xIconLight : multiplier4xIcon
+        if (pageMultiplier === 5) return theme.includes("light") ? multiplier5xIconLight : multiplier5xIcon
     }
 
     const logout = async () => {
@@ -410,6 +428,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setScroll(newValue)
     }
 
+    const togglePageMultiplier = () => {
+        if (pageMultiplier === 1) return setPageMultiplier(2)
+        if (pageMultiplier === 2) return setPageMultiplier(3)
+        if (pageMultiplier === 3) return setPageMultiplier(4)
+        if (pageMultiplier === 4) return setPageMultiplier(5)
+        if (pageMultiplier === 5) return setPageMultiplier(1)
+    }
+
     const getFontSize = () => {
         if (tablet) {
             return "17px"
@@ -457,6 +483,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={getPageMultiplierIcon()} onClick={togglePageMultiplier} style={{filter: getFilter()}}/>
                 </div>
                 <MiniAudioPlayer/>
                 {getColorDropdownJSX()}

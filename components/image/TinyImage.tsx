@@ -18,7 +18,7 @@ interface Props {
     maxLineWidth?: number
 }
 
-const EffectImage: React.FunctionComponent<Props> = (props) => {
+const TinyImage: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {brightness, contrast, hue, saturation, blur, lightness, sharpen, pixelate, splatter} = useFilterSelector()
@@ -194,4 +194,4 @@ const EffectImage: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default EffectImage
+export default TinyImage

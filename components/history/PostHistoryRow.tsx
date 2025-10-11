@@ -14,7 +14,7 @@ import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import "./styles/historyrow.less"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import {PostHistory, SourceData, TagCategories} from "../../types/Types"
 
 interface Props {
@@ -397,7 +397,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                <EffectImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={props.imageHeight}/>
+                <TinyImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={props.imageHeight}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

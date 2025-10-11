@@ -31,7 +31,8 @@ const flagSlice = createSlice({
         tagFlag: false as string | boolean,
         pasteNoteFlag: null as Note[] | null,
         historyFlag: false,
-        tagFavoriteFlag: false
+        tagFavoriteFlag: false,
+        saveSearchFlag: false
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -59,7 +60,8 @@ const flagSlice = createSlice({
         setTagFlag: (state, action) => {state.tagFlag = action.payload},
         setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload},
         setHistoryFlag: (state, action) => {state.historyFlag = action.payload},
-        setTagFavoriteFlag: (state, action) => {state.tagFavoriteFlag = action.payload}
+        setTagFavoriteFlag: (state, action) => {state.tagFavoriteFlag = action.payload},
+        setSaveSearchFlag: (state, action) => {state.saveSearchFlag = action.payload}
     }
 })
 
@@ -70,7 +72,7 @@ const {
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
     setPasteNoteFlag, setHistoryFlag, setTagSearchFlag, setTagFavoriteFlag,
-    setForumPostSearchFlag
+    setForumPostSearchFlag, setSaveSearchFlag
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -101,7 +103,8 @@ export const useFlagSelector = () => {
         tagFlag: selector((state) => state.flag.tagFlag),
         pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag),
         historyFlag: selector((state) => state.flag.historyFlag),
-        tagFavoriteFlag: selector((state) => state.flag.tagFavoriteFlag)
+        tagFavoriteFlag: selector((state) => state.flag.tagFavoriteFlag),
+        saveSearchFlag: selector((state) => state.flag.saveSearchFlag)
     }
 }
 
@@ -134,7 +137,8 @@ export const useFlagActions = () => {
         setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state)),
         setHistoryFlag: (state: boolean) => dispatch(setHistoryFlag(state)),
         setTagFavoriteFlag: (state: boolean) => dispatch(setTagFavoriteFlag(state)),
-    }    
+        setSaveSearchFlag: (state: boolean) => dispatch(setSaveSearchFlag(state))
+    }
 }
 
 export default flagSlice.reducer

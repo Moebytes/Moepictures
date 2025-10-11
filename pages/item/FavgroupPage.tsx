@@ -18,7 +18,7 @@ import groupCancelActive from "../../assets/icons/group-cancel-active.png"
 import groupAccept from "../../assets/icons/group-accept.png"
 import lockIcon from "../../assets/icons/private-lock.png"
 import Reorder from "react-reorder"
-import EffectImage from "../../components/image/EffectImage"
+import TinyImage from "../../components/image/TinyImage"
 import "./styles/grouppage.less"
 import {GroupItem, Favgroup} from "../../types/Types"
 
@@ -154,7 +154,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             }
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <EffectImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
+                    <TinyImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
                     onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )

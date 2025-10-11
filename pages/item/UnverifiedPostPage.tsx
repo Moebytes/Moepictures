@@ -5,6 +5,8 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import PostImage from "../../components/image/PostImage"
+import PostAnimation from "../../components/image/PostAnimation"
+import PostVideo from "../../components/image/PostVideo"
 import PostModel from "../../components/image/PostModel"
 import PostLive2D from "../../components/image/PostLive2D"
 import PostSong from "../../components/image/PostSong"
@@ -226,32 +228,46 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
 
     const getPostJSX = () => {
         if (!post) return
+        let img = image
+        if (session.cookie) {
+            img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
+        }
         if (post.type === "model") {
             return (
                 <>
-                <PostModel unverified={true} post={post} model={image} order={order}/>
-                <PostImageOptions post={post} noFavorite={true} model={image} download={download} next={next} previous={previous}/>
+                <PostModel unverified={true} post={post} model={img} order={order}/>
+                <PostImageOptions post={post} noFavorite={true} model={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "live2d") {
             return (
                 <>
-                <PostLive2D unverified={true} post={post} live2d={image} order={order}/>
-                <PostImageOptions post={post} noFavorite={true} live2d={image} download={download} next={next} previous={previous}/>
+                <PostLive2D unverified={true} post={post} live2d={img} order={order}/>
+                <PostImageOptions post={post} noFavorite={true} live2d={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong unverified={true} post={post} audio={image} order={order}/>
-                <PostImageOptions noFavorite={true} audio={image} post={post} download={download} next={next} previous={previous}/>
+                <PostSong unverified={true} post={post} audio={img} order={order}/>
+                <PostImageOptions noFavorite={true} audio={img} post={post} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "video") {
+            return (
+                <>
+                <PostVideo unverified={true} post={post} video={img} order={order}/>
+                <PostImageOptions post={post} noFavorite={true} img={img} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "animation") {
+            return (
+                <>
+                <PostAnimation unverified={true} post={post} anim={img} order={order}/>
+                <PostImageOptions post={post} noFavorite={true} img={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else {
-            let img = image
-            if (session.cookie) {
-                img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
-            }
             return (
                 <>
                 <PostImage unverified={true} post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order}/>

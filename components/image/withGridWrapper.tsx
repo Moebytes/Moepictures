@@ -14,7 +14,12 @@ interface Props {
     id: string
     post: PostSearch
     img: string
-    original: string
+    anim?: string
+    video?: string
+    audio?: string
+    model?: string
+    live2d?: string
+    original?: string
     live?: string
     cached?: boolean
     comicPages?: string[] | null
@@ -51,22 +56,17 @@ interface AddonProps {
     pixelateRef: React.RefObject<HTMLCanvasElement | null>
     imageLoaded: boolean
     setImageLoaded: React.Dispatch<React.SetStateAction<boolean>>
+    onLoaded: (event: React.SyntheticEvent) => void
     hover: boolean
     setHover: React.Dispatch<React.SetStateAction<boolean>>
-    imageWidth: number
-    setImageWidth: React.Dispatch<React.SetStateAction<number>>
-    imageHeight: number
-    setImageHeight: React.Dispatch<React.SetStateAction<number>>
-    naturalWidth: number
-    setNaturalWidth: React.Dispatch<React.SetStateAction<number>>
-    naturalHeight: number
-    setNaturalHeight: React.Dispatch<React.SetStateAction<number>>
     imageSize: number
     setImageSize: React.Dispatch<React.SetStateAction<number>>
     gifData: GIFFrame[] | null
     setGIFData: React.Dispatch<React.SetStateAction<GIFFrame[] | null>>
     backFrame: string
     setBackFrame: React.Dispatch<React.SetStateAction<string>>
+    getCurrentLink: (forceOriginal?: boolean | undefined) => string
+    getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer>
 }
 
 export interface GridWrapperRef {
@@ -90,6 +90,10 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const {setPost} = useCacheActions()
         const [visible, setVisible] = useState(true)
         const [drag, setDrag] = useState(false)
+        const [imageWidth, setImageWidth] = useState(0)
+        const [imageHeight, setImageHeight] = useState(0)
+        const [naturalWidth, setNaturalWidth] = useState(0)
+        const [naturalHeight, setNaturalHeight] = useState(0)
         const [pageBuffering, setPageBuffering] = useState(true)
         const [selected, setSelected] = useState(false)
         const navigate = useNavigate()
@@ -110,10 +114,6 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const lightnessRef = useRef<HTMLImageElement>(null)
         const pixelateRef = useRef<HTMLCanvasElement>(null)
         const effectRef = useRef<HTMLCanvasElement>(null)
-        const [imageWidth, setImageWidth] = useState(0)
-        const [imageHeight, setImageHeight] = useState(0)
-        const [naturalWidth, setNaturalWidth] = useState(0)
-        const [naturalHeight, setNaturalHeight] = useState(0)
         const [imageLoaded, setImageLoaded] = useState(false)
         const [imageSize, setImageSize] = useState(240)
         const [hover, setHover] = useState(false)
@@ -123,6 +123,11 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const getRef = () => {
             return imageRef.current || animationRef.current || videoRef.current ||
                 audioRef.current || modelRef.current || live2DRef.current
+        }
+
+        const getImg = () => {
+            return props.img || props.anim || props.video || 
+                props.audio || props.model || props.live2d
         }
 
         const getFilter = () => {
@@ -278,7 +283,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             if (!imageFiltersRef.current) return
             const element = imageFiltersRef.current
             let newContrast = contrast
-            let image = props.img
+            let image = getImg()
             if (backFrame) image = backFrame
             const sharpenOverlay = overlayRef.current
             const lightnessOverlay = lightnessRef.current
@@ -441,7 +446,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
                 setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))
                 setToolTipPost(props.post)
-                setToolTipImg(props.img)
+                setToolTipImg(getImg()!)
                 setToolTipEnabled(true)
             }, 700)
         }
@@ -476,6 +481,57 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 selectionPosts.delete(props.post.postID)
             }
         }, [selectionMode])
+
+        const getCurrentLink = (forceOriginal?: boolean) => {
+            if (!props.post) return getImg()!
+            const showUpscaled = !forceOriginal && Boolean(session.upscaledImages)
+            const image = props.post.images[0]
+            let upscaledImage = props.post.upscaledImages?.[0] || image
+            let currentImage = showUpscaled ? upscaledImage : image
+
+            let img = ""
+            if (typeof currentImage === "string") {
+                img = functions.link.getRawImageLink(currentImage)
+            } else {
+                img = functions.link.getImageLink(currentImage, showUpscaled)
+            }
+            if (forceOriginal) {
+                return functions.util.appendURLParams(img, {upscaled: false})
+            } else {
+                return img
+            }
+        }
+
+        const getCurrentBuffer = async (forceOriginal?: boolean) => {
+            let encryptedBuffer = new ArrayBuffer(0) 
+            if (!props.post) return fetch(getImg()!).then((r) => r.arrayBuffer())
+            const img = getCurrentLink(forceOriginal)
+            if (forceOriginal) {
+                encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            } else {
+                encryptedBuffer = await fetch(img).then((r) => r.arrayBuffer())
+            }
+            return functions.crypto.decryptBuffer(encryptedBuffer, img, session)
+        }
+
+        const onLoaded = (event: React.SyntheticEvent) => {
+            if (event.target instanceof HTMLVideoElement) {
+                let element = event.target as HTMLVideoElement
+                setImageWidth(element.clientWidth)
+                setImageHeight(element.clientHeight)
+                setNaturalWidth(element.videoWidth)
+                setNaturalHeight(element.videoHeight)
+            } else {
+                let element = event.target as HTMLImageElement
+                setImageWidth(element.width)
+                setImageHeight(element.height)
+                setNaturalWidth(element.naturalWidth)
+                setNaturalHeight(element.naturalHeight)
+                element.style.opacity = "1"
+            }
+            setImageLoaded(true)
+            props.onLoad?.()
+        }
 
         const cornerIcon = () => {
             if (props.post.private) return privateIcon
@@ -513,20 +569,15 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                         setHover={setHover}
                         imageLoaded={imageLoaded}
                         setImageLoaded={setImageLoaded}
-                        imageWidth={imageWidth}
-                        setImageWidth={setImageWidth}
-                        imageHeight={imageHeight}
-                        setImageHeight={setImageHeight}
-                        naturalWidth={naturalWidth}
-                        setNaturalWidth={setNaturalWidth}
-                        naturalHeight={naturalHeight}
-                        setNaturalHeight={setNaturalHeight}
+                        onLoaded={onLoaded}
                         imageSize={imageSize}
                         setImageSize={setImageSize}
                         gifData={gifData}
                         setGIFData={setGIFData}
                         backFrame={backFrame}
                         setBackFrame={setBackFrame}
+                        getCurrentLink={getCurrentLink}
+                        getCurrentBuffer={getCurrentBuffer}
                     />
                 </div>
             </div>

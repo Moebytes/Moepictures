@@ -14,7 +14,7 @@ import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import {NoteHistory, Note} from "../../types/Types"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -234,7 +234,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? notehistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                <EffectImage className="historyrow-img" post={props.noteHistory.post} order={props.noteHistory.order} onClick={imgClick} height={200}/>
+                <TinyImage className="historyrow-img" post={props.noteHistory.post} order={props.noteHistory.order} onClick={imgClick} height={200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

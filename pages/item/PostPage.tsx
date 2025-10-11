@@ -5,6 +5,8 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import PostImage from "../../components/image/PostImage"
+import PostAnimation from "../../components/image/PostAnimation"
+import PostVideo from "../../components/image/PostVideo"
 import PostModel from "../../components/image/PostModel"
 import PostLive2D from "../../components/image/PostLive2D"
 import PostSong from "../../components/image/PostSong"
@@ -604,32 +606,46 @@ const PostPage: React.FunctionComponent = () => {
 
     const getPostJSX = () => {
         if (!post) return
+        let img = image
+        if (session.cookie) {
+            if (img) img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
+        }
         if (post.type === "model") {
             return (
                 <>
-                <PostModel post={post} model={image} order={order} next={next} previous={previous} noteID={noteID}/>
-                <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
+                <PostModel post={post} model={img} order={order} next={next} previous={previous} noteID={noteID}/>
+                <PostImageOptions post={post} model={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "live2d") {
             return (
                 <>
-                <PostLive2D post={post} live2d={image} order={order} next={next} previous={previous} noteID={noteID}/>
-                <PostImageOptions post={post} live2d={image} download={download} next={next} previous={previous}/>
+                <PostLive2D post={post} live2d={img} order={order} next={next} previous={previous} noteID={noteID}/>
+                <PostImageOptions post={post} live2d={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong post={post} audio={image} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
-                <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
+                <PostSong post={post} audio={img} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
+                <PostImageOptions post={post} audio={img} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "video") {
+            return (
+                <>
+                <PostVideo post={post} video={img} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
+                <PostImageOptions post={post} img={img} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "animation") {
+            return (
+                <>
+                <PostAnimation post={post} anim={img} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>
+                <PostImageOptions post={post} img={img} download={download} next={next} previous={previous}/>
                 </>
             )
         } else {
-            let img = image
-            if (session.cookie) {
-                if (img) img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
-            }
             return (
                 <>
                 <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} noteID={noteID} artists={tagCategories?.artists}/>

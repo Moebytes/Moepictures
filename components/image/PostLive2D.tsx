@@ -1,7 +1,7 @@
-import React, {useEffect, useRef, useState, useReducer} from "react"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
-import functions from "../../functions/Functions"
+import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle, useReducer} from "react"
+import {useNavigate} from "react-router-dom"
+import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
+import {useSessionSelector, usePlaybackSelector, usePlaybackActions, useInteractionActions} from "../../store"
 import Slider from "react-slider"
 import live2dZoomInIcon from "../../assets/icons/live2d-zoom-in.png"
 import live2dZoomOutIcon from "../../assets/icons/live2d-zoom-out.png"
@@ -15,69 +15,30 @@ import live2d2xSpeedIcon from "../../assets/icons/live2d-2x.png"
 import live2dParameterIcon from "../../assets/icons/live2d-parameter.png"
 import live2dPartIcon from "../../assets/icons/live2d-part.png"
 import live2dFullscreenIcon from "../../assets/icons/live2d-fullscreen.png"
-import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import expand from "../../assets/icons/expand.png"
-import contract from "../../assets/icons/contract.png"
-import NoteEditor from "./NoteEditor"
-import path from "path"
-import nextIcon from "../../assets/icons/go-right.png"
-import prevIcon from "../../assets/icons/go-left.png"
 import {Live2DCubismModel} from "live2d-renderer"
-import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import path from "path"
+import functions from "../../functions/Functions"
 import "./styles/postmodel.less"
 
-let id = null as any
-
-interface Props {
-    post?: PostFull | PostHistory | UnverifiedPost
-    live2d: string
-    width?: number
-    height?: number
-    scale?: number
-    noKeydown?: boolean
-    comicPages?: string[] | null
-    order?: number
-    noNotes?: boolean
-    unverified?: boolean
-    previous?: () => void
-    next?: () => void
-    noteID?: string | null
-}
-
-const PostLive2D: React.FunctionComponent<Props> = (props) => {
+const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {setEnableDrag} = useInteractionActions()
-    const {mobile} = useLayoutSelector()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {session} = useSessionSelector()
     const {disableZoom, paused} = usePlaybackSelector()
     const {setDisableZoom, setPaused} = usePlaybackActions()
-    const {noteMode, imageExpand} = useSearchSelector()
-    const {session} = useSessionSelector()
-    const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
-    const {downloadFlag, downloadIDs} = useFlagSelector()
-    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setEnableDrag} = useInteractionActions()
     const [showParameterDropdown, setShowParameterDropdown] = useState(false)
     const [showPartDropdown, setShowPartDropdown] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
-    const fullscreenRef = useRef<HTMLDivElement>(null)
-    const rendererRef = useRef<HTMLCanvasElement>(null)
-    const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLCanvasElement>(null)
-    const lightnessRef = useRef<HTMLCanvasElement>(null)
     const live2dControls = useRef<HTMLDivElement>(null)
     const live2dParameterRef = useRef<HTMLImageElement>(null)
     const live2dPartRef = useRef<HTMLImageElement>(null)
-    const [image, setImage] = useState(null as string | null)
     const [model, setModel] = useState(null as Live2DCubismModel | null)
     const [modelWidth, setModelWidth] = useState(0)
     const [modelHeight, setModelHeight] = useState(0)
     const [modelSpeed, setModelSpeed] = useState(1)
-    const [defaultOpacities, setDefaultOpacities] = useState(new Float32Array())
-    const [previousButtonHover, setPreviousButtonHover] = useState(false)
-    const [nextButtonHover, setNextButtonHover] = useState(false)
-    const [buttonHover, setButtonHover] = useState(false)
-    const [decrypted, setDecrypted] = useState("")
+    const [live2d, setLive2D] = useState("")
+    const {toggleFullscreen} = props
+    const {live2DRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
+    const navigate = useNavigate()
 
     useEffect(() => {
         const savedSpeed = localStorage.getItem("live2dSpeed")
@@ -89,14 +50,14 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("live2dSpeed", String(modelSpeed))
     }, [modelSpeed])
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    useImperativeHandle(parentRef, () => ({
+        download: download
+    }))
 
     const decryptLive2D = async () => {
         if (!props.live2d) return
         const decryptedLive2D = await functions.crypto.decryptItem(props.live2d, session)
-        if (decryptedLive2D) setDecrypted(decryptedLive2D)
+        if (decryptedLive2D) setLive2D(decryptedLive2D)
     }
 
     useEffect(() => {
@@ -108,78 +69,31 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }, [props.live2d, session])
 
     useEffect(() => {
-        if (decrypted) loadLive2DModel()
-    }, [decrypted])
+        if (live2d) loadLive2DModel()
+    }, [live2d])
 
     const loadLive2DModel = async () => {
-        if (!decrypted || !rendererRef.current) return
+        if (!live2d || !live2DRef.current) return
 
-        rendererRef.current.width = 700
-        rendererRef.current.height = 700
-        const model = new Live2DCubismModel(rendererRef.current)
-        await model.load(decrypted)
+        live2DRef.current.width = 700
+        live2DRef.current.height = 700
+        const model = new Live2DCubismModel(live2DRef.current)
+        await model.load(live2d)
 
         setModel(model)
         setModelWidth(model.width)
         setModelHeight(model.height)
-        setDefaultOpacities(structuredClone(model.parts.opacities))
     }
 
     useEffect(() => {
-        if (!model || !rendererRef.current) return
+        if (!model || !live2DRef.current) return
 
         model.paused = paused
         model.zoomEnabled = !disableZoom
         model.speed = modelSpeed
     }, [model, disableZoom, paused, modelSpeed])
 
-    const resizeImageCanvas = () => {
-        if (!pixelateRef.current || !rendererRef.current) return
-        pixelateRef.current.width = rendererRef.current.clientWidth
-        pixelateRef.current.height = rendererRef.current.clientHeight
-    }
-
-    const exitFullScreen = async () => {
-        // @ts-ignore
-        if (!document.fullscreenElement && !document.webkitIsFullScreen) {
-            await fullscreen(true)
-            resizeImageCanvas()
-            forceUpdate()
-        }
-    }
-
-    const handleKeydown = (event: KeyboardEvent) => {
-        const key = event.keyCode
-        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
-            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
-            if (value === "f") {
-                if (!props.noKeydown) fullscreen()
-            }
-            if (value === "t") {
-                setNoteMode(!noteMode)
-                setNoteDrawingEnabled(true)
-            }
-        }
-    }
-
-    useEffect(() => {
-        if (!rendererRef.current) return
-        let observer = null as ResizeObserver | null
-        observer = new ResizeObserver(resizeImageCanvas)
-        observer.observe(rendererRef.current)
-        window.addEventListener("keydown", handleKeydown)
-        window.addEventListener("fullscreenchange", exitFullScreen)
-        window.addEventListener("webkitfullscreenchange", exitFullScreen)
-        return () => {
-            observer?.disconnect()
-            window.removeEventListener("keydown", handleKeydown)
-            window.removeEventListener("fullscreenchange", exitFullScreen)
-            window.removeEventListener("webkitfullscreenchange", exitFullScreen)
-        }
-    }, [])
-
-    const getLive2DParameterMarginRight = () => {
+    const getParameterMarginRight = () => {
         const controlRect = live2dControls.current?.getBoundingClientRect()
         const rect = live2dParameterRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
@@ -188,7 +102,7 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    const getLive2DPartMarginRight = () => {
+    const getPartMarginRight = () => {
         const controlRect = live2dControls.current?.getBoundingClientRect()
         const rect = live2dPartRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
@@ -197,88 +111,10 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    useEffect(() => {
-        if (!fullscreenRef.current) return
-        const element = fullscreenRef.current
-        let newContrast = contrast
-        const sharpenOverlay = overlayRef.current
-        const lightnessOverlay = lightnessRef.current
-        if (!image || !sharpenOverlay || !lightnessOverlay) return
-        if (sharpen !== 0) {
-            const sharpenOpacity = sharpen / 5
-            newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image})`
-            sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
-            sharpenOverlay.style.mixBlendMode = "overlay"
-            sharpenOverlay.style.opacity = `${sharpenOpacity}`
-        } else {
-            sharpenOverlay.style.backgroundImage = "none"
-            sharpenOverlay.style.filter = "none"
-            sharpenOverlay.style.mixBlendMode = "normal"
-            sharpenOverlay.style.opacity = "0"
-        }
-        if (lightness !== 100) {
-            const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
-            lightnessOverlay.style.filter = filter
-            lightnessOverlay.style.opacity = `${Math.abs((lightness - 100) / 100)}`
-        } else {
-            lightnessOverlay.style.filter = "none"
-            lightnessOverlay.style.opacity = "0"
-        }
-        element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, image])
-
-    const imagePixelate = () => {
-        if (!pixelateRef.current || !containerRef.current || !rendererRef.current) return
-        const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d")!
-        const imageWidth = rendererRef.current.clientWidth 
-        const imageHeight = rendererRef.current.clientHeight
-        const landscape = imageWidth >= imageHeight
-        ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = imageWidth
-        pixelateCanvas.height = imageHeight
-        const pixelWidth = imageWidth / pixelate 
-        const pixelHeight = imageHeight / pixelate
-        if (pixelate !== 1) {
-            ctx.drawImage(rendererRef.current, 0, 0, pixelWidth, pixelHeight)
-            if (landscape) {
-                pixelateCanvas.style.width = `${imageWidth * pixelate}px`
-                pixelateCanvas.style.height = "auto"
-            } else {
-                pixelateCanvas.style.width = "auto"
-                pixelateCanvas.style.height = `${imageHeight * pixelate}px`
-            }
-            pixelateCanvas.style.opacity = "1"
-        } else {
-            pixelateCanvas.style.width = "none"
-            pixelateCanvas.style.height = "none"
-            pixelateCanvas.style.opacity = "0"
-        }
+    const download = async () => {
+        let filename = path.basename(props.live2d!).replace(/\?.*$/, "")
+        functions.dom.download(filename, live2d)
     }
-
-    useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
-    }, [])
-
-    useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
-    }, [pixelate, image])
-
-    useEffect(() => {
-        if (!props.post) return
-        if (downloadFlag) {
-            if (downloadIDs.includes(props.post.postID)) {
-                functions.dom.download(path.basename(props.live2d), decrypted)
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
-                setDownloadFlag(false)
-            }
-        }
-    }, [downloadFlag, decrypted])
 
     const closeDropdowns = () => {
         setShowParameterDropdown(false)
@@ -350,62 +186,6 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
         return setModelSpeed(1)
     }
 
-    const fullscreen = async (exit?: boolean) => {
-        // @ts-ignore
-        if (document.fullscreenElement || document.webkitIsFullScreen || exit) {
-            try {
-                await document.exitFullscreen?.()
-                // @ts-ignore
-                await document.webkitExitFullscreen?.()
-            } catch {
-                // ignore
-            }
-            if (rendererRef.current) {
-                rendererRef.current.style.maxWidth = ""
-                rendererRef.current.style.maxHeight = ""
-            }
-            setTimeout(() => {
-                resizeImageCanvas()
-            }, 100)
-        } else {
-            try {
-                await fullscreenRef.current?.requestFullscreen?.()
-                // @ts-ignore
-                await fullscreenRef.current?.webkitRequestFullscreen?.()
-            } catch {
-                // ignore
-            }
-            if (rendererRef.current) {
-                rendererRef.current.style.maxWidth = "100vw"
-                rendererRef.current.style.maxHeight = "100vh"
-            }
-            setTimeout(() => {
-                resizeImageCanvas()
-            }, 100)
-        }
-    }
-
-    const loadImage = async () => {
-        if (!image || !overlayRef.current || !lightnessRef.current) return
-        const img = document.createElement("img")
-        img.src = image
-        img.onload = () => {
-            if (!overlayRef.current || !lightnessRef.current) return
-            const overlayCtx = overlayRef.current.getContext("2d")
-            overlayRef.current.width = img.width
-            overlayRef.current.height = img.height
-            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const lightnessCtx = lightnessRef.current.getContext("2d")
-            lightnessRef.current.width = img.width
-            lightnessRef.current.height = img.height
-            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
-        }
-    }
-
-    useEffect(() => {
-        loadImage()
-    }, [image])
-
     const zoomIn = () => {
         if (disableZoom) return
         model?.zoomIn()
@@ -441,14 +221,15 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <div className="live2d-dropdown-row live2d-row">
                     <span className="live2d-dropdown-text">{id}</span>
-                    <Slider className="live2d-slider" trackClassName="live2d-slider-track" thumbClassName="live2d-slider-thumb" onChange={(value) => updateParameter(value)} min={min} max={max} step={step} value={value}/>
+                    <Slider className="live2d-slider" trackClassName="live2d-slider-track" thumbClassName="live2d-slider-thumb" 
+                    onChange={(value) => updateParameter(value)} min={min} max={max} step={step} value={value}/>
                 </div>
             )
         }
 
         return (
             <div className={`live2d-dropdown ${showParameterDropdown ? "" : "hide-live2d-dropdown"}`}
-            style={{marginRight: getLive2DParameterMarginRight(), top: `-300px`}}>
+            style={{marginRight: getParameterMarginRight(), top: `-300px`}}>
                 <div className="live2d-dropdown-container">
                     {jsx}
                     <div className="live2d-dropdown-row live2d-row">
@@ -480,14 +261,15 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <div className="live2d-dropdown-row live2d-row">
                     <span className="live2d-dropdown-text">{id}</span>
-                    <Slider className="live2d-slider" trackClassName="live2d-slider-track" thumbClassName="live2d-slider-thumb" onChange={(value) => updatePart(value)} min={0} max={1} step={0.01} value={opacity}/>
+                    <Slider className="live2d-slider" trackClassName="live2d-slider-track" thumbClassName="live2d-slider-thumb" 
+                    onChange={(value) => updatePart(value)} min={0} max={1} step={0.01} value={opacity}/>
                 </div>
             )
         }
 
         return (
             <div className={`live2d-dropdown ${showPartDropdown ? "" : "hide-live2d-dropdown"}`}
-            style={{marginRight: getLive2DPartMarginRight(), top: `-300px`}}>
+            style={{marginRight: getPartMarginRight(), top: `-300px`}}>
                 <div className="live2d-dropdown-container">
                     {jsx}
                     <div className="live2d-dropdown-row live2d-row">
@@ -499,46 +281,30 @@ const PostLive2D: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.live2d} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={modelWidth} imageHeight={modelHeight}/> : null}
-            <div className="post-model-box" ref={containerRef}>
-                <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
-                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
-                    </div>
-                    <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
-                        <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
-                    </div>
-                    <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
-                        <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
-                    </div>
-                    <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
-                        <div className="image-controls" ref={live2dControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-                            <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <div className="image-control-row-container">
-                                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
-                                    <img draggable={false} className="image-control-img" onClick={zoomOut} src={live2dZoomOutIcon}/>
-                                    <img draggable={false} className="image-control-img" onClick={zoomIn} src={live2dZoomInIcon}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getPlayIcon()}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => changeFPS()} src={getFPSIcon()}/>
-                                    <img draggable={false} className="image-control-img" ref={live2dParameterRef} src={live2dParameterIcon} onClick={() => toggleDropdown("parameter")}/>
-                                    <img draggable={false} className="image-control-img" ref={live2dPartRef} src={live2dPartIcon} onClick={() => toggleDropdown("part")}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => fullscreen()} src={live2dFullscreenIcon}/>
-                                </div> 
-                            </div>
-                            {parameterDropdownJSX()}
-                            {partDropdownJSX()}
-                        </div>
-                        <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>
-                        <canvas draggable={false} className="post-sharpen-overlay" ref={overlayRef}></canvas>
-                        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                        <canvas draggable={false} className="post-model-renderer" ref={rendererRef}></canvas>
-                    </div>
-                </div>
+        <>
+        <div className="image-controls" ref={live2dControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+            <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="image-control-row-container">
+                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
+                    <img draggable={false} className="image-control-img" onClick={zoomOut} src={live2dZoomOutIcon}/>
+                    <img draggable={false} className="image-control-img" onClick={zoomIn} src={live2dZoomInIcon}/>
+                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getPlayIcon()}/>
+                    <img draggable={false} className="image-control-img" onClick={() => changeFPS()} src={getFPSIcon()}/>
+                    <img draggable={false} className="image-control-img" ref={live2dParameterRef} src={live2dParameterIcon} onClick={() => toggleDropdown("parameter")}/>
+                    <img draggable={false} className="image-control-img" ref={live2dPartRef} src={live2dPartIcon} onClick={() => toggleDropdown("part")}/>
+                    <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={live2dFullscreenIcon}/>
+                </div> 
             </div>
+            {parameterDropdownJSX()}
+            {partDropdownJSX()}
         </div>
+        <img draggable={false} className="post-lightness-overlay" ref={lightnessRef}/>
+        <img draggable={false} className="post-sharpen-overlay" ref={overlayRef}/>
+        <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
+        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
+        <canvas draggable={false} className="post-model-renderer" ref={live2DRef}></canvas>
+        </>
     )
-}
+})
 
-export default PostLive2D
+export default withPostWrapper(PostLive2D)

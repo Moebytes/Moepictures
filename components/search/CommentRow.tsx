@@ -17,7 +17,7 @@ import curatorStar from "../../assets/icons/curator-star.png"
 import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/commentrow.less"
 import {CommentSearch} from "../../types/Types"
 
@@ -244,7 +244,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentrow" comment-id={props.comment?.commentID}>
             <div className="commentrow-container">
-                <EffectImage className="commentrow-img" post={props.comment.post} 
+                <TinyImage className="commentrow-img" post={props.comment.post} 
                 onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">
