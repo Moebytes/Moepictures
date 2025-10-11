@@ -520,7 +520,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         }
 
         const generateQRCode = async () => {
-            let img = await generateTempLink()
+            let img = await generateTempLink(!Boolean(audioRef.current))
             QRCode.toDataURL(img, {margin: 0}, (err, url) => {
                 setQRCodeImage(url)
             })
