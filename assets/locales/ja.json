@@ -98,6 +98,7 @@
     },
     "footer": {
         "bottom": "これはページの一番下です",
+        "bottomMobile": "ページの下部",
         "top": "トップに戻る"
     },
     "filters": {

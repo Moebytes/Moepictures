@@ -3,6 +3,8 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useThemeActions,
 useLayoutActions} from "../../store"
 import backToTop from "../../assets/icons/backtotop.png"
+import terms from "../../assets/icons/terms.png"
+import contact from "../../assets/icons/contact.png"
 import enIcon from "../../assets/icons/translation-en.png"
 import jaIcon from "../../assets/icons/translation-ja.png"
 import "./styles/footer.less"
@@ -87,9 +89,18 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>
-            {mobile ? <div className="footer-row" style={{justifyContent: "flex-start", marginTop: "3px"}}>
-                <span style={{marginLeft: "12px"}} className="footer-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span>
-                <span style={{marginLeft: "12px"}} className="footer-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span>
+            {mobile ? <div className="footer-row" style={{justifyContent: "center", marginTop: "3px"}}>
+                <div className="footer-click-container" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>
+                    <img className="footer-img" src={terms} style={{filter: getFilter()}}/>
+                    <span className="footer-text" >{i18n.navbar.terms}</span>
+                </div>
+                <div className="footer-click-container" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>
+                    <img className="footer-img" src={contact} style={{filter: getFilter()}}/>
+                    <span className="footer-text" >{i18n.navbar.contact}</span>
+                </div>
+                <div className="footer-click-container" style={{cursor: "default"}}>
+                    <span style={{fontSize: "16px"}} className="footer-text">- {i18n.footer.bottomMobile} -</span>
+                </div>
             </div> : null}
         </div>
         </>

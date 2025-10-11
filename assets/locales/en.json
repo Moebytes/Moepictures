@@ -98,6 +98,7 @@
     },
     "footer": {
         "bottom": "This is the bottom of the page",
+        "bottomMobile": "Bottom of the page",
         "top": "Back to top"
     },
     "filters": {
