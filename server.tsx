@@ -459,7 +459,8 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
     if (mimeType) res.setHeader("Content-Type", mimeType)
     res.setHeader("Content-Length", body.byteLength)
     res.status(200).send(body)
-  } catch {
+  } catch (e) {
+    console.log(e)
     res.status(400).end()
   }
 })
@@ -491,7 +492,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
         : functions.link.getImagePath(img.type, img.postID, img.order, img.filename)
         
         const imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
-        body = await serverFunctions.squareCrop(imageBuffer, 200)
+        body = await serverFunctions.squareCrop(imageBuffer, 500)
       }
     }
   
