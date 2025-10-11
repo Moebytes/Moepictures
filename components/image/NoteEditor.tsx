@@ -18,6 +18,7 @@ import translationEN from "../../assets/icons/translation-en.png"
 import translationJA from "../../assets/icons/translation-ja.png"
 import noteClear from "../../assets/icons/note-clear.png"
 import noteCopy from "../../assets/icons/note-copy.png"
+import notePaste from "../../assets/icons/note-paste.png"
 import noteOCR from "../../assets/icons/note-ocr.png"
 import "./styles/noteeditor.less"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
@@ -353,6 +354,19 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         setActionBanner("copy-notes")
     }
 
+    const pasteNotes = async () => {
+        const text = await navigator.clipboard.readText()
+        const parsedNotes = JSON.parse(text)
+        if (parsedNotes?.[0]) {
+            const note = parsedNotes[0]
+            if ("x" in note && "y" in note && 
+                "width" in note && "height" in note) {
+                setPasteNoteFlag(parsedNotes)
+            }
+        }
+        setActionBanner("paste-notes")
+    }
+
     useEffect(() => {
         if (pasteNoteFlag?.length) {
             setItems(pasteNoteFlag)
@@ -559,6 +573,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="note-editor-button" src={noteSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="note-editor-button" src={noteClear} style={{filter: getFilter()}} onClick={() => clearNotes()}/>
                     <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter: getFilter()}} onClick={() => copyNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={notePaste} style={{filter: getFilter()}} onClick={() => pasteNotes()}/>
                     <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript(!showTranscript)}/>
                     {/* <img draggable={false} className="note-editor-button" src={noteText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/> */}
                     {/* <img draggable={false} className="note-editor-button" src={noteDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/> */}
