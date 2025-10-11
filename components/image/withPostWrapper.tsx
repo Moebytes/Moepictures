@@ -507,8 +507,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             return functions.crypto.decryptBuffer(encryptedBuffer, img, session)
         }
 
-        const generateTempLink = async (audio?: boolean) => {
-            const link = getCurrentLink()
+        const generateTempLink = async (audio?: boolean, forceOriginal?: boolean) => {
+            const link = getCurrentLink(forceOriginal)
             let url = await functions.http.post("/storage", {link, songCover: !audio}, session, setSessionFlag)
             if (audio) {
                 setAudioTempLink(url)
@@ -549,7 +549,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 "saucenao": "https://saucenao.com/search.php?url=",
                 "ascii2d": "https://ascii2d.net/search/url/"
             }
-            let img = await generateTempLink(!Boolean(audioRef.current))
+            let img = await generateTempLink(!Boolean(audioRef.current), true)
             window.open(baseMap[service] + encodeURIComponent(img), "_blank", "noreferrer")
         }
 
