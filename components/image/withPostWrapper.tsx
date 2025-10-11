@@ -341,6 +341,14 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 if (animationRef.current || videoRef.current) {
                     currentRef.style.marginTop = "0px"
                     currentRef.style.marginBottom = "0px"
+                    if (pixelateRef.current) {
+                        pixelateRef.current.style.marginTop = "0px"
+                        pixelateRef.current.style.marginBottom = "0px"
+                    }
+                    if (effectRef.current) {
+                        effectRef.current.style.marginTop = "0px"
+                        effectRef.current.style.marginBottom = "0px"
+                    }
                 }
                 if (backFrame && backFrameRef.current) {
                     currentRef.style.position = "absolute"
@@ -361,6 +369,14 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 if (animationRef.current || videoRef.current) {
                     currentRef.style.marginTop = "auto"
                     currentRef.style.marginBottom = "auto"
+                    if (pixelateRef.current) {
+                        pixelateRef.current.style.marginTop = "auto"
+                        pixelateRef.current.style.marginBottom = "auto"
+                    }
+                    if (effectRef.current) {
+                        effectRef.current.style.marginTop = "auto"
+                        effectRef.current.style.marginBottom = "auto"
+                    }
                 }
                 if (backFrame && backFrameRef.current) {
                     currentRef.style.position = "relative"
