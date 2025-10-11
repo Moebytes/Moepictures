@@ -531,7 +531,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             let url = `${functions.config.getDomain()}${window.location.pathname}`
             let text = `${props.post.englishTitle} (${props.post.title}) by ${props.artists[0].tag} (${props.post.artist})\n\n`
             if (site === "pinterest") {
-                let img = await generateTempLink()
+                let img = await generateTempLink(!Boolean(audioRef.current))
                 window.open(`http://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${img}&description=${encodeURIComponent(text)}`, "_blank")
             } else if (site === "twitter") {
                 window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank")
@@ -549,7 +549,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 "saucenao": "https://saucenao.com/search.php?url=",
                 "ascii2d": "https://ascii2d.net/search/url/"
             }
-            let img = await generateTempLink()
+            let img = await generateTempLink(!Boolean(audioRef.current))
             window.open(baseMap[service] + encodeURIComponent(img), "_blank", "noreferrer")
         }
 
