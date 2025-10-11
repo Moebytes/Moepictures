@@ -35,6 +35,8 @@ import lineart from "../../assets/icons/lineart.png"
 import promo from "../../assets/icons/promo.png"
 import Carousel from "../../components/site/Carousel"
 import PostImage from "../../components/image/PostImage"
+import PostAnimation from "../../components/image/PostAnimation"
+import PostVideo from "../../components/image/PostVideo"
 import PostModel from "../../components/image/PostModel"
 import PostLive2D from "../../components/image/PostLive2D"
 import PostSong from "../../components/image/PostSong"
@@ -122,6 +124,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [danbooruLink, setDanbooruLink] = useState("")
     const [hideGuidelines, setHideGuidelines] = useState(false)
     const [pending, setPending] = useState([] as UnverifiedPost[])
+    const [currentAnimatedWebp, setCurrentAnimatedWebp] = useState(false)
     const metaTagRef = useRef<HTMLInputElement>(null!)
     const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
@@ -227,6 +230,12 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
         }
     }
+
+    useEffect(() => {
+        fetch(currentImg).then((r) => r.arrayBuffer()).then((buffer) => {
+            setCurrentAnimatedWebp(functions.file.isAnimatedWebp(buffer))
+        })
+    }, [currentImg])
 
     const reset = () => {
         setParentID("")
@@ -983,6 +992,10 @@ const UploadPage: React.FunctionComponent = (props) => {
             return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.file.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
+        } else if (functions.file.isVideo(currentImg)) {
+            return <PostVideo video={currentImg} noKeydown={true} noNotes={true}/>
+        } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp) {
+            return <PostAnimation anim={currentImg} noKeydown={true} noNotes={true}/>
         } else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
         }

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../../store"
 import functions from "../../functions/Functions"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import {GroupSearch, GroupPosts} from "../../types/Types"
 import "./styles/groupthumbnail.less"
 
@@ -37,14 +37,14 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     }, [brightness, contrast, hue, saturation, blur])
 
     if (props.image) {
-        return <EffectImage className="group-thumbnail-img-outlined" image={props.image} live={props.live} height={300}
+        return <TinyImage className="group-thumbnail-img-outlined" image={props.image} live={props.live} height={300}
                 onClick={props.onClick ? props.onClick : click} style={props.style ? props.style : {}}/>
     }
 
     return (
         <div className="group-thumbnail" onClick={click} ref={imageFiltersRef}>
             {props.group ? <>
-            <EffectImage className="group-thumbnail-img" post={props.group.posts[0]}/>
+            <TinyImage className="group-thumbnail-img" post={props.group.posts[0]}/>
             <div className="group-thumbnail-text-container">
                 <span className="group-thumbnail-text">{props.group.name}</span>
             </div></> : null}

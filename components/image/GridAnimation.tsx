@@ -19,14 +19,10 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     const [staticImg, setStaticImg] = useState("")
     const [liveImg, setLiveImg] = useState("")
     const {imageLoaded, setImageLoaded} = props
-    const {imageWidth, setImageWidth} = props
-    const {imageHeight, setImageHeight} = props
-    const {naturalWidth, setNaturalWidth} = props
-    const {naturalHeight, setNaturalHeight} = props
     const {imageSize, setImageSize} = props
     const {hover, setHover} = props
     const {gifData, setGIFData} = props
-    const {animationRef, lightnessRef, overlayRef, effectRef, pixelateRef} = props
+    const {animationRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded, getCurrentBuffer} = props
 
     useImperativeHandle(props.componentRef, () => ({
         shouldWait: async () => {
@@ -38,8 +34,8 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         update: async () => {
             if (!shouldUpdate()) return
             if (!gifData) {
-                if (functions.file.isGIF(props.original)) return parseGIF()
-                if (functions.file.isWebP(props.original)) return parseAnimatedWebP()
+                if (functions.file.isGIF(props.anim)) return parseGIF()
+                if (functions.file.isWebP(props.anim)) return parseAnimatedWebP()
             }
         }
     }))
@@ -94,7 +90,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
 
     const parseGIF = async () => {
         const start = new Date()
-        const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+        const arrayBuffer = await getCurrentBuffer(true)
         const frames = await functions.video.extractGIFFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
@@ -104,7 +100,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
 
     const parseAnimatedWebP = async () => {
         const start = new Date()
-        const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+        const arrayBuffer = await getCurrentBuffer(true)
         const animated = functions.file.isAnimatedWebp(arrayBuffer)
         if (!animated) return 
         const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
@@ -203,10 +199,10 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
             let lastTime = performance.now()
 
             const animate = (now: number) => {
+                draw()
                 const delta = now - lastTime
                 if (delta >= delay) {
                     update()
-                    draw()
                     lastTime = now
                 }
                 id = window.requestAnimationFrame(animate)
@@ -219,21 +215,11 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     }, [imageLoaded, gifData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
 
     const download = async () => {
-        let filename = path.basename(props.original).replace(/\?.*$/, "")
+        let filename = path.basename(props.anim!).replace(/\?.*$/, "")
         if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
-            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
+            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.anim!).replace(/\?.*$/, "")
         }
-        functions.dom.download(filename, props.original)
-    }
-
-    const onLoad = (event: React.SyntheticEvent) => {
-        let element = event.target as HTMLImageElement
-        setImageWidth(element.width)
-        setImageHeight(element.height)
-        setNaturalWidth(element.naturalWidth)
-        setNaturalHeight(element.naturalHeight)
-        setImageLoaded(true)
-        props.onLoad?.()
+        functions.dom.download(filename, props.anim!)
     }
 
     const dynamicSrc = () => {
@@ -249,7 +235,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
         <img draggable={false} className="image" ref={animationRef} src={dynamicSrc()} 
-        onLoad={(event) => onLoad(event)} style={{opacity: "1"}}/>
+        onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )
 })

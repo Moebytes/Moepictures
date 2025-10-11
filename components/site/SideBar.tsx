@@ -112,7 +112,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setDeleteTagFavoritesDialog} = useTagDialogActions()
     const {sidebarText} = useActiveSelector()
     const {tagFavoriteFlag} = useFlagSelector()
-    const {setRandomFlag, setImageSearchFlag, setTagFavoriteFlag} = useFlagActions()
+    const {setRandomFlag, setImageSearchFlag, setTagFavoriteFlag, setSaveSearchFlag} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -569,6 +569,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setEditSaveSearchTags(savedSearch)
             }
             const savedSearchClick = () => {
+                setSaveSearchFlag(true)
                 setSearch(savedSearch)
                 setSearchFlag(true)
             }

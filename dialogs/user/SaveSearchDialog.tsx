@@ -84,7 +84,8 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.http.post("/api/user/savesearch", {name, tags}, session, setSessionFlag)
+        let parsedTags = await functions.native.parseSpaceEnabledSearch(tags, session, setSessionFlag)
+        await functions.http.post("/api/user/savesearch", {name, tags: parsedTags}, session, setSessionFlag)
         setSessionFlag(true)
     }
 

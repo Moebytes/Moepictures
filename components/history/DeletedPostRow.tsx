@@ -6,7 +6,7 @@ import functions from "../../functions/Functions"
 import undeleteIcon from "../../assets/icons/revert.png"
 import deleteIcon from "../../assets/icons/delete.png"
 import {DeletedPost} from "../../types/Types"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -76,7 +76,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {deleteHistoryOptions()}
             <div className="historyrow-container">
-                <EffectImage className="historyrow-img" post={props.post} onClick={imgClick} height={200}/>
+                <TinyImage className="historyrow-img" post={props.post} onClick={imgClick} height={200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

@@ -1,7 +1,8 @@
-import React, {useEffect, useRef, useState, useReducer} from "react"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions, useSessionSelector} from "../../store"
-import functions from "../../functions/Functions"
+import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
+import {useNavigate} from "react-router-dom"
+import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
+import {useSessionSelector, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, 
+useInteractionActions} from "../../store"
 import Slider from "react-slider"
 import modelReverseIcon from "../../assets/icons/model-reverse.png"
 import modelSpeedIcon from "../../assets/icons/model-speed.png"
@@ -17,62 +18,27 @@ import modelShapeKeysIcon from "../../assets/icons/model-shapekeys.png"
 import modelLightIcon from "../../assets/icons/model-light.png"
 import ambientLightIcon from "../../assets/icons/ambient.png"
 import directionalLightIcon from "../../assets/icons/directional.png"
-import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import expand from "../../assets/icons/expand.png"
-import contract from "../../assets/icons/contract.png"
-import NoteEditor from "./NoteEditor"
-import path from "path"
-import nextIcon from "../../assets/icons/go-right.png"
-import prevIcon from "../../assets/icons/go-left.png"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
-import {VRMLoaderPlugin, VRMUtils} from "@pixiv/three-vrm"
-import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import {VRMLoaderPlugin} from "@pixiv/three-vrm"
+import path from "path"
+import functions from "../../functions/Functions"
 import "./styles/postmodel.less"
 
 let imageTimer = null as any
-let id = null as any
+let id = 0
 
-interface Props {
-    post?: PostFull | PostHistory | UnverifiedPost
-    model: string
-    width?: number
-    height?: number
-    scale?: number
-    noKeydown?: boolean
-    comicPages?: string[]
-    order?: number
-    noNotes?: boolean
-    unverified?: boolean
-    previous?: () => void
-    next?: () => void
-    noteID?: string | null
-}
-
-const PostModel: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {setEnableDrag} = useInteractionActions()
+const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef) => {
     const {mobile} = useLayoutSelector()
-    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {session} = useSessionSelector()
     const {secondsProgress, progress, dragProgress, reverse, speed, 
     paused, duration, dragging, seekTo} = usePlaybackSelector()
     const {setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed,
     setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
-    const {noteMode, imageExpand} = useSearchSelector()
-    const {session} = useSessionSelector()
-    const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
-    const {downloadFlag, downloadIDs} = useFlagSelector()
-    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
-    const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
+    const {setEnableDrag} = useInteractionActions()
+    const {imageExpand, format} = useSearchSelector()
     const [showLightDropdown, setShowLightDropdown] = useState(false)
     const [showMorphDropdown, setShowMorphDropdown] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
-    const fullscreenRef = useRef<HTMLDivElement>(null)
-    const rendererRef = useRef<HTMLDivElement>(null)
-    const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLCanvasElement>(null)
-    const lightnessRef = useRef<HTMLCanvasElement>(null)
     const modelSliderRef = useRef<Slider>(null)
     const modelControls = useRef<HTMLDivElement>(null)
     const modelSpeedRef = useRef<HTMLImageElement>(null)
@@ -81,7 +47,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [image, setImage] = useState(null as string | null)
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
-    const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const [wireframe, setWireframe] = useState(false)
     const [matcap, setMatcap] = useState(false)
     const [ambient, setAmbient] = useState(0.5)
@@ -92,23 +57,25 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [initMorphTargets, setInitMorphTargets] = useState([] as {name: string, value: number}[])
     const [morphTargets, setMorphTargets] = useState([] as {name: string, value: number}[])
     const [model, setModel] = useState(null as THREE.Object3D | null)
+    const [controls, setControls] = useState(null as OrbitControls | null)
     const [modelWidth, setModelWidth] = useState(0)
     const [modelHeight, setModelHeight] = useState(0)
     const [scene, setScene] = useState(null as THREE.Scene | null)
-    const [previousButtonHover, setPreviousButtonHover] = useState(false)
-    const [nextButtonHover, setNextButtonHover] = useState(false)
     const [objMaterials, setObjMaterials] = useState([] as THREE.Material[])
-    const [buttonHover, setButtonHover] = useState(false)
-    const [decrypted, setDecrypted] = useState("")
+    const [modelLink, setModelLink] = useState("")
+    const {toggleFullscreen, changeReverse, seek, updateProgressText, updateEffects} = props
+    const {showSpeedDropdown, setShowSpeedDropdown} = props
+    const {modelRef, rendererRef, fullscreenRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
+    const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    useImperativeHandle(parentRef, () => ({
+        download: download
+    }))
 
     const decryptModel = async () => {
         if (!props.model) return
         const decryptedModel = await functions.crypto.decryptItem(props.model, session)
-        if (decryptedModel) setDecrypted(decryptedModel)
+        if (decryptedModel) setModelLink(decryptedModel)
     }
 
     useEffect(() => {
@@ -118,7 +85,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setDragProgress(0)
         setDragging(false)
         setSeekTo(null)
-        if (ref) ref.style.opacity = "1"
+        if (rendererRef.current) rendererRef.current.style.opacity = "1"
     }, [props.model])
 
     useEffect(() => {
@@ -126,12 +93,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }, [props.model, session])
 
     useEffect(() => {
-        if (decrypted) loadModel()
-    }, [decrypted])
+        if (modelLink) loadModel()
+    }, [modelLink])
 
     const loadModel = async () => {
-        if (!props.model || !decrypted) return
-        const element = rendererRef.current
+        if (!props.model || !modelLink) return
+        const element = modelRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
         let width = window.innerWidth - functions.dom.sidebarWidth() - 400
@@ -163,21 +130,21 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         let model = null as unknown as THREE.Object3D
         if (functions.file.isGLTF(props.model)) {
             const loader = new GLTFLoader()
-            const gltf = await loader.loadAsync(decrypted)
+            const gltf = await loader.loadAsync(modelLink)
             model = gltf.scene
             model.animations = gltf.animations
         } else if (functions.file.isOBJ(props.model)) {
             const loader = new OBJLoader()
-            model = await loader.loadAsync(decrypted)
+            model = await loader.loadAsync(modelLink)
         } else if (functions.file.isFBX(props.model)) {
             const loader = new FBXLoader()
-            model = await loader.loadAsync(decrypted)
+            model = await loader.loadAsync(modelLink)
         } else if (functions.file.isVRM(props.model)) {
             const loader = new GLTFLoader()
             loader.register((parser: any) => {
                 return new VRMLoaderPlugin(parser) as any
             })
-            const vrm = await loader.loadAsync(decrypted).then((l) => l.userData.vrm)
+            const vrm = await loader.loadAsync(modelLink).then((l) => l.userData.vrm)
             if (vrm.meta?.metaVersion === "0") {
                 scene.rotation.y = Math.PI
             }
@@ -218,15 +185,13 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
         let morphTargets  = [] as {name: string, value: number}[]
         let morphMesh = null as THREE.Mesh | null
-        model.traverse((mesh) => {
-            // @ts-ignore
+        model.traverse((mesh: any) => {
             if (mesh.isMesh && mesh.morphTargetInfluences?.length) {
-                // @ts-ignore
                 for (let i = 0; i < mesh.morphTargetInfluences.length; i++) {
-                    // @ts-ignore
                     Object.keys(mesh.morphTargetDictionary).forEach((key) => {
-                        // @ts-ignore
-                        if (key && mesh.morphTargetDictionary[key] === i) morphTargets.push({name: key, value: mesh.morphTargetInfluences[i]})
+                        if (key && mesh.morphTargetDictionary[key] === i) {
+                            morphTargets.push({name: key, value: mesh.morphTargetInfluences[i]})
+                        }
                     })
                 }
                 morphMesh = mesh as THREE.Mesh
@@ -260,16 +225,18 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         camera.updateProjectionMatrix()
 
         controls.maxDistance = size.length() * 10
-        controls.addEventListener("change", () => {
+        controls.addEventListener("change", async () => {
             if (imageTimer) return 
             imageTimer = setTimeout(() => {
                 renderer.setClearColor(0x000000, 1)
                 setImage(renderer.domElement.toDataURL())
                 renderer.setClearColor(0x000000, 0)
                 imageTimer = null
-            }, 100)
+                updateEffects()
+            }, 50)
         })
         controls.update()
+        setControls(controls)
 
         if (mixer) {
             mixer.stopAllAction()
@@ -309,7 +276,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
 
         animate()
-        setRef(renderer.domElement)
+        rendererRef.current = renderer.domElement
 
         window.addEventListener("resize", () => {
             let width = window.innerWidth - functions.dom.sidebarWidth() - 400
@@ -318,15 +285,13 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 width = window.innerWidth - functions.dom.sidebarWidth() - 200
                 height = window.innerHeight
             }
-            // @ts-ignore
-            if (document.fullscreenElement || document.webkitIsFullScreen) {
+            if (document.fullscreenElement) {
                 width = window.innerWidth
                 height = window.innerHeight
                 camera.aspect = width / height
                 camera.updateProjectionMatrix()
                 renderer.setSize(width, height)
             } else {
-                if (width < 1000) return
                 camera.aspect = width / height
                 camera.updateProjectionMatrix()
                 renderer.setSize(width, height)
@@ -339,7 +304,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const updateMaterials = async () => {
         if (!scene || !model) return
         if (matcap) {
-            const matcapMaterial = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, metalness: 1.0, envMap: scene.environment})
+            const matcapMaterial = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, 
+                metalness: 1.0, envMap: scene.environment})
             await new Promise<void>((resolve) => {
                 model.traverse((obj: any) => {
                     if (obj.isMesh) {
@@ -399,64 +365,16 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }, [seekTo])
 
     useEffect(() => {
+        if (!controls) return
+        controls.enabled = !showSpeedDropdown &&
+        !showLightDropdown && !showMorphDropdown
+    }, [controls, showSpeedDropdown, showLightDropdown, showMorphDropdown])
+
+    useEffect(() => {
         if (modelSliderRef.current) modelSliderRef.current.resize()
     })
 
-    const resizeImageCanvas = () => {
-        if (!pixelateRef.current || !ref) return
-        pixelateRef.current.width = ref.clientWidth
-        pixelateRef.current.height = ref.clientHeight
-    }
-
-    const exitFullScreen = async () => {
-        // @ts-ignore
-        if (!document.fullscreenElement && !document.webkitIsFullScreen) {
-            await fullscreen(true)
-            resizeImageCanvas()
-            forceUpdate()
-        }
-    }
-
-    const handleKeydown = (event: KeyboardEvent) => {
-        const key = event.keyCode
-        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && 
-            !(event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) {
-            if (value === "f") {
-                if (!props.noKeydown) fullscreen()
-            }
-            if (value === "t") {
-                setNoteMode(!noteMode)
-                setNoteDrawingEnabled(true)
-            }
-        }
-    }
-
-    useEffect(() => {
-        if (!ref) return
-        let observer = null as ResizeObserver | null
-        observer = new ResizeObserver(resizeImageCanvas)
-        observer.observe(ref)
-        window.addEventListener("keydown", handleKeydown)
-        window.addEventListener("fullscreenchange", exitFullScreen)
-        window.addEventListener("webkitfullscreenchange", exitFullScreen)
-        return () => {
-            observer?.disconnect()
-            window.removeEventListener("keydown", handleKeydown)
-            window.removeEventListener("fullscreenchange", exitFullScreen)
-            window.removeEventListener("webkitfullscreenchange", exitFullScreen)
-        }
-    }, [ref])
-
-    useEffect(() => {
-        if (!dragging && dragProgress !== null) {
-            setSecondsProgress(dragProgress)
-            setProgress((dragProgress / duration) * 100)
-            setDragProgress(null)
-        }
-    }, [dragging, dragProgress])
-
-    const getModelSpeedMarginRight = () => {
+    const getSpeedMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
         const rect = modelSpeedRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
@@ -465,7 +383,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    const getModelLightMarginRight = () => {
+    const getLightMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
         const rect = modelLightRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
@@ -474,7 +392,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    const getModelMorphMarginRight = () => {
+    const getMorphMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
         const rect = modelMorphRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
@@ -483,115 +401,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    const updateProgressText = (value: number) => {
-        let percent = value / 100
-        if (reverse === true) {
-            const secondsProgress = (1-percent) * duration
-            setDragProgress(duration - secondsProgress)
-        } else {
-            const secondsProgress = percent * duration
-            setDragProgress(secondsProgress)
-        }
+    const download = async () => {
+        let filename = path.basename(props.model!).replace(/\?.*$/, "")
+        functions.dom.download(filename, modelLink)
     }
-
-    const seek = (position: number) => {
-        let secondsProgress = (position / 100) * duration
-        let progress = (duration / 100) * position
-        setProgress(progress)
-        setDragging(false)
-        setSeekTo(secondsProgress)
-    }
-
-    const changeReverse = (value?: boolean) => {
-        const val = value !== undefined ? value : !reverse 
-        let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
-        // if (gifData) secondsProgress = (duration / 100) * progress
-        setReverse(val)
-        setSeekTo(secondsProgress)
-    }
-
-    useEffect(() => {
-        if (!fullscreenRef.current) return
-        const element = fullscreenRef.current
-        let newContrast = contrast
-        const sharpenOverlay = overlayRef.current
-        const lightnessOverlay = lightnessRef.current
-        if (!image || !sharpenOverlay || !lightnessOverlay) return
-        if (sharpen !== 0) {
-            const sharpenOpacity = sharpen / 5
-            newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image})`
-            sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
-            sharpenOverlay.style.mixBlendMode = "overlay"
-            sharpenOverlay.style.opacity = `${sharpenOpacity}`
-        } else {
-            sharpenOverlay.style.backgroundImage = "none"
-            sharpenOverlay.style.filter = "none"
-            sharpenOverlay.style.mixBlendMode = "normal"
-            sharpenOverlay.style.opacity = "0"
-        }
-        if (lightness !== 100) {
-            const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
-            lightnessOverlay.style.filter = filter
-            lightnessOverlay.style.opacity = `${Math.abs((lightness - 100) / 100)}`
-        } else {
-            lightnessOverlay.style.filter = "none"
-            lightnessOverlay.style.opacity = "0"
-        }
-        element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, image])
-
-    const imagePixelate = () => {
-        if (!pixelateRef.current || !containerRef.current || !ref) return
-        const pixelateCanvas = pixelateRef.current
-        const ctx = pixelateCanvas.getContext("2d")!
-        const imageWidth = ref.clientWidth 
-        const imageHeight = ref.clientHeight
-        const landscape = imageWidth >= imageHeight
-        ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = imageWidth
-        pixelateCanvas.height = imageHeight
-        const pixelWidth = imageWidth / pixelate 
-        const pixelHeight = imageHeight / pixelate
-        if (pixelate !== 1) {
-            ctx.drawImage(ref, 0, 0, pixelWidth, pixelHeight)
-            if (landscape) {
-                pixelateCanvas.style.width = `${imageWidth * pixelate}px`
-                pixelateCanvas.style.height = "auto"
-            } else {
-                pixelateCanvas.style.width = "auto"
-                pixelateCanvas.style.height = `${imageHeight * pixelate}px`
-            }
-            pixelateCanvas.style.opacity = "1"
-        } else {
-            pixelateCanvas.style.width = "none"
-            pixelateCanvas.style.height = "none"
-            pixelateCanvas.style.opacity = "0"
-        }
-    }
-
-    useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
-    }, [])
-
-    useEffect(() => {
-        setTimeout(() => {
-            imagePixelate()
-        }, 50)
-    }, [pixelate, image, ref])
-
-    useEffect(() => {
-        if (!props.post) return
-        if (downloadFlag) {
-            if (downloadIDs.includes(props.post.postID)) {
-                functions.dom.download(path.basename(props.model), decrypted)
-                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post?.postID))
-                setDownloadFlag(false)
-            }
-        }
-    }, [downloadFlag, decrypted])
 
     const controlMouseEnter = () => {
         if (modelControls.current) modelControls.current.style.opacity = "1"
@@ -639,62 +452,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setDirectionalFront(0.2)
     }
 
-    const fullscreen = async (exit?: boolean) => {
-        // @ts-ignore
-        if (document.fullscreenElement || document.webkitIsFullScreen || exit) {
-            try {
-                await document.exitFullscreen?.()
-                // @ts-ignore
-                await document.webkitExitFullscreen?.()
-            } catch {
-                // ignore
-            }
-            if (ref) {
-                ref.style.maxWidth = ""
-                ref.style.maxHeight = ""
-            }
-            setTimeout(() => {
-                resizeImageCanvas()
-            }, 100)
-        } else {
-            try {
-                await fullscreenRef.current?.requestFullscreen?.()
-                // @ts-ignore
-                await fullscreenRef.current?.webkitRequestFullscreen?.()
-            } catch {
-                // ignore
-            }
-            if (ref) {
-                ref.style.maxWidth = "100vw"
-                ref.style.maxHeight = "100vh"
-            }
-            setTimeout(() => {
-                resizeImageCanvas()
-            }, 100)
-        }
-    }
-
-    const loadImage = async () => {
-        if (!image || !overlayRef.current || !lightnessRef.current) return
-        const img = document.createElement("img")
-        img.src = image
-        img.onload = () => {
-            if (!overlayRef.current || !lightnessRef.current) return
-            const overlayCtx = overlayRef.current.getContext("2d")
-            overlayRef.current.width = img.width
-            overlayRef.current.height = img.height
-            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const lightnessCtx = lightnessRef.current.getContext("2d")
-            lightnessRef.current.width = img.width
-            lightnessRef.current.height = img.height
-            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
-        }
-    }
-
-    useEffect(() => {
-        loadImage()
-    }, [image])
-
     const updateMorphTargets = (value?: number, index?: number) => {
         if (!morphMesh?.morphTargetInfluences?.length || !morphTargets?.length) return 
         if (value && index) {
@@ -725,16 +482,16 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < morphTargets.length; i++) {
             jsx.push(
                 <div className="model-dropdown-row model-row">
-                    {/* <img className="morph-dropdown-img" src={getAmbientIcon()}/> */}
                     <span className="model-dropdown-text">{morphTargets[i].name}</span>
-                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => updateMorphTargets(value, i)} min={0} max={1} step={0.05} value={morphTargets[i].value}/>
+                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" 
+                    onChange={(value) => updateMorphTargets(value, i)} min={0} max={1} step={0.05} value={morphTargets[i].value}/>
                 </div>
             )
         }
 
         return (
             <div className={`model-dropdown ${showMorphDropdown ? "" : "hide-model-dropdown"}`}
-            style={{marginRight: getModelMorphMarginRight(), top: `-300px`}}>
+            style={{marginRight: getMorphMarginRight(), top: `-300px`}}>
                 <div className="model-dropdown-container">
                     {jsx}
                     <div className="model-dropdown-row model-row">
@@ -761,114 +518,97 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+
     return (
-        <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noNotes ? <NoteEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={modelWidth} imageHeight={modelHeight}/> : null}
-            <div className="post-model-box" ref={containerRef}>
-                <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
-                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
-                    </div>
-                    <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
-                        <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
-                    </div>
-                    <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
-                        <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
-                    </div>
-                    <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
-                        <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-                            {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <p className="model-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
-                                <Slider ref={modelSliderRef} className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                                <p className="model-control-text">{functions.date.formatSeconds(duration)}</p>
-                            </div> : null}
-                            <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                {animations ? <>
-                                <div className="model-control-row-container">
-                                    <img draggable={false} className="image-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
-                                    <img draggable={false} className="image-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => toggleDropdown("speed")}/>
-                                </div> 
-                                <div className="model-control-row-container">
-                                    <img draggable={false} className="image-control-img" src={modelClearIcon} onClick={reset}/>
-                                    {/* <img className="control-img" src={modelRewindIcon}/> */}
-                                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
-                                    {/* <img className="control-img" src={modelFastforwardIcon}/> */}
-                                </div></> : null}
-                                <div className="model-control-row-container">
-                                    <img draggable={false} className="image-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
-                                    <img draggable={false} className="image-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
-                                    <img draggable={false} className="image-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => toggleDropdown("morph")}/>
-                                    <img draggable={false} className="image-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => toggleDropdown("light")}/>
-                                </div> 
-                                <div className="model-control-row-container">
-                                    <img draggable={false} className="image-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
-                                </div> 
-                            </div>
-                            <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getModelSpeedMarginRight(), marginTop: "-240px"}}
-                            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                {/* <Slider ref={gifSpeedSliderRef} invert orientation="vertical" className="model-speed-slider" trackClassName="model-speed-slider-track" thumbClassName="model-speed-slider-thumb"
-                                value={speed} min={0.5} max={4} step={0.5} onChange={(value) => setSpeed(value)}/> */}
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">4x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">2x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">1.75x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">1.5x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">1.25x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">1x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">0.75x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">0.5x</span>
-                                </div>
-                                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
-                                    <span className="model-speed-dropdown-text">0.25x</span>
-                                </div>
-                            </div>
-                            {shapeKeysDropdownJSX()}
-                            <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
-                            style={{marginRight: getModelLightMarginRight(), top: `-140px`}}>
-                                <div className="model-dropdown-row model-row">
-                                    <img draggable={false} className="model-dropdown-img" src={ambientLightIcon}/>
-                                    <span className="model-dropdown-text">Ambient</span>
-                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
-                                </div>
-                                <div className="model-dropdown-row model-row">
-                                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
-                                    <span className="model-dropdown-text">Directional Front</span>
-                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
-                                </div>
-                                <div className="model-dropdown-row model-row">
-                                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
-                                    <span className="model-dropdown-text">Directional Back</span>
-                                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
-                                </div>
-                                <div className="model-dropdown-row model-row">
-                                    <button className="model-button" onClick={() => resetLights()}>Reset</button>
-                                </div>
-                            </div>
-                        </div>
-                        <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>
-                        <canvas draggable={false} className="post-sharpen-overlay" ref={overlayRef}></canvas>
-                        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                        <div className="post-model-renderer" ref={rendererRef}></div>
-                    </div>
+        <>
+        <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+            {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <p className="model-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
+                <Slider ref={modelSliderRef} className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
+                <p className="model-control-text">{functions.date.formatSeconds(duration)}</p>
+            </div> : null}
+            <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                {animations ? <>
+                <div className="model-control-row-container">
+                    <img draggable={false} className="image-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
+                    <img draggable={false} className="image-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => toggleDropdown("speed")}/>
+                </div> 
+                <div className="model-control-row-container">
+                    <img draggable={false} className="image-control-img" src={modelClearIcon} onClick={reset}/>
+                    {/* <img className="control-img" src={modelRewindIcon}/> */}
+                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
+                    {/* <img className="control-img" src={modelFastforwardIcon}/> */}
+                </div></> : null}
+                <div className="model-control-row-container">
+                    <img draggable={false} className="image-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
+                    <img draggable={false} className="image-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
+                    <img draggable={false} className="image-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => toggleDropdown("morph")}/>
+                    <img draggable={false} className="image-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => toggleDropdown("light")}/>
+                </div> 
+                <div className="model-control-row-container">
+                    <img draggable={false} className="image-control-img" src={modelFullscreenIcon} onClick={() => toggleFullscreen()}/>
+                </div> 
+            </div>
+            <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
+            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">4x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">2x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">1.75x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">1.5x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">1.25x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">1x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">0.75x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">0.5x</span>
+                </div>
+                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                    <span className="model-speed-dropdown-text">0.25x</span>
+                </div>
+            </div>
+            {shapeKeysDropdownJSX()}
+            <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
+            style={{marginRight: getLightMarginRight(), top: `-140px`}}>
+                <div className="model-dropdown-row model-row">
+                    <img draggable={false} className="model-dropdown-img" src={ambientLightIcon}/>
+                    <span className="model-dropdown-text">Ambient</span>
+                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
+                </div>
+                <div className="model-dropdown-row model-row">
+                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
+                    <span className="model-dropdown-text">Directional Front</span>
+                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
+                </div>
+                <div className="model-dropdown-row model-row">
+                    <img draggable={false} className="model-dropdown-img" src={directionalLightIcon}/>
+                    <span className="model-dropdown-text">Directional Back</span>
+                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
+                </div>
+                <div className="model-dropdown-row model-row">
+                    <button className="model-button" onClick={() => resetLights()}>Reset</button>
                 </div>
             </div>
         </div>
+        <img draggable={false} className="post-lightness-overlay" ref={lightnessRef}/>
+        <img draggable={false} className="post-sharpen-overlay" ref={overlayRef}/>
+        <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
+        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
+        <div className="post-model-renderer" ref={modelRef}></div>
+        </>
     )
-}
+})
 
-export default PostModel
+export default withPostWrapper(PostModel)

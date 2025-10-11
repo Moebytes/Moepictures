@@ -5,7 +5,7 @@ useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
 import searchHistoryDelete from "../../assets/icons/delete.png"
 import {SearchHistory} from "../../types/Types"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -67,7 +67,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {searchHistoryOptions()}
             <div className="historyrow-container">
-                <EffectImage className="historyrow-img" post={props.history.post} onClick={imgClick} height={200}/>
+                <TinyImage className="historyrow-img" post={props.history.post} onClick={imgClick} height={200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

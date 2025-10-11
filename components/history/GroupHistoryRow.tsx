@@ -13,7 +13,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
-import EffectImage from "../image/EffectImage"
+import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 import {GroupHistory, PostFull} from "../../types/Types"
 
@@ -264,7 +264,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? groupHistoryOptions() : null}
             <div className="historyrow-container">
-                <EffectImage className="historyrow-img" post={groupPost} onClick={imgClick} height={200}/>
+                <TinyImage className="historyrow-img" post={groupPost} onClick={imgClick} height={200}/>
                 {!mobile ? <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span> : null}
             </div>
             {mobile ? <div className="historyrow-container">

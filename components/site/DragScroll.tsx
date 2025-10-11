@@ -1,16 +1,20 @@
 import React, {useEffect} from "react"
-import {useInteractionSelector} from "../../store"
+import {useInteractionSelector, useSearchSelector} from "../../store"
+import functions from "../../functions/Functions"
 
 let inertia = false
 let mouseDown = false
 let lastClientY = 0
 let lastScrollY = 0
-let lastGoodDelta = 0
+let lastDelta = 0
+let smoothedDelta = 0
+let lastDirection = 0
 let time = new Date()
 let id = 0
 
 const DragScroll = () => {
     const {enableDrag} = useInteractionSelector()
+    const {noteDrawingEnabled} = useSearchSelector()
 
     useEffect(() => {
         const element = document.documentElement
@@ -22,7 +26,7 @@ const DragScroll = () => {
 
         const onPointerDown = (event: PointerEvent) => {
             if (event.button === 2) return
-            window.getSelection()?.removeAllRanges()
+            functions.dom.clearSelection()
             mouseDown = true
             inertia = false
             time = new Date()
@@ -56,20 +60,40 @@ const DragScroll = () => {
 
         const onPointerMove = (event: PointerEvent) => {
             if (!mouseDown) return
-            window.getSelection()?.removeAllRanges()
+            let dialogActive = document.querySelector(".dialog") || document.querySelector(".edit-note-dialog")
+            if (dialogActive || noteDrawingEnabled) {
+                mouseDown = false
+                return
+            }
+            functions.dom.clearSelection()
 
-            const dy = event.clientY - lastClientY
+            let maxSpeed = 500
+
+            let dy = event.clientY - lastClientY
             lastClientY = event.clientY
 
-            let scrollDelta = -dy * 12
+            let smoothingFactor = 0.15
+            let directionEase = 0.3
+
+            let scrollDelta = -dy * 20
 
             if (scrollDelta === 0) {
-                scrollDelta = lastGoodDelta
+                scrollDelta = lastDelta
             } else {
-                lastGoodDelta = scrollDelta
+                lastDelta = scrollDelta
             }
 
-            window.scrollBy(0, scrollDelta)
+            let direction = Math.sign(scrollDelta)
+
+            if (direction && direction !== lastDirection) {
+                smoothedDelta *= directionEase
+                lastDirection = direction
+            }
+
+            smoothedDelta = smoothedDelta * (1 - smoothingFactor) + scrollDelta * smoothingFactor
+            smoothedDelta = Math.max(Math.min(smoothedDelta, maxSpeed), -maxSpeed)
+
+            window.scrollBy(0, smoothedDelta)
             lastScrollY = window.scrollY
         }
 
@@ -92,9 +116,11 @@ const DragScroll = () => {
         enableDrag ? enable() : disable()
 
         return () => {
+            mouseDown = false
+            inertia = false
             disable()
         }
-    }, [enableDrag])
+    }, [enableDrag, noteDrawingEnabled])
 
   return null
 }

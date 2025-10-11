@@ -17,15 +17,11 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     const {sizeType, square} = useSearchSelector()
     const [liveImg, setLiveImg] = useState("")
     const {imageLoaded, setImageLoaded} = props
-    const {imageWidth, setImageWidth} = props
-    const {imageHeight, setImageHeight} = props
-    const {naturalWidth, setNaturalWidth} = props
-    const {naturalHeight, setNaturalHeight} = props
     const {imageSize, setImageSize} = props
     const {hover, setHover} = props
     const {backFrame, setBackFrame} = props
     const [videoData, setVideoData] = useState(null as ImageBitmap[] | null)
-    const {videoRef, lightnessRef, overlayRef, effectRef, pixelateRef} = props
+    const {videoRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded, getCurrentBuffer, getCurrentLink} = props
 
     useImperativeHandle(props.componentRef, () => ({
         shouldWait: async () => {
@@ -37,7 +33,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         update: async () => {
             if (!shouldUpdate()) return
             if (!videoData) {
-                if (functions.file.isVideo(props.original)) return getVideoData()
+                if (functions.file.isVideo(props.video)) return getVideoData()
             }
         }
     }))
@@ -81,10 +77,12 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         if (!mobile) {
             let frames = [] as ImageBitmap[]
             if (functions.file.isMP4(props.img)) {
-                frames = await functions.video.extractMP4Frames(props.img)
+                const link = getCurrentLink(true)
+                frames = await functions.video.extractMP4Frames(link)
                 if (!frames) return
             } else if (functions.file.isWebM(props.img)) {
-                frames = await functions.video.extractWebMFrames(props.img)
+                const arrayBuffer = await getCurrentBuffer(true)
+                frames = await functions.video.extractWebMFrames(arrayBuffer)
                 if (!frames) return
             }
             setVideoData(frames)
@@ -192,21 +190,11 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     }, [imageLoaded, videoData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
 
     const download = async () => {
-        let filename = path.basename(props.original).replace(/\?.*$/, "")
+        let filename = path.basename(props.video!).replace(/\?.*$/, "")
         if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
-            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
+            filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.video!).replace(/\?.*$/, "")
         }
-        functions.dom.download(filename, props.original)
-    }
-
-    const onLoad = (event: React.SyntheticEvent) => {
-        let element = event.target as HTMLVideoElement
-        setImageWidth(element.clientWidth)
-        setImageHeight(element.clientHeight)
-        setNaturalWidth(element.videoWidth)
-        setNaturalHeight(element.videoHeight)
-        setImageLoaded(true)
-        props.onLoad?.()
+        functions.dom.download(filename, props.video!)
     }
 
     const getDisplay = (invert?: boolean) => {
@@ -227,7 +215,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
         <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} 
-        src={liveImg} onLoadedData={(event) => onLoad(event)} style={{...getDisplay(true)}}></video>
+        src={liveImg} onLoadedData={(event) => onLoaded(event)} style={{...getDisplay(true)}}></video>
         <img draggable={false} className="image" src={backFrame} style={{...getDisplay()}}/>
         </>
     )

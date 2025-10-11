@@ -25,7 +25,7 @@ import permissions from "../../structures/Permissions"
 import DragScroll from "../../components/site/DragScroll"
 import LocalStorage from "../../LocalStorage"
 import PostImage from "../../components/image/PostImage"
-import EffectImage from "../../components/image/EffectImage"
+import TinyImage from "../../components/image/TinyImage"
 import {PostFull} from "../../types/PostTypes"
 import {useInView} from "react-intersection-observer"
 import Filters from "../../components/post/Filters"
@@ -301,7 +301,7 @@ const ReaderPage: React.FunctionComponent = () => {
             jsx.push(
                 <div key={i} className={`reader-thumbnail ${readerPage === i + 1 ? "selected" : ""}`} 
                 style={{filter: readerInvert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}>
-                    <EffectImage height={150} image={thumbnails[i]} onClick={() => navigateToPage(i + 1)}/>
+                    <TinyImage height={150} image={thumbnails[i]} onClick={() => navigateToPage(i + 1)}/>
                 </div>
             )
         }

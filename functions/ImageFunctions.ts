@@ -6,7 +6,8 @@ import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
 import JSZip from "jszip"
 import path from "path"
-import {UploadImage, Session, Dimensions, Post, SplatterOptions, PixelateOptions, CanvasDrawable} from "../types/Types"
+import {UploadImage, Session, Dimensions, Post, SplatterOptions, PixelateOptions, CanvasDrawable,
+PostFull, PostHistory, UnverifiedPost, ImageFormat} from "../types/Types"
 
 export default class ImageFunctions {
     public static allowedFileType = (file: File | JSZip.JSZipObject, bytes: Uint8Array, inZip?: boolean) => {
@@ -88,7 +89,7 @@ export default class ImageFunctions {
             thumbnailExt = result.typename || "jpg"
             thumbnail = link*/
         }
-        thumbnail = await ImageFunctions.resize(thumbnail, thumbnailExt)
+        thumbnail = await functions.image.resize(thumbnail, thumbnailExt)
         return {thumbnail, thumbnailExt}
     }
 
@@ -103,12 +104,12 @@ export default class ImageFunctions {
                 const file = zipFile.files[filename]
                 if (file.dir || filename.startsWith("__MACOSX/")) continue
                 const contents = await file.async("uint8array")
-                const {allowed, result} = ImageFunctions.allowedFileType(file, contents, true)
+                const {allowed, result} = functions.image.allowedFileType(file, contents, true)
                 let url = URL.createObjectURL(new Blob([new Uint8Array(contents)]))
                 let ext = result.typename
                 let link = `${url}#.${ext}`
-                let {thumbnail, thumbnailExt} = await ImageFunctions.thumbnail(link)
-                let {width, height, size, duration} = await ImageFunctions.dimensions(link)
+                let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
+                let {width, height, size, duration} = await functions.image.dimensions(link)
                 if (allowed) {
                     images.push({
                         link, originalLink, ext: result.typename, size,
@@ -124,13 +125,13 @@ export default class ImageFunctions {
         for (let i = 0; i < files.length; i++) {
             const file = files[i]
             const originalLink = links?.[i] || ""
-            const bytes = await ImageFunctions.readFileBytes(file)
-            const {allowed, maxSize, result} = ImageFunctions.allowedFileType(file, bytes)
+            const bytes = await functions.image.readFileBytes(file)
+            const {allowed, maxSize, result} = functions.image.allowedFileType(file, bytes)
             let url = URL.createObjectURL(file)
             let ext = result.typename
             let link = `${url}#.${ext}`
-            let {thumbnail, thumbnailExt} = await ImageFunctions.thumbnail(link)
-            let {width, height, size, duration} = await ImageFunctions.dimensions(link)
+            let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
+            let {width, height, size, duration} = await functions.image.dimensions(link)
             let live2d = false
             if (allowed) {
                 const MB = file.size / (1024 * 1024)
@@ -164,7 +165,7 @@ export default class ImageFunctions {
     }
 
     public static validateTagImage = async (file: File) => {
-        let bytes = await ImageFunctions.readFileBytes(file)
+        let bytes = await functions.image.readFileBytes(file)
         const result = functions.byte.bufferFileType(bytes)?.[0]
         const jpg = result?.mime === "image/jpeg"
         const png = result?.mime === "image/png"
@@ -396,15 +397,15 @@ export default class ImageFunctions {
         })
     }
 
-    public static pixelateEffect = async (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
+    public static pixelateEffect = (canvas: HTMLCanvasElement | null, image: CanvasDrawable | null, 
         pixelate: number, opt?: PixelateOptions) => {
         if (!opt) opt = {}
         if (!canvas || !image) return canvas
         if (opt.isAnimation || opt.isVideo) return canvas
 
         const ctx = canvas.getContext("2d")!
-        const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
-        const imageHeight = (image instanceof ImageBitmap ? image.height : image.clientHeight)
+        const imageWidth = (image instanceof ImageBitmap ? image.width : opt.clientWidth || image.clientWidth)
+        const imageHeight = (image instanceof ImageBitmap ? image.height : opt.clientHeight || image.clientHeight)
         const landscape = imageWidth >= imageHeight
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         const pixelWidth = imageWidth / pixelate 
@@ -435,8 +436,8 @@ export default class ImageFunctions {
         if (!canvas || !image) return canvas
         if (splatter !== 0) {
             canvas.style.opacity = "1"
-            const imageWidth = (image instanceof ImageBitmap ? image.width : image.clientWidth)
-            const imageHeight = (image instanceof ImageBitmap ? image.height : image.clientHeight)
+            const imageWidth = (image instanceof ImageBitmap ? image.width : opt.clientWidth || image.clientWidth)
+            const imageHeight = (image instanceof ImageBitmap ? image.height : opt.clientHeight || image.clientHeight)
             canvas.width = imageWidth
             canvas.height = imageHeight
             const ctx = canvas.getContext("2d")!
@@ -491,31 +492,37 @@ export default class ImageFunctions {
         return canvas
     }
 
-    public static render = (image: HTMLImageElement, brightness: number, contrast: number,
-        hue: number, saturation: number, lightness: number, blur: number, sharpen: number, pixelate: number) => {
+    public static render = <T extends boolean>(image: HTMLImageElement | HTMLCanvasElement | ImageBitmap, filters: {brightness: number, contrast: number, hue: number,
+        saturation: number, lightness: number, blur: number, sharpen: number, pixelate: number, splatter: number}, buffer?: T, 
+        opt?: {naturalWidth?: number, naturalHeight?: number, clientWidth?: number, clientHeight?: number}) => {
+        let {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = filters
+        let naturalWidth = image instanceof HTMLImageElement ? image.naturalWidth : opt?.naturalWidth || image.width
+        let naturalHeight = image instanceof HTMLImageElement ? image.naturalHeight : opt?.naturalHeight || image.height
+        let clientWidth = opt?.clientWidth
+        let clientHeight = opt?.clientHeight
         const canvas = document.createElement("canvas") as HTMLCanvasElement
-        canvas.width = image.naturalWidth
-        canvas.height = image.naturalHeight
+        canvas.width = naturalWidth
+        canvas.height = naturalHeight
         const ctx = canvas.getContext("2d")!
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
-            const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = image.width / pixelate 
-            const pixelHeight = image.height / pixelate
-            pixelateCanvas.width = pixelWidth 
-            pixelateCanvas.height = pixelHeight
-            const pixelateCtx = pixelateCanvas.getContext("2d")!
-            pixelateCtx.imageSmoothingEnabled = false
-            pixelateCtx.drawImage(image, 0, 0, pixelWidth, pixelHeight)
+            let pixelateCanvas = document.createElement("canvas")
+            functions.image.pixelateEffect(pixelateCanvas, image, pixelate, {directWidth: true, clientWidth, clientHeight})
             ctx.imageSmoothingEnabled = false
             ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
+            ctx.imageSmoothingEnabled = true
+        }
+        if (splatter !== 0) {
+            const splatterCanvas = document.createElement("canvas")
+            functions.image.splatterEffect(splatterCanvas, image, splatter, {clientWidth, clientHeight})
+            ctx.drawImage(splatterCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (sharpen !== 0) {
             const sharpnessCanvas = document.createElement("canvas")
-            sharpnessCanvas.width = image.naturalWidth
-            sharpnessCanvas.height = image.naturalHeight
+            sharpnessCanvas.width = naturalWidth
+            sharpnessCanvas.height = naturalHeight
             const sharpnessCtx = sharpnessCanvas.getContext("2d")
             sharpnessCtx?.drawImage(image, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
             const sharpenOpacity = sharpen / 5
@@ -528,8 +535,8 @@ export default class ImageFunctions {
         }
         if (lightness !== 100) {
             const lightnessCanvas = document.createElement("canvas")
-            lightnessCanvas.width = image.naturalWidth
-            lightnessCanvas.height = image.naturalHeight
+            lightnessCanvas.width = naturalWidth
+            lightnessCanvas.height = naturalHeight
             const lightnessCtx = lightnessCanvas.getContext("2d")
             lightnessCtx?.drawImage(image, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
@@ -537,7 +544,11 @@ export default class ImageFunctions {
             ctx.globalAlpha = Math.abs((lightness - 100) / 100)
             ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
         }
-        return canvas
+        if (buffer) {
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            return img.data.buffer as T extends true ? ArrayBuffer : string
+        }
+        return canvas.toDataURL("image/png") as T extends true ? ArrayBuffer : string
     }
 
     public static convertToFormat = async (image: string, format: string) => {
@@ -579,5 +590,93 @@ export default class ImageFunctions {
             return URL.createObjectURL(blob)
         }
         return image
+    }
+
+    public static filtersOn = (filters: {brightness: number, contrast: number, hue: number, saturation: number,
+        lightness: number, blur: number, sharpen: number, pixelate: number, splatter: number}) => {
+        let {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = filters
+        if ((brightness !== 100) ||
+            (contrast !== 100) ||
+            (hue !== 180) ||
+            (saturation !== 100) ||
+            (lightness !== 100) ||
+            (blur !== 0) ||
+            (sharpen !== 0) ||
+            (pixelate !== 1 ||
+            (splatter !== 0))) {
+                return true 
+            } else {
+                return false
+            }
+    }
+
+    public static renderImage = async (img: string, ref: HTMLImageElement, filters: {brightness: number, contrast: number, 
+        hue: number, saturation: number, lightness: number, blur: number, sharpen: number, pixelate: number, 
+        splatter: number}, session: Session, currentImage?: string) => {
+        if (functions.image.filtersOn(filters)) {
+            if (currentImage) {
+                const decrypted = await functions.crypto.decryptItem(currentImage, session)
+                const img = await functions.image.createImage(decrypted)
+                return functions.image.render(img, filters, false)
+            } else {
+                return functions.image.render(ref, filters, false)
+            }
+        } else {
+            if (currentImage) {
+                return functions.crypto.decryptItem(currentImage, session)
+            } else {
+                return functions.crypto.decryptItem(img, session)
+            }
+
+        }
+    }
+
+    public static download = async (img: string, ref: HTMLImageElement, post: PostFull | PostHistory | UnverifiedPost, 
+        format: ImageFormat, session: Session, filters: {brightness: number, contrast: number, hue: number, saturation: number,
+        lightness: number, blur: number, sharpen: number, pixelate: number, splatter: number}, comicPages?: string[] | null) => {
+        let filename = path.basename(img).replace(/\?.*$/, "")
+        if (session.downloadPixivID && post?.source?.includes("pixiv.net")) {
+            filename = post.source.match(/\d+/g)?.[0] + path.extname(img).replace(/\?.*$/, "")
+        }
+        if (comicPages && comicPages?.length > 1) {
+            const zip = new JSZip()
+            for (let i = 0; i < comicPages.length; i++) {
+                const page = comicPages[i]
+                let pageName = path.basename(page).replace(/\?.*$/, "")
+                if (session.downloadPixivID && post?.source?.includes("pixiv.net")) {
+                    pageName = `${post.source.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
+                }
+                const decryptedPage = await functions.crypto.decryptItem(page, session)
+                let image = await functions.image.renderImage(img, ref, filters, session, decryptedPage)
+                if (functions.image.filtersOn(filters) || path.extname(pageName) !== `.${format}`) {
+                    image = await functions.image.convertToFormat(image, format)
+                }
+                pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
+                let data = new ArrayBuffer(0)
+                if (functions.byte.isBase64(image)) {
+                    data = await fetch(image).then((r) => r.arrayBuffer())
+                } else {
+                    data = await functions.http.getBuffer(functions.util.appendURLParams(image, 
+                    {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})
+                }
+                zip.file(decodeURIComponent(pageName), data, {binary: true})
+            }
+            const decoded = decodeURIComponent(filename)
+            const id = decoded.split("-")[0]
+            const basename = path.basename(decoded.split("-")[2] ?? "", path.extname(decoded.split("-")[2] ?? ""))
+            const downloadName = basename ? `${id}-${basename}.zip` : `${path.basename(filename, path.extname(filename))}.zip`
+            const blob = await zip.generateAsync({type: "blob"})
+            const url = window.URL.createObjectURL(blob)
+            functions.dom.download(downloadName , url)
+            window.URL.revokeObjectURL(url)
+        } else {
+            let image = await functions.image.renderImage(img, ref, filters, session)
+            if (functions.image.filtersOn(filters) || path.extname(filename) !== `.${format}`) {
+                image = await functions.image.convertToFormat(image, format)
+            }
+            filename = path.basename(filename, path.extname(filename)) + `.${format}`
+            functions.dom.download(filename, image)
+            window.URL.revokeObjectURL(image)
+        }
     }
 }

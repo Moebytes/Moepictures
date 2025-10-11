@@ -28,6 +28,7 @@ const playbackSlice = createSlice({
         muteFlag: false,
         resetFlag: false,
         disableZoom: true,
+        zoom: 1,
         audioSpeed: 1,
         audioReverse: false,
         audioSecondsProgress: 0,
@@ -67,6 +68,7 @@ const playbackSlice = createSlice({
         setMuteFlag: (state, action) => {state.muteFlag = action.payload},
         setResetFlag: (state, action) => {state.resetFlag = action.payload},
         setDisableZoom: (state, action) => {state.disableZoom = action.payload},
+        setZoom: (state, action) => {state.zoom = action.payload},
         setAudioSpeed: (state, action) => {state.audioSpeed = action.payload},
         setAudioReverse: (state, action) => {state.audioReverse = action.payload},
         setAudioSecondsProgress: (state, action) => {state.audioSecondsProgress = action.payload},
@@ -93,7 +95,7 @@ const {
     setAudioReverse, setAudioSecondsProgress, setAudioProgress, setAudioDragProgress, 
     setAudioVolume, setAudioPreviousVolume, setAudioPaused, setAudioDuration, 
     setAudioSeekTo, setAudioDragging, setAudioRewindFlag, setAudioFastForwardFlag,
-    setShowMiniPlayer, setShowBigPlayer
+    setShowMiniPlayer, setShowBigPlayer, setZoom
 } = playbackSlice.actions
 
 export const usePlaybackSelector = () => {
@@ -121,6 +123,7 @@ export const usePlaybackSelector = () => {
         muteFlag: selector((state) => state.playback.muteFlag),
         resetFlag: selector((state) => state.playback.resetFlag),
         disableZoom: selector((state) => state.playback.disableZoom),
+        zoom: selector((state) => state.playback.zoom),
         audioSpeed: selector((state) => state.playback.audioSpeed),
         audioReverse: selector((state) => state.playback.audioReverse),
         audioSecondsProgress: selector((state) => state.playback.audioSecondsProgress),
@@ -164,6 +167,7 @@ export const usePlaybackActions = () => {
         setMuteFlag: (state: boolean) => dispatch(setMuteFlag(state)),
         setResetFlag: (state: boolean) => dispatch(setResetFlag(state)),
         setDisableZoom: (state: boolean) => dispatch(setDisableZoom(state)),
+        setZoom: (state: number) => dispatch(setZoom(state)),
         setAudioSpeed: (state: number) => dispatch(setAudioSpeed(state)),
         setAudioReverse: (state: boolean) => dispatch(setAudioReverse(state)),
         setAudioSecondsProgress: (state: number) => dispatch(setAudioSecondsProgress(state)),

@@ -79,7 +79,7 @@ const MiscRoutes = (app: Express) => {
                 width: 230
             })
             req.session.captchaAnswer = captcha.text
-            serverFunctions.sendEncrypted(captcha.data, req, res)
+            serverFunctions.sendEncrypted({captcha: captcha.data}, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

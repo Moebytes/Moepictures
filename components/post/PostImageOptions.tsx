@@ -151,9 +151,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const getFilterMarginTop = () => {
         if (typeof document === "undefined") return 0
         let elementName = ".post-image-box"
-        if (props.model) elementName = ".post-model-box"
-        if (props.live2d) elementName = ".post-model-box"
-        if (props.audio) elementName = ".post-song-box"
         if (noteMode) elementName = ".note-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
