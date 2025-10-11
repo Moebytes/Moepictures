@@ -467,8 +467,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
-                    <span className="mobile-nav-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span>
-                    <span className="mobile-nav-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span>
+                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span> */}
+                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span> */}
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
                         <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>

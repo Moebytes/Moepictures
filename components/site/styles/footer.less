@@ -2,12 +2,20 @@
 
 .footer {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     width: 100%;
     height: @footer-height;
     background-color: var(--footerBG);
+}
+
+.footer-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 
 .footer-title-container {
@@ -65,10 +73,19 @@
     margin-right: 10px;
 }
 
+.footer-bottom {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
 @media screen and (max-width: 500px) {
     .footer {
-        padding-bottom: 50px;    
-        padding-top: 20px;
+        //padding-bottom: 50px;    
+        //padding-top: 20px;
+        height: 75px;
     }
 
     .footer-title-a {
