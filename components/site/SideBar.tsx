@@ -1488,7 +1488,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <Link to="/contact">
                         <img className="sidebar-footer-icon" src={contact} style={{filter: getFilter()}}/>
                     </Link>
-                    {/* <img className="sidebar-footer-icon" src={code} style={{filter: getFilter()}} onClick={() => window.open(pack.repository.url, "_blank")}/> */}
                 </div>
             </div>
         </div>
