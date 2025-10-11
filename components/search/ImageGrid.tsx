@@ -64,10 +64,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    useEffect(() => {
-        limit = mobile ? 20 : 100
-    }, [mobile])
-
     const getPageAmount = () => {
         let loadAmount = 36
         if (sizeType === "tiny") loadAmount = 36
