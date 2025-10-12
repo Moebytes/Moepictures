@@ -1277,6 +1277,20 @@ export default class ServerFunctions {
         return {tagData, danbooruLink, newRating: rating}
     }
 
+    public static isTransparent = async (bytes: number[]) => {
+        const image = sharp(new Uint8Array(bytes))
+        const metadata = await image.metadata()
+        if (!metadata.hasAlpha) return false
+
+        const {data, info} = await image.ensureAlpha().raw().toBuffer({resolveWithObject: true})
+
+        let counter = 0
+        for (let i = 3; i < data.length; i += info.channels) {
+            if (data[i] === 0) counter++
+        }
+        return counter > 100000
+    }
+
     public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
         let tagArr = [] as string[]
         let blockedTags = tagConvert.blockedTags
@@ -1318,6 +1332,12 @@ export default class ServerFunctions {
             if (tagArr.includes("sketch")) style = "sketch"
             if (tagArr.includes("lineart")) style = "lineart"
             if (tagArr.includes("ad")) style = "promo"
+            if (current.name.includes("chibi")) style = "chibi"
+            if (current.name.includes("pixel")) style = "pixel"
+            if (current.name.includes("daki")) style = "daki"
+            if (current.name.includes("sketch")) style = "sketch"
+            if (current.name.includes("lineart")) style = "lineart"
+            if (current.name.includes("promo")) style = "promo"
             if (tagArr.includes("comic")) {
                 if (type === "image") type = "comic"
             }
@@ -1333,6 +1353,9 @@ export default class ServerFunctions {
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
+
+            const isTransparent = await ServerFunctions.isTransparent(bytes)
+            if (isTransparent) tagArr.push("transparent")
 
             artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
@@ -1388,6 +1411,12 @@ export default class ServerFunctions {
             if (tagArr.includes("sketch")) style = "sketch"
             if (tagArr.includes("lineart")) style = "lineart"
             if (tagArr.includes("ad")) style = "promo"
+            if (current.name.includes("chibi")) style = "chibi"
+            if (current.name.includes("pixel")) style = "pixel"
+            if (current.name.includes("daki")) style = "daki"
+            if (current.name.includes("sketch")) style = "sketch"
+            if (current.name.includes("lineart")) style = "lineart"
+            if (current.name.includes("promo")) style = "promo"
             if (tagArr.includes("comic")) {
                 if (type === "image") type = "comic"
             }
@@ -1403,6 +1432,13 @@ export default class ServerFunctions {
             }
             tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
+            tagArr.push("autotags")
+            tagArr.push("needscheck")
+            if (hasUpscaled) tagArr.push("upscaled")
+
+            const isTransparent = await ServerFunctions.isTransparent(bytes)
+            if (isTransparent) tagArr.push("transparent")
+
             characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
@@ -1413,10 +1449,6 @@ export default class ServerFunctions {
                 characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
             characterArr = characterArr.filter((tag: string) => tag.length >= 3)
-
-            tagArr.push("autotags")
-            tagArr.push("needscheck")
-            if (hasUpscaled) tagArr.push("upscaled")
 
             let seriesArr = [] as string[]
 
@@ -1484,5 +1516,11 @@ export default class ServerFunctions {
         } else {
             return Buffer.from("")
         }
+    }
+
+    public static postIDFromPixivID = async (rawPixivID: string) => {
+        const pixivID = rawPixivID.match(/(\d+)/g)?.[0] || ""
+        const result = await sql.search.searchPixivID(pixivID, "", "", "", "")
+        return result[0] ? result[0].postID : ""
     }
 }
