@@ -1356,6 +1356,14 @@ export default class ServerFunctions {
 
             const isTransparent = await ServerFunctions.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
+            if (current.name.includes("fanbox")) {
+                tagArr.push("fanbox")
+                tagArr.push("paid-content-available")
+            }
+            if (current.name.includes("patreon")) {
+                tagArr.push("patreon")
+                tagArr.push("paid-content-available")
+            }
 
             artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
@@ -1438,6 +1446,14 @@ export default class ServerFunctions {
 
             const isTransparent = await ServerFunctions.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
+            if (current.name.includes("fanbox")) {
+                tagArr.push("fanbox")
+                tagArr.push("paid-content-available")
+            }
+            if (current.name.includes("patreon")) {
+                tagArr.push("patreon")
+                tagArr.push("paid-content-available")
+            }
 
             characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
