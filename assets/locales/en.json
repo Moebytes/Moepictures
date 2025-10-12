@@ -47,6 +47,7 @@
         "getInfo": "Get Info",
         "splitVariations": "Split Variations",
         "joinChildPosts": "Join Child Posts",
+        "flipParent": "Flip Parent",
         "deleteFavorites": "Delete Favorites",
         "editThumbnail": "Edit Thumbnail",
         "result": "result.",
@@ -235,6 +236,7 @@
         "untranslated": "Untranslated",
         "split": "Split",
         "join": "Join",
+        "flip": "Flip",
         "update": "Update",
         "updateAll": "Update All",
         "autogenerate": "Auto-Generate",
@@ -762,6 +764,7 @@
             "multipleHeading": "If there are multiple images, select the rightmost tag that fits.",
             "possibleDuplicates": "Possible Duplicates",
             "childHeading": "If this is a child post, enter the parent post ID: ",
+            "groupHeading": "If you would like to add this to a group, enter the group name: ",
             "fetchFromPixiv": "Fetch from Pixiv",
             "fetchFromDanbooru": "Fetch from Danbooru",
             "banText": "You are banned. Cannot upload.",
@@ -1194,13 +1197,18 @@
         "splitPost": {
             "title": "Split Variations",
             "header": "Split off variations into child posts of this post? This action is irreversible.",
-            "currentOnly": "Current Only"
+            "currentOnly": "Current Only",
+            "mergeSubsequent": "Merge Subsequent"
         },
         "joinPost": {
             "title": "Join Child Posts",
             "header": "Join all child posts into variations of this post?",
             "lostData": " *Tag and source data of the child posts will be lost.",
             "nestedChildren": "Nested Children"
+        },
+        "flipPost": {
+            "title": "Flip Parent",
+            "header": "Flip this post to become the parent?"
         },
         "deleteTagFavorites": {
             "title": "Delete Tag Favorites",

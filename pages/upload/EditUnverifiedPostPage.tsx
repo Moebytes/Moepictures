@@ -91,6 +91,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const [style, setStyle] = useState("2d" as PostStyle)
     const [showLinksInput, setShowLinksInput] = useState(false)
     const [parentID, setParentID] = useState("")
+    const [groupName, setGroupName] = useState("")
     const [sourceTitle, setSourceTitle] = useState("")
     const [sourceEnglishTitle, setSourceEnglishTitle] = useState("")
     const [sourceArtist, setSourceArtist] = useState("")
@@ -340,6 +341,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
 
     const reset = () => {
         setParentID("")
+        setGroupName("")
         setSourceTitle("")
         setSourceEnglishTitle("")
         setSourceArtist("")
@@ -808,6 +810,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             rating,
             style,
             parentID,
+            groupName,
             source: {
                 title: sourceTitle,
                 englishTitle: sourceEnglishTitle,
@@ -1474,10 +1477,14 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             </div>}
                 {getStyleJSX()}
                 <div className="upload-container">
-                        <div className="upload-container-row">
-                            <span className="upload-text-alt">{i18n.pages.upload.childHeading}</span>
-                            <input className="upload-input" type="number" value={parentID} onChange={(event) => setParentID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                        </div>
+                    <div className="upload-container-row">
+                        <span className="upload-text-alt">{i18n.pages.upload.childHeading}</span>
+                        <input className="upload-input" type="number" value={parentID} onChange={(event) => setParentID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
+                        <span className="upload-text-alt">{i18n.pages.upload.groupHeading}</span>
+                        <input className="upload-input-wide" type="text" value={groupName} onChange={(event) => setGroupName(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
                 </div>
                 <span className="upload-heading">{i18n.labels.source}</span>
                 <div className="upload-container">

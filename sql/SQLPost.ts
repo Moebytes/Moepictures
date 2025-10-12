@@ -25,9 +25,9 @@ export default class SQLPost {
     }
 
     /** Updates a post */
-    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private" | "deleted" 
+    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private" | "deleted" | "parentID"
         | "deletionDate", value: string | number | boolean | null) => {
-        let whitelist = ["type", "hidden", "locked", "private", "deleted", "deletionDate"]
+        let whitelist = ["type", "hidden", "locked", "private", "deleted", "parentID", "deletionDate"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

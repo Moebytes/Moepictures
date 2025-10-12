@@ -67,7 +67,8 @@ const postDialogSlice = createSlice({
         postInfoID: null as PostInfoID | null,
         editThumbnailID: null as EditThumbnailID | null,
         splitPostID: null as PostInfoID | null,
-        joinPostID: null as PostEditID | null
+        joinPostID: null as PostEditID | null,
+        flipPostID: null as PostEditID | null
     },
     reducers: {
         setDeletePostID: (state, action) => {state.deletePostID = action.payload},
@@ -93,7 +94,8 @@ const postDialogSlice = createSlice({
         setPostInfoID: (state, action) => {state.postInfoID = action.payload},
         setEditThumbnailID: (state, action) => {state.editThumbnailID = action.payload},
         setSplitPostID: (state, action) => {state.splitPostID = action.payload},
-        setJoinPostID: (state, action) => {state.joinPostID = action.payload}
+        setJoinPostID: (state, action) => {state.joinPostID = action.payload},
+        setFlipPostID: (state, action) => {state.flipPostID = action.payload}
     }
 })
 
@@ -103,7 +105,7 @@ const {
     setLockPostID, setPrivatePostID, setTagEditID, setSourceEditID, setChildPostObj,
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
     setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, 
-    setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID, setEditThumbnailID
+    setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID, setEditThumbnailID, setFlipPostID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
@@ -132,7 +134,8 @@ export const usePostDialogSelector = () => {
         postInfoID: selector((state) => state.postDialog.postInfoID),
         editThumbnailID: selector((state) => state.postDialog.editThumbnailID),
         splitPostID: selector((state) => state.postDialog.splitPostID),
-        joinPostID: selector((state) => state.postDialog.joinPostID)
+        joinPostID: selector((state) => state.postDialog.joinPostID),
+        flipPostID: selector((state) => state.postDialog.flipPostID),
     }
 }
 
@@ -162,7 +165,8 @@ export const usePostDialogActions = () => {
         setPostInfoID: (state: PostInfoID | null) => dispatch(setPostInfoID(state)),
         setEditThumbnailID: (state: EditThumbnailID | null) => dispatch(setEditThumbnailID(state)),
         setSplitPostID: (state: PostInfoID | null) => dispatch(setSplitPostID(state)),
-        setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state))
+        setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state)),
+        setFlipPostID: (state: PostEditID | null) => dispatch(setFlipPostID(state))
     }    
 }
 

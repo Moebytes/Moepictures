@@ -7,7 +7,7 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structu
 import {Group, GroupHistory, GroupPosts, GroupParams, GroupEditParams, GroupPostDeleteParams,
 GroupReorderParams, GroupRequestParams, GroupRequestFulfillParams, GroupDeleteRequestParams,
 GroupPostDeleteRequestParams, GroupDeleteRequestFulfillParams, GroupPostDeleteRequestFulfillParams,
-GroupEditRequestParams, GroupEditRequestFulfillParams, GroupHistoryParams} from "../types/Types"
+GroupEditRequestParams, GroupEditRequestFulfillParams, GroupHistoryParams, PostFull} from "../types/Types"
 
 const groupLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -17,6 +17,55 @@ const groupLimiter = rateLimit({
     keyGenerator,
     handler
 })
+
+export const addToGroup = async (post: PostFull, name: string, username: string, date: string) => {
+    const slug = functions.post.generateSlug(name.trim())
+    const group = await sql.group.group(slug)
+    if (!group) {
+        try {
+            const groupID = await sql.group.insertGroup(username, name.trim(), slug, post.rating)
+            await sql.group.insertGroupPost(String(groupID), post.postID, 1)
+        } catch {
+            // it's an orphan group with no posts, so group.group() failed
+            const groups = await sql.group.groups([name.trim()])
+            const group = groups.find((g) => g.name === name.trim())
+            if (group) await sql.group.insertGroupPost(String(group.groupID), post.postID, 1)
+        }
+    } else {
+        if (!group.posts?.length) group.posts = [{order: 0}] as any
+        let maxOrder = Math.max(...group.posts.map((post) => post.order))
+        if (group.rating !== post.rating) {
+            if (post.rating === functions.r18()) {
+                await sql.group.updateGroup(group.groupID, "rating", functions.r18())
+            } else if (post.rating === functions.r17() && group.rating !== functions.r18()) {
+                await sql.group.updateGroup(group.groupID, "rating", functions.r17())
+            } else if (post.rating === functions.r15() && group.rating !== functions.r17() && group.rating !== functions.r18()) {
+                await sql.group.updateGroup(group.groupID, "rating", functions.r15())
+            }
+        }
+        try {
+            await sql.group.insertGroupPost(group.groupID, post.postID, maxOrder + 1)
+        } catch {}
+
+        const groupHistory = await sql.history.groupHistory(group.groupID)
+        const updated = await sql.group.group(slug) as GroupPosts
+        const changes = functions.compare.parseGroupChanges(group, updated)
+        let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+        if (!groupHistory.length) {
+            let vanilla = group as unknown as GroupHistory
+            vanilla.user = group.creator
+            vanilla.date = group.createDate
+            let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+            await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+            rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
+            await sql.history.insertGroupHistory({username: username, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
+            description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [post.postID], removedPosts: [], changes})
+        } else {
+            await sql.history.insertGroupHistory({username: username, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
+            description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [post.postID], removedPosts: [], changes})
+        }
+    }
+}
 
 const GroupRoutes = (app: Express) => {
     app.post("/api/group", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
@@ -28,48 +77,10 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid post")
-            const slug = functions.post.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
-            const group = await sql.group.group(slug)
-            if (!group) {
-                const groupID = await sql.group.insertGroup(targetUser, name, slug, post.rating)
-                await sql.group.insertGroupPost(String(groupID), postID, 1)
-            } else {
-                if (!group.posts?.length) group.posts = [{order: 0}] as any
-                let maxOrder = Math.max(...group.posts.map((post) => post.order))
-                if (group.rating !== post.rating) {
-                    if (post.rating === functions.r18()) {
-                        await sql.group.updateGroup(group.groupID, "rating", functions.r18())
-                    } else if (post.rating === functions.r17() && group.rating !== functions.r18()) {
-                        await sql.group.updateGroup(group.groupID, "rating", functions.r17())
-                    } else if (post.rating === functions.r15() && group.rating !== functions.r17() && group.rating !== functions.r18()) {
-                        await sql.group.updateGroup(group.groupID, "rating", functions.r15())
-                    }
-                }
-                try {
-                    await sql.group.insertGroupPost(group.groupID, postID, maxOrder + 1)
-                } catch {}
-
-                const groupHistory = await sql.history.groupHistory(group.groupID)
-                const updated = await sql.group.group(slug) as GroupPosts
-                const changes = functions.compare.parseGroupChanges(group, updated)
-                let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                if (!date) date = new Date().toISOString()
-                if (!groupHistory.length) {
-                    let vanilla = group as unknown as GroupHistory
-                    vanilla.user = group.creator
-                    vanilla.date = group.createDate
-                    let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                    await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
-                    rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
-                    await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
-                    description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [postID], removedPosts: [], changes})
-                } else {
-                    await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
-                    description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [postID], removedPosts: [], changes})
-                }
-            }
+            if (!date) date = new Date().toISOString()
+            await addToGroup(post, name, targetUser, date)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

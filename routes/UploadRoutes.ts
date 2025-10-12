@@ -12,6 +12,7 @@ import {PostHistory, UploadParams, UploadImage, EditParams, BulkTag, UnverifiedU
 UnverifiedEditParams, PostFull, UnverifiedPost, ApproveParams, TagHistory, UploadTag,
 PostType, SourceData, PostRating, Image, PostStyle, MiniTag, ChildPost,
 MiniTagGroup} from "../types/Types"
+import {addToGroup} from "./GroupRoutes"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -870,7 +871,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, noImageUpdate} = req.body as UploadParams
 
         if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -909,10 +910,16 @@ const CreateRoutes = (app: Express) => {
         const {hasOriginal, hasUpscaled} = await insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged: true})
         await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, uploader: req.session.username,
         updater: req.session.username, approver: req.session.username})
+
         let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, tags, noImageUpdate, username: req.session.username})
         await sql.cuteness.updateCuteness(postID, req.session.username, 500)
 
         await updateTagGroups(postID, {oldTagGroups: [], newTagGroups: tagGroups})
+
+        if (groupName) {
+          const post = await sql.post.post(postID)
+          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+        }
 
         if (unverifiedID) {
           const unverifiedPost = await sql.post.unverifiedPost(unverifiedID)
@@ -927,7 +934,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
@@ -1001,6 +1008,11 @@ const CreateRoutes = (app: Express) => {
         
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
 
+        if (groupName) {
+          const post = await sql.post.post(postID)
+          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+        }
+
         if (unverifiedID) {
           const unverifiedPost = await sql.post.unverifiedPost(unverifiedID)
           if (unverifiedPost) await serverFunctions.deleteUnverifiedPost(unverifiedPost)
@@ -1025,7 +1037,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {images, upscaledImages, type, rating, style, parentID, source, artists, characters, series, 
+        let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series, 
         tags, tagGroups, newTags, duplicates} = req.body as UnverifiedUploadParams
 
         if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -1074,6 +1086,11 @@ const CreateRoutes = (app: Express) => {
 
         await updateTagGroups(postID, {unverified: true, oldTagGroups: [], newTagGroups: tagGroups})
 
+        if (groupName) {
+          const post = await sql.post.post(postID)
+          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+        }
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
@@ -1083,7 +1100,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, source, artists, characters, series,
+        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
         tags, tagGroups, newTags, reason} = req.body as UnverifiedEditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
@@ -1163,6 +1180,10 @@ const CreateRoutes = (app: Express) => {
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {unverified: true, 
           oldTagGroups: unverifiedPost.tagGroups, newTagGroups: tagGroups})
 
+        if (groupName) {
+          const post = await sql.post.post(postID)
+          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+        }
 
         if (post && originalPostID) {
           const updated = await sql.post.unverifiedPost(postID) as UnverifiedPost
@@ -1360,7 +1381,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/split", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, order} = req.body as {postID: string, order: number | null}
+        let {postID, order, mergeSubsequent} = req.body as {postID: string, order: number | null, mergeSubsequent?: boolean}
         if (!req.session.username) return void res.status(403).send("Unauthorized")
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!permissions.isAdmin(req.session)) return void res.status(403).end()
@@ -1378,6 +1399,10 @@ const CreateRoutes = (app: Express) => {
             }
             let images = [image]
             let upscaledImages = [image]
+            if (mergeSubsequent) {
+              images = post.images.slice(i)
+              upscaledImages = post.images.slice(i)
+            }
             let type = image.type
             let rating = post.rating
             let style = post.style
@@ -1408,11 +1433,13 @@ const CreateRoutes = (app: Express) => {
             await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: post.tagGroups})
             await sql.cuteness.updateCuteness(newPostID, req.session.username, 500)
 
-            const imagePath = functions.link.getImagePath(image.type, post.postID, image.order, image.filename)
-            const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
-            await sql.post.deleteImage(image.imageID)
-            await serverFunctions.deleteFile(imagePath, r18)
-            await serverFunctions.deleteFile(upscaledImagePath, r18)
+            for (const image of images) {
+              const imagePath = functions.link.getImagePath(image.type, post.postID, image.order, image.filename)
+              const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
+              await sql.post.deleteImage(image.imageID)
+              await serverFunctions.deleteFile(imagePath, r18)
+              await serverFunctions.deleteFile(upscaledImagePath, r18)
+            }
           }
         }
 
@@ -1470,6 +1497,39 @@ const CreateRoutes = (app: Express) => {
 
         await joinChildPosts(childPosts)
 
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
+    app.post("/api/post/flip", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {postID} = req.body as {postID: string}
+        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+        const post = await sql.post.post(postID)
+        if (!post) return void res.status(400).send("Bad postID")
+        
+        if (!post.parentID) return void res.status(400).send("This is not a child post")
+
+        const childPosts = await sql.post.childPosts(post.parentID)
+        for (const childPost of childPosts) {
+          await sql.post.deleteChild(childPost.postID)
+        }
+
+        await sql.post.updatePost(postID, "parentID", null)
+        await sql.post.insertChild(post.parentID, postID)
+        await sql.post.updatePost(post.parentID, "parentID", postID)
+        for (const childPost of childPosts) {
+          if (childPost.postID !== postID) {
+            await sql.post.insertChild(childPost.postID, postID)
+            await sql.post.updatePost(childPost.postID, "parentID", postID)
+          }
+        }
+        
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
