@@ -73,6 +73,7 @@ import unprivateIcon from "../../assets/icons/unprivate.png"
 import appealIcon from "../../assets/icons/appeal.png"
 import infoIcon from "../../assets/icons/info.png"
 import splitIcon from "../../assets/icons/split.png"
+import flipIcon from "../../assets/icons/flip.png"
 import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../functions/Functions"
@@ -118,7 +119,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID, setEditThumbnailID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID} = usePostDialogActions()
     const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
     const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
     const {setActionBanner} = useActiveActions()
@@ -949,6 +950,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setJoinPostID({post: props.post, unverified: props.unverified})
     }
 
+    const triggerFlip = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setFlipPostID({post: props.post, unverified: props.unverified})
+    }
+
     const generateUsernameJSX = (type?: string) => {
         if (!props.post) return
         let username = props.post.uploader
@@ -1396,6 +1402,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerJoin}>
                                 <img className="sidebar-icon" src={joinIcon} style={{filter: getFilter()}}/>
                                 <span className="tag">{i18n.sidebar.joinChildPosts}</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerFlip}>
+                                <img className="sidebar-icon" src={flipIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{i18n.sidebar.flipParent}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">

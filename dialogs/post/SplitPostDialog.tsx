@@ -17,6 +17,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const {setSplitPostID} = usePostDialogActions()
     const [currentOnly, setCurrentOnly] = useState(false)
+    const [mergeSubsequent, setMergeSubsequent] = useState(false)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -40,8 +41,8 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const splitPost = async () => {
         if (!splitPostID) return
         if (permissions.isAdmin(session)) {
-            let order = currentOnly ? splitPostID.order : null
-            await functions.http.post("/api/post/split", {postID: splitPostID.post.postID, order}, session, setSessionFlag)
+            let order = currentOnly || mergeSubsequent ? splitPostID.order : null
+            await functions.http.post("/api/post/split", {postID: splitPostID.post.postID, order, mergeSubsequent}, session, setSessionFlag)
             setPostFlag(splitPostID.post.postID)
         }
     }
@@ -51,6 +52,22 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
             splitPost()
         }
         setSplitPostID(null)
+    }
+
+    const toggleCheckbox = (type: "currentOnly" | "mergeSubsequent") => {
+        if (type === "mergeSubsequent") {
+            setMergeSubsequent((prev: boolean) => {
+                const newValue = !prev
+                if (newValue) setCurrentOnly(false)
+                return newValue
+            })
+        } else if (type === "currentOnly") {
+            setCurrentOnly((prev: boolean) => {
+                const newValue = !prev
+                if (newValue) setMergeSubsequent(false)
+                return newValue
+            })
+        }
     }
 
     if (permissions.isAdmin(session)) {
@@ -69,7 +86,11 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.splitPost.currentOnly}?</span>
-                                <img className="dialog-checkbox" src={currentOnly ? checkboxChecked : checkbox} onClick={() => setCurrentOnly((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={currentOnly ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px", filter: getFilter()}}/>
+                            </div>
+                            <div className="dialog-row" style={{justifyContent: "center"}}>
+                                <span className="dialog-text">{i18n.dialogs.splitPost.mergeSubsequent}?</span>
+                                <img className="dialog-checkbox" src={mergeSubsequent ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px", filter: getFilter()}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

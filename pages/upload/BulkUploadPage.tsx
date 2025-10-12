@@ -301,6 +301,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 rating: tagData.rating,
                 style: tagData.style,
                 parentID: "",
+                groupName: "",
                 source: {
                     title: sourceData.source.title,
                     englishTitle: sourceData.source.englishTitle,

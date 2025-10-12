@@ -47,6 +47,7 @@
         "getInfo": "情報を得る",
         "splitVariations": "スプリットのバリエーション",
         "joinChildPosts": "子どもの投稿に参加する",
+        "flipParent": "親を反転させる",
         "deleteFavorites": "お気に入りの削除",
         "editThumbnail": "サムネイルの編集",
         "result": "件の結果。",
@@ -236,6 +237,7 @@
         "untranslated": "未翻訳",
         "split": "スプリット",
         "join": "参加",
+        "flip": "ひっくり返す",
         "update": "更新",
         "updateAll": "すべて更新",
         "autogenerate": "自動生成",
@@ -763,6 +765,7 @@
             "multipleHeading": "画像が複数ある場合は、一番右のタグを選択します。",
             "possibleDuplicates": "重複の可能性",
             "childHeading": "子投稿の場合は、親投稿のIDを入力してください： ",
+            "groupHeading": "グループに追加する場合は、グループ名を入力してください： ",
             "fetchFromPixiv": "Pixivからフェッチ",
             "fetchFromDanbooru": "Danbooruからフェッチ",
             "banText": "禁止されています。アップロードできません。",
@@ -1195,13 +1198,18 @@
         "splitPost": {
             "title": "スプリットのバリエーション",
             "header": "この記事の子記事にバリエーションを分割しますか？この操作は不可逆です。",
-            "currentOnly": "現在のみ"
+            "currentOnly": "現在のみ",
+            "mergeSubsequent": "後続をマージ"
         },
         "joinPost": {
             "title": "子どもの投稿に参加する",
             "header": "すべての子ポストをこのポストのバリエーションに統合する？",
             "lostData": " *子投稿のタグとソースデータは失われます。",
             "nestedChildren": "入れ子の子供たち"
+        },
+        "flipPost": {
+            "title": "Flip Parent",
+            "header": "この投稿を親投稿にするには？"
         },
         "deleteTagFavorites": {
             "title": "タグのお気に入りを削除",
