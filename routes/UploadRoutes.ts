@@ -904,6 +904,12 @@ const CreateRoutes = (app: Express) => {
         const totalMB = originalMB + upscaledMB
         if (!skipMBCheck && totalMB > 300) return void res.status(400).send("Invalid size")
 
+        // Special handling for bulk uploading. Dynamically get the correct parentID from 
+        // the pixivID since it wouldn't be uploaded at the time of making the request object.
+        if (parentID?.includes("pixiv")) {
+          parentID = await serverFunctions.postIDFromPixivID(parentID)
+        }
+
         const postID = await sql.post.insertPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
 

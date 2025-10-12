@@ -33,6 +33,8 @@ export interface UploadImage {
     thumbnail: string
     thumbnailExt: string
     duration?: number
+    groupName?: string
+    parentID?: string
 }
 
 export interface UploadParams {

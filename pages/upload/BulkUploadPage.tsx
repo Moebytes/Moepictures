@@ -244,9 +244,25 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         forceUpdate()
     }
 
+    const parseFilename = (filename: string) => {
+        const id = filename.match(/\d{4,}/g)?.[0] || filename.split("_")[0]
+        
+        let match = filename.match(/_(p|g|c!?|s)(\d+)/i)
+        const qualifier = match?.[1].toLowerCase() || "s"
+        const num = Number(match?.[2] || 0)
+
+        return {id, qualifier, num}
+    }
+
     const submit = async () => {
+        setSubmitError(true)
+        if (!submitErrorRef.current) await functions.timeout(20)
+        submitErrorRef.current!.innerText = "Scanning images..."
         let submitObj = {} as UploadImage
         let upscaledSubmitObj = {} as UploadImage
+
+        let lastParentID = ""
+        let lastChildKey = ""
         for (let i = 0; i < originalFiles.length; i++) {
             const current = originalFiles[i]
             const upscaledCurrent = upscaledFiles[i]
@@ -258,17 +274,49 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 dupes = await functions.http.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
             }
             if (dupes.length) continue
-            let id = current.name.includes("_s") ? current.name : current.name.split("_")[0]
-            let upscaledID = current.name.includes("_s") ? current.name : current.name.split("_")[0]
-            if (submitObj[id]) {
-                submitObj[id].push(current)
-            } else {
-                submitObj[id] = [current]
+
+            let {id, qualifier, num} = parseFilename(current.name)
+
+            let key = id
+            switch (qualifier) {
+                case "s":
+                    key = `${id}_s${num}`
+                    break
+                case "g":
+                    key = `${id}_g${num}`
+                    current.groupName = `Pixiv ${id}`
+                    upscaledCurrent.groupName = `Pixiv ${id}`
+                    break
+                case "c":
+                    key = `${id}_c${num}`
+                    lastChildKey = key
+
+                    if (num === 0) {
+                        lastParentID = `pixiv-${id}`
+                        current.parentID = ""
+                        upscaledCurrent.parentID = ""
+                    } else {
+                        current.parentID = lastParentID
+                        upscaledCurrent.parentID = lastParentID
+                    }
+                    break
+                case "c!":
+                    key = lastChildKey
+                    break
+                case "p":
+                default:
+                    key = id
+                    break
             }
-            if (upscaledSubmitObj[upscaledID]) {
-                upscaledSubmitObj[upscaledID].push(upscaledCurrent)
+            if (submitObj[key]) {
+                submitObj[key].push(current)
             } else {
-                upscaledSubmitObj[upscaledID] = [upscaledCurrent]
+                submitObj[key] = [current]
+            }
+            if (upscaledSubmitObj[key]) {
+                upscaledSubmitObj[key].push(upscaledCurrent)
+            } else {
+                upscaledSubmitObj[key] = [upscaledCurrent]
             }
         }
         const submitData = Object.values(submitObj) as UploadImage[][]
@@ -282,6 +330,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }, 2000)
             return setProgressText("")
         }
+        setSubmitError(false)
         setProgress(0)
         setProgressText(`0/${submitData.length}`)
         for (let i = 0; i < submitData.length; i++) {
@@ -300,8 +349,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 type: tagData.type,
                 rating: tagData.rating,
                 style: tagData.style,
-                parentID: "",
-                groupName: "",
+                parentID: currentArr[0].parentID,
+                groupName: currentArr[0].groupName,
                 source: {
                     title: sourceData.source.title,
                     englishTitle: sourceData.source.englishTitle,
