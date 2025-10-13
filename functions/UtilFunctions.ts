@@ -1,6 +1,7 @@
 import enLocale from "../assets/locales/en.json"
 import axios from "axios"
 import path from "path"
+import {UploadImage} from "../types/Types"
 
 export default class UtilFunctions {
     public static appendURLParams = (url: string, params: {[key: string]: string | boolean | undefined}) => {
@@ -209,5 +210,13 @@ export default class UtilFunctions {
     public static readableFileSize = (bytes: number) => {
         const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024))
         return `${Number((bytes / Math.pow(1024, i)).toFixed(2))} ${["B", "KB", "MB", "GB", "TB"][i]}`
+    }
+
+    public static numericSortImages = (items: UploadImage[]) => {
+        return items.sort((a, b) => {
+            const cleanA = a.name.replace(/[^a-zA-Z0-9]/g, "")
+            const cleanB = b.name.replace(/[^a-zA-Z0-9]/g, "")
+            return cleanA.localeCompare(cleanB, undefined, {numeric: true, sensitivity: "base"})
+        })
     }
 }

@@ -67,7 +67,7 @@ const UserRoutes = (app: Express) => {
         try {
             const username = req.query.username as string
             if (!username) return void res.status(200).json(null)
-            let user = await sql.user.user(username.trim())
+            let user = await sql.user.user(username.trim().toLowerCase())
             if (!user) return void res.status(200).json(null)
             delete user.ips
             delete user.$2fa

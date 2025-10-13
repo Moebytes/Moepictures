@@ -1356,6 +1356,8 @@ export default class ServerFunctions {
 
             const isTransparent = await ServerFunctions.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
+            if (current.name.includes("text")) tagArr.push("untranslated")
+            if (current.name.includes("tutorial")) tagArr.push("art-tutorial")
             if (current.name.includes("fanbox")) {
                 tagArr.push("fanbox")
                 tagArr.push("paid-content-available")
@@ -1368,6 +1370,13 @@ export default class ServerFunctions {
             artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+
+            let charTest = charStrArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
+            if (charTest.length === 1) {
+                tagArr.push("solo")
+            } else {
+                tagArr.push("multiple-characters")
+            }
 
             for (let i = 0; i < artistStrArr.length; i++) {
                 artists[artists.length - 1].tag = artistStrArr[i]
@@ -1446,6 +1455,8 @@ export default class ServerFunctions {
 
             const isTransparent = await ServerFunctions.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
+            if (current.name.includes("text")) tagArr.push("untranslated")
+            if (current.name.includes("tutorial")) tagArr.push("art-tutorial")
             if (current.name.includes("fanbox")) {
                 tagArr.push("fanbox")
                 tagArr.push("paid-content-available")
@@ -1465,6 +1476,13 @@ export default class ServerFunctions {
                 characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
             characterArr = characterArr.filter((tag: string) => tag.length >= 3)
+
+            let charTest = characterArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
+            if (charTest.length === 1) {
+                tagArr.push("solo")
+            } else {
+                tagArr.push("multiple-characters")
+            }
 
             let seriesArr = [] as string[]
 

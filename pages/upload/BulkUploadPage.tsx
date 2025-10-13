@@ -263,9 +263,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
         let lastParentID = ""
         let lastChildKey = ""
-        for (let i = 0; i < originalFiles.length; i++) {
-            const current = originalFiles[i]
-            const upscaledCurrent = upscaledFiles[i]
+        let lastGroupKey = ""
+
+        let sortedFiles = functions.util.numericSortImages(originalFiles)
+        let sortedUpscaledFiles = functions.util.numericSortImages(upscaledFiles)
+
+        for (let i = 0; i < sortedFiles.length; i++) {
+            const current = sortedFiles[i]
+            const upscaledCurrent = sortedUpscaledFiles[i]
             let dupes = [] as Post[]
             if (current.thumbnail) {
                 const bytes = await functions.byte.base64toUint8Array(current.thumbnail)
@@ -284,8 +289,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     break
                 case "g":
                     key = `${id}_g${num}`
+                    lastGroupKey = key
+
                     current.groupName = `Pixiv ${id}`
                     upscaledCurrent.groupName = `Pixiv ${id}`
+                    break
+                case "g!":
+                    key = lastGroupKey
                     break
                 case "c":
                     key = `${id}_c${num}`
