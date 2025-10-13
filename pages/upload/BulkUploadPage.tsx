@@ -264,6 +264,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let lastParentID = ""
         let lastChildKey = ""
         let lastGroupKey = ""
+        let lastID = ""
 
         let sortedFiles = functions.util.numericSortImages(originalFiles)
         let sortedUpscaledFiles = functions.util.numericSortImages(upscaledFiles)
@@ -281,6 +282,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             if (dupes.length) continue
 
             let {id, qualifier, num} = parseFilename(current.name)
+
+            if (id !== lastID) {
+                lastParentID = ""
+                lastID = id
+            }
 
             let key = id
             switch (qualifier) {
@@ -301,7 +307,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     key = `${id}_c${num}`
                     lastChildKey = key
 
-                    if (num === 0) {
+                    if (!lastParentID) {
                         lastParentID = `pixiv-${id}`
                         current.parentID = ""
                         upscaledCurrent.parentID = ""
