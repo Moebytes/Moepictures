@@ -22,14 +22,25 @@ export const addToGroup = async (post: PostFull, name: string, username: string,
     const slug = functions.post.generateSlug(name.trim())
     const group = await sql.group.group(slug)
     if (!group) {
+        let groupID = ""
         try {
-            const groupID = await sql.group.insertGroup(username, name.trim(), slug, post.rating)
+            groupID = await sql.group.insertGroup(username, name.trim(), slug, post.rating)
             await sql.group.insertGroupPost(String(groupID), post.postID, 1)
         } catch {
             // it's an orphan group with no posts, so group.group() failed
             const groups = await sql.group.groups([name.trim()])
             const group = groups.find((g) => g.name === name.trim())
-            if (group) await sql.group.insertGroupPost(String(group.groupID), post.postID, 1)
+            if (group) {
+                groupID = group.groupID
+                await sql.group.insertGroupPost(groupID, post.postID, 1)
+            }
+        }
+        if (name.trim().toLowerCase().startsWith("pixiv")) {
+            const pixivID = name.match(/\d+/)?.[0]
+            if (pixivID && groupID) {
+                let desc = `https://www.pixiv.net/artworks/${pixivID}`
+                await sql.group.updateGroup(groupID, "description", desc)
+            }
         }
     } else {
         if (!group.posts?.length) group.posts = [{order: 0}] as any
