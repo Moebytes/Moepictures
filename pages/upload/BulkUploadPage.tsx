@@ -283,7 +283,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             let {id, qualifier, num} = parseFilename(current.name)
 
-            if (id !== lastID) {
+            if (lastID !== id) {
                 lastParentID = ""
                 lastID = id
             }
