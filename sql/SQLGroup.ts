@@ -100,9 +100,9 @@ export default class SQLGroup {
     }
 
     /** Update group. */
-    public static updateGroup = async (groupID: string, column: "updater" | "updatedDate" | "rating", 
+    public static updateGroup = async (groupID: string, column: "updater" | "updatedDate" | "rating" | "description", 
         value: string | boolean) => {
-        let whitelist = ["updater", "updatedDate", "rating"]
+        let whitelist = ["updater", "updatedDate", "rating", "description"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
