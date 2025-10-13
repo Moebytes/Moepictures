@@ -49,7 +49,7 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
-        <img draggable={false} className="image" ref={imageRef} src={img} 
+        <img draggable={false} className="image" ref={imageRef} src={img} fetchPriority="high"
         onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )

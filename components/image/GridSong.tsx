@@ -66,7 +66,7 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
         <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
-        <img draggable={false} className="image" ref={audioRef} src={coverArt} 
+        <img draggable={false} className="image" ref={audioRef} src={coverArt} fetchPriority="high"
         onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )

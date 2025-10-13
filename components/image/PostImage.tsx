@@ -104,7 +104,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
             <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
             <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={imageRef} 
-            src={img} onLoad={(event) => onLoaded(event)}/>
+            src={img} onLoad={(event) => onLoaded(event)} fetchPriority="high"/>
         </TransformComponent>
         </TransformWrapper>
         </>

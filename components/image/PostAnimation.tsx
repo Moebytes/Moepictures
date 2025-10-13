@@ -347,7 +347,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         <canvas draggable={false} className="post-gif-canvas" ref={animationRef}></canvas>
     
         <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={imageRef} 
-        src={img} onLoad={(event) => onLoaded(event)}/>
+        src={img} onLoad={(event) => onLoaded(event)} fetchPriority="high"/>
         </>
     )
 })

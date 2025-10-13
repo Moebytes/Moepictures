@@ -189,7 +189,8 @@ const TinyImage: React.FunctionComponent<Props> = (props) => {
             
             <video draggable={false} autoPlay muted playsInline disablePictureInPicture className={className} src={functions.file.isVideo(getOriginal()) ? liveImg : emptyVideo} ref={ref as any} 
             style={{...imageStyle, ...getDisplay(true)}} onContextMenu={updateIndex}></video>
-            <img draggable={false} className={className} src={dynamicSrc()} ref={ref as any} style={{...imageStyle, ...getDisplay()}} onContextMenu={updateIndex}/>
+            <img draggable={false} className={className} src={dynamicSrc()} ref={ref as any} fetchPriority="high"
+            style={{...imageStyle, ...getDisplay()}} onContextMenu={updateIndex}/>
         </div>
     )
 }
