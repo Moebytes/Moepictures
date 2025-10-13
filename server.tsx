@@ -181,7 +181,8 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Last-Modified", lastModified)
       res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.slice(1))
-      let upscaled = req.session.upscaledImages || upscaleParam === "true"
+      let upscaled = req.session.upscaledImages ?? false
+      if (upscaleParam) upscaled = upscaleParam === "true"
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       if (req.session.captchaNeeded) upscaled = false
       let r18 = false
@@ -318,7 +319,8 @@ for (let i = 0; i < folders.length; i++) {
       }
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
-        upscaled = req.session.upscaledImages || upscaleParam === "true"
+        upscaled = req.session.upscaledImages ?? false
+        if (upscaleParam) upscaled = upscaleParam === "true"
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
@@ -411,7 +413,8 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
     let userKey = req.session.username ? req.session.username : ip
     const pixelHash = new URL(link).searchParams.get("hash") ?? ""
     const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))
-    let upscaled = req.session.upscaledImages || upscaleParam === "true"
+    let upscaled = req.session.upscaledImages ?? false
+    if (upscaleParam) upscaled = upscaleParam === "true"
     if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
     if (req.session.captchaNeeded) {
       storageMap.delete(userKey)
