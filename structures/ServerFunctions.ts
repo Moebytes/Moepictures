@@ -1310,7 +1310,13 @@ export default class ServerFunctions {
             bytes = current.bytes
         }
 
-        let booruLinks = await ServerFunctions.booruLinks(bytes)
+        let pngBytes = bytes
+        if (current.ext !== "jpg" && current.ext !== "png") {
+            let buffer = await sharp(new Uint8Array(bytes)).png().toBuffer()
+            pngBytes = Object.values(new Uint8Array(buffer))
+        }
+
+        let booruLinks = await ServerFunctions.booruLinks(pngBytes)
         let {tagData, danbooruLink, newRating} = await ServerFunctions.testBooruLinks(booruLinks, rating)
         rating = newRating
 
