@@ -179,7 +179,7 @@ for (let i = 0; i < folders.length; i++) {
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Last-Modified", lastModified)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.slice(1))
       let upscaled = req.session.upscaledImages || upscaleParam === "true"
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
@@ -238,7 +238,7 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -307,7 +307,7 @@ for (let i = 0; i < folders.length; i++) {
       const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
@@ -352,7 +352,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {

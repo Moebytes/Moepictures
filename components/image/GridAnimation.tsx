@@ -234,7 +234,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
-        <img draggable={false} className="image" ref={animationRef} src={dynamicSrc()} 
+        <img draggable={false} className="image" ref={animationRef} src={dynamicSrc()} fetchPriority="high"
         onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )

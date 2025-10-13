@@ -216,7 +216,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
 
         <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} 
         src={liveImg} onLoadedData={(event) => onLoaded(event)} style={{...getDisplay(true)}}></video>
-        <img draggable={false} className="image" src={backFrame} style={{...getDisplay()}}/>
+        <img draggable={false} className="image" src={backFrame} style={{...getDisplay()}} fetchPriority="high"/>
         </>
     )
 })

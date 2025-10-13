@@ -580,7 +580,7 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
 
     <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline src={video} 
     className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} onLoadedData={(event) => onLoaded(event)}></video>
-    <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`}/>
+    <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`} fetchPriority="high"/>
     </>
     )
 })

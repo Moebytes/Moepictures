@@ -332,7 +332,7 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
         <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
         <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
         <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={audioRef} 
-        src={coverImg} onLoad={(event) => onLoaded(event)} style={{minWidth: "400px"}}/>
+        src={coverImg} onLoad={(event) => onLoaded(event)} style={{minWidth: "400px"}} fetchPriority="high"/>
         </>
     )
 })
