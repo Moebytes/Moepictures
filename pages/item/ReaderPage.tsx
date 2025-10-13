@@ -99,8 +99,10 @@ const ReaderPage: React.FunctionComponent = () => {
         let images = [] as string[]
         let thumbnails = [] as string[]
         for (let i = 0; i < post.images.length; i++) {
-            const imageLink = functions.link.getImageLink(post.images[i], session.upscaledImages)
-            const thumbLink = functions.link.getThumbnailLink(post.images[i], "tiny", session, mobile)
+            let imageLink = functions.link.getImageLink(post.images[i], session.upscaledImages)
+            imageLink = functions.util.appendURLParams(imageLink, {upscaled: session.upscaledImages})
+            let thumbLink = functions.link.getThumbnailLink(post.images[i], "tiny", session, mobile)
+            thumbLink = functions.util.appendURLParams(thumbLink, {upscaled: false})
             const decrypted = await functions.crypto.decryptItem(imageLink, session)
             const decryptedThumb = await functions.crypto.decryptThumb(thumbLink, session)
             images.push(decrypted)

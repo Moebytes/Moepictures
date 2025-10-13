@@ -9,6 +9,7 @@ import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
 let tooltipTimer = null as any
+let clickTimer = null as any
 
 interface Props {
     id: string
@@ -71,6 +72,7 @@ interface AddonProps {
 
 export interface GridWrapperRef {
     download: () => Promise<void>
+    nextImage?: () => Promise<void>
     songClick?: (event: React.MouseEvent) => void
 }
 
@@ -387,6 +389,13 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 newWindow?.blur()
                 window.focus()
             }
+            if (props.post.images.length > 1 && event.button === 2) {
+                event.preventDefault()
+                clearTimeout(clickTimer)
+                clickTimer = setTimeout(() => {
+                    childRef.current?.nextImage?.()
+                }, 100)
+            }
         }
     
         const mouseDown = () => {
@@ -399,36 +408,29 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
     
         const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
             setScrollY(window.scrollY)
+            if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) return
             if (selectionMode) {
-                if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
-                    return
+                const isSelected = !selected
+                if (isSelected) {
+                    selectionItems.add(props.post.postID)
+                    selectionPosts.set(props.post.postID, props.post)
                 } else {
-                    const isSelected = !selected
-                    if (isSelected) {
-                        selectionItems.add(props.post.postID)
-                        selectionPosts.set(props.post.postID, props.post)
-                    } else {
-                        selectionItems.delete(props.post.postID)
-                        selectionPosts.delete(props.post.postID)
-                    }
-                    setSelected(isSelected)
-                    setSelectionItems(selectionItems)
-                    setSelectionPosts(selectionPosts)
+                    selectionItems.delete(props.post.postID)
+                    selectionPosts.delete(props.post.postID)
                 }
+                setSelected(isSelected)
+                setSelectionItems(selectionItems)
+                setSelectionPosts(selectionPosts)
             } else {
                 if (!drag) {
-                    if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) {
-                        return
+                    if (location.pathname.includes("/post/")) {
+                        navigate(`/post/${props.id}/${props.post.slug}`, {replace: true})
+                        setPostFlag(props.id)
+                        window.scrollTo(0, 0)
                     } else {
-                        if (location.pathname.includes("/post/")) {
-                            navigate(`/post/${props.id}/${props.post.slug}`, {replace: true})
-                            setPostFlag(props.id)
-                            window.scrollTo(0, 0)
-                        } else {
-                            setPost(null)
-                            navigate(`/post/${props.id}/${props.post.slug}`)
-                            window.scrollTo(0, 0)
-                        }
+                        setPost(null)
+                        navigate(`/post/${props.id}/${props.post.slug}`)
+                        window.scrollTo(0, 0)
                     }
                 }
             }
@@ -543,7 +545,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
     
         return (
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
-            onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
+            onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                     {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={cornerIcon()} 
                     onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
