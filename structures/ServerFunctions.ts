@@ -1005,8 +1005,8 @@ export default class ServerFunctions {
         let mirrors = [] as string[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
-        if (/^\d+(?=$|_p)/.test(basename)) {
-            const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
+        if (/^\d{5,}(?=$|_)/.test(basename)) {
+            const pixivID = basename.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
             source = `https://www.pixiv.net/artworks/${pixivID}`
             try {
                 const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)

@@ -688,7 +688,8 @@ const MiscRoutes = (app: Express) => {
             const sourceLookup = await serverFunctions.sourceLookup(current, rating)
             processingQueue.delete(ip)
             res.status(200).json(sourceLookup)
-        } catch {
+        } catch (e) {
+            console.log(e)
             if (ip) processingQueue.delete(ip)
             res.status(400).end()
         }
