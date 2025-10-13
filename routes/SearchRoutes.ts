@@ -3,7 +3,6 @@ import crypto from "crypto"
 import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
-import dist from "sharp-phash/distance"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
@@ -181,22 +180,19 @@ const SearchRoutes = (app: Express) => {
             } else {
                 hash = await phash(buffer).then((hash: any) => functions.byte.binaryToHex(hash))
             }
-            const query = {
+
+            const exactQuery = {
                 text: `SELECT * FROM "images" WHERE "images".hash = $1`,
                 values: [hash]
-              }
-            let images = await sql.run(query) as Image[]
-            if (!images.length) images = await sql.run(`SELECT * FROM "images"`)
-            let postIDs = new Set<string>()
-            for (let i = 0; i < images.length; i++) {
-                if (useMD5) {
-                    const imgHash = images[i].hash
-                    if (imgHash === hash) postIDs.add(images[i].postID)
-                } else {
-                    if (dist(images[i].hash, hash) < 6) postIDs.add(images[i].postID)
-                }
             }
-            let result = await sql.search.posts(Array.from(postIDs))
+            const similarQuery = {
+                text: `SELECT * FROM "images" WHERE hamming_distance("images".hash, $1) < 6`,
+                values: [hash]
+            }
+            let images = await sql.run(exactQuery) as Image[]
+            if (!images.length && !useMD5) images = await sql.run(similarQuery) as Image[]
+        
+            let result = await sql.search.posts(Array.from(images.map((i) => i.postID)))
             result = functions.post.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
