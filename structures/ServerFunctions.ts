@@ -701,9 +701,9 @@ export default class ServerFunctions {
         }
         for (const note of postNotes) {
             const hash = note.imageHash
-            const oldOrder = oldHashes.find((o) => dist(o.hash, hash) < 7)?.order
+            const oldOrder = oldHashes.find((o) => dist(o.hash, hash) < 6)?.order
             if (!oldOrder) continue
-            const newOrder = newHashes.find((n) => dist(n.hash, hash) < 7)?.order
+            const newOrder = newHashes.find((n) => dist(n.hash, hash) < 6)?.order
             if (newOrder === undefined) {
                 deletedNotes.push({noteID: note.noteID})
             } else if (oldOrder !== newOrder) {

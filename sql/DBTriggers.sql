@@ -301,3 +301,18 @@ DROP TRIGGER IF EXISTS delete_tag_trigger ON "tags";
 CREATE TRIGGER delete_tag_trigger
 AFTER DELETE ON "tags" 
 FOR EACH ROW EXECUTE FUNCTION delete_tag_keys();
+
+CREATE OR REPLACE FUNCTION hamming_distance(a text, b text)
+RETURNS int AS $$
+DECLARE
+  i int;
+  dist int := 0;
+BEGIN
+  FOR i IN 1..length(a) LOOP
+    IF substr(a, i, 1) <> substr(b, i, 1) THEN
+      dist := dist + 1;
+    END IF;
+  END LOOP;
+  RETURN dist;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE STRICT;

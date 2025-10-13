@@ -80,7 +80,7 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
     oldBuffer = await serverFunctions.getFile(imgPath, false, false)
     let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
     let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
-    if (dist(oldHash, newHash) < 7) return
+    if (dist(oldHash, newHash) < 6) return
   }
 
   const newHash = serverFunctions.md5(newBuffer)
