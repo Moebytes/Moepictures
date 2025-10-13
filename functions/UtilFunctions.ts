@@ -214,9 +214,13 @@ export default class UtilFunctions {
 
     public static numericSortImages = (items: UploadImage[]) => {
         return items.sort((a, b) => {
-            const cleanA = a.name.replace(/[^a-zA-Z0-9]/g, "")
-            const cleanB = b.name.replace(/[^a-zA-Z0-9]/g, "")
-            return cleanA.localeCompare(cleanB, undefined, {numeric: true, sensitivity: "base"})
+            let splitA = a.name.split("_")
+            let partA = splitA[0] + "_" + splitA[splitA.length - 1]
+            partA = partA.replace(/[^a-zA-Z0-9_.]/g, "").split(".")[0]
+            let splitB = b.name.split("_")
+            let partB = splitB[0] + "_" + splitB[splitB.length - 1]
+            partB = partB.replace(/[^a-zA-Z0-9_.]/g, "").split(".")[0]
+            return partA.localeCompare(partB, undefined, {numeric: true, sensitivity: "base"})
         })
     }
 }
