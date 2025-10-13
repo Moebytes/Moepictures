@@ -156,14 +156,14 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.username) return
-        const events = new EventSource("/api/notifications", {withCredentials: true})
+        let events = new EventSource("/api/notifications", {withCredentials: true})
         events.onmessage = (event: any) => {
             if (event.data === "new message!") setHasNotification(true)
         }
         return () => {
             events.close()
         }
-    }, [session])
+    }, [session.username])
 
     useEffect(() => {
         if (!session.cookie) return

@@ -123,7 +123,9 @@ const ThreadPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         const updateRead = async () => {
-            await functions.http.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
+            if (session.username) {
+                await functions.http.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
+            }
         }
         updateRead()
     }, [session])
