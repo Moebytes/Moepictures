@@ -31,6 +31,7 @@ interface Props {
     noteID?: string | null
     imageWidth: number
     imageHeight: number
+    reader?: boolean
 }
 
 let isAnimatedWebP = false
@@ -592,6 +593,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
                         let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth, borderRadius} = item
+                        if (props.reader) y -= 120
+
                         if (!imageWidth) imageWidth = targetWidth
                         if (!imageHeight) imageHeight = targetHeight
 
@@ -656,16 +659,22 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 if (!item.transcript && !item.translation) return setBubbleToggle(false)
                             }
                             const bounds = (event.target as SVGRectElement).getBoundingClientRect()
+                            
                             let width = Math.floor(bounds.width * 2)
                             if (width > bounds.width) width = bounds.width
                             if (width < 125) width = 125
+
                             let height = Math.floor(bounds.height / 2)
                             if (height < 25) height = 25
+
+                            const yTop = bounds.top - 30
+                            const yBottom = bounds.bottom + 5
+
                             const id = item.id ?? Number(item.noteID)
                             if (item.character) {
-                                setBubbleData({id, x: bounds.left, y: bounds.top-30, width, height, character: item.character, characterTag: item.characterTag})
+                                setBubbleData({id, x: bounds.left, y: yTop, width, height, character: item.character, characterTag: item.characterTag})
                             } else {
-                                setBubbleData({id, x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation,
+                                setBubbleData({id, x: bounds.left, y: yBottom, width, height, transcript: item.transcript, translation: item.translation,
                                 fontFamily: item.fontFamily, fontSize: item.fontSize, bold: item.bold, italic: item.italic})
                             }
                             setBubbleWidth(width)
