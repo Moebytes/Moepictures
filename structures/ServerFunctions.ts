@@ -36,7 +36,6 @@ const exec = util.promisify(child_process.exec)
 let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
 let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
 const twitter = new Scraper({fetch: cycleTLSFetch})
-await twitter.login(process.env.TWITTER_USERNAME!, process.env.TWITTER_PASSWORD!, process.env.TWITTER_EMAIL!)
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -1072,6 +1071,10 @@ export default class ServerFunctions {
         try {
             // Twitter lookup
             if (/\d{10,}/.test(basename)) {
+                if (!twitter.isLoggedIn) {
+                    await twitter.login(process.env.TWITTER_USERNAME!, 
+                        process.env.TWITTER_PASSWORD!, process.env.TWITTER_EMAIL!)
+                }
                 const twitterID = basename.match(/\d{10,}/gm)?.[0] ?? ""
                 const tweet = await twitter.getTweet(twitterID)
                 if (!tweet) throw new Error("tweet doesn't exist")

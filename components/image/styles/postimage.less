@@ -756,11 +756,33 @@
     transition: opacity 0.6s;
 }
 
+.post-image-share-buttons {
+    .post-image-top-buttons();
+    position: relative;
+    padding: 0;
+    pointer-events: none;
+}
+
+.show-post-image-share-buttons {
+    .show-post-image-top-buttons();
+    pointer-events: all;
+}
+
+.post-image-reverse-buttons {
+    .post-image-share-buttons();
+    margin-right: 10px;
+}
+
+.show-post-image-reverse-buttons {
+    .show-post-image-share-buttons();
+}
+
 .post-image-top-button {
     width: auto;
     height: 25px;
     cursor: pointer;
     margin-right: 10px;
+    user-select: none;
     &:hover {
         filter: brightness(130%);
     }
