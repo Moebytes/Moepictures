@@ -211,6 +211,7 @@ const PostPage: React.FunctionComponent = () => {
             }
         }
         if (!session.username || session.showRelated) {
+            setArtistPosts([])
             updateArtistPosts()
         }
     }, [session, post, tagCategories])
