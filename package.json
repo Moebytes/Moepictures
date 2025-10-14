@@ -15,7 +15,9 @@
     "clean": "del-cli ./dist"
   },
   "binary": {
-    "napi_versions": [8]
+    "napi_versions": [
+      8
+    ]
   },
   "keywords": [
     "moe",
@@ -88,7 +90,7 @@
     "@pixiv/three-vrm": "^3.3.6",
     "@react-email/components": "^0.0.33",
     "@reduxjs/toolkit": "^2.6.1",
-    "@the-convocation/twitter-scraper": "^0.17.1",
+    "@the-convocation/twitter-scraper": "^0.19.0",
     "@tsparticles/all": "^3.8.1",
     "@tsparticles/preset-snow": "^3.2.0",
     "@tsparticles/react": "^3.0.0",
@@ -105,6 +107,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csrf": "^3.1.0",
+    "cycletls": "^2.0.5",
     "deviantart.ts": "^0.2.9",
     "dotenv": "^16.4.7",
     "evaporate": "^2.1.4",

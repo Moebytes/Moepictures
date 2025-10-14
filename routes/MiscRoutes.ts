@@ -21,6 +21,7 @@ import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
 import {Scraper} from "@the-convocation/twitter-scraper"
+import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
 import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(path.join(__dirname, dotline))
@@ -30,6 +31,7 @@ let processingQueue = new Set<string>()
 const exec = util.promisify(child_process.exec)
 let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
 let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+const twitter = new Scraper({fetch: cycleTLSFetch})
 
 const reddit = new snoowrap({
     userAgent: "kisaragi bot v1.0",
@@ -194,7 +196,6 @@ const MiscRoutes = (app: Express) => {
                 }
             }
             if (link.includes("twitter.com") || link.includes("x.com")) {
-                const twitter = new Scraper()
                 const id = link.match(/(?<=status\/)\d+/)?.[0] || ""
                 const tweet = await twitter.getTweet(id)
                 if (!tweet) return void res.status(200).send([])
