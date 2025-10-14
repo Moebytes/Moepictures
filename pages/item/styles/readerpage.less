@@ -254,8 +254,11 @@
 .reader-image {
     width: auto;
     max-width: 100vw;
-    max-height: 100vh;
+    // max-height: 100vh;
     transition: margin-left 0.3s;
+    & > .post-image-container > .post-image-box {
+        margin: 0px;
+    }
 }
 
 .reader-thumbnail-container {
@@ -271,6 +274,7 @@
     overflow-x: hidden;
     background-color: var(--background);
     transform-origin: left;
+    margin-left: 10px;
     transform: translateX(0px);
     transition: transform 0.3s;
 }
@@ -323,6 +327,13 @@
         filter: brightness(120%);
         border: 3px solid var(--text-strong);
     }
+}
+
+.reader-thumb-img {
+    width: auto;
+    height: auto !important;
+    max-width: 130px;
+    max-height: 150px;
 }
 
 .selected {

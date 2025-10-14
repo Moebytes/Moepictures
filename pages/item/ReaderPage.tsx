@@ -26,9 +26,9 @@ import DragScroll from "../../components/site/DragScroll"
 import LocalStorage from "../../LocalStorage"
 import PostImage from "../../components/image/PostImage"
 import TinyImage from "../../components/image/TinyImage"
-import {PostFull} from "../../types/PostTypes"
 import {useInView} from "react-intersection-observer"
 import Filters from "../../components/post/Filters"
+import {Themes, PostFull} from "../../types/Types"
 import "./styles/readerpage.less"
 
 const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
@@ -56,14 +56,14 @@ const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
     return (
         <div ref={ref} className="reader-image" style={{marginLeft: !mobile && readerThumbnails && !readerHorizontal ? "100px" : "0px",
         filter: readerInvert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}>
-            <PostImage img={img} post={post} order={order}/>
+            <PostImage img={img} post={post} order={order} reader={true}/>
         </div>
     )
 }
 
 const ReaderPage: React.FunctionComponent = () => {
-    const {i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {theme, language, i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
@@ -91,6 +91,10 @@ const ReaderPage: React.FunctionComponent = () => {
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
+
+    useEffect(() => {
+        document.title = "Post"
+    }, [])
 
     const loadImages = async () => {
         if (!postID) return
@@ -127,6 +131,21 @@ const ReaderPage: React.FunctionComponent = () => {
         setLoaded(false)
         loadImages()
     }, [postID, session])
+
+    useEffect(() => {
+        const updateTitle = async () => {
+            if (!post) return
+            let title = ""
+            if (language === "ja") {
+                title = post.title ? post.title : "Post"
+            } else {
+                title = post.englishTitle ? functions.util.toProperCase(post.englishTitle) : 
+                post.title ? post.title : "Post"
+            }
+            document.title = `${title}`
+        }
+        updateTitle()
+    }, [post, language])
 
     useEffect(() => {
         const keyDown = (event: KeyboardEvent) => {
@@ -223,6 +242,16 @@ const ReaderPage: React.FunctionComponent = () => {
         setSiteLightness(50)
     }
 
+    const lightChange = () => {
+        let newTheme = ""
+        if (theme.includes("light")) {
+            newTheme = "dark"
+        } else {
+            newTheme = "light"
+        }
+        setTheme(newTheme as Themes)
+    }
+
     const toggleUpscale = async () => {
         if (!session.username) {
             setRedirect(`/post/${postID}/${slug}`)
@@ -303,7 +332,7 @@ const ReaderPage: React.FunctionComponent = () => {
             jsx.push(
                 <div key={i} className={`reader-thumbnail ${readerPage === i + 1 ? "selected" : ""}`} 
                 style={{filter: readerInvert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}>
-                    <TinyImage height={150} image={thumbnails[i]} onClick={() => navigateToPage(i + 1)}/>
+                    <TinyImage className="reader-thumb-img" image={thumbnails[i]} onClick={() => navigateToPage(i + 1)}/>
                 </div>
             )
         }
@@ -362,18 +391,27 @@ const ReaderPage: React.FunctionComponent = () => {
                 <div className={`reader-dropdown ${colorDropdown ? "" : "hide-reader-dropdown"}`} style={{top: "40px"}}>
                     <div className="reader-dropdown-row" style={{filter: getFilter()}}>
                         <span className="reader-dropdown-text">{i18n.filters.hue}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
+                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
+                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} 
+                        min={60} max={300} step={1} value={siteHue}/>
                     </div>
                     <div className="reader-dropdown-row" style={{filter: getFilter()}}>
                         <span className="reader-dropdown-text">{i18n.filters.saturation}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
+                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
+                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} 
+                        min={50} max={100} step={1} value={siteSaturation}/>
                     </div>
                     <div className="reader-dropdown-row" style={{filter: getFilter()}}>
                         <span className="reader-dropdown-text">{i18n.filters.lightness}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
+                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
+                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} 
+                        min={45} max={55} step={1} value={siteLightness}/>
                     </div>
-                    <div className="reader-dropdown-row" style={{filter: getFilter()}}>
+                    <div className="reader-dropdown-row" style={{justifyContent: "space-evenly", filter: getFilter()}}>
                         <button className="reader-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
+                        <button className="reader-dropdown-button" onClick={() => lightChange()} 
+                        style={{backgroundColor: theme.includes("light") ? "#f536ac" : "#36eaf7"}}>
+                        {theme.includes("light") ? i18n.buttons.dark : i18n.buttons.light}</button>
                     </div>
                 </div>
             </div>

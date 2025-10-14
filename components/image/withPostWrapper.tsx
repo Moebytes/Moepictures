@@ -49,6 +49,7 @@ interface Props {
     next?: () => void
     noteID?: string | null
     artists?: MiniTag[]
+    reader?: boolean
 }
 
 interface AddonProps {
@@ -555,7 +556,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
 
         return (
             <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-                {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight}/> : null}
+                {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader}/> : null}
                 <div className="post-image-box" ref={containerRef}>
                     <div className="post-image-filters" ref={fullscreenRef}>
                         <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false); setShowShareIcons(false)}} onMouseLeave={() => setButtonHover(false)}>

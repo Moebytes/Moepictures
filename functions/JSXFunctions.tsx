@@ -272,7 +272,7 @@ export default class JSXFunctions {
                     items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
                 } else {
                     items.push({text: null, jsx: (
-                        <span key={index} style={{display: "inline-flex", alignItems: "center"}}>
+                        <span key={index} style={{display: "inline-flex", alignItems: "center", wordBreak: "break-all", flexWrap: "wrap"}}>
                             <img className="link-favicon" src={`https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${part}&size=64`}/>
                             <a href={part} target="_blank" rel="noopener">{name}</a>
                         </span>
