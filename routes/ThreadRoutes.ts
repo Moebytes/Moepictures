@@ -199,7 +199,7 @@ const ThreadRoutes = (app: Express) => {
             if (badReply) return void res.status(400).send("Bad reply")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return void res.status(400).send("Invalid threadID")
-            if (thread.locked) return void res.status(400).send("Thread is locked")
+            if (thread.locked && !permissions.isMod(req.session)) return void res.status(400).send("Thread is locked")
             const replyID = await sql.thread.insertReply(threadID, req.session.username, content, r18)
             await sql.thread.updateThread(threadID, "updater", req.session.username)
             await sql.thread.updateThread(threadID, "updatedDate", new Date().toISOString())

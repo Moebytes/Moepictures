@@ -2,6 +2,7 @@ import {ServerSession, MiniTag} from "../types/Types"
 
 export default class Permissions {
     public static isAdmin = (session: ServerSession) => {
+        if (!session) return false
         return session.role === "admin" ? true : false
     }
 
@@ -28,7 +29,7 @@ export default class Permissions {
 
     public static isPremium = (session: ServerSession) => {
         if (!Permissions.isPremiumEnabled()) return true
-        if (Permissions.isMod(session)) return true 
+        if (Permissions.isMod(session)) return true
         if (Permissions.isSystem(session)) return true
         if (session.role === "premium-curator") return true
         if (session.role === "premium-contributor") return true
@@ -37,6 +38,7 @@ export default class Permissions {
     }
 
     public static isSystem = (session: ServerSession) => {
+        if (!session) return false
         if (session.role === "system") return true
         return false
     }
