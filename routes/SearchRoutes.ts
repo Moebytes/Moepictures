@@ -3,7 +3,7 @@ import crypto from "crypto"
 import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
-import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 import {PostSearch, Tag, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
@@ -169,7 +169,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/search/similar", csrfProtection, searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, useMD5} = req.body as SimilarSearchParams
             if (!bytes) return void res.status(400).send("Image data must be provided as bytes")
