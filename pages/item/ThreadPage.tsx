@@ -628,7 +628,7 @@ const ThreadPage: React.FunctionComponent = () => {
 
     const getReplyBoxJSX = () => {
         if (!thread) return
-        if (thread.locked) return (
+        if (thread.locked && !permissions.isMod(session)) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
             </div>
