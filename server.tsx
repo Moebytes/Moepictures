@@ -527,7 +527,7 @@ app.get("/*", async (req: Request, res: Response) => {
     let title = "Moepictures: Anime Art Image Board"
     let description = "Moepictures is an anime image board focusing on cute and moe content. Search for the cutest art, comics, animations, music, and 3d models with comprehensive tags."
     let image = "/assets/images/mainimg.png"
-    let url = "https://moepictures.moe"
+    let url = "https://moepictures.net"
 
     const key = decodeURIComponent(req.path.slice(1))
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]

@@ -59,23 +59,23 @@ const posts = await run(`SELECT * FROM posts WHERE posts.rating = 'cute'`) as Po
 ssh.close()
 
 let urls = [
-    "https://moepictures.moe/",
-    "https://moepictures.moe/posts",
-    "https://moepictures.moe/comments",
-    "https://moepictures.moe/artists",
-    "https://moepictures.moe/characters",
-    "https://moepictures.moe/series",
-    "https://moepictures.moe/tags",
-    "https://moepictures.moe/help",
-    "https://moepictures.moe/terms",
-    "https://moepictures.moe/contact",
-    "https://moepictures.moe/upload",
-    "https://moepictures.moe/signup",
-    "https://moepictures.moe/login"
+    "https://moepictures.net/",
+    "https://moepictures.net/posts",
+    "https://moepictures.net/comments",
+    "https://moepictures.net/artists",
+    "https://moepictures.net/characters",
+    "https://moepictures.net/series",
+    "https://moepictures.net/tags",
+    "https://moepictures.net/help",
+    "https://moepictures.net/terms",
+    "https://moepictures.net/contact",
+    "https://moepictures.net/upload",
+    "https://moepictures.net/signup",
+    "https://moepictures.net/login"
 ]
 
 for (const post of posts) {
-    urls.push(`https://moepictures.moe/post/${post.postID}/${post.slug}`)
+    urls.push(`https://moepictures.net/post/${post.postID}/${post.slug}`)
 }
 
 fs.writeFileSync("public/sitemap.txt", urls.join("\n"))

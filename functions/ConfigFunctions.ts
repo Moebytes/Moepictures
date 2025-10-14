@@ -20,7 +20,7 @@ export default class ConfigFunctions {
         if (this.isLocalHost()) {
             return "http://localhost:8082"
         } else {
-            return "https://moepictures.moe"
+            return "https://moepictures.net"
         }
     }
 }

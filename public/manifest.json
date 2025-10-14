@@ -1,12 +1,12 @@
 {
-    "short_name": "moepictures.moe",
-    "name": "Moepictures.moe",
+    "short_name": "moepictures.net",
+    "name": "Moepictures.net",
     "description": "Moepictures is an anime image board focusing on cute and moe content. Search for the cutest art, comics, animations, music, and 3d models with comprehensive tags.",
     "icons": [
       {
-        "src": "assets/icons/favicon.png",
+        "src": "/favicon.png",
         "sizes": "128x128",
-        "type": "image/gif"
+        "type": "image/png"
       }
     ],
     "start_url": ".",
