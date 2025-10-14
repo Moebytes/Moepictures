@@ -156,4 +156,21 @@ export default class HTTPFunctions {
         const response = await fetch(link, {method: "HEAD"}).then((r) => r.status)
         return response !== 404
     }
+
+    public static followRedirects = async (link: string) => {
+        let redirects = [] as string[]
+        let currentLink = link
+
+        while (true) {
+            redirects.push(currentLink)
+
+            const response = await fetch(currentLink, {redirect: "manual"})
+            const location = response.headers.get("location")
+            if (!location) break
+
+            currentLink = new URL(location, currentLink).href
+        }
+
+        return redirects
+    }
 }

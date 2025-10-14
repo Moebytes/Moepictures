@@ -22,6 +22,8 @@ import util from "util"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
 import {Translator} from "@vitalets/google-translate-api"
+import {Scraper} from "@the-convocation/twitter-scraper"
+import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import tagConvert from "../assets/json/tag-convert.json"
@@ -33,6 +35,8 @@ const csrf = new CSRF()
 const exec = util.promisify(child_process.exec)
 let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
 let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+const twitter = new Scraper({fetch: cycleTLSFetch})
+await twitter.login(process.env.TWITTER_USERNAME!, process.env.TWITTER_PASSWORD!, process.env.TWITTER_EMAIL!)
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -1005,18 +1009,21 @@ export default class ServerFunctions {
         let mirrors = [] as string[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
-        if (/^\d{5,}(?=$|_)/.test(basename)) {
-            const pixivID = basename.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
-            source = `https://www.pixiv.net/artworks/${pixivID}`
-            try {
-                const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
-                if (result.length) {
-                    danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                    if (result[0].rating === "q") rating = functions.r17()
-                    if (result[0].rating === "e") rating = functions.r18()
-                }
-            } catch {}
-            try {
+
+        try {
+            // Pixiv lookup
+            if (/^\d{5,}(?=$|_)/.test(basename)) {
+                const pixivID = basename.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
+                source = `https://www.pixiv.net/artworks/${pixivID}`
+                try {
+                    const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+                    if (result.length) {
+                        danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                        if (result[0].rating === "q") rating = functions.r17()
+                        if (result[0].rating === "e") rating = functions.r18()
+                    }
+                } catch {}
+
                 const illust = await ServerFunctions.getPixivIllust(source)
                 commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                 posted = functions.date.formatDate(new Date(illust.create_date), true)
@@ -1035,158 +1042,227 @@ export default class ServerFunctions {
                 artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
                 artistIcon = illust.user.profile_image_urls.medium
                 artists.push({})
-            } catch (e) {
-                console.log(e)
-            }
-            mirrors = await ServerFunctions.booruLinks(bytes)
-            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
-            return {
-                rating,
-                artists,
-                danbooruLink,
-                source: {
-                    title,
-                    englishTitle,
-                    artist,
-                    source,
-                    commentary,
-                    englishCommentary,
-                    bookmarks,
-                    posted,
-                    mirrors: mirrorStr
-                }
-            }
-        } else {
-            let results = await ServerFunctions.saucenaoLookup(bytes)
-            if (results.length) {
-                const pixiv = results.filter((r) => r.header.index_id === 5)
-                const twitter = results.filter((r) => r.header.index_id === 41)
-                const artstation = results.filter((r) => r.header.index_id === 39)
-                const deviantart = results.filter((r) => r.header.index_id === 34)
-                const danbooru = results.filter((r) => r.header.index_id === 9)
-                const gelbooru = results.filter((r) => r.header.index_id === 25)
-                const konachan = results.filter((r) => r.header.index_id === 26)
-                const yandere = results.filter((r) => r.header.index_id === 12)
-                const anime = results.filter((r) => r.header.index_id === 21)
-                if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
-                if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
-                if (deviantart.length) {
-                    let redirectedLink = ""
-                    try {
-                        redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
-                    } catch {
-                        // ignore
+
+                mirrors = await ServerFunctions.booruLinks(bytes)
+                mirrors = functions.util.removeItem(mirrors, source)
+                const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+                return {
+                    rating,
+                    artists,
+                    danbooruLink,
+                    source: {
+                        title,
+                        englishTitle,
+                        artist,
+                        source,
+                        commentary,
+                        englishCommentary,
+                        bookmarks,
+                        posted,
+                        mirrors: mirrorStr
                     }
-                    mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
                 }
-                if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
-                if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
-                if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
-                if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
-                if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
-                if (danbooru.length) danbooruLink = `https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`
-                if (pixiv.length) {
-                    source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
-                    if (!danbooru.length) {
-                        const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
+            }
+        } catch (e) {
+            console.log(e)
+        }
+        
+        try {
+            // Twitter lookup
+            if (/\d{10,}/.test(basename)) {
+                const twitterID = basename.match(/\d{10,}/gm)?.[0] ?? ""
+                const tweet = await twitter.getTweet(twitterID)
+                if (!tweet) throw new Error("tweet doesn't exist")
+                const redirectLink = tweet.text?.match(/(https:\/\/t.co).*?(?=$)/gm)?.[0] ?? ""
+
+                const redirects = await functions.http.followRedirects(redirectLink)
+                for (const redirect of redirects) {
+                    if (redirect.includes("t.co")) continue
+                    try {
+                        let cleaned = redirect.replace("/photo/1", "")
+                        const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`)
                         if (result.length) {
                             danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                             if (result[0].rating === "q") rating = functions.r17()
                             if (result[0].rating === "e") rating = functions.r18()
                         }
+                    } catch {}
+                }
+
+                const tweetText = tweet.text?.replace(/(https:\/\/t.co).*?(?=$)/gm, "").trim()
+                commentary = tweetText ?? ""
+                posted = functions.date.formatDate(new Date(tweet?.timeParsed!), true)
+                source = tweet.permanentUrl?.replace("x.com", "twitter.com") ?? ""
+                title = tweetText ?? ""
+                artist = tweet.username ?? ""
+                bookmarks = String(tweet?.likes)
+                const translated = await ServerFunctions.translate([title, commentary])
+                if (translated) {
+                    englishTitle = translated[0]
+                    englishCommentary = translated[1]
+                }
+                if (tweet.sensitiveContent) {
+                    if (rating === functions.r13()) rating = functions.r17()
+                }
+                artists[artists.length - 1].tag = tweet.username ?? ""
+                let profile = await twitter.getProfile(tweet.username ?? "").catch(() => ({avatar: ""}))
+                artistIcon = profile.avatar ?? ""
+                artists.push({})
+
+                mirrors = await ServerFunctions.booruLinks(bytes)
+                mirrors = functions.util.removeItem(mirrors, source)
+                const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+                return {
+                    rating,
+                    artists,
+                    danbooruLink,
+                    source: {
+                        title,
+                        englishTitle,
+                        artist,
+                        source,
+                        commentary,
+                        englishCommentary,
+                        bookmarks,
+                        posted,
+                        mirrors: mirrorStr
                     }
-                    artist = pixiv[0].data.author_name || ""
-                    title = pixiv[0].data.title || ""
-                    try {
-                        const illust = await ServerFunctions.getPixivIllust(source)
-                        commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        posted = functions.date.formatDate(new Date(illust.create_date), true)
-                        source = illust.url!
-                        title = illust.title
-                        artist = illust.user.name 
-                        bookmarks = String(illust.total_bookmarks)
-                        const translated = await ServerFunctions.translate([title, commentary])
-                        if (translated) {
-                            englishTitle = translated[0]
-                            englishCommentary = translated[1]
-                        }
-                        if (illust.x_restrict !== 0) {
-                            if (rating === functions.r13()) rating = functions.r17()
-                        }
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
-                        artistIcon = illust.user.profile_image_urls.medium
-                        artists.push({})
-                    } catch (e) {
-                        console.log(e)
-                    }
-                } else if (deviantart.length) {
-                    let redirectedLink = ""
-                    try {
-                        redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
-                    } catch {
-                        // ignore
-                    }
-                    source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
-                    artist = deviantart[0].data.member_name || ""
-                    title = deviantart[0].data.title || ""
-                    try {
-                        const deviation = await ServerFunctions.getDeviantartDeviation(source)
-                        title = deviation.title
-                        artist = deviation.author.user.username
-                        source = deviation.url
-                        commentary = deviation.description
-                        posted = functions.date.formatDate(new Date(deviation.date), true)
-                        if (deviation.rating === "adult") {
-                            if (rating === functions.r13()) rating = functions.r17()
-                        }
-                        artists[artists.length - 1].tag = artist
-                        artistIcon = deviation.author.user.usericon
-                        artists.push({})
-                    } catch (e) {
-                        console.log(e)
-                    } 
-                } else if (anime.length) {
-                    title = anime[0].data.source || ""
-                    source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
-                } else if (twitter.length) {
-                    source = twitter[0].data.ext_urls[0]
-                    artist = twitter[0].data.twitter_user_handle || ""
-                } else if (danbooru.length) {
-                    source = danbooru[0].data.ext_urls[0]
-                    artist = danbooru[0].data.creator || ""
-                    title = danbooru[0].data.characters || ""
-                } else if (gelbooru.length) {
-                    source = gelbooru[0].data.ext_urls[0]
-                    artist = gelbooru[0].data.creator || ""
-                    title = gelbooru[0].data.characters || ""
-                } else if (yandere.length) {
-                    source = yandere[0].data.ext_urls[0]
-                    artist = yandere[0].data.creator || ""
-                    title = yandere[0].data.characters || ""
-                } else if (konachan.length) {
-                    source = konachan[0].data.ext_urls[0]
-                    artist = konachan[0].data.creator || ""
-                    title = konachan[0].data.characters || ""
                 }
             }
-            mirrors = functions.util.removeItem(mirrors, source)
-            const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
-            return {
-                rating,
-                artists,
-                danbooruLink,
-                artistIcon,
-                source: {
-                    title,
-                    englishTitle,
-                    artist,
-                    source,
-                    commentary,
-                    englishCommentary,
-                    bookmarks,
-                    posted,
-                    mirrors: mirrorStr
+        } catch (e) {
+            console.log(e)
+        }
+
+        // Fallback to Saucenao - this has high rate limits
+        let results = await ServerFunctions.saucenaoLookup(bytes)
+        if (results.length) {
+            const pixiv = results.filter((r) => r.header.index_id === 5)
+            const twitter = results.filter((r) => r.header.index_id === 41)
+            const artstation = results.filter((r) => r.header.index_id === 39)
+            const deviantart = results.filter((r) => r.header.index_id === 34)
+            const danbooru = results.filter((r) => r.header.index_id === 9)
+            const gelbooru = results.filter((r) => r.header.index_id === 25)
+            const konachan = results.filter((r) => r.header.index_id === 26)
+            const yandere = results.filter((r) => r.header.index_id === 12)
+            const anime = results.filter((r) => r.header.index_id === 21)
+            if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
+            if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
+            if (deviantart.length) {
+                let redirectedLink = ""
+                try {
+                    redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
+                } catch {
+                    // ignore
                 }
+                mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
+            }
+            if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
+            if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
+            if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
+            if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
+            if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
+            if (danbooru.length) danbooruLink = `https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`
+            if (pixiv.length) {
+                source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
+                if (!danbooru.length) {
+                    const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
+                    if (result.length) {
+                        danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                        if (result[0].rating === "q") rating = functions.r17()
+                        if (result[0].rating === "e") rating = functions.r18()
+                    }
+                }
+                artist = pixiv[0].data.author_name || ""
+                title = pixiv[0].data.title || ""
+                try {
+                    const illust = await ServerFunctions.getPixivIllust(source)
+                    commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                    posted = functions.date.formatDate(new Date(illust.create_date), true)
+                    source = illust.url!
+                    title = illust.title
+                    artist = illust.user.name 
+                    bookmarks = String(illust.total_bookmarks)
+                    const translated = await ServerFunctions.translate([title, commentary])
+                    if (translated) {
+                        englishTitle = translated[0]
+                        englishCommentary = translated[1]
+                    }
+                    if (illust.x_restrict !== 0) {
+                        if (rating === functions.r13()) rating = functions.r17()
+                    }
+                    artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await ServerFunctions.romajinize([artist]).then((r) => r[0])
+                    artistIcon = illust.user.profile_image_urls.medium
+                    artists.push({})
+                } catch (e) {
+                    console.log(e)
+                }
+            } else if (deviantart.length) {
+                let redirectedLink = ""
+                try {
+                    redirectedLink = await ServerFunctions.followRedirect(deviantart[0].data.ext_urls[0])
+                } catch {
+                    // ignore
+                }
+                source = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
+                artist = deviantart[0].data.member_name || ""
+                title = deviantart[0].data.title || ""
+                try {
+                    const deviation = await ServerFunctions.getDeviantartDeviation(source)
+                    title = deviation.title
+                    artist = deviation.author.user.username
+                    source = deviation.url
+                    commentary = deviation.description
+                    posted = functions.date.formatDate(new Date(deviation.date), true)
+                    if (deviation.rating === "adult") {
+                        if (rating === functions.r13()) rating = functions.r17()
+                    }
+                    artists[artists.length - 1].tag = artist
+                    artistIcon = deviation.author.user.usericon
+                    artists.push({})
+                } catch (e) {
+                    console.log(e)
+                } 
+            } else if (anime.length) {
+                title = anime[0].data.source || ""
+                source = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
+            } else if (twitter.length) {
+                source = twitter[0].data.ext_urls[0]
+                artist = twitter[0].data.twitter_user_handle || ""
+            } else if (danbooru.length) {
+                source = danbooru[0].data.ext_urls[0]
+                artist = danbooru[0].data.creator || ""
+                title = danbooru[0].data.characters || ""
+            } else if (gelbooru.length) {
+                source = gelbooru[0].data.ext_urls[0]
+                artist = gelbooru[0].data.creator || ""
+                title = gelbooru[0].data.characters || ""
+            } else if (yandere.length) {
+                source = yandere[0].data.ext_urls[0]
+                artist = yandere[0].data.creator || ""
+                title = yandere[0].data.characters || ""
+            } else if (konachan.length) {
+                source = konachan[0].data.ext_urls[0]
+                artist = konachan[0].data.creator || ""
+                title = konachan[0].data.characters || ""
+            }
+        }
+        mirrors = functions.util.removeItem(mirrors, source)
+        const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+        return {
+            rating,
+            artists,
+            danbooruLink,
+            artistIcon,
+            source: {
+                title,
+                englishTitle,
+                artist,
+                source,
+                commentary,
+                englishCommentary,
+                bookmarks,
+                posted,
+                mirrors: mirrorStr
             }
         }
     }
