@@ -21,6 +21,7 @@ import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
 import {Scraper} from "@the-convocation/twitter-scraper"
+// @ts-ignore
 import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
 import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
