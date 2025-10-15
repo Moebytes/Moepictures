@@ -17,7 +17,7 @@ import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./functions/Functions"
 import encryption from "./structures/Encryption"
-import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./structures/ServerFunctions"
+import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./server functions/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
@@ -201,8 +201,8 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
-      let body = await serverFunctions.getFile(key, upscaled, r18, pixelHash)
-      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18, pixelHash)
+      let body = await serverFunctions.files.getFile(key, upscaled, r18, pixelHash)
+      if (!body.byteLength) body = await serverFunctions.files.getFile(key, false, r18, pixelHash)
       let contentLength = body.byteLength
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
@@ -260,8 +260,8 @@ for (let i = 0; i < folders.length; i++) {
       const [id, order, name] = path.basename(key, path.extname(key)).split("-")
       let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
       if (req.path.includes("history/post")) thumbKey = key
-      let body = await serverFunctions.getFile(thumbKey, false, r18, pixelHash)
-      if (!body.byteLength) body = await serverFunctions.getFile(key, false, r18, pixelHash)
+      let body = await serverFunctions.files.getFile(thumbKey, false, r18, pixelHash)
+      if (!body.byteLength) body = await serverFunctions.files.getFile(key, false, r18, pixelHash)
       let contentLength = body.byteLength
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
@@ -323,7 +323,7 @@ for (let i = 0; i < folders.length; i++) {
         if (upscaleParam) upscaled = upscaleParam === "true"
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
-      const body = await serverFunctions.getUnverifiedFile(key, upscaled)
+      const body = await serverFunctions.files.getUnverifiedFile(key, upscaled)
       const contentLength = body.byteLength
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
@@ -366,8 +366,8 @@ for (let i = 0; i < folders.length; i++) {
       const [id, order, name] = path.basename(key, path.extname(key)).split("-")
       let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
       if (req.path.includes("history/post")) thumbKey = key
-      let body = await serverFunctions.getUnverifiedFile(thumbKey, false)
-      if (!body.byteLength) body = await serverFunctions.getUnverifiedFile(key, false)
+      let body = await serverFunctions.files.getUnverifiedFile(thumbKey, false)
+      if (!body.byteLength) body = await serverFunctions.files.getUnverifiedFile(key, false)
       let contentLength = body.byteLength
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
@@ -453,10 +453,10 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
     if (!storage) return res.status(404).json({message: "Not found"})
     if (secret !== storage.secret) return res.status(403).json({message: "Unauthorized"})
     
-    let body = await serverFunctions.getFile(storage.key, storage.upscaled, storage.r18, storage.pixelHash)
-    if (!body.byteLength) body = await serverFunctions.getFile(storage.key, false, storage.r18, storage.pixelHash)
+    let body = await serverFunctions.files.getFile(storage.key, storage.upscaled, storage.r18, storage.pixelHash)
+    if (!body.byteLength) body = await serverFunctions.files.getFile(storage.key, false, storage.r18, storage.pixelHash)
 
-    if (storage.songCover) body = await serverFunctions.songCover(body)
+    if (storage.songCover) body = await serverFunctions.util.songCover(body)
   
     const mimeType = mime.getType(req.path)
     if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -494,8 +494,8 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
         const imagePath = img.thumbnail ? functions.link.getThumbnailImagePath(img.type, img.thumbnail)
         : functions.link.getImagePath(img.type, img.postID, img.order, img.filename)
         
-        const imageBuffer = await serverFunctions.getFile(imagePath, false, r18, post.images[0].pixelHash)
-        body = await serverFunctions.squareCrop(imageBuffer, 500)
+        const imageBuffer = await serverFunctions.files.getFile(imagePath, false, r18, post.images[0].pixelHash)
+        body = await serverFunctions.util.squareCrop(imageBuffer, 500)
       }
     }
   
@@ -663,7 +663,7 @@ const deleteQueuedPosts = async () => {
     const deletionDate = new Date(post.deletionDate)
     if (now > deletionDate) {
       try {
-        await serverFunctions.deletePost(post)
+        await serverFunctions.posts.deletePost(post)
       } catch (e) {
         console.log(e)
       }
@@ -679,7 +679,7 @@ const deleteQueuedUnverifiedPosts = async () => {
     const deletionDate = new Date(unverified.deletionDate)
     if (now > deletionDate) {
       try {
-        await serverFunctions.deleteUnverifiedPost(unverified)
+        await serverFunctions.posts.deleteUnverifiedPost(unverified)
       } catch (e) {
         console.log(e)
       }
@@ -701,7 +701,7 @@ const runDaily = async () => {
 
 const run = async () => {
   await sql.createDB()
-  await serverFunctions.downloadWDTagger()
+  await serverFunctions.tags.downloadWDTagger()
   runDaily()
   setInterval(runDaily, 24 * 60 * 60 * 1000)
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))

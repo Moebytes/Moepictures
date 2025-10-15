@@ -3,11 +3,11 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import path from "path"
 import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
 TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType} from "../types/Types"
-import ServerFunctions from "../structures/ServerFunctions"
+import ServerFunctions from "../server functions/ServerFunctions"
 
 const tagLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -123,7 +123,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!tagObj) return void res.status(400).send("Bad tag")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
-            await serverFunctions.deleteTag(tagObj)
+            await serverFunctions.tags.deleteTag(tagObj)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -201,9 +201,9 @@ const TagRoutes = (app: Express) => {
                     }
 
                     if (key && key.trim() !== tag) {
-                        await serverFunctions.updateImplications(posts, toAdd)
+                        await serverFunctions.tags.updateImplications(posts, toAdd)
                     } else {
-                        serverFunctions.updateImplications(posts, toAdd)
+                        serverFunctions.tags.updateImplications(posts, toAdd)
                     }
                 }
             }
@@ -237,8 +237,8 @@ const TagRoutes = (app: Express) => {
                 if (tagObj.image) {
                     try {
                         const imagePath = functions.link.getTagPath(tagObj.type, tagObj.image)
-                        vanillaImageBuffer = await serverFunctions.getFile(imagePath, false, false)
-                        await serverFunctions.deleteFile(imagePath, false)
+                        vanillaImageBuffer = await serverFunctions.files.getFile(imagePath, false, false)
+                        await serverFunctions.files.deleteFile(imagePath, false)
                         tagObj.image = null
                         tagObj.imageHash = null
                     } catch {
@@ -250,9 +250,9 @@ const TagRoutes = (app: Express) => {
                     const filename = `${tag}.${functions.byte.fileExtension(image as number[])}`
                     const imagePath = functions.link.getTagPath(tagObj.type, filename)
                     const newBuffer = Buffer.from(Object.values(image) as any)
-                    imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
-                    await serverFunctions.uploadFile(imagePath, newBuffer, false)
-                    const hash = serverFunctions.md5(newBuffer)
+                    imgChange = serverFunctions.posts.buffersChanged(vanillaImageBuffer, newBuffer)
+                    await serverFunctions.files.uploadFile(imagePath, newBuffer, false)
+                    const hash = serverFunctions.util.md5(newBuffer)
                     await sql.tag.updateTag(tag, "image", filename)
                     await sql.tag.updateTag(tag, "imageHash", hash)
                     tagObj.image = filename
@@ -314,7 +314,7 @@ const TagRoutes = (app: Express) => {
                     if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.byte.fileExtension(image as number[])}`
                     const oldImagePath = functions.link.getTagPath(tagObj.type, tagObj.image)
                     const newImagePath = functions.link.getTagPath(tagObj.type, newFilename)
-                    await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
+                    await serverFunctions.files.renameFile(oldImagePath, newImagePath, false, false)
                     await sql.tag.updateTag(tag, "image", newFilename)
                     imageFilename = newFilename
                 }
@@ -330,7 +330,7 @@ const TagRoutes = (app: Express) => {
                         await sql.history.updateTagHistory(tagHistory.historyID, "image", newPath)
                     }
                 }
-                ServerFunctions.renameFolder(`history/tag/${tag}`, `history/tag/${key.trim()}`, false)
+                ServerFunctions.files.renameFolder(`history/tag/${tag}`, `history/tag/${key.trim()}`, false)
                 await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
@@ -345,7 +345,7 @@ const TagRoutes = (app: Express) => {
             const changes = functions.compare.parseTagChanges(tagObj, updated)
 
             const tagHistory = await sql.history.tagHistory(targetTag)
-            const nextKey = await serverFunctions.getNextKey("tag", key, false)
+            const nextKey = await serverFunctions.files.getNextKey("tag", key, false)
             if (!tagHistory.length) {
                 let vanilla = tagObj as unknown as TagHistory
                 vanilla.date = tagObj.createDate 
@@ -355,7 +355,7 @@ const TagRoutes = (app: Express) => {
                 if (vanilla.image && vanillaImageBuffer) {
                     if (imgChange) {
                         const newImagePath = functions.link.getTagHistoryPath(targetTag, 1, vanilla.image)
-                        await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer, false)
+                        await serverFunctions.files.uploadFile(newImagePath, vanillaImageBuffer, false)
                         vanilla.image = newImagePath
                     }
                 } else {
@@ -368,7 +368,7 @@ const TagRoutes = (app: Express) => {
                     if (imgChange) {
                         const imagePath = functions.link.getTagHistoryPath(key, 2, imageFilename)
                         const buffer = Buffer.from(Object.values(image) as any)
-                        await serverFunctions.uploadFile(imagePath, buffer, false)
+                        await serverFunctions.files.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
                     }
                 }
@@ -381,7 +381,7 @@ const TagRoutes = (app: Express) => {
                     if (imgChange) {
                         const imagePath = functions.link.getTagHistoryPath(key, nextKey, imageFilename)
                         const buffer = Buffer.from(Object.values(image) as any)
-                        await serverFunctions.uploadFile(imagePath, buffer, false)
+                        await serverFunctions.files.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
 
                         const result = await sql.history.tagHistory(targetTag)
@@ -426,7 +426,7 @@ const TagRoutes = (app: Express) => {
             if (!silent) await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
             await sql.tag.renameTagMap(tag, aliasTo)
             await sql.note.renameCharacterNotes(tag, aliasTo)
-            await serverFunctions.deleteTag(tagObj)
+            await serverFunctions.tags.deleteTag(tagObj)
             if (!skipAliasing) await sql.tag.bulkInsertAliases(aliasTo, [tag])
             res.status(200).send("Success")
         } catch (e) {
@@ -668,8 +668,8 @@ const TagRoutes = (app: Express) => {
                     const filename = `${tag}.${functions.byte.fileExtension(image as number[])}`
                     imagePath = functions.link.getTagPath(tagObj.type, filename)
                     const buffer = Buffer.from(Object.values(image))
-                    await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-                    imageHash = serverFunctions.md5(buffer)
+                    await serverFunctions.files.uploadUnverifiedFile(imagePath, buffer)
+                    imageHash = serverFunctions.util.md5(buffer)
                 } else {
                     imagePath = "delete"
                     imageHash = null
@@ -713,7 +713,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
-            if (image) await serverFunctions.deleteUnverifiedFile(image)
+            if (image) await serverFunctions.files.deleteUnverifiedFile(image)
             await sql.request.deleteTagEditRequest(username, tag)
             if (accepted) {
                 let message = `Tag edit request on ${functions.config.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
@@ -763,8 +763,8 @@ const TagRoutes = (app: Express) => {
                 const currentHistory = tagHistory.find((history: any) => history.historyID === historyID)
                 if (!currentHistory) return void res.status(400).send("Bad request")
                 if (currentHistory.image?.includes("history/")) {
-                    await serverFunctions.deleteFile(currentHistory.image, false)
-                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.image), false)
+                    await serverFunctions.files.deleteFile(currentHistory.image, false)
+                    await serverFunctions.files.deleteIfEmpty(path.dirname(currentHistory.image), false)
                 }
                 await sql.history.deleteTagHistory(historyID)
             }
@@ -829,7 +829,7 @@ const TagRoutes = (app: Express) => {
                 for (const implication of toAdd) {
                     await sql.tag.insertImplicationHistory(req.session.username, tag.tag, implication, "implication", postIDs, null)
                 }
-                serverFunctions.updateImplications(posts, toAdd)
+                serverFunctions.tags.updateImplications(posts, toAdd)
             }
 
             res.status(200).send("Success")

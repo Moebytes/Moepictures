@@ -6,7 +6,7 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../functions/Functions"
 import enLocale from "../assets/locales/en.json"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
 import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
@@ -150,7 +150,7 @@ const UserRoutes = (app: Express) => {
                 const link = `${functions.config.getDomain()}/api/user/verifyemail?token=${token}`
                 await serverFunctions.email(email, "Moepictures Email Address Verification", functions.jsx.verifyEmailJSX(user, link))
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "account created", ip, device, region)
                 res.status(200).send("Success")
             } catch {
@@ -174,7 +174,7 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
-            const region = await serverFunctions.ipRegion(ip)
+            const region = await serverFunctions.util.ipRegion(ip)
             const matches = await bcrypt.compare(password, user.password!)
             if (matches) {
                 if (user.ips?.length) {
@@ -359,14 +359,14 @@ const UserRoutes = (app: Express) => {
             if (jpg || png || gif || webp || avif) {
                 if (req.session.image) {
                     let oldImagePath = functions.link.getTagPath("pfp", req.session.image)
-                    await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
+                    await serverFunctions.files.deleteFile(oldImagePath, false).catch(() => null)
                 }
                 if (jpg) result.extension = "jpg"
                 const filename = `${req.session.username}.${result.extension}`
                 let imagePath = functions.link.getTagPath("pfp", filename)
                 const buffer = Buffer.from(Object.values(bytes) as any)
-                const hash = serverFunctions.md5(buffer)
-                await serverFunctions.uploadFile(imagePath, buffer, false)
+                const hash = serverFunctions.util.md5(buffer)
+                await serverFunctions.files.uploadFile(imagePath, buffer, false)
                 await sql.user.updateUser(req.session.username, "image", filename)
                 await sql.user.updateUser(req.session.username, "imageHash", hash)
                 if (postID) await sql.user.updateUser(req.session.username, "imagePost", postID)
@@ -388,7 +388,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.image) {
                 let oldImagePath = functions.link.getTagPath("pfp", req.session.image)
-                await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
+                await serverFunctions.files.deleteFile(oldImagePath, false).catch(() => null)
             }
             await sql.user.updateUser(req.session.username, "image", null)
             await sql.user.updateUser(req.session.username, "imageHash", null)
@@ -707,12 +707,12 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
-            const region = await serverFunctions.ipRegion(ip)
+            const region = await serverFunctions.util.ipRegion(ip)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.link.getTagPath("pfp", user.image)
                 let newImagePath = functions.link.getTagPath("pfp", newFilename)
-                await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
+                await serverFunctions.files.renameFile(oldImagePath, newImagePath, false, false)
                 await sql.user.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
             }
@@ -742,7 +742,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
                 const username = functions.util.toProperCase(req.session.username)
                 const link = `${functions.config.getDomain()}/forgot-password`
@@ -798,7 +798,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device, region)
                 res.status(200).redirect("/change-email-success")
             } else {
@@ -857,7 +857,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "email verified", ip, device, region)
                 res.status(200).redirect("/verify-email-success")
             } else {
@@ -941,7 +941,7 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
-            const region = await serverFunctions.ipRegion(ip)
+            const region = await serverFunctions.util.ipRegion(ip)
             await sql.user.insertLoginHistory(user.username, "password reset request", ip, device, region)
             res.status(200).send("Success")
         } catch (e) {
@@ -969,7 +969,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "password reset", ip, device, region)
                 res.status(200).send("Success")
             } else {
@@ -989,7 +989,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad username")
             try {
                 await sql.token.deleteEmailToken(user.email!)
-                if (user.image) await serverFunctions.deleteFile(functions.link.getTagLink("pfp", user.image, user.imageHash), false)
+                if (user.image) await serverFunctions.files.deleteFile(functions.link.getTagLink("pfp", user.image, user.imageHash), false)
             } catch (e) {
                 console.log(e)
                 // ignore
@@ -1029,7 +1029,7 @@ const UserRoutes = (app: Express) => {
             for (let i = favorites.length - 1; i >= 0; i--) {
                 const post = favorites[i]
                 if (post.private) {
-                    const categories = await serverFunctions.tagCategories(post.tags)
+                    const categories = await serverFunctions.tags.tagCategories(post.tags)
                     if (!permissions.canPrivate(req.session, categories.artists)) favorites.splice(i, 1)
                 }
             }
@@ -1063,7 +1063,7 @@ const UserRoutes = (app: Express) => {
             for (let i = uploads.length - 1; i >= 0; i--) {
                 const post = uploads[i]
                 if (post.private) {
-                    const categories = await serverFunctions.tagCategories(post.tags)
+                    const categories = await serverFunctions.tags.tagCategories(post.tags)
                     if (!permissions.canPrivate(req.session, categories.artists)) uploads.splice(i, 1)
                 }
             }
@@ -1118,7 +1118,7 @@ const UserRoutes = (app: Express) => {
                 }
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
-                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                    const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) comments.splice(i, 1)
                 }
             }
@@ -1148,7 +1148,7 @@ const UserRoutes = (app: Express) => {
                     await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
                         const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                        await serverFunctions.deleteUnverifiedFile(file)
+                        await serverFunctions.files.deleteUnverifiedFile(file)
                     }
                 }
                 // Delete unverified post edits
@@ -1157,7 +1157,7 @@ const UserRoutes = (app: Express) => {
                     await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
                         const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                        await serverFunctions.deleteUnverifiedFile(file)
+                        await serverFunctions.files.deleteUnverifiedFile(file)
                     }
                 }
                 // Delete unverified post deletions
@@ -1252,7 +1252,7 @@ const UserRoutes = (app: Express) => {
                     for (const image of history.images) {
                         if (image?.startsWith("history/")) {
                             let r18 = functions.post.isR18(history.rating)
-                            await serverFunctions.deleteFile(image, r18)
+                            await serverFunctions.files.deleteFile(image, r18)
                         }
                     }
                     await sql.history.deletePostHistory(history.historyID)
@@ -1262,7 +1262,7 @@ const UserRoutes = (app: Express) => {
                 const tagHistory = await sql.history.userTagHistory(username)
                 for (const history of tagHistory) {
                     if (history.image?.startsWith("history/")) {
-                        await serverFunctions.deleteFile(history.image, false)
+                        await serverFunctions.files.deleteFile(history.image, false)
                     }
                     await sql.history.deleteTagHistory(history.historyID)
                     revertTagIDs.add(history.tag)

@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import {Group, GroupHistory, GroupPosts, GroupParams, GroupEditParams, GroupPostDeleteParams,
 GroupReorderParams, GroupRequestParams, GroupRequestFulfillParams, GroupDeleteRequestParams,
 GroupPostDeleteRequestParams, GroupDeleteRequestFulfillParams, GroupPostDeleteRequestFulfillParams,
@@ -175,7 +175,7 @@ const GroupRoutes = (app: Express) => {
                 const post = group.posts[i]
                 if (post.private) {
                     const tags = await sql.post.postTags(post.postID)
-                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                    const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                 }
             }
@@ -205,7 +205,7 @@ const GroupRoutes = (app: Express) => {
                     const post = group.posts[i]
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
-                        const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                        const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                         if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                     }
                 }

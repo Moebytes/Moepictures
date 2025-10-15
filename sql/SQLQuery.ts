@@ -2,7 +2,7 @@ import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import {pgDump} from "pg-dump-restore"
 import * as Redis from "redis"
 import functions from "../functions/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions from "../server functions/ServerFunctions"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
@@ -159,7 +159,7 @@ export default class SQLQuery {
     })
 
     const backupData = fs.readFileSync(backupPath)
-    await serverFunctions.uploadBackup(filename, backupData)
+    await serverFunctions.files.uploadBackup(filename, backupData)
     fs.unlinkSync(backupPath)
   }
 }

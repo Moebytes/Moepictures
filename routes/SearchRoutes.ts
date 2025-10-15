@@ -3,7 +3,7 @@ import crypto from "crypto"
 import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 import {PostSearch, Tag, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
@@ -158,7 +158,7 @@ const SearchRoutes = (app: Express) => {
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
                 if (post.private) {
-                    const categories = await serverFunctions.tagCategories(post.tags)
+                    const categories = await serverFunctions.tags.tagCategories(post.tags)
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
@@ -222,7 +222,7 @@ const SearchRoutes = (app: Express) => {
                     const post = artist.posts[i]
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
-                        const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                        const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                         if (!permissions.canPrivate(req.session, categories.artists)) artist.posts.splice(i, 1)
                     }
                 }
@@ -255,7 +255,7 @@ const SearchRoutes = (app: Express) => {
                     const post = character.posts[i]
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
-                        const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                        const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                         if (!permissions.canPrivate(req.session, categories.artists)) character.posts.splice(i, 1)
                     }
                 }
@@ -288,7 +288,7 @@ const SearchRoutes = (app: Express) => {
                     const post = series.posts[i]
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
-                        const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                        const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                         if (!permissions.canPrivate(req.session, categories.artists)) series.posts.splice(i, 1)
                     }
                 }
@@ -362,7 +362,7 @@ const SearchRoutes = (app: Express) => {
                 }
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
-                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                    const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
@@ -407,7 +407,7 @@ const SearchRoutes = (app: Express) => {
                 }
                 if (note.post.private) {
                     const tags = await sql.post.postTags(note.post.postID)
-                    const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                    const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
