@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag} from "../types/Types"
 import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
@@ -200,7 +200,7 @@ const NoteRoutes = (app: Express) => {
             if (post.locked && !permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
             postID = await sql.post.insertUnverifiedPost()
 
-            const {artists, characters, series, tags: newTags} = await serverFunctions.tagCategories(post.tags)
+            const {artists, characters, series, tags: newTags} = await serverFunctions.tags.tagCategories(post.tags)
             let tags = newTags.map((t) => t.tag)
             let type = post.type
             let rating = post.rating
@@ -319,8 +319,8 @@ const NoteRoutes = (app: Express) => {
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 const upscaledFile = functions.link.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
-                await serverFunctions.deleteUnverifiedFile(file)
-                await serverFunctions.deleteUnverifiedFile(upscaledFile)
+                await serverFunctions.files.deleteUnverifiedFile(file)
+                await serverFunctions.files.deleteUnverifiedFile(upscaledFile)
             }
 
             const notes = await sql.note.notes(originalID, order)
@@ -352,8 +352,8 @@ const NoteRoutes = (app: Express) => {
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.link.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 const upscaledFile = functions.link.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
-                await serverFunctions.deleteUnverifiedFile(file)
-                await serverFunctions.deleteUnverifiedFile(upscaledFile)
+                await serverFunctions.files.deleteUnverifiedFile(file)
+                await serverFunctions.files.deleteUnverifiedFile(upscaledFile)
             }
             const unverifiedNotes = await sql.note.unverifiedNotes(postID, order)
             for (const unverifiedNote of unverifiedNotes) {

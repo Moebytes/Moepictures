@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import {Favgroup, FavgroupUpdateParams, FavgroupEditParams, FavgroupReorderParams} from "../types/Types"
 
 const favoriteLimiter = rateLimit({
@@ -121,7 +121,7 @@ const FavoriteRoutes = (app: Express) => {
                     const post = group.posts[i]
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
-                        const categories = await serverFunctions.tagCategories(tags.map((tag) => tag.tag))
+                        const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
                         if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                     }
                 }
@@ -181,7 +181,7 @@ const FavoriteRoutes = (app: Express) => {
             for (let i = favgroup.posts.length - 1; i >= 0; i--) {
                 const post = favgroup.posts[i]
                 if (post.private) {
-                    const categories = await serverFunctions.tagCategories(post.tags)
+                    const categories = await serverFunctions.tags.tagCategories(post.tags)
                     if (!permissions.canPrivate(req.session, categories.artists)) favgroup.posts.splice(i, 1)
                 }
             }

@@ -2,9 +2,9 @@
     "compilerOptions": {
         "outDir": "dist",
         "noImplicitAny": false,
-        "moduleResolution": "node16",
-        "target": "es2023",
-        "module": "node16",
+        "moduleResolution": "node",
+        "target": "es2022",
+        "module": "es2022",
         "lib": ["es2023", "dom"],
         "allowJs": true,
         "allowSyntheticDefaultImports": true,

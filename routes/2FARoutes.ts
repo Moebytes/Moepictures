@@ -2,7 +2,7 @@ import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 
 const $2faLimiter = rateLimit({
@@ -33,7 +33,7 @@ const $2FARoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
                 res.status(200).send("Success")
             }
@@ -72,7 +72,7 @@ const $2FARoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
-                const region = await serverFunctions.ipRegion(ip)
+                const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device, region)
                 res.status(200).send("Success")
             } else {
@@ -95,7 +95,7 @@ const $2FARoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
-            const region = await serverFunctions.ipRegion(ip)
+            const region = await serverFunctions.util.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken?.token || "", token, 60)
             if (validToken) {

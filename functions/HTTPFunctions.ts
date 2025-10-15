@@ -157,6 +157,11 @@ export default class HTTPFunctions {
         return response !== 404
     }
 
+    public static followRedirect = async (link: string) => {
+        const redirect = await axios.head(link).then((r) => r.request.res.responseUrl)
+        return redirect as string
+    }
+
     public static followRedirects = async (link: string) => {
         let redirects = [] as string[]
         let currentLink = link

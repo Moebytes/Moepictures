@@ -8,7 +8,7 @@ import snoowrap from "snoowrap"
 import functions from "../functions/Functions"
 import encryption from "../structures/Encryption"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import phash from "sharp-phash"
@@ -105,7 +105,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
-            let result = await serverFunctions.saucenaoLookup(req.body)
+            let result = await serverFunctions.sources.saucenaoLookup(req.body)
             res.status(200).json(result)
         } catch {
             res.status(400).end()
@@ -115,7 +115,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, pixivID} = req.body as {bytes: number[], pixivID: string}
-            const mirrors = await serverFunctions.booruLinks(bytes)
+            const mirrors = await serverFunctions.links.booruLinks(bytes)
             res.status(200).send(mirrors)
         } catch {
             res.status(400).end()
@@ -125,42 +125,12 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
-            const booruLinks = await serverFunctions.booruLinks(req.body)
+            const booruLinks = await serverFunctions.links.booruLinks(req.body)
             let result = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
             if (result) result += ".json"
             res.status(200).send(result)
         } catch (e) {
             console.log(e)
-            res.status(400).end()
-        }
-    })
-
-    app.get("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const link = req.query.url as string
-        if (!link) return void res.status(400).send("No url")
-        if (link.includes("pixiv.net") || link.includes("pximg.net")) {
-            try {
-                const illust = await serverFunctions.getPixivIllust(link)
-                serverFunctions.sendEncrypted(illust, req, res)
-            } catch (e) {
-                res.status(400).end()
-            }
-        } else {
-            res.status(400).end()
-        }
-    })
-
-    app.get("/api/misc/deviantart", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const link = req.query.url as string
-        if (!link) return void res.status(400).send("No url")
-        if (link.includes("deviantart.com")) {
-            try {
-                const deviation = await serverFunctions.getDeviantartDeviation(link)
-                serverFunctions.sendEncrypted(deviation, req, res)
-            } catch (e) {
-                res.status(400).end()
-            }
-        } else {
             res.status(400).end()
         }
     })
@@ -331,7 +301,7 @@ const MiscRoutes = (app: Express) => {
         const link = req.query.url as string
         if (!link) return void res.status(400).send("No url")
         try {
-            const response = await serverFunctions.followRedirect(link)
+            const response = await functions.http.followRedirect(link)
             serverFunctions.sendEncrypted(response, req, res)
         } catch {
             res.status(400).end()
@@ -341,14 +311,14 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
         if (!words?.[0]) return void res.status(400).send("No words")
-        let translated = await serverFunctions.translate(words)
+        let translated = await serverFunctions.util.translate(words)
         res.status(200).send(translated)
     })
 
     app.post("/api/misc/romajinize", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
         if (!words?.[0]) return void res.status(400).send("No words")
-        let romajinized = await serverFunctions.romajinize(words)
+        let romajinized = await serverFunctions.util.romajinize(words)
         res.status(200).send(romajinized)
     })
 
@@ -437,7 +407,7 @@ const MiscRoutes = (app: Express) => {
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(ip)
-            const json = await serverFunctions.wdtagger(req.body)
+            const json = await serverFunctions.tags.wdtagger(req.body)
             processingQueue.delete(ip)
             res.status(200).json(json)
         } catch (e) {
@@ -686,7 +656,7 @@ const MiscRoutes = (app: Express) => {
             const {current, rating} = req.body as SourceLookupParams
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)
-            const sourceLookup = await serverFunctions.sourceLookup(current, rating)
+            const sourceLookup = await serverFunctions.sources.sourceLookup(current, rating)
             processingQueue.delete(ip)
             res.status(200).json(sourceLookup)
         } catch (e) {
@@ -704,7 +674,7 @@ const MiscRoutes = (app: Express) => {
             const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)
-            const tagLookup = await serverFunctions.tagLookup(current, type, rating, style, hasUpscaled)
+            const tagLookup = await serverFunctions.tags.tagLookup(current, type, rating, style, hasUpscaled)
             processingQueue.delete(ip)
             res.status(200).json(tagLookup)
         } catch {

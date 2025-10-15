@@ -182,8 +182,6 @@ export interface SplatterOptions {
 
 export type MiscGetEndpoint<T extends string> = 
     T extends "/api/misc/captcha/create" ? {params: {color: string}, response: {captcha: string}} :
-    T extends "/api/misc/pixiv" ? {params: {url: string}, response: PixivResponse} :
-    T extends "/api/misc/deviantart" ? {params: {url: string}, response: DeviationRSSExtended} :
     T extends "/api/misc/redirect" ? {params: {url: string}, response: string} :
     T extends "/api/misc/emojis" ? {params: null, response: {[key: string]: string}} :
     T extends "/api/misc/banner" ? {params: null, response: Banner | undefined} :
