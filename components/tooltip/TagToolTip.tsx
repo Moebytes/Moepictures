@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, 
+import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, useFlagActions, 
 useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import website from "../../assets/icons/website.png"
@@ -23,6 +23,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {selectionMode, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
+    const {setPostFlag} = useFlagActions()
     const {tagTooltipTag, tagTooltipEnabled, tagTooltipY} = useInteractionSelector()
     const {setTagToolTipEnabled} = useInteractionActions()
     const [hover, setHover] = useState(false)
@@ -214,7 +215,12 @@ const TagToolTip: React.FunctionComponent = (props) => {
     }
 
     const openPost = (event: React.MouseEvent, post: PostSearch) => {
-        functions.post.openPost(post, event, navigate, session, setSessionFlag)
+        if (location.pathname.includes("/post/")) {
+            navigate(`/post/${post.postID}/${post.slug}`, {replace: true})
+            setPostFlag(post.postID)
+        } else {
+            functions.post.openPost(post, event, navigate, session, setSessionFlag)
+        }
         setTagToolTipEnabled(false)
     }
 
