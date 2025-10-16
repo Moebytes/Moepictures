@@ -278,11 +278,13 @@ export default class SQLTag {
             text: functions.multiTrim(/*sql*/`
                     SELECT "tag map posts".tag, 
                     array_length("tag map posts"."posts", 1) AS count,
-                    "tags".type, "tags".image, "tags"."imageHash"
+                    "tags".type, "tags".image, "tags"."imageHash", 
+                    "tags"."hidden", "tags"."r18"
                     FROM "tag map posts"
                     LEFT JOIN tags ON tags."tag" = "tag map posts".tag
                     ${whereQuery}
-                    GROUP BY "tag map posts".tag, "tags".type, "tags".image, "tags"."imageHash"
+                    GROUP BY "tag map posts".tag, "tags".type, "tags".image, 
+                    "tags"."imageHash", "tags"."hidden", "tags"."r18"
                     ORDER BY count DESC
             `)
         }

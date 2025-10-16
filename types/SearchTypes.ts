@@ -57,16 +57,6 @@ export interface SimilarSearchParams {
     useMD5?: boolean
 }
 
-export interface SearchSuggestionsParams {
-    query?: string
-    type?: TagType
-}
-
-export type SidebarTagParams = {
-    postIDs?: string[]
-    isBanner?: boolean
-}
-
 export type SearchGetEndpoint<T extends string> = 
     T extends "/api/search/posts" ? {params: PostSearchParams, response: PostSearch[]} :
     T extends "/api/search/artists" ? {params: CategorySearchParams, response: TagCategorySearch[]} :
@@ -76,8 +66,6 @@ export type SearchGetEndpoint<T extends string> =
     T extends "/api/search/comments" ? {params: CommentSearchParams, response: CommentSearch[]} :
     T extends "/api/search/notes" ? {params: CommentSearchParams, response: NoteSearch[]} :
     T extends "/api/search/groups" ? {params: GroupSearchParams, response: GroupSearch[]} :
-    T extends "/api/search/suggestions" ? {params: SearchSuggestionsParams, response: TagCount[]} :
-    T extends "/api/search/sidebartags" ? {params: SidebarTagParams, response: TagCount[]} :
     T extends "/api/search/threads" ? {params: CommentSearchParams, response: ThreadSearch[]} :
     T extends "/api/search/messages" ? {params: MessageSearchParams, response: MessageSearch[]} :
     T extends "/api/search/reports" ? {params: {offset?: number} | null, response: Report[]} :

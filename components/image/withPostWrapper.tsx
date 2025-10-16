@@ -23,8 +23,8 @@ import contract from "../../assets/icons/contract.png"
 import NoteEditor from "./NoteEditor"
 import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
+import sourceIcon from "../../assets/icons/source.png"
 import QRCode from "qrcode"
-import {ReactZoomPanPinchRef} from "react-zoom-pan-pinch"
 import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postimage.less"
 
@@ -579,7 +579,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 </> : null}
                             </div>
 
-
+                            {/*!props.noNotes ? <img draggable={false} className="post-image-top-button" src={sourceIcon} style={{filter: getFilter(), marginRight: "6px"}} 
+                                onClick={() => {}}/> : null*/}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
                                 onClick={() => {setShowReverseIcons(false); setShowShareIcons((prev: boolean) => !prev)}}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 

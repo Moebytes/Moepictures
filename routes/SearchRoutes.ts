@@ -6,11 +6,9 @@ import phash from "sharp-phash"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
-import {PostSearch, Tag, TagSearch, TagCount, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
-GroupSearchParams, Image, SimilarSearchParams, CommentSearchParams, NoteSearch, SearchSuggestionsParams, 
-SidebarTagParams, ThreadSearch, MessageSearchParams, MessageSearch} from "../types/Types"
-
-// const nodeFunctions = require("../build/Release/NodeFunctions.node")
+import {PostSearch, TagSearch, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 
+GroupSearchParams, Image, SimilarSearchParams, CommentSearchParams, NoteSearch, ThreadSearch, MessageSearchParams, 
+MessageSearch} from "../types/Types"
 
 const searchLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -23,19 +21,6 @@ const searchLimiter = rateLimit({
 })
 
 const SearchRoutes = (app: Express) => {
-    /* This has potential to be faster than client-side but our server is slow at processing
-    app.post("/api/search/parse-space-search", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let {query} = req.body as {query?: string}
-            const tagMap = await serverFunctions.tagMap(true)
-            const result = nodeFunctions.parseSpaceEnabledSearch(query ?? "", tagMap)
-            res.status(200).send(result)
-        } catch (e) {
-            console.log(e)
-            return void res.status(400).send("Bad request")
-        }
-    })*/
-
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {query, type, rating, style, sort, offset, limit} = req.query as PostSearchParams
@@ -430,78 +415,6 @@ const SearchRoutes = (app: Express) => {
                 result = result.filter((g: any) => !functions.post.isR18(g.rating))
             }
             serverFunctions.sendEncrypted(result, req, res)
-        } catch (e) {
-            console.log(e)
-            return void res.status(400).send("Bad request")
-        }
-    })
-
-    app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let {query, type} = req.query as SearchSuggestionsParams
-            if (!query) query = ""
-            if (!type) type = "all"
-            if (!functions.validation.validTagType(type)) return void res.status(400).send("Invalid type")
-            query = functions.tag.trimSpecialCharacters(query)
-            let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.search.tagSearch(search, "posts", type, 100).then((r) => r.slice(0, 100))
-            if (!result?.[0]) {
-                return void serverFunctions.sendEncrypted([], req, res)
-            }
-            if (!permissions.isMod(req.session)) {
-                result = result.filter((tag: any) => !tag.hidden)
-            }
-            if (!req.session.showR18) {
-                result = result.filter((tag: any) => !tag.r18)
-            }
-            const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
-            serverFunctions.sendEncrypted(tags.slice(0, 100), req, res)
-        } catch (e) {
-            console.log(e)
-            return void res.status(400).send("Bad request")
-        }
-    })
-
-    app.get("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let {postIDs} = req.query as SidebarTagParams
-            if (!postIDs) postIDs = []
-            const isBanner = req.query.isBanner === "true"
-            let postArray = Array.from(postIDs)?.slice(0, 100) as any
-            if (req.session.captchaNeeded) {
-                if (postArray?.length === 1) {
-                    return void serverFunctions.sendEncrypted([], req, res)
-                }
-                postArray = []
-            }
-            let slice = false
-            if (!postArray?.length) slice = true
-            let posts = await sql.search.posts(postArray)
-            let uniqueTags = new Set<string>()
-            for (let i = 0; i < posts.length; i++) {
-                for (let j = 0; j < posts[i].tags.length; j++) {
-                    uniqueTags.add(posts[i].tags[j])
-                }
-            }
-            const uniqueTagArray = Array.from(uniqueTags)
-            let result = await sql.tag.tagCounts(uniqueTagArray.filter(Boolean))
-            for (let i = 0; i < uniqueTagArray.length; i++) {
-                const found = result.find((r: any) => r.tag === uniqueTagArray[i])
-                if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", image: "", imageHash: ""})
-            }
-            //let artistTags = result.filter((t: any) => t.type === "artist")
-            let characterTags = result.filter((t: any) => t.type === "character")
-            let seriesTags = result.filter((t: any) => t.type === "series")
-            //let metaTags = result.filter((t: any) => t.type === "meta")
-            //let tags = result.filter((t: any) => t.type === "tag")
-            let finalTags = [] as TagCount[]
-            if (isBanner) {
-                finalTags = [...seriesTags, ...characterTags]
-            } else {
-                finalTags = result
-            }
-            finalTags = slice ? finalTags.slice(0, 100) : finalTags
-            serverFunctions.sendEncrypted(finalTags, req, res)
         } catch (e) {
             console.log(e)
             return void res.status(400).send("Bad request")

@@ -43,6 +43,12 @@ const TagRoutes = (app: Express) => {
                     if (pixivTag) result = await sql.tag.tag(pixivTag.tag)
                 }
             }
+            if (result?.hidden && !permissions.isMod(req.session)) {
+                result = undefined
+            }
+            if (result?.r18 && !req.session.showR18) {
+                result = undefined
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -80,6 +86,12 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tagCounts(tags.filter(Boolean))
+            if (!permissions.isMod(req.session)) {
+                result = result.filter((tag) => !tag.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((tag) => !tag.r18)
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -92,6 +104,12 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
+            if (!permissions.isMod(req.session)) {
+                result = result.filter((tag) => !tag.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((tag) => !tag.r18)
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -104,6 +122,12 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
+            if (!permissions.isMod(req.session)) {
+                result = result.filter((tag) => !tag.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((tag) => !tag.r18)
+            }
             const tagMap = {} as {[key: string]: Tag}
             for (const tag of result) {
                 tagMap[tag.tag] = tag
