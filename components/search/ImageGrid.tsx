@@ -26,6 +26,7 @@ let interval = null as any
 let reloadedPost = false
 let replace = true
 let manualHistoryChange = false
+let searchLocked = false
 let init = true
 let limit = 100
 
@@ -91,6 +92,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const searchPosts = async (query?: string) => {
+        if (searchLocked) return
         if (searchFlag) setSearchFlag(false)
         saveSearchSkip()
         if (!query) query = search
@@ -115,15 +117,17 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!permissions.isPremium(session)) return setPremiumRequired(true)
         }
         setNoResults(false)
+        setSearch(query ?? "")
+        searchLocked = true
+        const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
+        sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
+        searchLocked = false
+        setHeaderFlag(true)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
-        setSearch(query ?? "")
-        const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
-        sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
-        setHeaderFlag(true)
-        setPosts(result)
         setIsRandomSearch(false)
+        setPosts(result)
         setUpdatePostFlag(true)
         if (!loaded) setLoaded(true)
         if (!result.length) setNoResults(true)
@@ -133,9 +137,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const randomPosts = async (query?: string) => {
+        if (searchLocked) return
         setRandomFlag(false)
+        searchLocked = true
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: "random", showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
+        searchLocked = true
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -363,6 +370,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [posts, i18n])
 
     const updateOffset = async () => {
+        if (searchLocked) return
         if (noResults) return
         if (ended) return
         let newOffset = offset + limit
@@ -379,15 +387,19 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         let result = null as unknown as PostSearch[]
         if (isRandomSearch) {
+            searchLocked = true
             result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
+            searchLocked = false
         } else {
             let query = search
             if (query.includes(" ") && !saveSearchFlag) {
                 query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
             }
+            searchLocked = true
             result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
             sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
+            searchLocked = false
         }
         let hasMore = result?.length >= limit
         const cleanPosts = posts.filter((p) => !p.fake)
