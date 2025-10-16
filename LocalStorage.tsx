@@ -104,8 +104,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
     groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, readerPage} = usePageSelector()
     const {setPage, setHistoryPage, setMessagePage, setThreadPage, setArtistsPage, setCharactersPage, setCommentsPage,
     setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage, setReaderPage} = usePageActions()
-    const {posts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
-    const {setPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
+    const {posts, navigationPosts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
+    const {setPosts, setNavigationPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session, userImg} = useSessionSelector()
@@ -145,12 +145,14 @@ const LocalStorage: React.FunctionComponent = (props) => {
 
     const initAsync = async () => {
         const savedPosts = await localforage.getItem("savedPosts") as string
+        const savedNavigationPosts = await localforage.getItem("savedNavigationPosts") as string
         const savedTags = await localforage.getItem("savedTags") as string
         const savedRelated = await localforage.getItem("savedRelated") as string
         const savedArtists = await localforage.getItem("savedArtists") as string
         const savedCharacters = await localforage.getItem("savedCharacters") as string
         const savedSeries = await localforage.getItem("savedSeries") as string
         if (savedPosts) setPosts(JSON.parse(savedPosts))
+        if (savedNavigationPosts) setNavigationPosts(JSON.parse(savedNavigationPosts))
         if (savedTags) setTags(JSON.parse(savedTags))
         if (savedRelated) setRelated(JSON.parse(savedRelated))
         if (savedArtists) setArtists(JSON.parse(savedArtists))
@@ -383,10 +385,11 @@ const LocalStorage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (posts.length) localforage.setItem("savedPosts", JSON.stringify(posts))
+        if (navigationPosts.length) localforage.setItem("savedNavigationPosts", JSON.stringify(navigationPosts))
         if (tags.length) localforage.setItem("savedTags", JSON.stringify(tags))
         if (bannerTags.length) localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
         localStorage.setItem("savedSession", JSON.stringify(session))
-    }, [posts, tags, bannerTags, session])
+    }, [posts, navigationPosts, tags, bannerTags, session])
 
     useEffect(() => {
         localStorage.setItem("order", String(order))

@@ -39,7 +39,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {setSearch, setSearchFlag} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
-    const {setPosts} = useCacheActions()
+    const {setNavigationPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null as Favgroup | null)
     const [items, setItems] = useState([] as GroupItem[])
     const navigate = useNavigate()
@@ -147,7 +147,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                 }
                 if (reorderState) return
                 functions.post.openPost(item.post, event, navigate, session, setSessionFlag)
-                setPosts(favgroup.posts)
+                setNavigationPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
                 }, 200)

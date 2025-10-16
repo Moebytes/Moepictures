@@ -45,8 +45,8 @@ const PostPage: React.FunctionComponent = () => {
     const {mobile} = useLayoutSelector()
     const {ratingType} = useSearchSelector()
     const {setRatingType} = useSearchActions()
-    const {posts, post, tagCategories, tagGroupCategories, order} = useCacheSelector()
-    const {setPosts, setTags, setPost, setTagCategories, setTagGroupCategories, setOrder} = useCacheActions()
+    const {posts, navigationPosts, post, tagCategories, tagGroupCategories, order} = useCacheSelector()
+    const {setNavigationPosts, setTags, setPost, setTagCategories, setTagGroupCategories, setOrder} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setReloadPostFlag, setRedirect, setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const {revertPostHistoryID, revertPostHistoryFlag} = usePostDialogSelector()
@@ -359,23 +359,23 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const next = async () => {
-        let currentIndex = posts.findIndex((p) => String(p.postID) === String(postID))
+        let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex++
             if (!session.username) {
-                while (posts[currentIndex]?.rating !== functions.r13()) {
+                while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
                     currentIndex++
-                    if (currentIndex >= posts.length) break
+                    if (currentIndex >= navigationPosts.length) break
                 }
             }
             if (!functions.post.isR18(ratingType)) {
-                while (functions.post.isR18(posts[currentIndex]?.rating)) {
+                while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
                     currentIndex++
-                    if (currentIndex >= posts.length) break
+                    if (currentIndex >= navigationPosts.length) break
                 }
             }
-            if (posts[currentIndex]) {
-                const post = posts[currentIndex]
+            if (navigationPosts[currentIndex]) {
+                const post = navigationPosts[currentIndex]
                 if (post.fake) return
                 navigate(`/post/${post.postID}/${post.slug}`)
             }
@@ -383,23 +383,23 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const previous = async () => {
-        let currentIndex = posts.findIndex((p) => String(p.postID) === String(postID))
+        let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex--
             if (!session.username) {
-                while (posts[currentIndex]?.rating !== functions.r13()) {
+                while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
                     currentIndex--
                     if (currentIndex <= -1) break
                 }
             }
             if (!functions.post.isR18(ratingType)) {
-                while (functions.post.isR18(posts[currentIndex]?.rating)) {
+                while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
                     currentIndex--
                     if (currentIndex <= -1) break
                 }
             }
-            if (posts[currentIndex]) {
-                const post = posts[currentIndex]
+            if (navigationPosts[currentIndex]) {
+                const post = navigationPosts[currentIndex]
                 if (post.fake) return
                 navigate(`/post/${post.postID}/${post.slug}`)
             }
@@ -588,7 +588,7 @@ const PostPage: React.FunctionComponent = () => {
                 navigate(`/post/${postID}/${slug}`, {replace: true})
                 setPostFlag(postID)
                 setTimeout(() => {
-                    setPosts(group.posts)
+                    setNavigationPosts(group.posts)
                     setActiveGroup(group)
                 }, 200)
             }

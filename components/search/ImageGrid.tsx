@@ -36,7 +36,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {posts, visiblePosts} = useCacheSelector()
-    const {setPosts, setVisiblePosts} = useCacheActions()
+    const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
     const [index, setIndex] = useState(0)
     const {scrollY} = useInteractionSelector()
     const {setScrollY, setEnableDrag, setMobileScrolling} = useInteractionActions()
@@ -360,6 +360,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         let resultCount = Number(posts[0]?.postCount)
         if (Number.isNaN(resultCount)) resultCount = posts.length
         setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
+        setNavigationPosts(posts)
     }, [posts, i18n])
 
     const updateOffset = async () => {

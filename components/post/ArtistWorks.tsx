@@ -14,7 +14,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
-    const {setPosts} = useCacheActions()
+    const {setNavigationPosts} = useCacheActions()
     const {setPostFlag} = useFlagActions()
     const navigate = useNavigate()
 
@@ -27,7 +27,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
         navigate(`/post/${post.postID}/${post.slug}`, {replace: true})
         setPostFlag(post.postID)
         setTimeout(() => {
-            setPosts(props.posts)
+            setNavigationPosts(props.posts)
         }, 500)
     }
 

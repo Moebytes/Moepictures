@@ -20,7 +20,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {ratingType} = useSearchSelector()
-    const {setPosts} = useCacheActions()
+    const {setPosts, setNavigationPosts} = useCacheActions()
     const [images, setImages] = useState([] as string[])
     const navigate = useNavigate()
 
@@ -52,6 +52,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(props.artist.posts)
+        setNavigationPosts(props.artist.posts)
     }
 
     const getImages = () => {
