@@ -34,6 +34,8 @@ import permissions from "../../structures/Permissions"
 import "./styles/postpage.less"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 
+let viewPromise = null as any
+
 const PostPage: React.FunctionComponent = () => {
     const {language, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -170,7 +172,11 @@ const PostPage: React.FunctionComponent = () => {
 
     const saveHistory = async () => {
         if (post && session.username) {
-            await functions.http.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
+            if (!viewPromise) {
+                viewPromise = functions.http.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
+            }
+            await viewPromise
+            viewPromise = null
         }
     }
 
