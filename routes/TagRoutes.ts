@@ -68,19 +68,6 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let tag = req.query.tag as string
-            if (!tag) return void res.status(400).send("Bad tag")
-            let result = await sql.tag.unverifiedTags([tag])
-            const unverifiedTag = result[0]
-            serverFunctions.sendEncrypted(unverifiedTag, req, res)
-        } catch (e) {
-            console.log(e)
-            return void res.status(400).send("Bad request")
-        }
-    })
-
     app.get("/api/tag/counts", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]

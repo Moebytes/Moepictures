@@ -62,7 +62,7 @@ export default class HTTPFunctions {
     }
 
     public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: Session, 
-        setSessionFlag?: (value: boolean) => void) => {
+        setSessionFlag?: (value: boolean) => void, noLock?: boolean) => {
         if (!this.privateKey) await functions.http.updateClientKeys(session)
         if (!this.serverPublicKey) await functions.http.updateServerPublicKey(session)
         const headers = {"x-csrf-token": session.csrfToken}
@@ -76,11 +76,19 @@ export default class HTTPFunctions {
         }
 
         try {
-            if (!this.lockManager[endpoint]) {
-                this.lockManager[endpoint] = axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            let response: any
+            if (noLock) {
+                response = await axios.get(endpoint, {params: params, headers, 
+                withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            } else {
+                if (!this.lockManager[endpoint]) {
+                    this.lockManager[endpoint] = axios.get(endpoint, {params: params, headers, 
+                    withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+                }
+                response = await this.lockManager[endpoint]
+                this.lockManager[endpoint] = null
             }
-            const response = await this.lockManager[endpoint]
-            this.lockManager[endpoint] = null
+
             const json = functions.http.arrayBufferToJSON(response)
             if (json !== null) {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})

@@ -1,4 +1,5 @@
 import functions from "./Functions"
+import permissions from "../structures/Permissions"
 import {MiniTag, TagCount, Post, PostFull, TagHistory, PostOrdered, Tag, Session, 
 UploadTag, PostSearch, UnverifiedPost, TagGroupCategory, MiniTagGroup} from "../types/Types"
 
@@ -7,32 +8,22 @@ export default class TagFunctions {
         return tag.toLowerCase().replaceAll("_", "-").replace(/^[-]+/, "").replace(/[-]+$/, "")
     }
 
-    public static parseTagsSingle = async (post: PostSearch, session: Session, setSessionFlag: (value: boolean) => void) => {
-        if (!post.tags) return this.parseTags([post], session, setSessionFlag)
-        let tagMap = await functions.cache.tagsCache(session, setSessionFlag)
-        let result = [] as Tag[]
-        for (let i = 0; i < post.tags.length; i++) {
-            const tag = post.tags[i]
-            if (tagMap[tag]) result.push(tagMap[tag])
-        }
-        return result
-    }
-
     public static parseTags = async (posts: PostFull[] | PostSearch[] | PostOrdered[] | Post[], session: Session, 
         setSessionFlag: (value: boolean) => void, isBanner?: boolean) => {
-        let cleanPosts = posts.filter((p) => !(p as PostSearch).fake) as PostFull[] | PostSearch[] 
-        if (cleanPosts.length && !cleanPosts[0].hasOwnProperty("tags")) {
-            cleanPosts = await functions.http.get("/api/posts", 
-            {postIDs: cleanPosts.map((p: Post) => p.postID)}, session, setSessionFlag)
+        if (!posts.length) return []
+        let taggedPosts = posts.filter((p) => p.hasOwnProperty("tags")) as PostFull[] | PostSearch[] 
+        if (!taggedPosts.length) {
+            taggedPosts = await functions.http.get("/api/posts", 
+            {postIDs: posts.map((p: Post) => p.postID).slice(0, 20)}, session, setSessionFlag, true)
         }
         let uniqueTags = new Set<string>()
-        for (let i = 0; i < cleanPosts.length; i++) {
-            for (let j = 0; j < cleanPosts[i].tags.length; j++) {
-                uniqueTags.add(cleanPosts[i].tags[j])
+        for (let i = 0; i < taggedPosts.length; i++) {
+            for (let j = 0; j < taggedPosts[i].tags.length; j++) {
+                uniqueTags.add(taggedPosts[i].tags[j])
             }
         }
         const uniqueTagArray = Array.from(uniqueTags)
-        let result = await functions.cache.tagCountsCache(uniqueTagArray.filter(Boolean), session, setSessionFlag)
+        let result = await functions.cache.tagCountsCache(uniqueTagArray.slice(0, 300), session, setSessionFlag)
         for (let i = 0; i < uniqueTagArray.length; i++) {
             const found = result.find((r: any) => r.tag === uniqueTagArray[i])
             if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", 
@@ -55,83 +46,86 @@ export default class TagFunctions {
     }
 
     public static tagCategories = async (parsedTags: string[] | TagCount[] | Tag[] | undefined, session: Session, 
-        setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+        setSessionFlag: (value: boolean) => void) => {
         let artists = [] as MiniTag[]
         let characters = [] as MiniTag[]
         let series = [] as MiniTag[]
         let meta = [] as MiniTag[]
         let tags = [] as MiniTag[] 
         if (!parsedTags) return {artists, characters, series, meta, tags}
-        let tagMap = cache ? await functions.cache.tagsCache(session, setSessionFlag) : await functions.http.get("/api/tag/map", 
-        {tags: parsedTags.map((t: string | TagCount | Tag) => typeof t === "string" ? t : t.tag)}, session, setSessionFlag)
+        let tagMap = await functions.cache.tagsCache(session, setSessionFlag)
+        let unverifiedCheck = [] as string[]
         for (let i = 0; i < parsedTags.length; i++) {
             let tag = parsedTags[i].hasOwnProperty("tag") ? (parsedTags[i] as TagCount).tag : parsedTags[i] as string
             let count = parsedTags[i].hasOwnProperty("count") ? (parsedTags[i] as TagCount).count : 0
             const foundTag = tagMap[tag]
-            if (!foundTag) {
-                const unverifiedTag = await functions.http.get("/api/tag/unverified", {tag}, session, setSessionFlag)
-                if (unverifiedTag) {
-                    const obj = {} as MiniTag
-                    obj.tag = tag
-                    obj.count = String(count)
-                    obj.image = unverifiedTag.image
-                    obj.imageHash = unverifiedTag.imageHash
-                    obj.type = unverifiedTag.type
-                    obj.description = unverifiedTag.description 
-                    obj.social = unverifiedTag.social
-                    obj.twitter = unverifiedTag.twitter
-                    obj.website = unverifiedTag.website
-                    obj.fandom = unverifiedTag.fandom
-                    obj.wikipedia = unverifiedTag.wikipedia
-                    if (unverifiedTag.type === "artist") {
-                        artists.push(obj)
-                    } else if (unverifiedTag.type === "character") {
-                        characters.push(obj)
-                    } else if (unverifiedTag.type === "series") {
-                        series.push(obj)
-                    } else if (unverifiedTag.type === "meta") {
-                        meta.push(obj)
-                    } else {
-                        tags.push(obj)
-                    }
+            if (foundTag) {
+                const obj = {} as MiniTag 
+                obj.tag = tag
+                obj.count = String(count)
+                obj.type = foundTag.type
+                obj.image = foundTag.image
+                obj.imageHash = foundTag.imageHash
+                obj.description = foundTag.description 
+                obj.social = foundTag.social
+                obj.twitter = foundTag.twitter
+                obj.website = foundTag.website
+                obj.fandom = foundTag.fandom
+                obj.wikipedia = foundTag.wikipedia
+                if (foundTag.type === "artist") {
+                    artists.push(obj)
+                } else if (foundTag.type === "character") {
+                    characters.push(obj)
+                } else if (foundTag.type === "series") {
+                    series.push(obj)
+                } else if (foundTag.type === "meta") {
+                    meta.push(obj)
+                } else {
+                    tags.push(obj)
                 }
-                continue
-            }
-            const obj = {} as MiniTag 
-            obj.tag = tag
-            obj.count = String(count)
-            obj.type = foundTag.type
-            obj.image = foundTag.image
-            obj.imageHash = foundTag.imageHash
-            obj.description = foundTag.description 
-            obj.social = foundTag.social
-            obj.twitter = foundTag.twitter
-            obj.website = foundTag.website
-            obj.fandom = foundTag.fandom
-            obj.wikipedia = foundTag.wikipedia
-            if (foundTag.type === "artist") {
-                artists.push(obj)
-            } else if (foundTag.type === "character") {
-                characters.push(obj)
-            } else if (foundTag.type === "series") {
-                series.push(obj)
-            } else if (foundTag.type === "meta") {
-                meta.push(obj)
             } else {
-                tags.push(obj)
+                unverifiedCheck.push(tag)
+            }
+        }
+        if (permissions.isMod(session) && unverifiedCheck.length) {
+            const unverifiedTags = await functions.http.get("/api/tag/list/unverified", {tags: unverifiedCheck}, session, setSessionFlag)
+            for (const unverifiedTag of unverifiedTags) {
+                const obj = {} as MiniTag
+                obj.tag = unverifiedTag.tag
+                obj.count = "0"
+                obj.image = unverifiedTag.image
+                obj.imageHash = unverifiedTag.imageHash
+                obj.type = unverifiedTag.type
+                obj.description = unverifiedTag.description 
+                obj.social = unverifiedTag.social
+                obj.twitter = unverifiedTag.twitter
+                obj.website = unverifiedTag.website
+                obj.fandom = unverifiedTag.fandom
+                obj.wikipedia = unverifiedTag.wikipedia
+                if (unverifiedTag.type === "artist") {
+                    artists.push(obj)
+                } else if (unverifiedTag.type === "character") {
+                    characters.push(obj)
+                } else if (unverifiedTag.type === "series") {
+                    series.push(obj)
+                } else if (unverifiedTag.type === "meta") {
+                    meta.push(obj)
+                } else {
+                    tags.push(obj)
+                }
             }
         }
         return {artists, characters, series, meta, tags}
     }
 
     public static tagGroupCategories = async (tagGroups: MiniTagGroup[], session: Session, 
-        setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+        setSessionFlag: (value: boolean) => void) => {
         let newTagGroups = [] as {name: string, tags: MiniTag[]}[]
         if (!tagGroups) return []
         for (const tagGroup of tagGroups) {
             if (!tagGroup) continue
             const tagCounts = await functions.cache.tagCountsCache(tagGroup.tags, session, setSessionFlag)
-            let {tags} = await this.tagCategories(tagCounts, session, setSessionFlag, cache)
+            let {tags} = await this.tagCategories(tagCounts, session, setSessionFlag)
             newTagGroups.push({name: tagGroup.name, tags})
         }
         return newTagGroups

@@ -111,8 +111,8 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         for (const postID of selectionItems.values()) {
             const promise = new Promise<PostQuickEditParams>(async (resolve) => {
                 const post = selectionPosts.get(String(postID)) as PostSearch
-                const parsedTags = await functions.tag.parseTagsSingle(post, session, setSessionFlag)
-                const tagCategories = await functions.tag.tagCategories(parsedTags, session, setSessionFlag, true)
+                const parsedTags = await functions.tag.parseTags([post], session, setSessionFlag)
+                const tagCategories = await functions.tag.tagCategories(parsedTags, session, setSessionFlag)
 
                 let artistData = tagCategories.artists.map((a) => a.tag)
                 let characterData = tagCategories.characters.map((c) => c.tag)
