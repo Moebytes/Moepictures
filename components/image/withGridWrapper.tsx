@@ -9,6 +9,7 @@ import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
 let tooltipTimer = null as any
+let timerTimeout = 300
 let clickTimer = null as any
 
 interface Props {
@@ -450,7 +451,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 setToolTipPost(props.post)
                 setToolTipImg(getImg()!)
                 setToolTipEnabled(true)
-            }, 700)
+            }, timerTimeout)
         }
     
         const mouseLeave = () => {

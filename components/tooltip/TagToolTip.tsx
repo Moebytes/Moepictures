@@ -14,6 +14,7 @@ import {PostSearch, Tag} from "../../types/Types"
 import "./styles/tagtooltip.less"
 
 let changeTimer = null as any
+let changeTimeout = 400
 
 const TagToolTip: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
@@ -50,7 +51,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
         if (changeTimer) clearTimeout(changeTimer)
         changeTimer = setTimeout(() => {
             updateTag()
-        }, 500)
+        }, changeTimeout)
     }, [tagTooltipTag, ratingType, session])
 
     useEffect(() => {
