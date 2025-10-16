@@ -69,7 +69,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
         let result = await functions.http.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
         rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
+        sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag, true)
 
         if (result.length < 50 && props.fallback?.[0]) {
             let interResult = await functions.http.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 

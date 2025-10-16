@@ -203,7 +203,8 @@ const PostPage: React.FunctionComponent = () => {
             if (!tagCategories?.artists?.[0]?.tag || !post) return
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
-                let artistPosts = await functions.http.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                let artistPosts = await functions.http.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", 
+                    rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
                 artistPosts = artistPosts.filter((p) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
@@ -227,7 +228,6 @@ const PostPage: React.FunctionComponent = () => {
             } else {
                 images = historyPost.images.map((i) => functions.link.getHistoryImageLink(i))
             }
-            setPost(historyPost)
             setImages(images)
             if (images[order-1]) {
                 setImage(images[order-1])
@@ -242,6 +242,7 @@ const PostPage: React.FunctionComponent = () => {
             setTagGroupCategories(groupCategories)
             setTagCategories(categories)
             setTags(tags)
+            setPost(historyPost)
         }
         updateHistory()
     }, [postID, historyID, order, session])
@@ -262,13 +263,13 @@ const PostPage: React.FunctionComponent = () => {
                 return
             }
             if (post) {
-                setPost(post)
                 const tags = await functions.tag.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
                 const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
+                setPost(post)
                 if (!post.tags) {
                     try {
                         post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
@@ -330,7 +331,6 @@ const PostPage: React.FunctionComponent = () => {
                 } else {
                     images = post.images.map((image) => functions.link.getImageLink(image))
                 }
-                setPost(post)
                 setImages(images)
                 if (images[order-1]) {
                     setImage(images[order-1])
@@ -344,6 +344,7 @@ const PostPage: React.FunctionComponent = () => {
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
+                setPost(post)
                 setSessionFlag(true)
             } else {
                 //functions.dom.replaceLocation("/404")
