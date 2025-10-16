@@ -128,26 +128,24 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 if (functions.util.cleanHTML(series)?.trim()) {
                     seriesData = functions.util.cleanHTML(series).trim().split(/[\n\r\s]+/g)
                 }
-                if (functions.util.cleanHTML(metaTags)?.trim()) {
-                    tagData = functions.util.removeDuplicates([...tagData, ...functions.util.cleanHTML(metaTags).trim().split(/[\n\r\s]+/g)])
-                }
-                
-                if (functions.util.cleanHTML(appendTags)?.trim()) {
-                    const appendData = functions.util.cleanHTML(appendTags).trim().split(/[\n\r\s]+/g)
-                    let toAppend = [] as string[]
-                    let toRemove = [] as string[]
-                    for (const tag of appendData) {
-                        if (tag.startsWith("-")) {
-                            toRemove.push(tag.replace("-", ""))
-                        } else {
-                            toAppend.push(tag.startsWith("+") ? tag.replace("+", "") : tag)
-                        }
+
+                const metaData = functions.util.cleanHTML(metaTags).trim().split(/[\n\r\s]+/g)
+                const appendData = functions.util.cleanHTML(appendTags).trim().split(/[\n\r\s]+/g)
+                let combinedData = [...metaData, ...appendData]
+
+                let toAppend = [] as string[]
+                let toRemove = [] as string[]
+                for (const tag of combinedData) {
+                    if (tag.startsWith("-")) {
+                        toRemove.push(tag.replace("-", ""))
+                    } else {
+                        toAppend.push(tag.startsWith("+") ? tag.replace("+", "") : tag)
                     }
-                    const tagSet = new Set(tagData)
-                    toAppend.forEach(tag => tagSet.add(tag))
-                    toRemove.forEach(tag => tagSet.delete(tag))
-                    tagData = Array.from(tagSet)
                 }
+                const tagSet = new Set(tagData)
+                toAppend.forEach(tag => tagSet.add(tag))
+                toRemove.forEach(tag => tagSet.delete(tag))
+                tagData = Array.from(tagSet)
 
                 const data = {
                     postID: postID,

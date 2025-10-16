@@ -25,6 +25,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {mobile, hideMobileNavbar} = useLayoutSelector()
     const {search, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
+    const [sortedTags, setSortedTags] = useState([] as TagCount[])
     const [suggestions, setSuggestions] = useState([] as TagCount[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
@@ -76,15 +77,46 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         }
     }, [props.active])
 
+    useEffect(() => {
+        const updateSortedTags = async () => {
+            let tagCounts = await functions.cache.tagCountsCache([], session, setSessionFlag)
+            setSortedTags(tagCounts)
+        }
+        updateSortedTags()
+    }, [session])
+
     const updateSearchSuggestions = async () => {
-        const query = props.text ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
+        let query = props.text ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
         if (!query) return setSuggestions([])
-        let suggestions = await functions.http.get("/api/search/suggestions", {query, type: props.type}, session, setSessionFlag)
+
+        query = functions.tag.trimSpecialCharacters(query)
+        let searchString = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
+
+        let tagCounts = sortedTags
+        if (props.type && props.type !== "all") {
+            if (props.type === "tags") {
+                tagCounts = tagCounts.filter((c) => c.type === "accessory" || c.type === "action" ||
+                c.type === "appearance" || c.type === "outfit" || c.type === "scenery" || c.type === "tag")
+            } else {
+                tagCounts = tagCounts.filter((c) => c.type === props.type)
+            }
+        }
+
+        let suggestions = [] as TagCount[]
+        for (const tagCount of tagCounts) {
+            if (tagCount.tag.toLowerCase().startsWith(searchString)) suggestions.push(tagCount)
+            if (suggestions.length >= 100) break
+        }
+
         if (!suggestions?.length) {
             const newQuery = query.split(/ +/g).slice(-1).join("")
             if (!newQuery) return setSuggestions([])
-            suggestions = await functions.http.get("/api/search/suggestions", {query: newQuery, type: props.type}, session, setSessionFlag)
+            for (const tagCount of tagCounts) {
+                if (tagCount.tag.toLowerCase().startsWith(newQuery)) suggestions.push(tagCount)
+                if (suggestions.length >= 100) break
+            }
         }
+
         setSuggestions(suggestions)
     }
 

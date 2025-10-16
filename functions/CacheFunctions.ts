@@ -65,10 +65,12 @@ export default class CacheFunctions {
             }
             localforage.setItem("tagCounts", tagCountMap)
         }
+        if (!tags.length) tags = Object.keys(tagCountMap)
         let result = [] as TagCount[]
         for (const tag of tags) {
             if (tagCountMap[tag]) result.push(tagCountMap[tag])
         }
+        result = result.sort((a, b) => b.count > a.count ? 1 : -1)
         return result
     }
 

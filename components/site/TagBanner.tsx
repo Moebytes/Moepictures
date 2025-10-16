@@ -124,7 +124,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const updateBannerTags = async () => {
         const visibleSlice = getVisibleSlice()
-        const visibleTags = await functions.http.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p) => p.postID)}, session, setSessionFlag)
+        const visibleTags = await functions.tag.parseTags(visibleSlice, session, setSessionFlag, true)
         const characterTags = [] as TagCount[]
         const characterTagsImg = [] as TagCount[]
         const seriesTags = [] as TagCount[]

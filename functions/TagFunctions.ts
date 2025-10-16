@@ -19,18 +19,36 @@ export default class TagFunctions {
     }
 
     public static parseTags = async (posts: PostFull[] | PostSearch[] | PostOrdered[] | Post[], session: Session, 
-        setSessionFlag: (value: boolean) => void) => {
-        let cleanPosts = posts.filter((p) => !(p as PostSearch).fake)
-        const postIDs = cleanPosts.map((post) => post.postID)
-        let result = await functions.http.get("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
-        return result ? result : []
+        setSessionFlag: (value: boolean) => void, isBanner?: boolean) => {
+        let cleanPosts = posts.filter((p) => !(p as PostSearch).fake) as PostFull[] | PostSearch[] 
+        if (cleanPosts.length && !cleanPosts[0].hasOwnProperty("tags")) {
+            cleanPosts = await functions.http.get("/api/posts", 
+            {postIDs: cleanPosts.map((p: Post) => p.postID)}, session, setSessionFlag)
+        }
+        let uniqueTags = new Set<string>()
+        for (let i = 0; i < cleanPosts.length; i++) {
+            for (let j = 0; j < cleanPosts[i].tags.length; j++) {
+                uniqueTags.add(cleanPosts[i].tags[j])
+            }
+        }
+        const uniqueTagArray = Array.from(uniqueTags)
+        let result = await functions.cache.tagCountsCache(uniqueTagArray.filter(Boolean), session, setSessionFlag)
+        for (let i = 0; i < uniqueTagArray.length; i++) {
+            const found = result.find((r: any) => r.tag === uniqueTagArray[i])
+            if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", 
+                image: "", imageHash: "", hidden: false, r18: false})
+        }
+        let characterTags = result.filter((t: any) => t.type === "character")
+        let seriesTags = result.filter((t: any) => t.type === "series")
+        return isBanner ? [...seriesTags, ...characterTags] : result
     }
 
     public static parseTagsUnverified = async (posts: UnverifiedPost[]) => {
         let result = [] as TagCount[]
         for (let i = 0; i < posts.length; i++) {
             for (let j = 0; j < posts[i].tags.length; j++) {
-                result.push({tag: posts[i].tags[j], count: "1", type: "tag", image: "", imageHash: ""})
+                result.push({tag: posts[i].tags[j], count: "1", type: "tag", 
+                image: "", imageHash: "", hidden: false, r18: false})
             }
         }
         return result

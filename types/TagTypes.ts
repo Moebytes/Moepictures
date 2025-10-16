@@ -29,6 +29,8 @@ export interface TagCount {
     image: string | null
     imageHash: string | null
     count: string
+    hidden: boolean | null
+    r18: boolean | null
 }
 
 export interface Alias {
