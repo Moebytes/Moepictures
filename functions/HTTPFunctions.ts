@@ -10,6 +10,7 @@ export default class HTTPFunctions {
     public static clientKeyLock = false
     public static serverPublicKey = ""
     public static serverKeyLock = false
+    public static lockManager = {} as {[key: string]: Promise<any> | null}
 
     public static fetch = async (link: string, headers?: any) => {
         return axios.get(link, {headers}).then((r) => r.data) as Promise<any>
@@ -75,7 +76,11 @@ export default class HTTPFunctions {
         }
 
         try {
-            const response = await axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            if (!this.lockManager[endpoint]) {
+                this.lockManager[endpoint] = axios.get(endpoint, {params: params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            }
+            const response = await this.lockManager[endpoint]
+            this.lockManager[endpoint] = null
             const json = functions.http.arrayBufferToJSON(response)
             if (json !== null) {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})
