@@ -544,8 +544,8 @@ app.get("/*", async (req: Request, res: Response) => {
           if (!permissions.isMod(req.session)) post = undefined
         }
         if (post) {
-          title = `Moepictures: ${post.englishTitle || post.title}`
-          description = post.englishCommentary || post.commentary || `${post.englishTitle} (${post.title}) by ${post.artist}`
+          title = `Moepictures | ${post.englishTitle || post.title}`
+          description = post.englishCommentary || post.commentary || `${post.englishTitle || post.title} by ${post.artist}`
           const img = post.images[0]
           image = `${functions.config.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
           url = `${functions.config.getDomain()}/post/${post.postID}/${post.slug}`
