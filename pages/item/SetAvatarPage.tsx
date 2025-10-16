@@ -23,7 +23,7 @@ const SetAvatarPage: React.FunctionComponent = () => {
     const {setSessionFlag, setUserImg} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {posts, tagCategories, tagGroupCategories} = useCacheSelector()
-    const {setPosts, setTags, setTagCategories, setTagGroupCategories} = useCacheActions()
+    const {setTags, setTagCategories, setTagGroupCategories} = useCacheActions()
     const {postFlag} = useFlagSelector()
     const {setRedirect, setPostFlag} = useFlagActions()
     const [images, setImages] = useState([] as string[])

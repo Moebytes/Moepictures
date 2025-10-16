@@ -38,7 +38,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {related} = useCacheSelector()
-    const {setPosts, setRelated} = useCacheActions()
+    const {setNavigationPosts, setRelated} = useCacheActions()
     const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
     const {setSearch, setSearchFlag, setScroll, setSquare, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
@@ -477,7 +477,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const click = (img: string, index: number) => {
         const post = related[index]
         navigate(`/post/${post.postID}/${post.slug}`)
-        setPosts(related)
+        setNavigationPosts(related)
     }
 
     let marginLeft = mobile ? 20 : 200

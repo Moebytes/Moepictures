@@ -41,7 +41,7 @@ const TagPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {setPosts} = useCacheActions()
+    const {setPosts, setNavigationPosts} = useCacheActions()
     const {tagFlag} = useFlagSelector()
     const {setTagFlag, setTagFavoriteFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
@@ -180,6 +180,7 @@ const TagPage: React.FunctionComponent = () => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(tagPosts)
+        setNavigationPosts(tagPosts)
     }
 
     const searchTag = (event: React.MouseEvent, alias?: string) => {

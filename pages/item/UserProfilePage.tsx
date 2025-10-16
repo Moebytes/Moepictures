@@ -62,7 +62,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {setPremiumRequired, setR18Confirmation, setShowDeleteAccountDialog} = useMiscDialogActions()
     const {setDMTarget} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
-    const {setPosts} = useCacheActions()
+    const {setPosts, setNavigationPosts} = useCacheActions()
     const errorRef = useRef<HTMLSpanElement>(null)
     const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
@@ -433,6 +433,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
+        setNavigationPosts(uploads)
     }
 
     const setFav = (img: string, index: number, newTab: boolean) => {
@@ -445,6 +446,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
+        setNavigationPosts(favorites)
     }
 
     const setPend = (img: string, index: number, newTab: boolean) => {
@@ -668,7 +670,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
-                setPosts(favgroup.posts)
+                setNavigationPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
                 }, 200)

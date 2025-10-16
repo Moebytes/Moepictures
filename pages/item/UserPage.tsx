@@ -46,7 +46,7 @@ const UserPage: React.FunctionComponent = () => {
     const {setBanName, setUnbanName, setPromoteName} = useMiscDialogActions()
     const {setDMTarget} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
-    const {setPosts} = useCacheActions()
+    const {setPosts, setNavigationPosts} = useCacheActions()
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0)
     const [uploads, setUploads] = useState([] as PostSearch[])
@@ -184,6 +184,7 @@ const UserPage: React.FunctionComponent = () => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
+        setNavigationPosts(uploads)
     }
 
     const setFav = (img: string, index: number, newTab: boolean) => {
@@ -196,6 +197,7 @@ const UserPage: React.FunctionComponent = () => {
         }
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
+        setNavigationPosts(favorites)
     }
 
     const getUserImg = () => {
@@ -408,7 +410,7 @@ const UserPage: React.FunctionComponent = () => {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
-                setPosts(favgroup.posts)
+                setNavigationPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
                 }, 200)

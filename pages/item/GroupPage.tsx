@@ -42,7 +42,7 @@ const GroupPage: React.FunctionComponent = () => {
     const {setSearch, setSearchFlag} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
-    const {setPosts} = useCacheActions()
+    const {setNavigationPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const [historyID, setHistoryID] = useState(null as string | null)
@@ -152,7 +152,7 @@ const GroupPage: React.FunctionComponent = () => {
                 }
                 if (reorderState) return
                 functions.post.openPost(item.post, event, navigate, session, setSessionFlag)
-                setPosts(group.posts)
+                setNavigationPosts(group.posts)
                 setTimeout(() => {
                     setActiveGroup(group)
                 }, 200)

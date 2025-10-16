@@ -62,7 +62,6 @@ export default class PostFunctions {
         if (postIndex === -1) return
         posts = structuredClone(posts);
         (posts[postIndex] as PostSearch).favorited = favorited
-        // setPosts(posts)
         localStorage.setItem("savedPosts", JSON.stringify(posts))
     }
 
