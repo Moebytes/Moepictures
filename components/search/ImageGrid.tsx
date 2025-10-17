@@ -279,8 +279,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 styleType !== initData.styleType || 
                 sortType !== initData.sortType ||
                 sortReverse !== initData.sortReverse) {
-                    const loadParam = new URLSearchParams(window.location.search).get("loaded")
-                    if (loadParam) init = false
                     if (init) {
                         return init = false
                     } else {
