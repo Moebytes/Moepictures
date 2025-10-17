@@ -13,14 +13,6 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
-import adminLabel from "../../assets/icons/admin-label.png"
-import modLabel from "../../assets/icons/mod-label.png"
-import systemLabel from "../../assets/icons/system-label.png"
-import premiumLabel from "../../assets/icons/premium-label.png"
-import contributorLabel from "../../assets/icons/contributor-label.png"
-import premiumContributorLabel from "../../assets/icons/premium-contributor-label.png"
-import curatorLabel from "../../assets/icons/curator-label.png"
-import premiumCuratorLabel from "../../assets/icons/premium-curator-label.png"
 import banIcon from "../../assets/icons/ban.png"
 import unbanIcon from "../../assets/icons/unban.png"
 import promoteIcon from "../../assets/icons/promote.png"
@@ -174,6 +166,17 @@ const UserPage: React.FunctionComponent = () => {
         }
     }, [mobile])
 
+    useEffect(() => {
+        const checkPendingDeletion = async () => {
+            if (user?.deleted && user?.deletionDate) {
+                const now = new Date()
+                const deletionDate = new Date(user.deletionDate)
+                if (now < deletionDate) functions.dom.replaceLocation("/404")
+            }
+        }
+        checkPendingDeletion()
+    }, [user])
+
     const setUp = (img: string, index: number, newTab: boolean) => {
         setUploadIndex(index)
         const post = uploads[index]
@@ -291,64 +294,11 @@ const UserPage: React.FunctionComponent = () => {
 
     const generateUsernameJSX = () => {
         if (!user) return
-        if (user?.role === "admin") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain admin-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={adminLabel}/>
-                </div>
-            )
-        } else if (user?.role === "mod") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain mod-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={modLabel}/>
-                </div>
-            )
-        } else if (user?.role === "system") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain system-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={systemLabel}/>
-                </div>
-            )
-        } else if (user?.role === "premium-curator") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={premiumCuratorLabel}/>
-                </div>
-            )
-        } else if (user?.role === "curator") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={curatorLabel}/>
-                </div>
-            )
-        } else if (user?.role === "premium-contributor") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={premiumContributorLabel}/>
-                </div>
-            )
-        } else if (user?.role === "contributor") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain contributor-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={contributorLabel}/>
-                </div>
-            )
-        } else if (user?.role === "premium") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.util.toProperCase(username)}</span>
-                    <img className="user-name-label" src={premiumLabel}/>
-                </div>
-            )
-        }
-        return <span className={`user-name ${user.banned ? "banned" : ""}`}>{functions.util.toProperCase(username)}</span>
+        return functions.jsx.usernameJSX(user, {
+            containerClass: "user-name-container",
+            textClass: "user-name-plain",
+            imageClass: "user-name-label"
+        }, i18n, navigate)
     }
 
     const banDialog = () => {
@@ -444,6 +394,7 @@ const UserPage: React.FunctionComponent = () => {
                         {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-opt-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
                     </div>
                     {banJSX()}
+                    {user.deleted ? <button className="user-deleted-button">{i18n.user.deletedAccount}</button> : null}
                     <div className="user-row">
                         <span className="user-text">{i18n.user.bio}: {functions.jsx.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>

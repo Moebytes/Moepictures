@@ -465,6 +465,12 @@ img {
     text-decoration: line-through;
 }
 
+.deleted {
+    font-weight: normal;
+    text-decoration: line-through;
+    color: var(--deletedColor);
+}
+
 .spoiler {
     color: var(--text);
     background-color: var(--text);
@@ -472,6 +478,13 @@ img {
     &:hover, &:focus {
         color: inherit;
         background-color: inherit;
+    }
+}
+
+.pointer-cursor {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(120%);
     }
 }
 

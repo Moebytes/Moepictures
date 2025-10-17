@@ -58,7 +58,7 @@ import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../functions/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory, PrunedUser} from "../../types/Types"
 import "./styles/mobileinfo.less"
 
 interface Props {
@@ -91,9 +91,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [maxTags, setMaxTags] = useState(23)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderImagePost, setUploaderImagePost] = useState("")
-    const [uploaderRole, setUploaderRole] = useState("")
-    const [updaterRole, setUpdaterRole] = useState("")
-    const [approverRole, setApproverRole] = useState("")
+    const [uploaderData, setUploaderData] = useState(null as PrunedUser | null)
+    const [updaterData, setUpdaterData] = useState(null as PrunedUser | null)
+    const [approverData, setApproverData] = useState(null as PrunedUser | null)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
@@ -109,14 +109,14 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const updateUserImg = async () => {
         if (props.post) {
-            const uploader = await functions.http.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
+            const uploader = await functions.http.get("/api/user", {username: props.post.uploader}, session, setSessionFlag, true)
             setUploaderImage(uploader?.image ? functions.link.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
             setUploaderImagePost(uploader?.imagePost || "")
-            if (uploader?.role) setUploaderRole(uploader.role)
-            const updater = await functions.http.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
-            if (updater?.role) setUpdaterRole(updater.role)
-            const approver = await functions.http.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
-            if (approver?.role) setApproverRole(approver.role)
+            setUploaderData(uploader ?? null)
+            const updater = await functions.http.get("/api/user", {username: props.post.updater}, session, setSessionFlag, true)
+            setUpdaterData(updater ?? null)
+            const approver = await functions.http.get("/api/user", {username: props.post.approver}, session, setSessionFlag, true)
+            setApproverData(approver ?? null)
         }
     }
 
@@ -644,33 +644,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = (type?: string) => {
-        if (!props.post) return
-        let username = props.post.uploader
-        let role = uploaderRole
-        if (type === "updater") {
-            username = props.post.updater 
-            role = updaterRole
-        }
-        if (type === "approver") {
-            username = props.post.approver 
-            role = approverRole
-        }
-        if (role === "admin") {
-            return (
-                <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                     <span className="tag-alt admin-color">{functions.util.toProperCase(username) || "deleted"}</span>
-                    <img className="mobileinfo-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (role === "mod") {
-            return (
-                <div className="mobileinfo-username-container" onClick={() => username ? navigate(`/user/${username}`) : null}>
-                    <span className="tag-alt mod-color">{functions.util.toProperCase(username) || "deleted"}</span>
-                    <img className="mobileinfo-user-label" src={modCrown}/>
-                </div>
-            )
-        }
-        return <span className="tag-alt-link" onClick={() => username ? navigate(`/user/${username}`) : null}>{functions.util.toProperCase(username) || "deleted"}</span>
+        if (!uploaderData) return
+        let user = uploaderData
+        if (type === "updater" && updaterData) user = updaterData
+        if (type === "approver" && approverData) user = approverData
+        return functions.jsx.usernameJSX(user, {
+            containerClass: "mobileinfo-username-container",
+            textClass: "tag-alt pointer-cursor",
+            imageClass: "mobileinfo-user-label"
+        }, i18n, navigate)
     }
 
     const copyTagsJSX = () => {

@@ -137,13 +137,13 @@ export default class SQLThread {
     public static thread = async (threadID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT threads.*, users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                SELECT threads.*, users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
                 FROM threads 
                 JOIN users ON users.username = threads.creator
                 WHERE threads."threadID" = $1
-                GROUP BY threads."threadID", users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                GROUP BY threads."threadID", users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
             `),
         values: [threadID]
         }
@@ -192,14 +192,14 @@ export default class SQLThread {
         if (offset && Number(offset) < 0) offset = 0
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate",
+                SELECT replies.*, users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."threadID" = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
                 ${offset ? "OFFSET $2" : ""}
             `),
         values: [threadID]
@@ -213,14 +213,14 @@ export default class SQLThread {
     public static userReplies = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate",
+                SELECT replies.*, users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies.creator = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
             `),
         values: [username]
         }
@@ -232,13 +232,13 @@ export default class SQLThread {
     public static reply = async (replyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                SELECT replies.*, users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."replyID" = $1
-                GROUP BY replies."replyID", users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash", users."postCount", users."joinDate"
+                GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
+                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
             `),
         values: [replyID]
         }
@@ -348,8 +348,8 @@ export default class SQLThread {
         if (sort === "reverse date") sortQuery = `ORDER BY forum_post."updatedDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                SELECT forum_post.*, users.role, users.image, users.banned, 
-                users."imagePost", users."imageHash",
+                SELECT forum_post.*, users."image", users."imagePost", users."imageHash", 
+                users."role", users."banned", users."deleted",
                 to_jsonb(thread_data.*) AS thread,
                 COUNT(*) OVER() AS "postCount"
                 FROM (

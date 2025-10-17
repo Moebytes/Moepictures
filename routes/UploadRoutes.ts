@@ -1270,7 +1270,7 @@ const CreateRoutes = (app: Express) => {
         } as SourceData
 
         const {artists, characters, series, tags: allTags} = await serverFunctions.tags.unverifiedTagCategories(unverified.tags)
-        let newTags = allTags.filter((t) => unverified.newTags?.includes(t.tag))
+        let newTags = allTags.filter((t) => unverified.newTags?.includes?.(t.tag))
         let tags = allTags.map((t) => t.tag)
 
         let type = unverified.type
@@ -1291,7 +1291,6 @@ const CreateRoutes = (app: Express) => {
         }
 
         let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: unverified.uploader, noImageUpdate})
-
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: unverified.tagGroups})
 
         // Approve notes

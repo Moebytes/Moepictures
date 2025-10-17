@@ -42,7 +42,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const updateUserRole = async () => {
-        const user = await functions.http.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag, true)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -88,7 +88,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deleteNoteHistoryFlag, deleteNoteHistoryID, session, props.current])
 
     const revertNoteHistoryDialog = async () => {
-        const post = await functions.http.get("/api/post", {postID: props.noteHistory.postID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID: props.noteHistory.postID}, session, setSessionFlag, true)
         if (!post) return
         if (post.locked && !permissions.isMod(session)) return setRevertNoteHistoryID({failed: "locked", historyID: props.noteHistory.historyID})
         setRevertNoteHistoryID({failed: false, historyID: props.noteHistory.historyID})

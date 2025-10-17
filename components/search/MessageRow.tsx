@@ -43,14 +43,14 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
 
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
-        const recipient = await functions.http.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
+        const recipient = await functions.http.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag, true)
         if (recipient) setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.message) return
-        const creator = await functions.http.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
+        const creator = await functions.http.get("/api/user", {username: props.message.creator}, session, setSessionFlag, true)
         if (creator) setCreatorData(creator)
         setCreatorDefaultIcon(creator?.image ? false : true)
     }

@@ -69,6 +69,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return void res.status(200).json(null)
             let user = await sql.user.user(username.trim().toLowerCase())
             if (!user) return void res.status(200).json(null)
+
             delete user.ips
             delete user.$2fa
             delete user.email
@@ -305,6 +306,7 @@ const UserRoutes = (app: Express) => {
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
                 req.session.lastNameChange = user.lastNameChange
+                req.session.deleted = user.deleted
 
                 if (user.role.includes("premium") && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
@@ -987,18 +989,38 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
+
             try {
                 await sql.token.deleteEmailToken(user.email!)
-                if (user.image) await serverFunctions.files.deleteFile(functions.link.getTagLink("pfp", user.image, user.imageHash), false)
+                await sql.token.deletePasswordToken(user.email!)
+                await sql.token.deleteIPToken(user.email!)
+                await sql.token.deleteAPIKey(user.email!)
             } catch (e) {
                 console.log(e)
-                // ignore
             }
-            await sql.user.deleteUser(req.session.username)
+            let deletionDate = new Date()
+            deletionDate.setDate(deletionDate.getDate() + 90)
+            await sql.user.updateUser(req.session.username, "deleted", true)
+            await sql.user.updateUser(req.session.username, "deletionDate", deletionDate.toISOString())
             req.session.destroy((err) => {
                 if (err) throw err
                 res.status(200).send("Success")
             })
+        } catch (e) {
+            console.log(e)
+            return void res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/user/undelete", csrfProtection, userLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return void res.status(400).send("Bad username")
+
+            await sql.user.updateUser(req.session.username, "deleted", false)
+            await sql.user.updateUser(req.session.username, "deletionDate", null)
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             return void res.status(400).send("Bad request")

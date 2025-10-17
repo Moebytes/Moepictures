@@ -11,6 +11,7 @@ import ServerLinks from "./ServerLinks"
 import ServerPosts from "./ServerPosts"
 import ServerSources from "./ServerSources"
 import ServerTags from "./ServerTags"
+import ServerUsers from "./ServerUsers"
 import ServerUtil from "./ServerUtil"
 import {Attachment} from "../types/Types"
 
@@ -86,6 +87,7 @@ export default class ServerFunctions {
     public static posts = ServerPosts
     public static sources = ServerSources
     public static tags = ServerTags
+    public static users = ServerUsers
     public static util = ServerUtil
 
     public static generateCSRF = () => {

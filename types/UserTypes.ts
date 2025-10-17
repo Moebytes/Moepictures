@@ -14,6 +14,8 @@ export interface PrunedUser {
     publicTagFavorites: boolean
     role: UserRole
     banned: boolean | null
+    deleted: boolean | null
+    deletionDate: string | null
     banExpiration: string | null
     deletedPosts?: string[]
 }
@@ -245,6 +247,7 @@ export type UserPostEndpoint<T extends string> =
 
 export type UserPutEndpoint<T extends string> = 
     T extends "/api/user/savesearch" ? {params: SaveSearchEditParams, response: string} :
+    T extends "/api/user/undelete" ? {params: null, response: string} :
     never
 
 export type UserDeleteEndpoint<T extends string> = 

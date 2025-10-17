@@ -687,6 +687,23 @@ const deleteQueuedUnverifiedPosts = async () => {
   }
 }
 
+const deleteQueuedUsers = async () => {
+  const deleted = await sql.user.deletedUsers()
+  const now = new Date()
+  for (const user of deleted) {
+    if (!user.deletionDate) continue
+    if (user.role === "deleted") continue 
+    const deletionDate = new Date(user.deletionDate)
+    if (now > deletionDate) {
+      try {
+        await serverFunctions.users.deleteUser(user)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+  }
+}
+
 const backupDatabase = async () => {
   await sql.backupDB()
 }
@@ -696,7 +713,7 @@ const runDaily = async () => {
   await deleteExpiredTokens()
   await deleteQueuedPosts()
   await deleteQueuedUnverifiedPosts()
-  sql.invalidateCache("tag-map")
+  await deleteQueuedUsers()
 }
 
 const run = async () => {

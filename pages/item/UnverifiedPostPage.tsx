@@ -229,9 +229,6 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
     const getPostJSX = () => {
         if (!post) return
         let img = image
-        if (session.cookie) {
-            img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
-        }
         if (post.type === "model") {
             return (
                 <>

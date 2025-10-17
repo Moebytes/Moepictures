@@ -38,10 +38,10 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const posts = await functions.http.get("/api/post-edits/list/unverified", null, session, setSessionFlag)
+        const posts = await functions.http.get("/api/post-edits/list/unverified", null, session, setSessionFlag, true)
         setEnded(false)
         setUnverifiedPosts(posts)
-        const originals = await functions.http.get("/api/posts", {postIDs: posts.map((p) => p.originalID)}, session, setSessionFlag)
+        const originals = await functions.http.get("/api/posts", {postIDs: posts.map((p) => p.originalID)}, session, setSessionFlag, true)
         for (const original of originals) {
             originalPosts.set(original.postID, original)
         }
@@ -117,7 +117,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/post-edits/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/post-edits/list/unverified", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedPosts.filter((t) => !t.fake)
         if (!scroll) {
@@ -133,7 +133,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             } else {
                 setUnverifiedPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const originals = await functions.http.get("/api/posts", {postIDs: result.map((p) => p.originalID)}, session, setSessionFlag)
+            const originals = await functions.http.get("/api/posts", {postIDs: result.map((p) => p.originalID)}, session, setSessionFlag, true)
             for (const original of originals) {
                 originalPosts.set(original.postID, original)
             }
@@ -145,7 +145,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 } else {
                     setUnverifiedPosts((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const originals = await functions.http.get("/api/posts", {postIDs: result.map((p) => p.originalID)}, session, setSessionFlag)
+                const originals = await functions.http.get("/api/posts", {postIDs: result.map((p) => p.originalID)}, session, setSessionFlag, true)
                 for (const original of originals) {
                     originalPosts.set(original.postID, original)
                 }

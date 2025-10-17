@@ -39,10 +39,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await functions.http.get("/api/tag/edit/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/tag/edit/request/list", null, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
-        const tags = await functions.http.get("/api/tag/list", {tags: requests.map((r) => r.tag)}, session, setSessionFlag)
+        const tags = await functions.http.get("/api/tag/list", {tags: requests.map((r) => r.tag)}, session, setSessionFlag, true)
         for (const tag of tags) {
             oldTags.set(tag.tag, tag)
         }
@@ -127,7 +127,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -143,7 +143,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             } else {
                 setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
+            const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag, true)
             for (const tag of tags) {
                 oldTags.set(tag.tag, tag)
             }
@@ -155,7 +155,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 } else {
                     setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag)
+                const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag, true)
                 for (const tag of tags) {
                     oldTags.set(tag.tag, tag)
                 }

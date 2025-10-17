@@ -57,7 +57,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateUserRole = async () => {
-        const user = await functions.http.get("/api/user", {username: props.tagHistory.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.tagHistory.user}, session, setSessionFlag, true)
         if (user?.role) setUserRole(user.role)
     }
 

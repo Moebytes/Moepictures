@@ -32,8 +32,12 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const deleteAccount = async () => {
         await functions.http.delete("/api/user/delete", null, session, setSessionFlag)
         setSessionFlag(true)
-        navigate("/posts")
-        setSidebarText(i18n.sidebar.accountDeleted)
+        setTimeout(() => {
+            navigate("/posts")
+            setTimeout(() => {
+                setSidebarText(i18n.sidebar.accountDeleted)
+            }, 500)
+        }, 500)
     }
 
     const click = (button: "accept" | "reject") => {
@@ -56,7 +60,8 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text-small">
                                 {i18n.dialogs.deleteAccount.header}<br/><br/>
                                 {i18n.dialogs.deleteAccount.header2}<br/><br/>
-                                {i18n.dialogs.deleteAccount.header3}
+                                {i18n.dialogs.deleteAccount.header3}<br/><br/>
+                                {i18n.dialogs.deleteAccount.header4}
                             </span>
                         </div>
                         <div className="dialog-row">

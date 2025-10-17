@@ -138,6 +138,7 @@ export type UserRole =
     | "contributor"
     | "premium"
     | "user"
+    | "deleted"
 
 export type AliasHistoryType =
     | "alias" 

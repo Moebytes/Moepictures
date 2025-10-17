@@ -56,7 +56,27 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.banner.removeBanner)
             document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
         }
+        if (actionBanner === "account-restored") {
+            setStickyText(i18n.banner.accountRestored)
+            document.documentElement.style.setProperty("--actionBannerColor", "#32a4f0CC")
+        }
     }, [actionBanner])
+
+    const getDuration = () => {
+        if (actionBanner === "account-restored") {
+            return 5000
+        } else {
+            return 2000
+        }
+    }
+
+    const getLeft = () => {
+        if (actionBanner === "account-restored") {
+            return "27%"
+        } else {
+            return "45%"
+        }
+    }
 
     if (actionBanner) {
         if (timeout && stickyText === actionBanner) {
@@ -66,12 +86,12 @@ const ActionBanner: React.FunctionComponent = (props) => {
             timeout = setTimeout(() => {
                 setActionBanner(null)
                 timeout = null
-            }, 2000)
+            }, getDuration())
         }
     }
 
     return (
-        <div className={`action-banner ${actionBanner ? "action-banner-visible" : ""}`}>
+        <div className={`action-banner ${actionBanner ? "action-banner-visible" : ""}`} style={{left: getLeft()}}>
             <span className="action-banner-text">{stickyText}</span>
             <span className="action-banner-x" onClick={() => setActionBanner(null)}>x</span>
         </div>

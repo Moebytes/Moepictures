@@ -34,7 +34,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const updateUserRole = async () => {
-        const user = await functions.http.get("/api/user", {username: props.history.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.history.user}, session, setSessionFlag, true)
         if (user?.role) setUserRole(user.role)
     }
 

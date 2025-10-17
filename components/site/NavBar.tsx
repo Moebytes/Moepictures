@@ -302,55 +302,73 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (<>
-                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutAdminIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "mod") {
             return (<>
-                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "system") {
             return (<>
-                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "curator") {
             return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium-contributor") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "contributor") {
             return (<>
-                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutContributorIcon} onClick={logout}/>
             </>
             )
         } else if (session.role === "premium") {
             return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else {
             return (<>
-                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>{functions.util.toProperCase(session.username)}</span>
+                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>
+                    {functions.util.toProperCase(session.username)}
+                </span>
                 <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
             </>
             )

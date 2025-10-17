@@ -35,7 +35,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     }
 
     const updateNotes = async () => {
-        const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag)
+        const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag, true)
         setEnded(false)
         setUnverifiedNotes(notes)
     }
@@ -105,7 +105,7 @@ const ModNotes: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedNotes.filter((t) => !t.fake)
         if (!scroll) {

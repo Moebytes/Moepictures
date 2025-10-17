@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS "users" (
     "banned" boolean,
     "banExpiration" timestamptz,
     "lastNameChange" timestamptz,
+    "deleted" boolean,
+    "deletionDate" timestamptz,
     "password" text
 );
 
