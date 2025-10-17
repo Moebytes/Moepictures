@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, 
-useSearchSelector, useSearchActions} from "../../store"
+useSearchSelector, useSearchActions, useCacheSelector} from "../../store"
 import "./styles/searchsuggestions.less"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
@@ -25,7 +25,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {mobile, hideMobileNavbar} = useLayoutSelector()
     const {search, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const [sortedTags, setSortedTags] = useState([] as TagCount[])
+    const {sortedTags} = useCacheSelector()
     const [suggestions, setSuggestions] = useState([] as TagCount[])
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
@@ -77,14 +77,6 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         }
     }, [props.active])
 
-    useEffect(() => {
-        const updateSortedTags = async () => {
-            let tagCounts = await functions.cache.tagCountsCache([], session, setSessionFlag)
-            setSortedTags(tagCounts)
-        }
-        updateSortedTags()
-    }, [session])
-
     const updateSearchSuggestions = async () => {
         let query = props.text ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
         if (!query) return setSuggestions([])
@@ -95,10 +87,10 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let tagCounts = sortedTags
         if (props.type && props.type !== "all") {
             if (props.type === "tags") {
-                tagCounts = tagCounts.filter((c) => c.type === "accessory" || c.type === "action" ||
+                tagCounts = sortedTags.filter((c) => c.type === "accessory" || c.type === "action" ||
                 c.type === "appearance" || c.type === "outfit" || c.type === "scenery" || c.type === "tag")
             } else {
-                tagCounts = tagCounts.filter((c) => c.type === props.type)
+                tagCounts = sortedTags.filter((c) => c.type === props.type)
             }
         }
 

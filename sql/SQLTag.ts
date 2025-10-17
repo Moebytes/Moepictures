@@ -219,6 +219,23 @@ export default class SQLTag {
         return result as Promise<Tag[]>
     }
 
+
+
+    /** Get aliases. */
+    public static aliases = async (aliases: string[]) => {
+        let whereQuery = aliases?.[0] ? `WHERE "aliases".alias = ANY ($1)` : ""
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    SELECT aliases.*
+                    FROM aliases
+                    ${whereQuery}
+            `)
+        }
+        if (aliases?.[0]) query.values = [aliases]
+        const result = await SQLQuery.run(query, `aliases/${aliases.join("-")}`)
+        return result as Promise<Alias[]>
+    }
+
     /** Get unverified tags. */
     public static unverifiedTags = async (tags: string[]) => {
         let whereQuery = tags?.[0] ? `WHERE "unverified tags".tag = ANY ($1)` : ""
@@ -279,12 +296,16 @@ export default class SQLTag {
                     SELECT "tag map posts".tag, 
                     array_length("tag map posts"."posts", 1) AS count,
                     "tags".type, "tags".image, "tags"."imageHash", 
-                    "tags"."hidden", "tags"."r18"
+                    "tags"."hidden", "tags"."r18", "tags"."description",
+                    "tags"."social", "tags"."twitter", "tags"."website",
+                    "tags"."wikipedia"
                     FROM "tag map posts"
                     LEFT JOIN tags ON tags."tag" = "tag map posts".tag
                     ${whereQuery}
                     GROUP BY "tag map posts".tag, "tags".type, "tags".image, 
-                    "tags"."imageHash", "tags"."hidden", "tags"."r18"
+                    "tags"."imageHash", "tags"."hidden", "tags"."r18",
+                    "tags"."description", "tags"."social", "tags"."twitter",
+                    "tags"."website", "tags"."wikipedia"
                     ORDER BY count DESC
             `)
         }
@@ -373,22 +394,6 @@ export default class SQLTag {
         }
         const result = await SQLQuery.run(query, `tag/alias/${alias}`)
         return result[0] as Promise<Alias | undefined>
-    }
-
-    /** Alias search. */
-    public static aliasSearch = async (search: string) => {
-        let whereQuery = ""
-        if (search) whereQuery = `WHERE lower(aliases.alias) LIKE $1 || '%'`
-        const query: QueryConfig = {
-            text: functions.multiTrim(/*sql*/`
-                    SELECT aliases.*
-                    FROM aliases
-                    ${whereQuery}
-            `)
-        }
-        if (search) query.values = [search.toLowerCase()]
-        const result = await SQLQuery.run(query, `tag/alias/search`)
-        return result as Promise<Alias[]>
     }
 
     /** Bulk insert implications. */

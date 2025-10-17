@@ -173,7 +173,7 @@ export default class PostFunctions {
         public static parseNewTags = async (post: PostSearch | PostHistory, session: Session, setSessionFlag: (value: boolean) => void) => {
             const tags = post.tags
             if (!tags?.[0]) return []
-            const tagMap = await functions.cache.tagsCache(session, setSessionFlag)
+            const tagMap = await functions.cache.tagCountsCache(session, setSessionFlag)
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]

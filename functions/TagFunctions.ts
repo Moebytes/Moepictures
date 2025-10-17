@@ -23,11 +23,12 @@ export default class TagFunctions {
             }
         }
         const uniqueTagArray = Array.from(uniqueTags)
-        let result = await functions.cache.tagCountsCache(uniqueTagArray.slice(0, 300), session, setSessionFlag)
+        let result = await functions.cache.sortedTagCounts(uniqueTagArray.slice(0, 300), session, setSessionFlag)
         for (let i = 0; i < uniqueTagArray.length; i++) {
             const found = result.find((r: any) => r.tag === uniqueTagArray[i])
             if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", 
-                image: "", imageHash: "", hidden: false, r18: false})
+                image: "", imageHash: "", description: "", social: "", twitter: "", 
+                website: "", fandom: "", wikipedia: "", hidden: false, r18: false})
         }
         let characterTags = result.filter((t: any) => t.type === "character")
         let seriesTags = result.filter((t: any) => t.type === "series")
@@ -39,7 +40,8 @@ export default class TagFunctions {
         for (let i = 0; i < posts.length; i++) {
             for (let j = 0; j < posts[i].tags.length; j++) {
                 result.push({tag: posts[i].tags[j], count: "1", type: "tag", 
-                image: "", imageHash: "", hidden: false, r18: false})
+                image: "", imageHash: "", description: "", social: "", twitter: "", 
+                website: "", fandom: "", wikipedia: "", hidden: false, r18: false})
             }
         }
         return result
@@ -53,7 +55,7 @@ export default class TagFunctions {
         let meta = [] as MiniTag[]
         let tags = [] as MiniTag[] 
         if (!parsedTags) return {artists, characters, series, meta, tags}
-        let tagMap = await functions.cache.tagsCache(session, setSessionFlag)
+        let tagMap = await functions.cache.tagCountsCache(session, setSessionFlag)
         let unverifiedCheck = [] as string[]
         for (let i = 0; i < parsedTags.length; i++) {
             let tag = parsedTags[i].hasOwnProperty("tag") ? (parsedTags[i] as TagCount).tag : parsedTags[i] as string
@@ -124,7 +126,7 @@ export default class TagFunctions {
         if (!tagGroups) return []
         for (const tagGroup of tagGroups) {
             if (!tagGroup) continue
-            const tagCounts = await functions.cache.tagCountsCache(tagGroup.tags, session, setSessionFlag)
+            const tagCounts = await functions.cache.sortedTagCounts(tagGroup.tags, session, setSessionFlag)
             let {tags} = await this.tagCategories(tagCounts, session, setSessionFlag)
             newTagGroups.push({name: tagGroup.name, tags})
         }

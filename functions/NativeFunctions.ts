@@ -15,7 +15,7 @@ export default class NativeFunctions {
     // Unused... The JS version is actually faster since it avoids expensive conversion to and from JSON strings.
     public static parseSpaceEnabledSearchNative = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
-        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
+        let savedTags = await functions.cache.tagCountsCache(session, setSessionFlag)
         const nativeFunctions = await this.getWasmModule()
         return nativeFunctions.ccall("parseSpaceEnabledSearch", "string", ["string", "string"], [query, JSON.stringify(savedTags)])
     }
@@ -49,7 +49,8 @@ export default class NativeFunctions {
     public static parseSpaceEnabledSearch = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
-        let savedTags = await functions.cache.tagsCache(session, setSessionFlag)
+        let savedTags = await functions.cache.tagCountsCache(session, setSessionFlag)
+        const savedAliases = await functions.cache.aliasCache(session, setSessionFlag)
         let permutations = this.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
         let specialFlagsArray = new Array(permutations.length).fill("")
@@ -77,8 +78,8 @@ export default class NativeFunctions {
         }
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
-                for (let savedTag of Object.values(savedTags)) {
-                    const exists = savedTag.aliases.find((a) => a?.alias === permutations[i][j])
+                for (let savedAlias of savedAliases) {
+                    const exists = savedAlias.alias === permutations[i][j]
                     if (exists) matchesArray[i]++
                 }
             }

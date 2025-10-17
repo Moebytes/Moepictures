@@ -104,22 +104,12 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/map", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/tag/aliases", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let tags = req.query.tags as string[]
-            if (!tags) tags = []
-            let result = await sql.tag.tags(tags.filter(Boolean))
-            if (!permissions.isMod(req.session)) {
-                result = result.filter((tag) => !tag.hidden)
-            }
-            if (!req.session.showR18) {
-                result = result.filter((tag) => !tag.r18)
-            }
-            const tagMap = {} as {[key: string]: Tag}
-            for (const tag of result) {
-                tagMap[tag.tag] = tag
-            }
-            serverFunctions.sendEncrypted(tagMap, req, res)
+            let aliases = req.query.aliases as string[]
+            if (!aliases) aliases = []
+            let result = await sql.tag.aliases(aliases.filter(Boolean))
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return void res.status(400).send("Bad request")
