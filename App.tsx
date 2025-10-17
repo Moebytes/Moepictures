@@ -91,7 +91,7 @@ const App: React.FunctionComponent = (props) => {
     const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
     const {postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag} = useFlagSelector()
     const {posts} = useCacheSelector()
-    const {setEmojis} = useCacheActions()
+    const {setEmojis, setSortedTags} = useCacheActions()
     const {selectionMode} = useSearchSelector()
     const {setRatingType} = useSearchActions()
     const navigate = useNavigate()
@@ -110,11 +110,17 @@ const App: React.FunctionComponent = (props) => {
         setEmojis(emojis)
     }
 
+    const cacheSortedTags = async () => {
+        const sorted = await functions.cache.sortedTagCounts([], session, setSessionFlag)
+        setSortedTags(sorted)
+    }
+
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
         functions.cache.clearCache()
         cacheEmojis()
+        cacheSortedTags()
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()

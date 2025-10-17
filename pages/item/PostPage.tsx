@@ -242,7 +242,7 @@ const PostPage: React.FunctionComponent = () => {
                 setOrder(1)
             }
             const allTags = [...historyPost.artists, ...historyPost.characters, ...historyPost.series, ...historyPost.tags]
-            const tags = await functions.cache.tagCountsCache(allTags, session, setSessionFlag)
+            const tags = await functions.cache.sortedTagCounts(allTags, session, setSessionFlag)
             const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
             const groupCategories = await functions.tag.tagGroupCategories(historyPost.tagGroups, session, setSessionFlag)
             setTagGroupCategories(groupCategories)

@@ -25,10 +25,16 @@ export interface TagCategories {
 
 export interface TagCount {
     tag: string
+    count: string
     type: TagType
     image: string | null
     imageHash: string | null
-    count: string
+    description: string
+    website: string | null
+    social: string | null
+    twitter: string | null
+    fandom: string | null
+    wikipedia: string | null
     hidden: boolean | null
     r18: boolean | null
 }
@@ -204,7 +210,7 @@ export type TagGetEndpoint<T extends string> =
     T extends "/api/tag/related" ? {params: {tag: string}, response: string[]} :
     T extends "/api/tag/counts" ? {params: {tags: string[]}, response: TagCount[]} :
     T extends "/api/tag/list" ? {params: {tags: string[]}, response: Tag[]} :
-    T extends "/api/tag/map" ? {params: {tags: string[]}, response: {[key: string]: Tag}} :
+    T extends "/api/tag/aliases" ? {params: {aliases: string[]}, response: Alias[]} :
     T extends "/api/tag/list/unverified" ? {params: {tags: string[]}, response: Tag[]} :
     T extends "/api/tag/delete/request/list" ? {params: {offset?: number} | null, response: TagDeleteRequest[]} :
     T extends "/api/tag/aliasto/request/list" ? {params: {offset?: number} | null, response: AliasRequest[]} :

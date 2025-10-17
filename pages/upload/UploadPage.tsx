@@ -900,7 +900,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const tagMap = await functions.cache.tagsCache(session, setSessionFlag)
+            const tagMap = await functions.cache.tagCountsCache(session, setSessionFlag)
             let notExists = [] as UploadTag[]
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]

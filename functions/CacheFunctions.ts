@@ -1,6 +1,6 @@
 import localforage from "localforage"
 import functions from "./Functions"
-import {GetEndpoint, TagCount, Tag, Session, PostSearchParams} from "../types/Types"
+import {GetEndpoint, TagCount, Tag, Alias, Session, PostSearchParams} from "../types/Types"
 
 export default class CacheFunctions {
     public static cachedThumbs = new Map<string, string>()
@@ -41,30 +41,24 @@ export default class CacheFunctions {
         url.searchParams.set("update", roundedTime.toString())
         return url.toString()
     }
-
-    public static tagsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
-        const cache = await localforage.getItem("tags")
-        if (cache) {
-            return cache as {[key: string]: Tag}
-        } else {
-            let tagMap = await functions.http.get("/api/tag/map", {tags: []}, session, setSessionFlag)
-            localforage.setItem("tags", tagMap)
-            return tagMap
-        }
-    }
     
-    public static tagCountsCache = async (tags: string[], session: Session, setSessionFlag: (value: boolean) => void) => {
+    public static tagCountsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
         let tagCountMap = {} as {[key: string]: TagCount}
         const cache = await localforage.getItem("tagCounts")
         if (cache) {
-            tagCountMap = cache as {[key: string]: TagCount}
+            return cache as {[key: string]: TagCount}
         } else {
             let tagCounts = await functions.http.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
             for (const tagCount of tagCounts) {
                 tagCountMap[tagCount.tag] = tagCount
             }
             localforage.setItem("tagCounts", tagCountMap)
+            return tagCountMap
         }
+    }
+
+    public static sortedTagCounts = async (tags: string[], session: Session, setSessionFlag: (value: boolean) => void) => {
+        let tagCountMap = await this.tagCountsCache(session, setSessionFlag)
         if (!tags.length) tags = Object.keys(tagCountMap)
         let result = [] as TagCount[]
         for (const tag of tags) {
@@ -72,6 +66,17 @@ export default class CacheFunctions {
         }
         result = result.sort((a, b) => b.count > a.count ? 1 : -1)
         return result
+    }
+
+    public static aliasCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
+        const cache = await localforage.getItem("aliases")
+        if (cache) {
+            return cache as Alias[]
+        } else {
+            let aliasMap = await functions.http.get("/api/tag/aliases", {aliases: []}, session, setSessionFlag)
+            localforage.setItem("aliases", aliasMap)
+            return aliasMap
+        }
     }
 
     public static emojisCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {

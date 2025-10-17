@@ -210,7 +210,9 @@ export default class ServerFiles {
             try {
                 fs.renameSync(`${folder}/${oldFolder}`, `${folder}/${newFolder}`)
             } catch {
-                fs.renameSync(`${folder}/${encodeURI(oldFolder)}`, `${folder}/${encodeURI(newFolder)}`)
+                try {
+                    fs.renameSync(`${folder}/${encodeURI(oldFolder)}`, `${folder}/${encodeURI(newFolder)}`)
+                } catch {}
             }
             return
         } else {
