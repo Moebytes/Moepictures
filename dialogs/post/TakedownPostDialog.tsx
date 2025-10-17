@@ -5,8 +5,9 @@ import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
+import takedownIcon from "../../assets/icons/takedown.png"
+import restoreIcon from "../../assets/icons/restore.png"
 import {PostSearch, PostHistory} from "../../types/Types"
-
 
 const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -74,6 +75,14 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
         }
     }
 
+    const getIcon = () => {
+        if (takedownPostID?.post.hidden) {
+            return restoreIcon
+        } else {
+            return takedownIcon
+        }
+    }
+
     if (takedownPostID) {
         if (permissions.isMod(session)) {
             return (
@@ -82,6 +91,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
+                                <img draggable={false} className="dialog-icon" src={getIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

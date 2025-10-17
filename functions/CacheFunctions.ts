@@ -57,7 +57,9 @@ export default class CacheFunctions {
         }
     }
 
-    public static sortedTagCounts = async (tags: string[], session: Session, setSessionFlag: (value: boolean) => void) => {
+    public static sortedTagCounts = async (tagsInput: string[] | "all", session: Session, setSessionFlag: (value: boolean) => void) => {
+        if (!tagsInput.length) return []
+        let tags = tagsInput === "all" ? [] : tagsInput
         let tagCountMap = await this.tagCountsCache(session, setSessionFlag)
         if (!tags.length) tags = Object.keys(tagCountMap)
         let result = [] as TagCount[]
