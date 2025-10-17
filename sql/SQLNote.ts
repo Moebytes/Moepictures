@@ -334,7 +334,8 @@ export default class SQLNote {
                 ranked_notes AS (
                     SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
                     notes."order", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
-                    users."image", users."imageHash", users."imagePost", users."role", users."banned",
+                    users."image", users."imageHash", users."imagePost", 
+                    users."role", users."banned", users."deleted",
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
@@ -346,7 +347,8 @@ export default class SQLNote {
                     LEFT JOIN note_json ON note_json."postID" = notes."postID" AND note_json."order" = notes."order"
                     ${whereQuery}
                     GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
-                    users."image", users."imageHash", users."imagePost", users."role", users."banned"
+                    users."image", users."imageHash", users."imagePost", 
+                    users."role", users."banned", users."deleted"
                 )
                 SELECT *
                 FROM ranked_notes
@@ -391,7 +393,8 @@ export default class SQLNote {
                 ranked_notes AS (
                     SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
                     notes."order", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
-                    users."image", users."imageHash", users."imagePost", users."role", users."banned",
+                    users."image", users."imageHash", users."imagePost", 
+                    users."role", users."banned", users."deleted",
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
@@ -403,7 +406,8 @@ export default class SQLNote {
                     LEFT JOIN note_json ON note_json."postID" = notes."postID" AND note_json."order" = notes."order"
                     ${whereQuery}
                     GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
-                    users."image", users."imageHash", users."imagePost", users."role", users."banned"
+                    users."image", users."imageHash", users."imagePost", 
+                    users."role", users."banned", users."deleted"
                 )
                 SELECT *
                 FROM ranked_notes

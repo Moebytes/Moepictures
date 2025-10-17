@@ -9,14 +9,6 @@ import commentQuote from "../../assets/icons/commentquote.png"
 import commentReport from "../../assets/icons/commentreport.png"
 import commentEdit from "../../assets/icons/commentedit.png"
 import commentDelete from "../../assets/icons/commentdelete.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import systemCrown from "../../assets/icons/system-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
 import TinyImage from "../image/TinyImage"
 import "./styles/commentrow.less"
 import {CommentSearch} from "../../types/Types"
@@ -175,64 +167,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = () => {
-        if (props.comment?.role === "admin") {
-            return (
-                <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (props.comment?.role === "mod") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (props.comment?.role === "system") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (props.comment?.role === "premium-curator") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (props.comment?.role === "curator") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (props.comment?.role === "premium-contributor") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (props.comment?.role === "contributor") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (props.comment?.role === "premium") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.comment.username)}</span>
-                    <img className="commentrow-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return <span className={`commentrow-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.comment?.username) || i18n.user.deleted}</span>
+        return functions.jsx.usernameJSX(props.comment, {
+            containerClass: "commentrow-username-container",
+            textClass: "commentrow-user-text",
+            imageClass: "commentrow-user-label"
+        }, i18n, navigate)
     }
 
     const commentJump = () => {

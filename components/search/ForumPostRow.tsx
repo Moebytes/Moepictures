@@ -9,14 +9,6 @@ import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import reportOptIcon from "../../assets/icons/report-opt.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import systemCrown from "../../assets/icons/system-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
 import "./styles/commentrow.less"
 import {ForumPostSearch} from "../../types/Types"
 
@@ -227,64 +219,11 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = () => {
-        if (props.forumPost?.role === "admin") {
-            return (
-                <div className="commentrow-username-container">
-                    <span className="commentrow-user-text admin-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "mod") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text mod-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "system") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text system-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "premium-curator") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "curator") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text curator-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "premium-contributor") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "contributor") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text contributor-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (props.forumPost?.role === "premium") {
-            return (
-                <div className="commentrow-username-container">
-                <span className="commentrow-user-text premium-color">{functions.util.toProperCase(props.forumPost.creator)}</span>
-                    <img className="commentrow-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return <span className={`commentrow-user-text ${props.forumPost?.banned ? "banned" : ""}`}>{functions.util.toProperCase(props.forumPost?.creator) || i18n.user.deleted}</span>
+        return functions.jsx.usernameJSX({username: props.forumPost.creator, ...props.forumPost}, {
+            containerClass: "commentrow-username-container",
+            textClass: "commentrow-user-text",
+            imageClass: "commentrow-user-label"
+        }, i18n, navigate)
     }
 
     const titleClick = (event: React.MouseEvent) => {

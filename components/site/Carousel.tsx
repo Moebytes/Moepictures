@@ -103,6 +103,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const getCombinedImages = () => {
         const images = functions.util.removeDuplicates([...props.images, ...(props.appendImages || [])])
+        if (props.unverified) return images
         return images.map((img) => functions.util.appendURLParams(img, {upscaled: session.upscaledImages}))
     }
 

@@ -275,7 +275,8 @@
         "logoutSessions": "Logged out other sessions!",
         "blacklist": "Blacklisted IP!",
         "unblacklist": "Unblacklisted IP!",
-        "removeBanner": "Removed Banner!"
+        "removeBanner": "Removed Banner!",
+        "accountRestored": "Your account was restored since you logged in within the 90-day grace period."
     },
     "user": {
         "bannedReason": "You are banned for reason:",
@@ -316,7 +317,8 @@
         "apiKey": "API Key",
         "favoriteTags": "Favorite Tags",
         "forumPosts": "Forum Posts",
-        "deleted": "deleted"
+        "deleted": "deleted",
+        "deletedAccount": "deleted account"
     },
     "roles": {
         "admin": "Admin",
@@ -875,9 +877,10 @@
             "title": "Upscale Post"
         },
         "deleteAccount": {
-            "header": "Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.",
-            "header2": "Because Moepictures is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as \"deleted\".",
-            "header3": "Are you sure that you want to continue?"
+            "header": "Are you sure that you want to delete your account? This action is irreversible. You will lose all of your favorites, comments, cuteness ratings, etc.",
+            "header2": "Since Moepictures is a site focused on community contributions, we will not remove your submitted posts. The account that uploaded these posts will show up as \"deleted\".",
+            "header3": "There is a 90-day grace period before your account is fully deleted. If you login again during this period, we will cancel the deletion and restore your account.",
+            "header4": "Are you sure that you want to continue?"
         },
         "deleteAliasHistory": {
             "aliasTitle": "Delete Alias History",

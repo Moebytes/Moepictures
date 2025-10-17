@@ -63,6 +63,7 @@ export interface NoteSearch {
     imagePost: string | null
     role: UserRole
     banned: boolean | null
+    deleted: boolean | null
     row: string
     fake?: boolean
 }

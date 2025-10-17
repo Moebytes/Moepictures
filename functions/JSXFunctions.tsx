@@ -1,10 +1,20 @@
 import functions from "../functions/Functions"
+import {NavigateFunction} from "react-router-dom"
 import VerifyEmail from "../emails/VerifyEmail"
 import ChangeEmail from "../emails/ChangeEmail"
 import ResetPassword from "../emails/ResetPassword"
 import ChangedPassword from "../emails/ChangedPassword"
 import VerifyLogin from "../emails/VerifyLogin"
 import email from "../assets/icons/email.png"
+import adminCrown from "../assets/icons/admin-crown.png"
+import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
+import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
+import curatorStar from "../assets/icons/curator-star.png"
+import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
+import contributorPencil from "../assets/icons/contributor-pencil.png"
+import premiumStar from "../assets/icons/premium-star.png"
+import enLocale from "../assets/locales/en.json"
 
 export default class JSXFunctions {
     public static verifyEmailJSX = (username: string, link: string) => {
@@ -376,5 +386,87 @@ export default class JSXFunctions {
             }
         }
         return jsx
+    }
+
+    public static usernameJSX = (userData: {username: string, role: string, banned: boolean | null, deleted: boolean | null}, 
+        classNames: {containerClass: string, textClass: string, imageClass: string}, i18n: typeof enLocale, navigate: NavigateFunction) => {
+        if (userData.role === "admin") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} admin-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={adminCrown}/>
+                </div>
+            )
+        } else if (userData.role === "mod") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} mod-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={modCrown}/>
+                </div>
+            )
+        } else if (userData.role === "system") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} system-color`}>
+                        {functions.util.toProperCase(userData.username)}</span>
+                    <img className={classNames.imageClass} src={systemCrown}/>
+                </div>
+            )
+        } else if (userData.role === "premium-curator") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} curator-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={premiumCuratorStar}/>
+                </div>
+            )
+        } else if (userData.role === "curator") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} curator-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={curatorStar}/>
+                </div>
+            )
+        } else if (userData.role === "premium-contributor") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} premium-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={premiumContributorPencil}/>
+                </div>
+            )
+        } else if (userData.role === "contributor") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} contributor-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={contributorPencil}/>
+                </div>
+            )
+        } else if (userData.role === "premium") {
+            return (
+                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
+                    <span className={`${classNames.textClass} premium-color`}>
+                        {functions.util.toProperCase(userData.username)}
+                    </span>
+                    <img className={classNames.imageClass} src={premiumStar}/>
+                </div>
+            )
+        }
+        return (
+            <span className={`${classNames.textClass} ${userData.banned ? "banned" : ""} ${userData.deleted ? "deleted" : ""}`} 
+                onClick={() => navigate(`/user/${userData.username}`)}>
+                {userData.deleted ? i18n.user.deleted : functions.util.toProperCase(userData.username)}
+            </span>
+        )
     }
 }

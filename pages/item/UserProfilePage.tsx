@@ -13,14 +13,6 @@ useCacheSelector, useCacheActions, useInteractionActions, useMiscDialogSelector}
 import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
-import adminLabel from "../../assets/icons/admin-label.png"
-import modLabel from "../../assets/icons/mod-label.png"
-import systemLabel from "../../assets/icons/system-label.png"
-import premiumLabel from "../../assets/icons/premium-label.png"
-import contributorLabel from "../../assets/icons/contributor-label.png"
-import premiumContributorLabel from "../../assets/icons/premium-contributor-label.png"
-import curatorLabel from "../../assets/icons/curator-label.png"
-import premiumCuratorLabel from "../../assets/icons/premium-curator-label.png"
 import permissions from "../../structures/Permissions"
 import premiumStar from "../../assets/icons/premium-star.png"
 import r18 from "../../assets/icons/r18.png"
@@ -185,6 +177,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updatePending = async () => {
          const pending = await functions.http.get("/api/post/pending", null, session, setSessionFlag)
          const images = pending.map((p) => functions.link.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
+         console.log(images)
          setPending(pending)
          setPendingImages(images)
     }
@@ -192,7 +185,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateDeleted = async () => {
         const deleted = await functions.http.get("/api/post/rejected", null, session, setSessionFlag)
         const images = deleted.map((p) => functions.link.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
-        setDeleted(pending)
+        setDeleted(deleted)
         setDeletedImages(images)
    }
 
@@ -503,64 +496,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const generateUsernameJSX = () => {
-        if (session.role === "admin") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain admin-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={adminLabel}/>
-                </div>
-            )
-        } else if (session.role === "mod") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain mod-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={modLabel}/>
-                </div>
-            )
-        } else if (session.role === "system") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain system-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={systemLabel}/>
-                </div>
-            )
-        } else if (session.role === "premium-curator") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={premiumCuratorLabel}/>
-                </div>
-            )
-        } else if (session.role === "curator") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain curator-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={curatorLabel}/>
-                </div>
-            )
-        } else if (session.role === "premium-contributor") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={premiumContributorLabel}/>
-                </div>
-            )
-        } else if (session.role === "contributor") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain contributor-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={contributorLabel}/>
-                </div>
-            )
-        } else if (session.role === "premium") {
-            return (
-                <div className="user-name-container">
-                    <span className="user-name-plain premium-color">{functions.util.toProperCase(session.username)}</span>
-                    <img className="user-name-label" src={premiumLabel}/>
-                </div>
-            )
-        } 
-        return <span className={`user-name ${session.banned ? "banned" : ""}`}>{functions.util.toProperCase(session.username)}</span>
+        return functions.jsx.usernameJSX(session, {
+            containerClass: "user-name-container",
+            textClass: "user-name-plain",
+            imageClass: "user-name-label"
+        }, i18n, navigate)
     }
 
     const getBanText = () => {
@@ -791,6 +731,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         </>}
                     </div>
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
+                    {session.deleted ? <button className="user-deleted-button">{i18n.user.deletedAccount}</button> : null}
                     {premiumExpirationJSX()}
                     {banExpirationJSX()}
                     <div className="user-row">

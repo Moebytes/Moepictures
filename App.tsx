@@ -86,7 +86,7 @@ const App: React.FunctionComponent = (props) => {
     const {enableDrag, sidebarHover} = useInteractionSelector()
     const {setMobileScrolling} = useInteractionActions()
     const {activeDropdown, filterDropActive, activeGroup, activeFavgroup} = useActiveSelector()
-    const {setActiveDropdown, setActiveGroup, setActiveFavgroup} = useActiveActions()
+    const {setActiveDropdown, setActiveGroup, setActiveFavgroup, setActionBanner} = useActiveActions()
     const {session, sessionFlag} = useSessionSelector()
     const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
     const {postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag} = useFlagSelector()
@@ -203,6 +203,10 @@ const App: React.FunctionComponent = (props) => {
                 }
             }
         }, 1000)
+        if (session.deleted) {
+            functions.http.put("/api/user/undelete", null, session, setSessionFlag)
+            setActionBanner("account-restored")
+        }
     }, [location, session])
 
     useEffect(() => {

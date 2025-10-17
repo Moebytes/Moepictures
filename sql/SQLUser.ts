@@ -42,13 +42,13 @@ export default class SQLUser {
         | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
         | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" 
-        | "publicTagFavorites" | "deletedPosts" | "lastNameChange", value?: string | number | boolean | null | string[]) => {
+        | "publicTagFavorites" | "deletedPosts" | "lastNameChange" | "deleted" | "deletionDate", value?: string | number | boolean | null | string[]) => {
 
         let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
         "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "liveAnimationPreview",
-        "publicTagFavorites", "deletedPosts", "lastNameChange"]
+        "publicTagFavorites", "deletedPosts", "lastNameChange", "deleted", "deletionDate"]
         
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
@@ -173,5 +173,20 @@ export default class SQLUser {
         }
         const result = await SQLQuery.run(query)
         return result[0] as Promise<Banner | undefined>
+    }
+
+    /** Get deleted users. */
+    public static deletedUsers = async () => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT users.*
+                FROM users
+                WHERE users."deleted" IS TRUE
+                GROUP BY users."userID"
+            `),
+            values: []
+        }
+        const result = await SQLQuery.run(query, `search/users/deleted`)
+        return result as Promise<User[]>
     }
 }

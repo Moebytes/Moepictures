@@ -35,7 +35,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await functions.http.get("/api/tag/delete/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/tag/delete/request/list", null, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
     }
@@ -106,7 +106,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/tag/delete/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/tag/delete/request/list", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {

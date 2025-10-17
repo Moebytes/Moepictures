@@ -13,6 +13,7 @@ export interface UserComment {
     imageHash: string | null
     role: UserRole
     banned: boolean | null
+    deleted: boolean | null
 }
 
 export interface CommentSearch extends UserComment {

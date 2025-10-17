@@ -21,6 +21,7 @@ export interface ThreadUser extends Thread {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null 
+    deleted: boolean | null
     postCount: number
     joinDate: string
 }
@@ -43,6 +44,7 @@ export interface ThreadReply {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null
+    deleted: boolean | null
     replyCount: string
     postCount: number
     joinDate: string
@@ -71,6 +73,7 @@ export interface ForumPostSearch {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null
+    deleted: boolean | null
     thread: Thread | null
     postCount: string
     fake?: boolean

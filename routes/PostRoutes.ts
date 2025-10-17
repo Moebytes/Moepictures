@@ -64,8 +64,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postIDs = req.query.postIDs as string[]
             if (!postIDs?.length) return void res.status(200).json([])
-            if (!permissions.isMod(req.session)) return void res.status(403).end()
-            let result = await sql.search.posts(postIDs)
+            let result = await sql.search.posts(postIDs.slice(0, 100))
             if (!permissions.isMod(req.session)) {
                 result = result.filter((p: any) => !p.hidden)
             }

@@ -43,14 +43,14 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const updateUpdater = async () => {
         if (!props.thread) return
-        const updater = await functions.http.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
+        const updater = await functions.http.get("/api/user", {username: props.thread.updater}, session, setSessionFlag, true)
         if (updater) setUpdaterData(updater)
         setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
     const updateCreator = async () => {
         if (!props.thread) return
-        const creator = await functions.http.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
+        const creator = await functions.http.get("/api/user", {username: props.thread.creator}, session, setSessionFlag, true)
         if (creator) setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
             if (creator) setUpdaterData(creator)

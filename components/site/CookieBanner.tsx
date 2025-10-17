@@ -28,7 +28,8 @@ const CookieBanner: React.FunctionComponent = (props) => {
     }, [session])
 
     const click = async (button: "accept" | "reject") => {
-        await functions.http.post("/api/user/cookieconsent", {consent: button === "accept"}, session, setSessionFlag)
+        await functions.http.post("/api/user/cookieconsent", 
+            {consent: button === "accept"}, session, setSessionFlag).catch(() => null)
         setShowCookieBanner(false)
     }
 

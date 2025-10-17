@@ -26,6 +26,7 @@ export interface Message {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null 
+    deleted: boolean | null
 }
 
 export interface MessageUser extends Message {
@@ -34,6 +35,7 @@ export interface MessageUser extends Message {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null 
+    deleted: boolean | null
 }
 
 export interface MessageSearch extends Message {
@@ -55,6 +57,7 @@ export interface MessageUserReply {
     imagePost: string | null
     imageHash: string | null
     banned: boolean | null
+    deleted: boolean | null
     replyCount: string
     fake?: boolean
 }

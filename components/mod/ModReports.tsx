@@ -29,13 +29,13 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     const updateAsset = async () => {
         if (props.request.type === "comment") {
-            const asset = await functions.http.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag, true)
             setAsset(asset as UserComment)
         } else if (props.request.type === "thread") {
-            const asset = await functions.http.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag, true)
             setAsset(asset as ThreadUser)
         } else if (props.request.type === "reply") {
-            const asset = await functions.http.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag)
+            const asset = await functions.http.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag, true)
             setAsset(asset as ThreadReply)
         }
     }
@@ -164,7 +164,7 @@ const ModReports: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
 
     const updateReports = async () => {
-        const requests = await functions.http.get("/api/search/reports", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/search/reports", null, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
     }
@@ -220,7 +220,7 @@ const ModReports: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {

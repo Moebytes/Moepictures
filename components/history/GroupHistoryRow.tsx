@@ -47,13 +47,13 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const updatePost = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
         props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
-        const post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag, true)
         if (!post) return
         setGroupPost(post)
     }
 
     const updateUserRole = async () => {
-        const user = await functions.http.get("/api/user", {username: props.groupHistory.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.groupHistory.user}, session, setSessionFlag, true)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -218,7 +218,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.groupHistory.posts.length > 1) {
             let newPostIndex = postIndex + 1 
             if (newPostIndex > props.groupHistory.posts.length - 1) newPostIndex = 0
-            const post = await functions.http.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag)
+            const post = await functions.http.get("/api/post", {postID: props.groupHistory.posts[newPostIndex].postID}, session, setSessionFlag, true)
             if (!post) return
             const filename = post.images[0]?.filename
             const newImgLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)

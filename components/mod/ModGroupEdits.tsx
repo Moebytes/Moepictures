@@ -39,10 +39,10 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async () => {
-        const requests = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag)
+        const requests = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
-        const groups = await functions.http.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag)
+        const groups = await functions.http.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag, true)
         for (const group of groups) {
             oldGroups.set(group.name, group)
         }
@@ -115,7 +115,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = requests.filter((t) => !t.fake)
         if (!scroll) {
@@ -131,7 +131,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             } else {
                 setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
+            const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag, true)
             for (const group of groups) {
                 oldGroups.set(group.name, group)
             }
@@ -143,7 +143,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 } else {
                     setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag)
+                const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag, true)
                 for (const group of groups) {
                     oldGroups.set(group.name, group)
                 }

@@ -36,7 +36,7 @@ const ModRejected: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const posts = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag)
+        const posts = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag, true)
         setEnded(false)
         setUnverifiedPosts(posts)
     }
@@ -110,7 +110,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.http.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag, true)
         let hasMore = result?.length >= 100
         const cleanHistory = unverifiedPosts.filter((t) => !t.fake)
         if (!scroll) {

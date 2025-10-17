@@ -45,7 +45,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateUserRole = async () => {
-        const user = await functions.http.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag)
+        const user = await functions.http.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag, true)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -133,7 +133,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deletePostHistoryFlag, deletePostHistoryID, session, props.current])
 
     const revertPostHistoryDialog = async () => {
-        const post = await functions.http.get("/api/post", {postID: props.postHistory.postID}, session, setSessionFlag)
+        const post = await functions.http.get("/api/post", {postID: props.postHistory.postID}, session, setSessionFlag, true)
         if (!post) return
         if (post.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID: props.postHistory.historyID})
         setRevertPostHistoryID({failed: false, historyID: props.postHistory.historyID})
