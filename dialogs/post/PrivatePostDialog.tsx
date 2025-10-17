@@ -4,8 +4,9 @@ import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
+import privateIcon from "../../assets/icons/private.png"
+import unprivateIcon from "../../assets/icons/unprivate.png"
 import {PostSearch, PostHistory} from "../../types/Types"
-
 
 const PrivatePostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -67,6 +68,14 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
         }
     }
 
+    const getIcon = () => {
+        if (privatePostID?.post.private) {
+            return unprivateIcon
+        } else {
+            return privateIcon
+        }
+    }
+
     if (privatePostID) {
         if (permissions.canPrivate(session, privatePostID.artists)) {
             return (
@@ -75,6 +84,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
+                                <img draggable={false} className="dialog-icon" src={getIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

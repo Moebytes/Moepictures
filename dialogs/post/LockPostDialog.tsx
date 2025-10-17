@@ -4,6 +4,8 @@ import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import "../dialog.less"
 import permissions from "../../structures/Permissions"
+import lockIcon from "../../assets/icons/lock-red.png"
+import unlockIcon from "../../assets/icons/unlock-red.png"
 import {PostSearch, PostHistory} from "../../types/Types"
 
 const LockPostDialog: React.FunctionComponent = (props) => {
@@ -66,6 +68,14 @@ const LockPostDialog: React.FunctionComponent = (props) => {
         }
     }
 
+    const getIcon = () => {
+        if (lockPostID?.post.locked) {
+            return unlockIcon
+        } else {
+            return lockIcon
+        }
+    }
+
     if (lockPostID) {
         if (permissions.isMod(session)) {
             return (
@@ -74,6 +84,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
+                                <img draggable={false} className="dialog-icon" src={getIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

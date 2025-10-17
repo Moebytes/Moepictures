@@ -111,7 +111,7 @@ const App: React.FunctionComponent = (props) => {
     }
 
     const cacheSortedTags = async () => {
-        const sorted = await functions.cache.sortedTagCounts([], session, setSessionFlag)
+        const sorted = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
         setSortedTags(sorted)
     }
 
