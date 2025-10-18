@@ -665,63 +665,77 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const getSource = () => {
+        if (!props.post) return ""
+        let order = props.order || 1
+        if ("historyID" in props.post) {
+            let src = props.post.imageSources?.[order]
+            if (src) return src
+        } else {
+            let image = props.post.images[order - 1]
+            if (image?.source) return image.source
+        }
+        return props.post.source
+    }
+
     const generateSourceJSX = () => {
         if (!props.post) return
         let jsx = [] as React.ReactElement[]
-        if (props.post.source) {
-            if (props.post.source.includes("pixiv")) {
-                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.source, "_blank")}/>)
+        let source = getSource()
+        if (source) {
+            if (source.includes("pixiv")) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("soundcloud")) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("soundcloud")) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("sketchfab")) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("sketchfab")) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("twitter") || props.post.source.includes("x.com")) {
-                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("twitter") || source.includes("x.com")) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("deviantart")) {
-                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("deviantart")) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("artstation")) {
-                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("artstation")) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("danbooru")) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("danbooru")) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("gelbooru")) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("gelbooru")) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("safebooru")) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("safebooru")) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("yande.re")) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("yande.re")) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("konachan")) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("konachan")) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("zerochan")) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("zerochan")) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("eshuushuu")) {
-                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("eshuushuu")) {
+                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("animepictures")) {
-                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("animepictures")) {
+                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("youtube")) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("youtube")) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (props.post.source.includes("bandcamp")) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.source, "_blank")}/>)
+            if (source.includes("bandcamp")) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(source, "_blank")}/>)
             }
         }
         return (
             <div className="sidebar-row">
                 <span className="tag">{i18n.labels.source}:</span>
-                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post?.source, "_blank")}>{functions.util.getSiteName(props.post.source, i18n)}</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(source, "_blank")}>{functions.util.getSiteName(source, i18n)}</span>
                 {jsx}
             </div>
         )

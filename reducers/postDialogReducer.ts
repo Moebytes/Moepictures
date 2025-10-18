@@ -1,7 +1,8 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory} from "../types/Types"
+import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag, 
+TagGroupCategory, PostFull, Image} from "../types/Types"
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
@@ -41,6 +42,12 @@ interface EditThumbnailID {
     unverified?: boolean
 }
 
+interface ImgSourceID {
+    post: PostFull | UnverifiedPost, 
+    image: Image
+    unverified?: boolean
+}
+
 const postDialogSlice = createSlice({
     name: "postDialog",
     initialState: {
@@ -68,7 +75,8 @@ const postDialogSlice = createSlice({
         editThumbnailID: null as EditThumbnailID | null,
         splitPostID: null as PostInfoID | null,
         joinPostID: null as PostEditID | null,
-        flipPostID: null as PostEditID | null
+        flipPostID: null as PostEditID | null,
+        imgSourceID: null as ImgSourceID | null
     },
     reducers: {
         setDeletePostID: (state, action) => {state.deletePostID = action.payload},
@@ -95,12 +103,13 @@ const postDialogSlice = createSlice({
         setEditThumbnailID: (state, action) => {state.editThumbnailID = action.payload},
         setSplitPostID: (state, action) => {state.splitPostID = action.payload},
         setJoinPostID: (state, action) => {state.joinPostID = action.payload},
-        setFlipPostID: (state, action) => {state.flipPostID = action.payload}
+        setFlipPostID: (state, action) => {state.flipPostID = action.payload},
+        setImgSourceID: (state, action) => {state.imgSourceID = action.payload}
     }
 })
 
 const {
-    setDeletePostID, setTakedownPostID, setDeletePostHistoryID,
+    setDeletePostID, setTakedownPostID, setDeletePostHistoryID, setImgSourceID,
     setDeletePostHistoryFlag, setRevertPostHistoryID, setRevertPostHistoryFlag, 
     setLockPostID, setPrivatePostID, setTagEditID, setSourceEditID, setChildPostObj,
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
@@ -136,6 +145,7 @@ export const usePostDialogSelector = () => {
         splitPostID: selector((state) => state.postDialog.splitPostID),
         joinPostID: selector((state) => state.postDialog.joinPostID),
         flipPostID: selector((state) => state.postDialog.flipPostID),
+        imgSourceID: selector((state) => state.postDialog.imgSourceID),
     }
 }
 
@@ -166,7 +176,8 @@ export const usePostDialogActions = () => {
         setEditThumbnailID: (state: EditThumbnailID | null) => dispatch(setEditThumbnailID(state)),
         setSplitPostID: (state: PostInfoID | null) => dispatch(setSplitPostID(state)),
         setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state)),
-        setFlipPostID: (state: PostEditID | null) => dispatch(setFlipPostID(state))
+        setFlipPostID: (state: PostEditID | null) => dispatch(setFlipPostID(state)),
+        setImgSourceID: (state: ImgSourceID | null) => dispatch(setImgSourceID(state))
     }    
 }
 

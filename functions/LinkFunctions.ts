@@ -44,7 +44,7 @@ export default class LinkFunctions {
         if (!image.filename && !image.upscaledFilename) return ""
         let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
         const link = `${window.location.protocol}//${window.location.host}/unverified/${image.type}/${image.postID}-${image.order}-${filename}`
-        return functions.util.appendURLParams(link, {hash: image.pixelHash})
+        return functions.util.appendURLParams(link, {hash: image.pixelHash, upscaled})
     }
 
     public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean, forceLive?: boolean) => {
@@ -106,7 +106,7 @@ export default class LinkFunctions {
             if (session.liveModelPreview) filename = originalFilename
         }
         const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
-        return functions.util.appendURLParams(link, {hash: image.pixelHash})
+        return functions.util.appendURLParams(link, {hash: image.pixelHash, upscaled: false})
     }
 
     public static getTagPath = (folder: string, filename: string) => {

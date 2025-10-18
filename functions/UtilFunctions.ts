@@ -5,6 +5,7 @@ import {UploadImage} from "../types/Types"
 
 export default class UtilFunctions {
     public static appendURLParams = (url: string, params: {[key: string]: string | boolean | undefined}) => {
+        if (!url) return ""
         const [baseUrl, hash] = url.split("#")
         const obj = new URL(baseUrl)
     
@@ -222,5 +223,22 @@ export default class UtilFunctions {
             partB = partB.replace(/[^a-zA-Z0-9_.]/g, "").split(".")[0]
             return partA.localeCompare(partB, undefined, {numeric: true, sensitivity: "base"})
         })
+    }
+
+    public static objDiff = <T extends object>(objA: T, objB: T) => {
+        let diff = {} as T
+        const keys = new Set([...Object.keys(objA), ...Object.keys(objB)])
+
+        for (const key of keys) {
+            const valueA = objA[key]
+            const valueB = objB[key]
+
+            if (!(key in objB)) {
+                diff[key] = null
+            } else if (!(key in objA) || valueA !== valueB) {
+                diff[key] = valueB
+            }
+        }
+        return diff
     }
 }

@@ -468,6 +468,7 @@ const PostPage: React.FunctionComponent = () => {
         const imgChanged = await functions.compare.imagesChanged(post, currentPost, session)
         const tagsChanged = functions.compare.tagsChanged(post, currentPost)
         const srcChanged = functions.compare.sourceChanged(post, currentPost)
+        let imageSources = functions.post.imageSourceMap(post)
         let source = undefined as SourceData | undefined
         if (imgChanged || srcChanged) {
             source = {
@@ -490,12 +491,12 @@ const PostPage: React.FunctionComponent = () => {
 
             await functions.http.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
             style: post.style, artists: functions.tag.tagObject(historyPost.artists), characters: functions.tag.tagObject(historyPost.characters), noImageUpdate: true,
-            preserveChildren: Boolean(post.parentID), series: functions.tag.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, 
+            preserveChildren: Boolean(post.parentID), series: functions.tag.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, imageSources,
             reason: historyPost.reason}, session, setSessionFlag)
         } else {
             await functions.http.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
             style: post.style, artists: historyPost.artists, characters: historyPost.characters, series: historyPost.series, tags: post.tags, 
-            tagGroups: historyPost.tagGroups, reason: historyPost.reason}, session, setSessionFlag)
+            tagGroups: historyPost.tagGroups, imageSources, reason: historyPost.reason}, session, setSessionFlag)
         }
         currentHistory()
     }

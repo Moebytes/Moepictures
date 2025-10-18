@@ -551,7 +551,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, unverified, type, rating, style, source, parentID, artists, characters, 
-            series, tags, tagGroups, reason, silent} = req.body as PostQuickEditParams
+            series, tags, tagGroups, imageSources, reason, silent} = req.body as PostQuickEditParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -570,7 +570,6 @@ const PostRoutes = (app: Express) => {
             if (unverified) {
                 if (post.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).send("Unauthorized")
             }
-
 
             let addedTags = [] as string[]
             let removedTags = [] as string[]
@@ -760,6 +759,9 @@ const PostRoutes = (app: Express) => {
                     await serverFunctions.posts.migratePost(post.postID, oldType, newType, oldR18, newR18)
                 }
             }
+            if (imageSources !== undefined) {
+                await serverFunctions.posts.applyImageSources(post.postID, imageSources, unverified)
+            }
 
             if (unverified) return void res.status(200).send("Success")
             
@@ -773,6 +775,7 @@ const PostRoutes = (app: Express) => {
             updated.characters = updatedCategories.characters.map((c: any) => c.tag)
             updated.series = updatedCategories.series.map((s: any) => s.tag)
             updated.tags = updatedCategories.tags.map((t: any) => t.tag)
+            const sourceMap = functions.post.imageSourceMap(updated)
 
             const changes = functions.compare.parsePostChanges(post, updated)
 
@@ -800,7 +803,7 @@ const PostRoutes = (app: Express) => {
                     bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
                     slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
                     characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
-                    addedTagGroups: [], removedTagGroups: [], imageChanged: false, changes: null, reason})
+                    addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: null, reason})
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
@@ -815,7 +818,7 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, 
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             } else {
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
@@ -831,7 +834,7 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled,
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -843,11 +846,12 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit/unverified", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, type, rating, style, source, parentID, artists, characters, 
-            series, tags, tagGroups, reason} = req.body as PostQuickEditUnverifiedParams
+            series, tags, tagGroups, imageSources, reason} = req.body as PostQuickEditUnverifiedParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
             let parentEdit = parentID !== undefined ? true : false
+            let imageSourcesEdit = imageSources !== undefined ? true : false
     
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Bad postID")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -891,6 +895,9 @@ const PostRoutes = (app: Express) => {
                 const parentPost = await sql.post.parent(originalPostID)
                 parentID = parentPost?.parentID || null
             }
+            if (!imageSourcesEdit) {
+                imageSources = functions.post.imageSourceMap(post)
+            }
 
             artists = functions.tag.cleanStringTags(artists, "artists")
             characters = functions.tag.cleanStringTags(characters, "characters")
@@ -925,22 +932,26 @@ const PostRoutes = (app: Express) => {
             uploadDate: post.uploadDate})
 
             let {addedTags, removedTags} = await insertTags(postID, {unverified: true, tags, artists: artistTags, characters: characterTags, 
-            series: seriesTags, newTags, username: req.session.username})
+            series: seriesTags, newTags, username: req.session.username, originalPost: post})
 
             let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {unverified: true, 
             oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
 
-            
+            await serverFunctions.posts.applyImageSources(postID, imageSources, true)
+
             const updated = await sql.post.unverifiedPost(postID) as UnverifiedPost
             const changes = functions.compare.parsePostChanges(post, updated)
             
             await sql.post.bulkUpdateUnverifiedPost(postID, {
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
+                updater: req.session.username,
+                updatedDate: new Date().toISOString(),
                 addedTags,
                 removedTags,
                 addedTagGroups,
                 removedTagGroups,
+                imageSources: imageSources ? JSON.stringify(imageSources) : null,
                 imageChanged: false,
                 changes
             })
@@ -1328,6 +1339,59 @@ const PostRoutes = (app: Express) => {
                     await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
                 }
             }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/image/source", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {imageID, source, unverified, reason} = req.body as {imageID: string, source: string, unverified?: boolean, reason?: string}
+            if (Number.isNaN(Number(imageID))) return void res.status(400).send("Invalid imageID")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            let image = unverified ? await sql.post.unverifiedImage(imageID) : await sql.post.image(imageID)
+            if (!image) return void res.status(400).send("Invalid imageID")
+
+            if (unverified) {
+                await sql.post.updateUnverifiedImage(image.imageID, "source", source)
+            } else {
+                const post = await sql.post.post(image.postID)
+                if (!post) return void res.status(400).end()
+
+                await sql.post.updateImage(image.imageID, "source", source)
+
+                const updated = await sql.post.post(image.postID)
+                const changes = functions.compare.parsePostChanges(post, updated!)
+                let sourceMap = changes.imageSources
+
+                const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
+                vanilla.date = vanilla.uploadDate
+                vanilla.user = vanilla.uploader
+                const categories = await serverFunctions.tags.tagCategories(vanilla.tags)
+                vanilla.artists = categories.artists.map((a: any) => a.tag)
+                vanilla.characters = categories.characters.map((c: any) => c.tag)
+                vanilla.series = categories.series.map((s: any) => s.tag)
+                vanilla.tags = categories.tags.map((t: any) => t.tag)
+                let vanillaImages = [] as string[]
+                let vanillaUpscaledImages = [] as string[]
+                for (let i = 0; i < vanilla.images.length; i++) {
+                    vanillaImages.push(functions.link.getImagePath(vanilla.images[i].type, post.postID, vanilla.images[i].order, vanilla.images[i].filename))
+                    vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(vanilla.images[i].type, post.postID, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
+                }
+                await sql.history.insertPostHistory({
+                    postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
+                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
+                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, posted: vanilla.posted, 
+                    artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
+                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
+                    slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
+                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
+                    addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, imageChanged: false, 
+                    changes: changes ? JSON.stringify(changes) : null, reason})
+            }
+            
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

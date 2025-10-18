@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
-useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions} from "../../store"
+useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions, usePostDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import noteToggleOn from "../../assets/icons/note-toggle-on.png"
@@ -24,6 +24,7 @@ import NoteEditor from "./NoteEditor"
 import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
 import sourceIcon from "../../assets/icons/source.png"
+import sourceSetIcon from "../../assets/icons/source-set.png"
 import QRCode from "qrcode"
 import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postimage.less"
@@ -122,6 +123,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const {downloadFlag, downloadIDs} = useFlagSelector()
         const {setDownloadFlag, setDownloadIDs, setRedirect} = useFlagActions()
         const {setPremiumRequired, setQRCodeImage} = useMiscDialogActions()
+        const {setImgSourceID} = usePostDialogActions()
         const [imageWidth, setImageWidth] = useState(0)
         const [imageHeight, setImageHeight] = useState(0)
         const [fullscreen, setFullscreen] = useState(false)
@@ -554,6 +556,23 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             window.open(baseMap[service] + encodeURIComponent(img), "_blank", "noreferrer")
         }
 
+        const editImgSource = () => {
+            if (!props.post || "historyID" in props.post) return
+            let order = (props.order || 1) - 1
+            setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})
+        }
+
+        const getSourceIcon = () => {
+            if (!props.post) return sourceIcon
+            let order = props.order || 1
+            if ("historyID" in props.post) {
+                if (props.post.imageSources?.[order]) return sourceSetIcon
+            } else {
+                if (props.post.images[order - 1].source) return sourceSetIcon
+            }
+            return sourceIcon
+        }
+
         return (
             <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
                 {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader}/> : null}
@@ -579,8 +598,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 </> : null}
                             </div>
 
-                            {/*!props.noNotes ? <img draggable={false} className="post-image-top-button" src={sourceIcon} style={{filter: getFilter(), marginRight: "6px"}} 
-                                onClick={() => {}}/> : null*/}
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getSourceIcon()} 
+                                style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
                                 onClick={() => {setShowReverseIcons(false); setShowShareIcons((prev: boolean) => !prev)}}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 

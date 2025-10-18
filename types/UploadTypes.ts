@@ -60,6 +60,7 @@ export interface EditParams extends UploadParams {
     postID: string
     preserveChildren?: boolean
     updatedDate?: string
+    imageSources?: {[key: string]: string | null} | null
     reason?: string | null
     silent?: boolean
 }
