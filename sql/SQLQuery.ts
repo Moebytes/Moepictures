@@ -31,6 +31,12 @@ const jsonStringIDs = (json: string) => {
 types.setTypeParser(types.builtins.JSON, jsonStringIDs)
 types.setTypeParser(types.builtins.JSONB, jsonStringIDs)
 
+if (!process.env.PG_USER || !process.env.PG_HOST || 
+    !process.env.PG_DATABASE || !process.env.PG_PASSWORD || 
+    !process.env.PG_PORT) {
+  throw new Error("Database credentials PG_USER, PG_HOST, PG_DATABASE, PG_PASSWORD, and PG_PORT required.")
+}
+
 const pgPool = functions.config.useLocalDB() ? new Pool({
   user: process.env.PG_LOCAL_USER,
   host: process.env.PG_LOCAL_HOST,

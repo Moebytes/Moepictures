@@ -57,6 +57,8 @@ If you want to upload upscaled files you also need to make their respective upsc
 
 `["image-upscaled", "comic-upscaled", "animation-upscaled", "video-upscaled"]`
 
+Rename the files `structures/Decryption.example.ts` to `structures/Decryption.ts` and `structures/Encryption.example.ts` to `structures/Encryption.ts`. They do nothing unless you implement them apart from making the project compile.
+
 #### Compiling Node.js
 
 Install all of the dependencies for this project by running `npm install`. \

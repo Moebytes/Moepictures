@@ -721,7 +721,8 @@ const run = async () => {
   await serverFunctions.tags.downloadWDTagger()
   runDaily()
   setInterval(runDaily, 24 * 60 * 60 * 1000)
-  app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
+  let port = process.env.PORT || 8082
+  app.listen(port, "0.0.0.0", () => console.log(`Started the web server! http://localhost:${port}`))
 }
 
 run()

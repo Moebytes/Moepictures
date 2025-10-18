@@ -30,16 +30,24 @@ svgCaptcha.loadFont(path.join(__dirname, dotline))
 let processingQueue = new Set<string>()
 
 const exec = util.promisify(child_process.exec)
-let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
-const twitter = new Scraper({fetch: cycleTLSFetch})
+let pixiv: Pixiv
+let deviantart: DeviantArt
+let twitter: Scraper
+let reddit: snoowrap
 
-const reddit = new snoowrap({
-    userAgent: "kisaragi bot v1.0",
-    clientId: process.env.REDDIT_APP_ID,
-    clientSecret: process.env.REDDIT_APP_SECRET,
-    refreshToken: process.env.REDDIT_REFRESH_TOKEN
-})
+try {
+    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+    twitter = new Scraper({fetch: cycleTLSFetch})
+    reddit = new snoowrap({
+        userAgent: process.env.REDDIT_USER_AGENT!,
+        clientId: process.env.REDDIT_APP_ID,
+        clientSecret: process.env.REDDIT_APP_SECRET,
+        refreshToken: process.env.REDDIT_REFRESH_TOKEN
+    })
+} catch (e) {
+    console.log(e)
+}
 
 const miscLimiter = rateLimit({
 	windowMs: 60 * 1000,

@@ -10,9 +10,17 @@ import serverFunctions from "./ServerFunctions"
 import functions from "../functions/Functions"
 import {UploadImage, PostRating, UploadTag, PixivResponse, SaucenaoResponse} from "../types/Types"
 
-let pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-let deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
-const twitter = new Scraper({fetch: cycleTLSFetch})
+let pixiv: Pixiv
+let deviantart: DeviantArt
+let twitter: Scraper
+
+try {
+    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+    deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+    twitter = new Scraper({fetch: cycleTLSFetch})
+} catch (e) {
+    console.log(e)
+}
 
 export default class ServerSources {
     public static pixivLookup = async (pixivLink: string, rating: PostRating) => {
