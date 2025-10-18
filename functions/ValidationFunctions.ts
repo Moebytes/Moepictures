@@ -54,6 +54,7 @@ export default class ValidationFunctions {
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return i18n.errors.username.alphanumeric
         if (this.isProfane(username)) return i18n.errors.username.profane
         if (bannedUsernames.includes(username.toLowerCase())) return i18n.errors.username.disallowed
+        if (/^\d+$/.test(username)) return i18n.errors.username.numericOnly
         const cleanUsername = functions.util.stripLinks(username).replace(/\d+/g, "")
         if (gibberish(cleanUsername)) return i18n.errors.username.gibberish
         return null
