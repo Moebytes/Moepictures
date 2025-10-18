@@ -43,7 +43,9 @@ Clone the project:
 git clone https://github.com/Moebytes/Moepictures.git
 ```
 
-Rename the file `.env.example` to `.env` and put in your credentials. At minimum the pg database credentials are required, which are the keys prefixed with `PG`. `COOKIE_SECRET` should be set to a string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc. For it to work with gmail, you need to setup an app password: https://myaccount.google.com/apppasswords 
+Rename the file `.env.example` to `.env` and put in your credentials. At minimum the pg database credentials are required, which are the keys `PG_HOST`, `PG_USER`, `PG_DATABASE`, `PG_PASSWORD`, `PG_PORT`, and the `COOKIE_SECRET` which should be set to a string of random characters. 
+
+`EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc. For it to work with gmail, you need to create an app password: https://myaccount.google.com/apppasswords 
 
 In order for source lookup from Pixiv, Twitter, and other sites to work, you need to seek out the credentials for their respective API's. You can find info on how to obtain them simply by googling, it would take me a long time to detail every site.
 
@@ -55,12 +57,12 @@ If you want to upload upscaled files you also need to make their respective upsc
 
 `["image-upscaled", "comic-upscaled", "animation-upscaled", "video-upscaled"]`
 
-The site runs on port 8082 by default but it can be configured by changing `PORT`.
-
 #### Compiling Node.js
 
 Install all of the dependencies for this project by running `npm install`. \
 Start the project by running the server `npm start`.
+
+The site runs on http://localhost:8082 by default, but the port can be configured by changing `PORT`.
 
 #### Python Scripts
 Some features like the auto tagger are done by a python script. The scripts try to install the dependencies if they aren't found, but if you 
@@ -75,6 +77,7 @@ To enable live2d support, you need to download the Cubism Core web sdk and place
 https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
+
 
 
 
