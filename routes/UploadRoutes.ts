@@ -515,7 +515,7 @@ export const updateTagGroups = async (postID: string, data: {oldTagGroups?: Mini
 
 export const insertTags = async (postID: string, data: {tags: string[], artists: UploadTag[] | MiniTag[], username: string,
   characters: UploadTag[] | MiniTag[], series: UploadTag[] | MiniTag[], newTags: UploadTag[] | MiniTag[], noImageUpdate?: boolean,
-  post?: PostFull | UnverifiedPost | null, unverified?: boolean}) => {
+  post?: PostFull | UnverifiedPost | null, unverified?: boolean, originalPost?: PostFull}) => {
   let {artists, characters, series, newTags, tags, username, noImageUpdate, post, unverified} = data
 
   let combinedTags = [...artists.map((a: MiniTag | UploadTag) => a.tag), ...characters.map((c: MiniTag | UploadTag) => c.tag), 
@@ -682,6 +682,14 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
     await sql.tag.insertTagMap(postID, addedTags)
   }
 
+  if (data.originalPost) {
+    let oldTagsSet = new Set<string>(data.originalPost.tags || [])
+    let newTagsSet = new Set<string>(combinedTags)
+    let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+    let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+    return {addedTags, removedTags}
+  }
+
   return {addedTags, removedTags}
 }
 
@@ -699,6 +707,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
 
   const updated = await sql.post.post(post.postID) as PostFull
   let r18 = functions.post.isR18(updated.rating)
+  const sourceMap = functions.post.imageSourceMap(updated)
 
   const changes = functions.compare.parsePostChanges(post, updated)
 
@@ -743,7 +752,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
         hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, 
         series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
-        removedTagGroups: [], imageChanged: false, changes: null, reason})
+        removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: null, reason})
 
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -797,8 +806,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
         bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
-        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: imgChanged, 
-        changes: changes ? JSON.stringify(changes) : null, reason})
+        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
+        imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
   } else {
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -863,8 +872,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
         bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
-        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageChanged: imgChanged, 
-        changes: changes ? JSON.stringify(changes) : null, reason})
+        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
+        imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
   }
 }
 
@@ -941,7 +950,7 @@ const CreateRoutes = (app: Express) => {
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
-        tags, tagGroups, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
+        tags, tagGroups, imageSources, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -1015,8 +1024,12 @@ const CreateRoutes = (app: Express) => {
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
 
         if (groupName) {
-          const post = await sql.post.post(postID)
-          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+          const post = await sql.post.post(postID) as PostFull
+          await addToGroup(post, groupName, req.session.username, new Date().toISOString())
+        }
+
+        if (imageSources !== undefined) {
+          await serverFunctions.posts.applyImageSources(postID, imageSources)
         }
 
         if (unverifiedID) {
@@ -1223,7 +1236,8 @@ const CreateRoutes = (app: Express) => {
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return void res.status(400).send("Bad request")
 
-        const targetUser = await sql.user.user(unverified.uploader)
+        let updater = unverified.originalID ? unverified.updater : unverified.uploader
+        const targetUser = await sql.user.user(updater)
         if (targetUser) {
           const deletedPosts = functions.util.removeItem(targetUser.deletedPosts || [], postID)
           await sql.user.updateUser(targetUser.username, "deletedPosts", deletedPosts)
@@ -1290,15 +1304,18 @@ const CreateRoutes = (app: Express) => {
           } catch {}
         }
 
-        let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: unverified.uploader, noImageUpdate})
+        let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: updater, noImageUpdate})
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: unverified.tagGroups})
+
+        let imageSources = functions.post.imageSourceMap(unverified)
+        await serverFunctions.posts.applyImageSources(newPostID, imageSources)
 
         // Approve notes
         for (let i = 0; i < unverified.images.length; i++) {
           const order = unverified.images[i].order
           const unverifiedNotes = await sql.note.unverifiedNotes(unverified.postID, order)
           for (const item of unverifiedNotes) {
-              await sql.note.insertNote(newPostID, unverified.uploader, order, item.transcript, item.translation,
+              await sql.note.insertNote(newPostID, updater, order, item.transcript, item.translation,
               item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
               item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
               item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
@@ -1316,7 +1333,7 @@ const CreateRoutes = (app: Express) => {
         if (post && unverified.originalID) {
           await insertPostHistory(post, {artists, characters, series, tags, imgChanged, addedTags, removedTags, vanillaBuffers, 
           upscaledVanillaBuffers, images: unverified.images, upscaledImages: unverified.images, imageFilenames, upscaledImageFilenames, 
-          imageOrders, unverifiedImages: true, tagGroups: post.tagGroups, addedTagGroups, removedTagGroups, username: req.session.username, reason})
+          imageOrders, unverifiedImages: true, tagGroups: post.tagGroups, addedTagGroups, removedTagGroups, username: updater, reason})
         }
 
         let subject = "Notice: Post has been approved"
@@ -1325,7 +1342,7 @@ const CreateRoutes = (app: Express) => {
           subject = "Notice: Post edit request has been approved"
           message = `Post edit request on ${functions.config.getDomain()}/post/${newPostID} has been approved. Thanks for the contribution!`
         }
-        await serverFunctions.systemMessage(unverified.uploader, subject, message)
+        await serverFunctions.systemMessage(updater, subject, message)
         
         res.status(200).send("Success")
       } catch (e) {

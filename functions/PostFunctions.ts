@@ -181,4 +181,25 @@ export default class PostFunctions {
             }
             return notExists
         }
+
+        public static imageSourceMap = (post: Post | PostHistory) => {
+            const sourceMap = {} as {[key: string]: string | null}
+            if ("historyID" in post) {
+                if (post.imageSources) {
+                    for (const entry of Object.entries(post.imageSources)) {
+                        let [key, value] = entry
+                        if (value?.trim()) {
+                            sourceMap[String(key)] = value.trim()
+                        }
+                    }
+                }
+            } else {
+                for (const image of post.images) {
+                    if (image.source?.trim()) {
+                        sourceMap[String(image.order)] = image.source.trim()
+                    }
+                }
+            }
+            return sourceMap
+        }
 }

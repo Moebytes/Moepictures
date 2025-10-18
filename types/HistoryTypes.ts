@@ -33,6 +33,7 @@ export interface  PostChanges {
     posted?: string
     source?: string
     mirrors?: PostMirrors | null
+    imageSources?: {[key: string]: string | null} | null
     bookmarks?: number
     buyLink?: string | null
     commentary?: string
@@ -69,6 +70,7 @@ export interface PostHistory {
     tagGroups: MiniTagGroup[]
     reason: string | null
     mirrors: PostMirrors | null
+    imageSources: {[key: string]: string | null} | null
     bookmarks: number
     hasOriginal: boolean | null
     hasUpscaled: boolean | null

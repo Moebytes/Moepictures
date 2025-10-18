@@ -164,6 +164,19 @@ export default class ServerPosts {
         }
     }
 
+    public static applyImageSources = async (postID: string, imageSources?: {[key: string]: string | null} | null, unverified?: boolean) => {
+        let post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
+        if (!post) return
+        for (const image of post.images) {
+            let source = imageSources?.[image.order] ?? null
+            if (unverified) {
+                await sql.post.updateUnverifiedImage(image.imageID, "source", source)
+            } else {
+                await sql.post.updateImage(image.imageID, "source", source)
+            }
+        }
+    }
+
     public static deletePost = async (post: DeletedPost | PostCuteness) => {
         let r18 = functions.post.isR18(post.rating)
         await sql.post.deletePost(post.postID)

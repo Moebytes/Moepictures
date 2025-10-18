@@ -241,7 +241,8 @@
         "updateAll": "Update All",
         "autogenerate": "Auto-Generate",
         "light": "Light",
-        "dark": "Dark"
+        "dark": "Dark",
+        "set": "Set"
     },
     "history": {
         "post": "Post History",
@@ -276,7 +277,8 @@
         "blacklist": "Blacklisted IP!",
         "unblacklist": "Unblacklisted IP!",
         "removeBanner": "Removed Banner!",
-        "accountRestored": "Your account was restored since you logged in within the 90-day grace period."
+        "accountRestored": "Your account was restored since you logged in within the 90-day grace period.",
+        "changedSource": "Changed Source!"
     },
     "user": {
         "bannedReason": "You are banned for reason:",
@@ -505,7 +507,8 @@
         "speed": "Speed",
         "dimensions": "Dimensions",
         "agree": "Agree",
-        "deny": "Deny"
+        "deny": "Deny",
+        "imageSources": "Image Sources"
     },
     "errors": {
         "$401":"401 error",
@@ -1216,6 +1219,11 @@
         "deleteTagFavorites": {
             "title": "Delete Tag Favorites",
             "header": "Are you sure you want to delete all your tag favorites?"
+        },
+        "imageSource": {
+            "title": "Set Image Source",
+            "request": "Set Image Source Request",
+            "reminder": "*Only set a source if it differs from the post source"
         }
     },
     "help": {

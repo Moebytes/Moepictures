@@ -82,6 +82,15 @@ export default class CompareFunctions {
         return false
     }
 
+    public static imageSourceChanges = (oldPost: Post | PostHistory, newPost: Post | PostHistory) => {
+        let oldSources = functions.post.imageSourceMap(oldPost)
+        let newSources = functions.post.imageSourceMap(newPost)
+        if (JSON.stringify(oldSources) !== JSON.stringify(newSources)) {
+            return functions.util.objDiff(oldSources, newSources)
+        }
+        return null
+    }
+
     public static parsePostChanges = (oldPost: Post, newPost: Post) => {
         let json = {} as PostChanges
         if (oldPost.images.length !== newPost.images.length) {
@@ -129,6 +138,7 @@ export default class CompareFunctions {
         if (oldPost.englishCommentary !== newPost.englishCommentary) {
             json.englishCommentary = newPost.englishCommentary
         }
+        json.imageSources = this.imageSourceChanges(oldPost, newPost)
         return json
     }
 
