@@ -164,11 +164,31 @@ export default class ServerPosts {
         }
     }
 
-    public static applyImageSources = async (postID: string, imageSources?: {[key: string]: string | null} | null, unverified?: boolean) => {
+    public static imageOrderHashes = (post: PostFull) => {
+        let hashMap = {} as {[key: string]: string}
+        for (const image of post.images) {
+            hashMap[image.order] = image.pixelHash
+        }
+        return hashMap
+    }
+
+    public static resolveImageOrder = (image: Image, images: Image[], imageOrderHashes?: {[key: string]: string}) => {
+        if (imageOrderHashes) {
+            let pixelHash = imageOrderHashes[String(image.order)]
+            let resolved = images.find((i) => i.pixelHash === pixelHash)
+            return resolved?.order ?? image.order
+        } else {
+            return image.order
+        }
+    }
+
+    public static applyImageSources = async (postID: string, imageSources?: {[key: string]: string | null} | null, 
+        unverified?: boolean, imageOrderHashes?: {[key: string]: string}) => {
         let post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
         if (!post) return
         for (const image of post.images) {
-            let source = imageSources?.[image.order] ?? null
+            let order = this.resolveImageOrder(image, post.images, imageOrderHashes)
+            let source = imageSources?.[String(order)] ?? null
             if (unverified) {
                 await sql.post.updateUnverifiedImage(image.imageID, "source", source)
             } else {

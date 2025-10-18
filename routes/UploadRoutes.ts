@@ -995,9 +995,12 @@ const CreateRoutes = (app: Express) => {
         let imgChanged = await serverFunctions.posts.imagesChanged(post.images, images, false, oldR18)
         if (!imgChanged) imgChanged = await serverFunctions.posts.imagesChanged(post.images, upscaledImages, true, oldR18)
 
+        let imageOrderHashes = serverFunctions.posts.imageOrderHashes(post)
+
         if (imgChanged) {
           if (!permissions.isMod(req.session)) return void res.status(403).send("No permission to modify images")
           await serverFunctions.posts.migrateNotes(post.images, images, oldR18)
+          if (imageSources === undefined) imageSources = functions.post.imageSourceMap(post)
         }
 
         let {vanillaBuffers, upscaledVanillaBuffers} = await deleteImages(post, {imgChanged, r18: oldR18})
@@ -1029,7 +1032,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         if (imageSources !== undefined) {
-          await serverFunctions.posts.applyImageSources(postID, imageSources)
+          await serverFunctions.posts.applyImageSources(postID, imageSources, false, imageOrderHashes)
         }
 
         if (unverifiedID) {
