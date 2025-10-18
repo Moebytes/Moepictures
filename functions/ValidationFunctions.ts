@@ -54,6 +54,8 @@ export default class ValidationFunctions {
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return i18n.errors.username.alphanumeric
         if (this.isProfane(username)) return i18n.errors.username.profane
         if (bannedUsernames.includes(username.toLowerCase())) return i18n.errors.username.disallowed
+        const cleanUsername = functions.util.stripLinks(username).replace(/\d+/g, "")
+        if (gibberish(cleanUsername)) return i18n.errors.username.gibberish
         return null
     }
 
@@ -98,9 +100,9 @@ export default class ValidationFunctions {
                 const username = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 const text = piece.replace(username, "").replaceAll(">", "")
                 if (!text && !username) continue
-                //if (gibberish(Functions.stripLinks(text))) return i18n.errors.comment.gibberish
+                //if (gibberish(functions.util.stripLinks(text))) return i18n.errors.comment.gibberish
             } else {
-                //if (gibberish(Functions.stripLinks(piece))) return i18n.errors.comment.gibberish
+                //if (gibberish(functions.util.stripLinks(piece))) return i18n.errors.comment.gibberish
             }
         }
         if (this.isProfane(comment)) return i18n.errors.comment.profane
@@ -142,7 +144,7 @@ export default class ValidationFunctions {
 
     public static validateBio = (bio: string, i18n: typeof enLocale) => {
         if (!bio) return i18n.errors.bio.empty
-        //if (gibberish(Functions.stripLinks(bio))) return i18n.errors.bio.gibberish
+        //if (gibberish(functions.util.stripLinks(bio))) return i18n.errors.bio.gibberish
         if (this.isProfane(bio)) return i18n.errors.bio.profane
         return null
     }

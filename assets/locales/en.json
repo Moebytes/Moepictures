@@ -518,7 +518,8 @@
             "empty": "No username.",
             "alphanumeric": "Usernames cannot contain special characters or spaces.",
             "profane": "Username is profane.",
-            "disallowed": "This username isn't allowed to be used."
+            "disallowed": "This username isn't allowed to be used.",
+            "gibberish": "Username cannot be gibberish."
         },
         "password": {
             "empty": "No password.",
