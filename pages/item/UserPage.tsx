@@ -171,11 +171,13 @@ const UserPage: React.FunctionComponent = () => {
             if (user?.deleted && user?.deletionDate) {
                 const now = new Date()
                 const deletionDate = new Date(user.deletionDate)
-                if (now < deletionDate) functions.dom.replaceLocation("/404")
+                if (now < deletionDate) {
+                    if (!permissions.isMod(session)) functions.dom.replaceLocation("/404")
+                }
             }
         }
         checkPendingDeletion()
-    }, [user])
+    }, [user, session])
 
     const setUp = (img: string, index: number, newTab: boolean) => {
         setUploadIndex(index)

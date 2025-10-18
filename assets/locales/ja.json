@@ -242,7 +242,8 @@
         "updateAll": "すべて更新",
         "autogenerate": "自動生成",
         "light": "ライト",
-        "dark": "暗い"
+        "dark": "暗い",
+        "set": "セット"
     },
     "history": {
         "post": "投稿履歴",
@@ -277,7 +278,8 @@
         "blacklist": "ブラックリストに載ったIP！",
         "unblacklist": "ブラックリストに載っていないIP！",
         "removeBanner": "バナーを削除しました！",
-        "accountRestored": "90日間の猶予期間内にログインしたため、アカウントが復元されました。"
+        "accountRestored": "90日間の猶予期間内にログインしたため、アカウントが復元されました。",
+        "changedSource": "ソースを変更しました！"
     },
     "user": {
         "bannedReason": "あなたが追放されたのには理由がある：",
@@ -506,7 +508,8 @@
         "speed": "スピード",
         "dimensions": "寸法",
         "agree": "同意する",
-        "deny": "拒否する"
+        "deny": "拒否する",
+        "imageSources": "画像ソース"
     },
     "errors": {
         "$401":"401エラー",
@@ -1217,6 +1220,11 @@
         "deleteTagFavorites": {
             "title": "タグのお気に入りを削除",
             "header": "タグのお気に入りをすべて削除してもよろしいですか？"
+        },
+        "imageSource": {
+            "title": "画像ソースの設定",
+            "request": "画像ソース設定リクエスト",
+            "reminder": "*投稿元と異なる場合のみ、ソースを設定してください"
         }
     },
     "help": {

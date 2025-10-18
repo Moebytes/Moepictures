@@ -66,6 +66,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const imgChanged = await functions.compare.imagesChanged(props.postHistory, props.currentHistory, session)
         const tagsChanged = functions.compare.tagsChanged(props.postHistory, props.currentHistory)
         const srcChanged = functions.compare.sourceChanged(props.postHistory, props.currentHistory)
+        let imageSources = functions.post.imageSourceMap(props.postHistory)
         let source = null as SourceData | null
         if (imgChanged || srcChanged) {
             source = {
@@ -91,11 +92,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             artists: functions.tag.tagObject(props.postHistory.artists), characters: functions.tag.tagObject(props.postHistory.characters), 
             preserveChildren: Boolean(props.postHistory.parentID), series: functions.tag.tagObject(props.postHistory.series), 
             parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, tagGroups: props.postHistory.tagGroups, 
-            newTags, reason: props.postHistory.reason}, session, setSessionFlag)
+            imageSources, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
             await functions.http.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
             rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
-            characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, 
+            characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, imageSources,
             tagGroups: props.postHistory.tagGroups, parentID: props.postHistory.parentID, reason: props.postHistory.reason}, 
             session, setSessionFlag)
         }
@@ -296,12 +297,28 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return calculateDiff(addedTagGroups, removedTagGroups)
     }
 
+    const printImageSources = () => {
+        if (!props.postHistory.imageSources) return "None"
+        const entries = Object.entries(props.postHistory.imageSources)
+        return entries.map((entry, i) => {
+            let [key, value] = entry
+            let append = i !== entries.length - 1 ? ", " : ""
+            return (
+                <span className="historyrow-text">{key + " ➞ "}
+                    {value ? <span className="historyrow-label-link" onClick={() => window.open(value, "_blank")}>
+                        {functions.util.getSiteName(value, i18n) + append}
+                    </span> : "none" + append}
+                </span>
+            )
+        })
+    }
+
     const printMirrors = () => {
         if (!props.postHistory.mirrors) return "None"
         const mapped = Object.values(props.postHistory.mirrors) as string[]
-        return mapped.map((m, i) => {
+        return mapped.map((value, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.util.getSiteName(m, i18n) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(value, "_blank")}>{functions.util.getSiteName(value, i18n) + append}</span>
         })
     }
 
@@ -371,6 +388,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (!prevHistory || changes.source) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.util.getSiteName(props.postHistory.source, i18n)}</span></span>)
+        }
+        if (!prevHistory || changes.imageSources) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageSources}: </span>{printImageSources()}</span>)
         }
         if (!prevHistory || changes.mirrors) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}: </span>{printMirrors()}</span>)

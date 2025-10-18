@@ -60,6 +60,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.banner.accountRestored)
             document.documentElement.style.setProperty("--actionBannerColor", "#32a4f0CC")
         }
+        if (actionBanner === "image-source") {
+            setStickyText(i18n.banner.changedSource)
+            document.documentElement.style.setProperty("--actionBannerColor", "#c432f0CC")
+        }
     }, [actionBanner])
 
     const getDuration = () => {

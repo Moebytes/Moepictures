@@ -285,7 +285,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                 <div className="post-container">
                     {images.length > 1 ?
                     <div className="carousel-container">
-                        <Carousel images={images} set={set} index={order-1}/>
+                        <Carousel images={images} set={set} index={order-1} unverified={true}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} 

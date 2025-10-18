@@ -41,6 +41,7 @@ import DeletePostDialog from "./post/DeletePostDialog"
 import DeletePostHistoryDialog from "./post/DeletePostHistoryDialog"
 import EditThumbnailDialog from "./post/EditThumbnailDialog"
 import FlipPostDialog from "./post/FlipPostDialog"
+import ImageSourceDialog from "./post/ImageSourceDialog"
 import JoinPostDialog from "./post/JoinPostDialog"
 import LockPostDialog from "./post/LockPostDialog"
 import ParentDialog from "./post/ParentDialog"
@@ -130,6 +131,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <DeletePostHistoryDialog/>
         <EditThumbnailDialog/>
         <FlipPostDialog/>
+        <ImageSourceDialog/>
         <JoinPostDialog/>
         <LockPostDialog/>
         <ParentDialog/>

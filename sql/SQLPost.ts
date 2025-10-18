@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {PostFull, UnverifiedPost, MiniTag, ChildPost} from "../types/Types"
+import {PostFull, UnverifiedPost, MiniTag, ChildPost, Image} from "../types/Types"
 
 export default class SQLPost {
     /** Create a new post. */
@@ -184,10 +184,10 @@ export default class SQLPost {
         englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, 
         reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
-        addedTagGroups?: string[], removedTagGroups?: string[], imageChanged?: boolean, changes?: any}) => {
+        addedTagGroups?: string[], removedTagGroups?: string[], imageSources?: string | null, imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
-        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageChanged, changes, reason} = params
+        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -254,6 +254,11 @@ export default class SQLPost {
         if (mirrors !== undefined) {
             setArray.push(`"mirrors" = $${i}`)
             values.push(mirrors)
+            i++
+        }
+        if (imageSources !== undefined) {
+            setArray.push(`"imageSources" = $${i}`)
+            values.push(imageSources)
             i++
         }
         if (slug !== undefined) {
@@ -413,8 +418,8 @@ export default class SQLPost {
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail", value: string | number | boolean) => {
-        let whitelist = ["hash", "type", "thumbnail"]
+    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail" | "source", value: string | number | boolean | null) => {
+        let whitelist = ["hash", "type", "thumbnail", "source"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -426,8 +431,8 @@ export default class SQLPost {
     }
 
     /** Updates an image (unverified) */
-    public static updateUnverifiedImage = async (imageID: string, column: "filename" | "thumbnail", value: string | number | boolean) => {
-        let whitelist = ["filename", "thumbnail"]
+    public static updateUnverifiedImage = async (imageID: string, column: "filename" | "thumbnail" | "source", value: string | number | boolean | null) => {
+        let whitelist = ["filename", "thumbnail", "source"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -690,5 +695,35 @@ export default class SQLPost {
         }
         const result = await SQLQuery.run(query)
         return result[0] as Promise<ChildPost | undefined>
+    }
+
+    /** Get image. */
+    public static image = async (imageID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT images.*
+            FROM images
+            WHERE images."imageID" = $1
+            GROUP BY images."imageID"
+            `),
+            values: [imageID]
+        }
+        const result = await SQLQuery.run(query, `image/${imageID}`)
+        return result[0] as Promise<Image | undefined>
+    }
+
+    /** Get image (unverified). */
+    public static unverifiedImage = async (imageID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "unverified images".*
+            FROM "unverified images"
+            WHERE "unverified images"."imageID" = $1
+            GROUP BY "unverified images"."imageID"
+            `),
+            values: [imageID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<Image | undefined>
     }
 }
