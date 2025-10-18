@@ -523,7 +523,7 @@ app.get("/proxy", imageLimiter, async (req: Request, res: Response, next: NextFu
       res.status(200).send(body)
     } else {
       const buffer = await response.arrayBuffer()
-      res.status(200).send(buffer)
+      res.status(200).send(Buffer.from(buffer))
     }
   } catch {
     res.status(400).end()
