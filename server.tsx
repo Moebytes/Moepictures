@@ -508,6 +508,27 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   }
 })
 
+app.post("/proxy", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const link = decodeURIComponent(req.body.url as string)
+    if (!link) return void res.status(400).send("No url")
+    const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}})
+    const contentType = response.headers.get("content-type") || "application/octet-stream"
+    res.setHeader("Content-Type", contentType)
+    res.setHeader("Access-Control-Allow-Origin", "*")
+    if (contentType.includes("application/json")) {
+      const body = await response.json()
+      res.status(200).send(body)
+    } else {
+      const buffer = await response.arrayBuffer()
+      let base64 = functions.byte.arrayBufferToBase64(buffer)
+      res.status(200).send(base64)
+    }
+  } catch {
+    res.status(400).end()
+  }
+})
+
 app.get("/*", async (req: Request, res: Response) => {
   try {
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {

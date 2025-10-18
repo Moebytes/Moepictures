@@ -519,7 +519,7 @@
             "alphanumeric": "Usernames cannot contain special characters or spaces.",
             "profane": "Username is profane.",
             "disallowed": "This username isn't allowed to be used.",
-            "numericOnly": "Usernames cannot be only numbers.",
+            "numericOnly": "Username cannot be only numbers.",
             "gibberish": "Username cannot be gibberish."
         },
         "password": {

@@ -140,7 +140,7 @@ export default class HTTPFunctions {
 
     public static proxyImage = async (link: string, session: Session, setSessionFlag: (value: boolean) => void) => {
         try {
-            const images = await functions.http.post(`/api/misc/proxy`, {url: encodeURIComponent(link)}, session, setSessionFlag)
+            const images = await functions.http.post(`/api/misc/proxy-images`, {url: encodeURIComponent(link)}, session, setSessionFlag)
             let files = [] as File[]
             for (let i = 0; i < images.length; i++) {
                 const blob = new Blob([new Uint8Array(images[i].data)])

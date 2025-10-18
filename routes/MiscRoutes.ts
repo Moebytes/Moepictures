@@ -144,7 +144,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/proxy", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/proxy-images", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = decodeURIComponent(req.body.url as string)
         if (!link) return void res.status(400).send("No url")
         let headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:131.0) Gecko/20100101 Firefox/131.0"}
