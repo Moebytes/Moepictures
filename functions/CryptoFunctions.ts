@@ -53,8 +53,14 @@ export default class CryptoFunctions {
             functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl
         }
-        if (functions.file.isLive2D(img)) {
-            const url = await functions.model.live2dScreenshot(decryptedImg + "#.zip")
+        if (await functions.file.isLive2D(img)) {
+            const url = await functions.model.live2dScreenshot(decryptedImg)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
+            return cacheUrl
+        }
+        if (await functions.file.isUgoira(img)) {
+            const url = await functions.video.ugoiraThumbnail(decryptedImg)
             let cacheUrl = `${url}#${path.extname(img)}`
             functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl

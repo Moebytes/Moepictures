@@ -568,7 +568,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             if ("historyID" in props.post) {
                 if (props.post.imageSources?.[order]) return sourceSetIcon
             } else {
-                if (props.post.images[order - 1].source) return sourceSetIcon
+                if (props.post.images[order - 1]?.source) return sourceSetIcon
             }
             return sourceIcon
         }

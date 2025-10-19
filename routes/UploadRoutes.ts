@@ -43,7 +43,7 @@ const modLimiter = rateLimit({
 const validImages = (images: UploadImage[], skipMBCheck?: boolean) => {
   if (!images.length) return false
   for (let i = 0; i < images.length; i++) {
-    if (functions.file.isModel(images[i].link) || functions.file.isLive2D(images[i].link)) {
+    if (functions.file.isModel(images[i].link) || functions.file.isZip(images[i].link)) {
       const MB = images[i].size / (1024*1024)
       const maxSize = functions.file.isModel(images[i].link) ? 10 : 50
       if (skipMBCheck || MB <= maxSize) continue
@@ -276,11 +276,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       kind = "comic"
     } else if (functions.file.isWebP(`.${ext}`)) {
       const animated = functions.file.isAnimatedWebp(new Uint8Array(bufferFallback).buffer)
-      if (animated) {
-        kind = "animation"
-      } else {
-        kind = "image"
-      }
+      kind = animated ? "animation" : "image"
     } else if (functions.file.isImage(`.${ext}`)) {
       kind = "image"
     } else if (functions.file.isGIF(`.${ext}`)) {
@@ -291,8 +287,11 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       kind = "audio"
     } else if (functions.file.isModel(`.${ext}`)) {
       kind = "model"
-    } else if (functions.file.isLive2D(`.${ext}`)) {
-      kind = "live2d"
+    } else if (functions.file.isZip(`.${ext}`)) {
+      const live2d = await functions.file.isLive2DZip(new Uint8Array(bufferFallback).buffer)
+      const ugoira = await functions.file.isUgoiraZip(new Uint8Array(bufferFallback).buffer)
+      if (live2d) kind = "live2d"
+      if (ugoira) kind = "animation"
     }
     if (imgChanged) {
       if (buffer?.byteLength) {
@@ -330,7 +329,7 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let upscaledDimensions = {} as {width?: number, height?: number}
       let hash = ""
       let pixelHash = ""
-      if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
+      if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d" || kind === "animation") {
           hash = await phash(thumbBuffer || bufferFallback).then((hash: string) => functions.byte.binaryToHex(hash))
           pixelHash = await serverFunctions.util.pixelHash(thumbBuffer || bufferFallback)
           dimensions.width = original.width

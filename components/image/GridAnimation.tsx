@@ -45,11 +45,19 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     }))
 
     const loadImage = async () => {
-        const decryptedImg = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
-        const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)
-        setLiveImg(liveImg)
-        setImg(decryptedImg)
-        setStaticImg(decryptedImg)
+        if (functions.file.isZip(props.anim)) {
+            const thumb = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`, true)
+            setLiveImg(thumb)
+            setImg(thumb)
+            setStaticImg(thumb)
+            await parseUgoira()
+        } else {
+            const decryptedImg = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
+            const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)
+            setLiveImg(liveImg)
+            setImg(decryptedImg)
+            setStaticImg(decryptedImg)
+        }
     }
 
     const toggleLive = async () => {
@@ -110,6 +118,16 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         setSeekTo(seconds)
     }
 
+    const parseUgoira = async () => {
+        const start = new Date()
+        const arrayBuffer = await getCurrentBuffer(true)
+        const frames = await functions.video.extractUgoiraFrames(arrayBuffer)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+    }
+
     useEffect(() => {
         if (!gifData) return
         if (imageLoaded) {
@@ -136,6 +154,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
             if (!adjustedData[pos]) pos = 0
             frame = adjustedData[pos].frame
             delay = adjustedData[pos].delay
+            if (pixelateCanvas) pixelateCanvas.style.opacity = "1"
 
             const update = () => {
                 if (reverse) {
@@ -184,14 +203,12 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
                             pixelateCanvas.style.height = `${pixelateCanvas.height * pixelate}px`
                         }
                         pixelateCanvas.style.imageRendering = "pixelated"
-                        pixelateCanvas.style.opacity = "1"
                     } else {
                         pixelateCanvas.style.width = `${pixelateCanvas.width}px`
                         pixelateCanvas.style.height = `${pixelateCanvas.height}px`
                         pixelateCanvas.style.imageRendering = "none"
                         pixelateCtx?.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
                         pixelateCtx?.drawImage(frame, 0, 0, pixelateCanvas.width, pixelateCanvas.height)
-                        pixelateCanvas.style.opacity = "0"
                     }
                 }
             }
@@ -200,6 +217,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
 
             const animate = (now: number) => {
                 draw()
+                if (!hover && !session.liveAnimationPreview) return window.cancelAnimationFrame(id)
                 const delta = now - lastTime
                 if (delta >= delay) {
                     update()

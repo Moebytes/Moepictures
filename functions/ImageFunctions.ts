@@ -1,7 +1,6 @@
 import functions from "./Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
-import {isLive2DZip} from "live2d-renderer"
 import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
 import JSZip from "jszip"
@@ -55,10 +54,12 @@ export default class ImageFunctions {
 
     public static dimensions = async (link: string) => {
         let dimensions = {width: 0, height: 0, size: 0} as Dimensions
-        if (functions.file.isLive2D(link)) {
+        if (await functions.file.isLive2D(link)) {
             dimensions = await functions.model.live2dDimensions(link)
+        } else if (await functions.file.isUgoira(link)) {
+            dimensions = await functions.video.ugoiraDimensions(link)
         } else if (functions.file.isVideo(link)) {
-            dimensions = await this.imageDimensions(link)
+            dimensions = await functions.video.videoDimensions(link)
         } else if (functions.file.isModel(link)) {
             dimensions = await functions.model.modelDimensions(link)
         } else if (functions.file.isAudio(link)) {
@@ -72,8 +73,10 @@ export default class ImageFunctions {
     public static thumbnail = async (link: string) => {
         let thumbnail = ""
         let thumbnailExt = "png"
-        if (functions.file.isLive2D(link)) {
+        if (await functions.file.isLive2D(link)) {
             thumbnail = await functions.model.live2dScreenshot(link)
+        } else if (await functions.file.isUgoira(link)) {
+            thumbnail = await functions.video.ugoiraThumbnail(link)
         } else if (functions.file.isVideo(link)) {
             thumbnailExt = "jpg"
             thumbnail = await functions.video.videoThumbnail(link)
@@ -133,12 +136,14 @@ export default class ImageFunctions {
             let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
             let {width, height, size, duration} = await functions.image.dimensions(link)
             let live2d = false
+            let ugoira = false
             if (allowed) {
                 const MB = file.size / (1024 * 1024)
                 if (MB <= maxSize || permissions.isMod(session)) {
                     if (result.mime === "application/zip") {
-                        live2d = await isLive2DZip(new Uint8Array(bytes).buffer)
-                        if (live2d) {
+                        live2d = await functions.file.isLive2DZip(new Uint8Array(bytes).buffer)
+                        ugoira = await functions.file.isUgoiraZip(new Uint8Array(bytes).buffer)
+                        if (live2d || ugoira) {
                             images.push({
                                 link, originalLink, ext: "zip", size,
                                 thumbnail, thumbnailExt, width, height, duration,
@@ -232,12 +237,11 @@ export default class ImageFunctions {
         const topLeft = {
             x: canvas.width,
             y: canvas.height,
-            update(x: number, y: number){
+            update(x: number, y: number) {
                 this.x = Math.min(this.x,x)
                 this.y = Math.min(this.y,y)
             }
         }
-
         const bottomRight = {
             x: 0,
             y: 0,
@@ -248,7 +252,6 @@ export default class ImageFunctions {
         }
 
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-
         for(let x = 0; x < canvas.width; x++) {
             for(let y = 0; y < canvas.height; y++) {
                 const alpha = imageData.data[((y * (canvas.width * 4)) + (x * 4)) + 3]
@@ -258,7 +261,6 @@ export default class ImageFunctions {
                 }
             }
         }
-
         const width = bottomRight.x - topLeft.x
         const height = bottomRight.y - topLeft.y
 
@@ -282,37 +284,20 @@ export default class ImageFunctions {
 
     public static imageDimensions = async (image: string) => {
         return new Promise<{width: number, height: number, size: number, duration?: number}>(async (resolve) => {
-            if (functions.file.isVideo(image)) {
-                const video = document.createElement("video")
-                video.addEventListener("loadedmetadata", async () => {
-                    let width = video.videoWidth 
-                    let height = video.videoHeight
-                    let duration = video.duration
-                    try {
-                        const r = await fetch(image).then(((r) => r.arrayBuffer()))
-                        const size = r.byteLength
-                        resolve({width, height, size, duration})
-                    } catch {
-                        resolve({width, height, size: 0, duration})
-                    }
-                })
-                video.src = image
-            } else {
-                const img = document.createElement("img")
-                img.addEventListener("load", async () => {
-                    let width = img.width
-                    let height = img.height
-                    try {
-                        let duration = await functions.video.animationDuration(image)
-                        const r = await fetch(image).then((r) => r.arrayBuffer())
-                        const size = r.byteLength 
-                        resolve({width, height, size, duration})
-                    } catch {
-                        resolve({width, height, size: 0, duration: 0})
-                    }
-                })
-                img.src = image
-            }
+            const img = document.createElement("img")
+            img.addEventListener("load", async () => {
+                let width = img.width
+                let height = img.height
+                try {
+                    let duration = await functions.video.animationDuration(image)
+                    const r = await fetch(image).then((r) => r.arrayBuffer())
+                    const size = r.byteLength 
+                    resolve({width, height, size, duration})
+                } catch {
+                    resolve({width, height, size: 0, duration: 0})
+                }
+            })
+            img.src = image
         })
     }
 

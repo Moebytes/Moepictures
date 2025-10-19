@@ -63,7 +63,7 @@ export default class LinkFunctions {
             return this.getImageLink(image, false)
         }
         if (image.type === "animation" || image.type === "video") {
-            if (session.liveAnimationPreview) return this.getImageLink(image, false)
+            if (session.liveAnimationPreview && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
         }
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview) return this.getImageLink(image, false)
@@ -100,7 +100,7 @@ export default class LinkFunctions {
             return this.getUnverifiedImageLink(image, false)
         }
         if (image.type === "animation" || image.type === "video") {
-            if (session.liveAnimationPreview) filename = originalFilename
+            if (session.liveAnimationPreview && !functions.file.isZip(originalFilename)) filename = originalFilename
         }
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview) filename = originalFilename

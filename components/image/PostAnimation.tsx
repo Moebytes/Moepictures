@@ -31,6 +31,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const gifSpeedRef = useRef<HTMLImageElement>(null)
     const gifSliderRef = useRef<Slider>(null)
     const [img, setImg] = useState("")
+    const [zip, setZip] = useState("")
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const {toggleFullscreen, getCurrentBuffer, updateProgressText, seek, reset, changeReverse} = props
     const {naturalWidth, setNaturalWidth} = props
@@ -51,8 +52,15 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const decryptImage = async () => {
         const decryptedImage = await functions.crypto.decryptItem(props.anim!, session)
         if (!decryptedImage) return
-        setBackFrame(decryptedImage)
-        setImg(decryptedImage)
+        if (functions.file.isZip(props.anim)) {
+            const firstFrame = await functions.video.ugoiraThumbnail(decryptedImage)
+            setBackFrame(firstFrame)
+            setImg(firstFrame)
+            setZip(decryptedImage)
+        } else {
+            setBackFrame(decryptedImage)
+            setImg(decryptedImage)
+        }
     }
 
     const cancelAnimation = () => {
@@ -65,6 +73,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         setReverse(false)
         setGIFData(null)
         setBackFrame("")
+        setZip("")
         setSecondsProgress(0)
         setProgress(0)
         setDragProgress(0)
@@ -108,6 +117,16 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         const seconds = (end.getTime() - start.getTime()) / 1000
         setSeekTo(seconds)
     }
+
+    const parseUgoira = async () => {
+        const start = new Date()
+        const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
+        const frames = await functions.video.extractUgoiraFrames(arrayBuffer)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+    }
     
     const processFrames = () => {
         if (imageLoaded && functions.file.isGIF(props.anim)) {
@@ -116,6 +135,10 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
 
         if (imageLoaded && functions.file.isWebP(props.anim)) {
             parseAnimatedWebP()
+        }
+
+        if (imageLoaded && functions.file.isZip(props.anim)) {
+            parseUgoira()
         }
     }
 
@@ -250,6 +273,9 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         if (session.downloadPixivID && props.post?.source?.includes("pixiv.net")) {
             filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.anim!).replace(/\?.*$/, "")
         }
+        if (functions.file.isZip(props.anim)) {
+            return functions.dom.download(filename, zip)
+        }
         const gif = await renderGIF()
         if (!gif) return
         if (gif !== img) filename = `${path.basename(filename, path.extname(filename))}.gif`
@@ -287,10 +313,11 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             <span className="encoding-overlay-text">{`Rendering GIF...`}</span>
         </div>
         <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            {duration >= 1 ?
+            {duration >= 0.1 ?
             <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <p className="gif-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
-                <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
+                <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} 
+                value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                 <p className="gif-control-text">{functions.date.formatSeconds(duration)}</p>
             </div> : null}
             <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

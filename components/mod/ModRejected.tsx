@@ -282,8 +282,10 @@ const ModRejected: React.FunctionComponent = (props) => {
             let src = img
             if (functions.file.isModel(img)) {
                 src = await functions.model.modelImage(img, img)
-            } else if (functions.file.isLive2D(img)) {
+            } else if (await functions.file.isLive2D(img)) {
                 src = await functions.model.live2dScreenshot(img)
+            } else if (await functions.file.isUgoira(img)) {
+                src = await functions.video.ugoiraThumbnail(img)
             } else if (functions.file.isAudio(img)) {
                 src = await functions.audio.songCover(img)
             }
@@ -345,7 +347,7 @@ const ModRejected: React.FunctionComponent = (props) => {
                 navigate(`/unverified/post/${post.postID}`)
             }
             const img = functions.link.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
-            let canvasImg = functions.file.isModel(img) || functions.file.isLive2D(img) || functions.file.isAudio(img)
+            let canvasImg = functions.file.isModel(img) || functions.file.isZip(img) || functions.file.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} key={i}>
                     <div className="mod-post-img-container">

@@ -1,11 +1,14 @@
 import path from "path"
 import functions from "./Functions"
+import fileType from "magic-bytes.js"
+import {isLive2DZip as verifyLive2DZip} from "live2d-renderer"
+import JSZip from "jszip"
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".fbx", ".vrm", ".obj"]
-const live2dExtensions = [".zip"]
+const zipExtensions = [".zip"]
 
 export default class FileFunctions {
     public static isImage = (file?: string) => {
@@ -44,15 +47,15 @@ export default class FileFunctions {
         return functions.util.arrayIncludes(ext, modelExtensions)
     }
 
-    public static isLive2D = (file?: string) => {
+    public static isZip = (file?: string) => {
         if (!file) return false
         file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
-            return functions.util.arrayIncludes(ext, live2dExtensions)
+            return functions.util.arrayIncludes(ext, zipExtensions)
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
-        return functions.util.arrayIncludes(ext, live2dExtensions)
+        return functions.util.arrayIncludes(ext, zipExtensions)
     }
 
     public static isGIF = (file?: string) => {
@@ -167,5 +170,42 @@ export default class FileFunctions {
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
         return ext === ".webm"
+    }
+
+    public static isLive2DZip = async (buffer: ArrayBuffer) => {
+        return verifyLive2DZip(buffer)
+    }
+
+    public static isLive2D = async (file?: string) => {
+        if (!file) return false
+        const buffer = await functions.http.getBuffer(file)
+        return this.isLive2DZip(buffer)
+    }
+
+    public static isUgoiraZip = async (buffer: ArrayBuffer) => {
+        let isZip = false
+        const result = fileType(new Uint8Array(buffer))?.[0] || {mime: ""}
+        if (result.mime === "application/zip") isZip = true
+        if (!isZip) return false
+        
+        const zip = await JSZip.loadAsync(buffer)
+        
+        let hasImage = false
+        let hasAnimation = false
+
+        for (const [relativePath, file] of Object.entries(zip.files)) {
+            if (relativePath.startsWith("__MACOSX") || file.dir) continue
+            if (relativePath.endsWith('animation.json')) hasAnimation = true
+            if (relativePath.match(/\.(png|jpg|webp|avif)$/)) hasImage = true
+        }
+        
+        return hasImage && hasAnimation
+    }
+
+
+    public static isUgoira = async (file?: string) => {
+        if (!file) return false
+        const buffer = await functions.http.getBuffer(file)
+        return this.isUgoiraZip(buffer)
     }
 }

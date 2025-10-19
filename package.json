@@ -142,7 +142,7 @@
     "pace-js": "^1.2.4",
     "pg": "^8.13.3",
     "pg-dump-restore": "^1.0.12",
-    "pixiv.ts": "^0.7.5",
+    "pixiv.ts": "^0.8.1",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",

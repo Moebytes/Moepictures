@@ -124,7 +124,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const [edited, setEdited] = useState(false)
     const [originalID, setOriginalID] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
+    const [currentLive2D, setCurrentLive2D] = useState(false)
     const [currentAnimatedWebp, setCurrentAnimatedWebp] = useState(false)
+    const [currentPixivUgoira, setCurrentPixivUgoira] = useState(false)
     const [post, setPost] = useState(null as UnverifiedPost | null)
     const {id: postID} = useParams() as {id: string}
     const navigate = useNavigate()
@@ -334,9 +336,13 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     useEffect(() => {
-        fetch(currentImg).then((r) => r.arrayBuffer()).then((buffer) => {
+        const testFormats = async () => {
+            const buffer = await fetch(currentImg).then((r) => r.arrayBuffer())
             setCurrentAnimatedWebp(functions.file.isAnimatedWebp(buffer))
-        })
+            setCurrentPixivUgoira(await functions.file.isUgoiraZip(buffer))
+            setCurrentLive2D(await functions.file.isLive2DZip(buffer))
+        }
+        testFormats()
     }, [currentImg])
 
     const reset = () => {
@@ -1082,7 +1088,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     const getPostJSX = () => {
-        if (functions.file.isLive2D(currentImg)) {
+        if (currentLive2D) {
             return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.file.isModel(currentImg)) {
             return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
@@ -1090,7 +1096,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
         } else if (functions.file.isVideo(currentImg)) {
             return <PostVideo video={currentImg} noKeydown={true} noNotes={true}/>
-        } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp) {
+        } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp || currentPixivUgoira) {
             return <PostAnimation anim={currentImg} noKeydown={true} noNotes={true}/>
         }  else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>

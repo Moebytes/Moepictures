@@ -472,7 +472,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 navigate(`/unverified/post/${post.postID}`)
             }
             const img = functions.link.getUnverifiedThumbnailLink(post.images[0], "tiny", session, mobile)
-            let canvasImg = functions.file.isModel(img) || functions.file.isLive2D(img) || functions.file.isAudio(img)
+            let canvasImg = functions.file.isModel(img) || functions.file.isZip(img) || functions.file.isAudio(img)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

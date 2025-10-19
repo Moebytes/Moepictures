@@ -3,6 +3,7 @@ import MP4Demuxer from "../structures/MP4Demuxer"
 import WebPXMux from "webpxmux"
 import {JsWebm} from "jswebm"
 import gifFrames from "gif-frames"
+import JSZip from "jszip"
 import GifEncoder from "gif-encoder"
 import pixels from "image-pixels"
 import {GIFFrame} from "../types/Types"
@@ -237,7 +238,7 @@ export default class VideoFunctions {
         return functions.byte.streamToBuffer(gif as NodeJS.ReadableStream)
     }
 
-    public static videoThumbnail = (link: string) => {
+    public static videoThumbnail = async (link: string) => {
         return new Promise<string>((resolve) => {
             const video = document.createElement("video")
             video.src = link 
@@ -253,6 +254,25 @@ export default class VideoFunctions {
                 resolve(canvas.toDataURL())
             })
             video.load()
+        })
+    }
+
+    public static videoDimensions = async (videoLink: string) => {
+        return new Promise<{width: number, height: number, size: number, duration: number}>(async (resolve) => {
+            const video = document.createElement("video")
+            video.addEventListener("loadedmetadata", async () => {
+                let width = video.videoWidth 
+                let height = video.videoHeight
+                let duration = video.duration
+                try {
+                    const r = await fetch(videoLink).then(((r) => r.arrayBuffer()))
+                    const size = r.byteLength
+                    resolve({width, height, size, duration})
+                } catch {
+                    resolve({width, height, size: 0, duration})
+                }
+            })
+            video.src = videoLink
         })
     }
 
@@ -275,5 +295,49 @@ export default class VideoFunctions {
         let {speed, reverse} = effects
         if ((speed !== 1) || (reverse !== false)) return true 
         return false
+    }
+
+    public static extractUgoiraFrames = async (zipBuffer: ArrayBuffer, firstOnly?: boolean) => {
+        const zip = await JSZip.loadAsync(zipBuffer)
+        let frames = [] as GIFFrame[]
+        let animations = [] as {file: string, delay: number}[]
+        const animationFile = zip.file("animation.json")
+        if (animationFile) {
+            const jsonText = await animationFile.async("text")
+            const json = JSON.parse(jsonText)
+            animations = json.frames || json
+        }
+        for (const frameInfo of animations) {
+            const {file, delay} = frameInfo
+            const fileObject = zip.file(file)
+            if (!fileObject) continue
+
+            const blob = await fileObject.async("blob")
+            const url = URL.createObjectURL(blob)
+            const image = await functions.image.createImage(url)
+            const canvas = document.createElement("canvas")
+            canvas.width = image.width
+            canvas.height = image.height
+            const ctx = canvas.getContext("2d")!
+            ctx.drawImage(image, 0, 0)
+            URL.revokeObjectURL(url)
+            frames.push({frame: canvas, delay})
+            if (firstOnly) return frames
+        }
+        return frames
+    }
+
+    public static ugoiraThumbnail = async (link: string) => {
+        const arrayBuffer = await functions.http.getBuffer(link)
+        const frames = await this.extractUgoiraFrames(arrayBuffer, true)
+        return frames[0].frame.toDataURL()
+    }
+
+    public static ugoiraDimensions = async (link: string) => {
+        const arrayBuffer = await functions.http.getBuffer(link)
+        const frames = await this.extractUgoiraFrames(arrayBuffer, true)
+        let duration = frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
+        return {width: frames[0].frame.width, height: frames[0].frame.height, 
+                size: arrayBuffer.byteLength, duration}
     }
 }
