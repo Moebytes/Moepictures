@@ -41,8 +41,8 @@ import {ServerSession, Storage, PostFull} from "./types/Types"
 const __dirname = path.resolve()
 
 const app = express() as any
-app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}))
-app.use(express.json({limit: "1gb"}))
+app.use(express.urlencoded({extended: true, limit: "300mb", parameterLimit: 10000}))
+app.use(express.json({limit: "300mb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 app.set("trust proxy", "loopback")
