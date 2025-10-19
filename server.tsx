@@ -13,6 +13,7 @@ import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import {Provider} from "react-redux"
+import {lookup} from "dns/promises"
 import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./functions/Functions"
@@ -512,6 +513,15 @@ app.get("/proxy", imageLimiter, async (req: Request, res: Response, next: NextFu
   try {
     const link = decodeURIComponent(req.query.url as string)
     if (!link) return void res.status(400).send("No url")
+
+    if (!["http:", "https:"].includes(new URL(link).protocol)) {
+      return void res.status(400).send("Bad protocol")
+    }
+    const ipLookups = await lookup(new URL(link).hostname, {all: true})
+    if (ipLookups.some((ip) => serverFunctions.util.isPrivateIP(ip.address))) {
+      return void res.status(400).send("Bad link")
+    }
+    if (serverFunctions.util.isPrivateIP(link)) return void res.status(400).send("Bad link")
     const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}})
     const contentType = response.headers.get("content-type") || "application/octet-stream"
     res.setHeader("Content-Type", contentType)

@@ -14,6 +14,38 @@ export default class ServerUtil {
         return region
     }
 
+    public static isPrivateIP = (ip: string) => {
+        if (!ip) return true
+
+        if (ip.includes(":")) {
+            const lower = ip.toLowerCase()
+            return (
+                lower === "::1" ||
+                lower.startsWith("fe80:") ||
+                lower.startsWith("fc") ||
+                lower.startsWith("fd") ||
+                lower.startsWith("::ffff:10.") ||
+                lower.startsWith("::ffff:172.") ||
+                lower.startsWith("::ffff:192.")
+            )
+        }
+
+        const parts = ip.split(".").map(Number)
+        if (parts.length !== 4 || parts.some(n => isNaN(n) || n < 0 || n > 255)) return true
+
+        const [a, b] = parts
+
+        return (
+            a === 10 ||
+            (a === 172 && b >= 16 && b <= 31) ||
+            (a === 192 && b === 168) ||
+            a === 127 ||
+            (a === 169 && b === 254) ||
+            (a === 100 && b >= 64 && b <= 127) ||
+            a >= 224
+        )
+    }
+
     public static translate = async (words: string[]) => {
         const translate = async (text: string) => {
             try {
