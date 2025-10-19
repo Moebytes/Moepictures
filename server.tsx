@@ -521,7 +521,6 @@ app.get("/proxy", imageLimiter, async (req: Request, res: Response, next: NextFu
     if (ipLookups.some((ip) => serverFunctions.util.isPrivateIP(ip.address))) {
       return void res.status(400).send("Bad link")
     }
-    if (serverFunctions.util.isPrivateIP(link)) return void res.status(400).send("Bad link")
     const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}})
     const contentType = response.headers.get("content-type") || "application/octet-stream"
     res.setHeader("Content-Type", contentType)
