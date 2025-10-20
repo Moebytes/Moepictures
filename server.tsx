@@ -509,36 +509,6 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   }
 })
 
-app.get("/proxy", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const link = decodeURIComponent(req.query.url as string)
-    if (!link) return void res.status(400).send("No url")
-
-    if (!["http:", "https:"].includes(new URL(link).protocol)) {
-      return void res.status(400).send("Bad protocol")
-    }
-    const ipLookups = await lookup(new URL(link).hostname, {all: true})
-    if (ipLookups.some((ip) => serverFunctions.util.isPrivateIP(ip.address))) {
-      return void res.status(400).send("Bad link")
-    }
-    const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}})
-    const contentType = response.headers.get("content-type") || "application/octet-stream"
-    res.setHeader("Content-Type", contentType)
-    res.setHeader("Access-Control-Allow-Origin", "*")
-    res.setHeader("Last-Modified", lastModified)
-    res.setHeader("Cache-Control", "public, max-age=2678400")
-    if (contentType.includes("application/json")) {
-      const body = await response.json()
-      res.status(200).send(body)
-    } else {
-      const buffer = await response.arrayBuffer()
-      res.status(200).send(Buffer.from(buffer))
-    }
-  } catch {
-    res.status(400).end()
-  }
-})
-
 app.get("/*", async (req: Request, res: Response) => {
   try {
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {
