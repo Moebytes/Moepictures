@@ -61,7 +61,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     }
 
     const toggleLive = async () => {
-        if (session.liveAnimationPreview) return
+        if (session.liveAnimationPreview && !mobile) return
         if (hover) {
             setImg(liveImg)
         } else {
@@ -81,7 +81,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     useEffect(() => {
         if (shouldUpdate()) props.reupdate?.()
     }, [imageLoaded, reverse, speed, pixelate])
-    
+
     const cancelAnimation = () => {
         window.cancelAnimationFrame(id)
     }
@@ -217,7 +217,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
 
             const animate = (now: number) => {
                 draw()
-                if (!hover && !session.liveAnimationPreview) return window.cancelAnimationFrame(id)
+                if (!hover && !(session.liveAnimationPreview && !mobile)) return window.cancelAnimationFrame(id)
                 const delta = now - lastTime
                 if (delta >= delay) {
                     update()

@@ -63,10 +63,10 @@ export default class LinkFunctions {
             return this.getImageLink(image, false)
         }
         if (image.type === "animation" || image.type === "video") {
-            if (session.liveAnimationPreview && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
+            if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
         }
         if (image.type === "model" || image.type === "live2d") {
-            if (session.liveModelPreview) return this.getImageLink(image, false)
+            if (session.liveModelPreview && !mobile) return this.getImageLink(image, false)
         }
         const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash})
@@ -100,10 +100,10 @@ export default class LinkFunctions {
             return this.getUnverifiedImageLink(image, false)
         }
         if (image.type === "animation" || image.type === "video") {
-            if (session.liveAnimationPreview && !functions.file.isZip(originalFilename)) filename = originalFilename
+            if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) filename = originalFilename
         }
         if (image.type === "model" || image.type === "live2d") {
-            if (session.liveModelPreview) filename = originalFilename
+            if (session.liveModelPreview && !mobile) filename = originalFilename
         }
         const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash, upscaled: false})

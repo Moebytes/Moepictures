@@ -981,14 +981,27 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }, i18n, navigate)
     }
 
-    const copyTags = (replaceDash?: boolean, commas?: boolean) => {
+    const copyTags = (event: React.MouseEvent) => {
         if (!props.artists || !props.characters || !props.series || !props.tags) return
+        event.preventDefault()
         const artists = props.artists.map((a) => a.tag)
         const characters = props.characters.map((c) => c.tag)
         const series = props.series.map((s) => s.tag)
         const tags = props.tags.map((t) => t.tag)
         let combined = [...artists, ...characters, ...series, ...tags]
-        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+        let commas = false
+        let replaceDash = false 
+        let danbooru = false
+        if (event.shiftKey) {
+            commas = false
+            replaceDash = true
+            danbooru = true
+        } else if (event.button === 2) {
+            commas = true
+            replaceDash = true
+        }
+        let replacer = danbooru ? "_" : " "
+        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", replacer))
         navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
         setActionBanner("copy-tags")
     }
@@ -1008,7 +1021,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="sidebar-subcontainer">
                     <div className="sidebar-row">
-                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}>
+                        <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
                             <img className="sidebar-icon" src={tagIcon}/>
                             <span className="tag-red">{i18n.sidebar.copyTags}</span>
                         </span>

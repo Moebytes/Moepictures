@@ -552,7 +552,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
         }
         populateCache()
-    }, [posts, sizeType, pageMultiplier, session])
+    }, [posts, sizeType, pageMultiplier, session, mobile])
 
     const firstPage = () => {
         setPage(1)
