@@ -118,10 +118,18 @@ export default class ServerPosts {
                 newBuffer = unverified ? await serverFunctions.files.getUnverifiedFile(newPath, false, newImage.pixelHash)
                 : await serverFunctions.files.getFile(newPath, false, r18, newImage.pixelHash)
             }
-            let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
-            let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
-            oldHashes.push({hash: oldHash, order: oldImages[i].order})
-            newHashes.push({hash: newHash, order: (newImages[i] as Image)?.order || i + 1})
+            try {
+                let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
+                let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
+                oldHashes.push({hash: oldHash, order: oldImage.order})
+                newHashes.push({hash: newHash, order: (newImage as Image)?.order || i + 1})
+
+            } catch {
+                let oldHash = serverFunctions.util.md5(oldBuffer)
+                let newHash = serverFunctions.util.md5(newBuffer)
+                oldHashes.push({hash: oldHash, order: oldImage.order})
+                newHashes.push({hash: newHash, order: (newImage as Image)?.order || i + 1})
+            }
         }
         return {oldHashes, newHashes}
     }
