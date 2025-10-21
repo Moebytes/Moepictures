@@ -32,7 +32,8 @@ const flagSlice = createSlice({
         pasteNoteFlag: null as Note[] | null,
         historyFlag: false,
         tagFavoriteFlag: false,
-        saveSearchFlag: false
+        saveSearchFlag: false,
+        sourceHook: null as string | null
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -61,7 +62,8 @@ const flagSlice = createSlice({
         setPasteNoteFlag: (state, action) => {state.pasteNoteFlag = action.payload},
         setHistoryFlag: (state, action) => {state.historyFlag = action.payload},
         setTagFavoriteFlag: (state, action) => {state.tagFavoriteFlag = action.payload},
-        setSaveSearchFlag: (state, action) => {state.saveSearchFlag = action.payload}
+        setSaveSearchFlag: (state, action) => {state.saveSearchFlag = action.payload},
+        setSourceHook: (state, action) => {state.sourceHook = action.payload}
     }
 })
 
@@ -72,7 +74,7 @@ const {
     setGroupFlag, setMessageFlag, setTagFlag, setPostAmount, setRedirect,
     setGroupSearchFlag, setThreadSearchFlag, setNoteSearchFlag, setMessageSearchFlag,
     setPasteNoteFlag, setHistoryFlag, setTagSearchFlag, setTagFavoriteFlag,
-    setForumPostSearchFlag, setSaveSearchFlag
+    setForumPostSearchFlag, setSaveSearchFlag, setSourceHook
 } = flagSlice.actions
 
 export const useFlagSelector = () => {
@@ -104,7 +106,8 @@ export const useFlagSelector = () => {
         pasteNoteFlag: selector((state) => state.flag.pasteNoteFlag),
         historyFlag: selector((state) => state.flag.historyFlag),
         tagFavoriteFlag: selector((state) => state.flag.tagFavoriteFlag),
-        saveSearchFlag: selector((state) => state.flag.saveSearchFlag)
+        saveSearchFlag: selector((state) => state.flag.saveSearchFlag),
+        sourceHook: selector((state) => state.flag.sourceHook)
     }
 }
 
@@ -137,7 +140,8 @@ export const useFlagActions = () => {
         setPasteNoteFlag: (state: Note[] | null) => dispatch(setPasteNoteFlag(state)),
         setHistoryFlag: (state: boolean) => dispatch(setHistoryFlag(state)),
         setTagFavoriteFlag: (state: boolean) => dispatch(setTagFavoriteFlag(state)),
-        setSaveSearchFlag: (state: boolean) => dispatch(setSaveSearchFlag(state))
+        setSaveSearchFlag: (state: boolean) => dispatch(setSaveSearchFlag(state)),
+        setSourceHook: (state: string | null) => dispatch(setSourceHook(state))
     }
 }
 

@@ -387,14 +387,14 @@ export default class SQLPost {
     public static insertImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
         type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
         upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
-        duration: number | null, thumbnail: string | null) => {
+        duration: number | null, thumbnail: string | null, source: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
             "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", 
-            "thumbnail") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING "imageID"`,
+            "thumbnail", "source") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING "imageID"`,
             rowMode: "array",
             values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
-            size, upscaledSize, duration, thumbnail]
+            size, upscaledSize, duration, thumbnail, source]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -404,14 +404,15 @@ export default class SQLPost {
     public static insertUnverifiedImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
         type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
         upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
-        duration: number | null, thumbnail: string | null) => {
+        duration: number | null, thumbnail: string | null, source: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
-            "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail") 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING "imageID"`,
+            "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail",
+            "source") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING "imageID"`,
             rowMode: "array",
             values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
-            size, upscaledSize, duration, thumbnail]
+            size, upscaledSize, duration, thumbnail, source]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])

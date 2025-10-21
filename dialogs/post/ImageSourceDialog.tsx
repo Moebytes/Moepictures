@@ -13,7 +13,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {imgSourceID} = usePostDialogSelector()
     const {setImgSourceID} = usePostDialogActions()
-    const {setPostFlag} = useFlagActions()
+    const {setPostFlag, setSourceHook} = useFlagActions()
     const {setActionBanner} = useActiveActions()
     const [submitted, setSubmitted] = useState(false)
     const [source, setSource] = useState("")
@@ -26,7 +26,11 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     useEffect(() => {
         if (imgSourceID) {
             document.body.style.pointerEvents = "all"
-            setSource(imgSourceID.image.source || "")
+            if (imgSourceID.uploadImage) {
+                setSource(imgSourceID.uploadImage.source || "")
+            } else if (imgSourceID.image) {
+                setSource(imgSourceID.image.source || "")
+            }
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
@@ -37,25 +41,31 @@ const ImageSourceDialog: React.FunctionComponent = () => {
 
     const updateSource = async () => {
         if (!imgSourceID) return
-        if (permissions.isContributor(session)) {
-            await functions.http.put("/api/image/source", {imageID: imgSourceID.image.imageID, 
-            unverified: imgSourceID.unverified, source, reason}, session, setSessionFlag)
-            setPostFlag(imgSourceID.image.postID)
+        if (imgSourceID.uploadImage) {
+            setSourceHook(source)
             setActionBanner("image-source")
             setImgSourceID(null)
-        } else {
-            let imageSources = functions.post.imageSourceMap(imgSourceID.post) || {}
-            imageSources[imgSourceID.image.order] = source
-            const data = {
-                postID: imgSourceID.post.postID,
-                type: imgSourceID.post.type,
-                rating: imgSourceID.post.rating,
-                style: imgSourceID.post.style,
-                imageSources,
-                reason
+        } else if (imgSourceID.image && imgSourceID.post) {
+            if (permissions.isContributor(session)) {
+                await functions.http.put("/api/image/source", {imageID: imgSourceID.image.imageID, 
+                unverified: imgSourceID.unverified, source, reason}, session, setSessionFlag)
+                setPostFlag(imgSourceID.image.postID)
+                setActionBanner("image-source")
+                setImgSourceID(null)
+            } else {
+                let imageSources = functions.post.imageSourceMap(imgSourceID.post) || {}
+                imageSources[imgSourceID.image.order] = source
+                const data = {
+                    postID: imgSourceID.post.postID,
+                    type: imgSourceID.post.type,
+                    rating: imgSourceID.post.rating,
+                    style: imgSourceID.post.style,
+                    imageSources,
+                    reason
+                }
+                await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+                setSubmitted(true)
             }
-            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
-            setSubmitted(true)
         }
     }
 

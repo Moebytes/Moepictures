@@ -6,7 +6,7 @@ import {optimize} from "svgo"
 import JSZip from "jszip"
 import path from "path"
 import {UploadImage, Session, Dimensions, Post, SplatterOptions, PixelateOptions, CanvasDrawable,
-PostFull, PostHistory, UnverifiedPost, ImageFormat} from "../types/Types"
+PostFull, PostHistory, UnverifiedPost, ImageFormat, SourceFile} from "../types/Types"
 
 export default class ImageFunctions {
     public static allowedFileType = (file: File | JSZip.JSZipObject, bytes: Uint8Array, inZip?: boolean) => {
@@ -96,7 +96,7 @@ export default class ImageFunctions {
         return {thumbnail, thumbnailExt}
     }
 
-    public static validateImages = async (files: File[], links: string[] | undefined, session: Session, i18n: typeof enLocale) => {
+    public static validateImages = async (files: SourceFile[], links: string[] | undefined, session: Session, i18n: typeof enLocale) => {
         let images = [] as UploadImage[]
         let error = ""
     
@@ -117,7 +117,7 @@ export default class ImageFunctions {
                     images.push({
                         link, originalLink, ext: result.typename, size,
                         thumbnail, thumbnailExt, width, height, duration,
-                        bytes: Object.values(bytes), name: filename
+                        bytes: Object.values(bytes), name: filename, source: ""
                     })
                 } else {
                     error = i18n.pages.upload.supportedFiletypesZip
@@ -133,6 +133,7 @@ export default class ImageFunctions {
             let url = URL.createObjectURL(file)
             let ext = result.typename
             let link = `${url}#.${ext}`
+            let source = file.source || ""
             let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
             let {width, height, size, duration} = await functions.image.dimensions(link)
             let live2d = false
@@ -145,7 +146,7 @@ export default class ImageFunctions {
                         ugoira = await functions.file.isUgoiraZip(new Uint8Array(bytes).buffer)
                         if (live2d || ugoira) {
                             images.push({
-                                link, originalLink, ext: "zip", size,
+                                link, originalLink, ext: "zip", size, source,
                                 thumbnail, thumbnailExt, width, height, duration,
                                 bytes: Object.values(bytes), name: file.name
                             })
@@ -154,7 +155,7 @@ export default class ImageFunctions {
                         }
                     } else {
                         images.push({
-                            link, originalLink, ext, size,
+                            link, originalLink, ext, size, source,
                             thumbnail, thumbnailExt, width, height, duration,
                             bytes: Object.values(bytes), name: file.name
                         })

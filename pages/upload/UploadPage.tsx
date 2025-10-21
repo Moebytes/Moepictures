@@ -41,7 +41,7 @@ import PostModel from "../../components/image/PostModel"
 import PostLive2D from "../../components/image/PostLive2D"
 import PostSong from "../../components/image/PostSong"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
+useLayoutActions, useActiveActions, useFlagSelector, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
 import JSZip from "jszip"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
@@ -63,7 +63,8 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
-    const {setRedirect} = useFlagActions()
+    const {sourceHook} = useFlagSelector()
+    const {setRedirect, setSourceHook} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -994,19 +995,39 @@ const UploadPage: React.FunctionComponent = (props) => {
         setMetaTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
     }
 
+    useEffect(() => {
+        if (sourceHook !== null) {
+            let original = originalFiles[currentIndex]
+            if (original) {
+                let newOriginal = {...original, source: sourceHook}
+                let newOriginalFiles = functions.util.replaceAtIndex(originalFiles, currentIndex, newOriginal)
+                setOriginalFiles(newOriginalFiles)
+            }
+            let upscaled = upscaledFiles[currentIndex]
+            if (upscaled) {
+                let newUpscaled = {...upscaled, source: sourceHook}
+                let newUpscaledFiles = functions.util.replaceAtIndex(upscaledFiles, currentIndex, newUpscaled)
+                setUpscaledFiles(newUpscaledFiles)
+            }
+            setSourceHook(null)
+        }
+    }, [sourceHook, originalFiles, upscaledFiles, currentIndex])
+
     const getPostJSX = () => {
+        const currentFiles = getCurrentFiles()
+        const uploadImage = currentFiles[currentIndex]
         if (currentLive2D) {
-            return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostLive2D live2d={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else if (functions.file.isModel(currentImg)) {
-            return <PostModel model={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostModel model={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else if (functions.file.isAudio(currentImg)) {
-            return <PostSong audio={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostSong audio={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else if (functions.file.isVideo(currentImg)) {
-            return <PostVideo video={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostVideo video={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp || currentPixivUgoira) {
-            return <PostAnimation anim={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostAnimation anim={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noNotes={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         }
     }
 

@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
 import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag, 
-TagGroupCategory, PostFull, Image} from "../types/Types"
+TagGroupCategory, PostFull, Image, UploadImage} from "../types/Types"
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
@@ -43,8 +43,9 @@ interface EditThumbnailID {
 }
 
 interface ImgSourceID {
-    post: PostFull | UnverifiedPost, 
-    image: Image
+    uploadImage?: UploadImage
+    post?: PostFull | UnverifiedPost, 
+    image?: Image
     unverified?: boolean
 }
 

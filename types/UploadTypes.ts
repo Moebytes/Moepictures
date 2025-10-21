@@ -1,5 +1,9 @@
 import {PostType, PostRating, PostStyle, MiniTagGroup} from "./Types"
 
+export interface SourceFile extends File {
+  source?: string
+}
+
 export interface SourceData {
     title: string | null
     englishTitle: string | null
@@ -32,6 +36,7 @@ export interface UploadImage {
     bytes: number[]
     thumbnail: string
     thumbnailExt: string
+    source: string
     duration?: number
     groupName?: string
     parentID?: string

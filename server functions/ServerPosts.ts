@@ -11,6 +11,8 @@ export default class ServerPosts {
         if (oldImages?.length !== newImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
+            const newImage = newImages[i]
+            if ((oldImage.source ?? "") !== (newImage.source ?? "")) return true
             let oldPath = ""
             if (upscaled) {
                 oldPath = functions.link.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
@@ -19,8 +21,7 @@ export default class ServerPosts {
             }
             const oldBuffer = await serverFunctions.files.getFile(oldPath, false, r18, oldImage.pixelHash)
             if (!oldBuffer) continue
-            const newImage = newImages[i]
-            const newBuffer = Buffer.from(newImage.bytes) as any
+            const newBuffer = Buffer.from(newImage.bytes)
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(newBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true

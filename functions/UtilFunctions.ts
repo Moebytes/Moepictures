@@ -241,4 +241,10 @@ export default class UtilFunctions {
         }
         return diff
     }
+
+    public static replaceAtIndex = <T>(arr: T[], index: number, element: T) => {
+        const newArray = [...arr]
+        newArray[index] = element
+        return newArray
+    }
 }

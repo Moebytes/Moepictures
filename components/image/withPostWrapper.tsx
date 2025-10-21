@@ -26,7 +26,7 @@ import prevIcon from "../../assets/icons/go-left.png"
 import sourceIcon from "../../assets/icons/source.png"
 import sourceSetIcon from "../../assets/icons/source-set.png"
 import QRCode from "qrcode"
-import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost, UploadImage} from "../../types/Types"
 import "./styles/postimage.less"
 
 interface Props {
@@ -46,6 +46,7 @@ interface Props {
     order?: number
     noNotes?: boolean
     unverified?: boolean
+    uploadImage?: UploadImage
     previous?: () => void
     next?: () => void
     noteID?: string | null
@@ -557,20 +558,28 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         }
 
         const editImgSource = () => {
-            if (!props.post || "historyID" in props.post) return
-            let order = (props.order || 1) - 1
-            setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})
+            if (props.uploadImage) {
+                setImgSourceID({uploadImage: props.uploadImage})
+            } else {
+                if (!props.post || "historyID" in props.post) return
+                let order = (props.order || 1) - 1
+                setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})
+            }
         }
 
         const getSourceIcon = () => {
-            if (!props.post) return sourceIcon
-            let order = props.order || 1
-            if ("historyID" in props.post) {
-                if (props.post.imageSources?.[order]) return sourceSetIcon
+            if (props.uploadImage) {
+                return props.uploadImage.source ? sourceSetIcon : sourceIcon
             } else {
-                if (props.post.images[order - 1]?.source) return sourceSetIcon
+                if (!props.post) return sourceIcon
+                let order = props.order || 1
+                if ("historyID" in props.post) {
+                    if (props.post.imageSources?.[order]) return sourceSetIcon
+                } else {
+                    if (props.post.images[order - 1]?.source) return sourceSetIcon
+                }
+                return sourceIcon
             }
-            return sourceIcon
         }
 
         return (
@@ -598,8 +607,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 </> : null}
                             </div>
 
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getSourceIcon()} 
-                                style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource}/> : null}
+                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource}/>
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
                                 onClick={() => {setShowReverseIcons(false); setShowShareIcons((prev: boolean) => !prev)}}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 

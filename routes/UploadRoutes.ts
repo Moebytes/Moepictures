@@ -349,12 +349,13 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let size = buffer?.byteLength || null
       let upscaledSize = upscaledBuffer?.byteLength || null
       let duration = original.duration || null
+      let source = original.source || null
       if (unverified) {
         await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
-        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, source)
       } else {
         await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
-        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, source)
       }
     }
   }
@@ -999,7 +1000,6 @@ const CreateRoutes = (app: Express) => {
         if (imgChanged) {
           if (!permissions.isMod(req.session)) return void res.status(403).send("No permission to modify images")
           await serverFunctions.posts.migrateNotes(post.images, images, oldR18)
-          if (imageSources === undefined) imageSources = functions.post.imageSourceMap(post)
         }
 
         let {vanillaBuffers, upscaledVanillaBuffers} = await deleteImages(post, {imgChanged, r18: oldR18})
@@ -1513,7 +1513,7 @@ const CreateRoutes = (app: Express) => {
 
               await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.pixelHash, 
               image.width, image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize, image.duration, 
-              image.thumbnail)
+              image.thumbnail, image.source)
             }
             await serverFunctions.posts.deletePost(child.post)
           }
