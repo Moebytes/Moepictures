@@ -221,9 +221,8 @@ export default class ServerTags {
             if (current.name.includes("sketch")) style = "sketch"
             if (current.name.includes("lineart")) style = "lineart"
             if (current.name.includes("promo")) style = "promo"
-            if (tagArr.includes("comic")) {
-                if (type === "image") type = "comic"
-            }
+            if (tagArr.includes("comic") && type === "image")  type = "comic"
+            if (tagArr.includes("r18")) rating = functions.r18()
 
             tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
@@ -317,9 +316,8 @@ export default class ServerTags {
             if (current.name.includes("sketch")) style = "sketch"
             if (current.name.includes("lineart")) style = "lineart"
             if (current.name.includes("promo")) style = "promo"
-            if (tagArr.includes("comic")) {
-                if (type === "image") type = "comic"
-            }
+            if (tagArr.includes("comic") && type === "image")  type = "comic"
+            if (tagArr.includes("r18")) rating = functions.r18()
 
             tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {

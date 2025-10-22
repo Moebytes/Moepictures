@@ -252,13 +252,16 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const parseFilename = (filename: string) => {
-        const id = filename.match(/\d{4,}/g)?.[0] || filename.split("_")[0]
+        let source = filename.match(/\*\d+\*/g)?.[0].replaceAll("*", "") || ""
+        const id = filename.replace(/\*\d+\*/g, "").match(/\d{4,}/g)?.[0] || filename.split("_")[0]
+
+        if (!source) source = id
         
         let match = filename.match(/_(p|g|c!?|s)(\d+)/i)
         const qualifier = match?.[1].toLowerCase() || "s"
         const num = Number(match?.[2] || 0)
 
-        return {id, qualifier, num}
+        return {id, qualifier, num, source}
     }
 
     const submit = async () => {
@@ -288,7 +291,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             if (dupes.length) continue
 
-            let {id, qualifier, num} = parseFilename(current.name)
+            let {id, qualifier, num, source} = parseFilename(current.name)
 
             if (lastID !== id) {
                 lastParentID = ""
@@ -332,14 +335,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     break
             }
             if (submitObj[key]) {
-                submitObj[key].push(current)
+                submitObj[key].push({...current, source})
             } else {
-                submitObj[key] = [current]
+                submitObj[key] = [{...current, source}]
             }
             if (upscaledSubmitObj[key]) {
-                upscaledSubmitObj[key].push(upscaledCurrent)
+                upscaledSubmitObj[key].push({...upscaledCurrent, source})
             } else {
-                upscaledSubmitObj[key] = [upscaledCurrent]
+                upscaledSubmitObj[key] = [{...upscaledCurrent, source}]
             }
         }
         const submitData = Object.values(submitObj) as UploadImage[][]
@@ -379,7 +382,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     englishTitle: sourceData.source.englishTitle,
                     artist: sourceData.source.artist,
                     posted: sourceData.source.posted,
-                    source: sourceData.source.source,
+                    source: currentArr[0].source || sourceData.source.source,
                     commentary: sourceData.source.commentary,
                     englishCommentary: sourceData.source.englishCommentary,
                     bookmarks: functions.util.safeNumber(sourceData.source.bookmarks),
