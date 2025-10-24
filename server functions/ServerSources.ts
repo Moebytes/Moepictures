@@ -53,6 +53,7 @@ export default class ServerSources {
             resolvable = Number(id)
         }
         const illust = await pixiv.illust.get(resolvable) as PixivResponse
+        if (!illust) throw new Error("illust doesn't exist")
         const user = await pixiv.user.webDetail(illust.user.id)
         const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
         illust.user.twitter = twitter || ""

@@ -268,8 +268,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setSubmitError(true)
         if (!submitErrorRef.current) await functions.timeout(20)
         submitErrorRef.current!.innerText = "Scanning images..."
-        let submitObj = {} as UploadImage
-        let upscaledSubmitObj = {} as UploadImage
+        let submitObj = {} as {[key: string]: UploadImage[]}
+        let upscaledSubmitObj = {} as {[key: string]: UploadImage[]}
+        let sourceObj = {} as {[key: string]: string[]}
 
         let lastParentID = ""
         let lastChildKey = ""
@@ -335,18 +336,24 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     break
             }
             if (submitObj[key]) {
-                submitObj[key].push({...current, source})
+                submitObj[key].push(current)
             } else {
-                submitObj[key] = [{...current, source}]
+                submitObj[key] = [current]
             }
             if (upscaledSubmitObj[key]) {
-                upscaledSubmitObj[key].push({...upscaledCurrent, source})
+                upscaledSubmitObj[key].push(upscaledCurrent)
             } else {
-                upscaledSubmitObj[key] = [{...upscaledCurrent, source}]
+                upscaledSubmitObj[key] = [upscaledCurrent]
+            }
+            if (sourceObj[key]) {
+                sourceObj[key].push(source)
+            } else {
+                sourceObj[key] = [source]
             }
         }
-        const submitData = Object.values(submitObj) as UploadImage[][]
-        const upscaledSubmitData = Object.values(upscaledSubmitObj) as UploadImage[][]
+        const submitData = Object.values(submitObj)
+        const upscaledSubmitData = Object.values(upscaledSubmitObj)
+        const sourceArrData = Object.values(sourceObj)
         if (!submitData.length) {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
@@ -362,12 +369,20 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < submitData.length; i++) {
             const currentArr = submitData[i]
             const upscaledCurrentArr = upscaledSubmitData[i]
+            const sourceArr = sourceArrData[i]
 
             let hasUpscaled = upscaledFiles.length ? true : false
             const sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
             const tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
+
+            for (let i = 0; i < sourceArr.length; i++) {
+                let parsedSource = sourceData.source.source.replace(/\d{4,}/, sourceArr[i])
+                if (parsedSource !== sourceData.source.source) {
+                    currentArr[i].source = parsedSource
+                }
+            }
 
             const data = {
                 images: currentArr,
@@ -382,7 +397,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     englishTitle: sourceData.source.englishTitle,
                     artist: sourceData.source.artist,
                     posted: sourceData.source.posted,
-                    source: currentArr[0].source || sourceData.source.source,
+                    source: sourceData.source.source,
                     commentary: sourceData.source.commentary,
                     englishCommentary: sourceData.source.englishCommentary,
                     bookmarks: functions.util.safeNumber(sourceData.source.bookmarks),
