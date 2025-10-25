@@ -136,6 +136,7 @@ export default class PostFunctions {
     
                 let imgLink = typeof image === "string" ? functions.link.getRawImageLink(image) : functions.link.getImageLink(image)
                 let upscaledImgLink = typeof upscaledImage === "string" ? functions.link.getRawImageLink(upscaledImage) : functions.link.getImageLink(upscaledImage, true)
+                let source = typeof image === "string" ? "" : image.source
     
                 let buffer = await functions.http.getBuffer(functions.util.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
                 let upscaledBuffer = await functions.http.getBuffer(functions.util.appendURLParams(upscaledImgLink, {upscaled: true}), {"x-force-upscale": "true"})
@@ -149,7 +150,7 @@ export default class PostFunctions {
                     let {width, height, size, duration} = await functions.image.dimensions(link)
                     let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
     
-                    images.push({link, ext: ext.replace(".", ""), width, height, size, duration, thumbnail, thumbnailExt, 
+                    images.push({link, ext: ext.replace(".", ""), width, height, size, duration, thumbnail, thumbnailExt, source,
                     originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
                 }
                 if (upscaledBuffer.byteLength) {
@@ -162,7 +163,7 @@ export default class PostFunctions {
                     let {thumbnail, thumbnailExt} = await functions.image.thumbnail(upscaledLink)
                     
                     upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), width, height, 
-                    size, duration, thumbnail, thumbnailExt, originalLink: upscaledImgLink, 
+                    size, duration, thumbnail, thumbnailExt, originalLink: upscaledImgLink, source,
                     bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
                 }
             }

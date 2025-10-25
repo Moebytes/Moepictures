@@ -159,6 +159,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     size: decrypted.byteLength,
                     width: image.width,
                     height: image.height,
+                    source: "",
                     thumbnail: "",
                     thumbnailExt: "",
                     name: `${pixivID}.${ext}`
