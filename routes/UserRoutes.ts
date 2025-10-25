@@ -6,6 +6,7 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../functions/Functions"
 import enLocale from "../assets/locales/en.json"
+import moepictures from "../assets/images/moepictures.jpg"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
@@ -117,7 +118,7 @@ const UserRoutes = (app: Express) => {
             let bannedIp = await sql.report.activeBannedIP(ip)
             if (bannedIp) return void res.status(400).send("IP banned")
             try {
-                await sql.user.insertUser(username, email)
+                const userID = await sql.user.insertUser(username, email)
                 await sql.user.updateUser(username, "joinDate", new Date().toISOString())
                 await sql.user.updateUser(username, "publicFavorites", true)
                 await sql.user.updateUser(username, "publicTagFavorites", true)
@@ -144,12 +145,36 @@ const UserRoutes = (app: Express) => {
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.user.updateUser(username, "password", passwordHash)
 
-                const token = crypto.randomBytes(32).toString("hex")
-                const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-                await sql.token.insertEmailToken(email, hashToken)
-                const user = functions.util.toProperCase(username)
-                const link = `${functions.config.getDomain()}/api/user/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moepictures Email Address Verification", functions.jsx.verifyEmailJSX(user, link))
+                if (process.env.EMAIL_VERIFICATION === "yes") {
+                    const token = crypto.randomBytes(32).toString("hex")
+                    const hashToken = crypto.createHash("sha256").update(token).digest("hex")
+                    await sql.token.insertEmailToken(email, hashToken)
+                    const user = functions.util.toProperCase(username)
+                    const link = `${functions.config.getDomain()}/api/user/verifyemail?token=${token}`
+                    await serverFunctions.email(email, "Moepictures Email Address Verification", functions.jsx.verifyEmailJSX(user, link))
+                } else {
+                    await sql.user.updateUser(username, "emailVerified", true)
+                }
+
+                if (Number(userID) === 1) {
+                    // First created user will be admin
+                    await sql.user.updateUser(username, "role", "admin")
+                    // Make the bot account with the same password
+                    await sql.user.insertUser("moepictures", process.env.EMAIL_ADDRESS || "changethis@email.com")
+                    await sql.user.updateUser("moepictures", "joinDate", new Date().toISOString())
+                    await sql.user.updateUser("moepictures", "role", "system")
+                    await sql.user.updateUser("moepictures", "bio", "This is a bot account!")
+                    await sql.user.updateUser("moepictures", "emailVerified", true)
+                    await sql.user.updateUser("moepictures", "password", passwordHash)
+                    const filename = "moepictures.jpg"
+                    let imagePath = functions.link.getTagPath("pfp", filename)
+                    const buffer = await serverFunctions.util.localImageBuffer(moepictures)
+                    const hash = serverFunctions.util.md5(buffer)
+                    await serverFunctions.files.uploadFile(imagePath, buffer, false)
+                    await sql.user.updateUser("moepictures", "image", filename)
+                    await sql.user.updateUser("moepictures", "imageHash", hash)
+                }
+
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "account created", ip, device, region)

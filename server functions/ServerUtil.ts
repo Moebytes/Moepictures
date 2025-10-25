@@ -3,6 +3,7 @@ import sharp from "sharp"
 import crypto from "crypto"
 import * as mm from "music-metadata"
 import {Translator} from "@vitalets/google-translate-api"
+import {createCanvas, loadImage} from "@napi-rs/canvas"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 
@@ -86,5 +87,13 @@ export default class ServerUtil {
         const rawBuffer = await sharp(buffer, {limitInputPixels: false})
         .ensureAlpha().toColorspace("srgb").raw().toBuffer()
         return crypto.createHash("md5").update(rawBuffer).digest("hex")
+    }
+
+    public static localImageBuffer = async (link: string) => {
+        const img = await loadImage(link)
+        const canvas = createCanvas(img.width, img.height)
+        const ctx = canvas.getContext("2d")
+        ctx.drawImage(img, 0, 0)
+        return canvas.toBuffer("image/png")
     }
 }

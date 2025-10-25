@@ -30,11 +30,14 @@ export default class SQLUser {
 
     /** Create a new user. */
     public static insertUser = async (username: string, email: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "users" ("username", "email") VALUES ($1, $2)`,
-        values: [username, email]
+        const query: QueryArrayConfig = {
+            text: /*sql*/`INSERT INTO "users" ("username", "email") VALUES ($1, $2) RETURNING "userID"`,
+            rowMode: "array",
+            values: [username, email]
         }
-        await SQLQuery.run(query)
+
+        const result = await SQLQuery.run(query)
+        return String(result.flat(Infinity)[0])
     }
 
     /** Updates a user */
