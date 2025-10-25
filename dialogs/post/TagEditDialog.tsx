@@ -25,7 +25,7 @@ import model from "../../assets/icons/model.png"
 import live2d from "../../assets/icons/live2d.png"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
-import {PostType, PostRating, PostStyle, UploadImage, SourceLookup, TagLookup} from "../../types/Types"
+import {PostType, PostRating, PostStyle, UploadImage} from "../../types/Types"
 import "../dialog.less"
 
 let caretPosition = 0
@@ -251,20 +251,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             }
             if (!current) throw new Error("Bad image")
             let hasUpscaled = image.upscaledFilename ? true : false
-            let sourceLookup: SourceLookup
-            let tagLookup: TagLookup
-            try {
-                sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
-            } catch {
-                await functions.timeout(3000)
-                sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
-            }
-            try {
-                tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
-            } catch {
-                await functions.timeout(3000)
-                tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
-            }
+            let sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
+            let tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
             let artistArr = sourceLookup.artists.length ? sourceLookup.artists : tagLookup.artists
             const newArtists = artistArr?.map((a) => a.tag) || []

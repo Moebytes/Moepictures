@@ -46,7 +46,7 @@ import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../../structures/Permissions"
-import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage} from "../../types/Types"
+import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, SourceLookup, TagLookup} from "../../types/Types"
 import path from "path"
 import "./styles/uploadpage.less"
 
@@ -286,9 +286,19 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let dupes = [] as Post[]
             if (current.thumbnail) {
                 const bytes = await functions.byte.base64toUint8Array(current.thumbnail)
-                dupes = await functions.http.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
+                try {
+                    dupes = await functions.http.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
+                } catch {
+                    await functions.timeout(3000)
+                    dupes = await functions.http.post("/api/search/similar", {bytes: Object.values(bytes)}, session, setSessionFlag)
+                }
             } else {
-                dupes = await functions.http.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
+                try {
+                    dupes = await functions.http.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
+                } catch {
+                    await functions.timeout(3000)
+                    dupes = await functions.http.post("/api/search/similar", {bytes: current.bytes}, session, setSessionFlag)
+                }
             }
             if (dupes.length) continue
 
@@ -372,8 +382,20 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const sourceArr = sourceArrData[i]
 
             let hasUpscaled = upscaledFiles.length ? true : false
-            const sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
-            const tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+            let sourceData: SourceLookup
+            let tagData: TagLookup
+            try {
+                sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
+            } catch {
+                await functions.timeout(3000)
+                sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
+            }
+            try {
+                tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+            } catch {
+                await functions.timeout(3000)
+                tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+            }
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
