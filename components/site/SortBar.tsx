@@ -377,7 +377,7 @@ const SortBar: React.FunctionComponent = (props) => {
             return (
                 <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
                     <img className="sortbar-img" src={promo}/>
-                    <span className="sortbar-text">{i18n.sortbar.style.promo}</span>
+                    <span style={{color: "var(--sketchColor)"}} className="sortbar-text">{i18n.sortbar.style.promo}</span>
                 </div>
             )
         } else if (styleType === "sketch") {
@@ -665,7 +665,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     {imageType !== "live2d" ? 
                     <div className="sortbar-dropdown-row" onClick={() => setStyleType("promo")}>
                         <img className="sortbar-dropdown-img" src={promo}/>
-                        <span className="sortbar-dropdown-text">{i18n.sortbar.style.promo}</span>
+                        <span style={{color: "var(--sketchColor)"}} className="sortbar-dropdown-text">{i18n.sortbar.style.promo}</span>
                     </div> : null}
                     {imageType !== "live2d" ? 
                     <div className="sortbar-dropdown-row" onClick={() => setStyleType("sketch")}>

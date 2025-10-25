@@ -34,7 +34,7 @@ export default class SQLSearch {
         if (style === "sketch") styleQuery = `posts.style = 'sketch'`
         if (style === "lineart") styleQuery = `posts.style = 'lineart'`
         if (style === "promo") styleQuery = `posts.style = 'promo'`
-        if (style === "all") styleQuery = `NOT (posts.style = 'sketch' OR posts.style = 'lineart')`
+        if (style === "all") styleQuery = `NOT (posts.style = 'promo' OR posts.style = 'sketch' OR posts.style = 'lineart')`
         if (style === "all+s") styleQuery = ``
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
