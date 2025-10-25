@@ -45,17 +45,11 @@ git clone https://github.com/Moebytes/Moepictures.git
 
 Rename the file `.env.example` to `.env` and put in your credentials. At minimum the pg database credentials are required, which are the keys `PG_HOST`, `PG_USER`, `PG_DATABASE`, `PG_PASSWORD`, `PG_PORT`, and the `COOKIE_SECRET` which should be set to a string of random characters. 
 
-`EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc. For it to work with gmail, you need to create an app password: https://myaccount.google.com/apppasswords 
+`EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc. Set `EMAIL_VERIFICATION` to yes to enable it. For it to work with gmail, you need to create an app password: https://myaccount.google.com/apppasswords 
 
 In order for source lookup from Pixiv, Twitter, and other sites to work, you need to seek out the credentials for their respective API's. You can find info on how to obtain them simply by googling, it would take me a long time to detail every site.
 
-To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`, each containing the following subfolders:
-
-`["image", "comic", "animation", "video", "audio", "model", "live2d", "artist", "character", "series", "tag", "pfp", "thumbnail"]`
-
-If you want to upload upscaled files you also need to make their respective upscaled folders:
-
-`["image-upscaled", "comic-upscaled", "animation-upscaled", "video-upscaled"]`
+To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`.
 
 Rename the files `structures/Decryption.example.ts` to `structures/Decryption.ts` and `structures/Encryption.example.ts` to `structures/Encryption.ts`. They do nothing unless you implement them apart from making the project compile.
 
