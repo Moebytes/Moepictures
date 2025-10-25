@@ -20,7 +20,7 @@ import TagFunctions from "./TagFunctions"
 import UtilFunctions from "./UtilFunctions"
 import ValidationFunctions from "./ValidationFunctions"
 import VideoFunctions from "./VideoFunctions"
-import {PostRating} from "../types/Types"
+import {PostRating, Post} from "../types/Types"
 
 export default class Functions {
     public static audio = AudioFunctions
@@ -68,5 +68,14 @@ export default class Functions {
 
     public static r13 = () => {
         return "cute" as PostRating
+    }
+
+    public static highestRating = (rating: PostRating, compareRating: PostRating) => {
+        const ratings = [Functions.r13(), Functions.r15(), Functions.r17(), Functions.r18()]
+        return ratings.indexOf(rating) >= ratings.indexOf(compareRating) ? rating : compareRating
+    }
+
+    public static reduceHighestRating = (posts: Post[]) => {
+        return posts.map(p => p.rating).reduce((highest, current) => Functions.highestRating(highest, current))
     }
 }

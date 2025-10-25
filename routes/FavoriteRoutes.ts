@@ -82,15 +82,8 @@ const FavoriteRoutes = (app: Express) => {
                 } else {
                     if (!favgroup.posts?.length) favgroup.posts = [{order: 0}] as any
                     const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
-                    if (favgroup.rating !== post.rating) {
-                        if (post.rating === functions.r18()) {
-                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r18())
-                        } else if (post.rating === functions.r17() && favgroup.rating !== functions.r18()) {
-                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r17())
-                        } else if (post.rating === functions.r15() && favgroup.rating !== functions.r17() && favgroup.rating !== functions.r18()) {
-                            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", functions.r15())
-                        }
-                    }
+                    let newRating = functions.reduceHighestRating(favgroup.posts)
+                    await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
                     await sql.favorite.insertFavgroupPost(favgroup.favgroupID, postID, maxOrder + 1)
                 }
             } catch {}
@@ -143,12 +136,7 @@ const FavoriteRoutes = (app: Express) => {
             const favgroup = await sql.favorite.favgroup(req.session.username, slug)
             if (!favgroup) return void res.status(400).send("Invalid favgroup")
             let filteredPosts = favgroup.posts.filter((p: any) => String(p.postID) !== String(postID))
-            let rating = functions.r13()
-            for (const filteredPost of filteredPosts) {
-                if (filteredPost.rating === functions.r18()) rating = functions.r18()
-                if (filteredPost.rating === functions.r17() && rating !== functions.r18()) rating = functions.r17()
-                if (filteredPost.rating === functions.r15() && rating !== functions.r17() && rating !== functions.r18()) rating = functions.r15()
-            }
+            let rating = functions.reduceHighestRating(filteredPosts)
             await sql.favorite.updateFavGroup(req.session.username, slug, "rating", rating)
             await sql.favorite.deleteFavgroupPost(favgroup.favgroupID, postID)
             if (favgroup.posts.length === 1) {

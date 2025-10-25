@@ -45,15 +45,8 @@ export const addToGroup = async (post: PostFull, name: string, username: string,
     } else {
         if (!group.posts?.length) group.posts = [{order: 0}] as any
         let maxOrder = Math.max(...group.posts.map((post) => post.order))
-        if (group.rating !== post.rating) {
-            if (post.rating === functions.r18()) {
-                await sql.group.updateGroup(group.groupID, "rating", functions.r18())
-            } else if (post.rating === functions.r17() && group.rating !== functions.r18()) {
-                await sql.group.updateGroup(group.groupID, "rating", functions.r17())
-            } else if (post.rating === functions.r15() && group.rating !== functions.r17() && group.rating !== functions.r18()) {
-                await sql.group.updateGroup(group.groupID, "rating", functions.r15())
-            }
-        }
+        let newRating = functions.reduceHighestRating(group.posts)
+        await sql.group.updateGroup(group.groupID, "rating", newRating)
         try {
             await sql.group.insertGroupPost(group.groupID, post.postID, maxOrder + 1)
         } catch {}
@@ -252,12 +245,7 @@ const GroupRoutes = (app: Express) => {
             const group = await sql.group.group(slug)
             if (!group) return void res.status(400).send("Invalid group")
             let filteredPosts = group.posts.filter((p: any) => p.postID !== post.postID)
-            let rating = functions.r13()
-            for (const filteredPost of filteredPosts) {
-                if (filteredPost.rating === functions.r18()) rating = functions.r18()
-                if (filteredPost.rating === functions.r17() && rating !== functions.r18()) rating = functions.r17()
-                if (filteredPost.rating === functions.r15() && rating !== functions.r17() && rating !== functions.r18()) rating = functions.r15()
-            }
+            let rating = functions.reduceHighestRating(filteredPosts)
             await sql.group.updateGroup(group.groupID, "rating", rating)
             await sql.group.deleteGroupPost(group.groupID, postID)
             if (group.posts.length === 1) {

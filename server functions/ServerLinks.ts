@@ -85,8 +85,8 @@ export default class ServerLinks {
         let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
         if (danbooruLink) {
             const json = await functions.http.fetch(`${danbooruLink}.json`)
-            if (json.rating === "q") rating = functions.r17()
-            if (json.rating === "e") rating = functions.r18()
+            if (json.rating === "q") rating = functions.highestRating(rating, functions.r17())
+            if (json.rating === "e") rating = functions.highestRating(rating, functions.r18())
             tagData.tags = json.tag_string_general
             tagData.artists = json.tag_string_artist
             tagData.characters = json.tag_string_character
@@ -100,8 +100,8 @@ export default class ServerLinks {
             const json = await functions.http.fetch(url)
             let post = json.post[0]
             if (post) {
-                if (post.rating === "questionable") rating = functions.r17()
-                if (post.rating === "explicit") rating = functions.r18()
+                if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())
+                if (post.rating === "explicit") rating = functions.highestRating(rating, functions.r18())
                     tagData.tags = post.tags
                     tagData.artists = ""
                     tagData.characters = ""
@@ -116,7 +116,7 @@ export default class ServerLinks {
             const json = await functions.http.fetch(url)
             let post = json[0]
             if (post) {
-                if (post.rating === "questionable") rating = functions.r17()
+                if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())
                 tagData.tags = post.tags
                 tagData.artists = ""
                 tagData.characters = ""

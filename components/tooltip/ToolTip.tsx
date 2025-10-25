@@ -248,6 +248,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     const getIconStyle = (icon: string) => {
         if (icon === "hentai") return {filter: `hue-rotate(-10deg)`}
+        if (icon === "promo") return {filter: `hue-rotate(125deg)`}
         if (icon === "sketch") return {filter: `hue-rotate(125deg)`}
         if (icon === "lineart") return {filter: `hue-rotate(125deg)`}
         return {filter: `hue-rotate(60deg)`}

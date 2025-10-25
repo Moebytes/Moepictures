@@ -42,8 +42,8 @@ export default class ServerSources {
             const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
             if (result.length) {
                 danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                if (result[0].rating === "q") rating = functions.r17()
-                if (result[0].rating === "e") rating = functions.r18()
+                if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
+                if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
             }
         } catch {}
 
@@ -71,7 +71,7 @@ export default class ServerSources {
             englishCommentary = translated[1]
         }
         if (illust.x_restrict !== 0) {
-            if (rating === functions.r13()) rating = functions.r17()
+            rating = functions.highestRating(rating, functions.r17())
         }
         artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await serverFunctions.util.romajinize([artist]).then((r) => r[0])
         artistIcon = illust.user.profile_image_urls.medium
@@ -111,8 +111,8 @@ export default class ServerSources {
                 const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`)
                 if (result.length) {
                     danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
-                    if (result[0].rating === "q") rating = functions.r17()
-                    if (result[0].rating === "e") rating = functions.r18()
+                    if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
+                    if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
                 }
             } catch {}
         }
@@ -130,7 +130,7 @@ export default class ServerSources {
             englishCommentary = translated[1]
         }
         if (tweet.sensitiveContent) {
-            if (rating === functions.r13()) rating = functions.r17()
+            rating = functions.highestRating(rating, functions.r17())
         }
         artists[artists.length - 1].tag = tweet.username ?? ""
         let profile = await twitter.getProfile(tweet.username ?? "").catch(() => ({avatar: ""}))
@@ -162,7 +162,7 @@ export default class ServerSources {
         commentary = deviation.description
         posted = functions.date.formatDate(new Date(deviation.date), true)
         if (deviation.rating === "adult") {
-            if (rating === functions.r13()) rating = functions.r17()
+            rating = functions.highestRating(rating, functions.r17())
         }
         artists[artists.length - 1].tag = artist
         artistIcon = deviation.author.user.usericon
@@ -186,8 +186,8 @@ export default class ServerSources {
 
         let id = source.match(/\d+/)?.[0]
         let danbooruPost = await functions.http.fetch(`https://danbooru.donmai.us/posts/${id}.json`)
-        if (danbooruPost.rating === "q") rating = functions.r17()
-        if (danbooruPost.rating === "e") rating = functions.r18()
+        if (danbooruPost.rating === "q") rating = functions.highestRating(rating, functions.r17())
+        if (danbooruPost.rating === "e") rating = functions.highestRating(rating, functions.r18())
 
         // Prefer storing twitter/pixiv sources if they exist. If we didn't find them before, 
         // it's highly likely they're deleted so no need to fetch them

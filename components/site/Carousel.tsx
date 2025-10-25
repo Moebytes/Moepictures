@@ -16,6 +16,7 @@ interface Props {
     appendImages?: string[]
     marginLeft?: number
     marginTop?: number
+    maxWidth?: number
     unverified?: boolean
 }
 
@@ -513,8 +514,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         <div className="carousel" ref={carouselRef} style={{maxWidth, marginTop, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
             <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} 
             onClick={arrowLeftClick} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)}/>
-            <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} 
-            onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+            <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} 
+            onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
             <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={arrowRight} style={{filter: getFilter()}} 
