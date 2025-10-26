@@ -222,15 +222,6 @@ export default class SQLToken {
         return result as Promise<IPToken[]>
     }
 
-    /** Insert payment. */
-    public static insertPayment = async (chargeID: string, username: string, email: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "payments" ("chargeID", "username", "email") VALUES ($1, $2, $3)`,
-        values: [chargeID, username, email]
-        }
-        await SQLQuery.run(query)
-    }
-
     /** Insert api key. */
     public static insertAPIKey = async (username: string, apiKey: string) => {
         let now = new Date().toISOString()

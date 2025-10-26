@@ -516,7 +516,6 @@ const MiscRoutes = (app: Express) => {
             if (event.type === "charge:pending") {
                 const id = event.data.id
                 const metadata = event.data.metadata
-                await sql.token.insertPayment(id, metadata.username, metadata.email)
 
                 const user = await sql.user.user(metadata.username)
                 if (!user) return void res.status(400).send("Invalid username")
