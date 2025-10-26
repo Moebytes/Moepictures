@@ -124,7 +124,7 @@ const SearchRoutes = (app: Express) => {
                 let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, showChildren, req.session.username)
                 result = history.map((h) => ({...h.post, postCount: h.historyCount}))
             } else {
-                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
+                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username, req.session)
             }
             result = result.map((p) => {
                 if (p.images?.length > 1) {

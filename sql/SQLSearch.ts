@@ -1,13 +1,14 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch} from "../types/Types"
+import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch, ServerSession} from "../types/Types"
 
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
         limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
-        format?: string, condition?: string, intermLimit?: boolean}) => {
-        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, favgroupOrder, outerSort, format, condition, intermLimit} = options
+        format?: string, condition?: string, intermLimit?: boolean, session?: ServerSession}) => {
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, 
+        favgroupOrder, outerSort, format, condition, intermLimit, session} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -138,7 +139,9 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 100) limit = 100
+            if (!Boolean(session?.apiKey)) {
+                if (Number(limit) > 100) limit = 100
+            }
             values.push(limit)
             i++
         }
@@ -240,10 +243,10 @@ export default class SQLSearch {
 
     /** Search posts. */
     public static search = async (tags: string[], type: string, rating: string, style: string, sort: string, offset?: number, 
-        limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, session?: ServerSession) => {
         const {postJSON, countJSON, values, countValues} = 
         SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, 
-        limit, username, withTags, showChildren, intermLimit: true})
+        limit, username, withTags, showChildren, session, intermLimit: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

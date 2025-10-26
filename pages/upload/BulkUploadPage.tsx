@@ -251,19 +251,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         forceUpdate()
     }
 
-    const parseFilename = (filename: string) => {
-        let source = filename.match(/\*\d+\*/g)?.[0].replaceAll("*", "") || ""
-        const id = filename.replace(/\*\d+\*/g, "").match(/\d{4,}/g)?.[0] || filename.split("_")[0]
-
-        if (!source) source = id
-        
-        let match = filename.match(/_(p|g|c!?|s)(\d+)/i)
-        const qualifier = match?.[1].toLowerCase() || "s"
-        const num = Number(match?.[2] || 0)
-
-        return {id, qualifier, num, source}
-    }
-
     const submit = async () => {
         setSubmitError(true)
         if (!submitErrorRef.current) await functions.timeout(20)
@@ -302,7 +289,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             if (dupes.length) continue
 
-            let {id, qualifier, num, source} = parseFilename(current.name)
+            let {id, qualifier, num, source} = functions.util.parseFilename(current.name)
 
             if (lastID !== id) {
                 lastParentID = ""

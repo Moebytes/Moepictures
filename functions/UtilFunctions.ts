@@ -249,4 +249,17 @@ export default class UtilFunctions {
         newArray[index] = element
         return newArray
     }
+
+    public static parseFilename = (filename: string) => {
+        let source = filename.match(/\*\d+\*/g)?.[0].replaceAll("*", "") || ""
+        const id = filename.replace(/\*\d+\*/g, "").match(/\d{4,}/g)?.[0] || filename.split("_")[0]
+
+        if (!source) source = id
+        
+        let match = filename.match(/_(p|g|c!?|s)(\d+)/i)
+        const qualifier = match?.[1].toLowerCase() || "s"
+        const num = Number(match?.[2] || 0)
+
+        return {id, qualifier, num, source}
+    }
 }

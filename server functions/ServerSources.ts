@@ -303,6 +303,8 @@ export default class ServerSources {
         let sourceLinks = [] as {link: string, hash: string}[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
+        let {id, source: alt} = functions.util.parseFilename(current.name)
+        if (id !== alt) basename = alt
 
         try {
             // Pixiv lookup
