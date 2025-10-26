@@ -692,7 +692,7 @@ export default class SQLSearch {
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
-                    LEFT JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                    JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
                     AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
                     OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%'
                     OR tags.wikipedia LIKE '%' || $1 || '%')
