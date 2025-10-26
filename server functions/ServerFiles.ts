@@ -199,7 +199,7 @@ export default class ServerFiles {
             const newBucket = newR18 ? remoteR18 : remote
 
             const mimeType = mime.lookup(newFile) || "application/octet-stream"
-            await r2.copyObject({Bucket: newBucket, CopySource: `${oldBucket}/${oldFile}`, Key: newFile, ContentType: mimeType})
+            await r2.copyObject({Bucket: newBucket, CopySource: encodeURI(`/${oldBucket}/${oldFile}`), Key: newFile, ContentType: mimeType})
             await r2.deleteObject({Bucket: oldBucket, Key: oldFile})
         }
     }
@@ -229,7 +229,7 @@ export default class ServerFiles {
                         if (Key) {
                             const newKey = Key.replace(`${oldFolder}/`, `${newFolder}/`)
                             const mimeType = mime.lookup(newKey) || "application/octet-stream"
-                            await r2.copyObject({Bucket: bucket, CopySource: `${bucket}/${Key}`, Key: newKey, ContentType: mimeType})
+                            await r2.copyObject({Bucket: bucket, CopySource: encodeURI(`/${bucket}/${Key}`), Key: newKey, ContentType: mimeType})
                             await r2.deleteObject({Bucket: bucket, Key: Key})
                         }
                     }
