@@ -526,13 +526,11 @@ export default class SQLPost {
     public static postTags = async (postID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'imageHash', "tags"."imageHash", 
-            'description', "tags".description, 'social', "tags".social, 'twitter', "tags".twitter, 'website', "tags".website, 'fandom', 
-            "tags".fandom, 'wikipedia', "tags".wikipedia)) AS tags
-            FROM "tag map"
-            JOIN tags ON "tag map".tag = "tags".tag
-            WHERE "tag map"."postID" = $1
-            GROUP BY "tag map"."postID"
+                SELECT json_agg(tags.*) AS tags
+                FROM "tag map tags"
+                JOIN tags ON "tags".tag = ANY("tag map tags".tags)
+                WHERE "tag map tags"."postID" = $1
+                GROUP BY "tag map tags"."postID"
             `),
             values: [postID]
         }

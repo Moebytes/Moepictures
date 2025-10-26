@@ -8,7 +8,7 @@ export default class Decryption {
     }
 
     public static decrypt = (arrayBuffer: ArrayBuffer, privateKey: string, serverPublicKey: string, session: ServerSession) => {
-        return arrayBuffer
+        return Buffer.from(arrayBuffer)
     }
 
     public static decryptAPI = (data: any, privateKey: string, serverPublicKey: string, session: ServerSession) => {
@@ -23,7 +23,7 @@ export default class Decryption {
         if (!functions.crypto.isEncrypted(buffer, link)) return link
         try {
             let decrypted = Decryption.decrypt(buffer, privateKey, serverPublicKey, session)
-            if (!decrypted.byteLength) decrypted = buffer
+            if (!decrypted.byteLength) decrypted = Buffer.from(buffer)
             const blob = new Blob([new Uint8Array(decrypted)])
             return URL.createObjectURL(blob)
         } catch {

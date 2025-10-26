@@ -372,16 +372,16 @@ export default class SQLSearch {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-            json_agg(DISTINCT "tag map".tag) AS tags,
+            COALESCE("tag map tags".tags, '{}') AS tags,
             COUNT(DISTINCT favorites."username") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
-            JOIN "tag map" ON posts."postID" = "tag map"."postID"
+            LEFT JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"
             LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
             LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
             ${postIDs ? "WHERE posts.\"postID\" = ANY ($1)" : ""}
-            GROUP BY posts."postID"
+            GROUP BY posts."postID", "tag map tags".tags
             `)
         }
         if (postIDs) query.values = [postIDs]
@@ -557,7 +557,7 @@ export default class SQLSearch {
             values.push(limit)
             i++
         }
-        let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
+        let whereQuery = whereQueries.length ? `WHERE ${whereQueries.join(" AND ")}` : ""
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
@@ -583,9 +583,9 @@ export default class SQLSearch {
                     array_length("tag map posts"."posts", 1) AS "postCount",
                     ROUND(AVG(DISTINCT post_json."cuteness")) AS "cuteness"
                     FROM tags
-                    JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
-                    JOIN post_json ON post_json."postID" = "tag map"."postID"
                     JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                    JOIN post_json ON post_json."postID" = ANY("tag map posts"."posts")
+                    ${whereQuery}
                     GROUP BY "tags"."tagID", "tag map posts"."posts"
                     ${sortQuery}
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
@@ -650,12 +650,11 @@ export default class SQLSearch {
         if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
         if (sort === "length") sortQuery = `ORDER BY LENGTH(tags.tag) ASC`
         if (sort === "reverse length") sortQuery = `ORDER BY LENGTH(tags.tag) DESC`
-        // COUNT(DISTINCT posts."postID") AS "postCount", 
-        // JOIN "tag map" ON "tag map"."tag" = tags."tag" 
-        // JOIN posts ON posts."postID" = "tag map"."postID"
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    SELECT tags.*, 
+                    COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
+                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     COUNT(*) OVER() AS "tagCount",
                     array_length("tag map posts"."posts", 1) AS "postCount",
                     COUNT(DISTINCT tags."image") AS "variationCount", 
@@ -683,19 +682,20 @@ export default class SQLSearch {
     public static tagSocialSearch = async (social: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    SELECT tags.*, 
+                    COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
+                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     COUNT(*) OVER() AS "tagCount",
-                    COUNT(DISTINCT posts."postID") AS "postCount", 
+                    COUNT("tag map posts".posts) AS "postCount", 
                     COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
-                    JOIN "tag map" ON "tag map"."tag" = tags."tag"
+                    LEFT JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
                     AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
                     OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%'
                     OR tags.wikipedia LIKE '%' || $1 || '%')
-                    JOIN posts ON posts."postID" = "tag map"."postID"
                     GROUP BY "tags"."tagID"
             `),
             values: [social]

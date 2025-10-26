@@ -57,7 +57,7 @@ export default class Permissions {
     }
 
     public static noEncryption = (session: ServerSession) => {
-        if (Permissions.isAdmin(session)) return true
+        // if (Permissions.isAdmin(session)) return true
         // Disable encryption for now due to poor performance
         return true
     }

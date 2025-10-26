@@ -16,7 +16,6 @@ interface Props {
     appendImages?: string[]
     marginLeft?: number
     marginTop?: number
-    maxWidth?: number
     unverified?: boolean
 }
 

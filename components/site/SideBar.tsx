@@ -151,7 +151,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const updateTags = async () => {
         const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
-        setTags(tags)
+        if (tags.length) setTags(tags)
     }
 
     const updateUserImg = async () => {

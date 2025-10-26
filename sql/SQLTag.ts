@@ -204,7 +204,9 @@ export default class SQLTag {
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
                     )
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    SELECT tags.*, 
+                    COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
+                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM tags
                     LEFT JOIN post_json ON post_json."postID" = tags."featuredPost"
@@ -247,7 +249,9 @@ export default class SQLTag {
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
                     )
-                    SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    SELECT "unverified tags".*,
+                    COALESCE(json_agg(DISTINCT "unverified aliases".*) FILTER (WHERE "unverified aliases".alias IS NOT NULL), '[]'::json) AS aliases,
+                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM "unverified tags"
                     LEFT JOIN post_json ON post_json."postID" = "unverified tags"."featuredPost"
@@ -273,7 +277,9 @@ export default class SQLTag {
                         JOIN images ON images."postID" = posts."postID"
                         GROUP BY posts."postID"
                     )
-                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    SELECT tags.*, 
+                    COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
+                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     to_json((array_agg(post_json.*))[1]) AS "featuredPost"
                     FROM tags
                     LEFT JOIN post_json ON post_json."postID" = tags."featuredPost"
@@ -453,12 +459,12 @@ export default class SQLTag {
                         JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"
                         GROUP BY posts."postID", "tag map tags"."tags"
                     )
-                    SELECT "tag map"."postID",
+                    SELECT "tag map tags"."postID",
                     to_json((array_agg(post_json.*))[1]) AS post
-                    FROM "tag map"
-                    JOIN post_json ON post_json."postID" = "tag map"."postID"
-                    WHERE "tag map".tag = $1
-                    GROUP BY "tag map"."postID"
+                    FROM "tag map tags"
+                    JOIN post_json ON post_json."postID" = "tag map tags"."postID"
+                    WHERE "tag map tags".tags @> ARRAY[$1]
+                    GROUP BY "tag map tags"."postID"
             `),
             values: [tag]
         }
