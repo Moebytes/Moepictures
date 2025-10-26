@@ -117,7 +117,8 @@ export default class ImageFunctions {
                     images.push({
                         link, originalLink, ext: result.typename, size,
                         thumbnail, thumbnailExt, width, height, duration,
-                        bytes: Object.values(bytes), name: filename, source: ""
+                        bytes: Object.values(bytes), name: filename, altSource: "",
+                        directLink: ""
                     })
                 } else {
                     error = i18n.pages.upload.supportedFiletypesZip
@@ -133,7 +134,8 @@ export default class ImageFunctions {
             let url = URL.createObjectURL(file)
             let ext = result.typename
             let link = `${url}#.${ext}`
-            let source = file.source || ""
+            let altSource = file.altSource || ""
+            let directLink = file.directLink || ""
             let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
             let {width, height, size, duration} = await functions.image.dimensions(link)
             let live2d = false
@@ -146,16 +148,16 @@ export default class ImageFunctions {
                         ugoira = await functions.file.isUgoiraZip(new Uint8Array(bytes).buffer)
                         if (live2d || ugoira) {
                             images.push({
-                                link, originalLink, ext: "zip", size, source,
-                                thumbnail, thumbnailExt, width, height, duration,
-                                bytes: Object.values(bytes), name: file.name
+                                link, originalLink, ext: "zip", size, altSource,
+                                directLink, thumbnail, thumbnailExt, width, height, 
+                                duration, bytes: Object.values(bytes), name: file.name
                             })
                         } else {
                             await handleZip(bytes, originalLink)
                         }
                     } else {
                         images.push({
-                            link, originalLink, ext, size, source,
+                            link, originalLink, ext, size, altSource, directLink,
                             thumbnail, thumbnailExt, width, height, duration,
                             bytes: Object.values(bytes), name: file.name
                         })

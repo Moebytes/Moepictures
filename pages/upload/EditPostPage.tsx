@@ -180,7 +180,8 @@ const EditPostPage: React.FunctionComponent = () => {
                 const decrypted = await functions.crypto.decryptBuffer(response, imageLink, session)
                 const blob = new Blob([new Uint8Array(decrypted)])
                 const file: SourceFile = new File([blob], path.basename(imageLink))
-                file.source = post.images[i].source
+                file.altSource = post.images[i].altSource
+                file.directLink = post.images[i].directLink
                 files.push(file)
                 links.push(imageLink)
             }
@@ -190,7 +191,8 @@ const EditPostPage: React.FunctionComponent = () => {
                 const decrypted = await functions.crypto.decryptBuffer(upscaledResponse, upscaledImageLink, session)
                 const upscaledBlob = new Blob([new Uint8Array(decrypted)])
                 const upscaledFile: SourceFile = new File([upscaledBlob], path.basename(upscaledImageLink))
-                upscaledFile.source = post.images[i].source
+                upscaledFile.altSource = post.images[i].altSource
+                upscaledFile.directLink = post.images[i].directLink
                 upscaledFiles.push(upscaledFile)
                 upscaledLinks.push(upscaledImageLink)
             }
@@ -1114,13 +1116,13 @@ const EditPostPage: React.FunctionComponent = () => {
         if (sourceHook !== null) {
             let original = originalFiles[currentIndex]
             if (original) {
-                let newOriginal = {...original, source: sourceHook}
+                let newOriginal = {...original, ...sourceHook}
                 let newOriginalFiles = functions.util.replaceAtIndex(originalFiles, currentIndex, newOriginal)
                 setOriginalFiles(newOriginalFiles)
             }
             let upscaled = upscaledFiles[currentIndex]
             if (upscaled) {
-                let newUpscaled = {...upscaled, source: sourceHook}
+                let newUpscaled = {...upscaled, ...sourceHook}
                 let newUpscaledFiles = functions.util.replaceAtIndex(upscaledFiles, currentIndex, newUpscaled)
                 setUpscaledFiles(newUpscaledFiles)
             }

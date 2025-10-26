@@ -1,7 +1,8 @@
 import {PostType, PostRating, PostStyle, MiniTagGroup} from "./Types"
 
 export interface SourceFile extends File {
-  source?: string
+  altSource?: string
+  directLink?: string
 }
 
 export interface SourceData {
@@ -36,7 +37,8 @@ export interface UploadImage {
     bytes: number[]
     thumbnail: string
     thumbnailExt: string
-    source: string
+    altSource: string
+    directLink: string
     duration?: number
     groupName?: string
     parentID?: string
@@ -56,16 +58,18 @@ export interface UploadParams {
     series: UploadTag[]
     tags: string[]
     tagGroups: MiniTagGroup[]
+    sourceLinks: {link: string, hash: string}[]
     newTags: UploadTag[]
     unverifiedID?: string
     noImageUpdate?: boolean
 }
 
-export interface EditParams extends UploadParams {
+export interface EditParams extends Omit<UploadParams, "sourceLinks"> {
     postID: string
     preserveChildren?: boolean
     updatedDate?: string
     imageSources?: {[key: string]: string | null} | null
+    imageLinks?: {[key: string]: string | null} | null
     reason?: string | null
     silent?: boolean
 }
@@ -80,7 +84,7 @@ export interface UnverifiedUploadParams extends Omit<UploadParams, "unverifiedID
     duplicates: boolean
 }
 
-export interface UnverifiedEditParams extends Omit<UploadParams, "noImageUpdate"> {
+export interface UnverifiedEditParams extends Omit<UploadParams, "noImageUpdate" | "sourceLinks"> {
     postID: string
     reason?: string
 }

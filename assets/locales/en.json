@@ -508,7 +508,10 @@
         "dimensions": "Dimensions",
         "agree": "Agree",
         "deny": "Deny",
-        "imageSources": "Image Sources"
+        "imageSources": "Image Sources",
+        "imageLinks": "Image Links",
+        "altSource": "Alt Source",
+        "directLink": "Direct Link"
     },
     "errors": {
         "$401":"401 error",
@@ -1225,7 +1228,7 @@
         "imageSource": {
             "title": "Set Image Source",
             "request": "Set Image Source Request",
-            "reminder": "*Only set a source if it differs from the post source"
+            "reminder": "*Only set an alt source if it differs from the main source"
         }
     },
     "help": {

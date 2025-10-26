@@ -363,6 +363,23 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         })
     }
 
+    const printImageLinks = (originalPost: UnverifiedPost, newPost: UnverifiedPost) => {
+        let imageLinks = functions.compare.imageLinkChanges(originalPost, newPost)
+        if (!imageLinks) return "None"
+        const entries = Object.entries(imageLinks)
+        return entries.map((entry, i) => {
+            let [key, value] = entry
+            let append = i !== entries.length - 1 ? ", " : ""
+            return (
+                <span className="mod-post-text">{key + " ➞ "}
+                    {value ? <span className="mod-post-link" onClick={() => window.open(value, "_blank")}>
+                        {functions.util.getSiteName(value, i18n) + append}
+                    </span> : "none" + append}
+                </span>
+            )
+        })
+    }
+
     const printMirrors = (newPost: UnverifiedPost) => {
         if (!newPost.mirrors) return "None"
         const mapped = Object.values(newPost.mirrors) as string[]
@@ -424,6 +441,9 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         }
         if (changes.imageSources) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.imageSources}:</span> {printImageSources(originalPost, newPost)}</span>)
+        }
+        if (changes.imageLinks) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.imageLinks}:</span> {printImageLinks(originalPost, newPost)}</span>)
         }
         if (changes.mirrors) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.mirrors}:</span> {printMirrors(newPost)}</span>)

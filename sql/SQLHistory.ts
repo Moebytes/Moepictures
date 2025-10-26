@@ -148,23 +148,23 @@ export default class SQLHistory {
         title: string, englishTitle: string, posted: string, artist: string, source: string, hasUpscaled: boolean | null, hasOriginal: boolean | null, 
         commentary: string, englishCommentary: string, bookmarks: number, buyLink: string | null, mirrors: string | null, slug: string | null, artists: string[], 
         characters: string[], series: string[], tags: string[], addedTags: string[], removedTags: string[], tagGroups: string, addedTagGroups: string[], 
-        removedTagGroups: string[], imageSources: string | null, imageChanged: boolean, changes: string | null, reason?: string | null}) => {
+        removedTagGroups: string[], imageSources: string | null, imageLinks: string | null, imageChanged: boolean, changes: string | null, reason?: string | null}) => {
         const {postID, username, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, title, 
         englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, hasOriginal, hasUpscaled, 
         slug, artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageSources, 
-        imageChanged, changes, reason} = options
+        imageLinks, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "upscaledImages", "uploader", "updater", "uploadDate", 
             "updatedDate", "type", "rating", "style", "parentID", "title", "englishTitle", "posted", "artist", "source", "commentary", 
             "englishCommentary", "bookmarks", "buyLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", 
-            "tags", "addedTags", "removedTags", "tagGroups", "addedTagGroups", "removedTagGroups", "imageSources", "imageChanged", "changes", "reason") 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, 
-            $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39) RETURNING "historyID"`,
+            "tags", "addedTags", "removedTags", "tagGroups", "addedTagGroups", "removedTagGroups", "imageSources", "imageLinks", "imageChanged", "changes", 
+            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, 
+            $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40) RETURNING "historyID"`,
             rowMode: "array",
             values: [postID, username, now, images, upscaledImages, uploader, updater, uploadDate, updatedDate, type, rating, style, parentID, 
             title, englishTitle, posted, artist, source, commentary, englishCommentary, bookmarks, buyLink, mirrors, slug, hasOriginal, hasUpscaled, 
-            artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageSources, imageChanged, 
+            artists, characters, series, tags, addedTags, removedTags, tagGroups, addedTagGroups, removedTagGroups, imageSources, imageLinks, imageChanged, 
             changes, reason]
         }
         const result = await SQLQuery.run(query)

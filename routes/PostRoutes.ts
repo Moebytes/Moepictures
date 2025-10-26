@@ -7,7 +7,7 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server 
 import sharp from "sharp"
 import waifu2x from "waifu2x"
 import mediaInfoFactory from "mediainfo.js"
-import fs from "fs"
+import fs, { link } from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
 PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate} from "../types/Types"
@@ -551,7 +551,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, unverified, type, rating, style, source, parentID, artists, characters, 
-            series, tags, tagGroups, imageSources, reason, silent} = req.body as PostQuickEditParams
+            series, tags, tagGroups, imageSources, imageLinks, reason, silent} = req.body as PostQuickEditParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
@@ -762,6 +762,9 @@ const PostRoutes = (app: Express) => {
             if (imageSources !== undefined) {
                 await serverFunctions.posts.applyImageSources(post.postID, imageSources, unverified)
             }
+            if (imageLinks !== undefined) {
+                await serverFunctions.posts.applyImageLinks(post.postID, imageLinks, unverified)
+            }
 
             if (unverified) return void res.status(200).send("Success")
             
@@ -776,6 +779,7 @@ const PostRoutes = (app: Express) => {
             updated.series = updatedCategories.series.map((s: any) => s.tag)
             updated.tags = updatedCategories.tags.map((t: any) => t.tag)
             const sourceMap = functions.post.imageSourceMap(updated)
+            const linkMap = functions.post.imageLinkMap(updated)
 
             const changes = functions.compare.parsePostChanges(post, updated)
 
@@ -803,7 +807,7 @@ const PostRoutes = (app: Express) => {
                     bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
                     slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
                     characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
-                    addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: null, reason})
+                    addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: false, changes: null, reason})
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
@@ -818,7 +822,8 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, 
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+                    imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             } else {
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
@@ -834,7 +839,8 @@ const PostRoutes = (app: Express) => {
                     englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
                     mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled,
                     artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
+                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+                    imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -846,12 +852,13 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/quickedit/unverified", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, type, rating, style, source, parentID, artists, characters, 
-            series, tags, tagGroups, imageSources, reason} = req.body as PostQuickEditUnverifiedParams
+            series, tags, tagGroups, imageSources, imageLinks, reason} = req.body as PostQuickEditUnverifiedParams
 
             let sourceEdit = source !== undefined ? true : false
             let tagEdit = tags !== undefined ? true : false
             let parentEdit = parentID !== undefined ? true : false
             let imageSourcesEdit = imageSources !== undefined ? true : false
+            let imageLinksEdit = imageLinks !== undefined ? true : false
     
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Bad postID")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -898,6 +905,9 @@ const PostRoutes = (app: Express) => {
             if (!imageSourcesEdit) {
                 imageSources = functions.post.imageSourceMap(post)
             }
+            if (!imageLinksEdit) {
+                imageLinks = functions.post.imageLinkMap(post)
+            }
 
             artists = functions.tag.cleanStringTags(artists, "artists")
             characters = functions.tag.cleanStringTags(characters, "characters")
@@ -938,6 +948,7 @@ const PostRoutes = (app: Express) => {
             oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
 
             await serverFunctions.posts.applyImageSources(postID, imageSources, true)
+            await serverFunctions.posts.applyImageLinks(postID, imageLinks, true)
 
             const updated = await sql.post.unverifiedPost(postID) as UnverifiedPost
             const changes = functions.compare.parsePostChanges(post, updated)
@@ -952,6 +963,7 @@ const PostRoutes = (app: Express) => {
                 addedTagGroups,
                 removedTagGroups,
                 imageSources: imageSources ? JSON.stringify(imageSources) : null,
+                imageLinks: imageLinks ? JSON.stringify(imageLinks) : null,
                 imageChanged: false,
                 changes
             })
@@ -1348,23 +1360,27 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/image/source", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {imageID, source, unverified, reason} = req.body as {imageID: string, source: string, unverified?: boolean, reason?: string}
+            let {imageID, altSource, directLink, unverified, reason} = req.body as {imageID: string, altSource: string, 
+                directLink: string, unverified?: boolean, reason?: string}
             if (Number.isNaN(Number(imageID))) return void res.status(400).send("Invalid imageID")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             let image = unverified ? await sql.post.unverifiedImage(imageID) : await sql.post.image(imageID)
             if (!image) return void res.status(400).send("Invalid imageID")
 
             if (unverified) {
-                await sql.post.updateUnverifiedImage(image.imageID, "source", source)
+                await sql.post.updateUnverifiedImage(image.imageID, "directLink", directLink)
+                await sql.post.updateUnverifiedImage(image.imageID, "altSource", altSource)
             } else {
                 const post = await sql.post.post(image.postID)
                 if (!post) return void res.status(400).end()
 
-                await sql.post.updateImage(image.imageID, "source", source)
+                await sql.post.updateImage(image.imageID, "directLink", directLink)
+                await sql.post.updateImage(image.imageID, "altSource", altSource)
 
                 const updated = await sql.post.post(image.postID)
                 const changes = functions.compare.parsePostChanges(post, updated!)
                 let sourceMap = changes.imageSources
+                let linkMap = changes.imageLinks
 
                 const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
                 vanilla.date = vanilla.uploadDate
@@ -1388,8 +1404,8 @@ const PostRoutes = (app: Express) => {
                     bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
                     slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
                     characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
-                    addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, imageChanged: false, 
-                    changes: changes ? JSON.stringify(changes) : null, reason})
+                    addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, imageLinks: linkMap ? JSON.stringify(linkMap) : null, 
+                    imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             
             res.status(200).send("Success")

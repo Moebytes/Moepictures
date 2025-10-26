@@ -35,6 +35,7 @@ export default class ServerSources {
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
+        let sourceLinks = [] as {link: string, hash: string}[]
 
         const pixivID = pixivLink.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
@@ -77,8 +78,21 @@ export default class ServerSources {
         artistIcon = illust.user.profile_image_urls.medium
         artists.push({})
 
+        let rawLinks = [] as string[]
+        if (illust.meta_pages.length) {
+            rawLinks = illust.meta_pages.map((m) => m.image_urls.original)
+        } else if (illust.meta_single_page.original_image_url) {
+            rawLinks = [illust.meta_single_page.original_image_url]
+        }
+
+        for (const link of rawLinks) {
+            const buffer = await serverFunctions.util.imageBuffer(link)
+            const hash = await serverFunctions.util.pHash(buffer)
+            sourceLinks.push({link, hash})
+        }
+
         return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating}
+                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static twitterLookup = async (twitterLink: string, rating: PostRating) => {
@@ -93,6 +107,7 @@ export default class ServerSources {
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
+        let sourceLinks = [] as {link: string, hash: string}[]
 
         if (!twitter.isLoggedIn) {
             await twitter.login(process.env.TWITTER_USERNAME!, 
@@ -137,8 +152,19 @@ export default class ServerSources {
         artistIcon = profile.avatar ?? ""
         artists.push({})
 
+        let rawLinks = [] as string[]
+        if (tweet.photos.length) {
+            rawLinks = tweet.photos.map((p) => p.url)
+        }
+
+        for (const link of rawLinks) {
+            const buffer = await serverFunctions.util.imageBuffer(link)
+            const hash = await serverFunctions.util.pHash(buffer)
+            sourceLinks.push({link, hash})
+        }
+
         return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating}
+                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static deviantartLookup = async (deviantartLink: string, rating: PostRating) => {
@@ -153,6 +179,7 @@ export default class ServerSources {
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
+        let sourceLinks = [] as {link: string, hash: string}[]
 
         const deviationRSS = await deviantart.rss.get(deviantartLink)
         const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
@@ -168,8 +195,19 @@ export default class ServerSources {
         artistIcon = deviation.author.user.usericon
         artists.push({})
 
+        let rawLinks = [] as string[]
+        if (deviation.content.length) {
+            rawLinks = deviation.content.map((c) => c.url)
+        }
+
+        for (const link of rawLinks) {
+            const buffer = await serverFunctions.util.imageBuffer(link)
+            const hash = await serverFunctions.util.pHash(buffer)
+            sourceLinks.push({link, hash})
+        }
+
         return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating}
+                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static danbooruLookup = async (danbooruLink: string, rating: PostRating) => {
@@ -183,6 +221,7 @@ export default class ServerSources {
         let bookmarks = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
+        let sourceLinks = [] as {link: string, hash: string}[]
 
         let id = source.match(/\d+/)?.[0]
         let danbooruPost = await functions.http.fetch(`https://danbooru.donmai.us/posts/${id}.json`)
@@ -210,8 +249,19 @@ export default class ServerSources {
             englishCommentary = commentaries[0].translated_description
         }
 
+        let rawLinks = [] as string[]
+        if (danbooruPost.file_url) {
+            rawLinks = [danbooruPost.file_url]
+        }
+
+        for (const link of rawLinks) {
+            const buffer = await serverFunctions.util.imageBuffer(link)
+            const hash = await serverFunctions.util.pHash(buffer)
+            sourceLinks.push({link, hash})
+        }
+
         return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating}
+                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static saucenaoLookup = async (bytes: number[]) => {
@@ -250,6 +300,7 @@ export default class ServerSources {
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let mirrors = [] as string[]
+        let sourceLinks = [] as {link: string, hash: string}[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
 
@@ -269,6 +320,7 @@ export default class ServerSources {
                 artistIcon = data.artistIcon
                 artists = data.artists
                 rating = data.rating
+                sourceLinks = data.sourceLinks
 
                 mirrors = await serverFunctions.links.booruLinks(bytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -277,6 +329,7 @@ export default class ServerSources {
                     rating,
                     artists,
                     danbooruLink,
+                    sourceLinks,
                     source: {
                         title,
                         englishTitle,
@@ -310,6 +363,7 @@ export default class ServerSources {
                 artistIcon = data.artistIcon
                 artists = data.artists
                 rating = data.rating
+                sourceLinks = data.sourceLinks
 
                 mirrors = await serverFunctions.links.booruLinks(bytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -318,6 +372,7 @@ export default class ServerSources {
                     rating,
                     artists,
                     danbooruLink,
+                    sourceLinks,
                     source: {
                         title,
                         englishTitle,
@@ -376,6 +431,7 @@ export default class ServerSources {
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
+                    sourceLinks = data.sourceLinks
                 } catch (e) {
                     console.log(e)
                 }
@@ -396,6 +452,7 @@ export default class ServerSources {
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
+                    sourceLinks = data.sourceLinks
                 } catch (e) {
                     console.log(e)
                 }
@@ -418,6 +475,7 @@ export default class ServerSources {
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
+                    sourceLinks = data.sourceLinks
                 } catch (e) {
                     console.log(e)
                 } 
@@ -439,6 +497,7 @@ export default class ServerSources {
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
+                    sourceLinks = data.sourceLinks
                 } catch (e) {
                     console.log(e)
                 }
@@ -462,6 +521,7 @@ export default class ServerSources {
             rating,
             artists,
             danbooruLink,
+            sourceLinks,
             artistIcon,
             source: {
                 title,

@@ -184,10 +184,10 @@ export default class SQLPost {
         englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, 
         reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
-        addedTagGroups?: string[], removedTagGroups?: string[], imageSources?: string | null, imageChanged?: boolean, changes?: any}) => {
+        addedTagGroups?: string[], removedTagGroups?: string[], imageSources?: string | null, imageLinks?: string | null, imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
-        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageChanged, changes, reason} = params
+        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageLinks, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -259,6 +259,11 @@ export default class SQLPost {
         if (imageSources !== undefined) {
             setArray.push(`"imageSources" = $${i}`)
             values.push(imageSources)
+            i++
+        }
+        if (imageLinks !== undefined) {
+            setArray.push(`"imageLinks" = $${i}`)
+            values.push(imageLinks)
             i++
         }
         if (slug !== undefined) {
@@ -387,14 +392,14 @@ export default class SQLPost {
     public static insertImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
         type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
         upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
-        duration: number | null, thumbnail: string | null, source: string | null) => {
+        duration: number | null, thumbnail: string | null, directLink: string | null, altSource: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
             "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", 
-            "thumbnail", "source") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING "imageID"`,
+            "thumbnail", "directLink", "altSource") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING "imageID"`,
             rowMode: "array",
             values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
-            size, upscaledSize, duration, thumbnail, source]
+            size, upscaledSize, duration, thumbnail, directLink, altSource]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -404,23 +409,23 @@ export default class SQLPost {
     public static insertUnverifiedImage = async (postID: string, filename: string | null, upscaledFilename: string | null, 
         type: string, order: number, hash: string, pixelHash: string, width: number | null, height: number | null, 
         upscaledWidth: number | null, upscaledHeight: number | null, size: number | null, upscaledSize: number | null, 
-        duration: number | null, thumbnail: string | null, source: string | null) => {
+        duration: number | null, thumbnail: string | null, directLink: string | null, altSource: string | null) => {
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", 
             "pixelHash", "width", "height", "upscaledWidth", "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail",
-            "source") 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING "imageID"`,
+            "directLink", "altSource") 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING "imageID"`,
             rowMode: "array",
             values: [postID, filename, upscaledFilename, type, order, hash, pixelHash, width, height, upscaledWidth, upscaledHeight, 
-            size, upscaledSize, duration, thumbnail, source]
+            size, upscaledSize, duration, thumbnail, directLink, altSource]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail" | "source", value: string | number | boolean | null) => {
-        let whitelist = ["hash", "type", "thumbnail", "source"]
+    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail" | "directLink" | "altSource", value: string | number | boolean | null) => {
+        let whitelist = ["hash", "type", "thumbnail", "directLink", "altSource"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -432,8 +437,8 @@ export default class SQLPost {
     }
 
     /** Updates an image (unverified) */
-    public static updateUnverifiedImage = async (imageID: string, column: "filename" | "thumbnail" | "source", value: string | number | boolean | null) => {
-        let whitelist = ["filename", "thumbnail", "source"]
+    public static updateUnverifiedImage = async (imageID: string, column: "filename" | "thumbnail" | "directLink" | "altSource", value: string | number | boolean | null) => {
+        let whitelist = ["filename", "thumbnail", "directLink", "altSource"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

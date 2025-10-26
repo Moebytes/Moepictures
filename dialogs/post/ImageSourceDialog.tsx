@@ -16,7 +16,8 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const {setPostFlag, setSourceHook} = useFlagActions()
     const {setActionBanner} = useActiveActions()
     const [submitted, setSubmitted] = useState(false)
-    const [source, setSource] = useState("")
+    const [directLink, setDirectLink] = useState("")
+    const [altSource, setAltSource] = useState("")
     const [reason, setReason] = useState("")
 
     useEffect(() => {
@@ -27,14 +28,17 @@ const ImageSourceDialog: React.FunctionComponent = () => {
         if (imgSourceID) {
             document.body.style.pointerEvents = "all"
             if (imgSourceID.uploadImage) {
-                setSource(imgSourceID.uploadImage.source || "")
+                setDirectLink(imgSourceID.uploadImage.directLink || "")
+                setAltSource(imgSourceID.uploadImage.altSource || "")
             } else if (imgSourceID.image) {
-                setSource(imgSourceID.image.source || "")
+                setDirectLink(imgSourceID.image.directLink || "")
+                setAltSource(imgSourceID.image.altSource || "")
             }
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
-            setSource("")
+            setAltSource("")
+            setDirectLink("")
             setReason("")
         }
     }, [imgSourceID, session])
@@ -42,25 +46,28 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const updateSource = async () => {
         if (!imgSourceID) return
         if (imgSourceID.uploadImage) {
-            setSourceHook(source)
+            setSourceHook({altSource, directLink})
             setActionBanner("image-source")
             setImgSourceID(null)
         } else if (imgSourceID.image && imgSourceID.post) {
             if (permissions.isContributor(session)) {
                 await functions.http.put("/api/image/source", {imageID: imgSourceID.image.imageID, 
-                unverified: imgSourceID.unverified, source, reason}, session, setSessionFlag)
+                unverified: imgSourceID.unverified, altSource, directLink, reason}, session, setSessionFlag)
                 setPostFlag(imgSourceID.image.postID)
                 setActionBanner("image-source")
                 setImgSourceID(null)
             } else {
                 let imageSources = functions.post.imageSourceMap(imgSourceID.post) || {}
-                imageSources[imgSourceID.image.order] = source
+                imageSources[imgSourceID.image.order] = altSource
+                let imageLinks = functions.post.imageLinkMap(imgSourceID.post) || {}
+                imageLinks[imgSourceID.image.order] = directLink
                 const data = {
                     postID: imgSourceID.post.postID,
                     type: imgSourceID.post.type,
                     rating: imgSourceID.post.rating,
                     style: imgSourceID.post.style,
                     imageSources,
+                    imageLinks,
                     reason
                 }
                 await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
@@ -86,12 +93,16 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const mainJSX = () => {
         return (
             <>
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="dialog-text">{i18n.labels.directLink}: </span>
+                <input className="dialog-input" type="text" spellCheck={false} value={directLink} onChange={(event) => setDirectLink(event.target.value)}/>
+            </div>
             <div className="dialog-row">
                 <span className="dialog-validation">{i18n.dialogs.imageSource.reminder}</span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <span className="dialog-text">{i18n.labels.source}: </span>
-                <input className="dialog-input" type="text" spellCheck={false} value={source} onChange={(event) => setSource(event.target.value)}/>
+                <span className="dialog-text">{i18n.labels.altSource}: </span>
+                <input className="dialog-input" type="text" spellCheck={false} value={altSource} onChange={(event) => setAltSource(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.reason}: </span>

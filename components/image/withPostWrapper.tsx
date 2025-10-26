@@ -569,16 +569,33 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
 
         const getSourceIcon = () => {
             if (props.uploadImage) {
-                return props.uploadImage.source ? sourceSetIcon : sourceIcon
+                return props.uploadImage.altSource ? sourceSetIcon : sourceIcon
             } else {
                 if (!props.post) return sourceIcon
-                let order = props.order || 1
+                let order = (props.order || 1) - 1
                 if ("historyID" in props.post) {
                     if (props.post.imageSources?.[order]) return sourceSetIcon
                 } else {
-                    if (props.post.images[order - 1]?.source) return sourceSetIcon
+                    if (props.post.images[order]?.altSource) return sourceSetIcon
                 }
                 return sourceIcon
+            }
+        }
+
+        const openDirectLink = (event: React.MouseEvent) => {
+            event.preventDefault()
+            if (props.uploadImage?.directLink) {
+                window.open(props.uploadImage.directLink, "_blank")
+            } else {
+                if (!props.post) return sourceIcon
+                let order = (props.order || 1) - 1
+                if ("historyID" in props.post) {
+                    if (props.post.imageLinks?.[order]) window.open(props.post.imageLinks[order], "_blank")
+                } else {
+                    if (props.post.images[order]?.directLink) {
+                        window.open(props.post.images[order].directLink, "_blank")
+                    }
+                }
             }
         }
 
@@ -607,7 +624,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 </> : null}
                             </div>
 
-                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource}/>
+                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource} onContextMenu={openDirectLink}/>
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
                                 onClick={() => {setShowReverseIcons(false); setShowShareIcons((prev: boolean) => !prev)}}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 

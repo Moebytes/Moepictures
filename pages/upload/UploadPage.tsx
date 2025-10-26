@@ -129,6 +129,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [currentLive2D, setCurrentLive2D] = useState(false)
     const [currentAnimatedWebp, setCurrentAnimatedWebp] = useState(false)
     const [currentPixivUgoira, setCurrentPixivUgoira] = useState(false)
+    const [sourceLinks, setSourceLinks] = useState([] as {hash: string, link: string}[])
     const metaTagRef = useRef<HTMLInputElement>(null!)
     const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
@@ -721,6 +722,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             style,
             parentID,
             groupName,
+            sourceLinks,
             source: {
                 title: sourceTitle,
                 englishTitle: sourceEnglishTitle,
@@ -802,6 +804,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             if (artists.length > 1) artists.pop()
             setArtists(artists)
+            setSourceLinks(sourceLookup.sourceLinks)
             forceUpdate()
             setSaucenaoError(false)
         } catch (e) {
@@ -999,13 +1002,13 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (sourceHook !== null) {
             let original = originalFiles[currentIndex]
             if (original) {
-                let newOriginal = {...original, source: sourceHook}
+                let newOriginal = {...original, ...sourceHook}
                 let newOriginalFiles = functions.util.replaceAtIndex(originalFiles, currentIndex, newOriginal)
                 setOriginalFiles(newOriginalFiles)
             }
             let upscaled = upscaledFiles[currentIndex]
             if (upscaled) {
-                let newUpscaled = {...upscaled, source: sourceHook}
+                let newUpscaled = {...upscaled, ...sourceHook}
                 let newUpscaledFiles = functions.util.replaceAtIndex(upscaledFiles, currentIndex, newUpscaled)
                 setUpscaledFiles(newUpscaledFiles)
             }

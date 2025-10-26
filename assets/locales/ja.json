@@ -509,7 +509,10 @@
         "dimensions": "寸法",
         "agree": "同意する",
         "deny": "拒否する",
-        "imageSources": "画像ソース"
+        "imageSources": "画像ソース",
+        "imageLinks": "画像リンク",
+        "altSource": "代替ソース",
+        "directLink": "ダイレクトリンク"
     },
     "errors": {
         "$401":"401エラー",
@@ -1226,7 +1229,7 @@
         "imageSource": {
             "title": "画像ソースの設定",
             "request": "画像ソース設定リクエスト",
-            "reminder": "*投稿元と異なる場合のみ、ソースを設定してください"
+            "reminder": "*メインソースと異なる場合にのみ代替ソースを設定してください"
         }
     },
     "help": {

@@ -1,11 +1,13 @@
 import axios from "axios"
 import sharp from "sharp"
+import phash from "sharp-phash"
 import crypto from "crypto"
 import * as mm from "music-metadata"
 import {Translator} from "@vitalets/google-translate-api"
 import {createCanvas, loadImage} from "@napi-rs/canvas"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
+import functions from "../functions/Functions"
 
 export default class ServerUtil {
     public static ipRegion = async (ip: string) => {
@@ -87,6 +89,16 @@ export default class ServerUtil {
         const rawBuffer = await sharp(buffer, {limitInputPixels: false})
         .ensureAlpha().toColorspace("srgb").raw().toBuffer()
         return crypto.createHash("md5").update(rawBuffer).digest("hex")
+    }
+
+    public static imageBuffer = async (link: string, headers?: {[key: string]: string}) => {
+        const response = await axios.get(link, {responseType: "arraybuffer", 
+        headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
+        return Buffer.from(response)
+    }
+
+    public static pHash = async (buffer: Buffer) => {
+        return phash(buffer).then((hash: string) => functions.byte.binaryToHex(hash))
     }
 
     public static localImageBuffer = async (link: string) => {

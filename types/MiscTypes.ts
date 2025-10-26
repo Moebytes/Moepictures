@@ -121,6 +121,7 @@ export interface SourceLookup {
     rating: PostRating
     artists: UploadTag[]
     danbooruLink: string
+    sourceLinks: {link: string, hash: string}[]
     artistIcon: string
     source: {
         title: string

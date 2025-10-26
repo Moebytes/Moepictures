@@ -12,7 +12,8 @@ export default class ServerPosts {
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
             const newImage = newImages[i]
-            if ((oldImage.source ?? "") !== (newImage.source ?? "")) return true
+            if ((oldImage.altSource ?? "") !== (newImage.altSource ?? "")) return true
+            if ((oldImage.directLink ?? "") !== (newImage.directLink ?? "")) return true
             let oldPath = ""
             if (upscaled) {
                 oldPath = functions.link.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
@@ -197,11 +198,26 @@ export default class ServerPosts {
         if (!post) return
         for (const image of post.images) {
             let order = this.resolveImageOrder(image, post.images, imageOrderHashes)
-            let source = imageSources?.[String(order)] ?? null
+            let altSource = imageSources?.[String(order)] ?? null
             if (unverified) {
-                await sql.post.updateUnverifiedImage(image.imageID, "source", source)
+                await sql.post.updateUnverifiedImage(image.imageID, "altSource", altSource)
             } else {
-                await sql.post.updateImage(image.imageID, "source", source)
+                await sql.post.updateImage(image.imageID, "altSource", altSource)
+            }
+        }
+    }
+
+    public static applyImageLinks = async (postID: string, imageLinks?: {[key: string]: string | null} | null, 
+        unverified?: boolean, imageOrderHashes?: {[key: string]: string}) => {
+        let post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
+        if (!post) return
+        for (const image of post.images) {
+            let order = this.resolveImageOrder(image, post.images, imageOrderHashes)
+            let directLink = imageLinks?.[String(order)] ?? null
+            if (unverified) {
+                await sql.post.updateUnverifiedImage(image.imageID, "directLink", directLink)
+            } else {
+                await sql.post.updateImage(image.imageID, "directLink", directLink)
             }
         }
     }
@@ -254,5 +270,17 @@ export default class ServerPosts {
         const pixivID = rawPixivID.match(/(\d+)/g)?.[0] || ""
         const result = await sql.search.searchPixivID(pixivID, "", "", "", "")
         return result[0] ? result[0].postID : ""
+    }
+
+    public static resolveSourceLink = (hash: string, order: number, sourceLinks: {link: string, hash: string}[]) => {
+        // Test at the order first
+        let first = sourceLinks[order - 1]
+        if (dist(hash, first.hash) < 6) return first.link
+
+        for (const current of sourceLinks) {
+            if (dist(hash, current.hash) < 6) return current.link
+        }
+
+        return null
     }
 }

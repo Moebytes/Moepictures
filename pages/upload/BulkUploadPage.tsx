@@ -402,7 +402,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             for (let i = 0; i < sourceArr.length; i++) {
                 let parsedSource = sourceData.source.source.replace(/\d{4,}/, sourceArr[i])
                 if (parsedSource !== sourceData.source.source) {
-                    currentArr[i].source = parsedSource
+                    currentArr[i].altSource = parsedSource
                 }
             }
 
@@ -432,6 +432,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 newTags: tagData.newTags,
                 tags: [...tagData.tags, ...tagData.meta],
                 tagGroups: [],
+                sourceLinks: sourceData.sourceLinks,
                 duplicates: false,
                 noImageUpdate: true
             }
@@ -528,13 +529,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         if (sourceHook !== null) {
             let original = originalFiles[currentIndex]
             if (original) {
-                let newOriginal = {...original, source: sourceHook}
+                let newOriginal = {...original, ...sourceHook}
                 let newOriginalFiles = functions.util.replaceAtIndex(originalFiles, currentIndex, newOriginal)
                 setOriginalFiles(newOriginalFiles)
             }
             let upscaled = upscaledFiles[currentIndex]
             if (upscaled) {
-                let newUpscaled = {...upscaled, source: sourceHook}
+                let newUpscaled = {...upscaled, ...sourceHook}
                 let newUpscaledFiles = functions.util.replaceAtIndex(upscaledFiles, currentIndex, newUpscaled)
                 setUpscaledFiles(newUpscaledFiles)
             }

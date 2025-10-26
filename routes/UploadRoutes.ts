@@ -158,8 +158,8 @@ export const deleteImages = async (post: PostFull, data: {imgChanged: boolean, r
 
 export const insertImages = async (postID: string, data: {images: UploadImage[] | Image[], upscaledImages: UploadImage[] | Image[], type: PostType,
   rating: PostRating, source: SourceData, characters: UploadTag[] | MiniTag[], imgChanged: boolean, unverified?: boolean, unverifiedImages?: boolean,
-  thumbnail?: string | null, thumbnailFilename?: string}) => {
-  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages} = data
+  thumbnail?: string | null, thumbnailFilename?: string, sourceLinks?: {link: string, hash: string}[]}) => {
+  let {images, upscaledImages, type, rating, source, characters, imgChanged, unverified, unverifiedImages, sourceLinks} = data
 
   if (images.length !== upscaledImages.length) {
     const maxLength = Math.max(images.length, upscaledImages.length)
@@ -349,13 +349,14 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       let size = buffer?.byteLength || null
       let upscaledSize = upscaledBuffer?.byteLength || null
       let duration = original.duration || null
-      let source = original.source || null
+      let altSource = original.altSource || null
+      let directLink = sourceLinks ? serverFunctions.posts.resolveSourceLink(hash, order, sourceLinks) : original.directLink || null
       if (unverified) {
         await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
-        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, source)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, directLink, altSource)
       } else {
         await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, pixelHash,
-        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, source)
+        width, height, upscaledWidth, upscaledHeight, size, upscaledSize, duration, thumbnailFilename, directLink, altSource)
       }
     }
   }
@@ -708,6 +709,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
   const updated = await sql.post.post(post.postID) as PostFull
   let r18 = functions.post.isR18(updated.rating)
   const sourceMap = functions.post.imageSourceMap(updated)
+  const linkMap = functions.post.imageLinkMap(updated)
 
   const changes = functions.compare.parsePostChanges(post, updated)
 
@@ -752,7 +754,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
         hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, 
         series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
-        removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageChanged: false, changes: null, reason})
+        removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: false, changes: null, reason})
 
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -807,7 +809,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
-        imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
+        imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
   } else {
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -873,7 +875,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
-        imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
+        imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
   }
 }
 
@@ -881,7 +883,7 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
-        tags, tagGroups, newTags, unverifiedID, noImageUpdate} = req.body as UploadParams
+        tags, tagGroups, newTags, unverifiedID, noImageUpdate, sourceLinks} = req.body as UploadParams
 
         if (!req.session.username) return void res.status(403).send("Unauthorized")
         if (!permissions.isCurator(req.session)) return void res.status(403).send("Unauthorized")
@@ -922,7 +924,7 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
 
-        const {hasOriginal, hasUpscaled} = await insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged: true})
+        const {hasOriginal, hasUpscaled} = await insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged: true, sourceLinks})
         await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, uploader: req.session.username,
         updater: req.session.username, approver: req.session.username})
 
@@ -950,7 +952,7 @@ const CreateRoutes = (app: Express) => {
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
-        tags, tagGroups, imageSources, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
+        tags, tagGroups, imageSources, imageLinks, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -1034,6 +1036,10 @@ const CreateRoutes = (app: Express) => {
           await serverFunctions.posts.applyImageSources(postID, imageSources, false, imageOrderHashes)
         }
 
+        if (imageLinks !== undefined) {
+          await serverFunctions.posts.applyImageLinks(postID, imageLinks, false, imageOrderHashes)
+        }
+
         if (unverifiedID) {
           const unverifiedPost = await sql.post.unverifiedPost(unverifiedID)
           if (unverifiedPost) await serverFunctions.posts.deleteUnverifiedPost(unverifiedPost)
@@ -1059,7 +1065,7 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload/unverified", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series, 
-        tags, tagGroups, newTags, duplicates} = req.body as UnverifiedUploadParams
+        tags, tagGroups, newTags, duplicates, sourceLinks} = req.body as UnverifiedUploadParams
 
         if (!req.session.username) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
@@ -1097,7 +1103,7 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertUnverifiedPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
 
-        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, type, rating, source, characters, imgChanged: true})
+        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, type, rating, source, characters, imgChanged: true, sourceLinks})
 
         await updatePost(postID, {unverified: true, artists, newTags, type, rating, style,
         source, hasOriginal, hasUpscaled, duplicates, parentID, uploader: req.session.username,
@@ -1309,8 +1315,11 @@ const CreateRoutes = (app: Express) => {
         let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: updater, noImageUpdate})
         let {addedTagGroups, removedTagGroups} = await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: unverified.tagGroups})
 
+        // Approve image sources/links
         let imageSources = functions.post.imageSourceMap(unverified)
         await serverFunctions.posts.applyImageSources(newPostID, imageSources)
+        let imageLinks = functions.post.imageLinkMap(unverified)
+        await serverFunctions.posts.applyImageLinks(newPostID, imageLinks)
 
         // Approve notes
         for (let i = 0; i < unverified.images.length; i++) {
@@ -1513,7 +1522,7 @@ const CreateRoutes = (app: Express) => {
 
               await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, image.pixelHash, 
               image.width, image.height, image.upscaledWidth, image.upscaledHeight, image.size, image.upscaledSize, image.duration, 
-              image.thumbnail, image.source)
+              image.thumbnail, image.directLink, image.altSource)
             }
             await serverFunctions.posts.deletePost(child.post)
           }

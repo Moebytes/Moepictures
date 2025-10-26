@@ -33,7 +33,7 @@ const flagSlice = createSlice({
         historyFlag: false,
         tagFavoriteFlag: false,
         saveSearchFlag: false,
-        sourceHook: null as string | null
+        sourceHook: null as {altSource: string, directLink: string} | null
     },
     reducers: {
         setRandomFlag: (state, action) => {state.randomFlag = action.payload},
@@ -141,7 +141,7 @@ export const useFlagActions = () => {
         setHistoryFlag: (state: boolean) => dispatch(setHistoryFlag(state)),
         setTagFavoriteFlag: (state: boolean) => dispatch(setTagFavoriteFlag(state)),
         setSaveSearchFlag: (state: boolean) => dispatch(setSaveSearchFlag(state)),
-        setSourceHook: (state: string | null) => dispatch(setSourceHook(state))
+        setSourceHook: (state: {altSource: string, directLink: string} | null) => dispatch(setSourceHook(state))
     }
 }
 

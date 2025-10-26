@@ -34,6 +34,7 @@ export interface  PostChanges {
     source?: string
     mirrors?: PostMirrors | null
     imageSources?: {[key: string]: string | null} | null
+    imageLinks?: {[key: string]: string | null} | null
     bookmarks?: number
     buyLink?: string | null
     commentary?: string
@@ -71,6 +72,7 @@ export interface PostHistory {
     reason: string | null
     mirrors: PostMirrors | null
     imageSources: {[key: string]: string | null} | null
+    imageLinks?: {[key: string]: string | null} | null
     bookmarks: number
     hasOriginal: boolean | null
     hasUpscaled: boolean | null

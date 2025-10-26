@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "addedTagGroups" text[],
     "removedTagGroups" text[],
     "imageSources" jsonb,
+    "imageLinks" jsonb,
     "imageChanged" boolean,
     "changes" jsonb
 );
@@ -138,7 +139,8 @@ CREATE TABLE IF NOT EXISTS "images" (
     "thumbnail" text,
     "hash" text,
     "pixelHash" text,
-    "source" text
+    "directLink" text,
+    "altSource" text
 );
 
 CREATE TABLE IF NOT EXISTS "unverified images" (
@@ -158,7 +160,8 @@ CREATE TABLE IF NOT EXISTS "unverified images" (
     "thumbnail" text,
     "hash" text,
     "pixelHash" text,
-    "source" text
+    "directLink" text,
+    "altSource" text
 );
 
 CREATE TABLE IF NOT EXISTS "tags" (
@@ -706,6 +709,7 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "addedTagGroups" text[],
     "removedTagGroups" text[],
     "imageSources" jsonb,
+    "imageLinks" jsonb,
     "imageChanged" boolean,
     "changes" jsonb,
     "reason" text

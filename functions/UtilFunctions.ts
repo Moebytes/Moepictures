@@ -196,6 +196,8 @@ export default class UtilFunctions {
 
     public static getSiteName = (link: string, i18n: typeof enLocale) => {
         try {
+            if (link.includes("pximg.net")) return "Pximg"
+            if (link.includes("pbs.twimg")) return "Twimg"
             const domain = new URL(link).hostname.replace("www.", "").split(".")?.[0] || ""
             if (domain.toLowerCase() === "yande") return "Yandere"
             return this.toProperCase(domain)

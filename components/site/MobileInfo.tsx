@@ -472,7 +472,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (src) return src
         } else {
             let image = props.post.images[order]
-            if (image?.source) return image.source
+            if (image?.altSource) return image.altSource
         }
         return props.post.source
     }

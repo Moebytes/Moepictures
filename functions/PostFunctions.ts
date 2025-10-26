@@ -136,7 +136,8 @@ export default class PostFunctions {
     
                 let imgLink = typeof image === "string" ? functions.link.getRawImageLink(image) : functions.link.getImageLink(image)
                 let upscaledImgLink = typeof upscaledImage === "string" ? functions.link.getRawImageLink(upscaledImage) : functions.link.getImageLink(upscaledImage, true)
-                let source = typeof image === "string" ? "" : image.source
+                let altSource = typeof image === "string" ? "" : image.altSource
+                let directLink = typeof image === "string" ? "" : image.directLink
     
                 let buffer = await functions.http.getBuffer(functions.util.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
                 let upscaledBuffer = await functions.http.getBuffer(functions.util.appendURLParams(upscaledImgLink, {upscaled: true}), {"x-force-upscale": "true"})
@@ -150,8 +151,8 @@ export default class PostFunctions {
                     let {width, height, size, duration} = await functions.image.dimensions(link)
                     let {thumbnail, thumbnailExt} = await functions.image.thumbnail(link)
     
-                    images.push({link, ext: ext.replace(".", ""), width, height, size, duration, thumbnail, thumbnailExt, source,
-                    originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
+                    images.push({link, ext: ext.replace(".", ""), width, height, size, duration, thumbnail, thumbnailExt, altSource,
+                    directLink, originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
                 }
                 if (upscaledBuffer.byteLength) {
                     let upscaledExt = path.extname(upscaledImgLink)
@@ -163,7 +164,7 @@ export default class PostFunctions {
                     let {thumbnail, thumbnailExt} = await functions.image.thumbnail(upscaledLink)
                     
                     upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), width, height, 
-                    size, duration, thumbnail, thumbnailExt, originalLink: upscaledImgLink, source,
+                    size, duration, thumbnail, thumbnailExt, originalLink: upscaledImgLink, altSource, directLink,
                     bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
                 }
             }
@@ -196,11 +197,32 @@ export default class PostFunctions {
                 }
             } else {
                 for (const image of post.images) {
-                    if (image.source?.trim()) {
-                        sourceMap[String(image.order)] = image.source.trim()
+                    if (image.altSource?.trim()) {
+                        sourceMap[String(image.order)] = image.altSource.trim()
                     }
                 }
             }
             return sourceMap
+        }
+
+        public static imageLinkMap = (post: Post | PostHistory) => {
+            const linkMap = {} as {[key: string]: string | null}
+            if ("historyID" in post) {
+                if (post.imageLinks) {
+                    for (const entry of Object.entries(post.imageLinks)) {
+                        let [key, value] = entry
+                        if (value?.trim()) {
+                            linkMap[String(key)] = value.trim()
+                        }
+                    }
+                }
+            } else {
+                for (const image of post.images) {
+                    if (image.directLink?.trim()) {
+                        linkMap[String(image.order)] = image.directLink.trim()
+                    }
+                }
+            }
+            return linkMap
         }
 }
