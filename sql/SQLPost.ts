@@ -476,7 +476,7 @@ export default class SQLPost {
             json_agg(DISTINCT tag_groups_json.*) AS "tagGroups"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
-            JOIN "tag map" ON posts."postID" = "tag map"."postID"
+            LEFT JOIN "tag map" ON posts."postID" = "tag map"."postID"
             LEFT JOIN tag_groups_json ON posts."postID" = tag_groups_json."postID"
             LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
             LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
