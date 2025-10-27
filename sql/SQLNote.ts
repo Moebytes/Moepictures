@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {Note, NoteSearch, UnverifiedNote, UnverifiedNoteSearch} from "../types/Types"
+import {Note, NoteSearch, NoteUpdateColumns, UnverifiedNote, UnverifiedNoteSearch} from "../types/Types"
 
 export default class SQLNote {
     /** Insert note. */
@@ -51,8 +51,11 @@ export default class SQLNote {
     }
 
     /** Updates a note */
-    public static updateNote = async (noteID: string, column: "order", value: string | number | boolean) => {
-        let whitelist = ["order"]
+    public static updateNote = async (noteID: string, column: NoteUpdateColumns, value: string | number | boolean) => {
+        let whitelist = ["order", "transcript", "translation", "x", "y", "width", "height", "rotation", 
+            "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "fontFamily", "bold", "italic",
+            "textColor", "backgroundColor", "backgroundAlpha", "strokeColor", "strokeWidth", "breakWord", "borderRadius",
+            "character", "characterTag"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -105,6 +108,21 @@ export default class SQLNote {
         }
         const result = await SQLQuery.run(query)
         return result as Promise<Note[]>
+    }
+
+    /** Get note. */
+    public static note = async (noteID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT notes.*
+                FROM notes
+                WHERE notes."noteID" = $1
+                GROUP BY notes."noteID"
+            `),
+            values: [noteID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<Note | undefined>
     }
 
     /** Delete note. */

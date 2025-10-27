@@ -6,7 +6,7 @@ import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import path from "path"
 import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
-TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType} from "../types/Types"
+TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType, TagUpdateColumns} from "../types/Types"
 import ServerFunctions from "../server functions/ServerFunctions"
 
 const tagLimiter = rateLimit({
@@ -22,6 +22,16 @@ const tagLimiter = rateLimit({
 const tagUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 100,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const modLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1000,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -837,6 +847,31 @@ const TagRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.put("/api/tag/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {tag, column, value} = req.body as {tag: string, column: TagUpdateColumns, value: any}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const tagObj = await sql.tag.tag(tag)
+            if (!tagObj) return void res.status(400).send("Invalid tag")
+            
+            let columns: {[key: string]: TagUpdateColumns} = {
+                tag: "tag", type: "type", image: "image", imageHash: "imageHash", 
+                description: "description", updater: "updater", updatedDate: "updatedDate",
+                website: "website", social: "social", twitter: "twitter", fandom: "fandom", 
+                wikipedia: "wikipedia", pixivTags: "pixivTags", featuredPost: "featuredPost", 
+                banned: "banned", hidden: "hidden", r18: "r18"
+            }
+            
+            await sql.tag.updateTag(tag, columns[column], value)
+            
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }

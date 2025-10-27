@@ -1,6 +1,8 @@
 import {Post, PostSearch, PostRating, GroupRequest, GroupDeleteRequest,
 GroupEditRequest, GroupHistory} from "./Types"
 
+export type GroupUpdateColumns = "name" | "slug" | "rating" | "description" | "updater" | "updatedDate"
+
 export interface PostOrdered extends Post {
     order: number
     fake?: boolean
@@ -158,6 +160,7 @@ export type GroupPostEndpoint<T extends string> =
 export type GroupPutEndpoint<T extends string> = 
     T extends "/api/group/edit" ? {params: GroupEditParams, response: string} :
     T extends "/api/group/reorder" ? {params: GroupReorderParams, response: string} :
+    T extends "/api/group/update" ? {params: {slug: string, column: GroupUpdateColumns, value: any}, response: string} :
     never
 
 export type GroupDeleteEndpoint<T extends string> = 

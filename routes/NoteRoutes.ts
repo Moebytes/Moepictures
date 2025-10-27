@@ -4,12 +4,22 @@ import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
-import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag} from "../types/Types"
+import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag, NoteUpdateColumns} from "../types/Types"
 import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const noteLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 300,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const modLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1000,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -403,6 +413,34 @@ const NoteRoutes = (app: Express) => {
             } else {
                 await sql.history.deleteNoteHistory(historyID)
             }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/note/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {noteID, column, value} = req.body as {noteID: string, column: NoteUpdateColumns, value: any}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const note = await sql.note.note(noteID)
+            if (!note) return void res.status(400).send("Invalid slug")
+            
+            let columns: {[key: string]: NoteUpdateColumns} = {
+                order: "order", transcript: "transcript", translation: "translation",
+                x: "x", y: "y", width: "width", height: "height", rotation: "rotation",
+                imageWidth: "imageWidth", imageHeight: "imageHeight", imageHash: "imageHash",
+                overlay: "overlay", fontSize: "fontSize", fontFamily: "fontFamily", bold: "bold",
+                italic: "italic", textColor: "textColor", backgroundColor: "backgroundColor",
+                backgroundAlpha: "backgroundAlpha", strokeColor: "strokeColor", strokeWidth: "strokeWidth",
+                breakWord: "breakWord", borderRadius: "borderRadius", character: "character", 
+                characterTag: "characterTag"
+            }
+            
+            await sql.note.updateNote(noteID, columns[column], value)
+            
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

@@ -7,10 +7,11 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server 
 import sharp from "sharp"
 import waifu2x from "waifu2x"
 import mediaInfoFactory from "mediainfo.js"
-import fs, { link } from "fs"
+import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
-PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate} from "../types/Types"
+PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate, PostUpdateColumns,
+ImageUpdateColumns} from "../types/Types"
 import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const postLimiter = rateLimit({
@@ -25,6 +26,15 @@ const postLimiter = rateLimit({
 const postUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 100,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const modLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1000,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -1407,6 +1417,60 @@ const PostRoutes = (app: Express) => {
                     addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, imageLinks: linkMap ? JSON.stringify(linkMap) : null, 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
+            
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/post/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID, column, value} = req.body as {postID: string, column: PostUpdateColumns, value: any}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const post = await sql.post.post(postID)
+            if (!post) return void res.status(400).send("Invalid postID")
+            
+            let columns: {[key: string]: PostUpdateColumns} = {
+                type: "type", rating: "rating", style: "style",
+                parentID: "parentID", posted: "posted", title: "title",
+                englishTitle: "englishTitle", artist: "artist", source: "source",
+                commentary: "commentary", englishCommentary: "englishCommentary",
+                bookmarks: "bookmarks", mirrors: "mirrors", buyLink: "buyLink",
+                pixivTags: "pixivTags", hidden: "hidden", locked: "locked",
+                private: "private", deleted: "deleted", deletionDate: "deletionDate"
+            }
+            
+            await sql.post.updatePost(postID, columns[column], value)
+            
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/image/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {imageID, column, value} = req.body as {imageID: string, column: ImageUpdateColumns, value: any}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const image = await sql.post.image(imageID)
+            if (!image) return void res.status(400).send("Invalid imageID")
+
+            let columns: {[key: string]: ImageUpdateColumns} = {
+                type: "type", order: "order", filename: "filename",
+                upscaledFilename: "upscaledFilename", width: "width", 
+                height: "height", upscaledWidth: "upscaledWidth",
+                upscaledHeight: "upscaledHeight", size: "size",
+                upscaledSize: "upscaledSize", duration: "duration",
+                thumbnail: "thumbnail", hash: "hash", pixelHash: "pixelHash",
+                directLink: "directLink", altSource: "altSource"
+            }
+
+            await sql.post.updateImage(imageID, columns[column], value)
             
             res.status(200).send("Success")
         } catch (e) {

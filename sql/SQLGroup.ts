@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {Group, GroupPosts, GroupPost, PostSearchOrdered} from "../types/Types"
+import {Group, GroupPosts, GroupPost, PostSearchOrdered, GroupUpdateColumns} from "../types/Types"
 
 export default class SQLGroup {
     /** Get group. */
@@ -100,9 +100,8 @@ export default class SQLGroup {
     }
 
     /** Update group. */
-    public static updateGroup = async (groupID: string, column: "updater" | "updatedDate" | "rating" | "description", 
-        value: string | boolean) => {
-        let whitelist = ["updater", "updatedDate", "rating", "description"]
+    public static updateGroup = async (groupID: string, column: GroupUpdateColumns, value: string | boolean) => {
+        let whitelist = ["name", "slug", "rating", "description", "updater", "updatedDate"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

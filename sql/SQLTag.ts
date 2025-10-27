@@ -2,7 +2,7 @@ import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
 import {Tag, MiniTag, BulkTag, TagCount, Implication, Alias, PostTagged, 
-AliasHistory, ImplicationHistory, AliasHistorySearch, TagGroup} from "../types/Types"
+AliasHistory, ImplicationHistory, AliasHistorySearch, TagGroup, TagUpdateColumns} from "../types/Types"
 
 export default class SQLTag {
     /** Insert a new tag. */
@@ -122,11 +122,9 @@ export default class SQLTag {
     }
 
     /** Update a tag. */
-    public static updateTag = async (tag: string, column: "tag" | "image" | "description" | "updater" | "updatedDate" 
-        | "type" | "featuredPost" | "r18" | "twitter" | "fandom" | "wikipedia" | "social" | "website" | "imageHash" | "pixivTags" 
-        | "banned", value: string | boolean | string[] | null) => {
-        let whitelist = ["tag", "image", "description", "updater", "updatedDate", "type", "featuredPost", "r18", "twitter", 
-        "fandom", "wikipedia", "social", "website", "imageHash", "pixivTags", "banned"]
+    public static updateTag = async (tag: string, column: TagUpdateColumns, value: string | boolean | string[] | null) => {
+        let whitelist = ["tag", "type", "image", "imageHash", "description", "updater", "updatedDate", "website", 
+            "social", "twitter", "fandom", "wikipedia", "pixivTags", "featuredPost", "banned", "hidden", "r18"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

@@ -1,7 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {PostFull, UnverifiedPost, MiniTag, ChildPost, Image} from "../types/Types"
+import {PostFull, UnverifiedPost, MiniTag, ChildPost, Image, PostUpdateColumns, ImageUpdateColumns} from "../types/Types"
 
 export default class SQLPost {
     /** Create a new post. */
@@ -25,9 +25,10 @@ export default class SQLPost {
     }
 
     /** Updates a post */
-    public static updatePost = async (postID: string, column: "type" | "hidden" | "locked" | "private" | "deleted" | "parentID"
-        | "deletionDate", value: string | number | boolean | null) => {
-        let whitelist = ["type", "hidden", "locked", "private", "deleted", "parentID", "deletionDate"]
+    public static updatePost = async (postID: string, column: PostUpdateColumns, value: string | number | boolean | null) => {
+        let whitelist = ["type", "rating", "style", "parentID", "posted", "title", "englishTitle", "artist", "source", 
+            "commentary", "englishCommentary", "bookmarks", "mirrors", "buyLink", "pixivTags", "hidden", "locked", "private",
+            "deleted", "deletionDate"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -424,8 +425,9 @@ export default class SQLPost {
     }
 
     /** Updates an image */
-    public static updateImage = async (imageID: string, column: "hash" | "type" | "thumbnail" | "directLink" | "altSource", value: string | number | boolean | null) => {
-        let whitelist = ["hash", "type", "thumbnail", "directLink", "altSource"]
+    public static updateImage = async (imageID: string, column: ImageUpdateColumns, value: string | number | boolean | null) => {
+        let whitelist = ["type", "order", "filename", "upscaledFilename", "width", "height", "upscaledWidth", 
+            "upscaledHeight", "size", "upscaledSize", "duration", "thumbnail", "hash", "pixelHash", "directLink", "altSource"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }

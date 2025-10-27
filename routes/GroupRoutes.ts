@@ -7,11 +7,21 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server 
 import {Group, GroupHistory, GroupPosts, GroupParams, GroupEditParams, GroupPostDeleteParams,
 GroupReorderParams, GroupRequestParams, GroupRequestFulfillParams, GroupDeleteRequestParams,
 GroupPostDeleteRequestParams, GroupDeleteRequestFulfillParams, GroupPostDeleteRequestFulfillParams,
-GroupEditRequestParams, GroupEditRequestFulfillParams, GroupHistoryParams, PostFull} from "../types/Types"
+GroupEditRequestParams, GroupEditRequestFulfillParams, GroupHistoryParams, PostFull,
+GroupUpdateColumns} from "../types/Types"
 
 const groupLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 300,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const modLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1000,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -586,6 +596,29 @@ const GroupRoutes = (app: Express) => {
             } else {
                 await sql.history.deleteGroupHistory(historyID)
             }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/group/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {slug, column, value} = req.body as {slug: string, column: GroupUpdateColumns, value: any}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const group = await sql.group.group(slug)
+            if (!group) return void res.status(400).send("Invalid slug")
+            
+            let columns: {[key: string]: GroupUpdateColumns} = {
+                name: "name", slug: "slug", rating: "rating",
+                description: "description", updater: "updater",
+                updatedDate: "updatedDate"
+            }
+            
+            await sql.group.updateGroup(group.groupID, columns[column], value)
+            
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

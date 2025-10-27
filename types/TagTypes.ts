@@ -1,6 +1,10 @@
 import {TagType, Post, AliasHistoryType, TagDeleteRequest, AliasRequest, TagEditRequest,
 TagHistory} from "./Types"
 
+export type TagUpdateColumns = "tag" | "type" | "image" | "imageHash" | "description" |
+"updater" | "updatedDate" | "website" | "social" | "twitter" | "fandom" | "wikipedia" | 
+"pixivTags" | "featuredPost" | "banned" | "hidden" | "r18"
+
 export interface MiniTag {
     tag: string
     type: TagType
@@ -236,6 +240,7 @@ export type TagPostEndpoint<T extends string> =
 
 export type TagPutEndpoint<T extends string> = 
     T extends "/api/tag/edit" ? {params: TagEditParams, response: string} :
+    T extends "/api/tag/update" ? {params: {tag: string, column: TagUpdateColumns, value: any}, response: string} :
     never
 
 export type TagDeleteEndpoint<T extends string> = 

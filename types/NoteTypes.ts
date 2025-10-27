@@ -1,5 +1,10 @@
 import {UserRole, Post, UnverifiedPost, NoteHistory} from "./Types"
 
+export type NoteUpdateColumns = "order" | "transcript" | "translation" | "x" | "y" | "width" |
+"height" | "rotation" | "imageWidth" | "imageHeight" | "imageHash" | "overlay" | "fontSize" | "fontFamily" |
+"bold" | "italic" | "textColor" | "backgroundColor" | "backgroundAlpha" | "strokeColor" | "strokeWidth" | 
+"breakWord" | "borderRadius" | "character" | "characterTag"
+
 export interface Note {
     id?: number
     noteID: string
@@ -138,6 +143,7 @@ export type NotePostEndpoint<T extends string> =
 export type NotePutEndpoint<T extends string> = 
     T extends "/api/note/save" ? {params: NoteEditParams, response: string} :
     T extends "/api/note/save/unverified" ? {params: NoteSaveParams, response: string} :
+    T extends "/api/note/update" ? {params: {noteID: string, column: NoteUpdateColumns, value: any}, response: string} :
     never
 
 export type NoteDeleteEndpoint<T extends string> = 
