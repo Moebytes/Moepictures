@@ -141,6 +141,9 @@ export default class CompareFunctions {
         if (oldPost.buyLink !== newPost.buyLink) {
             json.buyLink = newPost.buyLink
         }
+        if (JSON.stringify(oldPost.pixivTags) !== JSON.stringify(newPost.pixivTags)) {
+            json.pixivTags = newPost.pixivTags
+        }
         if (oldPost.commentary !== newPost.commentary) {
             json.commentary = newPost.commentary
         }

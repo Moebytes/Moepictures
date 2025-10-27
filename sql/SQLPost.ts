@@ -42,11 +42,11 @@ export default class SQLPost {
     /** Bulk updates a post */
     public static bulkUpdatePost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
         title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
-        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, 
         approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, 
-        buyLink, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, 
+        buyLink, pixivTags, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, 
         hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
@@ -109,6 +109,11 @@ export default class SQLPost {
         if (buyLink !== undefined) {
             setArray.push(`"buyLink" = $${i}`)
             values.push(buyLink)
+            i++
+        }
+        if (pixivTags !== undefined) {
+            setArray.push(`"pixivTags" = $${i}`)
+            values.push(pixivTags)
             i++
         }
         if (mirrors !== undefined) {
@@ -182,11 +187,11 @@ export default class SQLPost {
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
         title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
-        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, mirrors?: string | null, slug?: string, type?: string, 
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, mirrors?: string | null, slug?: string, type?: string, 
         uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, 
         reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
         addedTagGroups?: string[], removedTagGroups?: string[], imageSources?: string | null, imageLinks?: string | null, imageChanged?: boolean, changes?: any}) => {
-        const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, 
+        const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, pixivTags,
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
         isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageLinks, imageChanged, changes, reason} = params
         let setArray = [] as any
@@ -250,6 +255,11 @@ export default class SQLPost {
         if (buyLink !== undefined) {
             setArray.push(`"buyLink" = $${i}`)
             values.push(buyLink)
+            i++
+        }
+        if (pixivTags !== undefined) {
+            setArray.push(`"pixivTags" = $${i}`)
+            values.push(pixivTags)
             i++
         }
         if (mirrors !== undefined) {

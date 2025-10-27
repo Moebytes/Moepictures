@@ -37,6 +37,7 @@ export interface  PostChanges {
     imageLinks?: {[key: string]: string | null} | null
     bookmarks?: number
     buyLink?: string | null
+    pixivTags?: string[] | null
     commentary?: string
     englishCommentary?: string
 }
@@ -77,6 +78,7 @@ export interface PostHistory {
     hasOriginal: boolean | null
     hasUpscaled: boolean | null
     buyLink: string | null
+    pixivTags: string[] | null
     addedTags: string[]
     removedTags: string[]
     addedTagGroups: string[]

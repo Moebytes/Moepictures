@@ -15,6 +15,7 @@ export interface SourceData {
     englishCommentary: string | null
     bookmarks: number | null
     buyLink: string | null
+    pixivTags: string[] | null
     mirrors: string | null
 }
 

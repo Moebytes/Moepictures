@@ -105,6 +105,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourceBuyLink, setSourceBuyLink] = useState("")
+    const [sourcePixivTags, setSourcePixivTags] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
     const [artists, setArtists] = useState([{}] as UploadTag[])
     const [characters, setCharacters] = useState([{}] as UploadTag[])
@@ -259,6 +260,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSourceLink("")
         setSourceBookmarks("")
         setSourceBuyLink("")
+        setSourcePixivTags("")
         setRawTags("")
         setDanbooruLink("")
         setArtists([{}])
@@ -732,6 +734,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
                 bookmarks: functions.util.safeNumber(sourceBookmarks),
+                pixivTags: sourcePixivTags.trim() ? sourcePixivTags.split(",") : null,
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -796,6 +799,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             setSourceCommentary(sourceLookup.source.commentary)
             setSourceEnglishCommentary(sourceLookup.source.englishCommentary)
             setSourceBookmarks(sourceLookup.source.bookmarks)
+            setSourcePixivTags(sourceLookup.source.pixivTags.join(", "))
             setSourceDate(sourceLookup.source.posted)
             setSourceMirrors(sourceLookup.source.mirrors)
             if (!sourceLookup.source.title && !sourceLookup.source.artist && !sourceLookup.source.source) {
@@ -1502,6 +1506,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.sort.bookmarks}: </span>
                     <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">{i18n.labels.pixivTags}: </span>
+                    <input className="upload-input-wide2" type="url" value={sourcePixivTags} onChange={(event) => setSourcePixivTags(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.commentary}: </span>

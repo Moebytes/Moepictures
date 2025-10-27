@@ -71,6 +71,7 @@ export interface Post {
     mirrors: PostMirrors | null
     bookmarks: number
     buyLink: string | null
+    pixivTags: string[] | null
     approver: string
     approveDate: string
     hasOriginal: boolean

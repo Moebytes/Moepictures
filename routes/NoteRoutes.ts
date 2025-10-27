@@ -225,6 +225,7 @@ const NoteRoutes = (app: Express) => {
                 englishCommentary: post.englishCommentary,
                 bookmarks: post.bookmarks,
                 buyLink: post.buyLink,
+                pixivTags: post.pixivTags,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
             }
 

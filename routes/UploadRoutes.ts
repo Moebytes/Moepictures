@@ -416,6 +416,7 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       englishCommentary: source.englishCommentary ? source.englishCommentary : null,
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
+      pixivTags: source.pixivTags?.length ? source.pixivTags : null,
       mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
       slug: newSlug,
       uploader,
@@ -444,6 +445,7 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       englishCommentary: source.englishCommentary ? source.englishCommentary : null,
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
+      pixivTags: source.pixivTags?.length ? source.pixivTags : null,
       mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
       slug: newSlug,
       uploader,
@@ -751,7 +753,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
         style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, slug: vanilla.slug,
         posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
+        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
         hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, 
         series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
         removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: false, changes: null, reason})
@@ -806,7 +808,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
         parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
         source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
         imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
@@ -872,7 +874,7 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
         parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
         source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
         hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
         imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
@@ -1286,6 +1288,7 @@ const CreateRoutes = (app: Express) => {
           artist: unverified.artist,
           bookmarks: unverified.bookmarks,
           buyLink: unverified.buyLink,
+          pixivTags: unverified.pixivTags,
           mirrors: unverified.mirrors ? Object.values(unverified.mirrors).join("\n") : "",
           posted: unverified.posted,
           source: unverified.source
@@ -1449,6 +1452,7 @@ const CreateRoutes = (app: Express) => {
               artist: post.artist,
               bookmarks: post.bookmarks,
               buyLink: post.buyLink,
+              pixivTags: post.pixivTags,
               mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : "",
               posted: post.posted,
               source: post.source

@@ -36,6 +36,7 @@ export default class ServerSources {
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
+        let pixivTags = [] as string[]
 
         const pixivID = pixivLink.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
@@ -66,6 +67,7 @@ export default class ServerSources {
         title = illust.title
         artist = illust.user.name
         bookmarks = String(illust.total_bookmarks)
+        pixivTags = illust.tags.map((t) => t.name)
         const translated = await serverFunctions.util.translate([title, commentary])
         if (translated) {
             englishTitle = translated[0]
@@ -91,7 +93,7 @@ export default class ServerSources {
             sourceLinks.push({link, hash})
         }
 
-        return {source, artist, title, englishTitle, commentary, englishCommentary, 
+        return {source, artist, title, englishTitle, commentary, englishCommentary, pixivTags,
                 posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
@@ -300,6 +302,7 @@ export default class ServerSources {
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let mirrors = [] as string[]
+        let pixivTags = [] as string[]
         let sourceLinks = [] as {link: string, hash: string}[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
@@ -323,6 +326,7 @@ export default class ServerSources {
                 artists = data.artists
                 rating = data.rating
                 sourceLinks = data.sourceLinks
+                pixivTags = data.pixivTags
 
                 mirrors = await serverFunctions.links.booruLinks(bytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -340,6 +344,7 @@ export default class ServerSources {
                         commentary,
                         englishCommentary,
                         bookmarks,
+                        pixivTags,
                         posted,
                         mirrors: mirrorStr
                     }
@@ -383,6 +388,7 @@ export default class ServerSources {
                         commentary,
                         englishCommentary,
                         bookmarks,
+                        pixivTags,
                         posted,
                         mirrors: mirrorStr
                     }
@@ -434,6 +440,7 @@ export default class ServerSources {
                     artists = data.artists
                     rating = data.rating
                     sourceLinks = data.sourceLinks
+                    pixivTags = data.pixivTags
                 } catch (e) {
                     console.log(e)
                 }
@@ -533,6 +540,7 @@ export default class ServerSources {
                 commentary,
                 englishCommentary,
                 bookmarks,
+                pixivTags,
                 posted,
                 mirrors: mirrorStr
             }

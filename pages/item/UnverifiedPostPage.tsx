@@ -274,6 +274,20 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
         }
     }
 
+    const generatePixivTagsJSX = () => {
+        let jsx = [] as React.ReactElement[]
+        if (post?.pixivTags?.[0]) {
+            for (let i = 0; i < post.pixivTags.length; i++) {
+                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/tags/${post.pixivTags?.[i]}/artworks`, "_blank", "noreferrer")}>{post.pixivTags[i]}</button>)
+            }
+        }
+        if (jsx.length) {
+            return <div className="tag-pixtag-button-container" style={{justifyContent: "center"}}>{jsx}</div>
+        } else {
+            return null
+        }
+    }
+
     return (
         <>
         <TitleBar post={post} unverified={true} goBack={true}/>
@@ -288,6 +302,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                         <Carousel images={images} set={set} index={order-1} unverified={true}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
+                    {generatePixivTagsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} 
                     artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} 
                     tags={tagCategories.tags} meta={tagCategories.meta} tagGroups={tagGroupCategories}/> : null}

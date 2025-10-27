@@ -482,6 +482,7 @@ const PostPage: React.FunctionComponent = () => {
                 englishCommentary: post.englishCommentary,
                 bookmarks: post.bookmarks,
                 buyLink: post.buyLink,
+                pixivTags: post.pixivTags,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
             }
         }
@@ -561,6 +562,20 @@ const PostPage: React.FunctionComponent = () => {
                 </button>
             </div>
         )
+    }
+
+    const generatePixivTagsJSX = () => {
+        let jsx = [] as React.ReactElement[]
+        if (post?.pixivTags?.[0]) {
+            for (let i = 0; i < post.pixivTags.length; i++) {
+                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/tags/${post.pixivTags?.[i]}/artworks`, "_blank", "noreferrer")}>{post.pixivTags[i]}</button>)
+            }
+        }
+        if (jsx.length) {
+            return <div className="tag-pixtag-button-container" style={{justifyContent: "center"}}>{jsx}</div>
+        } else {
+            return null
+        }
     }
 
     const generateActiveFavgroupJSX = () => {
@@ -682,6 +697,7 @@ const PostPage: React.FunctionComponent = () => {
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
+                    {generatePixivTagsJSX()}
                     {generateActiveFavgroupJSX()}
                     {post && parentPost ? <Parent post={parentPost}/>: null}
                     {post && childPosts.length ? <Children posts={childPosts}/> : null}

@@ -100,6 +100,7 @@ const EditPostPage: React.FunctionComponent = () => {
     const [sourceLink, setSourceLink] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourceBuyLink, setSourceBuyLink] = useState("")
+    const [sourcePixivTags, setSourcePixivTags] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
@@ -166,6 +167,7 @@ const EditPostPage: React.FunctionComponent = () => {
         setSourceLink(post.source || "")
         setSourceBookmarks(String(post.bookmarks) || "")
         setSourceBuyLink(post.buyLink || "")
+        setSourcePixivTags(post.pixivTags?.join(", ") || "")
         const parentPost = await functions.http.get("/api/post/parent", {postID}, session, setSessionFlag)
         if (parentPost) setParentID(parentPost.parentID)
 
@@ -252,7 +254,7 @@ const EditPostPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, rating, style, sourceTitle, sourceArtist, sourceCommentary, sourceEnglishCommentary, sourceMirrors, sourceEnglishTitle,
-    sourceLink, sourceBookmarks, sourceBuyLink, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
+    sourceLink, sourceBookmarks, sourceBuyLink, sourcePixivTags, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -352,6 +354,7 @@ const EditPostPage: React.FunctionComponent = () => {
         setSourceLink("")
         setSourceBookmarks("")
         setSourceBuyLink("")
+        setSourcePixivTags("")
         setRawTags("")
         setDanbooruLink("")
         setArtists([{}])
@@ -826,6 +829,7 @@ const EditPostPage: React.FunctionComponent = () => {
                 commentary: sourceCommentary,
                 englishCommentary: sourceEnglishCommentary,
                 bookmarks: functions.util.safeNumber(sourceBookmarks),
+                pixivTags: sourcePixivTags.trim() ? sourcePixivTags.split(",") : null,
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -911,6 +915,7 @@ const EditPostPage: React.FunctionComponent = () => {
             setSourceCommentary(sourceLookup.source.commentary)
             setSourceEnglishCommentary(sourceLookup.source.englishCommentary)
             setSourceBookmarks(sourceLookup.source.bookmarks)
+            setSourcePixivTags(sourceLookup.source.pixivTags.join(", "))
             setSourceDate(sourceLookup.source.posted)
             setSourceMirrors(sourceLookup.source.mirrors)
             if (!sourceLookup.source.title && !sourceLookup.source.artist && !sourceLookup.source.source) {
@@ -1596,8 +1601,8 @@ const EditPostPage: React.FunctionComponent = () => {
                     <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">{i18n.labels.buyLink}: </span>
-                    <input className="upload-input-wide2" type="url" value={sourceBuyLink} onChange={(event) => setSourceBuyLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <span className="upload-text">{i18n.labels.pixivTags}: </span>
+                    <input className="upload-input-wide2" type="url" value={sourcePixivTags} onChange={(event) => setSourcePixivTags(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.commentary}: </span>
@@ -1616,6 +1621,10 @@ const EditPostPage: React.FunctionComponent = () => {
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">{i18n.labels.buyLink}: </span>
+                    <input className="upload-input-wide2" type="url" value={sourceBuyLink} onChange={(event) => setSourceBuyLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <span className="upload-heading">{i18n.tag.artist}</span>

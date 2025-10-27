@@ -131,6 +131,7 @@ export interface SourceLookup {
         commentary: string
         englishCommentary: string
         bookmarks: string
+        pixivTags: string[]
         posted: string
         mirrors: string
     }

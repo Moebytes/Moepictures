@@ -80,6 +80,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 englishCommentary: props.postHistory.englishCommentary,
                 bookmarks: props.postHistory.bookmarks,
                 buyLink: props.postHistory.buyLink,
+                pixivTags: props.postHistory.pixivTags,
                 mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
             }
         }
@@ -417,6 +418,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}: </span>{props.postHistory.bookmarks || "?"}</span>)
+        }
+        if ((!prevHistory && props.postHistory.pixivTags) || changes.pixivTags) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}: </span>{props.postHistory.pixivTags?.join(", ") || i18n.labels.none}</span>)
         }
         if ((!prevHistory && props.postHistory.buyLink) || changes.buyLink) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}: </span>{props.postHistory.buyLink || i18n.labels.none}</span>)

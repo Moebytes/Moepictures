@@ -451,6 +451,9 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.bookmarks) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.bookmarks}:</span> {newPost.bookmarks || "?"}</span>)
         }
+        if (changes.pixivTags) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.pixivTags}:</span> {newPost.pixivTags?.join(", ") || i18n.labels.none}</span>)
+        }
         if (changes.buyLink) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.buyLink}:</span> {newPost.buyLink || i18n.labels.none}</span>)
         }

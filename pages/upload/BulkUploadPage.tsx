@@ -410,6 +410,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     commentary: sourceData.source.commentary,
                     englishCommentary: sourceData.source.englishCommentary,
                     bookmarks: functions.util.safeNumber(sourceData.source.bookmarks),
+                    pixivTags: sourceData.source.pixivTags,
                     buyLink: "",
                     mirrors: sourceData.source.mirrors
                 },
