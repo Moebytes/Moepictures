@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
-useFlagActions, useInteractionActions, useThemeSelector} from "../../store"
+useFlagActions, useInteractionActions, useThemeSelector, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
 import "./styles/tooltip.less"
 import pixiv from "../../assets/icons/pixiv.png"
@@ -51,6 +51,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {tooltipX, tooltipY, tooltipEnabled, tooltipPost} = useInteractionSelector()
     const {setEnableDrag, setToolTipEnabled} = useInteractionActions()
+    const {setActionBanner} = useActiveActions()
     const [tags, setTags] = useState([] as MiniTag[])
     const [artist, setArtist] = useState(null as MiniTag | null)
     const scrollRef = useRef<HTMLDivElement>(null)
@@ -188,11 +189,24 @@ const ToolTip: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const copyTags = (removeDashes?: boolean, commas?: boolean) => {
-        let tagArr = [artist?.tag || "", ...tags.map((t) => t.tag)]
-        if (removeDashes) tagArr = tagArr.map((t) => t.replaceAll("-", " "))
-        navigator.clipboard.writeText(commas ? tagArr.join(", ") : tagArr.join(" "))
-        //setActionBanner("copy-tags")
+    const copyTags = (event: React.MouseEvent) => {
+        event.preventDefault()
+        let combined = [artist?.tag || "", ...tags.map((t) => t.tag)]
+        let commas = false
+        let replaceDash = false 
+        let danbooru = false
+        if (event.shiftKey) {
+            commas = false
+            replaceDash = true
+            danbooru = true
+        } else if (event.button === 2) {
+            commas = true
+            replaceDash = true
+        }
+        let replacer = danbooru ? "_" : " "
+        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", replacer))
+        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        setActionBanner("copy-tags")
     }
 
     if (selectionMode) return null
@@ -260,7 +274,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
-                    <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
+                    <img className="tooltip-img-small" src={tagIcon} onClick={copyTags} onContextMenu={copyTags}/>
                 </div>
                 <div className="tooltip-artist-container">
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
