@@ -1,0 +1,34 @@
+import {Scraper} from "@the-convocation/twitter-scraper"
+// @ts-ignore
+import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
+import {SourceExtractor} from "./SourceExtractor"
+
+let twitter: Scraper
+
+try {
+    twitter = new Scraper({fetch: cycleTLSFetch})
+} catch (e) {
+    console.log(e)
+}
+
+export class TwitterExtractor extends SourceExtractor {
+    public matches = (url: string) => {
+        return /twitter\.com/.test(url) || /x\.com/.test(url)
+    }
+
+    public extractImages = async (url: string) => {
+        const id = url.match(/(?<=status\/)\d+/)?.[0] || ""
+        const tweet = await twitter.getTweet(id)
+        if (!tweet) throw new Error("bad tweet")
+        let images = [] as Buffer[]
+        for (let i = 0; i < tweet.photos.length; i++) {
+            const response = await this.fetchBuffer(tweet.photos[i].url)
+            images.push(response)
+        }
+        for (let i = 0; i < tweet.videos.length; i++) {
+            const response = await this.fetchBuffer(tweet.videos[i].url || tweet.videos[i].preview)
+            images.push(response)
+        }
+        return images
+    }
+}

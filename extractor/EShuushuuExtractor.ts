@@ -1,0 +1,15 @@
+import {SourceExtractor} from "./SourceExtractor"
+
+export class EShuushuuExtractor extends SourceExtractor {
+    public matches = (url: string) => {
+        return /e-shuushuu\.net/.test(url)
+    }
+
+    public extractImages = async (url: string) => {
+        const html = await this.fetchText(url)
+        const imagePart = html.match(/(\/images\/).*?(?=")/gm)?.[0]
+        const image = `https://e-shuushuu.net${imagePart}`
+        const buffer = await this.fetchBuffer(image)
+        return [buffer]
+    }
+}
