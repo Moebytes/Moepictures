@@ -1,4 +1,3 @@
-import axios from "axios"
 import path from "path"
 import localforage from "localforage"
 import functions from "./Functions"
@@ -13,15 +12,15 @@ export default class HTTPFunctions {
     public static lockManager = {} as {[key: string]: Promise<any> | null}
 
     public static fetch = async (link: string, headers?: any) => {
-        return axios.get(link, {headers}).then((r) => r.data) as Promise<any>
+        return window.fetch(link, {headers}).then((r) => r.json())
     }
 
     public static getBuffer = async (link: string, headers?: any) => {
-        return axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers}).then((r) => r.data) as Promise<ArrayBuffer>
+        return window.fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
     }
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
-        if (this.privateKey) return
+        if (this.privateKey) return this.privateKey
         if (this.clientKeyLock) await functions.timeout(1000 + Math.random() * 1000)
         if (!this.privateKey) {
             this.clientKeyLock = true
@@ -38,16 +37,18 @@ export default class HTTPFunctions {
                 this.privateKey = keys.privateKey
             }
         }
+        return this.privateKey
     }
 
     public static updateServerPublicKey = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
-        if (this.serverPublicKey) return
+        if (this.serverPublicKey) return this.serverPublicKey
         if (this.serverKeyLock) await functions.timeout(1000 + Math.random() * 1000)
         if (!this.serverPublicKey) {
             this.serverKeyLock = true
             const response = await functions.http.post("/api/server-key", null, session, setSessionFlag)
             this.serverPublicKey = response.publicKey
         }
+        return this.serverPublicKey
     }
 
     public static arrayBufferToJSON = (arrayBuffer: ArrayBuffer) => {
@@ -77,13 +78,12 @@ export default class HTTPFunctions {
 
         try {
             let response: any
+            let parsedURL = functions.util.parseURLParams(endpoint, params)
             if (noLock) {
-                response = await axios.get(endpoint, {params: params, headers, 
-                withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+                response = await window.fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
             } else {
                 if (!this.lockManager[endpoint]) {
-                    this.lockManager[endpoint] = axios.get(endpoint, {params: params, headers, 
-                    withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+                    this.lockManager[endpoint] = window.fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
                 }
                 response = await this.lockManager[endpoint]
                 this.lockManager[endpoint] = null
@@ -107,9 +107,13 @@ export default class HTTPFunctions {
 
     public static post = async <T extends string>(endpoint: T, data: PostEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": session.csrfToken}
+        const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
-            const response = await axios.post(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
+            let body = data ? JSON.stringify(data) : null
+            let response = await window.fetch(endpoint, {method: "POST", headers, credentials: "include", body}).then((r) => r.text())
+            try {
+                response = JSON.parse(response)
+            } catch {}
             return response as PostEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
@@ -118,9 +122,13 @@ export default class HTTPFunctions {
 
     public static put = async <T extends string>(endpoint: T, data: PutEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": session.csrfToken}
+        const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
-            const response = await axios.put(endpoint, data as any, {headers, withCredentials: true}).then((r) => r.data)
+            let body = data ? JSON.stringify(data) : null
+            let response = await window.fetch(endpoint, {method: "PUT", headers, credentials: "include", body}).then((r) => r.text())
+            try {
+                response = JSON.parse(response)
+            } catch {}
             return response as PutEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
@@ -131,7 +139,11 @@ export default class HTTPFunctions {
         setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken}
         try {
-            const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
+            const parsedURL = functions.util.parseURLParams(endpoint, params)
+            let response = await window.fetch(parsedURL, {method: "DELETE", headers, credentials: "include"}).then((r) => r.text())
+            try {
+                response = JSON.parse(response)
+            } catch {}
             return response as DeleteEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
@@ -149,7 +161,7 @@ export default class HTTPFunctions {
             }
             return files
         } catch {
-            const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.arrayBuffer())
+            const response = await window.fetch(link, {headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link) + ".png")
             return [file]
@@ -166,13 +178,13 @@ export default class HTTPFunctions {
     }
 
     public static linkExists = async (link: string) => {
-        const response = await fetch(link, {method: "HEAD"}).then((r) => r.status)
+        const response = await window.fetch(link, {method: "HEAD"}).then((r) => r.status)
         return response !== 404
     }
 
     public static followRedirect = async (link: string) => {
-        const redirect = await axios.head(link).then((r) => r.request.res.responseUrl)
-        return redirect as string
+        const response = await window.fetch(link, {method: "HEAD", redirect: "follow"})
+        return response.url
     }
 
     public static followRedirects = async (link: string) => {
@@ -182,7 +194,7 @@ export default class HTTPFunctions {
         while (true) {
             redirects.push(currentLink)
 
-            const response = await fetch(currentLink, {redirect: "manual"})
+            const response = await window.fetch(currentLink, {redirect: "manual"})
             const location = response.headers.get("location")
             if (!location) break
 

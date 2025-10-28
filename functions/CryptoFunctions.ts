@@ -34,12 +34,8 @@ export default class CryptoFunctions {
 
     public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
         if (permissions.noEncryption(session)) return img
-        let privateKey = functions.http.privateKey
-        let serverPublicKey = functions.http.serverPublicKey
-        if (!privateKey) await functions.http.updateClientKeys(session)
-        if (!serverPublicKey) await functions.http.updateServerPublicKey(session)
-        privateKey = functions.http.privateKey
-        serverPublicKey = functions.http.serverPublicKey
+        let privateKey = await functions.http.updateClientKeys(session)
+        let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (!cacheKey) cacheKey = img
         const cached = functions.cache.cachedThumbs.get(cacheKey)
@@ -96,12 +92,8 @@ export default class CryptoFunctions {
 
     public static decryptItem = async (img: string, session: Session, cacheKey?: string) => {
         if (permissions.noEncryption(session)) return img
-        let privateKey = functions.http.privateKey
-        let serverPublicKey = functions.http.serverPublicKey
-        if (!privateKey) await functions.http.updateClientKeys(session)
-        if (!serverPublicKey) await functions.http.updateServerPublicKey(session)
-        privateKey = functions.http.privateKey
-        serverPublicKey = functions.http.serverPublicKey
+        let privateKey = await functions.http.updateClientKeys(session)
+        let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (!cacheKey) cacheKey = img
         const cached = functions.cache.cachedImages.get(cacheKey)
@@ -131,12 +123,8 @@ export default class CryptoFunctions {
 
     public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: Session) => {
         if (permissions.noEncryption(session)) return buffer
-        let privateKey = functions.http.privateKey
-        let serverPublicKey = functions.http.serverPublicKey
-        if (!privateKey) await functions.http.updateClientKeys(session)
-        if (!serverPublicKey) await functions.http.updateServerPublicKey(session)
-        privateKey = functions.http.privateKey
-        serverPublicKey = functions.http.serverPublicKey
+        let privateKey = await functions.http.updateClientKeys(session)
+        let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (functions.file.isVideo(imageLink)) {
             return buffer

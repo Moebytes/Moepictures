@@ -1,5 +1,4 @@
 import functions from "./Functions"
-import axios from "axios"
 import {Session, Image} from "../types/Types"
 
 export default class LinkFunctions {
@@ -145,7 +144,7 @@ export default class LinkFunctions {
     }
 
     public static linkToBase64 = async (link: string) => {
-        const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
+        const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
         if (!arrayBuffer.byteLength) return ""
         const buffer = Buffer.from(arrayBuffer)
         let mime = functions.byte.bufferFileType(arrayBuffer)[0]?.mime || "image/jpeg"

@@ -1,9 +1,24 @@
 import enLocale from "../assets/locales/en.json"
-import axios from "axios"
 import path from "path"
 import {UploadImage} from "../types/Types"
 
 export default class UtilFunctions {
+    public static parseURLParams = (url: string, params?: object | null) => {
+        if (!params) return url
+        const parsed = url.startsWith("http") ? new URL(url) : new URL(url, window.location.origin)
+        Object.entries(params).forEach(([key, value]) => {
+            parsed.searchParams.delete(key)
+            if (value === undefined || value === null) return
+
+            if (Array.isArray(value)) {
+                value.forEach((v) => parsed.searchParams.append(key, String(v)))
+            } else {
+                parsed.searchParams.set(key, String(value))
+            }
+        })
+        return parsed.toString()
+    }
+
     public static appendURLParams = (url: string, params: {[key: string]: string | boolean | undefined}) => {
         if (!url) return ""
         const [baseUrl, hash] = url.split("#")
@@ -98,7 +113,7 @@ export default class UtilFunctions {
     }
 
     public static getFile = async (filepath: string) => {
-        const blob = await axios.get(filepath, {responseType: "blob"}).then((r) => r.data)
+        const blob = await fetch(filepath).then((r) => r.blob())
         const name = path.basename(filepath).replace(".mp3", "").replace(".wav", "").replace(".flac", "").replace(".ogg", "")
         // @ts-ignore
         blob.lastModifiedDate = new Date()

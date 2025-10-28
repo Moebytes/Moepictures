@@ -27,7 +27,6 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import bitcoin from "../../assets/icons/bitcoin.png"
 import "./styles/premiumpage.less"
-import axios from "axios"
 
 const PaymentButton: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

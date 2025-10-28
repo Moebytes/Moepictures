@@ -36,7 +36,7 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         const decryptedImg = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
         const bufferTest = await fetch(decryptedImg).then((r) => r.arrayBuffer())
         const result = functions.byte.bufferFileType(bufferTest)
-        if (result[0].mime !== "application/json") {
+        if (result?.[0].mime !== "application/json") {
             setImg(decryptedImg)
         } else {
             const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)

@@ -94,14 +94,14 @@ const ImageSourceDialog: React.FunctionComponent = () => {
         return (
             <>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <span className="dialog-text">{i18n.labels.directLink}: </span>
+                <span className="dialog-text" style={{textWrap: "nowrap"}}>{i18n.labels.directLink}: </span>
                 <input className="dialog-input" type="text" spellCheck={false} value={directLink} onChange={(event) => setDirectLink(event.target.value)}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-validation">{i18n.dialogs.imageSource.reminder}</span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <span className="dialog-text">{i18n.labels.altSource}: </span>
+                <span className="dialog-text" style={{textWrap: "nowrap"}}>{i18n.labels.altSource}: </span>
                 <input className="dialog-input" type="text" spellCheck={false} value={altSource} onChange={(event) => setAltSource(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
