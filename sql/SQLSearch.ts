@@ -319,9 +319,10 @@ export default class SQLSearch {
 
     /** Search search. */
     public static searchSource = async (source: string, type: string, rating: string, style: string, sort: string, 
-        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
-        let condition = `(posts."source" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%')`
-        const {postJSON, values} = 
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, negate?: boolean) => {
+        let condition = `(COALESCE(posts."source", '') LIKE '%' || $1 || '%' OR COALESCE(posts."mirrors"::text, '') LIKE '%' || $1 || '%')`
+        if (negate) condition = `NOT ${condition}`
+        const {postJSON, values, countJSON, countValues} = 
         SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
         limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
@@ -334,11 +335,15 @@ export default class SQLSearch {
             values: [source]
         }
         if (values?.[0]) query.values?.push(...values)
+        let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query)
         } else {
-            return SQLQuery.run(query, `search/source/${source}`) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query, `search/source/${source}`)
         }
+        const count = await SQLQuery.search.count(countJSON, [source, ...countValues])
+        result.forEach((r) => r.postCount = count)
+        return result
     }
 
     /** Search format. */

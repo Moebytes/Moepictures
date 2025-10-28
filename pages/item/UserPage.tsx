@@ -226,7 +226,7 @@ const UserPage: React.FunctionComponent = () => {
     const viewUploads = () => {
         if (!user) return
         navigate("/posts")
-        setSearch(`uploads:${user.username}`)
+        setSearch(`user:${user.username}`)
         setSearchFlag(true)
     }
 

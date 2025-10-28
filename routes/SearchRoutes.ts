@@ -38,14 +38,16 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validation.validStyle(style, true)) return void res.status(400).send("Invalid style")
             if (!functions.validation.validSort(sort)) return void res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
-            for (let i = 0; i < tags?.length; i++) {
-                const tag = await sql.tag.tag(tags[i])
+            const qualities = functions.tag.mapSpecialQualities(query)
+            const cleanTags = functions.tag.trimSpecialCharacters(query)?.split(/ +/g)
+            for (let i = 0; i < cleanTags?.length; i++) {
+                const tag = await sql.tag.tag(cleanTags[i])
                 if (!tag) {
-                    const alias = await sql.tag.alias(tags[i])
-                    if (alias) tags[i] = alias.tag
-                    if (!alias && functions.util.isJapaneseText(tags[i])) {
-                        const pixivTag = await sql.tag.tagFromPixivTag(tags[i])
-                        if (pixivTag) tags[i] = pixivTag.tag
+                    const alias = await sql.tag.alias(cleanTags[i])
+                    if (alias) tags[i] = qualities[i] + alias.tag
+                    if (!alias && functions.util.isJapaneseText(cleanTags[i])) {
+                        const pixivTag = await sql.tag.tagFromPixivTag(cleanTags[i])
+                        if (pixivTag) tags[i] = qualities[i] + pixivTag.tag
                     }
                 }
             }
@@ -81,9 +83,10 @@ const SearchRoutes = (app: Express) => {
             } else if (query.startsWith("twitter:") || query.includes("twitter.com") || query.includes("x.com")) {
                 const twitterID = query.match(/(\d{10,})/g)?.[0] || ""
                 result = await sql.search.searchTwitterID(twitterID, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
-            } else if (query.startsWith("source:") || query.startsWith("http")) {
-                const source = query.replace("source:", "").trim()
-                result = await sql.search.searchSource(source, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
+            } else if (query.startsWith("source:") || query.startsWith("-source:") || query.startsWith("http")) {
+                const negate = query.startsWith("-source:")
+                const source = query.replace("-source:", "").replace("source:", "").trim()
+                result = await sql.search.searchSource(source, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username, negate)
             } else if (query.startsWith("format:")) {
                 const format = query.replace("format:", "").trim()
                 result = await sql.search.searchFormat(format, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
@@ -99,8 +102,8 @@ const SearchRoutes = (app: Express) => {
                 const user = await sql.user.user(username as string)
                 if (!user?.publicFavorites) return void res.status(403).send("Unauthorized")
                 result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
-            } else if (query.startsWith("uploads:")) {
-                const username = query.replace("uploads:", "").trim()
+            } else if (query.startsWith("user:")) {
+                const username = query.replace("user:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user) return void res.status(400).send("Bad username")
                 result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)

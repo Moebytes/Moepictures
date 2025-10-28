@@ -152,6 +152,16 @@ export default class TagFunctions {
         return tags.map((tag) => ({tag})) as UploadTag[]
     }
 
+    public static mapSpecialQualities = (query: string) => {
+        return query?.trim().split(/ +/g).map((item) => {
+            if (item.startsWith("+-")) return "+-"
+            if (item.startsWith("+")) return "+"
+            if (item.startsWith("-")) return "-"
+            if (item.startsWith("*")) return "*"
+            return ""
+        })
+    }
+
     public static trimSpecialCharacters = (query: string) => {
         return query?.trim().split(/ +/g).map((item) => {
             if (item.startsWith("+-")) return item.replace("+-", "")

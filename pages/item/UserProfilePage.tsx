@@ -476,7 +476,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const viewUploads = () => {
         navigate("/posts")
-        setSearch(`uploads:${session.username}`)
+        setSearch(`user:${session.username}`)
         setSearchFlag(true)
     }
 

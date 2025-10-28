@@ -1262,7 +1262,7 @@
                     "favorites:user": " - Search for favorites of the user (if public).",
                     "favgroup:user:name": " - Search for favgroup of a user (if public).",
                     "group:name": " - Search for a group by its name.",
-                    "uploads:user": " - Search for uploads of a user.",
+                    "user:user": " - Search for uploads of a user.",
                     "history:user": "- Get your search history (only works on yourself!)",
                     "comments:user": " - (Comments page) get all comments by the user.",
                     "notes:user": " - (Notes page) get all notes by the user.",
