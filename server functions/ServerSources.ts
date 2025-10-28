@@ -41,7 +41,7 @@ export default class ServerSources {
         const pixivID = pixivLink.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
         try {
-            const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+            const result = await functions.http.getJSON(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
             if (result.length) {
                 danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                 if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
@@ -125,7 +125,7 @@ export default class ServerSources {
             if (redirect.includes("t.co")) continue
             try {
                 let cleaned = redirect.replace("/photo/1", "")
-                const result = await functions.http.fetch(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`)
+                const result = await functions.http.getJSON(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`)
                 if (result.length) {
                     danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                     if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
@@ -226,7 +226,7 @@ export default class ServerSources {
         let sourceLinks = [] as {link: string, hash: string}[]
 
         let id = source.match(/\d+/)?.[0]
-        let danbooruPost = await functions.http.fetch(`https://danbooru.donmai.us/posts/${id}.json`)
+        let danbooruPost = await functions.http.getJSON(`https://danbooru.donmai.us/posts/${id}.json`)
         if (danbooruPost.rating === "q") rating = functions.highestRating(rating, functions.r17())
         if (danbooruPost.rating === "e") rating = functions.highestRating(rating, functions.r18())
 
@@ -243,7 +243,7 @@ export default class ServerSources {
             if (regexCheck !== "i/web") artist = regexCheck
         }
 
-        let commentaries = await functions.http.fetch(`https://danbooru.donmai.us/artist_commentaries.json?commit=Search&search[post_id]=${id}`)
+        let commentaries = await functions.http.getJSON(`https://danbooru.donmai.us/artist_commentaries.json?commit=Search&search[post_id]=${id}`)
         if (commentaries[0]) {
             title = commentaries[0].original_title
             commentary = commentaries[0].original_description

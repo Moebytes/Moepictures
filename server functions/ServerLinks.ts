@@ -84,7 +84,7 @@ export default class ServerLinks {
 
         let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
         if (danbooruLink) {
-            const json = await functions.http.fetch(`${danbooruLink}.json`)
+            const json = await functions.http.getJSON(`${danbooruLink}.json`)
             if (json.rating === "q") rating = functions.highestRating(rating, functions.r17())
             if (json.rating === "e") rating = functions.highestRating(rating, functions.r18())
             tagData.tags = json.tag_string_general
@@ -97,7 +97,7 @@ export default class ServerLinks {
         if (!Object.keys(tagData).length && gelbooruLink) {
             let id = gelbooruLink.match(/\d+/g)?.[0]
             let url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&id=${id}&json=1${process.env.GELBOORU_API_KEY}`
-            const json = await functions.http.fetch(url)
+            const json = await functions.http.getJSON(url)
             let post = json.post[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())
@@ -113,7 +113,7 @@ export default class ServerLinks {
         if (!Object.keys(tagData).length && safebooruLink) {
             let id = safebooruLink.match(/\d+/g)?.[0]
             let url = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${id}`
-            const json = await functions.http.fetch(url)
+            const json = await functions.http.getJSON(url)
             let post = json[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())

@@ -11,12 +11,12 @@ export default class HTTPFunctions {
     public static serverKeyLock = false
     public static lockManager = {} as {[key: string]: Promise<any> | null}
 
-    public static fetch = async (link: string, headers?: any) => {
-        return window.fetch(link, {headers}).then((r) => r.json())
+    public static getJSON = async (link: string, headers?: any) => {
+        return fetch(link, {headers}).then((r) => r.json())
     }
 
     public static getBuffer = async (link: string, headers?: any) => {
-        return window.fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+        return fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
     }
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
@@ -80,10 +80,10 @@ export default class HTTPFunctions {
             let response: any
             let parsedURL = functions.util.parseURLParams(endpoint, params)
             if (noLock) {
-                response = await window.fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+                response = await fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
             } else {
                 if (!this.lockManager[endpoint]) {
-                    this.lockManager[endpoint] = window.fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+                    this.lockManager[endpoint] = fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
                 }
                 response = await this.lockManager[endpoint]
                 this.lockManager[endpoint] = null
@@ -110,7 +110,7 @@ export default class HTTPFunctions {
         const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
             let body = data ? JSON.stringify(data) : null
-            let response = await window.fetch(endpoint, {method: "POST", headers, credentials: "include", body}).then((r) => r.text())
+            let response = await fetch(endpoint, {method: "POST", headers, credentials: "include", body}).then((r) => r.text())
             try {
                 response = JSON.parse(response)
             } catch {}
@@ -125,7 +125,7 @@ export default class HTTPFunctions {
         const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
             let body = data ? JSON.stringify(data) : null
-            let response = await window.fetch(endpoint, {method: "PUT", headers, credentials: "include", body}).then((r) => r.text())
+            let response = await fetch(endpoint, {method: "PUT", headers, credentials: "include", body}).then((r) => r.text())
             try {
                 response = JSON.parse(response)
             } catch {}
@@ -140,7 +140,7 @@ export default class HTTPFunctions {
         const headers = {"x-csrf-token": session.csrfToken}
         try {
             const parsedURL = functions.util.parseURLParams(endpoint, params)
-            let response = await window.fetch(parsedURL, {method: "DELETE", headers, credentials: "include"}).then((r) => r.text())
+            let response = await fetch(parsedURL, {method: "DELETE", headers, credentials: "include"}).then((r) => r.text())
             try {
                 response = JSON.parse(response)
             } catch {}
@@ -161,7 +161,7 @@ export default class HTTPFunctions {
             }
             return files
         } catch {
-            const response = await window.fetch(link, {headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.arrayBuffer())
+            const response = await fetch(link, {headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link) + ".png")
             return [file]
@@ -178,12 +178,12 @@ export default class HTTPFunctions {
     }
 
     public static linkExists = async (link: string) => {
-        const response = await window.fetch(link, {method: "HEAD"}).then((r) => r.status)
+        const response = await fetch(link, {method: "HEAD"}).then((r) => r.status)
         return response !== 404
     }
 
     public static followRedirect = async (link: string) => {
-        const response = await window.fetch(link, {method: "HEAD", redirect: "follow"})
+        const response = await fetch(link, {method: "HEAD", redirect: "follow"})
         return response.url
     }
 
@@ -194,7 +194,7 @@ export default class HTTPFunctions {
         while (true) {
             redirects.push(currentLink)
 
-            const response = await window.fetch(currentLink, {redirect: "manual"})
+            const response = await fetch(currentLink, {redirect: "manual"})
             const location = response.headers.get("location")
             if (!location) break
 
