@@ -129,8 +129,10 @@ const ReaderPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         setLoaded(false)
-        loadImages()
-    }, [postID, session])
+        setTimeout(() => {
+            loadImages()  
+        }, 200)
+    }, [postID, session, session.upscaledImages])
 
     useEffect(() => {
         const updateTitle = async () => {

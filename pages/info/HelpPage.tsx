@@ -538,6 +538,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <a className="help-link" onClick={() => openLink("https://twitter.com/")}>Twitter</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.deviantart.com/")}>Deviantart</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.artstation.com/")}>Artstation</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://skeb.jp/")}>Skeb</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.reddit.com/")}>Reddit</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.tumblr.com/")}>Tumblr</a><br/>
                     <a className="help-link" onClick={() => openLink("https://imgur.com/")}>Imgur</a><br/>

@@ -302,8 +302,8 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedShowBigPlayer) setShowBigPlayer(savedShowBigPlayer === "true")
         if (savedReaderHorizontal) setReaderHorizontal(savedReaderHorizontal === "true")
         if (savedReaderThumbnails) setReaderThumbnails(savedReaderThumbnails === "true")
+        if (savedReaderZoom && Number(savedReaderZoom) !== 100) setReaderZoom(Number(savedReaderZoom))
         if (savedReaderInvert) setReaderInvert(savedReaderInvert === "true")
-        if (savedReaderZoom) setReaderZoom(Number(savedReaderZoom))
         if (savedUserImg) setUserImg(savedUserImg)
     }, [])
 

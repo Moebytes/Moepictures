@@ -112,7 +112,7 @@ const UserPage: React.FunctionComponent = () => {
     }
 
     const updateFavgroups = async () => {
-        const favgroups = await functions.http.get("/api/user/favgroups", null, session, setSessionFlag)
+        const favgroups = await functions.http.get("/api/user/favgroups", null, session, setSessionFlag).catch(() => [])
         setFavgroups(favgroups)
     }
 
