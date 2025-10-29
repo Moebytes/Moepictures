@@ -103,7 +103,7 @@ export default class ServerFunctions {
 
     public static sendEncrypted = (data: any, req: Request, res: Response) => {
         if (req.session.apiKey) return res.status(200).send(data)
-        if (permissions.noEncryption(req.session)) return res.status(200).send(data)
+        if (permissions.noAPIEncryption(req.session)) return res.status(200).send(data)
         if (!req.session.publicKey) return res.status(401).send("No public key")
         const encrypted = encryption.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)

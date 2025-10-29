@@ -57,9 +57,12 @@ export default class Permissions {
     }
 
     public static noEncryption = (session: ServerSession) => {
-        // if (Permissions.isAdmin(session)) return true
-        // Disable encryption for now due to poor performance
+        // Disable image encryption for now due to poor performance
         return true
+    }
+
+    public static noAPIEncryption = (session: ServerSession) => {
+        return false
     }
 
     public static isPremiumEnabled = () => {
