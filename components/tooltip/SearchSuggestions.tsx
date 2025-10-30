@@ -96,7 +96,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
 
         let suggestions = [] as TagCount[]
         for (const tagCount of tagCounts) {
-            if (tagCount.tag.toLowerCase().startsWith(searchString)) suggestions.push(tagCount)
+            if (tagCount.tag.toLowerCase().includes(searchString)) suggestions.push(tagCount)
             if (suggestions.length >= 100) break
         }
 
@@ -104,7 +104,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             const newQuery = query.split(/ +/g).slice(-1).join("")
             if (!newQuery) return setSuggestions([])
             for (const tagCount of tagCounts) {
-                if (tagCount.tag.toLowerCase().startsWith(newQuery)) suggestions.push(tagCount)
+                if (tagCount.tag.toLowerCase().includes(newQuery)) suggestions.push(tagCount)
                 if (suggestions.length >= 100) break
             }
         }
