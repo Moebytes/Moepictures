@@ -15,7 +15,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     const {addFavgroupPostObj} = useGroupDialogSelector()
     const {setAddFavgroupPostObj} = useGroupDialogActions()
     const {setGroupFlag} = useFlagActions()
-    const [postID, setPostID] = useState("")
+    const [postIDs, setPostIDs] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
@@ -40,15 +40,15 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
 
     const addPost = async () => {
         if (!addFavgroupPostObj) return
-        if (!postID) {
+        if (!postIDs) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostID
+            errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostIDs
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.http.post("/api/favgroup/update", {postID, name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
         setAddFavgroupPostObj(null)
+        await functions.http.post("/api/favgroup/update", {postIDs: postIDs.split(/ +/g), name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
         setGroupFlag(true)
     }
 
@@ -70,8 +70,8 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.dialogs.addFavgroupPost.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.labels.postID}: </span>
-                            <input className="dialog-input-taller" type="text" spellCheck={false} value={postID} onChange={(event) => setPostID(event.target.value)} style={{width: "50%"}}/>
+                            <span className="dialog-text">{i18n.labels.postIDs}: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={postIDs} onChange={(event) => setPostIDs(event.target.value)} style={{width: "50%"}}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">

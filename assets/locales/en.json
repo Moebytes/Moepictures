@@ -483,6 +483,7 @@
         "attachFiles": "Attach Files",
         "sendMessage": "Send Message",
         "postID": "Post ID",
+        "postIDs": "Post IDs",
         "featured": "Featured Post",
         "edits": "Edits",
         "overlay": "Overlay",
@@ -1009,7 +1010,7 @@
             "title": "Edit Favorite Group"
         },
         "addFavgroupPost": {
-            "title": "Add Favorite Group Post"
+            "title": "Add Favorite Group Posts"
         },
         "editGroup": {
             "title": "Edit Group",
@@ -1018,10 +1019,10 @@
             "noName": "No name."
         },
         "addGroupPost": {
-            "title": "Add Group Post",
+            "title": "Add Group Posts",
             "request": "Add Group Post Request",
-            "noPostID": "No post ID.",
-            "banText": "You are banned. Cannot add post."
+            "noPostIDs": "No post IDs.",
+            "banText": "You are banned. Cannot add posts."
         },
         "editSaveSearch": {
             "title": "Edit Saved Search",

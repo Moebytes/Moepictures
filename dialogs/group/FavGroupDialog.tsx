@@ -66,7 +66,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
 
     const addFavGroup = async () => {
         if (!favGroupID) return
-        await functions.http.post("/api/favgroup/update", {postID: favGroupID, name, isPrivate}, session, setSessionFlag)
+        await functions.http.post("/api/favgroup/update", {postIDs: [favGroupID], name, isPrivate}, session, setSessionFlag)
         setFavGroupID(null)
         setSessionFlag(true)
     }

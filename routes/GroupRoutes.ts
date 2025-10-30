@@ -84,17 +84,19 @@ export const addToGroup = async (post: PostFull, name: string, username: string,
 const GroupRoutes = (app: Express) => {
     app.post("/api/group", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            let {postID, name, username, date} = req.body as GroupParams
-            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            let {postIDs, name, username, date} = req.body as GroupParams
             if (!name) return void res.status(400).send("Invalid name")
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
-            const post = await sql.post.post(postID)
-            if (!post) return void res.status(400).send("Invalid post")
-            let targetUser = req.session.username
-            if (username && permissions.isMod(req.session)) targetUser = username
-            if (!date) date = new Date().toISOString()
-            await addToGroup(post, name, targetUser, date)
+            for (const postID of postIDs) {
+                if (Number.isNaN(Number(postID))) continue
+                const post = await sql.post.post(postID)
+                if (!post) continue
+                let targetUser = req.session.username
+                if (username && permissions.isMod(req.session)) targetUser = username
+                if (!date) date = new Date().toISOString()
+                await addToGroup(post, name, targetUser, date)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

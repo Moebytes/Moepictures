@@ -57,9 +57,7 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
 
     const bulkFavGroup = async () => {
         if (!selectionMode) return setBulkFavGroupDialog(false)
-        for (const postID of selectionItems.values()) {
-            await functions.http.post("/api/favgroup/update", {postID, name, isPrivate}, session, setSessionFlag)
-        }
+        await functions.http.post("/api/favgroup/update", {postIDs: Array.from(selectionItems.values()), name, isPrivate}, session, setSessionFlag)
         setBulkFavGroupDialog(false)
         setSelectionMode(false)
         setTimeout(() => {

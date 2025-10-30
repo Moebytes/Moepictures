@@ -49,7 +49,7 @@ export interface GroupItem {
 }
 
 export interface GroupParams {
-    postID: string
+    postIDs: string[]
     name: string
     username?: string
     date?: string

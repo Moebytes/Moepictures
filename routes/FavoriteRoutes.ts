@@ -68,25 +68,27 @@ const FavoriteRoutes = (app: Express) => {
 
     app.post("/api/favgroup/update", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, name, isPrivate} = req.body as FavgroupUpdateParams
-            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            const {postIDs, name, isPrivate} = req.body as FavgroupUpdateParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
-            const post = await sql.post.post(postID)
-            if (!post) return void res.status(400).send("Invalid post")
-            const slug = functions.post.generateSlug(name)
-            const favgroupID = await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
-            try {
-                const favgroup = await sql.favorite.favgroup(req.session.username, slug)
-                if (!favgroup) {
-                    await sql.favorite.insertFavgroupPost(favgroupID, postID, 1)
-                } else {
-                    if (!favgroup.posts?.length) favgroup.posts = [{order: 0}] as any
-                    const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
-                    let newRating = functions.reduceHighestRating(favgroup.posts)
-                    await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
-                    await sql.favorite.insertFavgroupPost(favgroup.favgroupID, postID, maxOrder + 1)
-                }
-            } catch {}
+            for (const postID of postIDs) {
+                if (Number.isNaN(Number(postID))) continue
+                const post = await sql.post.post(postID)
+                if (!post) continue
+                const slug = functions.post.generateSlug(name)
+                const favgroupID = await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
+                try {
+                    const favgroup = await sql.favorite.favgroup(req.session.username, slug)
+                    if (!favgroup) {
+                        await sql.favorite.insertFavgroupPost(favgroupID, postID, 1)
+                    } else {
+                        if (!favgroup.posts?.length) favgroup.posts = [{order: 0}] as any
+                        const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
+                        let newRating = functions.reduceHighestRating(favgroup.posts)
+                        await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
+                        await sql.favorite.insertFavgroupPost(favgroup.favgroupID, postID, maxOrder + 1)
+                    }
+                } catch {}
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

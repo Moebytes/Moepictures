@@ -32,7 +32,7 @@ export interface FavgroupSearch extends Favgroup {
 }
 
 export interface FavgroupUpdateParams {
-    postID: string
+    postIDs: string[]
     name: string
     isPrivate: boolean
 }

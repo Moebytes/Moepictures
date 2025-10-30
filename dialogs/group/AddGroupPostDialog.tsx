@@ -15,7 +15,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
     const {addGroupPostObj} = useGroupDialogSelector()
     const {setAddGroupPostObj} = useGroupDialogActions()
     const {setGroupFlag} = useFlagActions()
-    const [postID, setPostID] = useState("")
+    const [postIDs, setPostIDs] = useState("")
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -43,15 +43,15 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
     const addPost = async () => {
         if (!addGroupPostObj) return
         if (permissions.isContributor(session)) {
-            if (!postID) {
+            if (!postIDs) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostID
+                errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostIDs
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.http.post("/api/group", {postID, name: addGroupPostObj.slug}, session, setSessionFlag)
             setAddGroupPostObj(null)
+            await functions.http.post("/api/group", {postIDs: postIDs.split(/ +/g), name: addGroupPostObj.slug}, session, setSessionFlag)
             setGroupFlag(true)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
@@ -63,14 +63,14 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            if (!postID) {
+            if (!postIDs) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostID
+                errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostIDs
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.http.post("/api/group/request", {postID, name: addGroupPostObj.slug, reason}, session, setSessionFlag)
+            await functions.http.post("/api/group/request", {postID: postIDs.split(/ +/g)[0], name: addGroupPostObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -118,8 +118,8 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-title">{i18n.dialogs.addGroupPost.title}</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">{i18n.labels.postID}: </span>
-                                <input className="dialog-input-taller" type="text" spellCheck={false} value={postID} onChange={(event) => setPostID(event.target.value)} style={{width: "50%"}}/>
+                                <span className="dialog-text">{i18n.labels.postIDs}: </span>
+                                <input className="dialog-input-taller" type="text" spellCheck={false} value={postIDs} onChange={(event) => setPostIDs(event.target.value)} style={{width: "50%"}}/>
                             </div>
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
@@ -152,7 +152,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                         </> : <>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.postID}: </span>
-                            <input className="dialog-input-taller" type="text" spellCheck={false} value={postID} onChange={(event) => setPostID(event.target.value)} style={{width: "50%"}}/>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={postIDs} onChange={(event) => setPostIDs(event.target.value)} style={{width: "50%"}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.reason}: </span>

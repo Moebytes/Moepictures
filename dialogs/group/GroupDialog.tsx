@@ -74,7 +74,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.http.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
+            await functions.http.post("/api/group", {postIDs: [groupPostID], name}, session, setSessionFlag)
             setGroupPostID(null)
             setPostFlag(groupPostID)
         } else {

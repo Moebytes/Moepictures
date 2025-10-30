@@ -53,9 +53,7 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
     const bulkGroup = async () => {
         if (!permissions.isContributor(session)) return setBulkGroupDialog(false)
         if (!selectionMode) return setBulkGroupDialog(false)
-        for (const postID of selectionItems.values()) {
-            await functions.http.post("/api/group", {postID, name}, session, setSessionFlag)
-        }
+        await functions.http.post("/api/group", {postIDs: Array.from(selectionItems.values()), name}, session, setSessionFlag)
         setBulkGroupDialog(false)
         setSelectionMode(false)
         setTimeout(() => {
