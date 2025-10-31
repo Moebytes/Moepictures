@@ -467,6 +467,28 @@
     background-color: var(--editBG);
 }
 
+.ReactCrop__crop-selection {
+    position: absolute;
+}
+
+.avatar-crop > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-crop {
+    cursor: inherit;
+    position: relative;
+    width: max-content;
+    height: max-content;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
 @media screen and (max-width: 500px) {
     .dialog-box {
         width: 350px;

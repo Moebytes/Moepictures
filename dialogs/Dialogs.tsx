@@ -50,6 +50,7 @@ import PermaDeletePostDialog from "./post/PermaDeletePostDialog"
 import PostInfoDialog from "./post/PostInfoDialog"
 import PrivatePostDialog from "./post/PrivatePostDialog"
 import RevertPostHistoryDialog from "./post/RevertPostHistoryDialog"
+import SetAvatarDialog from "./post/SetAvatarDialog"
 import SourceEditDialog from "./post/SourceEditDialog"
 import SplitPostDialog from "./post/SplitPostDialog"
 import TagEditDialog from "./post/TagEditDialog"
@@ -140,6 +141,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <PostInfoDialog/>
         <PrivatePostDialog/>
         <RevertPostHistoryDialog/>
+        <SetAvatarDialog/>
         <SourceEditDialog/>
         <SplitPostDialog/>
         <TagEditDialog/>

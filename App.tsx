@@ -47,7 +47,6 @@ import UnverifiedPostPage from "./pages/item/UnverifiedPostPage"
 import functions from "./functions/Functions"
 import ModQueuePage from "./pages/search/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/upload/EditUnverifiedPostPage"
-import SetAvatarPage from "./pages/item/SetAvatarPage"
 import NoteHistoryPage from "./pages/history/NoteHistoryPage"
 import ForumPage from "./pages/search/ForumPage"
 import ForumPostsPage from "./pages/search/ForumPostsPage"
@@ -330,7 +329,6 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/unverified/post/:id" element={<UnverifiedPostPage/>}/>
                 <Route path="/edit-post/:id/:slug" element={<EditPostPage/>}/>
                 <Route path="/unverified/edit-post/:id" element={<EditUnverifiedPostPage/>}/>
-                <Route path="/set-avatar/:id/:slug" element={<SetAvatarPage/>}/>
                 <Route path="/help" element={<HelpPage/>}/>
                 <Route path="/forum" element={<ForumPage/>}/>
                 <Route path="/posts/:username" element={<ForumPostsPage/>}/>

@@ -119,7 +119,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
     const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
     const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
     const {setActionBanner} = useActiveActions()
@@ -896,8 +896,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const triggerSetAvatar = () => {
         if (!props.post) return
-        window.scrollTo(0, 0)
-        navigate(`/set-avatar/${props.post.postID}/${props.post.slug}`)
+        setAvatarID({post: props.post, order: props.order || 1, unverified: props.unverified})
     }
 
     const postHistory = () => {

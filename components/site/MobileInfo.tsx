@@ -85,7 +85,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -444,8 +444,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const triggerSetAvatar = () => {
         if (!props.post) return
-        window.scrollTo(0, 0)
-        navigate(`/set-avatar/${props.post.postID}/${props.post.slug}`)
+        setAvatarID({post: props.post, order: props.order || 1, unverified: props.unverified})
     }
 
     const triggerTagEdit = () => {
