@@ -463,7 +463,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (loaded) {
             const searchParams = new URLSearchParams(window.location.search)
-            searchParams.delete("loaded")
             navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
         }
     }, [loaded])
@@ -472,6 +471,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (manualHistoryChange) return
         const searchParams = new URLSearchParams(window.location.search)
         if (search) searchParams.set("query", search)
+    }, [search])
+
+    useEffect(() => {
+        if (manualHistoryChange) return
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(page))
         if (!searchParams.toString()) return
         if (replace) {
@@ -480,7 +484,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, search, page])
+    }, [scroll, page])
 
     const maxPage = () => {
         if (!posts?.length) return 1

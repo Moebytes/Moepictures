@@ -246,6 +246,10 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(artistsPage || ""))
         if (replace) {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
@@ -253,7 +257,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, artistsPage])
+    }, [scroll, artistsPage])
 
     useEffect(() => {
         if (artists?.length) {

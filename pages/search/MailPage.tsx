@@ -287,6 +287,10 @@ const MailPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(mailPage || ""))
         if (replace) {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
@@ -294,7 +298,7 @@ const MailPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, mailPage])
+    }, [scroll, mailPage])
 
     useEffect(() => {
         if (messages?.length) {

@@ -253,6 +253,10 @@ const GroupsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(groupsPage || ""))
         if (replace) {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
@@ -260,7 +264,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, groupsPage])
+    }, [scroll, groupsPage])
 
     useEffect(() => {
         if (groups?.length) {

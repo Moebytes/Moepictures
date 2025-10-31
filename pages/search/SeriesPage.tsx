@@ -247,6 +247,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(seriesPage || ""))
         if (replace) {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
@@ -254,7 +258,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, seriesPage])
+    }, [scroll, seriesPage])
 
     useEffect(() => {
         if (series?.length) {

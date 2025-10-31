@@ -266,6 +266,10 @@ const CommentsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(commentsPage || ""))
         if (commentID) searchParams.set("comment", String(commentID))
         if (replace) {
@@ -274,7 +278,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, commentsPage, commentID])
+    }, [scroll, commentsPage, commentID])
 
     const onCommentJump = async (commentID: number) => {
         let index = -1

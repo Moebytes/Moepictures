@@ -253,6 +253,10 @@ const ForumPostsPage: React.FunctionComponent = () => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
+    }, [searchQuery])
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
         if (!scroll) searchParams.set("page", String(forumPostsPage || ""))
         if (replace) {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
@@ -260,7 +264,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
         } else {
             if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, searchQuery, forumPostsPage])
+    }, [scroll, forumPostsPage])
 
     useEffect(() => {
         if (forumPosts?.length) {
