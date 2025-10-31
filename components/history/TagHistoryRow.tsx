@@ -78,8 +78,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             image = Object.values(bytes)
         }
         await functions.http.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
-        aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
-        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, wikipedia: props.tagHistory.wikipedia, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false,
+        aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, danbooruTag: props.tagHistory.danbooruTag, 
+        social: props.tagHistory.social, twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, 
+        wikipedia: props.tagHistory.wikipedia, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false, 
         featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             navigate(`/tag/history/${props.tagHistory.key}`)
@@ -377,6 +378,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (props.tagHistory.pixivTags?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}: </span>{props.tagHistory.pixivTags.join(", ")}</span>)
             }
+        }
+        if ((!prevHistory && props.tagHistory.danbooruTag) || changes.danbooruTag) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.danbooruTag}: </span>{props.tagHistory.danbooruTag}</span>)
         }
         if ((!prevHistory && props.tagHistory.featuredPost) || changes.featuredPost) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.featured}: </span>{props.tagHistory.featuredPost?.postID}</span>)

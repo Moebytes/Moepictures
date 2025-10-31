@@ -65,7 +65,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 }
             }
             await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
-            implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
+            implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
             wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             setSubmitted(true)
         }
@@ -284,6 +284,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             <div className="dialog-row">
                 <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags?.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
             </div></> : null}
+            <div className="dialog-row">
+                <span className="dialog-text">{i18n.labels.danbooruTag}: </span>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.danbooruTag ?? ""} onChange={(event) => setEditTagObj({...editTagObj, danbooruTag: event.target.value})} style={{width: "max-content"}}/>
+            </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.reason}: </span>
                 <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason || ""} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>

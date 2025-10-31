@@ -69,21 +69,20 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], 
-        implications: string[], social: string, twitter: string, website: string, fandom: string, wikipedia: string) => {
+    const editTag = async (request: TagEditRequest) => {
         let bytes = null as number[] | ["delete"] | null
-        if (image) {
-            if (image === "delete") {
+        if (request.image) {
+            if (request.image === "delete") {
                 bytes = ["delete"]
             } else {
-                const parts = image.split("/")
+                const parts = request.image.split("/")
                 const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
                 const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
-        await functions.http.put("/api/tag/edit", {tag, key, description, image: bytes!, aliases, implications, social, twitter, website, fandom, wikipedia}, session, setSessionFlag)
-        await functions.http.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
+        await functions.http.put("/api/tag/edit", {...request, tag: request.tag, key: request.key, image: bytes!, featuredPost: request.featuredPost?.postID, r18: request.r18!}, session, setSessionFlag)
+        await functions.http.post("/api/tag/edit/request/fulfill", {username: request.username, tag: request.tag, image: request.image, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
@@ -355,6 +354,13 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 jsx.push(<span className="mod-post-text">{i18n.labels.newPixivTags}: {newTag.pixivTags?.[0] ? newTag.pixivTags.join(", ") : i18n.labels.none}</span>)
             }
         }
+        if (changes.danbooruTag) {
+            if (showOldTag && oldTag) {
+                jsx.push(<span className="mod-post-text">{i18n.labels.oldDanbooruTag}: {oldTag.danbooruTag ?? i18n.labels.none}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">{i18n.labels.newDanbooruTag}: {newTag.danbooruTag ?? i18n.labels.none}</span>)
+            }
+        }
         if (changes.website) {
             if (showOldTag && oldTag) {
                 jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website!, "_blank")}>{i18n.labels.oldWebsite}: {oldTag.website || i18n.labels.none}</span>)
@@ -472,8 +478,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, 
-                            request.image!, request.aliases, request.implications, request.social!, request.twitter!, request.website!, request.fandom!, request.wikipedia!)}>
+                        <div className="mod-post-options-container" onClick={() => editTag(request)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>

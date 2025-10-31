@@ -183,6 +183,7 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "fandom" text,
     "wikipedia" text,
     "pixivTags" text[],
+    "danbooruTag" text,
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "banned" boolean,
     "hidden" boolean,
@@ -202,6 +203,7 @@ CREATE TABLE IF NOT EXISTS "unverified tags" (
     "fandom" text,
     "wikipedia" text,
     "pixivTags" text[],
+    "danbooruTag" text,
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
@@ -556,6 +558,7 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "fandom" text,
     "wikipedia" text,
     "pixivTags" text[],
+    "danbooruTag" text,
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,
@@ -667,6 +670,7 @@ CREATE TABLE IF NOT EXISTS "tag history" (
     "fandom" text,
     "wikipedia" text,
     "pixivTags" text[],
+    "danbooruTag" text,
     "featuredPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "imageChanged" boolean,
     "changes" jsonb,

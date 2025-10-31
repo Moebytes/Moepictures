@@ -171,7 +171,7 @@ export default class ServerTags {
     public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
         let tagArr = [] as string[]
         let blockedTags = tagConvert.blockedTags
-        let tagReplaceMap = tagConvert.tagReplaceMap
+        let tagReplaceMap = await sql.tag.tagReplaceMap()
         let artists = [{}] as UploadTag[]
         let characters = [{}] as UploadTag[]
         let series = [{}] as UploadTag[]
@@ -198,17 +198,24 @@ export default class ServerTags {
         rating = newRating
 
         if (Object.keys(tagData).length) {
-            tagArr = tagData.tags.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            tagArr = tagData.tags.split(" ")
+            let artistStrArr = tagData.artists.split(" ")
+            let charStrArr = tagData.characters.split(" ")
+            let seriesStrArr = tagData.series.split(" ")
+
+            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            artistStrArr = artistStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            charStrArr = charStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            seriesStrArr = seriesStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+            artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+
             tagArr.push("autotags")
             if (hasUpscaled) tagArr.push("upscaled")
-            let artistStrArr = tagData.artists.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-            let charStrArr = tagData.characters.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-            let seriesStrArr = tagData.series.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
-            if (seriesStrArr?.includes("original")) {
-                charStrArr = ["original"]
-                seriesStrArr = ["no-series"]
-            }
-
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
@@ -224,14 +231,10 @@ export default class ServerTags {
             if (current.name.includes("comic") && type === "image")  type = "comic"
             if (tagArr.includes("comic") && type === "image")  type = "comic"
             if (current.name.includes("r18")) rating = functions.r18()
-
-            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
-            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                const key = Object.keys(tagReplaceMap)[i]
-                const value = Object.values(tagReplaceMap)[i]
-                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            if (seriesStrArr?.includes("original")) {
+                charStrArr = ["original"]
+                seriesStrArr = ["no-series"]
             }
-            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
@@ -249,10 +252,6 @@ export default class ServerTags {
                 tagArr.push("patreon")
                 tagArr.push("paid-content-available")
             }
-
-            artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-            charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-            seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
 
             let charTest = charStrArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
             if (charTest.length > 1) {
@@ -305,6 +304,14 @@ export default class ServerTags {
             let tagArr = result.tags
             let characterArr = result.characters
 
+            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            characterArr = characterArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
+            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
+
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
@@ -321,21 +328,13 @@ export default class ServerTags {
             if (tagArr.includes("comic") && type === "image")  type = "comic"
             if (current.name.includes("r18")) rating = functions.r18()
 
-            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
-            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                const key = Object.keys(tagReplaceMap)[i]
-                const value = Object.values(tagReplaceMap)[i]
-                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
-            }
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
-            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
             tagArr.push("autotags")
             tagArr.push("needscheck")
             if (hasUpscaled) tagArr.push("upscaled")
-
             const isTransparent = await serverFunctions.util.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
             if (current.name.includes("text")) tagArr.push("untranslated")
@@ -344,21 +343,15 @@ export default class ServerTags {
                 tagArr.push("fanbox")
                 tagArr.push("paid-content-available")
             }
+
             if (current.name.includes("patreon")) {
                 tagArr.push("patreon")
                 tagArr.push("paid-content-available")
             }
 
-            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
-            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
-                const key = Object.keys(tagReplaceMap)[i]
-                const value = Object.values(tagReplaceMap)[i]
-                characterArr = characterArr.map((tag: string) => tag.replaceAll(key, value))
-            }
             for (let i = 0; i < blockedTags.length; i++) {
                 characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
-            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
 
             let charTest = characterArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
             if (charTest.length > 1) {

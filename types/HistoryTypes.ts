@@ -103,6 +103,7 @@ export interface TagChanges {
     aliases?: Array<Alias | null>
     implications?: Array<Implication | null>
     pixivTags?: string[] | null
+    danbooruTag?: string | null
     website?: string | null
     social?: string | null
     twitter?: string | null
@@ -133,6 +134,7 @@ export interface TagHistory {
     aliases: string[]
     implications: string[]
     pixivTags: string[] | null
+    danbooruTag: string | null
     r18: boolean | null
     reason: string | null
     imageChanged: boolean

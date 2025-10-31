@@ -82,7 +82,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
-            let result = await sql.tag.tagCounts(tags.filter(Boolean))
+            let result = await sql.tag.tagCounts(tags?.filter(Boolean) ?? [])
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag) => !tag.hidden)
             }
@@ -171,7 +171,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, 
+            let {tag, key, type, description, image, aliases, implications, pixivTags, danbooruTag, social, twitter, 
             website, fandom, wikipedia, r18, featuredPost, reason, updater, updatedDate, silent} = req.body as TagEditParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
@@ -238,6 +238,9 @@ const TagRoutes = (app: Express) => {
             }
             if (pixivTags !== undefined) {
                 await sql.tag.updateTag(tag, "pixivTags", pixivTags)
+            }
+            if (danbooruTag !== undefined) {
+                await sql.tag.updateTag(tag, "danbooruTag", danbooruTag)
             }
             if (description !== undefined) {
                 await sql.tag.updateTag(tag, "description", description)
@@ -374,7 +377,7 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: vanilla.tag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
                     description: vanilla.description, aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), pixivTags: functions.util.filterNulls(vanilla.pixivTags), 
-                    website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, wikipedia: vanilla.wikipedia, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
+                    website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, wikipedia: vanilla.wikipedia, danbooruTag: vanilla.danbooruTag, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.link.getTagHistoryPath(key, 2, imageFilename)
@@ -385,7 +388,7 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.util.filterNulls(updatedAliases), implications: functions.util.filterNulls(updatedImplications), pixivTags: functions.util.filterNulls(updated.pixivTags), 
-                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
+                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, danbooruTag: updated.danbooruTag, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
                 imageChanged: imgChange, changes, reason})
             } else {
                 if (image?.[0] && imageFilename) {
@@ -409,8 +412,8 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: imageFilename, imageHash: updated.imageHash,
                 description: updated.description, aliases: functions.util.filterNulls(updatedAliases), implications: functions.util.filterNulls(updatedImplications), pixivTags: functions.util.filterNulls(updated.pixivTags), 
-                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, r18: updated.r18, featuredPost: updated.featuredPost?.postID,
-                imageChanged: imgChange, changes, reason})
+                website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, wikipedia: updated.wikipedia, danbooruTag: updated.danbooruTag, 
+                r18: updated.r18, featuredPost: updated.featuredPost?.postID, imageChanged: imgChange, changes, reason})
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -652,7 +655,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, website, 
+            let {tag, key, type, description, image, aliases, implications, pixivTags, danbooruTag, social, twitter, website, 
             fandom, wikipedia, r18, featuredPost, reason} = req.body as TagEditRequestParams
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!tag) return void res.status(400).send("Bad tag")
@@ -664,6 +667,7 @@ const TagRoutes = (app: Express) => {
             if (aliases === undefined) aliases = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
             if (implications === undefined) implications = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
             if (pixivTags === undefined) pixivTags = tagObj.pixivTags
+            if (danbooruTag === undefined) danbooruTag = tagObj.danbooruTag
             if (social === undefined) social = tagObj.social
             if (twitter === undefined) twitter = tagObj.twitter
             if (website === undefined) website = tagObj.website
@@ -690,12 +694,12 @@ const TagRoutes = (app: Express) => {
             let featuredObj = null as Post | null
             if (featuredPost) featuredObj = await sql.post.post(featuredPost) ?? null
             const changes = functions.compare.parseTagChanges(tagObj, {tag: key, type, description, aliases, implications, 
-            pixivTags, website, social, twitter, fandom, wikipedia, featuredObj, r18} as unknown as Tag)
+            pixivTags, danbooruTag, website, social, twitter, fandom, wikipedia, featuredObj, r18} as unknown as Tag)
             aliases = aliases?.[0] ? aliases : []
             implications = implications?.[0] ? implications : []
             pixivTags = pixivTags?.[0] ? pixivTags : []
-            await sql.request.insertTagEditRequest(req.session.username, tag, key, type, description, imagePath, imageHash, aliases, implications, pixivTags, social, 
-            twitter, website, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason)
+            await sql.request.insertTagEditRequest(req.session.username, tag, key, type, description, imagePath, imageHash, aliases, 
+            implications, pixivTags, danbooruTag, social, twitter, website, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -862,8 +866,8 @@ const TagRoutes = (app: Express) => {
                 tag: "tag", type: "type", image: "image", imageHash: "imageHash", 
                 description: "description", updater: "updater", updatedDate: "updatedDate",
                 website: "website", social: "social", twitter: "twitter", fandom: "fandom", 
-                wikipedia: "wikipedia", pixivTags: "pixivTags", featuredPost: "featuredPost", 
-                banned: "banned", hidden: "hidden", r18: "r18"
+                wikipedia: "wikipedia", pixivTags: "pixivTags", danbooruTag: "danbooruTag",
+                featuredPost: "featuredPost", banned: "banned", hidden: "hidden", r18: "r18"
             }
             
             await sql.tag.updateTag(tag, columns[column], value)

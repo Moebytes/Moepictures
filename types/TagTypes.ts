@@ -3,7 +3,7 @@ TagHistory} from "./Types"
 
 export type TagUpdateColumns = "tag" | "type" | "image" | "imageHash" | "description" |
 "updater" | "updatedDate" | "website" | "social" | "twitter" | "fandom" | "wikipedia" | 
-"pixivTags" | "featuredPost" | "banned" | "hidden" | "r18"
+"pixivTags" | "danbooruTag" | "featuredPost" | "banned" | "hidden" | "r18"
 
 export interface MiniTag {
     tag: string
@@ -77,6 +77,7 @@ export interface Tag {
     aliases: Array<Alias | null>
     implications: Array<Implication | null>
     pixivTags: string[] | null
+    danbooruTag: string | null
     r18: boolean | null
 }
 
@@ -194,6 +195,7 @@ export interface TagEditParams {
     aliases?: string[]
     implications?: string[]
     pixivTags?: string[] | null
+    danbooruTag?: string | null
     website?: string | null
     social?: string | null
     twitter?: string | null

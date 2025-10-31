@@ -139,13 +139,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         }
         try {
             await functions.http.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
-            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
+            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter,
             website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
-                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
+                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: props.tag.tag, failed: "implication"})
             } else {
@@ -172,6 +172,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias || "") : [],
             implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication || "s") : [],
             pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
+            danbooruTag: props.tag.danbooruTag,
             type: props.tag.type,
             social: props.tag.social,
             twitter: props.tag.twitter,

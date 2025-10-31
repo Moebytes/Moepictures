@@ -179,6 +179,9 @@ export default class CompareFunctions {
         if (JSON.stringify(oldTag.pixivTags?.filter(Boolean)) !== JSON.stringify(newTag.pixivTags?.filter(Boolean))) {
             json.pixivTags = newTag.pixivTags
         }
+        if (oldTag.danbooruTag !== newTag.danbooruTag) {
+            json.danbooruTag = newTag.danbooruTag
+        }
         if (oldTag.website !== newTag.website) {
             json.website = newTag.website
         }

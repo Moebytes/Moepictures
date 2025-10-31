@@ -26,13 +26,13 @@ export default class SQLTag {
     /** Insert a new tag (all populated fields). */
     public static insertTagFromData = async (data: Tag) => {
         const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, wikipedia, pixivTags, banned, hidden, r18, featuredPost} = data
+            twitter, fandom, wikipedia, pixivTags, danbooruTag, banned, hidden, r18, featuredPost} = data
         const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", 
-            "updater", "updatedDate", "website", "social", "twitter", "fandom", "wikipedia", "pixivTags", "banned", "hidden", "r18", 
-            "featuredPost") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+            "updater", "updatedDate", "website", "social", "twitter", "fandom", "wikipedia", "pixivTags", "danbooruTag", "banned", 
+            "hidden", "r18", "featuredPost") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
             values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, 
-            twitter, fandom, wikipedia, pixivTags, banned, hidden, r18, featuredPost]
+            twitter, fandom, wikipedia, pixivTags, danbooruTag, banned, hidden, r18, featuredPost]
         }
         try {
             await SQLQuery.run(query)
@@ -124,7 +124,7 @@ export default class SQLTag {
     /** Update a tag. */
     public static updateTag = async (tag: string, column: TagUpdateColumns, value: string | boolean | string[] | null) => {
         let whitelist = ["tag", "type", "image", "imageHash", "description", "updater", "updatedDate", "website", 
-            "social", "twitter", "fandom", "wikipedia", "pixivTags", "featuredPost", "banned", "hidden", "r18"]
+            "social", "twitter", "fandom", "wikipedia", "pixivTags", "danbooruTag", "featuredPost", "banned", "hidden", "r18"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -790,5 +790,17 @@ export default class SQLTag {
             values
         }
         await SQLQuery.run(query)
+    }
+
+    public static tagReplaceMap = async () => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    SELECT json_object_agg(tags."danbooruTag", tags."tag") AS tag_map
+                    FROM tags
+                    WHERE tags."danbooruTag" IS NOT NULL
+            `)
+        }
+        const result = await SQLQuery.run(query)
+        return result[0].tag_map as {[key: string]: string}
     }
 }

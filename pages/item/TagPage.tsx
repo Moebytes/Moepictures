@@ -251,7 +251,7 @@ const TagPage: React.FunctionComponent = () => {
         }
         try {
             await functions.http.put("/api/tag/edit", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description,
-            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, 
+            image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag,
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, 
             r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
@@ -259,7 +259,7 @@ const TagPage: React.FunctionComponent = () => {
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
-                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
+                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
@@ -290,6 +290,7 @@ const TagPage: React.FunctionComponent = () => {
             implications: tag.implications?.[0] ? tag.implications.map((i: Implication | string | null) => 
             typeof i === "string" ? i : i?.implication || "") : [],
             pixivTags: tag.pixivTags?.[0] ? tag.pixivTags : [],
+            danbooruTag: tag.danbooruTag,
             type: tag.type,
             social: tag.social,
             twitter: tag.twitter,

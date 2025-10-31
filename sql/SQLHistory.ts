@@ -6,20 +6,20 @@ import {TagHistory, PostHistory, NoteHistory, GroupHistory, SearchHistory, MiniT
 export default class SQLHistory {
     /** Insert tag history */
     public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string | null, 
-        imageHash: string | null, description: string, aliases: string[], implications: string[], pixivTags: string[], website: string | null, 
-        social: string | null, twitter: string | null, fandom: string | null, wikipedia: string | null, r18: boolean | null, featuredPost: string | undefined | null, imageChanged: boolean, 
-        changes: any, reason?: string | null}) => {
-        const {username, tag, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
+        imageHash: string | null, description: string, aliases: string[], implications: string[], pixivTags: string[], danbooruTag: string | null, 
+        website: string | null, social: string | null, twitter: string | null, fandom: string | null, wikipedia: string | null, r18: boolean | null, 
+        featuredPost: string | undefined | null, imageChanged: boolean, changes: any, reason?: string | null}) => {
+        const {username, tag, key, type, image, imageHash, description, aliases, implications, pixivTags, danbooruTag, website, social, 
         twitter, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "imageHash", "description", 
-            "aliases", "implications", "pixivTags", "website", "social", "twitter", "fandom", "wikipedia", "r18", "featuredPost", "imageChanged", 
-            "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) 
+            "aliases", "implications", "pixivTags", "danbooruTag", "website", "social", "twitter", "fandom", "wikipedia", "r18", "featuredPost", "imageChanged", 
+            "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22) 
             RETURNING "historyID"`,
             rowMode: "array",
-            values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, 
-            twitter, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason]
+            values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, danbooruTag, 
+            website, social, twitter, fandom, wikipedia, r18, featuredPost, imageChanged, changes, reason]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
