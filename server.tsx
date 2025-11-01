@@ -202,7 +202,7 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(404).end()
         }
         if (post) {
-          let matches = false
+          let matches = req.path.includes("history/post")
           for (const image of post.images) {
             if (image.pixelHash === pixelHash) matches = true
           }
@@ -265,7 +265,7 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(404).end()
         }
         if (post) {
-          let matches = false
+          let matches = req.path.includes("history/post")
           for (const image of post.images) {
             if (image.pixelHash === pixelHash) matches = true
           }
@@ -451,7 +451,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         if (!permissions.isMod(req.session)) return res.status(404).end()
       }
       if (post) {
-        let matches = false
+        let matches = req.path.includes("history/post")
         for (const image of post.images) {
           if (image.pixelHash === pixelHash) matches = true
         }
