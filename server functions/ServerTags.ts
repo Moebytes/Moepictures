@@ -81,7 +81,7 @@ export default class ServerTags {
     }
 
     public static deleteTag = async (tag: Tag) => {
-        await serverFunctions.files.deleteFolder(`history/tag/${tag.tag}`, false).catch(() => null)
+        await serverFunctions.files.deleteFolder(`history/tag/${encodeURIComponent(tag.tag)}`, false).catch(() => null)
         if (tag.image) {
             await serverFunctions.files.deleteFile(functions.link.getTagPath(tag.type, tag.image), false).catch(() => null)
         }

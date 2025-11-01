@@ -184,25 +184,25 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.history.type === "alias") return (
             <span>
                 <span>{props.history.source}</span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.target}`)}> ⇢ {props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.target)}`)}> ⇢ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo alias") return (
             <span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source} ⇠ </span>
-                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.target}`)}>{props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.source)}`)}>{props.history.source} ⇠ </span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.target)}`)}>{props.history.target}</span>
             </span>
         )
         if (props.history.type === "implication") return (
             <span>
-                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source}</span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.target}`)}> ⇾ {props.history.target}</span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.source)}`)}>{props.history.source}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.target)}`)}> ⇾ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo implication") return (
             <span>
-                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${props.history.source}`)}>{props.history.source} ⇽ </span>
-                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${props.history.target}`)}>{props.history.target}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.source)}`)}>{props.history.source} ⇽ </span>
+                <span style={{cursor: "pointer"}} onClick={() => navigate(`/tag/${encodeURIComponent(props.history.target)}`)}>{props.history.target}</span>
             </span>
         )
     }

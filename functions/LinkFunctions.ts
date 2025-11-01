@@ -118,7 +118,7 @@ export default class LinkFunctions {
     }
 
     public static getTagHistoryPath = (tag: string, key: number, filename: string) => {
-        return `history/tag/${tag}/${key}/${filename}`
+        return `history/tag/${encodeURIComponent(tag)}/${key}/${filename}`
     }
 
     public static getTagLink = (folder: string, filename: string | null, hash: string | null) => {

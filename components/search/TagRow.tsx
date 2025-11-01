@@ -79,9 +79,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const tagPage = (event: React.MouseEvent) => {
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.tag.tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(props.tag.tag)}`, "_blank")
         } else {
-            navigate(`/tag/${props.tag.tag}`)
+            navigate(`/tag/${encodeURIComponent(props.tag.tag)}`)
         }
     }
 

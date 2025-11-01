@@ -26,9 +26,9 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const tagPage = (event: React.MouseEvent) => {
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.series.tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(props.series.tag)}`, "_blank")
         } else {
-            navigate(`/tag/${props.series.tag}`)
+            navigate(`/tag/${encodeURIComponent(props.series.tag)}`)
         }
     }
 

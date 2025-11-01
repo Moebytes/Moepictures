@@ -241,7 +241,7 @@ export default class TagFunctions {
           if (type === "series") tags = [{tag: "unknown-series"}]
         }
         tags = tags.filter(Boolean).map((t) => {
-          if (t.tag) t.tag = t.tag.toLowerCase().replace(/[^a-z0-9()]+/g, "-")
+          if (t.tag) t.tag = t.tag.toLowerCase().replace(/[^a-z0-9():><&!#@?]+/g, "-")
           return t
         })
         return tags
@@ -255,8 +255,12 @@ export default class TagFunctions {
           if (type === "series") tags = ["unknown-series"]
           if (type === "tags") tags = ["needs-tags"]
         }
-        tags = tags?.filter(Boolean).map((t) => t.toLowerCase().replace(/[^a-z0-9()]+/g, "-"))
+        tags = tags?.filter(Boolean).map((t) => t.toLowerCase().replace(/[^a-z0-9():><&!#@?]+/g, "-"))
         return tags || []
+    }
+
+    public static cleanTag = (tag: string) => {
+        return tag.normalize("NFD").replace(/[^a-z0-9_\-():><&!#@?]/gi, "").replaceAll("_", "-")
     }
 
     public static parseTagGroupsField = (tags: string[], tagGroups?: MiniTagGroup[] | TagGroupCategory[]) => {
@@ -273,10 +277,6 @@ export default class TagFunctions {
         let missingTags = tags.filter((tag) => !removeTags.includes(tag))
         resultStr += `${missingTags.join(" ")}`
         return resultStr
-    }
-
-    public static cleanTag = (tag: string) => {
-        return tag.normalize("NFD").replace(/[^a-z0-9_\-()><&!#@]/gi, "").replaceAll("_", "-")
     }
 
     public static appendOrphanTags = (tagGroups: TagGroupCategory[], tags?: MiniTag[]) => {

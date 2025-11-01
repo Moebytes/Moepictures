@@ -294,9 +294,9 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             if (request.fake) continue
             const openTag = (event: React.MouseEvent) => {
                 if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/tag/${request.tag}`, "_blank")
+                    window.open(`/tag/${encodeURIComponent(request.tag)}`, "_blank")
                 } else {
-                    navigate(`/tag/${request.tag}`)
+                    navigate(`/tag/${encodeURIComponent(request.tag)}`)
                 }
             }
             const img = functions.link.getTagLink(request.type, request.image, request.imageHash)

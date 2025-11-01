@@ -341,11 +341,12 @@ const TagRoutes = (app: Express) => {
                     } else {
                         const parts = tagHistory.image.split("/")
                         let keep = parts.slice(3).join("/")
-                        const newPath = `history/tag/${key.trim()}/${keep}`
+                        const newPath = `history/tag/${encodeURIComponent(key.trim())}/${keep}`
                         await sql.history.updateTagHistory(tagHistory.historyID, "image", newPath)
                     }
                 }
-                ServerFunctions.files.renameFolder(`history/tag/${tag}`, `history/tag/${key.trim()}`, false)
+                ServerFunctions.files.renameFolder(`history/tag/${encodeURIComponent(tag)}`, 
+                `history/tag/${encodeURIComponent(key.trim())}`, false)
                 await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
@@ -588,10 +589,10 @@ const TagRoutes = (app: Express) => {
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
             if (accepted) {
-                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${tag} has been approved. Thanks!`
+                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${encodeURIComponent(tag)} has been approved. Thanks!`
                 await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been approved", message)
             } else {
-                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
+                let message = `Tag deletion request on ${functions.config.getDomain()}/tag/${encodeURIComponent(tag)} has been rejected. This tag can stay up. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been rejected", message)
             }
             res.status(200).send("Success")
@@ -732,10 +733,10 @@ const TagRoutes = (app: Express) => {
             if (image) await serverFunctions.files.deleteUnverifiedFile(image)
             await sql.request.deleteTagEditRequest(username, tag)
             if (accepted) {
-                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
+                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${encodeURIComponent(tag)} has been approved. Thanks for the contribution!`
                 await serverFunctions.systemMessage(username, "Notice: Tag edit request has been approved", message)
             } else {
-                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
+                let message = `Tag edit request on ${functions.config.getDomain()}/tag/${encodeURIComponent(tag)} has been rejected. The original tag details can stay. Thanks!`
                 // await serverFunctions.systemMessage(username, "Notice: Tag edit request has been rejected", message)
             }
             res.status(200).send("Success")

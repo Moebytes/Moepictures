@@ -24,9 +24,9 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const tagPage = (event: React.MouseEvent) => {
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.character.tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(props.character.tag)}`, "_blank")
         } else {
-            navigate(`/tag/${props.character.tag}`)
+            navigate(`/tag/${encodeURIComponent(props.character.tag)}`)
         }
     }
 

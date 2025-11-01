@@ -359,9 +359,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!tag) return
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(tag)}`, "_blank")
         } else {
-            navigate(`/tag/${tag}`)
+            navigate(`/tag/${encodeURIComponent(tag)}`)
         }
         setTagToolTipEnabled(false)
     }

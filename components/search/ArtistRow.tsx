@@ -27,9 +27,9 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const tagPage = (event: React.MouseEvent) => {
         event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.artist.tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(props.artist.tag)}`, "_blank")
         } else {
-            navigate(`/tag/${props.artist.tag}`)
+            navigate(`/tag/${encodeURIComponent(props.artist.tag)}`)
         }
     }
 

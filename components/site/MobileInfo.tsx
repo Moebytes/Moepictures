@@ -141,7 +141,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.artists[i]) break
             const tagClick = () => {
                 if (!props.artists) return
-                navigate(`/tag/${props.artists[i].tag}`)
+                navigate(`/tag/${encodeURIComponent(props.artists[i].tag)}`)
             }
             const artistSocials = () => {
                 if (!props.artists) return
@@ -186,7 +186,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.characters[i]) break
             const tagClick = () => {
                 if (!props.characters) return
-                navigate(`/tag/${props.characters[i].tag}`)
+                navigate(`/tag/${encodeURIComponent(props.characters[i].tag)}`)
             }
             const characterSocials = () => {
                 if (!props.characters) return
@@ -221,7 +221,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.series[i]) break
             const tagClick = () => {
                 if (!props.series) return
-                navigate(`/tag/${props.series[i].tag}`)
+                navigate(`/tag/${encodeURIComponent(props.series[i].tag)}`)
             }
             const seriesSocials = () => {
                 if (!props.series) return
@@ -261,7 +261,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (!props.meta[i]) break
             const tagClick = () => {
                 if (!props.meta) return
-                navigate(`/tag/${props.meta[i].tag}`)
+                navigate(`/tag/${encodeURIComponent(props.meta[i].tag)}`)
             }
             jsx.push(
                 <div className="mobileinfo-row">
@@ -302,7 +302,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             for (let i = 0; i < currentTags.length; i++) {
                 if (!currentTags[i]) break
                 const tagClick = () => {
-                    navigate(`/tag/${currentTags[i].tag}`)
+                    navigate(`/tag/${encodeURIComponent(currentTags[i].tag)}`)
                 }
                 jsx.push(
                     <div className="mobileinfo-row">
@@ -325,7 +325,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
-                navigate(`/tag/${currentTags[i].tag}`)
+                navigate(`/tag/${encodeURIComponent(currentTags[i].tag)}`)
             }
             jsx.push(
                 <div className="mobileinfo-row">

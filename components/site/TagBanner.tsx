@@ -162,7 +162,7 @@ const TagBanner: React.FunctionComponent = (props) => {
             }
             const tagPage = (event: React.MouseEvent) => {
                 event.preventDefault()
-                navigate(`/tag/${bannerTag.tag}`)
+                navigate(`/tag/${encodeURIComponent(bannerTag.tag)}`)
             }
             jsx.push(
                 <div className="tagbanner-box" key={bannerTag.tag}>

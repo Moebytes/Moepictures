@@ -225,7 +225,7 @@ const ToolTip: React.FunctionComponent = (props) => {
             setSearch(artist.tag)
             setSearchFlag(true)
         } else {
-            navigate(`/tag/${artist.tag}`)
+            navigate(`/tag/${encodeURIComponent(artist.tag)}`)
         }
     }
 

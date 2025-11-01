@@ -60,7 +60,9 @@ const TagPage: React.FunctionComponent = () => {
     const [count, setCount] = useState(0)
     const navigate = useNavigate()
     const location = useLocation()
-    const {tag: tagName} = useParams() as {tag: string}
+    let {tag: tagName} = useParams() as {tag: string}
+
+    tagName = decodeURIComponent(tagName)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -255,7 +257,7 @@ const TagPage: React.FunctionComponent = () => {
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, 
             r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
-            navigate(`/tag/${editTagObj.key}`)
+            navigate(`/tag/${encodeURIComponent(editTagObj.key!)}`)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
@@ -394,7 +396,7 @@ const TagPage: React.FunctionComponent = () => {
                 if (!implication) continue
                 let implicationSpace = implication.replaceAll("-", " ")
                 if (i !== tag.implications.length - 1) implication += ", "
-                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${implication}`)}>{implicationSpace}</span>)
+                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${encodeURIComponent(implication)}`)}>{implicationSpace}</span>)
             }
         }
         if (jsx.length) {
@@ -415,7 +417,7 @@ const TagPage: React.FunctionComponent = () => {
             for (let i = 0; i < relatedTags.length; i++) {
                 let relatedTag = relatedTags[i].replaceAll("-", " ")
                 if (i !== relatedTags.length - 1) relatedTag += ", "
-                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${relatedTags[i]}`)}>{relatedTag}</span>)
+                jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${encodeURIComponent(relatedTags[i])}`)}>{relatedTag}</span>)
             }
         }
         if (jsx.length) {
@@ -460,7 +462,7 @@ const TagPage: React.FunctionComponent = () => {
         twitter: tag.twitter, website: tag.website, fandom: tag.fandom, wikipedia: tag.wikipedia, type: tag.type, featuredPost: tag.featuredPost?.postID,
         r18: tag.r18 ?? false}, session, setSessionFlag)
         if (tag.tag === history.key) setTagFlag(true)
-        navigate(`/tag/${history.key}`)
+        navigate(`/tag/${encodeURIComponent(history.key)}`)
     }
 
     useEffect(() => {
@@ -481,7 +483,7 @@ const TagPage: React.FunctionComponent = () => {
     }
 
     const currentHistory = (key?: string) => {
-        navigate(`/tag/${key ? key : tagName}`)
+        navigate(`/tag/${encodeURIComponent(key ? key : tagName)}`)
         setHistoryID(null)
         setTagFlag(true)
     }

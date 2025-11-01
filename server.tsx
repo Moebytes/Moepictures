@@ -189,23 +189,30 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
-        let post = await sql.getCache(`cached-post/${postID}`)
+        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
         if (!post) {
           post = await sql.post.post(postID)
           await sql.setCache(`cached-post/${postID}`, post)
         }
         if (post && functions.post.isR18(post.rating)) {
-          if (!req.session.showR18) return res.status(403).end()
+          if (!req.session.showR18) return res.status(404).end()
           r18 = true
         }
         if (post && post.hidden) {
-          if (!permissions.isMod(req.session)) return res.status(403).end()
+          if (!permissions.isMod(req.session)) return res.status(404).end()
+        }
+        if (post) {
+          let matches = false
+          for (const image of post.images) {
+            if (image.pixelHash === pixelHash) matches = true
+          }
+          if (!matches) return res.status(404).end()
         }
       }
       let body = await serverFunctions.files.getFile(key, upscaled, r18, pixelHash)
       if (!body.byteLength) body = await serverFunctions.files.getFile(key, false, r18, pixelHash)
       let contentLength = body.byteLength
-      if (!contentLength) return res.status(200).send(body)
+      if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body, false)
@@ -251,11 +258,18 @@ for (let i = 0; i < folders.length; i++) {
           await sql.setCache(`cached-post/${postID}`, post)
         }
         if (post && functions.post.isR18(post.rating)) {
-          if (!req.session.showR18) return res.status(403).end()
+          if (!req.session.showR18) return res.status(404).end()
           r18 = true
         }
         if (post && post.hidden) {
-          if (!permissions.isMod(req.session)) return res.status(403).end()
+          if (!permissions.isMod(req.session)) return res.status(404).end()
+        }
+        if (post) {
+          let matches = false
+          for (const image of post.images) {
+            if (image.pixelHash === pixelHash) matches = true
+          }
+          if (!matches) return res.status(404).end()
         }
       }
       const [id, order, name] = path.basename(key, path.extname(key)).split("-")
@@ -264,7 +278,7 @@ for (let i = 0; i < folders.length; i++) {
       let body = await serverFunctions.files.getFile(thumbKey, false, r18, pixelHash)
       if (!body.byteLength) body = await serverFunctions.files.getFile(key, false, r18, pixelHash)
       let contentLength = body.byteLength
-      if (!contentLength) return res.status(200).send(body)
+      if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body)
@@ -314,9 +328,9 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.unverifiedPost(postID)
-        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(404).end()
       } else {
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(404).end()
       }
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
@@ -360,9 +374,9 @@ for (let i = 0; i < folders.length; i++) {
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (postID) {
         const post = await sql.post.unverifiedPost(postID)
-        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(403).end()
+        if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(404).end()
       } else {
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(404).end()
       }
       const [id, order, name] = path.basename(key, path.extname(key)).split("-")
       let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
@@ -430,11 +444,18 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         await sql.setCache(`cached-post/${postID}`, post)
       }
       if (post && functions.post.isR18(post.rating)) {
-        if (!req.session.showR18) return res.status(403).end()
+        if (!req.session.showR18) return res.status(404).end()
         r18 = true
       }
       if (post && post.hidden) {
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(404).end()
+      }
+      if (post) {
+        let matches = false
+        for (const image of post.images) {
+          if (image.pixelHash === pixelHash) matches = true
+        }
+        if (!matches) return res.status(404).end()
       }
     }
     const secret = encryption.generateAPIKey(16)
@@ -484,11 +505,11 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
         await sql.setCache(`cached-post/${postID}`, post)
       }
       if (post && functions.post.isR18(post.rating)) {
-        if (!req.session.showR18) return void res.status(403).end()
+        if (!req.session.showR18) return void res.status(404).end()
         r18 = true
       }
       if (post && post.hidden) {
-        if (!permissions.isMod(req.session)) return void res.status(403).end()
+        if (!permissions.isMod(req.session)) return void res.status(404).end()
       }
       if (post) {
         const img = post.images[0]

@@ -35,7 +35,7 @@ export default class ServerFiles {
 
         if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
-            const historyFolder = isTag ? `${folder}/history/tag/${id}` : `${folder}/history/post/${id}/${upscaled ? "upscaled" : "original"}`
+            const historyFolder = isTag ? `${folder}/history/tag/${encodeURIComponent(id)}` : `${folder}/history/post/${id}/${upscaled ? "upscaled" : "original"}`
             if (!fs.existsSync(historyFolder)) return defaultBuffer
             let folders = fs.readdirSync(historyFolder).filter((f) => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
             if (!folders.length) return defaultBuffer
@@ -46,7 +46,7 @@ export default class ServerFiles {
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
-            const prefix = isTag ? `history/tag/${id}` : `history/post/${id}/${upscaled ? "upscaled" : "original"}`
+            const prefix = isTag ? `history/tag/${encodeURIComponent(id)}` : `history/post/${id}/${upscaled ? "upscaled" : "original"}`
             const fileName = file.split("/").pop()
 
             for (let i = 0; i < 10; i++) {

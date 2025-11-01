@@ -305,9 +305,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         let changes = newTag.changes || {}
         const openTag = (event: React.MouseEvent) => {
             if (event.ctrlKey || event.metaKey || event.button === 1) {
-                window.open(`/tag/${newTag.tag}`, "_blank")
+                window.open(`/tag/${encodeURIComponent(newTag.tag)}`, "_blank")
             } else {
-                navigate(`/tag/${newTag.tag}`)
+                navigate(`/tag/${encodeURIComponent(newTag.tag)}`)
             }
         }
         if (changes.tag) {

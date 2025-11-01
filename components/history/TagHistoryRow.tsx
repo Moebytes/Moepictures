@@ -158,9 +158,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imgClick = (event: React.MouseEvent) => {
         let historyIndex = props.current ? "" : `?history=${props.tagHistory.historyID}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.tagHistory.tag}${historyIndex}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(props.tagHistory.tag)}${historyIndex}`, "_blank")
         } else {
-            navigate(`/tag/${props.tagHistory.tag}${historyIndex}`)
+            navigate(`/tag/${encodeURIComponent(props.tagHistory.tag)}${historyIndex}`)
         }
     }
 
