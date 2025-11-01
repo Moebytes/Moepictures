@@ -81,8 +81,9 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/counts", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]
+            if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
-            let result = await sql.tag.tagCounts(tags?.filter(Boolean) ?? [])
+            let result = await sql.tag.tagCounts(tags.filter(Boolean) ?? [])
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag) => !tag.hidden)
             }
