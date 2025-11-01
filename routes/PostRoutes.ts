@@ -11,7 +11,7 @@ import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
 PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate, PostUpdateColumns,
-ImageUpdateColumns} from "../types/Types"
+ImageUpdateColumns, BulkTag} from "../types/Types"
 import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const postLimiter = rateLimit({
@@ -654,16 +654,16 @@ const PostRoutes = (app: Express) => {
                 }
             } 
             if (tagEdit) {
+                if (!functions.validation.validType(type)) return void res.status(400).send("Invalid type")
+                if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
+                if (!functions.validation.validStyle(style)) return void res.status(400).send("Invalid style")
+
                 if (!functions.util.cleanArray(artists)[0]) artists = ["unknown-artist"]
                 if (!functions.util.cleanArray(series)[0]) series = characters?.includes("original") ? ["no-series"] : ["unknown-series"]
                 if (!functions.util.cleanArray(characters)[0]) characters = ["unknown-character"]
                 if (!functions.util.cleanArray(tags)[0]) tags = ["needs-tags"]
-                artists = artists!
-                characters = characters!
-                series = series!
-                tags = tags!
 
-                let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+                let rawTags = `${characters!.join(" ")} ${series!.join(" ")} ${tags!.join(" ")}`
                 if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
                     return void res.status(400).send("Invalid characters in tags: , _ / \\")
                 }
@@ -673,16 +673,17 @@ const PostRoutes = (app: Express) => {
                 series = functions.tag.cleanStringTags(series, "series")
                 tags = functions.tag.cleanStringTags(tags, "tags")
 
+                artists = await serverFunctions.tags.applyAliases(artists)
+                characters = await serverFunctions.tags.applyAliases(characters)
+                series = await serverFunctions.tags.applyAliases(series)
+                tags = await serverFunctions.tags.applyAliases(tags)
+
                 for (let i = 0; i < (tagGroups?.length || 0); i++) {
                     if (tagGroups?.[i]) {
                         tagGroups[i].tags = functions.tag.cleanStringTags(tagGroups[i].tags, "tags")
                     }
                 }
-        
-                if (!functions.validation.validType(type)) return void res.status(400).send("Invalid type")
-                if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
-                if (!functions.validation.validStyle(style)) return void res.status(400).send("Invalid style")
-        
+    
                 let oldR18 = functions.post.isR18(post.rating)
                 let newR18 = functions.post.isR18(rating)
                 let oldType = post.type 
@@ -713,7 +714,7 @@ const PostRoutes = (app: Express) => {
                 addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
                 removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
-                let bulkTagUpdate = [] as any
+                let bulkTagUpdate = [] as BulkTag[]
                 let tagObjectMapping = await serverFunctions.tags.tagMap()
         
                 for (let i = 0; i < artists.length; i++) {
@@ -742,23 +743,15 @@ const PostRoutes = (app: Express) => {
                     }
                 }
 
-                for (let i = 0; i < addedTags.length; i++) {
-                    const implications = await sql.tag.implications(addedTags[i])
-                    if (implications?.[0]) {
-                        for (const i of implications) {
-                            if (!oldTagsSet.has(i.implication)) addedTags.push(i.implication)
-                            const tag = await sql.tag.tag(i.implication)
-                            bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type || "tag", description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
-                        }
-                    }
-                }
+                await serverFunctions.tags.applyImplications(addedTags, tagObjectMapping, newTagsSet, bulkTagUpdate)
 
                 addedTags = functions.util.removeDuplicates(addedTags).filter(Boolean)
                 if (unverified) {
                     await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
                     await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
                     await sql.tag.insertUnverifiedTagMap(postID, addedTags)
-                    const resultGroups = await updateTagGroups(postID, {unverified: true, oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+                    const resultGroups = await updateTagGroups(postID, {unverified: true, oldTagGroups: post.tagGroups, 
+                        newTagGroups: tagGroups})
                     addedTagGroups = resultGroups.addedTagGroups
                     removedTagGroups = resultGroups.removedTagGroups
                 } else {
@@ -809,18 +802,23 @@ const PostRoutes = (app: Express) => {
                 let vanillaImages = [] as string[]
                 let vanillaUpscaledImages = [] as string[]
                 for (let i = 0; i < vanilla.images.length; i++) {
-                    vanillaImages.push(functions.link.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
-                    vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
+                    vanillaImages.push(functions.link.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, 
+                        vanilla.images[i].filename))
+                    vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(vanilla.images[i].type, postID, 
+                        vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
                     postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
-                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
-                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, posted: vanilla.posted, 
-                    artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
-                    slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
-                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
-                    addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: false, changes: null, reason})
+                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, 
+                    rating: vanilla.rating, style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, 
+                    englishTitle: vanilla.englishTitle, posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, 
+                    commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
+                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, 
+                    mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, 
+                    hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, 
+                    tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
+                    addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+                    imageChanged: false, changes: null, reason})
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
@@ -832,27 +830,30 @@ const PostRoutes = (app: Express) => {
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags,
-                    mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, 
-                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
+                    pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
+                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, characters: updated.characters, 
+                    series: updated.series, tags: updated.tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
+                    addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             } else {
                 let images = [] as string[]
                 let upscaledImages = [] as string[]
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.link.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
-                    upscaledImages.push(functions.link.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
+                    upscaledImages.push(functions.link.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, 
+                        post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
                     style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
                     posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags,
-                    mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled,
-                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, 
-                    tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
+                    pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
+                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, characters: updated.characters, 
+                    series: updated.series, tags: updated.tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
+                    addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             res.status(200).send("Success")

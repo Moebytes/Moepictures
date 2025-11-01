@@ -3,18 +3,20 @@ import {SourceExtractor} from "./SourceExtractor"
 
 let reddit: snoowrap
 
-try {
-    reddit = new snoowrap({
-        userAgent: process.env.REDDIT_USER_AGENT!,
-        clientId: process.env.REDDIT_APP_ID,
-        clientSecret: process.env.REDDIT_APP_SECRET,
-        refreshToken: process.env.REDDIT_REFRESH_TOKEN
-    })
-} catch (e) {
-    console.log(e)
-}
-
 export class RedditExtractor extends SourceExtractor {
+    public init = async () => {
+        try {
+            reddit = new snoowrap({
+                userAgent: process.env.REDDIT_USER_AGENT!,
+                clientId: process.env.REDDIT_APP_ID,
+                clientSecret: process.env.REDDIT_APP_SECRET,
+                refreshToken: process.env.REDDIT_REFRESH_TOKEN
+            })
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     public matches = (url: string) => {
         return /reddit\.com/.test(url)
     }

@@ -5,15 +5,17 @@ import {SourceExtractor} from "./SourceExtractor"
 
 let pixiv: Pixiv
 
-try {
-    pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
-} catch (e) {
-    console.log(e)
-}
-
 export class PixivExtractor extends SourceExtractor {
     public get headers() {
         return {...super.headers, Referer: "https://www.pixiv.net/"}
+    }
+
+    public init = async () => {
+        try {
+            pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     public matches = (url: string) => {
@@ -21,6 +23,7 @@ export class PixivExtractor extends SourceExtractor {
     }
 
     public extractImages = async (url: string) => {
+        if (!pixiv) await this.init()
         let resolvable = url
         if (/pximg\.net/.test(url)) {
             if (/user-profile/.test(url)) {

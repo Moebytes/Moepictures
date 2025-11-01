@@ -275,7 +275,7 @@ export default class ServerPosts {
     public static resolveSourceLink = (hash: string, order: number, sourceLinks: {link: string, hash: string}[]) => {
         // Test at the order first
         let first = sourceLinks[order - 1]
-        if (dist(hash, first.hash) < 6) return first.link
+        if (first && dist(hash, first.hash) < 6) return first.link
 
         for (const current of sourceLinks) {
             if (dist(hash, current.hash) < 6) return current.link

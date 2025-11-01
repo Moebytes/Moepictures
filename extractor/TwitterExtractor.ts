@@ -5,13 +5,15 @@ import {SourceExtractor} from "./SourceExtractor"
 
 let twitter: Scraper
 
-try {
-    twitter = new Scraper({fetch: cycleTLSFetch})
-} catch (e) {
-    console.log(e)
-}
-
 export class TwitterExtractor extends SourceExtractor {
+    public init = async () => {
+        try {
+            twitter = new Scraper({fetch: cycleTLSFetch})
+        } catch (e) {
+            console.log(e)
+        }
+    }
+    
     public matches = (url: string) => {
         return /twitter\.com/.test(url) || /x\.com/.test(url)
     }

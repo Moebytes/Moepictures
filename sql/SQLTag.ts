@@ -438,6 +438,16 @@ export default class SQLTag {
 
     /** Rename tag map. */
     public static renameTagMap = async (tag: string, newTag: string) => {
+        const deleteQuery: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "tag map" t1
+                USING "tag map" t2
+                WHERE t1."postID" = t2."postID" AND t1."tag" = $2 AND t2."tag" = $1
+            `),
+            values: [newTag, tag]
+        }
+        await SQLQuery.run(deleteQuery)
+
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
             values: [newTag, tag]

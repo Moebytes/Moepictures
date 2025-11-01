@@ -278,4 +278,27 @@ export default class TagFunctions {
     public static cleanTag = (tag: string) => {
         return tag.normalize("NFD").replace(/[^a-z0-9_\-()><&!#@]/gi, "").replaceAll("_", "-")
     }
+
+    public static appendOrphanTags = (tagGroups: TagGroupCategory[], tags?: MiniTag[]) => {
+        if (!tags) return tagGroups
+        let tagGroupTagsSet = new Set(tagGroups.flatMap((t) => t.tags.map((t) => t.tag)))
+        let orphanTags = tags.filter((t) => !tagGroupTagsSet.has(t.tag))
+
+        if (orphanTags.length) {
+            let tagsGroupIndex = tagGroups.findIndex((g) => g.name === "Tags")
+            if (tagsGroupIndex >= 0) {
+                const existingGroup = tagGroups[tagsGroupIndex]
+                const updatedGroup = {
+                    ...existingGroup,
+                    tags: [...existingGroup.tags, ...orphanTags]
+                }
+                const newTagGroups = [...tagGroups]
+                newTagGroups.splice(tagsGroupIndex, 1, updatedGroup)
+                return newTagGroups
+            } else {
+                return [...tagGroups, {name: "Tags", tags: orphanTags}]
+            }
+        }
+        return tagGroups
+    }
 }

@@ -9,7 +9,7 @@ import functions from "../functions/Functions"
 import serverFunctions from "./ServerFunctions"
 import tagConvert from "../assets/json/tag-convert.json"
 import {UploadImage, PostRating, UploadTag, MiniTag, PostTagged, Tag, WDTaggerResponse, 
-PostType, PostStyle} from "../types/Types"
+PostType, PostStyle, BulkTag} from "../types/Types"
 
 const exec = util.promisify(child_process.exec)
 
@@ -408,5 +408,47 @@ export default class ServerTags {
             newTags,
             danbooruLink
         }
+    }
+
+    public static applyAliases = async <T extends MiniTag[] | UploadTag[] | string[]>(tags: T) => {
+        if (!tags?.length) return tags
+        let result = [] as unknown[]
+        for (const tag of tags) {
+            let tagName = typeof tag === "string" ? tag : tag.tag ?? ""
+            let alias = await sql.tag.alias(tagName)
+
+            if (alias) {
+                if (typeof tag === "string") {
+                    result.push(alias.tag)
+                } else {
+                    const newTag = {...(tag as MiniTag | UploadTag), tag: alias.tag}
+                    result.push(newTag)
+                }
+            } else {
+                result.push(tag)
+            }
+        }
+        return result as T
+    }
+
+    public static applyImplications = async (addedTags: string[], tagObjectMapping: {[key: string]: Tag},
+        newTagsSet?: Set<string>, bulkTags?: BulkTag[], ) => {
+        let newTags = newTagsSet ? [...newTagsSet] : addedTags
+        if (!newTags?.length) return addedTags
+        if (!newTagsSet) newTagsSet = new Set(addedTags)
+        for (const tag of newTags) {
+            const implications = await sql.tag.implications(tag)
+            if (!implications?.length) continue
+            for (const i of implications) {
+                if (!newTagsSet.has(i.implication)) addedTags.push(i.implication)
+                const tag = await sql.tag.tag(i.implication)
+                if (bulkTags) {
+                    bulkTags.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type || "tag", 
+                    description: tag?.description || null, image: tag?.image || null, 
+                    imageHash: tag?.imageHash || null})
+                }
+            }
+        }
+        return addedTags
     }
 }

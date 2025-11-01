@@ -232,11 +232,11 @@ export default class ServerSources {
 
         // Prefer storing twitter/pixiv sources if they exist. If we didn't find them before, 
         // it's highly likely they're deleted so no need to fetch them
-        if (danbooruPost.source.includes("pximg") || danbooruPost.source.includes("pixiv")) {
+        if (danbooruPost.source?.includes("pximg") || danbooruPost.source?.includes("pixiv")) {
             let id = path.basename(danbooruPost.source).match(/\d+/)?.[0]
             source = `https://www.pixiv.net/artworks/${id}`
         }
-        if (danbooruPost.source.includes("twitter")) {
+        if (danbooruPost.source?.includes("twitter")) {
             source = danbooruPost.source
             const redirectedLink = await functions.http.followRedirect(source)
             let regexCheck = redirectedLink.match(/(?<=com\/)(.*?)(?=\/status)/)?.[0] || ""

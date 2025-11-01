@@ -100,18 +100,22 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
       } else {
           vanilla.image = null
       }
-      await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: targetTag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
-          description: vanilla.description, aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), 
-          pixivTags: functions.util.filterNulls(vanilla.pixivTags), website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, 
-          wikipedia: vanilla.wikipedia, danbooruTag: vanilla.danbooruTag, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
+      await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: targetTag, type: vanilla.type, 
+      image: vanilla.image, imageHash: vanilla.imageHash, description: vanilla.description, 
+      aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), 
+      pixivTags: functions.util.filterNulls(vanilla.pixivTags), website: vanilla.website, social: vanilla.social, 
+      twitter: vanilla.twitter, fandom: vanilla.fandom, wikipedia: vanilla.wikipedia, danbooruTag: vanilla.danbooruTag, 
+      r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
       
       const imagePath = functions.link.getTagHistoryPath(targetTag, 2, filename)
       await serverFunctions.files.uploadFile(imagePath, newBuffer, false)
 
-      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
-      aliases: functions.util.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.util.filterNulls(tag.implications).map((i) => i.implication), 
-      pixivTags: functions.util.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, wikipedia: tag.wikipedia, 
-      danbooruTag: tag.danbooruTag, r18: tag.r18, featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
+      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, 
+      type: tag.type, description: tag.description, aliases: functions.util.filterNulls(tag.aliases).map((a) => a.alias), 
+      implications: functions.util.filterNulls(tag.implications).map((i) => i.implication), 
+      pixivTags: functions.util.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, 
+      fandom: tag.fandom, wikipedia: tag.wikipedia, danbooruTag: tag.danbooruTag, r18: tag.r18, 
+      featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
   } else {
       const imagePath = functions.link.getTagHistoryPath(targetTag, nextKey, filename)
       await serverFunctions.files.uploadFile(imagePath, newBuffer, false)
@@ -126,10 +130,12 @@ const updateTagImageHistory = async (targetTag: string, filename: string, newBuf
               await sql.history.updateTagHistory(lastResult.historyID, "image", penultImage)
           }
       }
-      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, type: tag.type, description: tag.description, 
-      aliases: functions.util.filterNulls(tag.aliases).map((a) => a.alias), implications: functions.util.filterNulls(tag.implications).map((i) => i.implication), 
-      pixivTags: functions.util.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, fandom: tag.fandom, wikipedia: tag.wikipedia, 
-      danbooruTag: tag.danbooruTag, r18: tag.r18, featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
+      await sql.history.insertTagHistory({username, image: filename, imageHash: newHash, tag: targetTag, key: targetTag, 
+      type: tag.type, description: tag.description, aliases: functions.util.filterNulls(tag.aliases).map((a) => a.alias), 
+      implications: functions.util.filterNulls(tag.implications).map((i) => i.implication), 
+      pixivTags: functions.util.filterNulls(tag.pixivTags), website: tag.website, social: tag.social, twitter: tag.twitter, 
+      fandom: tag.fandom, wikipedia: tag.wikipedia, danbooruTag: tag.danbooruTag, r18: tag.r18, 
+      featuredPost: tag.featuredPost?.postID, imageChanged: true, changes: null, reason: null})
   }
 }
 
@@ -205,8 +211,8 @@ export const insertImages = async (postID: string, data: {images: UploadImage[] 
       if ("bytes" in upscaledImage) {
         upscaledBuffer = Buffer.from(upscaledImage.bytes)
       } else if ("type" in upscaledImage) {
-        const upscaledImagePath = functions.link.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, 
-        upscaledImage.upscaledFilename || upscaledImage.filename)
+        const upscaledImagePath = functions.link.getUpscaledImagePath(upscaledImage.type, 
+          upscaledImage.postID, upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
         if (unverifiedImages) {
           upscaledBuffer = await serverFunctions.files.getUnverifiedFile(upscaledImagePath, false, upscaledImage.pixelHash)
         } else {
@@ -465,9 +471,12 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
 export const updateTagGroups = async (postID: string, data: {oldTagGroups?: MiniTagGroup[], 
   newTagGroups?: MiniTagGroup[], unverified?: boolean}) => {
   let {oldTagGroups, newTagGroups, unverified} = data
-  let {addedTagGroups, removedTagGroups} = functions.compare.tagGroupChanges(oldTagGroups, newTagGroups)
   if (!oldTagGroups) oldTagGroups = []
   if (!newTagGroups) newTagGroups = []
+  let tagObjectMapping = await serverFunctions.tags.tagMap()
+
+  let {addedTagGroups, removedTagGroups} = functions.compare.tagGroupChanges(oldTagGroups, newTagGroups)
+  
   let oldTagsSet = new Set<string>(oldTagGroups.filter(Boolean).map((o) => o.name))
   let newTagsSet = new Set<string>(newTagGroups.filter(Boolean).map((n) => n.name))
   let addedGroups = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
@@ -475,6 +484,9 @@ export const updateTagGroups = async (postID: string, data: {oldTagGroups?: Mini
 
   for (const tagGroup of addedTagGroups) {
     if (!tagGroup) continue
+    tagGroup.tags = await serverFunctions.tags.applyAliases(tagGroup.tags)
+    tagGroup.tags = await serverFunctions.tags.applyImplications(tagGroup.tags, tagObjectMapping)
+
     if (unverified) {
       const groupID = await sql.tag.insertUnverifiedTagGroup(postID, tagGroup.name)
       await sql.tag.insertUnverifiedTagGroupMap(groupID, postID, tagGroup.tags)
@@ -521,6 +533,12 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   post?: PostFull | UnverifiedPost | null, unverified?: boolean, originalPost?: PostFull}) => {
   let {artists, characters, series, newTags, tags, username, noImageUpdate, post, unverified} = data
 
+  artists = await serverFunctions.tags.applyAliases(artists)
+  characters = await serverFunctions.tags.applyAliases(characters)
+  series = await serverFunctions.tags.applyAliases(series)
+  newTags = await serverFunctions.tags.applyAliases(newTags)
+  tags = await serverFunctions.tags.applyAliases(tags)
+
   let combinedTags = [...artists.map((a: MiniTag | UploadTag) => a.tag), ...characters.map((c: MiniTag | UploadTag) => c.tag), 
   ...series.map((s: MiniTag | UploadTag) => s.tag), ...newTags.map((n: MiniTag | UploadTag) => n.tag), ...tags] as string[]
   let oldTagsSet = new Set<string>(post?.tags || [])
@@ -533,14 +551,16 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
 
   if (unverified) {
     for (let i = 0; i < addedTags.length; i++) {
-      bulkTagUpdate.push({tag: addedTags[i], type: tagObjectMapping[addedTags[i]]?.type || "tag", description: null, image: null, imageHash: null})
+      bulkTagUpdate.push({tag: addedTags[i], type: tagObjectMapping[addedTags[i]]?.type || "tag", description: null,
+         image: null, imageHash: null})
     }
   }
 
   for (let i = 0; i < newTags.length; i++) {
     let newTag = newTags[i]
     if (!newTag.tag) continue
-    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag]?.type || "tag", description: null, image: null, imageHash: null} as BulkTag
+    let bulkObj = {tag: newTag.tag, type: tagObjectMapping[newTag.tag]?.type || "tag", description: null, image: null, 
+      imageHash: null} as BulkTag
     if (newTag.description) bulkObj.description = newTag.description
     if (!noImageUpdate && newTag.image) {
       let ext = ""
@@ -662,17 +682,7 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
     bulkTagUpdate.push(bulkObj)
   }
 
-  for (let i = 0; i < addedTags.length; i++) {
-    const implications = await sql.tag.implications(addedTags[i])
-    if (implications?.[0]) {
-      for (const i of implications) {
-        if (!oldTagsSet.has(i.implication)) addedTags.push(i.implication)
-        const tag = await sql.tag.tag(i.implication)
-        bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type || "tag", 
-        description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
-      }
-    }
-  }
+  await serverFunctions.tags.applyImplications(addedTags, tagObjectMapping, newTagsSet, bulkTagUpdate)
 
   addedTags = functions.util.removeDuplicates(addedTags).filter(Boolean)
   if (unverified) {
@@ -698,9 +708,10 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
 
 const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | MiniTag[], characters: UploadTag[] | MiniTag[], 
   series: UploadTag[] | MiniTag[], tags: string[], imgChanged: boolean, addedTags: string[], removedTags: string[], 
-  vanillaBuffers: Buffer[], upscaledVanillaBuffers: Buffer[], images: UploadImage[] | Image[], upscaledImages: UploadImage[] | Image[], 
-  imageFilenames: string[], upscaledImageFilenames: string[], imageOrders: number[], unverifiedImages?: boolean, tagGroups: MiniTagGroup[],
-  addedTagGroups: string[], removedTagGroups: string[], username: string, reason?: string | null}) => {
+  vanillaBuffers: Buffer[], upscaledVanillaBuffers: Buffer[], images: UploadImage[] | Image[], 
+  upscaledImages: UploadImage[] | Image[], imageFilenames: string[], upscaledImageFilenames: string[], 
+  imageOrders: number[], unverifiedImages?: boolean, tagGroups: MiniTagGroup[], addedTagGroups: string[], 
+  removedTagGroups: string[], username: string, reason?: string | null}) => {
   let {artists, characters, series, tags, imgChanged, addedTags, removedTags, vanillaBuffers, 
   upscaledVanillaBuffers, images, upscaledImages, imageFilenames, upscaledImageFilenames, 
   imageOrders, unverifiedImages, tagGroups, addedTagGroups, removedTagGroups, username, reason} = data
@@ -734,7 +745,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             let newImagePath = ""
             let newUpscaledImagePath = ""
             if (upscaledVanillaBuffers[i]) {
-              newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, 1, image.order, image.upscaledFilename || image.filename)
+              newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, 1, image.order, 
+                image.upscaledFilename || image.filename)
               await serverFunctions.files.uploadFile(newUpscaledImagePath, upscaledVanillaBuffers[i], r18)
             }
             if (vanillaBuffers[i]) {
@@ -745,18 +757,22 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             vanillaUpscaledImages.push(newUpscaledImagePath)
           } else {
             vanillaImages.push(functions.link.getImagePath(image.type, post.postID, image.order, image.filename))
-            vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename))
+            vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(image.type, post.postID, image.order, 
+              image.upscaledFilename || image.filename))
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
-        updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
-        style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, slug: vanilla.slug,
-        posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
-        hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, 
-        series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
-        removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: false, changes: null, reason})
+        postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+        uploader: vanilla.uploader, updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, 
+        type: vanilla.type, rating: vanilla.rating, style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, 
+        englishTitle: vanilla.englishTitle, slug: vanilla.slug, posted: vanilla.posted, artist: vanilla.artist, 
+        source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
+        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, 
+        mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, hasOriginal: vanilla.hasOriginal, 
+        hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, 
+        tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
+        removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
+        imageChanged: false, changes: null, reason})
 
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -771,14 +787,16 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               if ("bytes" in upscaledImage) {
                 buffer = Buffer.from(Object.values(upscaledImage.bytes))
               } else {
-                const imagePath = functions.link.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
+                const imagePath = functions.link.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, 
+                  upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
                 if (unverifiedImages) {
                   buffer = await serverFunctions.files.getUnverifiedFile(imagePath, false, upscaledImage.pixelHash)
                 } else {
                   buffer = await serverFunctions.files.getFile(imagePath, false, r18, upscaledImage.pixelHash)
                 }
               }
-              newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, 2, imageOrders[i], upscaledImageFilenames[i])
+              newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, 2, imageOrders[i], 
+                upscaledImageFilenames[i])
               await serverFunctions.files.uploadFile(newUpscaledImagePath, buffer, r18)
             }
             if (image) {
@@ -799,19 +817,24 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             newImages.push(newImagePath)
             newUpscaledImages.push(newUpscaledImagePath)
           } else {
-            newImages.push(functions.link.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].filename))
-            newUpscaledImages.push(functions.link.getUpscaledImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
+            newImages.push(functions.link.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, 
+              updated.images[i].filename))
+            newUpscaledImages.push(functions.link.getUpscaledImagePath(updated.images[i].type, post.postID, 
+              updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, updater: updated.updater, 
-        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
-        parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
-        source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
-        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
-        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
-        imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
+        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, 
+        updater: updated.updater, uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, 
+        rating: updated.rating, style: updated.style, parentID: updated.parentID, title: updated.title, 
+        englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, source: updated.source, 
+        commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, 
+        mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, 
+        hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, 
+        imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, 
+        changes: changes ? JSON.stringify(changes) : null, reason})
   } else {
       let newImages = [] as string[]
       let newUpscaledImages = [] as string[]
@@ -826,14 +849,16 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
             if ("bytes" in upscaledImage) {
               buffer = Buffer.from(Object.values(upscaledImage.bytes))
             } else {
-              const imagePath = functions.link.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
+              const imagePath = functions.link.getUpscaledImagePath(upscaledImage.type, upscaledImage.postID, 
+                upscaledImage.order, upscaledImage.upscaledFilename || upscaledImage.filename)
               if (unverifiedImages) {
                 buffer = await serverFunctions.files.getUnverifiedFile(imagePath, false, upscaledImage.pixelHash)
               } else {
                 buffer = await serverFunctions.files.getFile(imagePath, false, r18, upscaledImage.pixelHash)
               }
             }
-            newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, nextKey, imageOrders[i], upscaledImageFilenames[i])
+            newUpscaledImagePath = functions.link.getUpscaledImageHistoryPath(post.postID, nextKey, imageOrders[i], 
+              upscaledImageFilenames[i])
             await serverFunctions.files.uploadFile(newUpscaledImagePath, buffer, r18)
           }
           if (image) {
@@ -865,19 +890,24 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
               }
           }
         } else {
-          newImages.push(functions.link.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].filename))
-          newUpscaledImages.push(functions.link.getUpscaledImagePath(updated.images[i].type, post.postID, updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
+          newImages.push(functions.link.getImagePath(updated.images[i].type, post.postID, updated.images[i].order, 
+            updated.images[i].filename))
+          newUpscaledImages.push(functions.link.getUpscaledImagePath(updated.images[i].type, post.postID, 
+            updated.images[i].order, updated.images[i].upscaledFilename || updated.images[i].filename))
         }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, updater: updated.updater, 
-        uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, style: updated.style, 
-        parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, 
-        source: updated.source, commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null,
-        hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
-        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap),
-        imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, changes: changes ? JSON.stringify(changes) : null, reason})
+        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, 
+        updater: updated.updater, uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, 
+        rating: updated.rating, style: updated.style, parentID: updated.parentID, title: updated.title, 
+        englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, source: updated.source, 
+        commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
+        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, 
+        mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, 
+        hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, 
+        imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, 
+        changes: changes ? JSON.stringify(changes) : null, reason})
   }
 }
 
@@ -926,11 +956,13 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
 
-        const {hasOriginal, hasUpscaled} = await insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged: true, sourceLinks})
-        await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, uploader: req.session.username,
-        updater: req.session.username, approver: req.session.username})
+        const {hasOriginal, hasUpscaled} = await insertImages(postID, {images, upscaledImages, type, rating, source, 
+          characters, imgChanged: true, sourceLinks})
+        await updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, 
+          uploader: req.session.username, updater: req.session.username, approver: req.session.username})
 
-        let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, tags, noImageUpdate, username: req.session.username})
+        let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, 
+          tags, noImageUpdate, username: req.session.username})
         await sql.cuteness.updateCuteness(postID, req.session.username, 500)
 
         await updateTagGroups(postID, {oldTagGroups: [], newTagGroups: tagGroups})
@@ -953,8 +985,9 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
-        tags, tagGroups, imageSources, imageLinks, newTags, unverifiedID, reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
+        let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, 
+          artists, characters, series, tags, tagGroups, imageSources, imageLinks, newTags, unverifiedID, 
+          reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!req.session.username) return void res.status(403).send("Unauthorized")
@@ -1027,7 +1060,8 @@ const CreateRoutes = (app: Express) => {
         let {addedTags, removedTags} = await insertTags(postID, {artists, characters, series, newTags, tags, noImageUpdate, 
         post, username: req.session.username})
         
-        let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+        let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, 
+          newTagGroups: tagGroups})
 
         if (groupName) {
           const post = await sql.post.post(postID) as PostFull
@@ -1105,7 +1139,8 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertUnverifiedPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
 
-        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, type, rating, source, characters, imgChanged: true, sourceLinks})
+        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, 
+          type, rating, source, characters, imgChanged: true, sourceLinks})
 
         await updatePost(postID, {unverified: true, artists, newTags, type, rating, style,
         source, hasOriginal, hasUpscaled, duplicates, parentID, uploader: req.session.username,
@@ -1129,8 +1164,8 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
-        tags, tagGroups, newTags, reason} = req.body as UnverifiedEditParams
+        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, groupName, 
+          source, artists, characters, series, tags, tagGroups, newTags, reason} = req.body as UnverifiedEditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (unverifiedID && Number.isNaN(unverifiedID)) return void res.status(400).send("Bad unverifiedID")
@@ -1189,8 +1224,11 @@ const CreateRoutes = (app: Express) => {
 
             for (let i = 0; i < unverifiedPost.images.length; i++) {
               await sql.post.deleteUnverifiedImage(unverifiedPost.images[i].imageID)
-              await serverFunctions.files.deleteUnverifiedFile(functions.link.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
-              await serverFunctions.files.deleteUnverifiedFile(functions.link.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename))
+              await serverFunctions.files.deleteUnverifiedFile(functions.link.getImagePath(unverifiedPost.images[i].type, 
+                unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
+              await serverFunctions.files.deleteUnverifiedFile(functions.link.getUpscaledImagePath(unverifiedPost.images[i].type, 
+                unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || 
+                unverifiedPost.images[i].filename))
             }
           }
         }
@@ -1198,7 +1236,8 @@ const CreateRoutes = (app: Express) => {
         if (unverifiedID) await sql.post.deleteUnverifiedChild(postID)
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
 
-        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, characters, imgChanged, rating, source, type})
+        let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images, upscaledImages, characters, 
+          imgChanged, rating, source, type})
 
         await updatePost(postID, {unverified: true, originalID: originalPostID, reason, hasUpscaled, hasOriginal, 
         artists, rating, source, type, style, updater: req.session.username, newTags, parentID})
@@ -1264,7 +1303,8 @@ const CreateRoutes = (app: Express) => {
         let imgChanged = true
         if (post && unverified.originalID) {
           imgChanged = await serverFunctions.posts.imagesChangedUnverified(post.images, unverified.images, false, true, oldR18)
-          if (!imgChanged) imgChanged = await serverFunctions.posts.imagesChangedUnverified(post.images, unverified.images, true, true, oldR18)
+          if (!imgChanged) imgChanged = await serverFunctions.posts.imagesChangedUnverified(post.images, 
+            unverified.images, true, true, oldR18)
         }
 
         let vanillaBuffers = [] as Buffer[]
@@ -1315,8 +1355,10 @@ const CreateRoutes = (app: Express) => {
           } catch {}
         }
 
-        let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, newTags, username: updater, noImageUpdate})
-        let {addedTagGroups, removedTagGroups} = await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: unverified.tagGroups})
+        let {addedTags, removedTags} = await insertTags(newPostID, {post, tags, artists, characters, series, 
+          newTags, username: updater, noImageUpdate})
+        let {addedTagGroups, removedTagGroups} = await updateTagGroups(newPostID, {oldTagGroups: [], 
+          newTagGroups: unverified.tagGroups})
 
         // Approve image sources/links
         let imageSources = functions.post.imageSourceMap(unverified)
@@ -1330,9 +1372,10 @@ const CreateRoutes = (app: Express) => {
           const unverifiedNotes = await sql.note.unverifiedNotes(unverified.postID, order)
           for (const item of unverifiedNotes) {
               await sql.note.insertNote(newPostID, updater, order, item.transcript, item.translation,
-              item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
-              item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
-              item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null)
+              item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, 
+              item.overlay, item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, 
+              item.bold, item.italic, item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, 
+              item.character, item.characterTag || null)
               await sql.note.deleteUnverifiedNote(item.noteID)
           }
         }
@@ -1345,9 +1388,10 @@ const CreateRoutes = (app: Express) => {
         }
 
         if (post && unverified.originalID) {
-          await insertPostHistory(post, {artists, characters, series, tags, imgChanged, addedTags, removedTags, vanillaBuffers, 
-          upscaledVanillaBuffers, images: unverified.images, upscaledImages: unverified.images, imageFilenames, upscaledImageFilenames, 
-          imageOrders, unverifiedImages: true, tagGroups: post.tagGroups, addedTagGroups, removedTagGroups, username: updater, reason})
+          await insertPostHistory(post, {artists, characters, series, tags, imgChanged, addedTags, 
+          removedTags, vanillaBuffers, upscaledVanillaBuffers, images: unverified.images, upscaledImages: unverified.images, 
+          imageFilenames, upscaledImageFilenames, imageOrders, unverifiedImages: true, tagGroups: post.tagGroups, 
+          addedTagGroups, removedTagGroups, username: updater, reason})
         }
 
         let subject = "Notice: Post has been approved"
@@ -1463,16 +1507,20 @@ const CreateRoutes = (app: Express) => {
             const newPostID = await sql.post.insertPost()
             await sql.post.insertChild(newPostID, parentID)
 
-            const {hasOriginal, hasUpscaled} = await insertImages(newPostID, {images, upscaledImages, type, rating, source, characters, imgChanged: true})
-            await updatePost(newPostID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, uploader: req.session.username,
+            const {hasOriginal, hasUpscaled} = await insertImages(newPostID, {images, upscaledImages, type, rating, source, 
+              characters, imgChanged: true})
+            await updatePost(newPostID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, 
+              uploader: req.session.username,
             updater: req.session.username, approver: req.session.username})
-            await insertTags(newPostID, {artists, characters, series, newTags: [], tags, noImageUpdate: true, username: req.session.username})
+            await insertTags(newPostID, {artists, characters, series, newTags: [], tags, 
+              noImageUpdate: true, username: req.session.username})
             await updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: post.tagGroups})
             await sql.cuteness.updateCuteness(newPostID, req.session.username, 500)
 
             for (const image of images) {
               const imagePath = functions.link.getImagePath(image.type, post.postID, image.order, image.filename)
-              const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, post.postID, image.order, image.upscaledFilename || image.filename)
+              const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, post.postID, 
+                image.order, image.upscaledFilename || image.filename)
               await sql.post.deleteImage(image.imageID)
               await serverFunctions.files.deleteFile(imagePath, r18)
               await serverFunctions.files.deleteFile(upscaledImagePath, r18)
@@ -1511,7 +1559,8 @@ const CreateRoutes = (app: Express) => {
               let order = ++maxOrder
               const imagePath = functions.link.getImagePath(image.type, image.postID, image.order, image.filename)
               const buffer = await serverFunctions.files.getFile(imagePath, false, r18, image.pixelHash)
-              const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, image.postID, image.order, image.upscaledFilename || image.filename)
+              const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, image.postID, image.order, 
+                image.upscaledFilename || image.filename)
               const upscaledBuffer = await serverFunctions.files.getFile(upscaledImagePath, false, r18, image.pixelHash)
 
               if (buffer.byteLength) {

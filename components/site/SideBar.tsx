@@ -602,7 +602,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const generateTagGroupJSX = () => {
         if (!props.tagGroups) return null
         let jsx = [] as React.ReactElement[]
-        for (const tagGroup of props.tagGroups) {
+        let tagGroups = functions.tag.appendOrphanTags(props.tagGroups, props.tags)
+        for (const tagGroup of tagGroups) {
             let currentTags = organizeTags(tagGroup.tags)
             if (!currentTags.length) continue
             jsx.push(
