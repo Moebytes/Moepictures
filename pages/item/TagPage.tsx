@@ -100,7 +100,6 @@ const TagPage: React.FunctionComponent = () => {
             if (!session.showR18) return functions.dom.replaceLocation("/403")
         }
         const tagCount = await functions.http.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
-        console.log(tagCount)
         setTag(tag)
         setCount(tagCount)
         if (tag.featuredPost) {
