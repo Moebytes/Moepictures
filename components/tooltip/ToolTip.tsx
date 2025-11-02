@@ -53,6 +53,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {setEnableDrag, setToolTipEnabled} = useInteractionActions()
     const {setActionBanner} = useActiveActions()
     const [tags, setTags] = useState([] as MiniTag[])
+    const [metaTags, setMetaTags] = useState([] as string[])
     const [artist, setArtist] = useState(null as MiniTag | null)
     const scrollRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
@@ -74,6 +75,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         const tags = result.filter((t) => t.type === "tag")
         setArtist(artists[0])
         setTags([...characters, ...series, ...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()])
+        setMetaTags(meta.map((t) => t.tag))
     }
 
     useEffect(() => {
@@ -205,6 +207,8 @@ const ToolTip: React.FunctionComponent = (props) => {
         }
         let outTags = ""
         if (danbooru) {
+            combined = combined.filter((t) => !metaTags.includes(t))
+            if (combined.includes("solo")) combined.push("1girl")
             outTags = await functions.http.post("/api/misc/danboorutags", 
             {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
         } else {

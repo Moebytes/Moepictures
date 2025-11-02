@@ -1002,6 +1002,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
         let outTags = ""
         if (danbooru) {
+            if (combined.includes("solo")) combined.push("1girl")
             outTags = await functions.http.post("/api/misc/danboorutags", 
             {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
         } else {
