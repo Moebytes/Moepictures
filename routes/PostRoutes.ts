@@ -1483,6 +1483,38 @@ const PostRoutes = (app: Express) => {
             res.status(400).send("Bad request")
         }
     })
+
+    app.put("/api/post/addtags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID, tags} = req.body as {postID: string, tags: string[]}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const post = await sql.post.post(postID)
+            if (!post) return void res.status(400).send("Invalid postID")
+                
+            await sql.tag.insertTagMap(postID, tags)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/post/removetags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID, tags} = req.body as {postID: string, tags: string[]}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            const post = await sql.post.post(postID)
+            if (!post) return void res.status(400).send("Invalid postID")
+    
+            await sql.tag.deleteTagMap(postID, tags)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
 }
 
 export default PostRoutes

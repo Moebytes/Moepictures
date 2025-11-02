@@ -277,6 +277,8 @@ export type PostPutEndpoint<T extends string> =
     T extends "/api/image/source" ? {params: {imageID: string, directLink: string, altSource: string, unverified?: boolean, reason?: string}, response: string} :
     T extends "/api/post/update" ? {params: {postID: string, column: PostUpdateColumns, value: any}, response: string} :
     T extends "/api/image/update" ? {params: {imageID: string, column: ImageUpdateColumns, value: any}, response: string} :
+    T extends "/api/post/addtags" ? {params: {postID: string, tags: string[]}, response: string} :
+    T extends "/api/post/removetags" ? {params: {postID: string, tags: string[]}, response: string} :
     never
 
 export type PostDeleteEndpoint<T extends string> = 

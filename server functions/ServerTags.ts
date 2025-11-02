@@ -223,6 +223,11 @@ export default class ServerTags {
                 charStrArr = ["original"]
                 seriesStrArr = ["no-series"]
             }
+            if (tagArr.includes("multiple_girls")) {
+                tagArr.push("multiple-characters")
+            } else {
+                tagArr.push("solo")
+            }
 
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
@@ -250,13 +255,6 @@ export default class ServerTags {
             if (current.name.includes("patreon")) {
                 tagArr.push("patreon")
                 tagArr.push("paid-content-available")
-            }
-
-            let charTest = charStrArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
-            if (charTest.length > 1) {
-                tagArr.push("multiple-characters")
-            } else if (charTest.length === 1) {
-                tagArr.push("solo")
             }
 
             for (let i = 0; i < artistStrArr.length; i++) {
@@ -321,6 +319,11 @@ export default class ServerTags {
             if (current.name.includes("comic") && type === "image") type = "comic"
             if (tagArr.includes("comic") && type === "image")  type = "comic"
             if (current.name.includes("r18")) rating = functions.r18()
+            if (tagArr.includes("multiple_girls")) {
+                tagArr.push("multiple-characters")
+            } else {
+                tagArr.push("solo")
+            }
 
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
@@ -350,13 +353,6 @@ export default class ServerTags {
 
             for (let i = 0; i < blockedTags.length; i++) {
                 characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
-            }
-
-            let charTest = characterArr.filter(str => (str.match(/\(([^)]+)\)/g)?.length || 0) < 2)
-            if (charTest.length > 1) {
-                tagArr.push("multiple-characters")
-            } else if (charTest.length === 1) {
-                tagArr.push("solo")
             }
 
             let seriesArr = [] as string[]
