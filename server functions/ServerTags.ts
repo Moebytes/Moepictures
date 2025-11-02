@@ -202,21 +202,10 @@ export default class ServerTags {
             let charStrArr = tagData.characters.split(" ")
             let seriesStrArr = tagData.series.split(" ")
 
-            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-            artistStrArr = artistStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-            charStrArr = charStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-            seriesStrArr = seriesStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-
-            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
-            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
-            artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-            charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-            seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-
             tagArr.push("autotags")
             if (hasUpscaled) tagArr.push("upscaled")
             if (tagArr.includes("chibi")) style = "chibi"
-            if (tagArr.includes("pixel-art")) style = "pixel"
+            if (tagArr.includes("pixel_art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
             if (tagArr.includes("sketch")) style = "sketch"
             if (tagArr.includes("lineart")) style = "lineart"
@@ -238,6 +227,17 @@ export default class ServerTags {
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
+
+            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            artistStrArr = artistStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            charStrArr = charStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            seriesStrArr = seriesStrArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+            artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
+            seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
 
             const isTransparent = await serverFunctions.util.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
@@ -303,16 +303,11 @@ export default class ServerTags {
             let tagArr = result.tags
             let characterArr = result.characters
 
-            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-            characterArr = characterArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-
-            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
-            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
-            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
-            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
-
+            tagArr.push("autotags")
+            tagArr.push("needscheck")
+            if (hasUpscaled) tagArr.push("upscaled")
             if (tagArr.includes("chibi")) style = "chibi"
-            if (tagArr.includes("pixel-art")) style = "pixel"
+            if (tagArr.includes("pixel_art")) style = "pixel"
             if (tagArr.includes("dakimakura")) style = "daki"
             if (tagArr.includes("sketch")) style = "sketch"
             if (tagArr.includes("lineart")) style = "lineart"
@@ -331,9 +326,14 @@ export default class ServerTags {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
 
-            tagArr.push("autotags")
-            tagArr.push("needscheck")
-            if (hasUpscaled) tagArr.push("upscaled")
+            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            characterArr = characterArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
+            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
+
             const isTransparent = await serverFunctions.util.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
             if (current.name.includes("text")) tagArr.push("untranslated")
