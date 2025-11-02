@@ -981,7 +981,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }, i18n, navigate)
     }
 
-    const copyTags = (event: React.MouseEvent) => {
+    const copyTags = async (event: React.MouseEvent) => {
         if (!props.artists || !props.characters || !props.series || !props.tags) return
         event.preventDefault()
         const artists = props.artists.map((a) => a.tag)
@@ -1000,9 +1000,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             commas = true
             replaceDash = true
         }
-        let replacer = danbooru ? "_" : " "
-        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", replacer))
-        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        let outTags = ""
+        if (danbooru) {
+            outTags = await functions.http.post("/api/misc/danboorutags", 
+            {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
+        } else {
+            if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+            outTags = commas ? combined.join(", ") : combined.join(" ")
+        }
+        navigator.clipboard.writeText(outTags)
         setActionBanner("copy-tags")
     }
 

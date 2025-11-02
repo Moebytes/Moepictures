@@ -188,7 +188,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.captchaNeeded) upscaled = false
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (postID) {
+      if (!noCache.includes(folders[i]) && postID) {
         let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
         if (!post) {
           post = await sql.post.post(postID)
@@ -251,7 +251,7 @@ for (let i = 0; i < folders.length; i++) {
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (postID) {
+      if (!noCache.includes(folders[i]) && postID) {
         let post = await sql.getCache(`cached-post/${postID}`)
         if (!post) {
           post = await sql.post.post(postID)
@@ -326,7 +326,7 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (postID) {
+      if (!noCache.includes(folders[i]) && postID) {
         const post = await sql.post.unverifiedPost(postID)
         if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(404).end()
       } else {
@@ -372,7 +372,7 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Cache-Control", "public, max-age=2678400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (postID) {
+      if (!noCache.includes(folders[i]) && postID) {
         const post = await sql.post.unverifiedPost(postID)
         if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return res.status(404).end()
       } else {

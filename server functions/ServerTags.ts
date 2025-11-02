@@ -451,4 +451,12 @@ export default class ServerTags {
         }
         return addedTags
     }
+
+    public static convertToDanbooru = async (tags: string) => {
+        let tagArr = tags.split(/ +/g)
+        let tagReplaceMap = await sql.tag.tagReplaceMap()
+        tagReplaceMap = functions.util.flipObject(tagReplaceMap)
+        tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag.replaceAll("-", "_"))
+        return tagArr.join(" ")
+    }
 }

@@ -339,15 +339,34 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const copyTags = (replaceDash?: boolean, commas?: boolean) => {
+    const copyTags = async (event: React.MouseEvent) => {
         if (!props.artists || !props.characters || !props.series || !props.tags) return
+        event.preventDefault()
         const artists = props.artists.map((a) => a.tag)
         const characters = props.characters.map((c) => c.tag)
         const series = props.series.map((s) => s.tag)
         const tags = props.tags.map((t) => t.tag)
         let combined = [...artists, ...characters, ...series, ...tags]
-        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
-        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        let commas = false
+        let replaceDash = false 
+        let danbooru = false
+        if (event.shiftKey) {
+            commas = false
+            replaceDash = true
+            danbooru = true
+        } else if (event.button === 2) {
+            commas = true
+            replaceDash = true
+        }
+        let outTags = ""
+        if (danbooru) {
+            outTags = await functions.http.post("/api/misc/danboorutags", 
+            {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
+        } else {
+            if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+            outTags = commas ? combined.join(", ") : combined.join(" ")
+        }
+        navigator.clipboard.writeText(outTags)
         setActionBanner("copy-tags")
     }
 
@@ -676,7 +695,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
-                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}>
+                        <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
                             <img className="mobileinfo-icon" src={tagIcon}/>
                             <span className="tag-red">{i18n.sidebar.copyTags}</span>
                         </span>

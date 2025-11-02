@@ -277,4 +277,8 @@ export default class UtilFunctions {
 
         return {id, qualifier, num, source}
     }
+
+    public static flipObject = (obj: object) => {
+        return Object.fromEntries(Object.entries(obj).map(([key, value]) => [value, key]))
+    }
 }

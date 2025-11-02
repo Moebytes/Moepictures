@@ -205,7 +205,6 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/premium/paymentlink" ? {params: null, response: {hosted_url: string}} :
     T extends "/api/premium/payment" ? {params: {event: CoinbaseEvent}, response: string} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :
-    T extends "/api/misc/litterbox" ? {params: number[], response: string} :
     T extends "/api/client-key" ? {params: {publicKey: string}, response: string} :
     T extends "/api/server-key" ? {params: null, response: {publicKey: string}} :
     T extends "/api/misc/blacklistip" ? {params: {ip: string, reason: string}, response: string} :
@@ -213,6 +212,7 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/api-key" ? {params: null, response: string} :
     T extends "/api/misc/sourcelookup" ? {params: SourceLookupParams, response: SourceLookup} :
     T extends "/api/misc/taglookup" ? {params: TagLookupParams, response: TagLookup} :
+    T extends "/api/misc/danboorutags" ? {params: {tags: string}, response: {tags: string}} :
     T extends "/storage" ? {params: {link: string, songCover?: boolean}, response: string} :
     never
 

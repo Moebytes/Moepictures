@@ -88,7 +88,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/saucenao", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             let result = await serverFunctions.sources.saucenaoLookup(req.body)
@@ -98,7 +98,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/boorulinks", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, pixivID} = req.body as {bytes: number[], pixivID: string}
             const mirrors = await serverFunctions.links.booruLinks(bytes)
@@ -108,7 +108,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/revdanbooru", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             const booruLinks = await serverFunctions.links.booruLinks(req.body)
@@ -121,7 +121,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/proxy-images", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/proxy-images", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")
@@ -143,14 +143,14 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/translate", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
         if (!words?.[0]) return void res.status(400).send("No words")
         let translated = await serverFunctions.util.translate(words)
         res.status(200).send(translated)
     })
 
-    app.post("/api/misc/romajinize", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/romajinize", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const words = req.body as string[]
         if (!words?.[0]) return void res.status(400).send("No words")
         let romajinized = await serverFunctions.util.romajinize(words)
@@ -235,7 +235,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/wdtagger", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/wdtagger", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
@@ -326,7 +326,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/premium/payment", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/premium/payment", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
             const {event} = req.body as {event: CoinbaseEvent}
@@ -392,26 +392,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/litterbox", miscLimiter, async (req: Request, res: Response) => {
-        try {
-            if (!req.body) return void res.status(400).send("Image data must be provided")
-            const form = new FormData()
-            form.append("time", "1h")
-            form.append("reqtype", "fileupload")
-            const inputType = functions.byte.bufferFileType(req.body)?.[0]
-            form.append("fileToUpload", Buffer.from(req.body, "binary"), {
-                filename: `file.${inputType.extension}`,
-                contentType: inputType.mime
-            })
-            let result = await axios.post("https://litterbox.catbox.moe/resources/internals/api.php", form, {headers: form.getHeaders()}).then((r) => r.data)
-            res.status(200).send(result)
-        } catch (e) {
-            console.log(e)
-            res.status(400).end()
-        }
-    })
-
-    app.post("/api/misc/imghash", miscLimiter, async (req: Request, res: Response) => {
+    app.post("/api/misc/imghash", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             const buffer = Buffer.from(req.body, "binary")
@@ -423,7 +404,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/api-key", miscLimiter, async (req: Request, res: Response) => {
+    app.post("/api/misc/api-key", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
@@ -449,7 +430,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/misc/api-key/delete", miscLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/misc/api-key/delete", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
@@ -513,6 +494,17 @@ const MiscRoutes = (app: Express) => {
             res.status(200).json(tagLookup)
         } catch {
             if (ip) processingQueue.delete(ip)
+            res.status(400).end()
+        }
+    })
+
+    app.post("/api/misc/danboorutags", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {tags} = req.body as {tags: string}
+            let danbooruTags = await serverFunctions.tags.convertToDanbooru(tags)
+            res.status(200).json({tags: danbooruTags})
+        } catch (e) {
+            console.log(e)
             res.status(400).end()
         }
     })

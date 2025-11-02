@@ -189,7 +189,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const copyTags = (event: React.MouseEvent) => {
+    const copyTags = async (event: React.MouseEvent) => {
         event.preventDefault()
         let combined = [artist?.tag || "", ...tags.map((t) => t.tag)]
         let commas = false
@@ -203,9 +203,15 @@ const ToolTip: React.FunctionComponent = (props) => {
             commas = true
             replaceDash = true
         }
-        let replacer = danbooru ? "_" : " "
-        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", replacer))
-        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        let outTags = ""
+        if (danbooru) {
+            outTags = await functions.http.post("/api/misc/danboorutags", 
+            {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
+        } else {
+            if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+            outTags = commas ? combined.join(", ") : combined.join(" ")
+        }
+        navigator.clipboard.writeText(outTags)
         setActionBanner("copy-tags")
     }
 
