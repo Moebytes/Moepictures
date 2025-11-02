@@ -58,6 +58,7 @@ import TakedownPostDialog from "./post/TakedownPostDialog"
 import UndeletePostDialog from "./post/UndeletePostDialog"
 import UpscalePostDialog from "./post/UpscalePostDialog"
 import AliasTagDialog from "./tag/AliasTagDialog"
+import BlockedTagsDialog from "./tag/BlockedTagsDialog"
 import CategorizeTagDialog from "./tag/CategorizeTagDialog"
 import DeleteAliasHistoryDialog from "./tag/DeleteAliasHistoryDialog"
 import DeleteTagDialog from "./tag/DeleteTagDialog"
@@ -149,6 +150,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <UndeletePostDialog/>
         <UpscalePostDialog/>
         <AliasTagDialog/>
+        <BlockedTagsDialog/>
         <CategorizeTagDialog/>
         <DeleteAliasHistoryDialog/>
         <DeleteTagDialog/>

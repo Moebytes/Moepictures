@@ -223,6 +223,7 @@ export type TagGetEndpoint<T extends string> =
     T extends "/api/tag/edit/request/list" ? {params: {offset?: number} | null, response: TagEditRequest[]} :
     T extends "/api/tag/history" ? {params: TagHistoryParams | null, response: TagHistory[]} :
     T extends "/api/alias/history" ? {params: {offset?: number, query?: string} | null, response: AliasHistorySearch[]} :
+    T extends "/api/tag/blockedtags" ? {params: null, response: string[]} :
     never
 
 export type TagPostEndpoint<T extends string> = 
@@ -243,6 +244,8 @@ export type TagPostEndpoint<T extends string> =
 export type TagPutEndpoint<T extends string> = 
     T extends "/api/tag/edit" ? {params: TagEditParams, response: string} :
     T extends "/api/tag/update" ? {params: {tag: string, column: TagUpdateColumns, value: any}, response: string} :
+    T extends "/api/tag/blocktags" ? {params: {tags: string[]}, response: string} :
+    T extends "/api/tag/unblocktags" ? {params: {tags: string[]}, response: string} :
     never
 
 export type TagDeleteEndpoint<T extends string> = 

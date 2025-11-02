@@ -39,7 +39,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {tagsPage} = usePageSelector()
     const {setTagsPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
-    const {setMassImplyDialog} = useTagDialogActions()
+    const {setMassImplyDialog, setBlockedTagsDialog} = useTagDialogActions()
     const {pageFlag, tagSearchFlag} = useFlagSelector()
     const {setPageFlag, setTagSearchFlag} = useFlagActions()
     const [sortType, setSortType] = useState("posts" as TagSort)
@@ -431,13 +431,27 @@ const TagsPage: React.FunctionComponent = (props) => {
         setMassImplyDialog(true)
     }
 
+    const blockedTagsDialog = () => {
+        setBlockedTagsDialog(true)
+    }
+
     const getMassImplyButton = () => {
-        if (session.banned) return null
         const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px", justifyContent: "flex-start"}
         if (session.username) {
             return (
                 <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <button className="item-button" onClick={() => massImplyDialog()}>{i18n.dialogs.massImply.title}</button>
+                </div>
+            )
+        }
+    }
+
+    const getBlockedTagsButton = () => {
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px", justifyContent: "flex-start"}
+        if (session.username) {
+            return (
+                <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <button className="item-button" onClick={() => blockedTagsDialog()}>＋</button>
                 </div>
             )
         }
@@ -461,6 +475,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </button>
                         </div>
                         {!mobile && permissions.isAdmin(session) ? getMassImplyButton() : null}
+                        {!mobile && permissions.isAdmin(session) ? getBlockedTagsButton() : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
@@ -528,7 +543,11 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    {mobile && permissions.isAdmin(session) ? <div className="item-row">{getMassImplyButton()}</div> : null}
+                    {mobile && permissions.isAdmin(session) ? 
+                    <div className="item-row" style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+                        {getMassImplyButton()}
+                        {getBlockedTagsButton()}
+                    </div> : null}
                     <div className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
                     </div>

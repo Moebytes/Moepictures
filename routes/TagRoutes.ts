@@ -856,6 +856,50 @@ const TagRoutes = (app: Express) => {
         }
     })
 
+    app.put("/api/tag/blocktags", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {tags} = req.body as {tags: string[]}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!tags?.length) return void res.status(400).send("Bad tags")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            for (const tag of tags) {
+                await sql.tag.insertBlockedTag(tag)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.put("/api/tag/unblocktags", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {tags} = req.body as {tags: string[]}
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!tags?.length) return void res.status(400).send("Bad tags")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            for (const tag of tags) {
+                await sql.tag.deleteBlockedTag(tag)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/tag/blockedtags", tagLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return void res.status(403).end()
+            const result = await sql.tag.blockedTags()
+            serverFunctions.sendEncrypted(result, req, res)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.put("/api/tag/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, column, value} = req.body as {tag: string, column: TagUpdateColumns, value: any}

@@ -224,6 +224,12 @@
     }
 }
 
+.dialog-button-square {
+    .dialog-button();
+    width: 35px;
+    height: 35px;
+}
+
 .dialog-button-img-small {
     filter: brightness(0);
     width: auto;
@@ -487,6 +493,28 @@
     user-select: none !important;
     -webkit-touch-callout: none !important;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
+.dialog-tag-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    max-height: 200px;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.dialog-tag-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: 1px solid transparent;
+    &:hover {
+        border: 1px solid var(--navbarText);
+    }
 }
 
 @media screen and (max-width: 500px) {

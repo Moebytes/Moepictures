@@ -97,10 +97,13 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
                                 <span className="dialog-title">{i18n.dialogs.aliasTag.title}</span>
+                            </div>
+                            <div className="dialog-center-row">
+                                <span className="dialog-text italic nowrap">{i18n.labels.aliasing} <span style={{color: "var(--text-alt)"}}>{aliasTagID}</span></span>
                             </div>
                             <div className="dialog-center-row">
                                 <span className="dialog-text">{i18n.labels.aliasTo}:</span>
@@ -120,7 +123,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">{i18n.dialogs.aliasTag.request}</span>
@@ -134,6 +137,9 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div> 
                         </> : <>
+                        <div className="dialog-center-row">
+                            <span className="dialog-text italic nowrap">{i18n.labels.aliasing} <span style={{color: "var(--text-alt)"}}>{aliasTagID}</span></span>
+                        </div>
                         <div className="dialog-center-row">
                             <span className="dialog-text">{i18n.labels.aliasTo}:</span>
                             <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>

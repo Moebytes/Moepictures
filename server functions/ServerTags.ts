@@ -7,7 +7,6 @@ import child_process from "child_process"
 import sharp from "sharp"
 import functions from "../functions/Functions"
 import serverFunctions from "./ServerFunctions"
-import tagConvert from "../assets/json/tag-convert.json"
 import {UploadImage, PostRating, UploadTag, MiniTag, PostTagged, Tag, WDTaggerResponse, 
 PostType, PostStyle, BulkTag} from "../types/Types"
 
@@ -170,7 +169,7 @@ export default class ServerTags {
 
     public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
         let tagArr = [] as string[]
-        let blockedTags = tagConvert.blockedTags
+        let blockedTags = await sql.tag.blockedTags()
         let tagReplaceMap = await sql.tag.tagReplaceMap()
         let artists = [{}] as UploadTag[]
         let characters = [{}] as UploadTag[]

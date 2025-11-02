@@ -805,12 +805,37 @@ export default class SQLTag {
     public static tagReplaceMap = async () => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT json_object_agg(tags."danbooruTag", tags."tag") AS tag_map
-                    FROM tags
-                    WHERE tags."danbooruTag" IS NOT NULL
+                SELECT json_object_agg(tags."danbooruTag", tags."tag") AS tag_map
+                FROM tags
+                WHERE tags."danbooruTag" IS NOT NULL
             `)
         }
         const result = await SQLQuery.run(query)
         return result[0].tag_map as {[key: string]: string}
+    }
+
+    public static blockedTags = async () => {
+        const query: QueryArrayConfig = {
+            text: /*sql*/`SELECT "blocked tags"."tag" FROM "blocked tags"`,
+            rowMode: "array"
+        }
+        const result = await SQLQuery.run(query)
+        return result.flat(Infinity) as string[]
+    }
+
+    public static insertBlockedTag = async (tag: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "blocked tags" ("tag") VALUES ($1) ON CONFLICT ("tag") DO NOTHING`,
+            values: [tag]
+        }
+        await SQLQuery.run(query)
+    }
+
+    public static deleteBlockedTag = async (tag: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "blocked tags" WHERE "blocked tags"."tag" = $1`),
+            values: [tag]
+        }
+        await SQLQuery.run(query)
     }
 }

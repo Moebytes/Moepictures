@@ -516,7 +516,8 @@
         "imageSources": "画像ソース",
         "imageLinks": "画像リンク",
         "altSource": "代替ソース",
-        "directLink": "ダイレクトリンク"
+        "directLink": "ダイレクトリンク",
+        "aliasing": "エイリアシング"
     },
     "errors": {
         "$401":"401エラー",
@@ -1184,6 +1185,9 @@
             "header": "この文字列を含むタグを一括インプリメントする。同じカテゴリのタグのみが影響を受けます。",
             "wildcard": "ワイルドカード",
             "implyTo": "を意味する"
+        },
+        "blockedTags": {
+            "title": "ブロックされたDanbooruタグ"
         },
         "qrcode": {
             "title": "QRコード"
