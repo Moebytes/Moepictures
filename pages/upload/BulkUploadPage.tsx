@@ -433,7 +433,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
                 data.artists = newArtists
             }
-            if (rawCharacter?.trim()) {
+
+            if (rawCharacter?.trim() && !currentArr[0].groupName) {
                 const characterArr = functions.util.cleanHTML(rawCharacter).trim().split(/[\n\r\s]+/g)
                 let newCharacters = [] as UploadTag[]
                 for (let i = 0; i < characterArr.length; i++) {
@@ -446,7 +447,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
                 data.characters = functions.util.removeDuplicates(data.characters)
             }
-            if (rawSeries?.trim()) {
+
+            if (rawSeries?.trim() && !currentArr[0].groupName) {
                 const seriesArr = functions.util.cleanHTML(rawSeries).trim().split(/[\n\r\s]+/g)
                 let newSeries = [] as UploadTag[]
                 for (let i = 0; i < seriesArr.length; i++) {
@@ -459,6 +461,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
                 data.series = functions.util.removeDuplicates(data.series)
             }
+
             if (rawAppendTags?.trim()) {
                 const appendData = functions.util.cleanHTML(rawAppendTags).trim().split(/[\n\r\s]+/g)
                 let toAppend = [] as string[]
@@ -475,6 +478,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 toRemove.forEach(tag => tagSet.delete(tag))
                 data.tags = Array.from(tagSet)
             }
+
             if (rawMetaTags?.trim()) {
                 const newMeta = functions.util.cleanHTML(rawMetaTags).trim().split(/[\n\r\s]+/g)
                 if (data.tags.filter(Boolean).length === 1) {
@@ -484,6 +488,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
                 data.tags = functions.util.removeDuplicates(data.tags)
             }
+            
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)

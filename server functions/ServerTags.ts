@@ -213,11 +213,16 @@ export default class ServerTags {
             if (current.name.includes("chibi")) style = "chibi"
             if (current.name.includes("pixel")) style = "pixel"
             if (current.name.includes("daki")) style = "daki"
+            if (current.name.includes("_3d")) style = "3d"
             if (current.name.includes("sketch")) style = "sketch"
             if (current.name.includes("lineart")) style = "lineart"
             if (current.name.includes("promo")) style = "promo"
-            if (current.name.includes("comic") && type === "image")  type = "comic"
-            if (tagArr.includes("comic") && type === "image")  type = "comic"
+            if (current.name.includes("comic") && type === "image") type = "comic"
+            if (tagArr.includes("comic") && type === "image") type = "comic"
+            if (current.name.includes("color-comic")) {
+                type = "comic"
+                tagArr.push("full-color-comic")
+            }
             if (current.name.includes("r18")) rating = functions.r18()
             if (seriesStrArr?.includes("original")) {
                 charStrArr = ["original"]
@@ -313,11 +318,16 @@ export default class ServerTags {
             if (current.name.includes("chibi")) style = "chibi"
             if (current.name.includes("pixel")) style = "pixel"
             if (current.name.includes("daki")) style = "daki"
+            if (current.name.includes("_3d")) style = "3d"
             if (current.name.includes("sketch")) style = "sketch"
             if (current.name.includes("lineart")) style = "lineart"
             if (current.name.includes("promo")) style = "promo"
             if (current.name.includes("comic") && type === "image") type = "comic"
-            if (tagArr.includes("comic") && type === "image")  type = "comic"
+            if (tagArr.includes("comic") && type === "image") type = "comic"
+            if (current.name.includes("color-comic")) {
+                type = "comic"
+                tagArr.push("full-color-comic")
+            }
             if (current.name.includes("r18")) rating = functions.r18()
             if (tagArr.includes("multiple_girls")) {
                 tagArr.push("multiple-characters")

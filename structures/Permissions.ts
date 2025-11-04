@@ -62,6 +62,7 @@ export default class Permissions {
     }
 
     public static noAPIEncryption = (session: ServerSession) => {
+        if (session.apiKey) return true
         return false
     }
 
