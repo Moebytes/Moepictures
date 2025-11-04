@@ -291,6 +291,13 @@ export default class ServerSources {
         } else {
             bytes = current.bytes
         }
+
+        let pngBytes = bytes
+        if (current.ext !== "jpg" && current.ext !== "png") {
+            let buffer = await sharp(new Uint8Array(bytes)).png().toBuffer()
+            pngBytes = Object.values(new Uint8Array(buffer))
+        }
+
         let source = ""
         let artist = ""
         let title = ""
@@ -329,7 +336,7 @@ export default class ServerSources {
                 sourceLinks = data.sourceLinks
                 pixivTags = data.pixivTags
 
-                mirrors = await serverFunctions.links.booruLinks(bytes)
+                mirrors = await serverFunctions.links.booruLinks(pngBytes)
                 mirrors = functions.util.removeItem(mirrors, source)
                 const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
                 return {
@@ -373,7 +380,7 @@ export default class ServerSources {
                 rating = data.rating
                 sourceLinks = data.sourceLinks
 
-                mirrors = await serverFunctions.links.booruLinks(bytes)
+                mirrors = await serverFunctions.links.booruLinks(pngBytes)
                 mirrors = functions.util.removeItem(mirrors, source)
                 const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
                 return {
@@ -397,12 +404,6 @@ export default class ServerSources {
             }
         } catch (e) {
             console.log(e)
-        }
-
-        let pngBytes = bytes
-        if (current.ext !== "jpg" && current.ext !== "png") {
-            let buffer = await sharp(new Uint8Array(bytes)).png().toBuffer()
-            pngBytes = Object.values(new Uint8Array(buffer))
         }
 
         // Fallback to Saucenao - this has high rate limits
