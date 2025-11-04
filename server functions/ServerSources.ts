@@ -6,6 +6,7 @@ import {Scraper} from "@the-convocation/twitter-scraper"
 import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
 import FormData from "form-data"
 import axios from "axios"
+import sharp from "sharp"
 import serverFunctions from "./ServerFunctions"
 import functions from "../functions/Functions"
 import {UploadImage, PostRating, UploadTag, PixivResponse, SaucenaoResponse} from "../types/Types"
@@ -398,8 +399,14 @@ export default class ServerSources {
             console.log(e)
         }
 
+        let pngBytes = bytes
+        if (current.ext !== "jpg" && current.ext !== "png") {
+            let buffer = await sharp(new Uint8Array(bytes)).png().toBuffer()
+            pngBytes = Object.values(new Uint8Array(buffer))
+        }
+
         // Fallback to Saucenao - this has high rate limits
-        let results = await this.saucenaoLookup(bytes)
+        let results = await this.saucenaoLookup(pngBytes)
         if (results.length) {
             const pixiv = results.filter((r) => r.header.index_id === 5)
             const twitter = results.filter((r) => r.header.index_id === 41)
