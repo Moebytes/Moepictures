@@ -664,13 +664,13 @@ export default class SQLSearch {
                     COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
                     COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     COUNT(*) OVER() AS "tagCount",
-                    array_length("tag map posts"."posts", 1) AS "postCount",
+                    COALESCE(array_length("tag map posts"."posts", 1), 0) AS "postCount",
                     COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
                     LEFT JOIN implications ON implications."tag" = tags."tag"
-                    JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                    LEFT JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
                     ${whereQuery}
                     GROUP BY "tags"."tagID", "tag map posts"."posts"
                     ${sortQuery}

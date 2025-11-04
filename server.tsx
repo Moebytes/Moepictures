@@ -728,6 +728,16 @@ const deleteQueuedUsers = async () => {
   }
 }
 
+const pruneEmptyTags = async () => {
+  let tagCounts = await sql.tag.tagCounts([])
+  let empty = tagCounts.filter((c) => Number(c.count) === 0)
+  if (empty.length) {
+    for (const tag of empty) {
+      if (tag.type !== "meta") await sql.tag.deleteTag(tag.tag)
+    }
+  }
+}
+
 const backupDatabase = async () => {
   await sql.backupDB()
 }
@@ -738,6 +748,7 @@ const runDaily = async () => {
   await deleteQueuedPosts()
   await deleteQueuedUnverifiedPosts()
   await deleteQueuedUsers()
+  await pruneEmptyTags()
 }
 
 const run = async () => {

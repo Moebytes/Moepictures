@@ -294,22 +294,22 @@ export default class SQLTag {
 
     /** Get tag counts. */
     public static tagCounts = async (tags: string[]) => {
-        let whereQuery = tags?.[0] ? `WHERE "tag map posts".tag = ANY($1)` : ""
+        let whereQuery = tags?.[0] ? `WHERE "tags".tag = ANY($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT "tag map posts".tag, 
-                    array_length("tag map posts"."posts", 1) AS count,
+                    SELECT "tags".tag, 
+                    COALESCE(array_length("tag map posts"."posts", 1), 0) AS count,
                     "tags".type, "tags".image, "tags"."imageHash", 
                     "tags"."hidden", "tags"."r18", "tags"."description",
                     "tags"."social", "tags"."twitter", "tags"."website",
                     "tags"."wikipedia"
-                    FROM "tag map posts"
-                    LEFT JOIN tags ON tags."tag" = "tag map posts".tag
+                    FROM tags
+                    LEFT JOIN "tag map posts" ON "tag map posts".tag = tags.tag
                     ${whereQuery}
-                    GROUP BY "tag map posts".tag, "tags".type, "tags".image, 
+                    GROUP BY "tags".tag, "tags".type, "tags".image,
                     "tags"."imageHash", "tags"."hidden", "tags"."r18",
                     "tags"."description", "tags"."social", "tags"."twitter",
-                    "tags"."website", "tags"."wikipedia"
+                    "tags"."website", "tags"."wikipedia", "tag map posts"."posts"
                     ORDER BY count DESC
             `)
         }
