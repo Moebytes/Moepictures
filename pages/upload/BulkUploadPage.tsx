@@ -369,19 +369,29 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const sourceArr = sourceArrData[i]
 
             let hasUpscaled = upscaledFiles.length ? true : false
-            let sourceData: SourceLookup
-            let tagData: TagLookup
-            try {
-                sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
-            } catch {
-                await functions.timeout(3000)
-                sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
+            let sourceData = {} as SourceLookup
+            let tagData = {} as TagLookup
+
+            for (let attempt = 1; attempt <= 5; attempt++) {
+                try {
+                    sourceData = await functions.http.post("/api/misc/sourcelookup", {current: currentArr[0], rating}, session, setSessionFlag)
+                    if (!sourceData.source) throw new Error("bad lookup")
+                    break
+                } catch {
+                    console.warn(`Source lookup failed for ${currentArr[0].name} (#${attempt})`)
+                    await functions.timeout(3000)
+                }
             }
-            try {
-                tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
-            } catch {
-                await functions.timeout(3000)
-                tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+
+            for (let attempt = 1; attempt <= 5; attempt++) {
+                try {
+                    tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)
+                    if (!tagData.tags) throw new Error("bad lookup")
+                    break
+                } catch {
+                    console.warn(`Tag lookup failed for ${currentArr[0].name} (#${attempt})`)
+                    await functions.timeout(3000)
+                }
             }
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
@@ -488,7 +498,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
                 data.tags = functions.util.removeDuplicates(data.tags)
             }
-            
+
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
