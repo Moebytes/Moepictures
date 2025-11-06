@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class EShuushuuExtractor extends SourceExtractor {
+export class EShuushuuSource extends AbstractSource {
     public matches = (url: string) => {
         return /e-shuushuu\.net/.test(url)
     }

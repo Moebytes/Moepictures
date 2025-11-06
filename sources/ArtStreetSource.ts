@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class ArtStreetExtractor extends SourceExtractor {
+export class ArtStreetSource extends AbstractSource {
     public matches = (url: string) => {
         return /medibang\.com/.test(url)
     }

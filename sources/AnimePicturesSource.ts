@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class AnimePicturesExtractor extends SourceExtractor {
+export class AnimePicturesSource extends AbstractSource {
     public matches = (url: string) => {
         return /anime-pictures\.net/.test(url)
     }

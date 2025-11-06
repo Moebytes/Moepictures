@@ -1,11 +1,11 @@
 import path from "path"
 import Pixiv from "pixiv.ts"
 import JSZip from "jszip"
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
 let pixiv: Pixiv
 
-export class PixivExtractor extends SourceExtractor {
+export class PixivSource extends AbstractSource {
     public get headers() {
         return {...super.headers, Referer: "https://www.pixiv.net/"}
     }

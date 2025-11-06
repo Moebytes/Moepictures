@@ -1,9 +1,9 @@
 import DeviantArt from "deviantart.ts"
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
 let deviantart: DeviantArt
 
-export class DeviantArtExtractor extends SourceExtractor {
+export class DeviantArtSource extends AbstractSource {
     public matches = (url: string) => {
         return /deviantart\.com/.test(url)
     }

@@ -1,9 +1,9 @@
 import snoowrap from "snoowrap"
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
 let reddit: snoowrap
 
-export class RedditExtractor extends SourceExtractor {
+export class RedditSource extends AbstractSource {
     public init = async () => {
         try {
             reddit = new snoowrap({

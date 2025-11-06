@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class ZerochanExtractor extends SourceExtractor {
+export class ZerochanSource extends AbstractSource {
     public matches = (url: string) => {
         return /zerochan\.net/.test(url)
     }

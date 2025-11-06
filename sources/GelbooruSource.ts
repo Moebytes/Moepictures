@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class GelbooruExtractor extends SourceExtractor {
+export class GelbooruSource extends AbstractSource {
     public matches = (url: string) => {
         return /gelbooru\.com/.test(url) || /safebooru\.org/.test(url)
     }

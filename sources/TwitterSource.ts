@@ -1,11 +1,11 @@
 import {Scraper} from "@the-convocation/twitter-scraper"
 // @ts-ignore
 import {cycleTLSFetch} from "@the-convocation/twitter-scraper/cycletls"
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
 let twitter: Scraper
 
-export class TwitterExtractor extends SourceExtractor {
+export class TwitterSource extends AbstractSource {
     public init = async () => {
         try {
             twitter = new Scraper({fetch: cycleTLSFetch})

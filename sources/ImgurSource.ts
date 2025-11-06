@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class ImgurExtractor extends SourceExtractor {
+export class ImgurSource extends AbstractSource {
     public matches = (url: string) => {
         return /imgur\.com/.test(url)
     }

@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class YandereExtractor extends SourceExtractor {
+export class YandereSource extends AbstractSource {
     public matches = (url: string) => {
         return /yande\.re/.test(url) || /konachan\.com/.test(url) || /konachan\.net/.test(url)
     }

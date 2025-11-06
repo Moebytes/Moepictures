@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class NewgroundsExtractor extends SourceExtractor {
+export class NewgroundsSource extends AbstractSource {
     public matches = (url: string) => {
         return /newgrounds\.com/.test(url)
     }

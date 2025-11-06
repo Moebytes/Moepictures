@@ -17,7 +17,7 @@ import sql from "../sql/SQLQuery"
 import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import {stripIndents} from "common-tags"
-import extractor from "../extractor/Extractor"
+import source from "../sources/Source"
 import {ContactParams, Attachment, CopyrightParams, OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(path.join(__dirname, dotline))
@@ -125,7 +125,7 @@ const MiscRoutes = (app: Express) => {
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")
-            let images = await extractor.extractImages(link)
+            let images = await source.extractImages(link)
             res.status(200).send(images)
         } catch {
             res.status(400).end()

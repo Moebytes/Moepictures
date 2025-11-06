@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class SkebExtractor extends SourceExtractor {
+export class SkebSource extends AbstractSource {
     public get headers() {
         return {
             ...super.headers, 

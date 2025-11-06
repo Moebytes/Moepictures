@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class TumblrExtractor extends SourceExtractor {
+export class TumblrSource extends AbstractSource {
     public matches = (url: string) => {
         return /tumblr\.com/.test(url)
     }

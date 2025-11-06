@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class DanbooruExtractor extends SourceExtractor {
+export class DanbooruSource extends AbstractSource {
     public matches = (url: string) => {
         return /danbooru\.donmai\.us/.test(url)
     }

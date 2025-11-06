@@ -1,6 +1,6 @@
 import functions from "../functions/Functions"
 
-export abstract class SourceExtractor {
+export abstract class AbstractSource {
     public constructor(public url: string) {}
 
     public get headers(): {[key: string]: string} {

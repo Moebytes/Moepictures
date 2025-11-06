@@ -1,6 +1,6 @@
-import {SourceExtractor} from "./SourceExtractor"
+import {AbstractSource} from "./AbstractSource"
 
-export class PinterestExtractor extends SourceExtractor {
+export class PinterestSource extends AbstractSource {
     public matches = (url: string) => {
         return /pinterest\.com/.test(url)
     }
