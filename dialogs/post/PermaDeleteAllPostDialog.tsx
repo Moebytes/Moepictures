@@ -34,7 +34,7 @@ const PermaDeleteAllPostDialog: React.FunctionComponent = (props) => {
 
     const emptyRecycleBin = async () => {
         if (permissions.isAdmin(session)) {
-            await functions.http.delete("/api/post/emptybin", null, session, setSessionFlag)
+            functions.http.delete("/api/post/emptybin", null, session, setSessionFlag)
         }
         setHistoryFlag(true)
         setPermaDeleteAllDialog(false)

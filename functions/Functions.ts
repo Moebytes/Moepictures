@@ -63,7 +63,7 @@ export default class Functions {
     }
 
     public static r15 = () => {
-        return "hot" as PostRating
+        return "sexy" as PostRating
     }
 
     public static r13 = () => {

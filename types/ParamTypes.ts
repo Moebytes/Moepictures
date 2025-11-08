@@ -20,7 +20,7 @@ export type PostRating =
     | "all"
     | "all+h"
     | "cute" 
-    | "hot" 
+    | "sexy" 
     | "erotic" 
     | "hentai"
 

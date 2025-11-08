@@ -165,7 +165,7 @@ export default class ValidationFunctions {
     public static validRating = (rating: PostRating, all?: boolean) => {
         if (all) if (rating === "all" || rating === "all+h") return true
         if (rating === "cute" ||
-            rating === "hot" ||
+            rating === "sexy" ||
             rating === "erotic" ||
             rating === "hentai") return true 
         return false
