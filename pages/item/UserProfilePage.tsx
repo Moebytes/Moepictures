@@ -177,7 +177,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updatePending = async () => {
          const pending = await functions.http.get("/api/post/pending", null, session, setSessionFlag)
          const images = pending.map((p) => functions.link.getUnverifiedThumbnailLink(p.images[0], "tiny", session, mobile))
-         console.log(images)
          setPending(pending)
          setPendingImages(images)
     }
@@ -563,14 +562,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }
 
-    const searchTag = (event: React.MouseEvent, tag?: string) => {
+    const openTag = (event: React.MouseEvent, tag?: string) => {
         if (!tag) return
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/posts?query=${tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(tag)}`, "_blank")
         } else {
-            navigate("/posts")
-            setSearch(tag)
-            setSearchFlag(true)
+            navigate(`/tag/${encodeURIComponent(tag)}`)
         }
     }
 
@@ -581,7 +579,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <span className="user-title">{i18n.user.favoriteTags} <span className="user-text-alt">{favoriteTags.length}</span></span>
                     <div className="tag-alias-button-container">
                         {favoriteTags.map((tag) =>
-                            <button className="tag-alias-button" onClick={(event) => searchTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
+                            <button className="tag-alias-button" onClick={(event) => openTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
                         )}
                     </div>
                 </div> 

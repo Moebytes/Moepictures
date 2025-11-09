@@ -241,14 +241,13 @@ const UserPage: React.FunctionComponent = () => {
         navigate(`/posts/${user.username}`)
     }
 
-    const searchTag = (event: React.MouseEvent, tag?: string) => {
+    const openTag = (event: React.MouseEvent, tag?: string) => {
         if (!tag) return
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/posts?query=${tag}`, "_blank")
+            window.open(`/tag/${encodeURIComponent(tag)}`, "_blank")
         } else {
-            navigate("/posts")
-            setSearch(tag)
-            setSearchFlag(true)
+            navigate(`/tag/${encodeURIComponent(tag)}`)
         }
     }
 
@@ -261,7 +260,7 @@ const UserPage: React.FunctionComponent = () => {
                     <span className="user-title">{i18n.user.favoriteTags} <span className="user-text-alt">{favoriteTags.length}</span></span>
                     <div className="tag-alias-button-container">
                         {favoriteTags.map((tag) =>
-                            <button className="tag-alias-button" onClick={(event) => searchTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
+                            <button className="tag-alias-button" onClick={(event) => openTag(event, tag.tag)}>{tag.tag.replaceAll("-", " ")}</button>
                         )}
                     </div>
                 </div> 

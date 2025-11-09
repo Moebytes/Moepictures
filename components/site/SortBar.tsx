@@ -356,7 +356,7 @@ const SortBar: React.FunctionComponent = (props) => {
             return (
                 <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
                     <img className="sortbar-img" src={pixel} style={{filter: getFilter()}}/>
-                    <span className="sortbar-text">{i18n.sortbar.style.chibi}</span>
+                    <span className="sortbar-text">{i18n.sortbar.style.pixel}</span>
                 </div>
             )
         } else if (styleType === "chibi") {
