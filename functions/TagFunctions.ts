@@ -215,11 +215,11 @@ export default class TagFunctions {
         const tags: Set<string> = new Set()
         if (!rawTags) return {tagGroups, tags: []}
       
-        const groupRegex = /([a-zA-Z0-9_-]+)\{([^}]+)\}/g
+        const groupRegex = /([a-zA-Z0-9_-]+)\s*\{([^}]+)\}/g
         let match = null as RegExpExecArray | null
       
         while ((match = groupRegex.exec(rawTags)) !== null) {
-          const name = match[1]
+          const name = match[1].trim()
           const groupTags = match[2].trim().split(/\s+/)
           tagGroups.push({name, tags: groupTags})
           groupTags.forEach(tag => tags.add(tag))
