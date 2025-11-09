@@ -301,7 +301,7 @@ const SearchRoutes = (app: Express) => {
                 const social = search.replace("social:", "").trim()
                 result = await sql.search.tagSocialSearch(social)
             } else {
-                result = await sql.search.tagSearch(search, sort, type, limit, offset)
+                result = await sql.search.tagSearch(search, sort, type, limit, offset, req.session)
             }
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag: any) => !tag.hidden)

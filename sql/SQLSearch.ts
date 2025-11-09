@@ -609,7 +609,8 @@ export default class SQLSearch {
     }
 
     /** Tag search */
-    public static tagSearch = async (search: string, sort: string, type?: string, limit?: number, offset?: number) => {
+    public static tagSearch = async (search: string, sort: string, type?: string, limit?: number, offset?: number, 
+        session?: ServerSession) => {
         let whereArray = [] as string[]
         let values = [] as any
         let i = 1
@@ -639,7 +640,9 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 200) limit = 200
+            if (!Boolean(session?.apiKey)) {
+                if (Number(limit) > 200) limit = 200
+            }
             values.push(limit)
             i++
         }
