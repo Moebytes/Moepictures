@@ -2,6 +2,8 @@ import axios from "axios"
 import sharp from "sharp"
 import phash from "sharp-phash"
 import crypto from "crypto"
+import path from "path"
+import fs from "fs"
 import * as mm from "music-metadata"
 import {Translator} from "@vitalets/google-translate-api"
 import {createCanvas, loadImage} from "@napi-rs/canvas"
@@ -107,5 +109,15 @@ export default class ServerUtil {
         const ctx = canvas.getContext("2d")
         ctx.drawImage(img, 0, 0)
         return canvas.toBuffer("image/png")
+    }
+
+    public static dumpImage = (imageBuffer: Buffer) => {
+        const folder = path.join(__dirname, "./dump")
+        if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+
+        const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
+        const imagePath = path.join(folder, filename)
+        fs.writeFileSync(imagePath, imageBuffer)
+        return imagePath
     }
 }

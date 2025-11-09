@@ -885,6 +885,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
             setMetaTags(tagLookup.meta.join(" "))
             setRawTags(tagLookup.tags.join(" "))
+            setRating(tagLookup.rating)
             setDanbooruError(false)
         } catch (e) {
             console.log(e)

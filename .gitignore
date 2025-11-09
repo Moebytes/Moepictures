@@ -28,5 +28,6 @@ structures/Encryption.ts
 # Live2D Cubism
 assets/live2d/*
 
-# WDTagger
+# Models
 assets/python/wdtagger
+assets/python/imagerater

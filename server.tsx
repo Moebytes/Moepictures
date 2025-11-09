@@ -742,6 +742,11 @@ const backupDatabase = async () => {
   await sql.backupDB()
 }
 
+const runOnce = async () => {
+  await serverFunctions.tags.downloadWDTagger()
+  await serverFunctions.tags.downloadImageRater()
+}
+
 const runDaily = async () => {
   await backupDatabase()
   await deleteExpiredTokens()
@@ -752,8 +757,7 @@ const runDaily = async () => {
 }
 
 const run = async () => {
-  await sql.createDB()
-  await serverFunctions.tags.downloadWDTagger()
+  runOnce()
   runDaily()
   setInterval(runDaily, 24 * 60 * 60 * 1000)
   let port = process.env.PORT || 8082

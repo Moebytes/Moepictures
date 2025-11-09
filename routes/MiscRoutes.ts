@@ -258,17 +258,14 @@ const MiscRoutes = (app: Express) => {
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
-            const buffer = Buffer.from(req.body, "binary") as any
-            const folder = path.join(__dirname, "./dump")
-            if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+            const buffer = Buffer.from(req.body, "binary")
+            const imagePath = serverFunctions.util.dumpImage(buffer)
 
-            const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
-            const imagePath = path.join(folder, filename)
-            fs.writeFileSync(imagePath, buffer)
             const scriptPath = path.join(__dirname, "../../assets/python/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str.match(/\[.*?\]/gm)?.[0]) as OCRResponse[]
+            
             fs.unlinkSync(imagePath)
             processingQueue.delete(req.session.username)
             res.status(200).json(json)

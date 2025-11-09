@@ -152,19 +152,51 @@ export default class ServerTags {
 
     public static wdtagger = async (bytes: number[]) => {
         const buffer = Buffer.from(bytes)
-        const folder = path.join(__dirname, "./dump")
-        if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+        const imagePath = serverFunctions.util.dumpImage(buffer)
 
-        const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
-        const imagePath = path.join(folder, filename)
-        fs.writeFileSync(imagePath, buffer)
         const scriptPath = path.join(__dirname, "../../assets/python/wdtagger.py")
         const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
         let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${wdTaggerPath}"`
         const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
         const json = JSON.parse(str.match(/{.*?}/gm)?.[0]) as WDTaggerResponse
+
         fs.unlinkSync(imagePath)
         return json
+    }
+
+    public static downloadImageRater = async () => {
+        const raterPath = path.join(__dirname, "../../assets/python/imagerater")
+        if (!fs.existsSync(raterPath)) fs.mkdirSync(raterPath, {recursive: true})
+        const configPath = path.join(raterPath, "config.json")
+        const modelPath = path.join(raterPath, "model.safetensors")
+        const preprocessPath = path.join(raterPath, "preprocessor_config.json")
+        if (!fs.existsSync(configPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-rating/resolve/main/config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(preprocessPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-rating/resolve/main/preprocessor_config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(preprocessPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading image rater...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-rating/resolve/main/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static rateImage = async (bytes: number[]) => {
+        const buffer = Buffer.from(bytes)
+        const imagePath = serverFunctions.util.dumpImage(buffer)
+
+        const scriptPath = path.join(__dirname, "../../assets/python/imagerater.py")
+        const modelPath = path.join(__dirname, "../../assets/python/imagerater")
+        let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${modelPath}"`
+        const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+        
+        fs.unlinkSync(imagePath)
+        return str.trim()
     }
 
     public static tagLookup = async (current: UploadImage, type: PostType, rating: PostRating, style: PostStyle, hasUpscaled?: boolean) => {
@@ -194,7 +226,9 @@ export default class ServerTags {
 
         let booruLinks = await serverFunctions.links.booruLinks(pngBytes)
         let {tagData, danbooruLink, newRating} = await serverFunctions.links.testBooruLinks(booruLinks, rating)
-        rating = newRating
+        rating = functions.highestRating(rating, newRating)
+        let predictedRating = await this.rateImage(pngBytes).catch(() => null)
+        if (predictedRating) rating = functions.highestRating(rating, predictedRating)
 
         if (Object.keys(tagData).length) {
             tagArr = tagData.tags.split(" ")
