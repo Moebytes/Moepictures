@@ -62,6 +62,10 @@ export default class UtilFunctions {
         return this.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "").replace(/\r?\n|\r/g, "")
     }
 
+    public static removeDiacritics = (text: string) => {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    }
+
     public static removeDuplicates = <T>(array: T[]) => {
         const set = new Set<string>()
         return array.filter(item => {

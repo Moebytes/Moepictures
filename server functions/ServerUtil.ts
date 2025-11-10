@@ -7,8 +7,9 @@ import fs from "fs"
 import * as mm from "music-metadata"
 import {Translator} from "@vitalets/google-translate-api"
 import {createCanvas, loadImage} from "@napi-rs/canvas"
-import Kuroshiro from "kuroshiro"
-import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
+import wanakana from "wanakana"
+import pinyin from "pinyin"
+import * as hangul from "hangul-romanization"
 import functions from "../functions/Functions"
 
 export default class ServerUtil {
@@ -32,14 +33,45 @@ export default class ServerUtil {
         return translated
     }
 
-    public static romajinize = async (words: string[]) => {
-        const kuroshiro = new Kuroshiro()
-        await kuroshiro.init(new KuromojiAnalyzer())
-        const romajinize = async (text: string) => {
-            const result = await kuroshiro.convert(text, {mode: "spaced", to: "romaji"})
-            return result.replace(/<\/?[^>]+(>|$)/g, "")
+    public static detectCJK = (text: string) => {
+        const result = {
+            chinese: false,
+            japanese: false,
+            korean: false,
+            diacritics: false
         }
-        let romajinized = await Promise.all(words.map((w) => romajinize(w)))
+    
+        const chineseRegex = /[\u4E00-\u9FFF]/
+        const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF\u4E00-\u9FFF]/
+        const koreanRegex = /[\uAC00-\uD7AF\u1100-\u11FF]/
+        const diacriticsRegex = /[\u00C0-\u017F\u1E00-\u1EFF\u0300-\u036F]/
+    
+        if (chineseRegex.test(text)) result.chinese = true
+        if (japaneseRegex.test(text)) result.japanese = true
+        if (koreanRegex.test(text)) result.korean = true
+        if (diacriticsRegex.test(text.normalize("NFD"))) result.diacritics = true
+    
+        return result
+    }
+
+    public static romanizeTag = (tag: string) => {
+        let attributes = this.detectCJK(tag)
+        let text = tag
+        if (attributes.japanese) {
+            text = wanakana.toRomaji(text)
+        }
+        if (attributes.chinese) {
+            text = pinyin(text, {style: pinyin.STYLE_NORMAL}).flat().join("-")
+        }
+        if (attributes.korean) {
+            text = hangul.convert(text)
+        }
+        text = functions.util.removeDiacritics(text)
+        return functions.tag.cleanTag(text)
+    }
+
+    public static romajinize = async (words: string[]) => {
+        let romajinized = await Promise.all(words.map((w) => this.romanizeTag(w)))
         return romajinized as string[]
     }
 
