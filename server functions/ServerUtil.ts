@@ -143,13 +143,14 @@ export default class ServerUtil {
         return canvas.toBuffer("image/png")
     }
 
-    public static dumpImage = (imageBuffer: Buffer) => {
+    public static dumpImage = async (imageBuffer: Buffer) => {
         const folder = path.join(__dirname, "./dump")
         if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
 
         const filename = `${Math.floor(Math.random() * 100000000)}.png`
         const imagePath = path.join(folder, filename)
-        fs.writeFileSync(imagePath, imageBuffer)
+        let pngBuffer = await sharp(imageBuffer).png().toBuffer()
+        fs.writeFileSync(imagePath, pngBuffer)
         return imagePath
     }
 

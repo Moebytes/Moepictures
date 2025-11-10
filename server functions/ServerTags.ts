@@ -152,7 +152,7 @@ export default class ServerTags {
 
     public static wdtagger = async (bytes: number[]) => {
         const buffer = Buffer.from(bytes)
-        const imagePath = serverFunctions.util.dumpImage(buffer)
+        const imagePath = await serverFunctions.util.dumpImage(buffer)
 
         const scriptPath = path.join(__dirname, "../../assets/python/wdtagger.py")
         const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
@@ -188,7 +188,7 @@ export default class ServerTags {
 
     public static rateImage = async (bytes: number[]) => {
         const buffer = Buffer.from(bytes)
-        const imagePath = serverFunctions.util.dumpImage(buffer)
+        const imagePath = await serverFunctions.util.dumpImage(buffer)
 
         const scriptPath = path.join(__dirname, "../../assets/python/imagerater.py")
         const modelPath = path.join(__dirname, "../../assets/python/imagerater")

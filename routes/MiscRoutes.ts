@@ -261,7 +261,7 @@ const MiscRoutes = (app: Express) => {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
             const buffer = Buffer.from(req.body, "binary")
-            const imagePath = serverFunctions.util.dumpImage(buffer)
+            const imagePath = await serverFunctions.util.dumpImage(buffer)
 
             const scriptPath = path.join(__dirname, "../../assets/python/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
@@ -285,7 +285,7 @@ const MiscRoutes = (app: Express) => {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
             const buffer = Buffer.from(req.body, "binary")
-            const imagePath = serverFunctions.util.dumpImage(buffer)
+            const imagePath = await serverFunctions.util.dumpImage(buffer)
 
             let outName = `${path.basename(imagePath, path.extname(imagePath))}_output${path.extname(imagePath)}`
             let outPath = path.join(path.dirname(imagePath), outName)
@@ -315,7 +315,7 @@ const MiscRoutes = (app: Express) => {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
             const buffer = Buffer.from(req.body, "binary")
-            const imagePath = serverFunctions.util.dumpImage(buffer)
+            const imagePath = await serverFunctions.util.dumpImage(buffer)
 
             let outName = `${path.basename(imagePath, path.extname(imagePath))}_output${path.extname(imagePath)}`
             let outPath = path.join(path.dirname(imagePath), outName)

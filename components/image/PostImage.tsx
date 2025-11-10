@@ -99,6 +99,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         if (!segmentated) {
             setSegmentateLink(getCurrentLink())
         } else {
+            setShowLineart(false)
             setShowSegmentate((prev: boolean) => !prev)
         }
     }
@@ -107,6 +108,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         if (!lineart) {
             setLineartLink(getCurrentLink())
         } else {
+            setShowSegmentate(false)
             setShowLineart((prev: boolean) => !prev)
         }
     }
