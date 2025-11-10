@@ -34,7 +34,6 @@ const SegmentateDialog: React.FunctionComponent = (props) => {
         const arrayBuffer = await functions.http.getBuffer(segmentateLink)
         const bytes = new Uint8Array(arrayBuffer)
         const resultBuffer = await functions.http.postBuffer("/api/misc/segmentate", Object.values(bytes), session)
-        console.log(resultBuffer)
         const base64 = functions.byte.arrayBufferToBase64(resultBuffer)
         setSegmentateFlag(base64)
         setSegmentateLink(null)

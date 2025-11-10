@@ -34,7 +34,6 @@ const LineartDialog: React.FunctionComponent = (props) => {
         const arrayBuffer = await functions.http.getBuffer(lineartLink)
         const bytes = new Uint8Array(arrayBuffer)
         const resultBuffer = await functions.http.postBuffer("/api/misc/lineart", Object.values(bytes), session)
-        console.log(resultBuffer)
         const base64 = functions.byte.arrayBufferToBase64(resultBuffer)
         setLineartFlag(base64)
         setLineartLink(null)
