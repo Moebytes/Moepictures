@@ -724,6 +724,8 @@ const backupDatabase = async () => {
 const runOnce = async () => {
   await serverFunctions.tags.downloadWDTagger()
   await serverFunctions.tags.downloadImageRater()
+  await serverFunctions.util.downloadSegmentator()
+  await serverFunctions.util.downloadLineartExtractor()
 }
 
 const runDaily = async () => {

@@ -147,9 +147,33 @@ export default class ServerUtil {
         const folder = path.join(__dirname, "./dump")
         if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
 
-        const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
+        const filename = `${Math.floor(Math.random() * 100000000)}.png`
         const imagePath = path.join(folder, filename)
         fs.writeFileSync(imagePath, imageBuffer)
         return imagePath
+    }
+
+    public static downloadSegmentator = async () => {
+        const segmentatorPath = path.join(__dirname, "../../assets/python/segmentator")
+        if (!fs.existsSync(segmentatorPath)) fs.mkdirSync(segmentatorPath, {recursive: true})
+        const modelPath = path.join(segmentatorPath, "anime-segmentation.ckpt")
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading anime segmentator...")
+            const data = await axios.get(`https://huggingface.co/skytnt/anime-seg/resolve/main/isnetis.ckpt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static downloadLineartExtractor = async () => {
+        const lineartPath = path.join(__dirname, "../../assets/python/sketchextractor")
+        if (!fs.existsSync(lineartPath)) fs.mkdirSync(lineartPath, {recursive: true})
+        const modelPath = path.join(lineartPath, "anime2sketch.pth")
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading anime sketch extractor...")
+            const data = await axios.get(`https://huggingface.co/lllyasviel/Annotators/resolve/main/netG.pth`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
     }
 }

@@ -11,6 +11,8 @@ import fs from "fs"
 import phash from "sharp-phash"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
+import waifu2x from "waifu2x"
+import sharp from "sharp"
 import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
@@ -269,6 +271,70 @@ const MiscRoutes = (app: Express) => {
             fs.unlinkSync(imagePath)
             processingQueue.delete(req.session.username)
             res.status(200).json(json)
+        } catch (e) {
+            console.log(e)
+            if (req.session.username) processingQueue.delete(req.session.username)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/segmentate", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
+            processingQueue.add(req.session.username)
+            const buffer = Buffer.from(req.body, "binary")
+            const imagePath = serverFunctions.util.dumpImage(buffer)
+
+            let outName = `${path.basename(imagePath, path.extname(imagePath))}_output${path.extname(imagePath)}`
+            let outPath = path.join(path.dirname(imagePath), outName)
+
+            const scriptPath = path.join(__dirname, "../../assets/python/segmentator.py")
+            const modelPath = path.join(__dirname, "../../assets/python/segmentator/anime-segmentation.ckpt")
+            let command = `python3 "${scriptPath}" -i "${imagePath}" -o "${outPath}" -m "${modelPath}"`
+            await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const outputBuffer = fs.readFileSync(outPath)
+            
+            fs.unlinkSync(imagePath)
+            fs.unlinkSync(outPath)
+            processingQueue.delete(req.session.username)
+            res.status(200).send(outputBuffer)
+        } catch (e) {
+            console.log(e)
+            if (req.session.username) processingQueue.delete(req.session.username)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/lineart", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
+            if (!req.body) return void res.status(400).send("Image data must be provided")
+            processingQueue.add(req.session.username)
+            const buffer = Buffer.from(req.body, "binary")
+            const imagePath = serverFunctions.util.dumpImage(buffer)
+
+            let outName = `${path.basename(imagePath, path.extname(imagePath))}_output${path.extname(imagePath)}`
+            let outPath = path.join(path.dirname(imagePath), outName)
+
+            const scriptPath = path.join(__dirname, "../../assets/python/sketchextractor.py")
+            const modelPath = path.join(__dirname, "../../assets/python/sketchextractor/anime2sketch.pth")
+            let command = `python3 "${scriptPath}" -i "${imagePath}" -o "${outPath}" -m "${modelPath}"`
+            await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+
+            if (req.session.upscaledImages) {
+                const resizedBuffer = await sharp(outPath, {limitInputPixels: false}).resize(2000, 2000, {fit: "inside"}).toBuffer()
+                fs.writeFileSync(outPath, resizedBuffer)
+                await waifu2x.upscaleImage(outPath, outPath, {rename: "", upscaler: "real-cugan", scale: 4})
+            }
+            const outputBuffer = fs.readFileSync(outPath)
+            
+            fs.unlinkSync(imagePath)
+            fs.unlinkSync(outPath)
+            processingQueue.delete(req.session.username)
+            res.status(200).send(outputBuffer)
         } catch (e) {
             console.log(e)
             if (req.session.username) processingQueue.delete(req.session.username)

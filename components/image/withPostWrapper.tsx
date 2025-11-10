@@ -25,6 +25,9 @@ import nextIcon from "../../assets/icons/go-right.png"
 import prevIcon from "../../assets/icons/go-left.png"
 import sourceIcon from "../../assets/icons/source.png"
 import sourceSetIcon from "../../assets/icons/source-set.png"
+import wandIcon from "../../assets/icons/wand.png"
+import lineartIcon from "../../assets/icons/lineart-big.png"
+import segmentateIcon from "../../assets/icons/segmentate.png"
 import QRCode from "qrcode"
 import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost, UploadImage} from "../../types/Types"
 import "./styles/postimage.less"
@@ -101,6 +104,8 @@ interface AddonProps {
 
 export interface PostWrapperRef {
     download: () => Promise<void>
+    toggleSegmentate?: () => Promise<void>
+    toggleLineart?: () => Promise<void>
 }
 
 export type PostWrapperProps = Props & AddonProps
@@ -133,6 +138,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const [nextButtonHover, setNextButtonHover] = useState(false)
         const [showReverseIcons, setShowReverseIcons] = useState(false)
         const [showShareIcons, setShowShareIcons] = useState(false)
+        const [showSpecialIcons, setShowSpecialIcons] = useState(false)
         const backFrameRef = useRef<HTMLImageElement>(null)
         const navigate = useNavigate()
         const childRef = useRef<PostWrapperRef | null>(null)
@@ -475,6 +481,34 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             }
         }
 
+        const toggleSegmentate = async () => {
+            if (!props.post) return
+            if (!session.username) {
+                setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
+                navigate("/login")
+                return setSidebarText(i18n.sidebar.loginRequired)
+            }
+            if (permissions.isPremium(session)) {
+                childRef.current?.toggleSegmentate?.()
+            } else {
+                setPremiumRequired(true)
+            }
+        }
+
+        const toggleLineart = async () => {
+            if (!props.post) return
+            if (!session.username) {
+                setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
+                navigate("/login")
+                return setSidebarText(i18n.sidebar.loginRequired)
+            }
+            if (permissions.isPremium(session)) {
+                childRef.current?.toggleLineart?.()
+            } else {
+                setPremiumRequired(true)
+            }
+        }
+
         useEffect(() => {
             if (mobile) setImageExpand(false)
         }, [mobile])
@@ -495,7 +529,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             if (forceOriginal) {
                 return functions.util.appendURLParams(img, {upscaled: false})
             } else {
-                return img
+                return functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
             }
         }
 
@@ -599,12 +633,42 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             }
         }
 
+        const buttonMouseEnter = () => {
+            setButtonHover(true)
+            setShowShareIcons(false)
+            setShowReverseIcons(false)
+            setShowSpecialIcons(false)
+        }
+
+        const showAdditionalIcons = (type: "share" | "reverse" | "special") => {
+            if (type === "share") {
+                setShowReverseIcons(false)
+                setShowSpecialIcons(false)
+                setShowShareIcons((prev: boolean) => !prev)
+            } else if (type === "reverse") {
+                setShowShareIcons(false)
+                setShowSpecialIcons(false)
+                setShowReverseIcons((prev: boolean) => !prev)
+            } else if (type === "special") {
+                setShowShareIcons(false)
+                setShowReverseIcons(false)
+                setShowSpecialIcons((prev: boolean) => !prev)
+            }
+        }
+
         return (
             <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
                 {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader}/> : null}
                 <div className="post-image-box" ref={containerRef}>
                     <div className="post-image-filters" ref={fullscreenRef}>
-                        <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => {setButtonHover(true); setShowReverseIcons(false); setShowShareIcons(false)}} onMouseLeave={() => setButtonHover(false)}>
+                        <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={buttonMouseEnter} onMouseLeave={() => setButtonHover(false)}>
+                            <div className={`post-image-special-buttons ${showSpecialIcons ? "show-post-image-special-buttons" : ""}`}>
+                                {showSpecialIcons ? <>
+                                <img draggable={false} className="post-image-top-button" src={segmentateIcon} style={{filter: getFilter()}} onClick={toggleSegmentate}/>
+                                <img draggable={false} className="post-image-top-button" src={lineartIcon} style={{filter: getFilter()}} onClick={toggleLineart}/>
+                                </> : null}
+                            </div>
+
                             <div className={`post-image-share-buttons ${showShareIcons ? "show-post-image-share-buttons" : ""}`}>
                                 {showShareIcons ? <>
                                 <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter: getFilter()}} onClick={() => generateQRCode()}/>
@@ -624,11 +688,14 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 </> : null}
                             </div>
 
-                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} onClick={editImgSource} onContextMenu={openDirectLink}/>
+                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} 
+                                onClick={editImgSource} onContextMenu={openDirectLink}/>
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
-                                onClick={() => {setShowReverseIcons(false); setShowShareIcons((prev: boolean) => !prev)}}/> : null}
+                                onClick={() => showAdditionalIcons("share")}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 
-                                onClick={() => {setShowShareIcons(false); setShowReverseIcons((prev: boolean) => !prev)}}/> : null}
+                                onClick={() => showAdditionalIcons("reverse")}/> : null}
+                            {!props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? <img draggable={false} className="post-image-top-button" 
+                                src={wandIcon} style={{filter: getFilter()}} onClick={() => showAdditionalIcons("special")}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} 
                                 onClick={() => toggleUpscale()}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} 

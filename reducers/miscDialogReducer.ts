@@ -15,7 +15,11 @@ const miscDialogSlice = createSlice({
         r18Confirmation: false,
         disable2FADialog: false,
         disable2FAFlag: false,
-        qrcodeImage: ""
+        qrcodeImage: "",
+        segmentateLink: null as string | null,
+        segmentateFlag: "",
+        lineartLink: null as string | null,
+        lineartFlag: ""
     },
     reducers: {
         setShowDownloadDialog: (state, action) => {state.showDownloadDialog = action.payload},
@@ -28,7 +32,11 @@ const miscDialogSlice = createSlice({
         setR18Confirmation: (state, action) => {state.r18Confirmation = action.payload},
         setDisable2FADialog: (state, action) => {state.disable2FADialog = action.payload},
         setDisable2FAFlag: (state, action) => {state.disable2FAFlag = action.payload},
-        setQRCodeImage: (state, action) => {state.qrcodeImage = action.payload}
+        setQRCodeImage: (state, action) => {state.qrcodeImage = action.payload},
+        setSegmentateLink: (state, action) => {state.segmentateLink = action.payload},
+        setSegmentateFlag: (state, action) => {state.segmentateFlag = action.payload},
+        setLineartLink: (state, action) => {state.lineartLink = action.payload},
+        setLineartFlag: (state, action) => {state.lineartFlag = action.payload}
     }
 })
 
@@ -36,7 +44,8 @@ const {
     setShowDownloadDialog, setShowPageDialog, setShowDeleteAccountDialog,
     setBanName, setUnbanName, setPromoteName, setPremiumRequired,
     setR18Confirmation, setDisable2FADialog, setDisable2FAFlag,
-    setQRCodeImage
+    setQRCodeImage, setSegmentateLink, setLineartLink, setSegmentateFlag,
+    setLineartFlag
 } = miscDialogSlice.actions
 
 export const useMiscDialogSelector = () => {
@@ -52,7 +61,11 @@ export const useMiscDialogSelector = () => {
         r18Confirmation: selector((state) => state.miscDialog.r18Confirmation),
         disable2FADialog: selector((state) => state.miscDialog.disable2FADialog),
         disable2FAFlag: selector((state) => state.miscDialog.disable2FAFlag),
-        qrcodeImage: selector((state) => state.miscDialog.qrcodeImage)
+        qrcodeImage: selector((state) => state.miscDialog.qrcodeImage),
+        segmentateLink: selector((state) => state.miscDialog.segmentateLink),
+        segmentateFlag: selector((state) => state.miscDialog.segmentateFlag),
+        lineartLink: selector((state) => state.miscDialog.lineartLink),
+        lineartFlag: selector((state) => state.miscDialog.lineartFlag)
     }
 }
 
@@ -69,7 +82,11 @@ export const useMiscDialogActions = () => {
         setR18Confirmation: (state: boolean) => dispatch(setR18Confirmation(state)),
         setDisable2FADialog: (state: boolean) => dispatch(setDisable2FADialog(state)),
         setDisable2FAFlag: (state: boolean) => dispatch(setDisable2FAFlag(state)),
-        setQRCodeImage: (state: string) => dispatch(setQRCodeImage(state))
+        setQRCodeImage: (state: string) => dispatch(setQRCodeImage(state)),
+        setSegmentateLink: (state: string | null) => dispatch(setSegmentateLink(state)),
+        setSegmentateFlag: (state: string) => dispatch(setSegmentateFlag(state)),
+        setLineartLink: (state: string | null) => dispatch(setLineartLink(state)),
+        setLineartFlag: (state: string) => dispatch(setLineartFlag(state)),
     }
 }
 

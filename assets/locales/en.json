@@ -1079,7 +1079,19 @@
         },
         "ocr": {
             "title": "OCR Page",
-            "header": "Run OCR on this page? (This will replace the current notes)."
+            "header": "Run OCR on this page? (This will replace the current notes).",
+            "banText": "You are banned. Can't use this function.",
+            "running": "Running OCR..."
+        },
+        "lineart": {
+            "title": "Extract Lineart",
+            "header": "Run lineart extraction?",
+            "running": "Extracting lineart..."
+        },
+        "segmentate": {
+            "title": "Remove Background",
+            "header": "Run background removal?",
+            "running": "Removing background..."
         },
         "parent": {
             "request": "Add to Parent Request",

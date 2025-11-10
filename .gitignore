@@ -31,3 +31,5 @@ assets/live2d/*
 # Models
 assets/python/wdtagger
 assets/python/imagerater
+assets/python/segmentator
+assets/python/sketchextractor

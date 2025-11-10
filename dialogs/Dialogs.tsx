@@ -24,10 +24,12 @@ import SendMessageDialog from "./message/SendMessageDialog"
 import SoftDeleteMessageDialog from "./message/SoftDeleteMessageDialog"
 import CaptchaDialog from "./misc/CaptchaDialog"
 import DownloadDialog from "./misc/DownloadDialog"
+import LineartDialog from "./misc/LineartDialog"
 import PageDialog from "./misc/PageDialog"
 import PremiumRequiredDialog from "./misc/PremiumRequiredDialog"
 import QRCodeDialog from "./misc/QRCodeDialog"
 import R18Dialog from "./misc/R18Dialog"
+import SegmentateDialog from "./misc/SegmentateDialog"
 import DeleteNoteHistoryDialog from "./note/DeleteNoteHistoryDialog"
 import EditNoteDialog from "./note/EditNoteDialog"
 import OCRDialog from "./note/OCRDialog"
@@ -116,10 +118,12 @@ const Dialogs: React.FunctionComponent = (props) => {
         <SoftDeleteMessageDialog/>
         <CaptchaDialog/>
         <DownloadDialog/>
+        <LineartDialog/>
         <PageDialog/>
         <PremiumRequiredDialog/>
         <QRCodeDialog/>
         <R18Dialog/>
+        <SegmentateDialog/>
         <DeleteNoteHistoryDialog/>
         <EditNoteDialog/>
         <OCRDialog/>

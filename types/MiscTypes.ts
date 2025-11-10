@@ -202,6 +202,8 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/copyright" ? {params: CopyrightParams, response: string} :
     T extends "/api/misc/wdtagger" ? {params: number[], response: WDTaggerResponse} :
     T extends "/api/misc/ocr" ? {params: number[], response: OCRResponse[]} :
+    T extends "/api/misc/segmentate" ? {params: number[], response: ArrayBuffer} :
+    T extends "/api/misc/lineart" ? {params: number[], response: ArrayBuffer} :
     T extends "/api/premium/paymentlink" ? {params: null, response: {hosted_url: string}} :
     T extends "/api/premium/payment" ? {params: {event: CoinbaseEvent}, response: string} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :

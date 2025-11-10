@@ -18,6 +18,11 @@ export default class HTTPFunctions {
     public static getBuffer = async (link: string, headers?: any) => {
         return fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
     }
+    
+    public static postBuffer = async (link: string, data: any, session: Session, moreHeaders?: any) => {
+        const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken, ...moreHeaders}
+        return fetch(link, {method: "POST", headers, credentials: "include", body: JSON.stringify(data)}).then((r) => r.arrayBuffer())
+    }
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.privateKey) return this.privateKey
