@@ -293,7 +293,8 @@ const MiscRoutes = (app: Express) => {
             const scriptPath = path.join(__dirname, "../../assets/python/segmentator.py")
             const modelPath = path.join(__dirname, "../../assets/python/segmentator/anime-segmentation.ckpt")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -o "${outPath}" -m "${modelPath}"`
-            await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            console.log(str)
             const outputBuffer = fs.readFileSync(outPath)
             
             fs.unlinkSync(imagePath)
@@ -322,7 +323,8 @@ const MiscRoutes = (app: Express) => {
             const scriptPath = path.join(__dirname, "../../assets/python/sketchextractor.py")
             const modelPath = path.join(__dirname, "../../assets/python/sketchextractor/anime2sketch.pth")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -o "${outPath}" -m "${modelPath}"`
-            await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            console.log(str)
 
             if (req.session.upscaledImages) {
                 const resizedBuffer = await sharp(outPath, {limitInputPixels: false}).resize(2000, 2000, {fit: "inside"}).toBuffer()
