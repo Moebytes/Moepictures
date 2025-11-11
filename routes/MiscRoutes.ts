@@ -327,11 +327,9 @@ const MiscRoutes = (app: Express) => {
             console.log(str)
 
             if (req.session.upscaledImages) {
-                const resizedBuffer = await sharp(outPath, {limitInputPixels: false}).resize(2000, 2000, {fit: "inside"}).toBuffer()
+                const resizedBuffer = await sharp(outPath, {limitInputPixels: false}).resize(1000, 1000, {fit: "inside"}).toBuffer()
                 fs.writeFileSync(outPath, resizedBuffer)
-                let newOutput = await waifu2x.upscaleImage(outPath, outPath, {rename: "2x", upscaler: "real-cugan", scale: 4})
-                fs.unlinkSync(outPath)
-                outPath = newOutput
+                await waifu2x.upscaleImage(outPath, outPath, {rename: "", upscaler: "real-cugan", scale: 4})
             }
             const outputBuffer = fs.readFileSync(outPath)
             
