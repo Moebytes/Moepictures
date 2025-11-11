@@ -202,7 +202,8 @@ def extract_lineart(image_path: str, out_path: str, model_path: str):
         line = line.cpu().numpy()
         line = line.clip(0, 255).astype(np.uint8)
     
-    lineart = remove_pad(HWC3(line))
+    lineart = cv2.resize(HWC3(line), (W, H), interpolation=cv2.INTER_AREA)
+    lineart = remove_pad(lineart)
     lineart = cv2.resize(lineart, (orig_W, orig_H), interpolation=cv2.INTER_AREA)
 
     image_pil = Image.fromarray(lineart)
