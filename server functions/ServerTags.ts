@@ -257,6 +257,7 @@ export default class ServerTags {
                 type = "comic"
                 tagArr.push("full-color-comic")
             }
+            if (current.name.includes("sequence")) tagArr.push("image-sequence")
             if (current.name.includes("r18")) rating = functions.r18()
             if (seriesStrArr?.includes("original")) {
                 charStrArr = ["original"]
@@ -362,6 +363,7 @@ export default class ServerTags {
                 type = "comic"
                 tagArr.push("full-color-comic")
             }
+            if (current.name.includes("sequence")) tagArr.push("image-sequence")
             if (current.name.includes("r18")) rating = functions.r18()
             if (tagArr.includes("multiple_girls")) {
                 tagArr.push("multiple-characters")
