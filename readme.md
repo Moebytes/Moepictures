@@ -1,34 +1,39 @@
 # Moepictures
 
-Moepictures is an image board site for cute anime art, organized by tags.
+Moepictures is a website for cataloging cute anime art and has its own tagging system.
 
 <img src="assets/images/mainimg.png">
 
 ### Searching With Spaces
 
-Moepictures's tags use the dash ("-") as the delimeter, but the search can guess what tags you are looking for even if you use spaces.
+Tags use the dash ("-") as the delimeter, and the search can guess what tags you are looking for even if you use spaces.
 
 ### Multiple Images Per Post
 
-Moepictures supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships and groups.
+A single "post" can contain multiple images, called variations. There are also child and group relations.
 
 ### Image Filters
 
 <img src="assets/images/imagefilters.png" height="500">
 
-You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
-can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
+You can add image filters such as brightness, contrast, hue, and pixelate. There are also audio filters such as highpass, 
+lowpass, and bitcrush.
 
 ### Custom Players
 
-Moepictures uses custom gif/video/music/3d/live2d players, so you can do many things that aren't normally possible like pausing/seeking 
-gifs, reverse playback, and modification of playback speed. 
+Most players are custom made and not the default. You can pause/reverse gifs and videos.
 
 ### Notes
 
 <img src="assets/images/notes.png" height="500">
 
-As often images might contain japanese text, adding and viewing notes for translations is also supported!
+Since images might contain non-english text, adding notes for translations is supported. Apart from appearing in a bubble, 
+notes may also be overlayn on the image with some styling. Notes can also be used to "mark" a character in images with multiple characters.
+
+### Tag Groups
+
+Tags support custom grouping, useful to separate each characters specific tags in images with multiple characters. The syntax is 
+`Character-1{tag-1 tag-2 tag-3} Character-2{tag-1 tag-2 tag-3}`. 
 
 ### Self-hosting
 
@@ -61,8 +66,7 @@ Start the project by running the server `npm start`.
 The site runs on http://localhost:8082 by default, but the port can be configured by changing `PORT`.
 
 #### Python Scripts
-Some features like the auto tagger are done by a python script. The scripts try to install the dependencies if they aren't found, but if you 
-have issues running them you can try installing the dependencies manually.
+Some features like the auto tagger are done by a python script. The scripts try to install the dependencies if they aren't found, but if you have issues running them you can try installing the dependencies manually.
 
 ```py
 pip3 install pandas torch torchvision numpy Pillow timm opencv-python manga-ocr text-detector translate pyclipper shapely pytorch_lightning einops transformers safetensors --compile --force-reinstall
@@ -73,7 +77,3 @@ To enable live2d support, you need to download the Cubism Core web sdk and place
 https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
-
-
-
-
