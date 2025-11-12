@@ -1445,7 +1445,8 @@ const PostRoutes = (app: Express) => {
                 commentary: "commentary", englishCommentary: "englishCommentary",
                 bookmarks: "bookmarks", mirrors: "mirrors", buyLink: "buyLink",
                 pixivTags: "pixivTags", hidden: "hidden", locked: "locked",
-                private: "private", deleted: "deleted", deletionDate: "deletionDate"
+                private: "private", deleted: "deleted", deletionDate: "deletionDate",
+                userProfile: "userProfile"
             }
             
             await sql.post.updatePost(postID, columns[column], value)

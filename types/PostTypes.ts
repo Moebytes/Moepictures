@@ -4,7 +4,7 @@ ImageFormat, Upscaler, SourceData, UserComment, Redirect, MiniTagGroup} from "./
 export type PostUpdateColumns = "type" | "rating" | "style" | "parentID" | "posted" |
 "title" | "englishTitle" | "artist" | "source" | "commentary" | "englishCommentary" |
 "bookmarks" | "mirrors" | "buyLink" | "pixivTags" | "hidden" | "locked" | "private" | 
-"deleted" | "deletionDate"
+"deleted" | "deletionDate" | "userProfile"
 
 export type ImageUpdateColumns = "type" | "order" | "filename" | "upscaledFilename" |
 "width" | "height" | "upscaledWidth" | "upscaledHeight" | "size" | "upscaledSize" |
