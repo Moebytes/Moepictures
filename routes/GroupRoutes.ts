@@ -226,6 +226,7 @@ const GroupRoutes = (app: Express) => {
     app.get("/api/groups/list", groupLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let groups = req.query.groups as string[]
+            if (typeof groups === "string") groups = [groups]
             if (!groups) groups = []
             let result = await sql.group.groups(groups.filter(Boolean))
             let newGroups = [] as Group[]

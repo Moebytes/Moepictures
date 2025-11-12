@@ -100,6 +100,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/list", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]
+            if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
             if (!permissions.isMod(req.session)) {
@@ -118,6 +119,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/aliases", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let aliases = req.query.aliases as string[]
+            if (typeof aliases === "string") aliases = [aliases]
             if (!aliases) aliases = []
             let result = await sql.tag.aliases(aliases.filter(Boolean))
             serverFunctions.sendEncrypted(result, req, res)
@@ -540,6 +542,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/list/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]
+            if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             let result = await sql.tag.unverifiedTags(tags.filter(Boolean))

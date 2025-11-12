@@ -219,6 +219,20 @@ BEGIN
       WHERE tag = OLD.tag
   ));
 
+  UPDATE "tag group tags"
+  SET "tags" = ARRAY(
+      SELECT DISTINCT "tag map"."tag"
+      FROM "tag group map"
+      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+      WHERE "tag group map"."groupID" = "tag group tags"."groupID"
+  )
+  WHERE "groupID" IN (
+      SELECT "tag group map"."groupID" FROM "tag group map"
+      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+      JOIN "tags" ON "tags"."tag" = "tag map"."tag"
+      WHERE "tags"."tag" = NEW.tag
+  );
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -287,6 +301,21 @@ BEGIN
       SELECT 1 FROM jsonb_array_elements_text(tag_group->'tags') AS tag
       WHERE tag = OLD.tag
   ));
+
+  UPDATE "tag group tags"
+  SET "tags" = ARRAY(
+      SELECT DISTINCT "tag map"."tag"
+      FROM "tag group map"
+      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+      WHERE "tag group map"."groupID" = "tag group tags"."groupID"
+  )
+  WHERE "groupID" IN (
+      SELECT "tag group map"."groupID"
+      FROM "tag group map"
+      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+      JOIN "tags" ON "tags"."tag" = "tag map"."tag"
+      WHERE "tags"."tag" = OLD.tag
+  );
 
   RETURN OLD;
 END;

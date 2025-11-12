@@ -120,7 +120,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
             if (post) {
                 const tags = await functions.tag.parseTagsUnverified([post])
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
@@ -166,7 +166,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                 }
                 const tags = await functions.tag.parseTagsUnverified([post])
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)

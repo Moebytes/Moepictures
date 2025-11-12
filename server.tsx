@@ -722,6 +722,7 @@ const backupDatabase = async () => {
 }
 
 const runOnce = async () => {
+  await sql.createDB()
   await serverFunctions.tags.downloadWDTagger()
   await serverFunctions.tags.downloadImageRater()
   await serverFunctions.util.downloadSegmentator()

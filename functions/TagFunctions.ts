@@ -1,6 +1,6 @@
 import functions from "./Functions"
 import permissions from "../structures/Permissions"
-import {MiniTag, TagCount, Post, PostFull, TagHistory, PostOrdered, Tag, Session, 
+import {MiniTag, TagCount, Post, PostFull, TagHistory, PostOrdered, Tag, Session, PostHistory,
 UploadTag, PostSearch, UnverifiedPost, TagGroupCategory, MiniTagGroup} from "../types/Types"
 
 export default class TagFunctions {
@@ -120,10 +120,20 @@ export default class TagFunctions {
         return {artists, characters, series, meta, tags}
     }
 
-    public static tagGroupCategories = async (tagGroups: MiniTagGroup[], session: Session, 
+    public static tagGroupCategories = async (post: PostSearch | PostHistory | UnverifiedPost, session: Session, 
         setSessionFlag: (value: boolean) => void) => {
+        let tagGroups = post.tagGroups
         let newTagGroups = [] as {name: string, tags: MiniTag[]}[]
-        if (!tagGroups) return []
+        if (!tagGroups?.length && !post.tags) {
+            if ("originalID" in post) {
+                let fullPost = await functions.http.get("/api/post/unverified", {postID: post.postID}, session, setSessionFlag)
+                tagGroups = fullPost?.tagGroups || []
+            } else {
+                let fullPost = await functions.http.get("/api/post", {postID: post.postID}, session, setSessionFlag)
+                tagGroups = fullPost?.tagGroups || []
+            }
+        }
+        if (!tagGroups?.length) return []
         for (const tagGroup of tagGroups) {
             if (!tagGroup) continue
             const tagCounts = await functions.cache.sortedTagCounts(tagGroup.tags, session, setSessionFlag)

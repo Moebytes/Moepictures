@@ -244,7 +244,7 @@ const PostPage: React.FunctionComponent = () => {
             const allTags = [...historyPost.artists, ...historyPost.characters, ...historyPost.series, ...historyPost.tags]
             const tags = await functions.cache.sortedTagCounts(allTags, session, setSessionFlag)
             const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-            const groupCategories = await functions.tag.tagGroupCategories(historyPost.tagGroups, session, setSessionFlag)
+            const groupCategories = await functions.tag.tagGroupCategories(historyPost, session, setSessionFlag)
             setTagGroupCategories(groupCategories)
             setTagCategories(categories)
             setTags(tags)
@@ -271,7 +271,7 @@ const PostPage: React.FunctionComponent = () => {
             if (post) {
                 const tags = await functions.tag.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
@@ -346,7 +346,7 @@ const PostPage: React.FunctionComponent = () => {
                 }
                 const tags = await functions.tag.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tag.tagGroupCategories(post.tagGroups, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
