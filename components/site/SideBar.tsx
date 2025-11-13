@@ -150,8 +150,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTags = async () => {
-        const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
-        if (tags.length) setTags(tags)
+        let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
+        if (!tags.length) tags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
+        setTags(tags)
     }
 
     const updateUserImg = async () => {
@@ -644,7 +645,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        let currentTags = props.tags ? organizeTags([...(props.meta || []), ...props.tags]) : tags
+        let currentTags = props.tags?.length ? organizeTags([...(props.meta || []), ...props.tags]) : tags
         let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break

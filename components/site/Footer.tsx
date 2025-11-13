@@ -53,7 +53,7 @@ const Footer: React.FunctionComponent<Props> = (props) => {
     }
 
     const getLanguageText = () => {
-        if (language === "ja") return "Japanese"
+        if (language === "ja") return "日本語"
         return "English"
     }
 
