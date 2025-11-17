@@ -39,7 +39,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, r18, recipients} = req.body as MessageCreateParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!title || !content) return void res.status(400).send("Bad title or content")
             if (recipients?.length < 1) return void res.status(400).send("Bad recipients")
@@ -69,7 +69,7 @@ const MessageRoutes = (app: Express) => {
     app.put("/api/message/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, title, content, r18} = req.body as MessageEditParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!title || !content) return void res.status(400).send("Bad title or content")
             const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
@@ -95,7 +95,7 @@ const MessageRoutes = (app: Express) => {
     app.get("/api/message", messageLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID as string
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Bad messageID")
             let canView = false
@@ -117,7 +117,7 @@ const MessageRoutes = (app: Express) => {
         try {
             const messageID = req.query.messageID as string
             if (!messageID) return void res.status(400).send("Bad messageID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
             if (message.creator !== req.session.username) {
@@ -134,7 +134,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/reply", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, content, r18} = req.body as MessageReplyParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!messageID || !content) return void res.status(400).send("Bad messageID or content")
             const badReply = functions.validation.validateReply(content, enLocale)
@@ -204,7 +204,7 @@ const MessageRoutes = (app: Express) => {
     app.put("/api/message/reply/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content, r18} = req.body as MessageReplyEditParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!replyID || !content) return void res.status(400).send("Bad replyID or content")
             const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
@@ -229,7 +229,7 @@ const MessageRoutes = (app: Express) => {
             const messageID = req.query.messageID as string
             const replyID = req.query.replyID as string
             if (!messageID || !replyID) return void res.status(400).send("Bad messageID or replyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
             const reply = await sql.message.messageReply(replyID)
@@ -262,7 +262,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/softdelete", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID} = req.body as {messageID: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!messageID) return void res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
@@ -300,7 +300,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/read", csrfProtection, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, forceRead} = req.body as {messageID: string, forceRead?: boolean}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!messageID) return void res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return void res.status(400).send("Invalid messageID")
@@ -336,7 +336,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/bulkread", csrfProtection, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {readStatus} = req.body
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (readStatus === undefined) return void res.status(400).send("No readStatus specified")
             const messages = await sql.message.allMessages(req.session.username, "", "date", undefined, 99999)
             for (const message of messages) {
@@ -360,7 +360,7 @@ const MessageRoutes = (app: Express) => {
     app.post("/api/message/forward", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, recipients} = req.body as MessageForwardParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!messageID) return void res.status(400).send("Bad messageID or content")
             const message = await sql.message.message(messageID)
@@ -392,7 +392,7 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             res.writeHead(200, {
                 "Content-Type": "text/event-stream",
                 "Connection": "keep-alive",

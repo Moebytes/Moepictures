@@ -17,7 +17,7 @@ const $2faLimiter = rateLimit({
 const $2FARoutes = (app: Express) => {
     app.post("/api/2fa/create", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
             const enabled = !Boolean(user.$2fa)
@@ -45,7 +45,7 @@ const $2FARoutes = (app: Express) => {
 
     app.post("/api/2fa/qr", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const $2FAToken = await sql.token.$2faToken(req.session.username)
             if (!$2FAToken) return void res.status(400).send("User doesn't have 2FA token")
             res.status(200).json($2FAToken.qrcode)
@@ -58,7 +58,7 @@ const $2FARoutes = (app: Express) => {
     app.post("/api/2fa/enable", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body as {token: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!token) return void res.status(400).send("Bad token")
             token = token.trim()
             const user = await sql.user.user(req.session.username)

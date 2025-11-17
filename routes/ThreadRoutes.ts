@@ -80,7 +80,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/create", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, r18} = req.body as ThreadCreateParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!title || !content) return void res.status(400).send("Bad title or content")
             const badTitle = functions.validation.validateTitle(title, enLocale)
@@ -102,7 +102,7 @@ const ThreadRoutes = (app: Express) => {
     app.put("/api/thread/edit", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, title, content, r18} = req.body as ThreadEditParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!title || !content) return void res.status(400).send("Bad title or content")
             const badTitle = functions.validation.validateTitle(title, enLocale)
             if (badTitle) return void res.status(400).send("Bad title")
@@ -140,7 +140,7 @@ const ThreadRoutes = (app: Express) => {
     app.delete("/api/thread/delete", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const threadID = req.query.threadID as string
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!threadID) return void res.status(400).send("Bad threadID")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return void res.status(400).send("Invalid threadID")
@@ -160,7 +160,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/sticky", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body as {threadID: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!threadID) return void res.status(400).send("Bad threadID")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const thread = await sql.thread.thread(threadID)
@@ -176,7 +176,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/lock", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body as {threadID: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!threadID) return void res.status(400).send("Bad threadID")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const thread = await sql.thread.thread(threadID)
@@ -192,7 +192,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/reply", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, content, r18} = req.body as ThreadReplyParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!threadID || !content) return void res.status(400).send("Bad threadID or content")
             const badReply = functions.validation.validateReply(content, enLocale)
@@ -245,7 +245,7 @@ const ThreadRoutes = (app: Express) => {
     app.put("/api/reply/edit", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content, r18} = req.body as ReplyEditParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!replyID || !content) return void res.status(400).send("Bad replyID or content")
             const badReply = functions.validation.validateReply(content, enLocale)
             if (badReply) return void res.status(400).send("Bad reply")
@@ -269,7 +269,7 @@ const ThreadRoutes = (app: Express) => {
         try {
             const threadID = req.query.threadID as string
             const replyID = req.query.replyID as string
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!threadID || !replyID) return void res.status(400).send("Bad threadID or replyID")
             const thread = await sql.thread.thread(threadID)
             if (!thread) return void res.status(400).send("Invalid threadID")
@@ -305,7 +305,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/report", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, reason} = req.body as {threadID: string, reason: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!threadID || !reason) return void res.status(400).send("Bad threadID or reason")
             const thread = await sql.thread.thread(threadID)
@@ -321,7 +321,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/reply/report", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, reason} = req.body as {replyID: string, reason: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!replyID || !reason) return void res.status(400).send("Bad replyID or reason")
             const reply = await sql.thread.reply(replyID)
@@ -337,7 +337,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/report/fulfill", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body as ThreadReportFulfillParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!reportID) return void res.status(400).send("Bad reportID")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.report.deleteThreadReport(reportID)
@@ -361,7 +361,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/reply/report/fulfill", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body as ThreadReportFulfillParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!reportID) return void res.status(400).send("Bad threadID")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.report.deleteReplyReport(reportID)
@@ -385,7 +385,7 @@ const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/read", csrfProtection, threadLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, forceRead} = req.body as {threadID: string, forceRead?: boolean}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!threadID) return void res.status(400).send("Bad thread ID")
             const threadRead = await sql.thread.getRead(threadID, req.session.username)
             if (!threadRead?.read || forceRead) {

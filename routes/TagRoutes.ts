@@ -6,7 +6,7 @@ import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import path from "path"
 import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
-TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType, TagUpdateColumns} from "../types/Types"
+TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType, TagUpdateColumns, TagType} from "../types/Types"
 import ServerFunctions from "../server functions/ServerFunctions"
 
 const tagLimiter = rateLimit({
@@ -134,7 +134,7 @@ const TagRoutes = (app: Express) => {
             const tag = req.query.tag as string
             if (!tag) return void res.status(400).send("Invalid tag")
             const tagObj = await sql.tag.tag(tag.trim())
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tagObj) return void res.status(400).send("Bad tag")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await serverFunctions.tags.deleteTag(tagObj)
@@ -148,7 +148,7 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/takedown", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag} = req.body as {tag: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tag) return void res.status(400).send("Bad tag")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
@@ -176,7 +176,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {tag, key, type, description, image, aliases, implications, pixivTags, danbooruTag, social, twitter, 
             website, fandom, wikipedia, r18, featuredPost, reason, updater, updatedDate, silent} = req.body as TagEditParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!tag) return void res.status(400).send("Bad tag")
@@ -430,7 +430,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {tag, aliasTo, username, reason, silent, skipAliasing} = req.body as AliasToParams
             tag = tag?.trim()
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return void res.status(400).send("Bad tag or aliasTo")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
@@ -457,7 +457,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {historyID} = req.body as {historyID: string}
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const aliasHistory = await sql.tag.aliasHistoryID(historyID)
             if (!aliasHistory) return void res.status(400).send("Bad historyID")
@@ -489,7 +489,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {historyID} = req.body as {historyID: string}
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const implicationHistory = await sql.tag.implicationHistoryID(historyID)
             if (!implicationHistory) return void res.status(400).send("Bad historyID")
@@ -516,7 +516,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {historyID} = req.body as {historyID: string}
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const implicationHistory = await sql.tag.implicationHistoryID(historyID)
             if (!implicationHistory) return void res.status(400).send("Bad historyID")
@@ -557,7 +557,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {tag, reason} = req.body as {tag: string, reason: string}
             if (!tag) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             const exists = await sql.tag.tag(tag)
             if (!exists) return void res.status(400).send("Bad tag")
@@ -573,7 +573,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.tagDeleteRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -587,7 +587,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {username, tag, accepted} = req.body as TagDeleteRequestFulfillParams
             if (!tag) return void res.status(400).send("Invalid tag")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
@@ -609,7 +609,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {tag, aliasTo, reason} = req.body as AliasToRequestParams
             if (!tag || !aliasTo) return void res.status(400).send("Bad tag or aliasTo")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const exists = await sql.tag.tag(tag)
             if (!exists) return void res.status(400).send("Bad tag")
             const exists2 = await sql.tag.tag(aliasTo)
@@ -626,7 +626,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.aliasRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -640,7 +640,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {username, tag, aliasTo, accepted} = req.body as AliasToRequestFulfillParams
             if (!tag) return void res.status(400).send("Invalid tag")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             await sql.request.deleteAliasRequest(username, tag)
@@ -662,7 +662,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {tag, key, type, description, image, aliases, implications, pixivTags, danbooruTag, social, twitter, website, 
             fandom, wikipedia, r18, featuredPost, reason} = req.body as TagEditRequestParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tag) return void res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return void res.status(400).send("Bad tag")
@@ -716,7 +716,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.tagEditRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -730,7 +730,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {username, tag, image, accepted} = req.body as TagEditRequestFulfillParams
             if (!tag) return void res.status(400).send("Invalid tag")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             if (image) await serverFunctions.files.deleteUnverifiedFile(image)
@@ -753,7 +753,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {tag, historyID, username, query, offset} = req.query as unknown as TagHistoryParams
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as TagHistory[]
             if (tag && historyID) {
                 const history = await sql.history.tagHistoryID(tag, historyID)
@@ -774,7 +774,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {tag, historyID} = req.query as {tag: string, historyID: string}
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const tagHistory = await sql.history.tagHistory(tag as string)
             if (tagHistory[0]?.historyID === historyID) {
@@ -799,7 +799,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {query, offset} = req.query as unknown as {query?: string, offset?: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const result = await sql.tag.aliasImplicationHistory(Number(offset), query)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -812,7 +812,7 @@ const TagRoutes = (app: Express) => {
         try {
             const {historyID, type} = req.query as {historyID: string, type: AliasHistoryType}
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             if (type === "alias" || type === "undo alias") {
                 await sql.tag.deleteAliasHistory(historyID)
@@ -829,7 +829,7 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/massimply", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {wildcard, implyTo} = req.body as {wildcard: string, implyTo: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!wildcard || !implyTo) return void res.status(400).send("Bad wildcard or implyTo")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const implyTag = await sql.tag.tag(implyTo)
@@ -862,7 +862,7 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/blocktags", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tags} = req.body as {tags: string[]}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tags?.length) return void res.status(400).send("Bad tags")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             for (const tag of tags) {
@@ -878,7 +878,7 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/unblocktags", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tags} = req.body as {tags: string[]}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!tags?.length) return void res.status(400).send("Bad tags")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             for (const tag of tags) {
@@ -893,7 +893,7 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/blockedtags", tagLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.tag.blockedTags()
             serverFunctions.sendEncrypted(result, req, res)
@@ -906,7 +906,7 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, column, value} = req.body as {tag: string, column: TagUpdateColumns, value: any}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return void res.status(400).send("Invalid tag")
@@ -920,6 +920,22 @@ const TagRoutes = (app: Express) => {
             }
             
             await sql.tag.updateTag(tag, columns[column], value)
+            
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/tag/insert", csrfProtection, modLimiter, async (req: Request, res: Response) => {
+        try {
+            let {tag, type, description} = req.body as {tag: string, type: TagType, description: string}
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+
+            await sql.tag.insertTag(tag, type)
+            if (description !== undefined) await sql.tag.updateTag(tag, "description", description)
             
             res.status(200).send("Success")
         } catch (e) {

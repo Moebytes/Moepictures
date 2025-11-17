@@ -917,7 +917,7 @@ const CreateRoutes = (app: Express) => {
         let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, noImageUpdate, sourceLinks} = req.body as UploadParams
 
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (!permissions.isCurator(req.session)) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!functions.validation.validType(type)) return void res.status(400).send("Invalid type")
@@ -990,7 +990,7 @@ const CreateRoutes = (app: Express) => {
           reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
@@ -1103,7 +1103,7 @@ const CreateRoutes = (app: Express) => {
         let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series, 
         tags, tagGroups, newTags, duplicates, sourceLinks} = req.body as UnverifiedUploadParams
 
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         const pending = await sql.search.unverifiedUserPosts(req.session.username)
         if (functions.post.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return void res.status(403).send("Upload limit reached")
@@ -1169,7 +1169,7 @@ const CreateRoutes = (app: Express) => {
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (unverifiedID && Number.isNaN(unverifiedID)) return void res.status(400).send("Bad unverifiedID")
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
 
         artists = functions.tag.cleanTags(artists, "artists")
@@ -1280,7 +1280,7 @@ const CreateRoutes = (app: Express) => {
       try {
         let {postID, reason, noImageUpdate} = req.body as ApproveParams
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (!permissions.isMod(req.session)) return void res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return void res.status(400).send("Bad request")
@@ -1462,7 +1462,7 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/split", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, order, mergeSubsequent} = req.body as {postID: string, order: number | null, mergeSubsequent?: boolean}
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!permissions.isAdmin(req.session)) return void res.status(403).end()
         const post = await sql.post.post(postID)
@@ -1538,7 +1538,7 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/join", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID, nested} = req.body as {postID: string, nested: boolean}
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!permissions.isAdmin(req.session)) return void res.status(403).end()
         const post = await sql.post.post(postID)
@@ -1593,7 +1593,7 @@ const CreateRoutes = (app: Express) => {
     app.post("/api/post/flip", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let {postID} = req.body as {postID: string}
-        if (!req.session.username) return void res.status(403).send("Unauthorized")
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!permissions.isAdmin(req.session)) return void res.status(403).end()
         const post = await sql.post.post(postID)

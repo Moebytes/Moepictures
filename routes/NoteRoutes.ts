@@ -135,7 +135,7 @@ const NoteRoutes = (app: Express) => {
             const {postID, order, data, reason} = req.body as NoteSaveParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return void res.status(400).send("Invalid order")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!data) return void res.status(400).send("Bad data")
@@ -160,7 +160,7 @@ const NoteRoutes = (app: Express) => {
             const {postID, order, data, silent} = req.body as NoteEditParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return void res.status(400).send("Invalid order")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!data) return void res.status(400).send("Bad data")
 
@@ -201,7 +201,7 @@ const NoteRoutes = (app: Express) => {
             let {postID, order, data, reason} = req.body as NoteSaveParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return void res.status(400).send("Invalid order")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!data) return void res.status(400).send("Bad data")
 
             const originalPostID = postID as string
@@ -263,7 +263,7 @@ const NoteRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const post = await sql.post.unverifiedPost(postID)
             if (post?.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).end()
             const notes = await sql.note.unverifiedPostNotes(postID)
@@ -279,7 +279,7 @@ const NoteRoutes = (app: Express) => {
             const {postID, order, data, reason} = req.body as NoteSaveParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return void res.status(400).send("Invalid order")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!data) return void res.status(400).send("Bad data")
 
             const post = await sql.post.unverifiedPost(postID)
@@ -309,7 +309,7 @@ const NoteRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.note.allUnverifiedNotes(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -322,7 +322,7 @@ const NoteRoutes = (app: Express) => {
     app.post("/api/note/approve", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, originalID, order, username, data} = req.body as NoteApproveParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return void res.status(400).send("Bad postID")
@@ -355,7 +355,7 @@ const NoteRoutes = (app: Express) => {
     app.post("/api/note/reject", csrfProtection, noteLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {postID, originalID, order, username, data} = req.body as NoteApproveParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return void res.status(400).send("Bad postID")
@@ -385,7 +385,7 @@ const NoteRoutes = (app: Express) => {
         try {
             let {postID, order, historyID, username, query, offset} = req.query as unknown as NoteHistoryParams
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as NoteHistory[]
             if (historyID) {
                 const history = await sql.history.noteHistoryID(postID, historyID)
@@ -406,7 +406,7 @@ const NoteRoutes = (app: Express) => {
         try {
             const {postID, order, historyID} = req.query as unknown as NoteHistoryDeleteParams
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const noteHistory = await sql.history.noteHistory(postID, order)
             if (noteHistory[0]?.historyID === historyID) {
@@ -424,7 +424,7 @@ const NoteRoutes = (app: Express) => {
     app.put("/api/note/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {noteID, column, value} = req.body as {noteID: string, column: NoteUpdateColumns, value: any}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const note = await sql.note.note(noteID)
             if (!note) return void res.status(400).send("Invalid slug")

@@ -256,7 +256,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/ocr", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
@@ -280,7 +280,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/segmentate", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
@@ -310,7 +310,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/lineart", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
@@ -368,7 +368,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/premium/paymentlink", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const data = {
                 local_price: {
                     amount: "15.00",
@@ -438,7 +438,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/setbanner", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {text, link} = req.body as {text: string, link: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             await sql.user.setBanner(text, link)
             res.status(200).send("Success")
@@ -472,7 +472,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/api-key", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const key = encryption.generateAPIKey()
             const hashedKey = encryption.hashAPIKey(key)
@@ -486,7 +486,7 @@ const MiscRoutes = (app: Express) => {
 
     app.get("/api/misc/api-key/status", miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const apiKey = await sql.token.apiKeyByUsername(req.session.username)
             serverFunctions.sendEncrypted(apiKey ? true : false, req, res)
@@ -498,7 +498,7 @@ const MiscRoutes = (app: Express) => {
 
     app.delete("/api/misc/api-key/delete", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             await sql.token.deleteAPIKey(req.session.username)
             res.status(200).send("Success")
@@ -533,7 +533,7 @@ const MiscRoutes = (app: Express) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, rating} = req.body as SourceLookupParams
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)
@@ -551,7 +551,7 @@ const MiscRoutes = (app: Express) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
         ip = ip?.toString().replace("::ffff:", "") || ""
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             processingQueue.add(ip)

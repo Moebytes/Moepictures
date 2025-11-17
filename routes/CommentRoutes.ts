@@ -32,7 +32,7 @@ const CommentRoutes = (app: Express) => {
     app.post("/api/comment/create", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, postID} = req.body as {comment: string, postID: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!comment || !postID) return void res.status(400).send("Bad comment or post ID")
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
@@ -49,7 +49,7 @@ const CommentRoutes = (app: Express) => {
     app.delete("/api/comment/delete", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const commentID = req.query.commentID as string
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (Number.isNaN(Number(commentID))) return void res.status(400).send("Invalid commentID")
             const comment = await sql.comment.comment(commentID)
             if (comment?.username !== req.session.username) {
@@ -66,7 +66,7 @@ const CommentRoutes = (app: Express) => {
     app.put("/api/comment/edit", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, commentID} = req.body as {comment: string, commentID: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!comment || !commentID) return void res.status(400).send("Bad comment or comment ID")
             if (Number.isNaN(Number(commentID))) return void res.status(400).send("Invalid commentID")
             const badComment = functions.validation.validateComment(comment as string, enLocale)
@@ -86,7 +86,7 @@ const CommentRoutes = (app: Express) => {
     app.post("/api/comment/report", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {commentID, reason} = req.body as {commentID: string, reason: string}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!commentID) return void res.status(400).send("Bad commentID")
             if (Number.isNaN(Number(commentID))) return void res.status(400).send("Invalid commentID")
@@ -103,7 +103,7 @@ const CommentRoutes = (app: Express) => {
     app.post("/api/comment/report/fulfill", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body as CommentReportFulfillParams
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!reportID) return void res.status(400).send("Bad reportID")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
 

@@ -149,7 +149,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {query, offset} = req.query as unknown as {query: string, offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const result = await sql.search.deletedPosts(query, Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -163,7 +163,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(200).send("Doesn't exist")
@@ -186,7 +186,7 @@ const PostRoutes = (app: Express) => {
 
     app.delete("/api/post/emptybin", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
 
             const deletedPosts = await sql.search.deletedPosts()
@@ -206,7 +206,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(200).send("Doesn't exist")
@@ -224,7 +224,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return void res.status(400).send("Bad postID")
             if (unverified.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).end()
@@ -240,7 +240,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const unverified = await sql.post.unverifiedPost(postID)
             if (!unverified) return void res.status(400).send("Bad postID")
@@ -264,7 +264,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(404).send("Doesn't exist")
@@ -285,7 +285,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(404).send("Post doesn't exist")
@@ -306,7 +306,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(404).send("Post doesn't exist")
             const categories = await serverFunctions.tags.tagCategories(post.tags)
@@ -395,7 +395,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.search.unverifiedPosts(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -409,7 +409,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.search.deletedUnverifiedPosts(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -421,7 +421,7 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/pending", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const result = await sql.search.unverifiedUserPosts(req.session.username)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -432,7 +432,7 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/rejected", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const result = await sql.search.deletedUnverifiedUserPosts(req.session.username)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
@@ -445,7 +445,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -487,7 +487,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID, reason} = req.body as {postID: string, reason: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Bad postID")
@@ -503,7 +503,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.request.postDeleteRequests(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
@@ -517,7 +517,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {username, postID, accepted} = req.body as PostDeleteRequestFulfillParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
 
@@ -540,7 +540,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID, reason} = req.body as {postID: string, reason: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const post = await sql.post.unverifiedPost(postID)
             if (!post) return void res.status(400).send("Bad postID")
             if (post.uploader !== req.session.username && !permissions.isMod(req.session)) return void res.status(403).end()
@@ -570,7 +570,7 @@ const PostRoutes = (app: Express) => {
     
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Bad postID")
             if (parentID && Number.isNaN(Number(parentID))) return void res.status(400).send("Bad parentID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!unverified && !permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!reason) reason = null
@@ -875,7 +875,7 @@ const PostRoutes = (app: Express) => {
             let imageLinksEdit = imageLinks !== undefined ? true : false
     
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Bad postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
             if (!functions.validation.validType(type)) return void res.status(400).send("Invalid type")
             if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
@@ -995,7 +995,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as PostHistory[]
             if (postID && historyID) {
                 const history = await sql.history.postHistoryID(postID, historyID)
@@ -1020,7 +1020,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             const historyID = req.query.historyID as string
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const postHistory = await sql.history.postHistory(postID)
             if (postHistory[0]?.historyID === historyID) {
@@ -1060,7 +1060,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = await sql.post.post(postID)
             if (!result) return void res.status(400).send("Invalid postID")
             await sql.history.updateSearchHistory(req.session.username, postID)
@@ -1075,7 +1075,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID, quality, format, maxDimension, maxUpscaledDimension, original, upscaled} = req.body as PostCompressParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             let post = await sql.post.unverifiedPost(postID)
             if (!post) return void res.status(400).send("Invalid postID")
@@ -1183,7 +1183,7 @@ const PostRoutes = (app: Express) => {
         try {
             const {postID, upscaler, scaleFactor, compressJPG} = req.body as PostUpscaleParams
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             let post = await sql.post.unverifiedPost(postID)
             if (!post) return void res.status(400).send("Invalid postID")
@@ -1338,7 +1338,7 @@ const PostRoutes = (app: Express) => {
         try {
             let {postID, thumbnails, unverified} = req.body as {postID: string, thumbnails: ThumbnailUpdate[], unverified?: boolean}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             let post = unverified ? await sql.post.unverifiedPost(postID) : await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")
@@ -1378,7 +1378,7 @@ const PostRoutes = (app: Express) => {
             let {imageID, altSource, directLink, unverified, reason} = req.body as {imageID: string, altSource: string, 
                 directLink: string, unverified?: boolean, reason?: string}
             if (Number.isNaN(Number(imageID))) return void res.status(400).send("Invalid imageID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let image = unverified ? await sql.post.unverifiedImage(imageID) : await sql.post.image(imageID)
             if (!image) return void res.status(400).send("Invalid imageID")
 
@@ -1433,7 +1433,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, column, value} = req.body as {postID: string, column: PostUpdateColumns, value: any}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")
@@ -1462,7 +1462,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/image/update", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {imageID, column, value} = req.body as {imageID: string, column: ImageUpdateColumns, value: any}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const image = await sql.post.image(imageID)
             if (!image) return void res.status(400).send("Invalid imageID")
@@ -1489,7 +1489,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/addtags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, tags} = req.body as {postID: string, tags: string[]}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")
@@ -1505,7 +1505,7 @@ const PostRoutes = (app: Express) => {
     app.put("/api/post/removetags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {postID, tags} = req.body as {postID: string, tags: string[]}
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")

@@ -244,6 +244,7 @@ export type TagPostEndpoint<T extends string> =
 export type TagPutEndpoint<T extends string> = 
     T extends "/api/tag/edit" ? {params: TagEditParams, response: string} :
     T extends "/api/tag/update" ? {params: {tag: string, column: TagUpdateColumns, value: any}, response: string} :
+    T extends "/api/tag/insert" ? {params: {tag: string, type: TagType, description: string}, response: string} :
     T extends "/api/tag/blocktags" ? {params: {tags: string[]}, response: string} :
     T extends "/api/tag/unblocktags" ? {params: {tags: string[]}, response: string} :
     never

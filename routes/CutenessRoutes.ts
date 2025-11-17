@@ -17,7 +17,7 @@ const CutenessRoutes = (app: Express) => {
         try {
             const {postID, cuteness} = req.body as {postID: string, cuteness: number}
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return void res.status(400).send("Bad postID or cuteness")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (Number(cuteness) < 0 || Number(cuteness) > 1000) return void res.status(400).send("Cuteness range must be between 0 and 1000")
             await sql.cuteness.updateCuteness(postID, req.session.username, cuteness)
             res.status(200).send("Success")
@@ -31,7 +31,7 @@ const CutenessRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const cute = await sql.cuteness.cuteness(postID, req.session.username)
             serverFunctions.sendEncrypted(cute, req, res)
         } catch (e) {
@@ -44,7 +44,7 @@ const CutenessRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             await sql.cuteness.deleteCuteness(postID, req.session.username)
             res.status(200).send("Success")
         } catch (e) {

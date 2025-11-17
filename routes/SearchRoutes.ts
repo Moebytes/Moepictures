@@ -56,7 +56,7 @@ const SearchRoutes = (app: Express) => {
                 if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             }
             if (sort === "favorites" || sort === "reverse favorites") {
-                if (!req.session.username) return void res.status(403).send("Unauthorized")
+                if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             }
             if (sort === "hidden" || sort === "reverse hidden" || 
                 sort === "locked" || sort === "reverse locked" ||
@@ -474,7 +474,7 @@ const SearchRoutes = (app: Express) => {
             if (!sort) sort = "random"
             const hideSystem = req.query.hideSystem === "true"
             if (!functions.validation.validThreadSort(sort)) return void res.status(400).send("Invalid sort")
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, Number(offset))
             let filtered = [] as MessageSearch[]
@@ -519,7 +519,7 @@ const SearchRoutes = (app: Express) => {
         try {
             let {offset} = req.query as unknown as {offset: number}
             if (!offset) offset = 0
-            if (!req.session.username) return void res.status(403).send("Unauthorized")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
             const result = await sql.report.reports(Number(offset))
             serverFunctions.sendEncrypted(result, req, res)
