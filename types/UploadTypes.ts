@@ -16,6 +16,9 @@ export interface SourceData {
     bookmarks: number | null
     buyLink: string | null
     pixivTags: string[] | null
+    userProfile: string | null
+    drawingTools: string[] | null
+    sourceImageCount: number | null
     mirrors: string | null
 }
 

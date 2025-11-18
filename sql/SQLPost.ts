@@ -42,12 +42,12 @@ export default class SQLPost {
     /** Bulk updates a post */
     public static bulkUpdatePost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
         title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
-        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, mirrors?: string | null, slug?: string, type?: string, 
-        uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, 
-        approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, userProfile?: string | null, drawingTools?: string[] | null, 
+        sourceImageCount?: number | null, mirrors?: string | null, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, 
+        updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, 
-        buyLink, pixivTags, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, 
-        hasUpscaled} = params
+        buyLink, pixivTags, userProfile, drawingTools, sourceImageCount, mirrors, slug, type, uploadDate, uploader, updatedDate, 
+        updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -114,6 +114,21 @@ export default class SQLPost {
         if (pixivTags !== undefined) {
             setArray.push(`"pixivTags" = $${i}`)
             values.push(pixivTags)
+            i++
+        }
+        if (userProfile !== undefined) {
+            setArray.push(`"userProfile" = $${i}`)
+            values.push(userProfile)
+            i++
+        }
+        if (drawingTools !== undefined) {
+            setArray.push(`"drawingTools" = $${i}`)
+            values.push(drawingTools)
+            i++
+        }
+        if (sourceImageCount !== undefined) {
+            setArray.push(`"sourceImageCount" = $${i}`)
+            values.push(sourceImageCount)
             i++
         }
         if (mirrors !== undefined) {
@@ -187,13 +202,15 @@ export default class SQLPost {
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: string, params: {rating?: string, style?: string, parentID?: string | null, 
         title?: string | null, englishTitle?: string | null, artist?: string | null, posted?: string | null, source?: string | null, commentary?: string | null, 
-        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, mirrors?: string | null, slug?: string, type?: string, 
-        uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, 
-        reason?: string | null, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], 
-        addedTagGroups?: string[], removedTagGroups?: string[], imageSources?: string | null, imageLinks?: string | null, imageChanged?: boolean, changes?: any}) => {
+        englishCommentary?: string | null, bookmarks?: number | null, buyLink?: string | null, pixivTags?: string[] | null, userProfile?: string | null, drawingTools?: string[] | null, 
+        sourceImageCount?: number | null, mirrors?: string | null, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, 
+        updater?: string, duplicates?: boolean, newTags?: number, originalID?: string | null, reason?: string | null, hidden?: boolean, hasOriginal?: boolean, 
+        hasUpscaled?: boolean, isNote?: boolean, addedTags?: string[], removedTags?: string[], addedTagGroups?: string[], removedTagGroups?: string[], 
+        imageSources?: string | null, imageLinks?: string | null, imageChanged?: boolean, changes?: any}) => {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, buyLink, pixivTags,
-        mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, 
-        isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageLinks, imageChanged, changes, reason} = params
+        userProfile, drawingTools, sourceImageCount, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, 
+        newTags, hidden, hasOriginal, hasUpscaled, isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageLinks, 
+        imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -260,6 +277,21 @@ export default class SQLPost {
         if (pixivTags !== undefined) {
             setArray.push(`"pixivTags" = $${i}`)
             values.push(pixivTags)
+            i++
+        }
+        if (userProfile !== undefined) {
+            setArray.push(`"userProfile" = $${i}`)
+            values.push(userProfile)
+            i++
+        }
+        if (drawingTools !== undefined) {
+            setArray.push(`"drawingTools" = $${i}`)
+            values.push(drawingTools)
+            i++
+        }
+        if (sourceImageCount !== undefined) {
+            setArray.push(`"sourceImageCount" = $${i}`)
+            values.push(sourceImageCount)
             i++
         }
         if (mirrors !== undefined) {

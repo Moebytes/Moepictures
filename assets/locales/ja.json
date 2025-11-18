@@ -517,7 +517,10 @@
         "imageLinks": "画像リンク",
         "altSource": "代替ソース",
         "directLink": "ダイレクトリンク",
-        "aliasing": "エイリアシング"
+        "aliasing": "エイリアシング",
+        "drawingTools": "描画ツール",
+        "userProfile": "ユーザープロフィール",
+        "imageCount": "画像数"
     },
     "errors": {
         "$401":"401エラー",

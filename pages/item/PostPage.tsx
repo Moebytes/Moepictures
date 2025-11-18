@@ -483,6 +483,9 @@ const PostPage: React.FunctionComponent = () => {
                 bookmarks: post.bookmarks,
                 buyLink: post.buyLink,
                 pixivTags: post.pixivTags,
+                userProfile: post.userProfile,
+                drawingTools: post.drawingTools,
+                sourceImageCount: post.sourceImageCount,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
             }
         }

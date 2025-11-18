@@ -423,6 +423,9 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
       pixivTags: source.pixivTags?.length ? source.pixivTags : null,
+      userProfile: source.userProfile ? source.userProfile : null,
+      drawingTools: source.drawingTools?.length ? source.drawingTools : null,
+      sourceImageCount: source.sourceImageCount ? source.sourceImageCount : null,
       mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
       slug: newSlug,
       uploader,
@@ -452,6 +455,9 @@ export const updatePost = async (postID: string, data: {artists: UploadTag[] | M
       bookmarks: source.bookmarks ? source.bookmarks : null,
       buyLink: source.buyLink ? source.buyLink : null,
       pixivTags: source.pixivTags?.length ? source.pixivTags : null,
+      userProfile: source.userProfile ? source.userProfile : null,
+      drawingTools: source.drawingTools?.length ? source.drawingTools : null,
+      sourceImageCount: source.sourceImageCount ? source.sourceImageCount : null,
       mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
       slug: newSlug,
       uploader,
@@ -538,6 +544,8 @@ export const insertTags = async (postID: string, data: {tags: string[], artists:
   series = await serverFunctions.tags.applyAliases(series)
   newTags = await serverFunctions.tags.applyAliases(newTags)
   tags = await serverFunctions.tags.applyAliases(tags)
+
+  tags = serverFunctions.tags.appendArtToolTags(tags, post?.drawingTools)
 
   let combinedTags = [...artists.map((a: MiniTag | UploadTag) => a.tag), ...characters.map((c: MiniTag | UploadTag) => c.tag), 
   ...series.map((s: MiniTag | UploadTag) => s.tag), ...newTags.map((n: MiniTag | UploadTag) => n.tag), ...tags] as string[]
@@ -762,15 +770,9 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
-        uploader: vanilla.uploader, updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, 
-        type: vanilla.type, rating: vanilla.rating, style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, 
-        englishTitle: vanilla.englishTitle, slug: vanilla.slug, posted: vanilla.posted, artist: vanilla.artist, 
-        source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-        bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, 
-        mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, hasOriginal: vanilla.hasOriginal, 
-        hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, 
-        tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
+        post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+        artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
+        addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
         removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
         imageChanged: false, changes: null, reason})
 
@@ -824,14 +826,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
           }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, 
-        updater: updated.updater, uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, 
-        rating: updated.rating, style: updated.style, parentID: updated.parentID, title: updated.title, 
-        englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, source: updated.source, 
-        commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, 
-        mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, 
-        hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        post: updated, username, images: newImages, upscaledImages: newUpscaledImages, 
+        artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, 
         imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, 
         changes: changes ? JSON.stringify(changes) : null, reason})
@@ -897,14 +893,8 @@ const insertPostHistory = async (post: PostFull, data: {artists: UploadTag[] | M
         }
       }
       await sql.history.insertPostHistory({
-        postID: post.postID, username, images: newImages, upscaledImages: newUpscaledImages, uploader: updated.uploader, 
-        updater: updated.updater, uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, 
-        rating: updated.rating, style: updated.style, parentID: updated.parentID, title: updated.title, 
-        englishTitle: updated.englishTitle, posted: updated.posted, artist: updated.artist, source: updated.source, 
-        commentary: updated.commentary, slug: updated.slug, englishCommentary: updated.englishCommentary, 
-        bookmarks: updated.bookmarks, buyLink: updated.buyLink, pixivTags: updated.pixivTags, 
-        mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, hasOriginal: updated.hasOriginal, 
-        hasUpscaled: updated.hasUpscaled, artists: artistsArr, characters: charactersArr, series: seriesArr, 
+        post: updated, username, images: newImages, upscaledImages: newUpscaledImages,  
+        artists: artistsArr, characters: charactersArr, series: seriesArr, 
         tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), addedTagGroups, removedTagGroups, 
         imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), imageChanged: imgChanged, 
         changes: changes ? JSON.stringify(changes) : null, reason})
@@ -1329,6 +1319,9 @@ const CreateRoutes = (app: Express) => {
           bookmarks: unverified.bookmarks,
           buyLink: unverified.buyLink,
           pixivTags: unverified.pixivTags,
+          userProfile: unverified.userProfile,
+          drawingTools: unverified.drawingTools,
+          sourceImageCount: unverified.sourceImageCount,
           mirrors: unverified.mirrors ? Object.values(unverified.mirrors).join("\n") : "",
           posted: unverified.posted,
           source: unverified.source
@@ -1497,6 +1490,9 @@ const CreateRoutes = (app: Express) => {
               bookmarks: post.bookmarks,
               buyLink: post.buyLink,
               pixivTags: post.pixivTags,
+              userProfile: post.userProfile,
+              drawingTools: post.drawingTools,
+              sourceImageCount: post.sourceImageCount,
               mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : "",
               posted: post.posted,
               source: post.source

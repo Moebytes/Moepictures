@@ -132,6 +132,9 @@ export interface SourceLookup {
         englishCommentary: string
         bookmarks: string
         pixivTags: string[]
+        userProfile: string
+        drawingTools: string[]
+        sourceImageCount: number | null
         posted: string
         mirrors: string
     }

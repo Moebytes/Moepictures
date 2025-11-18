@@ -611,6 +611,10 @@ const PostRoutes = (app: Express) => {
                 const updatedDate = new Date().toISOString()
 
                 let newSlug = functions.post.postSlug(source.title, source.englishTitle)
+
+                let oldArtTags = serverFunctions.tags.appendArtToolTags([], post.drawingTools)
+                let newArtTags = serverFunctions.tags.appendArtToolTags([], source?.drawingTools)
+
                 if (unverified) {
                     await sql.post.bulkUpdateUnverifiedPost(postID, {
                         title: source.title ? source.title : null,
@@ -623,11 +627,17 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         buyLink: source.buyLink ? source.buyLink : null,
                         pixivTags: source.pixivTags?.length ? source.pixivTags : null,
+                        userProfile: source.userProfile ? source.userProfile : null,
+                        drawingTools: source.drawingTools?.length ? source.drawingTools : null,
+                        sourceImageCount: source.sourceImageCount ? source.sourceImageCount : null,
                         mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
                         slug: newSlug,
                         updatedDate,
                         updater: req.session.username
                     })
+
+                    await sql.tag.deleteUnverifiedTagMap(postID, oldArtTags)
+                    await sql.tag.insertUnverifiedTagMap(postID, newArtTags)
                 } else {
                     await sql.post.bulkUpdatePost(postID, {
                         title: source.title ? source.title : null,
@@ -640,11 +650,16 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         buyLink: source.buyLink ? source.buyLink : null,
                         pixivTags: source.pixivTags?.length ? source.pixivTags : null,
+                        userProfile: source.userProfile ? source.userProfile : null,
+                        drawingTools: source.drawingTools?.length ? source.drawingTools : null,
+                        sourceImageCount: source.sourceImageCount ? source.sourceImageCount : null,
                         mirrors: source.mirrors ? functions.post.mirrorsJSON(source.mirrors) : null,
                         slug: newSlug,
                         updatedDate,
                         updater: req.session.username
                     })
+                    await sql.tag.deleteTagMap(postID, oldArtTags)
+                    await sql.tag.insertTagMap(postID, newArtTags)
                 }
 
                 if (post.slug && post.slug !== newSlug) {
@@ -808,15 +823,9 @@ const PostRoutes = (app: Express) => {
                         vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
-                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, 
-                    rating: vanilla.rating, style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, 
-                    englishTitle: vanilla.englishTitle, posted: vanilla.posted, artist: vanilla.artist, source: vanilla.source, 
-                    commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, 
-                    mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, 
-                    hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, 
-                    tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
+                    post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
+                    addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
                     addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: null, reason})
                 let images = [] as string[]
@@ -826,14 +835,9 @@ const PostRoutes = (app: Express) => {
                     upscaledImages.push(functions.link.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
-                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-                    style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
-                    posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
-                    pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
-                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, characters: updated.characters, 
-                    series: updated.series, tags: updated.tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
+                    post: updated, username: req.session.username, images, upscaledImages, 
+                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags,
+                    addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
                     addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             } else {
@@ -845,14 +849,9 @@ const PostRoutes = (app: Express) => {
                         post.images[i].upscaledFilename || post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, upscaledImages, uploader: updated.uploader, updater: updated.updater, 
-                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, rating: updated.rating, 
-                    style: updated.style, parentID: updated.parentID, title: updated.title, englishTitle: updated.englishTitle, 
-                    posted: updated.posted, artist: updated.artist, source: updated.source, commentary: updated.commentary, slug: updated.slug,
-                    englishCommentary: updated.englishCommentary, bookmarks: updated.bookmarks, buyLink: updated.buyLink, 
-                    pixivTags: updated.pixivTags, mirrors: updated.mirrors ? JSON.stringify(updated.mirrors) : null, 
-                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, characters: updated.characters, 
-                    series: updated.series, tags: updated.tags, addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
+                    post: updated, username: req.session.username, images, upscaledImages, 
+                    artists: updated.artists, characters: updated.characters, series: updated.series, tags: updated.tags,
+                    addedTags, removedTags, tagGroups: JSON.stringify(tagGroups), 
                     addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
@@ -910,6 +909,9 @@ const PostRoutes = (app: Express) => {
                     bookmarks: post.bookmarks,
                     buyLink: post.buyLink,
                     pixivTags: post.pixivTags,
+                    userProfile: post.userProfile,
+                    drawingTools: post.drawingTools,
+                    sourceImageCount: post.sourceImageCount,
                     mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
                 }
             }
@@ -1412,14 +1414,11 @@ const PostRoutes = (app: Express) => {
                     vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(vanilla.images[i].type, post.postID, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID: post.postID, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, uploader: vanilla.uploader, 
-                    updater: vanilla.updater, uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, rating: vanilla.rating, 
-                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, englishTitle: vanilla.englishTitle, posted: vanilla.posted, 
-                    artist: vanilla.artist, source: vanilla.source, commentary: vanilla.commentary, englishCommentary: vanilla.englishCommentary, 
-                    bookmarks: vanilla.bookmarks, buyLink: vanilla.buyLink, pixivTags: vanilla.pixivTags, mirrors: vanilla.mirrors ? JSON.stringify(vanilla.mirrors) : null, 
-                    slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, artists: vanilla.artists, 
-                    characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
-                    addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, imageLinks: linkMap ? JSON.stringify(linkMap) : null, 
+                    post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
+                    addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
+                    addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, 
+                    imageLinks: linkMap ? JSON.stringify(linkMap) : null, 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
             

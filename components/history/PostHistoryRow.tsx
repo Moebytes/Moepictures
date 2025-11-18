@@ -81,6 +81,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 bookmarks: props.postHistory.bookmarks,
                 buyLink: props.postHistory.buyLink,
                 pixivTags: props.postHistory.pixivTags,
+                userProfile: props.postHistory.userProfile,
+                drawingTools: props.postHistory.drawingTools,
+                sourceImageCount: props.postHistory.sourceImageCount,
                 mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
             }
         }
@@ -407,6 +410,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.source) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.util.getSiteName(props.postHistory.source, i18n)}</span></span>)
         }
+        if (!prevHistory || changes.userProfile) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.userProfile}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.userProfile!, "_blank")}>{props.postHistory.userProfile}</span></span>)
+        }
         if (!prevHistory || changes.imageSources) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageSources}: </span>{printImageSources()}</span>)
         }
@@ -419,8 +425,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}: </span>{props.postHistory.bookmarks || "?"}</span>)
         }
+        if ((!prevHistory && props.postHistory.sourceImageCount) || changes.sourceImageCount) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageCount}: </span>{props.postHistory.sourceImageCount || "?"}</span>)
+        }
         if ((!prevHistory && props.postHistory.pixivTags) || changes.pixivTags) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}: </span>{props.postHistory.pixivTags?.join(", ") || i18n.labels.none}</span>)
+        }
+        if ((!prevHistory && props.postHistory.drawingTools) || changes.drawingTools) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.drawingTools}: </span>{props.postHistory.drawingTools?.join(", ") || i18n.labels.none}</span>)
         }
         if ((!prevHistory && props.postHistory.buyLink) || changes.buyLink) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}: </span>{props.postHistory.buyLink || i18n.labels.none}</span>)

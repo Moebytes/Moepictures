@@ -27,6 +27,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [bookmarks, setBookmarks] = useState("")
     const [buyLink, setBuyLink] = useState("")
     const [pixivTags, setPixivTags] = useState("")
+    const [drawingTools, setDrawingTools] = useState("")
+    const [userProfile, setUserProfile] = useState("")
+    const [sourceImageCount, setSourceImageCount] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
@@ -45,6 +48,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setBookmarks(String(sourceEditID.post.bookmarks) || "")
         setBuyLink(sourceEditID.post.buyLink || "")
         setPixivTags(sourceEditID.post.pixivTags?.join(", ") || "")
+        setDrawingTools(sourceEditID.post.drawingTools?.join(", ") || "")
+        setUserProfile(sourceEditID.post.userProfile || "")
+        setSourceImageCount(String(sourceEditID.post.sourceImageCount || ""))
     }
 
     const reset = () => {
@@ -59,6 +65,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setBookmarks("")
         setBuyLink("")
         setPixivTags("")
+        setUserProfile("")
+        setDrawingTools("")
+        setSourceImageCount("")
     }
 
     useEffect(() => {
@@ -93,8 +102,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
+                    userProfile,
                     bookmarks: functions.util.safeNumber(bookmarks),
                     pixivTags: pixivTags.trim() ? pixivTags.split(",") : null,
+                    drawingTools: drawingTools.trim() ? drawingTools.split(",") : null,
+                    sourceImageCount: functions.util.safeNumber(sourceImageCount),
                     buyLink,
                     mirrors
                 },
@@ -127,8 +139,11 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     source,
                     commentary,
                     englishCommentary,
+                    userProfile,
                     bookmarks: functions.util.safeNumber(bookmarks),
                     pixivTags: pixivTags.trim() ? pixivTags.split(",") : null,
+                    drawingTools: drawingTools.trim() ? drawingTools.split(",") : null,
+                    sourceImageCount: functions.util.safeNumber(sourceImageCount),
                     buyLink,
                     mirrors
                 },
@@ -184,6 +199,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             setSource(sourceLookup.source.source)
             setBookmarks(sourceLookup.source.bookmarks)
             setPixivTags(sourceLookup.source.pixivTags.join(", "))
+            setDrawingTools(sourceLookup.source.drawingTools.join(", "))
+            setUserProfile(sourceLookup.source.userProfile)
+            setSourceImageCount(String(sourceLookup.source.sourceImageCount || ""))
         } catch (e) {
             console.log(e)
             errorRef.current!.innerText = i18n.pages.upload.nothingFound
@@ -219,7 +237,9 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.tag.artist}: </span>
-                <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
+                <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)} style={{width: "30%"}}/>
+                <span className="dialog-text">{i18n.labels.imageCount}: </span>
+                <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={sourceImageCount} onChange={(event) => setSourceImageCount(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.sort.posted}: </span>
@@ -231,27 +251,35 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <span className="dialog-text">{i18n.labels.source}: </span>
                 <input className="dialog-input" type="text" spellCheck={false} value={source} onChange={(event) => setSource(event.target.value)}/>
             </div>
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="dialog-text nowrap">{i18n.labels.userProfile}: </span>
+                <input className="dialog-input" type="text" spellCheck={false} value={userProfile} onChange={(event) => setUserProfile(event.target.value)}/>
+            </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.commentary}: </span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
+                <textarea className="dialog-textarea-tiny" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.englishCommentary}: </span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={englishCommentary} onChange={(event) => setEnglishCommentary(event.target.value)}></textarea>
+                <textarea className="dialog-textarea-tiny" style={{resize: "vertical"}} spellCheck={false} value={englishCommentary} onChange={(event) => setEnglishCommentary(event.target.value)}></textarea>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.labels.mirrors}: </span>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
+                <textarea className="dialog-textarea-tiny" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <span className="dialog-text">{i18n.labels.pixivTags}: </span>
+                <span className="dialog-text nowrap">{i18n.labels.pixivTags}: </span>
                 <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={pixivTags} onChange={(event) => setPixivTags(event.target.value)}/>
+            </div>
+            <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <span className="dialog-text nowrap">{i18n.labels.drawingTools}: </span>
+                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={drawingTools} onChange={(event) => setDrawingTools(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.labels.buyLink}: </span>

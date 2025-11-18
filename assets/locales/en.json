@@ -516,7 +516,10 @@
         "imageLinks": "Image Links",
         "altSource": "Alt Source",
         "directLink": "Direct Link",
-        "aliasing": "Aliasing"
+        "aliasing": "Aliasing",
+        "drawingTools": "Drawing Tools",
+        "userProfile": "User Profile",
+        "imageCount": "Image Count"
     },
     "errors": {
         "$401":"401 error",

@@ -72,6 +72,9 @@ const BanDialog: React.FunctionComponent = (props) => {
                     bookmarks: currentHistory.bookmarks,
                     buyLink: currentHistory.buyLink,
                     pixivTags: currentHistory.pixivTags,
+                    userProfile: currentHistory.userProfile,
+                    drawingTools: currentHistory.drawingTools,
+                    sourceImageCount: currentHistory.sourceImageCount,
                     mirrors: currentHistory.mirrors ? Object.values(currentHistory.mirrors).join("\n") : null
                 }
                 await functions.http.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 

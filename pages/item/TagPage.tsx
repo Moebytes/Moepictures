@@ -514,7 +514,7 @@ const TagPage: React.FunctionComponent = () => {
 
     const featuredClick = (event: React.MouseEvent) => {
         if (!tag || !tag.featuredPost) return
-        functions.post.openPost(tag.featuredPost.postID, event, navigate, session, setSessionFlag)
+        functions.post.openPost(tag.featuredPost, event, navigate, session, setSessionFlag)
     }
 
     return (

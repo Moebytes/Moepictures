@@ -439,6 +439,9 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.source) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.source}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.source, "_blank")}>{functions.util.getSiteName(newPost.source, i18n)}</span></span>)
         }
+        if (changes.userProfile) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.userProfile}:</span> <span className="mod-post-link" onClick={() => window.open(newPost.userProfile!, "_blank")}>{newPost.userProfile}</span></span>)
+        }
         if (changes.imageSources) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.imageSources}:</span> {printImageSources(originalPost, newPost)}</span>)
         }
@@ -451,8 +454,14 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.bookmarks) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.sort.bookmarks}:</span> {newPost.bookmarks || "?"}</span>)
         }
+        if (changes.sourceImageCount) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.imageCount}:</span> {newPost.sourceImageCount || "?"}</span>)
+        }
         if (changes.pixivTags) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.pixivTags}:</span> {newPost.pixivTags?.join(", ") || i18n.labels.none}</span>)
+        }
+        if (changes.drawingTools) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.drawingTools}:</span> {newPost.drawingTools?.join(", ") || i18n.labels.none}</span>)
         }
         if (changes.buyLink) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">{i18n.labels.buyLink}:</span> {newPost.buyLink || i18n.labels.none}</span>)

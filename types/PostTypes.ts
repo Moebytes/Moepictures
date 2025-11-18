@@ -72,6 +72,9 @@ export interface Post {
     bookmarks: number
     buyLink: string | null
     pixivTags: string[] | null
+    userProfile: string | null
+    drawingTools: string[] | null
+    sourceImageCount: number | null
     approver: string
     approveDate: string
     hasOriginal: boolean

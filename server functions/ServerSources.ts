@@ -9,6 +9,7 @@ import axios from "axios"
 import sharp from "sharp"
 import serverFunctions from "./ServerFunctions"
 import functions from "../functions/Functions"
+import sql from "../sql/SQLQuery"
 import {UploadImage, PostRating, UploadTag, PixivResponse, SaucenaoResponse} from "../types/Types"
 
 let pixiv: Pixiv
@@ -24,6 +25,17 @@ try {
 }
 
 export default class ServerSources {
+    public static checkArtistConflict = async (artistTag: string, userProfile: string) => {
+        if (!userProfile) return artistTag
+        const tag = await sql.tag.tag(artistTag)
+        if (!tag) return artistTag
+        if (tag?.social !== userProfile) {
+            let id = userProfile.match(/\d+/)?.[0] || ""
+            if (id) return `${artistTag}-(${id})`
+        }
+        return artistTag
+    }
+
     public static pixivLookup = async (pixivLink: string, rating: PostRating) => {
         let source = ""
         let artist = ""
@@ -33,13 +45,16 @@ export default class ServerSources {
         let englishCommentary = ""
         let posted = ""
         let bookmarks = ""
+        let userProfile = ""
+        let sourceImageCount = null as number | null
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
         let pixivTags = [] as string[]
+        let drawingTools = [] as string[]
 
-        const pixivID = pixivLink.match(/^\d{5,}(?=$|_)/gm)?.[0] ?? ""
+        const pixivID = pixivLink.match(/\d{5,}/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
         try {
             const result = await functions.http.getJSON(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
@@ -50,13 +65,13 @@ export default class ServerSources {
             }
         } catch {}
 
-        let resolvable = source as string | number
+        let resolvable = source
         if (source.includes("pximg.net")) {
-            const id = path.basename(source).match(/(\d+)(?=_)/)?.[0]
-            resolvable = Number(id)
+            resolvable = path.basename(source).match(/(\d+)(?=_)/)?.[0] || ""
         }
         const illust = await pixiv.illust.get(resolvable) as PixivResponse
         if (!illust) throw new Error("illust doesn't exist")
+        userProfile = `https://www.pixiv.net/users/${illust.user.id}`
         const user = await pixiv.user.webDetail(illust.user.id)
         const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
         illust.user.twitter = twitter || ""
@@ -68,7 +83,9 @@ export default class ServerSources {
         title = illust.title
         artist = illust.user.name
         bookmarks = String(illust.total_bookmarks)
+        sourceImageCount = illust.page_count
         pixivTags = illust.tags.map((t) => t.name)
+        drawingTools = illust.tools
         const translated = await serverFunctions.util.translate([title, commentary])
         if (translated) {
             englishTitle = translated[0]
@@ -77,7 +94,8 @@ export default class ServerSources {
         if (illust.x_restrict !== 0) {
             rating = functions.highestRating(rating, functions.r17())
         }
-        artists[artists.length - 1].tag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await serverFunctions.util.romajinize([artist]).then((r) => r[0])
+        let artistTag = illust.user.twitter ? functions.tag.fixTwitterTag(illust.user.twitter) : await serverFunctions.util.romajinize([artist]).then((r) => r[0])
+        artists[artists.length - 1].tag = await this.checkArtistConflict(artistTag, userProfile)
         artistIcon = illust.user.profile_image_urls.medium
         artists.push({})
 
@@ -95,7 +113,8 @@ export default class ServerSources {
         }
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, pixivTags,
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+            userProfile, drawingTools, sourceImageCount, posted, bookmarks, danbooruLink, 
+            artistIcon, artists, rating, sourceLinks}
     }
 
     public static twitterLookup = async (twitterLink: string, rating: PostRating) => {
@@ -107,6 +126,8 @@ export default class ServerSources {
         let englishCommentary = ""
         let posted = ""
         let bookmarks = ""
+        let userProfile = ""
+        let sourceImageCount = null as number | null
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
@@ -142,6 +163,9 @@ export default class ServerSources {
         title = tweetText ?? ""
         artist = tweet.username ?? ""
         bookmarks = String(tweet?.likes)
+        userProfile = `https://twitter.com/${tweet.username}`
+        sourceImageCount = tweet.photos.length
+        
         const translated = await serverFunctions.util.translate([title, commentary])
         if (translated) {
             englishTitle = translated[0]
@@ -150,7 +174,8 @@ export default class ServerSources {
         if (tweet.sensitiveContent) {
             rating = functions.highestRating(rating, functions.r17())
         }
-        artists[artists.length - 1].tag = tweet.username ?? ""
+        let artistTag = tweet.username ?? ""
+        artists[artists.length - 1].tag = await this.checkArtistConflict(artistTag, userProfile)
         let profile = await twitter.getProfile(tweet.username ?? "").catch(() => ({avatar: ""}))
         artistIcon = profile.avatar ?? ""
         artists.push({})
@@ -166,8 +191,8 @@ export default class ServerSources {
             sourceLinks.push({link, hash})
         }
 
-        return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+        return {source, artist, title, englishTitle, commentary, englishCommentary, userProfile,
+            sourceImageCount, posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static deviantartLookup = async (deviantartLink: string, rating: PostRating) => {
@@ -179,6 +204,8 @@ export default class ServerSources {
         let englishCommentary = ""
         let posted = ""
         let bookmarks = ""
+        let userProfile = ""
+        let sourceImageCount = null as number | null
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
@@ -191,10 +218,12 @@ export default class ServerSources {
         source = deviation.url
         commentary = deviation.description
         posted = functions.date.formatDate(new Date(deviation.date), true)
+        userProfile = `https://www.deviantart.com/${deviation.author.user.username}`
+        sourceImageCount = deviation.content.length
         if (deviation.rating === "adult") {
             rating = functions.highestRating(rating, functions.r17())
         }
-        artists[artists.length - 1].tag = artist
+        artists[artists.length - 1].tag = await this.checkArtistConflict(artist, userProfile)
         artistIcon = deviation.author.user.usericon
         artists.push({})
 
@@ -209,8 +238,8 @@ export default class ServerSources {
             sourceLinks.push({link, hash})
         }
 
-        return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+        return {source, artist, title, englishTitle, commentary, englishCommentary, userProfile,
+            sourceImageCount, posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
     }
 
     public static danbooruLookup = async (danbooruLink: string, rating: PostRating) => {
@@ -306,11 +335,14 @@ export default class ServerSources {
         let englishCommentary = ""
         let posted = ""
         let bookmarks = ""
+        let userProfile = ""
+        let sourceImageCount = null as number | null
         let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let mirrors = [] as string[]
         let pixivTags = [] as string[]
+        let drawingTools = [] as string[]
         let sourceLinks = [] as {link: string, hash: string}[]
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
@@ -335,6 +367,9 @@ export default class ServerSources {
                 rating = data.rating
                 sourceLinks = data.sourceLinks
                 pixivTags = data.pixivTags
+                userProfile = data.userProfile
+                drawingTools = data.drawingTools
+                sourceImageCount = data.sourceImageCount
 
                 mirrors = await serverFunctions.links.booruLinks(pngBytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -353,6 +388,9 @@ export default class ServerSources {
                         englishCommentary,
                         bookmarks,
                         pixivTags,
+                        userProfile,
+                        drawingTools,
+                        sourceImageCount,
                         posted,
                         mirrors: mirrorStr
                     }
@@ -379,6 +417,8 @@ export default class ServerSources {
                 artists = data.artists
                 rating = data.rating
                 sourceLinks = data.sourceLinks
+                userProfile = data.userProfile
+                sourceImageCount = data.sourceImageCount
 
                 mirrors = await serverFunctions.links.booruLinks(pngBytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -397,6 +437,8 @@ export default class ServerSources {
                         englishCommentary,
                         bookmarks,
                         pixivTags,
+                        userProfile,
+                        sourceImageCount,
                         posted,
                         mirrors: mirrorStr
                     }
@@ -449,6 +491,9 @@ export default class ServerSources {
                     rating = data.rating
                     sourceLinks = data.sourceLinks
                     pixivTags = data.pixivTags
+                    userProfile = data.userProfile
+                    drawingTools = data.drawingTools
+                    sourceImageCount = data.sourceImageCount
                 } catch (e) {
                     console.log(e)
                 }
@@ -470,6 +515,8 @@ export default class ServerSources {
                     artists = data.artists
                     rating = data.rating
                     sourceLinks = data.sourceLinks
+                    userProfile = data.userProfile
+                    sourceImageCount = data.sourceImageCount
                 } catch (e) {
                     console.log(e)
                 }
@@ -493,6 +540,8 @@ export default class ServerSources {
                     artists = data.artists
                     rating = data.rating
                     sourceLinks = data.sourceLinks
+                    userProfile = data.userProfile
+                    sourceImageCount = data.sourceImageCount
                 } catch (e) {
                     console.log(e)
                 } 
@@ -549,6 +598,9 @@ export default class ServerSources {
                 englishCommentary,
                 bookmarks,
                 pixivTags,
+                userProfile,
+                drawingTools,
+                sourceImageCount,
                 posted,
                 mirrors: mirrorStr
             }

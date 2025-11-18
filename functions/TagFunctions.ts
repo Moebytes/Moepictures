@@ -270,7 +270,7 @@ export default class TagFunctions {
     }
 
     public static cleanTag = (tag: string) => {
-        return tag.normalize("NFD").replace(/[^a-z0-9_\-():><&!#@?]/gi, "")
+        return tag.toLowerCase().normalize("NFD").replace(/[^a-z0-9_\-():><&!#@?]/gi, "")
         .replaceAll("_", "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "")
     }
 

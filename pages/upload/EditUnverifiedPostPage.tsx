@@ -104,6 +104,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceEnglishCommentary, setSourceEnglishCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
+    const [sourceDrawingTools, setSourceDrawingTools] = useState("")
+    const [sourceUserProfile, setSourceUserProfile] = useState("")
+    const [sourceImageCount, setSourceImageCount] = useState("")
     const [artists, setArtists] = useState([{}] as UploadTag[])
     const [characters, setCharacters] = useState([{}] as UploadTag[])
     const [series, setSeries] = useState([{}] as UploadTag[])
@@ -156,6 +159,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
         setSourceBookmarks(String(post.bookmarks) || "")
         setSourceBuyLink(post.buyLink || "")
         setSourcePixivTags(post.pixivTags?.join(", ") || "")
+        setSourceDrawingTools(post.drawingTools?.join(", ") || "")
+        setSourceImageCount(String(post.sourceImageCount) || "")
+        setSourceUserProfile(post.userProfile || "")
         const parentPost = await functions.http.get("/api/post/parent/unverified", {postID}, session, setSessionFlag)
         if (parentPost) setParentID(parentPost.parentID)
 
@@ -267,7 +273,8 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, rating, style, sourceTitle, sourceArtist, sourceCommentary, sourceEnglishCommentary, sourceMirrors, sourceEnglishTitle,
-    sourceLink, sourceBookmarks, sourceBuyLink, sourcePixivTags, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
+        sourceLink, sourceBookmarks, sourceBuyLink, sourcePixivTags, sourceDate, sourceDrawingTools, sourceUserProfile, sourceImageCount, 
+        originalFiles, upscaledFiles, artists, characters, series, rawTags])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -835,6 +842,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                 englishCommentary: sourceEnglishCommentary,
                 bookmarks: functions.util.safeNumber(sourceBookmarks),
                 pixivTags: sourcePixivTags.trim() ? sourcePixivTags.split(",") : null,
+                userProfile: sourceUserProfile,
+                drawingTools: sourceDrawingTools.trim() ? sourceDrawingTools.split(",") : null,
+                sourceImageCount: functions.util.safeNumber(sourceImageCount),
                 buyLink: sourceBuyLink,
                 mirrors: sourceMirrors
             },
@@ -897,6 +907,9 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
             setSourceEnglishCommentary(sourceLookup.source.englishCommentary)
             setSourceBookmarks(sourceLookup.source.bookmarks)
             setSourcePixivTags(sourceLookup.source.pixivTags.join(", "))
+            setSourceDrawingTools(sourceLookup.source.drawingTools.join(", "))
+            setSourceUserProfile(sourceLookup.source.userProfile)
+            setSourceImageCount(String(sourceLookup.source.sourceImageCount || ""))
             setSourceDate(sourceLookup.source.posted)
             setSourceMirrors(sourceLookup.source.mirrors)
             if (!sourceLookup.source.title && !sourceLookup.source.artist && !sourceLookup.source.source) {
@@ -1548,12 +1561,24 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                         <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
+                        <span className="upload-text">{i18n.labels.userProfile}: </span>
+                        <input className="upload-input-wide2" type="url" value={sourceUserProfile} onChange={(event) => setSourceUserProfile(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
                         <span className="upload-text">{i18n.sort.bookmarks}: </span>
                         <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
+                        <span className="upload-text">{i18n.labels.imageCount}: </span>
+                        <input className="upload-input-wide" type="number" value={sourceImageCount} onChange={(event) => setSourceImageCount(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
                         <span className="upload-text">{i18n.labels.pixivTags}: </span>
                         <input className="upload-input-wide2" type="url" value={sourcePixivTags} onChange={(event) => setSourcePixivTags(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
+                        <span className="upload-text">{i18n.labels.drawingTools}: </span>
+                        <input className="upload-input-wide2" type="url" value={sourceDrawingTools} onChange={(event) => setSourceDrawingTools(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text">{i18n.labels.commentary}: </span>

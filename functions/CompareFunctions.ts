@@ -141,8 +141,17 @@ export default class CompareFunctions {
         if (oldPost.buyLink !== newPost.buyLink) {
             json.buyLink = newPost.buyLink
         }
+        if (oldPost.userProfile !== newPost.userProfile) {
+            json.userProfile = newPost.userProfile
+        }
+        if (oldPost.sourceImageCount !== newPost.sourceImageCount) {
+            json.sourceImageCount = newPost.sourceImageCount
+        }
         if (JSON.stringify(oldPost.pixivTags) !== JSON.stringify(newPost.pixivTags)) {
             json.pixivTags = newPost.pixivTags
+        }
+        if (JSON.stringify(oldPost.drawingTools) !== JSON.stringify(newPost.drawingTools)) {
+            json.drawingTools = newPost.drawingTools
         }
         if (oldPost.commentary !== newPost.commentary) {
             json.commentary = newPost.commentary

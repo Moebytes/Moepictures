@@ -38,6 +38,9 @@ export interface  PostChanges {
     bookmarks?: number
     buyLink?: string | null
     pixivTags?: string[] | null
+    userProfile?: string | null
+    drawingTools?: string[] | null
+    sourceImageCount?: number | null
     commentary?: string
     englishCommentary?: string
 }
@@ -79,6 +82,9 @@ export interface PostHistory {
     hasUpscaled: boolean | null
     buyLink: string | null
     pixivTags: string[] | null
+    userProfile: string | null
+    drawingTools: string[] | null
+    sourceImageCount: number | null
     addedTags: string[]
     removedTags: string[]
     addedTagGroups: string[]
