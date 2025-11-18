@@ -647,7 +647,7 @@
             "signupText": "Don't have an account? Sign up.",
             "forgotText": "Forgot Password?",
             "captcha": "Solve the captcha.",
-            "error": "Invalid username, password, or captcha.",
+            "error": "Invalid username or password.",
             "rateLimit": "Too many login attempts, try again later.",
             "newIP": "New IP location detected. Check your email."
         },
@@ -655,7 +655,7 @@
             "title": "Sign Up",
             "loginText": "Already have an account? Login.",
             "submitHeading": "Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.",
-            "error": "Bad username, password, email, or captcha.",
+            "error": "Bad username, password, or email.",
             "rateLimit": "Too many accounts created, try again later.",
             "banned": "This IP is associated with a banned account.",
             "lengthReq": "-Passwords must contain at least 10 characters",

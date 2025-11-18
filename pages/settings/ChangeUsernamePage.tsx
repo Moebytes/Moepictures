@@ -101,7 +101,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             setError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.changeUsername.error
-            if (err.response?.data.includes("Changing username too frequently")) errMsg = i18n.pages.changeUsername.rateLimit
+            if (err.message.includes("Changing username too frequently")) errMsg = i18n.pages.changeUsername.rateLimit
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)

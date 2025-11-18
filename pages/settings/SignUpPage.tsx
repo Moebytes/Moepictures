@@ -141,8 +141,8 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.signup.error
-            if (err.response?.data.includes("Too many accounts created")) errMsg = i18n.pages.signup.rateLimit
-            if (err.response?.data.includes("IP banned")) errMsg = i18n.pages.signup.banned
+            if (err.message.includes("Too many accounts created")) errMsg = i18n.pages.signup.rateLimit
+            if (err.message.includes("IP banned")) errMsg = i18n.pages.signup.banned
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)

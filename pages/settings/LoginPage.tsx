@@ -97,7 +97,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            const result = await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
+            await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)
@@ -112,8 +112,8 @@ const LoginPage: React.FunctionComponent = (props) => {
             setError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.login.error
-            if (err.response?.data.includes("Too many login attempts")) errMsg = i18n.pages.login.rateLimit
-            if (err.response?.data.includes("new IP login location")) errMsg = i18n.pages.login.newIP
+            if (err.message.includes("Too many requests")) errMsg = i18n.pages.login.rateLimit
+            if (err.message.includes("new IP login location")) errMsg = i18n.pages.login.newIP
             errorRef.current!.innerText = errMsg
             await functions.timeout(3000)
             setError(false)

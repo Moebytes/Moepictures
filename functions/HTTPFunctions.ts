@@ -82,24 +82,29 @@ export default class HTTPFunctions {
         }
 
         try {
-            let response: any
+            let response: Response
             let parsedURL = functions.util.parseURLParams(endpoint, params)
             if (noLock) {
-                response = await fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+                response = await fetch(parsedURL, {headers, credentials: "include"})
             } else {
                 if (!this.lockManager[endpoint]) {
-                    this.lockManager[endpoint] = fetch(parsedURL, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+                    this.lockManager[endpoint] = fetch(parsedURL, {headers, credentials: "include"})
                 }
                 response = await this.lockManager[endpoint]
                 this.lockManager[endpoint] = null
             }
 
-            const json = functions.http.arrayBufferToJSON(response)
+            if (response.status === 404) throw new Error("404")
+            if (response.status === 403) throw new Error("403")
+            if (!response.ok) throw new Error(await response.text())
+
+            let arrayBuffer = await response.arrayBuffer()
+            const json = functions.http.arrayBufferToJSON(arrayBuffer)
             if (json !== null) {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})
                 return json as GetEndpoint<T>["response"]
             }
-            let decrypted = decryption.decryptAPI(response, this.privateKey, this.serverPublicKey, session)?.toString()
+            let decrypted = decryption.decryptAPI(arrayBuffer, this.privateKey, this.serverPublicKey, session)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}
@@ -115,11 +120,13 @@ export default class HTTPFunctions {
         const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
             let body = data ? JSON.stringify(data) : null
-            let response = await fetch(endpoint, {method: "POST", headers, credentials: "include", body}).then((r) => r.text())
+            let response = await fetch(endpoint, {method: "POST", headers, credentials: "include", body})
+            let text = await response.text()
+            if (!response.ok) throw new Error(text)
             try {
-                response = JSON.parse(response)
+                text = JSON.parse(text)
             } catch {}
-            return response as PostEndpoint<T>["response"]
+            return text as PostEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
@@ -130,11 +137,13 @@ export default class HTTPFunctions {
         const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}
         try {
             let body = data ? JSON.stringify(data) : null
-            let response = await fetch(endpoint, {method: "PUT", headers, credentials: "include", body}).then((r) => r.text())
+            let response = await fetch(endpoint, {method: "PUT", headers, credentials: "include", body})
+            let text = await response.text()
+            if (!response.ok) throw new Error(text)
             try {
-                response = JSON.parse(response)
+                text = JSON.parse(text)
             } catch {}
-            return response as PutEndpoint<T>["response"]
+            return text as PutEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }
@@ -145,11 +154,13 @@ export default class HTTPFunctions {
         const headers = {"x-csrf-token": session.csrfToken}
         try {
             const parsedURL = functions.util.parseURLParams(endpoint, params)
-            let response = await fetch(parsedURL, {method: "DELETE", headers, credentials: "include"}).then((r) => r.text())
+            let response = await fetch(parsedURL, {method: "DELETE", headers, credentials: "include"})
+            let text = await response.text()
+            if (!response.ok) throw new Error(text)
             try {
-                response = JSON.parse(response)
+                text = JSON.parse(text)
             } catch {}
-            return response as DeleteEndpoint<T>["response"]
+            return text as DeleteEndpoint<T>["response"]
         } catch (err: any) {
             return Promise.reject(err)
         }

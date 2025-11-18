@@ -97,7 +97,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
             setError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.changeEmail.error
-            if (err.response?.data.includes("Email already sent")) errMsg = i18n.pages.changeEmail.alreadySent
+            if (err.message.includes("Email already sent")) errMsg = i18n.pages.changeEmail.alreadySent
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)

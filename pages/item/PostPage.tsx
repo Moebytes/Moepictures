@@ -264,8 +264,8 @@ const PostPage: React.FunctionComponent = () => {
             try {
                 if (!post) post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (err: any) {
-                if (err.response?.status === 404) functions.dom.replaceLocation("/404")
-                if (err.response?.status === 403) functions.dom.replaceLocation("/403")
+                if (err.message === "404") functions.dom.replaceLocation("/404")
+                if (err.message === "403") functions.dom.replaceLocation("/403")
                 return
             }
             if (post) {
@@ -281,8 +281,8 @@ const PostPage: React.FunctionComponent = () => {
                         post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
                         if (post) setPost(post)
                     } catch (err: any) {
-                        if (err.response?.status === 404) functions.dom.replaceLocation("/404")
-                        if (err.response?.status === 403) functions.dom.replaceLocation("/403")
+                        if (err.message === "404") functions.dom.replaceLocation("/404")
+                        if (err.message === "403") functions.dom.replaceLocation("/403")
                         return
                     }
                 }
@@ -326,8 +326,8 @@ const PostPage: React.FunctionComponent = () => {
             try {
                 post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag) as PostSearch | null
             } catch (err: any) {
-                if (err.response?.status === 404) functions.dom.replaceLocation("/404")
-                if (err.response?.status === 403) functions.dom.replaceLocation("/403")
+                if (err.message === "404") functions.dom.replaceLocation("/404")
+                if (err.message === "403") functions.dom.replaceLocation("/403")
                 return
             }
             if (post) {

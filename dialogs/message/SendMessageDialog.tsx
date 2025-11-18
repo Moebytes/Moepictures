@@ -100,12 +100,13 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         }
         try {
             const messageID = await functions.http.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
+            if (Number.isNaN(Number(messageID))) throw new Error(messageID)
             setDMTarget(null)
             if (messageID) navigate(`/message/${messageID}`)
         } catch (err: any) {
             setError(true)
             let errMsg = i18n.dialogs.sendMessage.error
-            if (err.response?.data.includes("Cannot send r18 message")) errMsg = i18n.dialogs.sendMessage.errorR18
+            if (err.message.includes("Cannot send r18 message")) errMsg = i18n.dialogs.sendMessage.errorR18
             if (!errorRef.current) await functions.timeout(20)
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
