@@ -285,4 +285,9 @@ export default class UtilFunctions {
     public static flipObject = (obj: object) => {
         return Object.fromEntries(Object.entries(obj).map(([key, value]) => [value, key]))
     }
+
+    public static extractLinks = (text: string) => {
+        const matches = text.match(/\b((?:https?:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi)
+        return matches ? matches : [] as string[]
+    }
 }

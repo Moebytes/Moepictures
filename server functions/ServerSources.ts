@@ -28,8 +28,13 @@ export default class ServerSources {
     public static checkArtistConflict = async (artistTag: string, userProfile: string) => {
         if (!userProfile) return artistTag
         const tag = await sql.tag.tag(artistTag)
-        if (!tag) return artistTag
-        if (tag?.social !== userProfile) {
+        if (!tag || !tag?.social) return artistTag
+        let conflict = tag.social !== userProfile
+        if (!conflict && tag.description) {
+            const profiles = functions.util.extractLinks(tag.description)
+            if (profiles.length) conflict = !profiles.includes(userProfile)
+        }
+        if (conflict) {
             let id = userProfile.match(/\d+/)?.[0] || ""
             if (id) return `${artistTag}-(${id})`
         }
