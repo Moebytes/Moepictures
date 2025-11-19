@@ -97,6 +97,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             }).catch((err) => {
                 setRevertTagHistoryFlag(false)
                 if (err.message.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID: props.tagHistory.historyID})
+                if (err.message.includes("No permission to rename tag")) return setRevertTagHistoryID({failed: "rename", historyID: props.tagHistory.historyID})
                 setRevertTagHistoryID({failed: true, historyID: props.tagHistory.historyID})
             })
         }

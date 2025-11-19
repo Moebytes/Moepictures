@@ -63,6 +63,28 @@ const RevertTagHistoryDialog: React.FunctionComponent = (props) => {
         )
     }
 
+    if (revertTagHistoryID?.failed === "rename") {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">{i18n.dialogs.revertTagHistory.title}</span>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">{i18n.dialogs.revertTagHistory.renamePermission}</span>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ok}</button>
+                        </div>
+                    </div>
+                </div>
+                </Draggable>
+            </div>
+        )
+    }
+
     if (revertTagHistoryID?.failed) {
         return (
             <div className="dialog">

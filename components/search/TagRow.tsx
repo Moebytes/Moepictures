@@ -143,7 +143,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
-            if (err.message.includes("No permission to edit implications")) {
+            if (err.message.includes("No permission to edit implications") || err.message.includes("No permission to rename tag")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)

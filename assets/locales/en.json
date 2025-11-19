@@ -1151,7 +1151,8 @@
         },
         "revertTagHistory": {
             "title": "Revert Tag History",
-            "implicationPermission": "You don't have permission to revert these implications."
+            "implicationPermission": "You don't have permission to revert these implications.",
+            "renamePermission": "You don't have permission to rename this tag."
         },
         "revertNoteHistory": {
             "title": "Revert Note History"

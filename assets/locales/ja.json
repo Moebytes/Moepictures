@@ -1152,7 +1152,8 @@
         },
         "revertTagHistory": {
             "title": "タグの履歴を戻す",
-            "implicationPermission": "このような意味合いを元に戻す許可はない。"
+            "implicationPermission": "このような意味合いを元に戻す許可はない。",
+            "renamePermission": "このタグの名前を変更する権限がありません。"
         },
         "revertNoteHistory": {
             "title": "ノート履歴を戻す"

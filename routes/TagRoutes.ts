@@ -326,6 +326,11 @@ const TagRoutes = (app: Express) => {
                 const exists = await sql.tag.tag(key.trim())
                 if (exists) return void res.status(400).send("Tag name conflict")
 
+                const posts = await sql.tag.tagPosts(tag)
+                if (posts.length >  300 && !permissions.isMod(req.session)) {
+                    return void res.status(400).send("No permission to rename tag")
+                } 
+
                 if (tagObj.image) {
                     let newFilename = `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
                     if (image && image[0] !== "delete") newFilename = `${key.trim()}.${functions.byte.fileExtension(image as number[])}`

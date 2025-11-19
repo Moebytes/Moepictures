@@ -259,7 +259,7 @@ const TagPage: React.FunctionComponent = () => {
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
             navigate(`/tag/${encodeURIComponent(editTagObj.key!)}`)
         } catch (err: any) {
-            if (err.message.includes("No permission to edit implications")) {
+            if (err.message.includes("No permission to edit implications") || err.message.includes("No permission to rename tag")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
@@ -473,6 +473,7 @@ const TagPage: React.FunctionComponent = () => {
             }).catch((err) => {
                 setRevertTagHistoryFlag(false)
                 if (err.message.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID})
+                if (err.message.includes("No permission to rename tag")) return setRevertTagHistoryID({failed: "rename", historyID})
                 setRevertTagHistoryID({failed: true, historyID})
             })
         }
