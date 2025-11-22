@@ -154,13 +154,23 @@ export default class ServerUtil {
         return imagePath
     }
 
+    public static downloadTextDetector = async () => {
+        const modelPath = path.join(__dirname, "../../assets/python/comictextdetector.pt")
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading ocr text detector...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/ocr/comictextdetector.pt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
     public static downloadSegmentator = async () => {
         const segmentatorPath = path.join(__dirname, "../../assets/python/segmentator")
         if (!fs.existsSync(segmentatorPath)) fs.mkdirSync(segmentatorPath, {recursive: true})
         const modelPath = path.join(segmentatorPath, "anime-segmentation.ckpt")
         if (!fs.existsSync(modelPath)) {
             console.log("Downloading anime segmentator...")
-            const data = await axios.get(`https://huggingface.co/skytnt/anime-seg/resolve/main/isnetis.ckpt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/segmentator/anime-segmentation.ckpt`, {responseType: "arraybuffer"}).then((r) => r.data)
             fs.writeFileSync(modelPath, Buffer.from(data))
             console.log("Done!")
         }
@@ -172,7 +182,7 @@ export default class ServerUtil {
         const modelPath = path.join(lineartPath, "anime2sketch.pth")
         if (!fs.existsSync(modelPath)) {
             console.log("Downloading anime sketch extractor...")
-            const data = await axios.get(`https://huggingface.co/lllyasviel/Annotators/resolve/main/netG.pth`, {responseType: "arraybuffer"}).then((r) => r.data)
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/sketchextractor/anime2sketch.pth`, {responseType: "arraybuffer"}).then((r) => r.data)
             fs.writeFileSync(modelPath, Buffer.from(data))
             console.log("Done!")
         }
