@@ -23,8 +23,6 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const [files, setFiles] = useState([] as FileUpload[])
-    const [email, setEmail] = useState("")
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
@@ -55,32 +53,8 @@ const ContactPage: React.FunctionComponent = (props) => {
             setRelative(false)
         }
     }, [mobile])
-
-    const fileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files?.[0]) return
-        const fileArray = Array.from(event.target.files)
-        const acceptedFiles = [] as FileUpload[]
-        for (let i = 0; i < fileArray.length; i++) {
-            const MB = fileArray[i].size / (1024*1024)
-            if (MB > 25) continue
-            let obj = {} as FileUpload
-            obj.bytes = Object.values(new Uint8Array(await fileArray[i].arrayBuffer()))
-            obj.name = fileArray[i].name
-            acceptedFiles.push(obj)
-        }
-        setFiles([...files, ...acceptedFiles])
-    }
     
     const submit = async () => {
-        const badEmail = functions.validation.validateEmail(email, i18n)
-        if (badEmail) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badEmail
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
         const badMessage = functions.validation.validateMessage(message, i18n)
         if (badMessage) {
             setError(true)
@@ -90,35 +64,10 @@ const ContactPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        setError(true)
-        if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = "Submitting..."
-        try {
-            await functions.http.post("/api/misc/contact", {email, subject, message, files}, session, setSessionFlag)
-            setSubmitted(true)
-            setError(false)
-        } catch {
-            errorRef.current!.innerText = "Bad email or message."
-            await functions.timeout(2000)
-            setError(false)
-        }
-    }
 
-    const generateFilesJSX = () => {
-        let jsx = [] as React.ReactElement[]
-        for (let i = 0; i < files.length; i++) {
-            const deleteFile = () => {
-                files.splice(i, 1)
-                setFiles(files)
-                forceUpdate()
-            }
-            jsx.push(<>
-                    <span className="contact-text-small">{files[i].name}</span>
-                    <img className="x-button" src={XButton} style={{filter: getFilter()}} onClick={() => deleteFile()}/>
-                </>
-            )
-        }
-        return jsx
+        window.location.href = `mailto:${i18n.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`
+        setMessage("")
+        setSubject("")
     }
 
     return (
@@ -130,28 +79,16 @@ const ContactPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="contact">
                     <span className="contact-title">{i18n.navbar.contact}</span>
-                    {submitted ? <>
-                    <span className="contact-link">{i18n.pages.contact.submitHeading}</span>
-                    <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => navigate("/posts")}>←{i18n.buttons.back}</button>
-                    </div>
-                    </> : <>
                     <span className="contact-link">
                         {i18n.pages.contact.heading} <Link className="contact-text-alt-link" to="/copyright-removal">{i18n.pages.contact.copyrightForm}</Link>
                     </span>
-                    <div className="contact-row">
-                        <span className="contact-text">{i18n.labels.email}:</span>
-                        <input className="contact-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
-                    </div>
                     <div className="contact-row">
                         <span className="contact-text">{i18n.labels.subject}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={subject} onChange={(event) => setSubject(event.target.value)}/>
                     </div>
                     <div className="contact-row">
                         <span className="contact-text">{i18n.labels.attachFiles}:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.labels.selectFiles}</label>
-                        <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
-                        {generateFilesJSX()}
+                        <span className="contact-link">{i18n.pages.contact.attachFiles}</span>
                     </div>
                     <div className="contact-row-start">
                         <span className="contact-text">{i18n.buttons.message}:</span>
@@ -161,7 +98,6 @@ const ContactPage: React.FunctionComponent = (props) => {
                     <div className="contact-button-container">
                         <button className="contact-button" onClick={submit}>{i18n.labels.sendMessage}</button>
                     </div>
-                    </> }
                 </div>
                 <Footer/>
             </div>

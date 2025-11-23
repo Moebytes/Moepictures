@@ -384,6 +384,7 @@ const UserRoutes = (app: Express) => {
                 if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             }
             if (jpg || png || gif || webp || avif) {
+                if (!await serverFunctions.util.isAnime(bytes)) return void res.status(400).send("Not anime")
                 if (req.session.image) {
                     let oldImagePath = functions.link.getTagPath("pfp", req.session.image)
                     await serverFunctions.files.deleteFile(oldImagePath, false).catch(() => null)

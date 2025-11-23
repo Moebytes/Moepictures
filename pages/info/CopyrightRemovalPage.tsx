@@ -11,6 +11,7 @@ import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import {FileUpload} from "../../types/Types"
+import {stripIndents} from "common-tags"
 import "./styles/contactpage.less"
 
 const CopyrightRemovalPage: React.FunctionComponent = (props) => {
@@ -25,9 +26,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
-    const [files, setFiles] = useState([] as FileUpload[])
     const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
     const [artistTag, setArtistTag] = useState("")
     const [socialMediaLinks, setSocialMediaLinks] = useState("")
     const [postLinks, setPostLinks] = useState("")
@@ -62,36 +61,12 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setRelative(false)
         }
     }, [mobile])
-
-    const fileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files?.[0]) return
-        const fileArray = Array.from(event.target.files)
-        const acceptedFiles = [] as FileUpload[]
-        for (let i = 0; i < fileArray.length; i++) {
-            const MB = fileArray[i].size / (1024*1024)
-            if (MB > 25) continue
-            let obj = {} as FileUpload
-            obj.bytes = Object.values(new Uint8Array(await fileArray[i].arrayBuffer()))
-            obj.name = fileArray[i].name
-            acceptedFiles.push(obj)
-        }
-        setFiles([...files, ...acceptedFiles])
-    }
     
     const submit = async () => {
         if (!name) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
             errorRef.current!.innerText = i18n.pages.copyrightRemoval.nameReq
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
-        const badEmail = functions.validation.validateEmail(email, i18n)
-        if (badEmail) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badEmail
             await functions.timeout(2000)
             setError(false)
             return
@@ -120,14 +95,6 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        if (!files.length && !proofLinks) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = i18n.pages.copyrightRemoval.proofReq
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
         if (!attestOwnership) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -136,35 +103,41 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        setError(true)
-        if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = i18n.buttons.submitting
-        try {
-            await functions.http.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, files}, session, setSessionFlag)
-            setSubmitted(true)
-            setError(false)
-        } catch {
-            errorRef.current!.innerText = i18n.pages.copyrightRemoval.error
-            await functions.timeout(2000)
-            setError(false)
-        }
-    }
 
-    const generateFilesJSX = () => {
-        let jsx = [] as React.ReactElement[]
-        for (let i = 0; i < files.length; i++) {
-            const deleteFile = () => {
-                files.splice(i, 1)
-                setFiles(files)
-                forceUpdate()
-            }
-            jsx.push(<>
-                    <span className="contact-text-small">{files[i].name}</span>
-                    <img className="x-button" src={XButton} style={{filter: getFilter()}} onClick={() => deleteFile()}/>
-                </>
-            )
-        }
-        return jsx
+        let removalType = removeAllRequest 
+            ? "I would like all of my associated content to be removed." 
+            : "I would like all of the provided links to be removed."
+
+        let subject = `Copyright Removal Request from ${artistTag}`
+
+        let message = stripIndents`
+            Artist Tag: ${artistTag}
+
+            Social Media Links:
+            ${socialMediaLinks}
+
+            ${removeAllRequest ? "Artist Tag Link:" : "Post Links:"}
+            ${postLinks}
+
+            Proof Links:
+            ${proofLinks ? proofLinks : "Please attach to this email."}
+
+            ${removalType}
+
+            *I am the copyright owner of the content linked above or am authorized 
+            to act on the behalf of the copyright owner.
+
+            Signature: ${name}
+        `
+
+        window.location.href = `mailto:${i18n.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`
+        setName("")
+        setArtistTag("")
+        setSocialMediaLinks("")
+        setPostLinks("")
+        setProofLinks("")
+        setAttestOwnership(false)
+        setRemoveAllRequest(false)
     }
 
     const getRemovalTypeJSX = () => {
@@ -208,25 +181,12 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="contact" style={{height: "max-content"}}>
                     <span className="contact-title">{i18n.pages.copyrightRemoval.title}</span>
-                    {submitted ? <>
-                    <span className="contact-link">{i18n.pages.copyrightRemoval.submitHeading}</span>
-                    <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => navigate("/posts")}>←{i18n.buttons.back}</button>
-                    </div>
-                    </> : <>
                     <span className="contact-link">
                         {i18n.pages.copyrightRemoval.heading}<br/><br/>
-
-                        {i18n.pages.copyrightRemoval.emailPref}
-                        <span className="contact-text-alt" style={{marginLeft: "5px"}}>moepictures.moe@gmail.com.</span>
                     </span>
                     <div className="contact-row">
                         <span className="contact-text" style={{width: "70px"}}>{i18n.labels.name}:</span>
                         <input className="contact-input-small" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
-                    </div>
-                    <div className="contact-row">
-                        <span className="contact-text" style={{width: "70px"}}>{i18n.labels.email}:</span>
-                        <input className="contact-input-small" style={{width: "50%"}} type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">
                         <span className="contact-text-alt">
@@ -269,9 +229,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="contact-row">
                         <span className="contact-text">{i18n.labels.attachFiles}:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">{i18n.labels.selectFiles}</label>
-                        <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
-                        {generateFilesJSX()}
+                        <span className="contact-link">{i18n.pages.contact.attachFiles}</span>
                     </div>
                     <div className="contact-row-start">
                         <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.proof}:</span>
@@ -282,13 +240,12 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     <div className="contact-row-start">
                         <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         <span className="contact-link">
-                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>{i18n.pages.copyrightRemoval.verifyCopyright}</span>
+                        <span className="contact-link" style={{marginRight: "5px"}}>*</span>{i18n.pages.copyrightRemoval.verifyCopyright}</span>
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container" style={{marginTop: "10px", marginBottom: "10px"}}>
                         <button className="contact-button" onClick={submit}>{i18n.pages.copyrightRemoval.submit}</button>
                     </div>
-                    </> }
                 </div>
                 <Footer/>
             </div>

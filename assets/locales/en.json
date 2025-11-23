@@ -701,12 +701,12 @@
         "contact": {
             "heading": "This is a contact form for general inquiries. If you would like to remove your work, please fill out our",
             "copyrightForm": "Copyright Removal Form",
-            "submitHeading": "Your message was delivered."
+            "submitHeading": "Your message was delivered.",
+            "attachFiles": "You can attach files later using your email client."
         },
         "copyrightRemoval": {
             "title": "Copyright Removal",
             "heading": "If your work is on Moepictures then it means that we love your work, but we are sorry if you are unhappy with your works appearing on our site. You may fill out this form to request the removal of your content.",
-            "emailPref": "If you prefer, you may also write an email containing all of this info to ",
             "submitHeading": "Your removal request was delivered.",
             "artistTagHeading": "Please provide the exact name of your artist tag on Moepictures.",
             "socialMediaHeading": "Please provide your social media links (eg. Twitter, Pixiv). It should be possible to find the works on your profile.",
@@ -720,7 +720,7 @@
             "proofHeading": "Please provide proof that you are the artist in question. These are a couple acceptable forms of proof:",
             "proof": "Links to Proof",
             "verifyCopyright": "I am the copyright owner of the content linked above or am authorized to act on the behalf of the copyright owner. I verify that all of provided information is accurate.",
-            "submit": "Submit Removal Request",
+            "submit": "Send Removal Request",
             "nameReq": "Name is required.",
             "artistTagReq": "Artist tag is required.",
             "socialMediaReq": "Social media links are required.",
