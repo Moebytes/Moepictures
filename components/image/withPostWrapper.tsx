@@ -596,6 +596,11 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 setImgSourceID({uploadImage: props.uploadImage})
             } else {
                 if (!props.post || "historyID" in props.post) return
+                if (!session.username) {
+                    setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
+                    navigate("/login")
+                    return setSidebarText(i18n.sidebar.loginRequired)
+                }
                 let order = (props.order || 1) - 1
                 setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})
             }
