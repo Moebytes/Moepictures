@@ -26,7 +26,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const data = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
+        const data = await functions.http.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag, true)
         setCaptcha(data.captcha)
         setCaptchaResponse("")
     }

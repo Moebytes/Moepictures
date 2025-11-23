@@ -276,7 +276,7 @@ export default class UtilFunctions {
 
         if (!source) source = id
         
-        let match = filename.match(/_(p|g|c!?|s)(\d+)/i)
+        let match = filename.match(/_(p|g!?|c!?|s)(\d+)/i)
         const qualifier = match?.[1].toLowerCase() || "s"
         const num = Number(match?.[2] || 0)
 

@@ -98,7 +98,7 @@ export default class HTTPFunctions {
             if (response.status === 403) throw new Error("403")
             if (!response.ok) throw new Error(await response.text())
 
-            let arrayBuffer = await response.arrayBuffer()
+            let arrayBuffer = await response.clone().arrayBuffer()
             const json = functions.http.arrayBufferToJSON(arrayBuffer)
             if (json !== null) {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})

@@ -225,6 +225,19 @@ export default class ServerTags {
                 tagArr.push("solo")
             }
 
+            const isTransparent = await serverFunctions.util.isTransparent(bytes)
+            if (isTransparent) tagArr.push("transparent")
+            if (current.name.includes("text")) tagArr.push("untranslated")
+            if (current.name.includes("tutorial")) tagArr.push("art-tutorial")
+            if (current.name.includes("fanbox")) {
+                tagArr.push("fanbox")
+                tagArr.push("paid-content-available")
+            }
+            if (current.name.includes("patreon")) {
+                tagArr.push("patreon")
+                tagArr.push("paid-content-available")
+            }
+
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
@@ -239,19 +252,6 @@ export default class ServerTags {
             artistStrArr = artistStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             charStrArr = charStrArr.map((tag: string) => functions.tag.cleanTag(tag))
             seriesStrArr = seriesStrArr.map((tag: string) => functions.tag.cleanTag(tag))
-
-            const isTransparent = await serverFunctions.util.isTransparent(bytes)
-            if (isTransparent) tagArr.push("transparent")
-            if (current.name.includes("text")) tagArr.push("untranslated")
-            if (current.name.includes("tutorial")) tagArr.push("art-tutorial")
-            if (current.name.includes("fanbox")) {
-                tagArr.push("fanbox")
-                tagArr.push("paid-content-available")
-            }
-            if (current.name.includes("patreon")) {
-                tagArr.push("patreon")
-                tagArr.push("paid-content-available")
-            }
 
             for (let i = 0; i < artistStrArr.length; i++) {
                 artists[artists.length - 1].tag = artistStrArr[i]
@@ -327,18 +327,6 @@ export default class ServerTags {
                 tagArr.push("solo")
             }
 
-            for (let i = 0; i < blockedTags.length; i++) {
-                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
-            }
-
-            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-            characterArr = characterArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
-
-            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
-            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
-            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
-            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
-
             const isTransparent = await serverFunctions.util.isTransparent(bytes)
             if (isTransparent) tagArr.push("transparent")
             if (current.name.includes("text")) tagArr.push("untranslated")
@@ -354,11 +342,22 @@ export default class ServerTags {
             }
 
             for (let i = 0; i < blockedTags.length; i++) {
+                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+
+            for (let i = 0; i < blockedTags.length; i++) {
                 characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
 
-            let seriesArr = [] as string[]
+            tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+            characterArr = characterArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
 
+            tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+            characterArr = characterArr.map((tag: string) => functions.tag.cleanTag(tag))
+            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
+
+            let seriesArr = [] as string[]
             for (let i = 0; i < characterArr.length; i++) {
                 const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "") || ""
                 seriesArr.push(seriesName)

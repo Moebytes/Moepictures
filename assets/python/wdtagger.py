@@ -59,18 +59,17 @@ def get_tags(model_dir, probs, general_threshold = 0.35, character_threshold = 0
     labels = {"names": df["name"].tolist(), "rating": list(np.where(df["category"] == 9)[0]), 
               "general": list(np.where(df["category"] == 0)[0]), "character": list(np.where(df["category"] == 4)[0])}
     probs = list(zip(labels["names"], probs.numpy()))
+    
     general_labels = [probs[i] for i in labels["general"]]
     general_labels = dict([x for x in general_labels if x[1] > general_threshold])
     general_labels = dict(sorted(general_labels.items(), key=lambda item: item[1], reverse=True))
+
     character_labels = [probs[i] for i in labels["character"]]
     character_labels = dict([x for x in character_labels if x[1] > character_threshold])
     character_labels = dict(sorted(character_labels.items(), key=lambda item: item[1], reverse=True))
-    # combined = [x for x in character_labels]
-    # combined.extend([x for x in general_labels])
-    # caption = ", ".join(combined).replace("_", "-")
-    # return caption
-    general_tags = [x.replace("_", "-") for x in general_labels]
-    character_tags = [x.replace("_", "-") for x in character_labels]
+
+    general_tags = [x for x in general_labels]
+    character_tags = [x for x in character_labels]
     result = json.dumps({"tags": general_tags, "characters": character_tags})
     return result
 
