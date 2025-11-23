@@ -128,28 +128,6 @@ export default class ServerTags {
         return tagMap
     }
 
-    public static downloadWDTagger = async () => {
-        const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
-        if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
-        const configPath = path.join(wdTaggerPath, "config.json")
-        const modelPath = path.join(wdTaggerPath, "model.safetensors")
-        const csvPath = path.join(wdTaggerPath, "selected_tags.csv")
-        if (!fs.existsSync(configPath)) {
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/config.json`, {responseType: "json"}).then((r) => r.data)
-            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
-        }
-        if (!fs.existsSync(csvPath)) {
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/selected_tags.csv`, {responseType: "text"}).then((r) => r.data)
-            fs.writeFileSync(csvPath, data)
-        }
-        if (!fs.existsSync(modelPath)) {
-            console.log("Downloading waifu diffusion tagger...")
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
-            fs.writeFileSync(modelPath, Buffer.from(data))
-            console.log("Done!")
-        }
-    }
-
     public static wdtagger = async (bytes: number[]) => {
         const buffer = Buffer.from(bytes)
         const imagePath = await serverFunctions.util.dumpImage(buffer)
@@ -162,28 +140,6 @@ export default class ServerTags {
 
         fs.unlinkSync(imagePath)
         return json
-    }
-
-    public static downloadImageRater = async () => {
-        const raterPath = path.join(__dirname, "../../assets/python/imagerater")
-        if (!fs.existsSync(raterPath)) fs.mkdirSync(raterPath, {recursive: true})
-        const configPath = path.join(raterPath, "config.json")
-        const modelPath = path.join(raterPath, "model.safetensors")
-        const preprocessPath = path.join(raterPath, "preprocessor_config.json")
-        if (!fs.existsSync(configPath)) {
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/config.json`, {responseType: "json"}).then((r) => r.data)
-            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
-        }
-        if (!fs.existsSync(preprocessPath)) {
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/preprocessor_config.json`, {responseType: "json"}).then((r) => r.data)
-            fs.writeFileSync(preprocessPath, JSON.stringify(data, null, 4))
-        }
-        if (!fs.existsSync(modelPath)) {
-            console.log("Downloading image rater...")
-            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
-            fs.writeFileSync(modelPath, Buffer.from(data))
-            console.log("Done!")
-        }
     }
 
     public static rateImage = async (bytes: number[]) => {

@@ -814,7 +814,7 @@
             "tagMinimum": "Minimum of 5 tags is required.",
             "sizeLimit": "Combined file size shouldn't exceed 300MB.",
             "error": "Failed to submit. You might be missing required fields.",
-            "errorOriginal": "Original image is required.",
+            "errorImages": "Can't upload these images.",
             "wait": "Wait a few seconds.",
             "noResults": "No results found.",
             "nothingFound": "Nothing found.",

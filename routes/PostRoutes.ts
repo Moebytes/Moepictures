@@ -12,7 +12,6 @@ import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
 PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate, PostUpdateColumns,
 ImageUpdateColumns, BulkTag} from "../types/Types"
-import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -765,7 +764,7 @@ const PostRoutes = (app: Express) => {
                     await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
                     await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
                     await sql.tag.insertUnverifiedTagMap(postID, addedTags)
-                    const resultGroups = await updateTagGroups(postID, {unverified: true, oldTagGroups: post.tagGroups, 
+                    const resultGroups = await serverFunctions.upload.updateTagGroups(postID, {unverified: true, oldTagGroups: post.tagGroups, 
                         newTagGroups: tagGroups})
                     addedTagGroups = resultGroups.addedTagGroups
                     removedTagGroups = resultGroups.removedTagGroups
@@ -773,7 +772,7 @@ const PostRoutes = (app: Express) => {
                     await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
                     await sql.tag.deleteTagMap(postID, removedTags)
                     await sql.tag.insertTagMap(postID, addedTags)
-                    const resultGroups = await updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+                    const resultGroups = await serverFunctions.upload.updateTagGroups(postID, {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
                     addedTagGroups = resultGroups.addedTagGroups
                     removedTagGroups = resultGroups.removedTagGroups
                     
@@ -951,17 +950,17 @@ const PostRoutes = (app: Express) => {
             let seriesTags = await Promise.all((series.map((s) => sql.tag.tag(s)))).then((s) => s.filter((s) => s !== undefined))
             let newTags = await Promise.all((tags.map((t) => sql.tag.tag(t)))).then((t) => t.filter((t) => t !== undefined))
 
-            let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images: post.images, upscaledImages: post.images,
+            let {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(postID, {unverified: true, images: post.images, upscaledImages: post.images,
             characters: characterTags, imgChanged: true, type, rating, source})
 
-            await updatePost(postID, {unverified: true, artists: artistTags, hasOriginal, hasUpscaled, rating, type, style,
+            await serverFunctions.upload.updatePost(postID, {unverified: true, artists: artistTags, hasOriginal, hasUpscaled, rating, type, style,
             source, originalID: originalPostID, reason, parentID: post.parentID, updater: req.session.username, uploader: post.uploader,
             uploadDate: post.uploadDate})
 
-            let {addedTags, removedTags} = await insertTags(postID, {unverified: true, tags, artists: artistTags, characters: characterTags, 
+            let {addedTags, removedTags} = await serverFunctions.upload.insertTags(postID, {unverified: true, tags, artists: artistTags, characters: characterTags, 
             series: seriesTags, newTags, username: req.session.username, originalPost: post})
 
-            let {addedTagGroups, removedTagGroups} = await updateTagGroups(postID, {unverified: true, 
+            let {addedTagGroups, removedTagGroups} = await serverFunctions.upload.updateTagGroups(postID, {unverified: true, 
             oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
 
             await serverFunctions.posts.applyImageSources(postID, imageSources, true)

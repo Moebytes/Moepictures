@@ -5,7 +5,6 @@ import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag, NoteUpdateColumns} from "../types/Types"
-import {insertImages, updatePost, insertTags, updateTagGroups} from "./UploadRoutes"
 
 const noteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -236,16 +235,16 @@ const NoteRoutes = (app: Express) => {
                 await sql.post.insertUnverifiedChild(postID, post.parentID)
             }
 
-            let {hasOriginal, hasUpscaled} = await insertImages(postID, {unverified: true, images: post.images, upscaledImages: post.images,
+            let {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(postID, {unverified: true, images: post.images, upscaledImages: post.images,
             characters, imgChanged: true, type, rating, source})
 
-            await updatePost(postID, {unverified: true, isNote: true, artists, hasOriginal, hasUpscaled, rating, type, style,
+            await serverFunctions.upload.updatePost(postID, {unverified: true, isNote: true, artists, hasOriginal, hasUpscaled, rating, type, style,
             source, originalID: originalPostID, reason, parentID: post.parentID, updater: req.session.username, uploader: post.uploader,
             uploadDate: post.uploadDate})
 
-            await insertTags(postID, {unverified: true, tags, artists, characters, series, newTags, username: req.session.username})
+            await serverFunctions.upload.insertTags(postID, {unverified: true, tags, artists, characters, series, newTags, username: req.session.username})
 
-            await updateTagGroups(postID, {unverified: true, oldTagGroups: [], newTagGroups: post.tagGroups})
+            await serverFunctions.upload.updateTagGroups(postID, {unverified: true, oldTagGroups: [], newTagGroups: post.tagGroups})
 
             const notes = await sql.note.notes(postID, order)
             let {addedEntries, removedEntries} = functions.compare.parseNoteChanges(notes, data)

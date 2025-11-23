@@ -97,7 +97,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
-            await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
+            const result = await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)

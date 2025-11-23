@@ -768,7 +768,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             return setSubmitError(false)
         } catch (err: any) {
             let errMsg = i18n.pages.upload.error
-            if (err.message.includes("Invalid images")) errMsg = i18n.pages.upload.errorOriginal
+            if (err.message.includes("Invalid images")) errMsg = i18n.pages.upload.errorImages
             if (!submitErrorRef.current) await functions.timeout(20)
             submitErrorRef.current!.innerText = errMsg
             await functions.timeout(3000)

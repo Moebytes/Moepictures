@@ -13,6 +13,7 @@ import ServerSources from "./ServerSources"
 import ServerTags from "./ServerTags"
 import ServerUsers from "./ServerUsers"
 import ServerUtil from "./ServerUtil"
+import ServerUpload from "./ServerUpload"
 import {Attachment} from "../types/Types"
 
 const csrf = new CSRF()
@@ -89,6 +90,7 @@ export default class ServerFunctions {
     public static tags = ServerTags
     public static users = ServerUsers
     public static util = ServerUtil
+    public static upload = ServerUpload
 
     public static generateCSRF = () => {
         const secret = csrf.secretSync()

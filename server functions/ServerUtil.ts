@@ -9,8 +9,12 @@ import {Translator} from "@vitalets/google-translate-api"
 import {createCanvas, loadImage} from "@napi-rs/canvas"
 import wanakana from "wanakana"
 import pinyin from "pinyin"
+import util from "util"
+import child_process from "child_process"
 import * as hangul from "hangul-romanization"
 import functions from "../functions/Functions"
+
+const exec = util.promisify(child_process.exec)
 
 export default class ServerUtil {
     public static ipRegion = async (ip: string) => {
@@ -154,11 +158,85 @@ export default class ServerUtil {
         return imagePath
     }
 
+    public static isAnime = async (bytes: number[]) => {
+        const buffer = Buffer.from(bytes)
+        const imagePath = await this.dumpImage(buffer)
+
+        const scriptPath = path.join(__dirname, "../../assets/python/animedetector.py")
+        const modelPath = path.join(__dirname, "../../assets/python/animedetector")
+        let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${modelPath}"`
+        const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+        
+        fs.unlinkSync(imagePath)
+        return str.trim() === "anime"
+    }
+
     public static downloadTextDetector = async () => {
         const modelPath = path.join(__dirname, "../../assets/python/comictextdetector.pt")
         if (!fs.existsSync(modelPath)) {
             console.log("Downloading ocr text detector...")
             const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/ocr/comictextdetector.pt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static downloadAnimeDetector = async () => {
+        const detectorPath = path.join(__dirname, "../../assets/python/animedetector")
+        if (!fs.existsSync(detectorPath)) fs.mkdirSync(detectorPath, {recursive: true})
+        const configPath = path.join(detectorPath, "meta.json")
+        if (!fs.existsSync(configPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/animedetector/meta.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
+        }
+        const modelPath = path.join(detectorPath, "model.onnx")
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading anime detector...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/animedetector/model.onnx`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static downloadWDTagger = async () => {
+        const wdTaggerPath = path.join(__dirname, "../../assets/python/wdtagger")
+        if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
+        const configPath = path.join(wdTaggerPath, "config.json")
+        const modelPath = path.join(wdTaggerPath, "model.safetensors")
+        const csvPath = path.join(wdTaggerPath, "selected_tags.csv")
+        if (!fs.existsSync(configPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(csvPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/selected_tags.csv`, {responseType: "text"}).then((r) => r.data)
+            fs.writeFileSync(csvPath, data)
+        }
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading waifu diffusion tagger...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static downloadImageRater = async () => {
+        const raterPath = path.join(__dirname, "../../assets/python/imagerater")
+        if (!fs.existsSync(raterPath)) fs.mkdirSync(raterPath, {recursive: true})
+        const configPath = path.join(raterPath, "config.json")
+        const modelPath = path.join(raterPath, "model.safetensors")
+        const preprocessPath = path.join(raterPath, "preprocessor_config.json")
+        if (!fs.existsSync(configPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(configPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(preprocessPath)) {
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/preprocessor_config.json`, {responseType: "json"}).then((r) => r.data)
+            fs.writeFileSync(preprocessPath, JSON.stringify(data, null, 4))
+        }
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading image rater...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/imagerater/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
             fs.writeFileSync(modelPath, Buffer.from(data))
             console.log("Done!")
         }

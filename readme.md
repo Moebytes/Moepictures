@@ -28,7 +28,7 @@ Most players are custom made and not the default. You can pause/reverse gifs and
 <img src="assets/images/notes.png" height="500">
 
 Since images might contain non-english text, adding notes for translations is supported. Apart from appearing in a bubble, 
-notes may also be overlayn on the image with some styling. Notes can also be used to "mark" a character in images with multiple characters.
+notes may also be overlayed on the image with some styling. Notes can also be used to "mark" a character in images with multiple characters.
 
 ### Tag Groups
 
@@ -52,9 +52,11 @@ Rename the file `.env.example` to `.env` and put in your credentials. At minimum
 
 `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc. Set `EMAIL_VERIFICATION` to yes to enable it. For it to work with gmail, you need to create an app password: https://myaccount.google.com/apppasswords 
 
-In order for source lookup from Pixiv, Twitter, and other sites to work, you need to seek out the credentials for their respective API's. You can find info on how to obtain them simply by googling, it would take me a long time to detail every site.
+In order for source lookup from Pixiv, Twitter, and other sites to work, you need to seek out the credentials for their respective API's. You can find info on how to obtain them simply by googling, it would take me a long time to detail every site. 
 
-To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`.
+To upload files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`. 
+
+To upload files remotely we use any S3-compatible object storage. Fill out the S3 relevant credentials as well as `MOEPICTURES_BUCKET` and `MOEPICTURES_BUCKET_UNVERIFIED`. 
 
 Rename the files `structures/Decryption.example.ts` to `structures/Decryption.ts` and `structures/Encryption.example.ts` to `structures/Encryption.ts`. They do nothing unless you implement them apart from making the project compile.
 
