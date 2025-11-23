@@ -1409,7 +1409,7 @@ const EditUnverifiedPostPage: React.FunctionComponent = () => {
                 <div className="upload-row">
                     {getCurrentFiles().length > 1 ? 
                     <div className="upload-container">
-                        <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex}/>
+                        <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex} unlimited={true}/>
                         {getPostJSX()}
                     </div>
                     : getPostJSX()}

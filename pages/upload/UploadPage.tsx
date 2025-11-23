@@ -1357,7 +1357,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex} unlimited={true}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
@@ -1479,7 +1479,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             {dupPosts.length ? <>
             <span className="upload-heading">{i18n.pages.upload.possibleDuplicates}</span>
             <div className="upload-row">
-                <Carousel images={dupPosts.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session))} set={setDup} index={currentDupIndex}/>
+                <Carousel images={dupPosts.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session))} set={setDup} index={currentDupIndex} unlimited={true}/>
             </div>
             </> : null}
             <div className="upload-container">

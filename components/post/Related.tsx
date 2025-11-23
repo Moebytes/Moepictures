@@ -503,7 +503,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             </div>}
             <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
-                {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/> */}
+                {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/> */}
             </div>
             <div className={`related-dropdown ${sizeDropdown ? "" : "hide-related-dropdown"}`} 
             style={{marginRight: getSizeMargin(), top: `50px`}} onClick={() => setSizeDropdown(false)}>

@@ -254,8 +254,11 @@ const PostPage: React.FunctionComponent = () => {
     }, [postID, historyID, order, session])
 
     useEffect(() => {
-        setImage("")
         window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
+    }, [postID])
+
+    useEffect(() => {
+        setImage("")
         const historyParam = new URLSearchParams(window.location.search).get("history")
         if (historyParam) return
         const updatePost = async () => {
@@ -365,49 +368,61 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const next = async () => {
-        let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
-        if (currentIndex !== -1) {
-            currentIndex++
-            if (!session.username) {
-                while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
-                    currentIndex++
-                    if (currentIndex >= navigationPosts.length) break
+        if (images.length > 1) {
+            let newIndex = Math.min(images.length - 1, order + 1)
+            setImage(images[newIndex])
+            setOrder(newIndex)
+        } else {
+            let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
+            if (currentIndex !== -1) {
+                currentIndex++
+                if (!session.username) {
+                    while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
+                        currentIndex++
+                        if (currentIndex >= navigationPosts.length) break
+                    }
                 }
-            }
-            if (!functions.post.isR18(ratingType)) {
-                while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
-                    currentIndex++
-                    if (currentIndex >= navigationPosts.length) break
+                if (!functions.post.isR18(ratingType)) {
+                    while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
+                        currentIndex++
+                        if (currentIndex >= navigationPosts.length) break
+                    }
                 }
-            }
-            if (navigationPosts[currentIndex]) {
-                const post = navigationPosts[currentIndex]
-                if (post.fake) return
-                navigate(`/post/${post.postID}/${post.slug}`)
+                if (navigationPosts[currentIndex]) {
+                    const post = navigationPosts[currentIndex]
+                    if (post.fake) return
+                    navigate(`/post/${post.postID}/${post.slug}`)
+                }
             }
         }
     }
 
     const previous = async () => {
-        let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
-        if (currentIndex !== -1) {
-            currentIndex--
-            if (!session.username) {
-                while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
-                    currentIndex--
-                    if (currentIndex <= -1) break
+        if (images.length > 1) {
+            let newIndex = Math.max(0, order - 1)
+            setImage(images[newIndex])
+            setOrder(newIndex)
+        } else {
+            let currentIndex = navigationPosts.findIndex((p) => String(p.postID) === String(postID))
+            if (currentIndex !== -1) {
+                currentIndex--
+                if (!session.username) {
+                    while (navigationPosts[currentIndex]?.rating !== functions.r13()) {
+                        currentIndex--
+                        if (currentIndex <= -1) break
+                    }
                 }
-            }
-            if (!functions.post.isR18(ratingType)) {
-                while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
-                    currentIndex--
-                    if (currentIndex <= -1) break
+                if (!functions.post.isR18(ratingType)) {
+                    while (functions.post.isR18(navigationPosts[currentIndex]?.rating)) {
+                        currentIndex--
+                        if (currentIndex <= -1) break
+                    }
                 }
-            }
-            if (navigationPosts[currentIndex]) {
-                const post = navigationPosts[currentIndex]
-                if (post.fake) return
-                navigate(`/post/${post.postID}/${post.slug}`)
+                if (navigationPosts[currentIndex]) {
+                    const post = navigationPosts[currentIndex]
+                    if (post.fake) return
+                    navigate(`/post/${post.postID}/${post.slug}`)
+                }
             }
         }
     }
@@ -415,17 +430,6 @@ const PostPage: React.FunctionComponent = () => {
     const set = (image: string, index: number) => {
         setImage(image)
         setOrder(index + 1)
-    }
-
-    const nsfwChecker = () => {
-        if (!post) return false
-        if (post.postID !== postID) return false
-        if (post.rating !== functions.r13()) {
-            if (loaded) return true
-            return false
-        } else {
-            return true
-        }
     }
 
     const revertNoteHistory = async () => {
@@ -594,7 +598,7 @@ const PostPage: React.FunctionComponent = () => {
                 <div className="post-item">
                     <div className="post-item-title-clickable" onClick={() => navigate(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{i18n.post.favgroup}: {activeFavgroup.name}</div>
                     <div className="post-item-container">
-                        <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
+                        <Carousel images={images} set={setGroup} noKey={true} marginTop={0} unlimited={true}/>
                     </div>
                 </div>
             )
@@ -624,7 +628,7 @@ const PostPage: React.FunctionComponent = () => {
                 <div className="post-item">
                     <div className="post-item-title-clickable" onClick={() => navigate(`/group/${group.slug}`)}>{i18n.labels.group}: {group.name}</div>
                     <div className="post-item-container">
-                        <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
+                        <Carousel images={images} set={setGroup} noKey={true} marginTop={0} unlimited={true}/>
                     </div>
                 </div>
             )
@@ -697,7 +701,7 @@ const PostPage: React.FunctionComponent = () => {
                     {historyID || noteID ? getHistoryButtons() : null}
                     {post && images.length > 1 ?
                     <div className="carousel-container">
-                        <Carousel images={images} set={set} index={order-1}/>
+                        <Carousel images={images} set={set} index={order-1} unlimited={true}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
                     {generatePixivTagsJSX()}

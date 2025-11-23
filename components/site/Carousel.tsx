@@ -17,6 +17,7 @@ interface Props {
     marginLeft?: number
     marginTop?: number
     unverified?: boolean
+    unlimited?: boolean
 }
 
 let startX = 0
@@ -61,6 +62,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const sliderRef = useRef<HTMLDivElement | null>(null)
     const smoothMarginRef = useRef<number>(0)
     const targetMarginRef = useRef<number>(0)
+    const savedMarginRef = useRef<number>(0)
     const arrowJump = useRef<boolean>(false)
 
     const getFilter = () => {
@@ -108,7 +110,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const newRefs = updateRefs(props.images.slice(0, loadAmount).length)
+        const initialAmount = props.unlimited ? props.images.length : loadAmount
+        const newRefs = updateRefs(initialAmount)
         setActive(newRefs[props.index ? props.index : 0])
         setLastActive(newRefs[props.index ? props.index : 0])
         setShowLeftArrow(false)
@@ -119,7 +122,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setVisibleIndex(0)
         setEnded(false)
         if (sliderRef?.current) {
-            targetMarginRef.current = 0
+            targetMarginRef.current = savedMarginRef.current
+            smoothMarginRef.current = savedMarginRef.current
+            sliderRef.current.style.marginLeft = `${savedMarginRef.current}px`
         }
     }, [props.images])
 
@@ -141,7 +146,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         const images = getCombinedImages()
         let newVisibleImages = [] as string[]
         let currentIndex = 0
-        for (let i = 0; i < loadAmount; i++) {
+        const limit = props.unlimited ? images.length : loadAmount
+        for (let i = 0; i < limit; i++) {
             if (!images[currentIndex]) break
             newVisibleImages.push(images[currentIndex])
             currentIndex++
@@ -158,6 +164,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }, [props.index])
 
     useEffect(() => {
+        if (props.unlimited) return 
         if (updateImagesFlag) {
             const images = getCombinedImages()
             if (scrollTimeout) return setUpdateImagesFlag(false)
@@ -239,6 +246,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (index < 5 || index > imageFilterRefs.length - 6) return
         sliderRef.current.style.transition = "margin-left 0.75s"
         targetMarginRef.current = marginLeft
+        savedMarginRef.current = marginLeft
         setTimeout(() => {
             if (!sliderRef?.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
@@ -252,7 +260,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "20px", threshold: 1})
         const resizeObserver = new ResizeObserver(handleResize)
         const element = imageFilterRefs[imageFilterRefs.length - 1]?.current
-        if (element) {
+        if (!props.unlimited && element) {
             observer.observe(element)
             resizeObserver.observe(element)
         }
@@ -309,9 +317,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
         targetMarginRef.current = marginLeft
+        savedMarginRef.current = marginLeft
     }
 
     const handleScroll = () => {
+        if (props.unlimited) return
         if (!trackPad) return
         if (!carouselRef.current) return
         if (carouselRef.current.scrollLeft + carouselRef.current.clientWidth >= carouselRef.current.scrollWidth) {
@@ -338,6 +348,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
         targetMarginRef.current = marginLeft
+        savedMarginRef.current = marginLeft
         startX = event.pageX
     }
 
@@ -372,6 +383,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
         targetMarginRef.current = marginLeft
+        savedMarginRef.current = marginLeft
         startX = event.touches[0].pageX
     }
 
@@ -405,6 +417,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         arrowJump.current = true
         targetMarginRef.current = newMargin
+        savedMarginRef.current = newMargin
         setTimeout(() => {
             if (!sliderRef.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
@@ -422,6 +435,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         arrowJump.current = true
         targetMarginRef.current = newMargin
+        savedMarginRef.current = newMargin
         setTimeout(() => {
             if (!sliderRef.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"

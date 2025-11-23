@@ -39,7 +39,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
         <div className="related">
             <div className="related-title">{i18n.post.artistWorks}</div>
             <div className="related-container">
-                <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/>
+                <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/>
             </div>
         </div>
     )

@@ -219,7 +219,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                 <div className="parent">
                     <div className="parent-title">Original Post</div>
                     <div className="parent-container">
-                        <Carousel images={[image]} set={click} noKey={true}/>
+                        <Carousel images={[image]} set={click} noKey={true} unlimited={true}/>
                     </div>
                 </div>
             )
@@ -299,7 +299,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                 <div className="post-container">
                     {images.length > 1 ?
                     <div className="carousel-container">
-                        <Carousel images={images} set={set} index={order-1} unverified={true}/>
+                        <Carousel images={images} set={set} index={order-1} unverified={true} unlimited={true}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
                     {generatePixivTagsJSX()}

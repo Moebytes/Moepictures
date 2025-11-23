@@ -100,7 +100,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 </span>
             </div>
             <div className="artistrow-row">
-                <Carousel set={set} noKey={true} images={images} height={200}/>
+                <Carousel set={set} noKey={true} images={images} height={200} unlimited={true}/>
             </div>
         </div>
     )

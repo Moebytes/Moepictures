@@ -619,7 +619,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         {favgroup.private ? <img className="user-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
                         <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
                     </div>
-                    <Carousel images={images} noKey={true} set={setFavgroup} index={0}/>
+                    <Carousel images={images} noKey={true} set={setFavgroup} index={0} unlimited={true}/>
                 </div>
             )
         }

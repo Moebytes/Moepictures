@@ -1460,7 +1460,7 @@ const EditPostPage: React.FunctionComponent = () => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={currentImages()} set={set} index={currentIndex}/>
+                    <Carousel images={currentImages()} set={set} index={currentIndex} unlimited={true}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
