@@ -130,7 +130,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const decryptImages = async () => {
-            const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
+            let startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
+            if (props.unlimited) startIndex = 0
             const newImages = visibleImages.slice(startIndex)
             let decrypted = await Promise.all(newImages.map((image) => functions.crypto.decryptThumb(image, session, `carousel-${image}`)))
             if (startIndex === 0) {
