@@ -133,7 +133,7 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     const maxTextWidth = width - padding
     let lines = [] as string[]
     if (overlay && !session.forceNoteBubbles) {
-        let size = (fontSize || 100) - (showTranscript ? Math.floor(fontSize/4) : 0)
+        let size = (fontSize || 100) - (showTranscript ? Math.floor(fontSize / 4) : 0)
         lines = splitTextIntoLines(text, maxTextWidth, size, breakWord && !showTranscript)
     }
     const lineHeight = (fontSize || 100) + padding
@@ -343,7 +343,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
     if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
-    if (targetWidth*scale > maxWidth) scale = maxWidth / targetWidth
+    if (targetWidth * scale > maxWidth) scale = maxWidth / targetWidth
 
     const clearNotes = () => {
         if (!noteDrawingEnabled) return
@@ -411,8 +411,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const editText = (index: number) => {
         setItems((prev) => {
             const item = prev[index]
-            item.imageWidth = targetWidth
-            item.imageHeight = targetHeight
+            item.imageWidth = item.imageWidth || targetWidth
+            item.imageHeight = item.imageHeight || targetHeight
             item.imageHash = targetHash
             item.translation = editNoteData.translation
             item.transcript = editNoteData.transcript
@@ -593,7 +593,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
                         let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth, borderRadius} = item
-                        if (props.reader) y -= 20
 
                         if (!imageWidth) imageWidth = targetWidth
                         if (!imageHeight) imageHeight = targetHeight
@@ -602,29 +601,33 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const newHeight = (height / imageHeight) * targetHeight
                         const newX = (x / imageWidth) * targetWidth
                         const newY = (y / imageHeight) * targetHeight
+
                         const newFontSize = (fontSize / imageHeight) * targetHeight
                         const newStrokeWidth = (strokeWidth / imageHeight) * targetHeight
                         const newBorderRadius = (borderRadius / imageHeight) * targetHeight
+
                         let rotationSpeed = targetWidth / 2000
                         if (session.upscaledImages) rotationSpeed *= 10
 
-                        if (item.imageWidth !== targetWidth || item.imageHeight !== targetHeight) {
-                            item.x = newX
-                            item.y = newY
-                            item.width = newWidth
-                            item.height = newHeight
-                            item.imageWidth = targetWidth
-                            item.imageHeight = targetHeight
-                        }
-
                         const insertItem = (newRect: BubbleData) => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev) => functions.util.insertAtIndex(prev, index, {...item, ...newRect}))
+
+                            const storedWidth = item.imageWidth || targetWidth
+                            const storedHeight = item.imageHeight || targetHeight
+
+                            let scaledRect = {
+                                x: (newRect.x / targetWidth) * storedWidth,
+                                y: (newRect.y / targetHeight) * storedHeight,
+                                width: (newRect.width / targetWidth) * storedWidth,
+                                height: (newRect.height / targetHeight) * storedHeight
+                            }
+
+                            setItems((prev) => functions.util.insertAtIndex(prev, index, {...item, ...scaledRect}))
                         }
 
                         const deleteItem = () => {
                             if (!noteDrawingEnabled) return
-                            setItems((prev) => functions.util.insertAtIndex(prev, index, null).filter(Boolean))
+                            setItems((prev) => functions.util.insertAtIndex(prev, index, null))
                         }
 
                         const onContextMenu = (event: React.MouseEvent) => {

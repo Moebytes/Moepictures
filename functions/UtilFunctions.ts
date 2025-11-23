@@ -135,7 +135,8 @@ export default class UtilFunctions {
     }
 
     public static insertAtIndex = <T>(array: T[], index: number, item: T | null) => {
-        return [...array.slice(0, index), item, ...array.slice(index + 1)].filter(Boolean) as T[]
+        if (item === null) return array.filter((value, i) => i !== index)
+        return array.map((value, i) => (i === index ? item : value))
     }
 
     public static parseUserAgent = (userAgent?: string) => {
