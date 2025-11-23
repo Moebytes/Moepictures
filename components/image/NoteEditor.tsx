@@ -270,7 +270,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             const history = await functions.http.get("/api/note/history", {postID: props.post.postID, historyID: props.noteID}, session, setSessionFlag)
             notes = history.flatMap((h) => h.notes)
         } else {
-            notes = await functions.http.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag)
+            notes = await functions.http.get("/api/notes", {postID: props.post.postID}, session, setSessionFlag, true)
         }
         notes = notes?.filter((n) => n.order === undefined || n.order === (props.order || 1))
         if (notes?.length) {
@@ -411,8 +411,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const editText = (index: number) => {
         setItems((prev) => {
             const item = prev[index]
-            item.imageWidth = item.imageWidth || targetWidth
-            item.imageHeight = item.imageHeight || targetHeight
+            item.imageWidth = item?.imageWidth || targetWidth
+            item.imageHeight = item?.imageHeight || targetHeight
             item.imageHash = targetHash
             item.translation = editNoteData.translation
             item.transcript = editNoteData.transcript
@@ -566,7 +566,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     if (!targetWidth || !targetHeight) return null
 
     return (
-        <div className="note-editor" style={{display: noteMode ? "flex" : "none"}}>
+        <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
