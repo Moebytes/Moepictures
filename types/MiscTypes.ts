@@ -123,6 +123,7 @@ export interface SourceLookup {
     danbooruLink: string
     sourceLinks: {link: string, hash: string}[]
     artistIcon: string
+    isAI: boolean
     source: {
         title: string
         englishTitle: string

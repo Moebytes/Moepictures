@@ -383,6 +383,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
 
+            if (sourceData.isAI) {
+                console.info(`Skipping detected AI image: ${currentArr[0].name}`)
+                continue
+            }
+
             for (let attempt = 1; attempt <= 5; attempt++) {
                 try {
                     tagData = await functions.http.post("/api/misc/taglookup", {current: currentArr[0], type, rating: sourceData.rating, style, hasUpscaled}, session, setSessionFlag)

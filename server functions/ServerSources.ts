@@ -58,6 +58,7 @@ export default class ServerSources {
         let sourceLinks = [] as {link: string, hash: string}[]
         let pixivTags = [] as string[]
         let drawingTools = [] as string[]
+        let isAI = false
 
         const pixivID = pixivLink.match(/\d{5,}/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
@@ -81,6 +82,7 @@ export default class ServerSources {
         const twitter = user.social?.twitter?.url?.trim().match(/(?<=com\/).*?(?=\?|$)/)?.[0]
         illust.user.twitter = twitter || ""
         illust.user.profile_image_urls.medium = user.imageBig
+        isAI = pixiv.util.isAI(illust, ["AI"])
                 
         commentary = `${functions.util.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
         posted = functions.date.formatDate(new Date(illust.create_date), true)
@@ -119,7 +121,7 @@ export default class ServerSources {
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, pixivTags,
             userProfile, drawingTools, sourceImageCount, posted, bookmarks, danbooruLink, 
-            artistIcon, artists, rating, sourceLinks}
+            artistIcon, artists, rating, sourceLinks, isAI}
     }
 
     public static twitterLookup = async (twitterLink: string, rating: PostRating) => {
@@ -349,6 +351,7 @@ export default class ServerSources {
         let pixivTags = [] as string[]
         let drawingTools = [] as string[]
         let sourceLinks = [] as {link: string, hash: string}[]
+        let isAI = false
 
         let basename = path.basename(current.name, path.extname(current.name)).trim()
         let {id, source: alt} = functions.util.parseFilename(current.name)
@@ -375,6 +378,7 @@ export default class ServerSources {
                 userProfile = data.userProfile
                 drawingTools = data.drawingTools
                 sourceImageCount = data.sourceImageCount
+                isAI = data.isAI
 
                 mirrors = await serverFunctions.links.booruLinks(pngBytes)
                 mirrors = functions.util.removeItem(mirrors, source)
@@ -384,6 +388,7 @@ export default class ServerSources {
                     artists,
                     danbooruLink,
                     sourceLinks,
+                    isAI,
                     source: {
                         title,
                         englishTitle,
@@ -433,6 +438,7 @@ export default class ServerSources {
                     artists,
                     danbooruLink,
                     sourceLinks,
+                    isAI,
                     source: {
                         title,
                         englishTitle,
@@ -499,6 +505,7 @@ export default class ServerSources {
                     userProfile = data.userProfile
                     drawingTools = data.drawingTools
                     sourceImageCount = data.sourceImageCount
+                    isAI = data.isAI
                 } catch (e) {
                     console.log(e)
                 }
@@ -594,6 +601,7 @@ export default class ServerSources {
             danbooruLink,
             sourceLinks,
             artistIcon,
+            isAI,
             source: {
                 title,
                 englishTitle,
