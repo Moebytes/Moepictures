@@ -274,11 +274,8 @@ const MiscRoutes = (app: Express) => {
             let fileData = {} as {[key: string]: string}
             for (const file of files) {
                 if (file === ".DS_Store") continue
-                const filePath = path.join(dir, file)
-                const buffer = fs.readFileSync(filePath)
                 const name = path.basename(file, path.extname(file))
-                const data = `data:image/${path.extname(file).replace(".", "")};base64,${buffer.toString("base64")}`
-                fileData[name] = data
+                fileData[name] = `${functions.config.getDomain()}/emojis/${encodeURIComponent(file)}`
             }
             serverFunctions.sendEncrypted(fileData, req, res)
         } catch (e) {

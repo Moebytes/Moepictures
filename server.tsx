@@ -82,7 +82,7 @@ app.use(session({
 }))
 
 app.use(express.static(path.join(__dirname, "./public")))
-app.use("/assets", express.static(path.join(__dirname, "./dist/client/assets")))
+app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis")))
 app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
 
 let blacklist = null as unknown as Set<string>
