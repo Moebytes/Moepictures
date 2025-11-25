@@ -152,7 +152,7 @@ export default class SQLUser {
     /** Destroy anon sessions. */
     public static pruneAnonSessions = async () => {
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM sessions WHERE NOT (session::json ? 'username')`
+            text: /*sql*/`DELETE FROM sessions WHERE NOT (session::jsonb ? 'username')`
         }
         await SQLQuery.run(query)
     }
