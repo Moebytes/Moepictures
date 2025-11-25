@@ -138,10 +138,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <img className="historyrow-options-img" src={tagHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
+                    {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteTagHistoryDialog}>
                         <img className="historyrow-options-img" src={tagHistoryDelete}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
-                    </div>
+                    </div> : null}
                 </div>
             )
         } else if (permissions.isContributor(session)) {

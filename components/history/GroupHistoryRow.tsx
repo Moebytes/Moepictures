@@ -120,10 +120,11 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <img className="historyrow-options-img" src={groupHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
+                    {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteGroupHistoryDialog}>
                         <img className="historyrow-options-img" src={groupHistoryDelete}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
-                    </div>
+                    </div> : null}
                 </div>
             )
         } else if (permissions.isContributor(session)) {

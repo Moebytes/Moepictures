@@ -590,7 +590,7 @@ const GroupRoutes = (app: Express) => {
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!slug) return void res.status(400).send("Bad slug")
-            if (!permissions.isMod(req.session)) return void res.status(403).end()
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const group = await sql.group.group(slug as string)
             if (!group) return void res.status(400).send("Bad group")
             const groupHistory = await sql.history.groupHistory(group.groupID)

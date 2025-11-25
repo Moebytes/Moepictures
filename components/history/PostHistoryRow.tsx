@@ -158,10 +158,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <img className="historyrow-options-img" src={postHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
+                    {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deletePostHistoryDialog}>
                         <img className="historyrow-options-img" src={postHistoryDelete}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
-                    </div>
+                    </div> : null}
                 </div>
             )
         } else if (permissions.isContributor(session)) {

@@ -409,7 +409,7 @@ const NoteRoutes = (app: Express) => {
             const {postID, order, historyID} = req.query as unknown as NoteHistoryDeleteParams
             if (Number.isNaN(Number(historyID))) return void res.status(400).send("Invalid historyID")
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (!permissions.isMod(req.session)) return void res.status(403).end()
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const noteHistory = await sql.history.noteHistory(postID, order)
             if (noteHistory[0]?.historyID === historyID) {
                 return void res.status(400).send("Bad historyID")

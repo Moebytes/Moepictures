@@ -107,10 +107,11 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <img className="historyrow-options-img" src={noteHistoryRevert}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
+                    {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteNoteHistoryDialog}>
                         <img className="historyrow-options-img" src={noteHistoryDelete}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
-                    </div>
+                    </div> : null}
                 </div>
             )
         } else if (permissions.isContributor(session)) {
