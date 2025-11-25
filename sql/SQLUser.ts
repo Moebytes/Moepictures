@@ -149,6 +149,14 @@ export default class SQLUser {
         await SQLQuery.run(query)
     }
 
+    /** Destroy anon sessions. */
+    public static pruneAnonSessions = async () => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE NOT (session::json ? 'username')`
+        }
+        await SQLQuery.run(query)
+    }
+
     /** Set banner */
     public static setBanner = async (text: string, link: string) => {
         let now = new Date().toISOString()
