@@ -739,6 +739,8 @@ const runDaily = async () => {
   await deleteQueuedUsers()
   await pruneEmptyTags()
   await sql.user.pruneAnonSessions()
+  await sql.user.pruneExpiredSessions()
+
 }
 
 const run = async () => {

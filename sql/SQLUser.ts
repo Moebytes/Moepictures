@@ -157,6 +157,14 @@ export default class SQLUser {
         await SQLQuery.run(query)
     }
 
+    /** Prune expired sessions. */
+    public static pruneExpiredSessions = async () => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE expires < NOW()`
+        }
+        await SQLQuery.run(query)
+    }
+
     /** Set banner */
     public static setBanner = async (text: string, link: string) => {
         let now = new Date().toISOString()
