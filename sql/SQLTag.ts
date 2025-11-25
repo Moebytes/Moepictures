@@ -300,16 +300,13 @@ export default class SQLTag {
                     SELECT "tags".tag, 
                     COALESCE(array_length("tag map posts"."posts", 1), 0) AS count,
                     "tags".type, "tags".image, "tags"."imageHash", 
-                    "tags"."hidden", "tags"."r18", "tags"."description",
-                    "tags"."social", "tags"."twitter", "tags"."website",
-                    "tags"."wikipedia"
+                    "tags"."hidden", "tags"."r18"
                     FROM tags
                     LEFT JOIN "tag map posts" ON "tag map posts".tag = tags.tag
                     ${whereQuery}
                     GROUP BY "tags".tag, "tags".type, "tags".image,
                     "tags"."imageHash", "tags"."hidden", "tags"."r18",
-                    "tags"."description", "tags"."social", "tags"."twitter",
-                    "tags"."website", "tags"."wikipedia", "tag map posts"."posts"
+                    "tag map posts"."posts"
                     ORDER BY count DESC
             `)
         }

@@ -27,8 +27,7 @@ export default class TagFunctions {
         for (let i = 0; i < uniqueTagArray.length; i++) {
             const found = result.find((r: any) => r.tag === uniqueTagArray[i])
             if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", 
-                image: "", imageHash: "", description: "", social: "", twitter: "", 
-                website: "", fandom: "", wikipedia: "", hidden: false, r18: false})
+                image: "", imageHash: "", hidden: false, r18: false})
         }
         let characterTags = result.filter((t: any) => t.type === "character")
         let seriesTags = result.filter((t: any) => t.type === "series")
@@ -40,8 +39,7 @@ export default class TagFunctions {
         for (let i = 0; i < posts.length; i++) {
             for (let j = 0; j < posts[i].tags.length; j++) {
                 result.push({tag: posts[i].tags[j], count: "1", type: "tag", 
-                image: "", imageHash: "", description: "", social: "", twitter: "", 
-                website: "", fandom: "", wikipedia: "", hidden: false, r18: false})
+                image: "", imageHash: "", hidden: false, r18: false})
             }
         }
         return result
@@ -49,11 +47,11 @@ export default class TagFunctions {
 
     public static tagCategories = async (parsedTags: string[] | TagCount[] | Tag[] | undefined, session: Session, 
         setSessionFlag: (value: boolean) => void) => {
-        let artists = [] as MiniTag[]
-        let characters = [] as MiniTag[]
-        let series = [] as MiniTag[]
-        let meta = [] as MiniTag[]
-        let tags = [] as MiniTag[] 
+        let artists = [] as TagCount[]
+        let characters = [] as TagCount[]
+        let series = [] as TagCount[]
+        let meta = [] as TagCount[]
+        let tags = [] as TagCount[] 
         if (!parsedTags) return {artists, characters, series, meta, tags}
         let tagMap = await functions.cache.tagCountsCache(session, setSessionFlag)
         let unverifiedCheck = [] as string[]
@@ -62,18 +60,12 @@ export default class TagFunctions {
             let count = parsedTags[i].hasOwnProperty("count") ? (parsedTags[i] as TagCount).count : 0
             const foundTag = tagMap[tag]
             if (foundTag) {
-                const obj = {} as MiniTag 
+                const obj = {} as TagCount 
                 obj.tag = tag
                 obj.count = String(count)
                 obj.type = foundTag.type
                 obj.image = foundTag.image
                 obj.imageHash = foundTag.imageHash
-                obj.description = foundTag.description 
-                obj.social = foundTag.social
-                obj.twitter = foundTag.twitter
-                obj.website = foundTag.website
-                obj.fandom = foundTag.fandom
-                obj.wikipedia = foundTag.wikipedia
                 if (foundTag.type === "artist") {
                     artists.push(obj)
                 } else if (foundTag.type === "character") {
@@ -92,18 +84,12 @@ export default class TagFunctions {
         if (permissions.isMod(session) && unverifiedCheck.length) {
             const unverifiedTags = await functions.http.get("/api/tag/list/unverified", {tags: unverifiedCheck}, session, setSessionFlag)
             for (const unverifiedTag of unverifiedTags) {
-                const obj = {} as MiniTag
+                const obj = {} as TagCount
                 obj.tag = unverifiedTag.tag
                 obj.count = "0"
                 obj.image = unverifiedTag.image
                 obj.imageHash = unverifiedTag.imageHash
                 obj.type = unverifiedTag.type
-                obj.description = unverifiedTag.description 
-                obj.social = unverifiedTag.social
-                obj.twitter = unverifiedTag.twitter
-                obj.website = unverifiedTag.website
-                obj.fandom = unverifiedTag.fandom
-                obj.wikipedia = unverifiedTag.wikipedia
                 if (unverifiedTag.type === "artist") {
                     artists.push(obj)
                 } else if (unverifiedTag.type === "character") {
@@ -123,7 +109,7 @@ export default class TagFunctions {
     public static tagGroupCategories = async (post: PostSearch | PostHistory | UnverifiedPost, session: Session, 
         setSessionFlag: (value: boolean) => void) => {
         let tagGroups = post.tagGroups
-        let newTagGroups = [] as {name: string, tags: MiniTag[]}[]
+        let newTagGroups = [] as {name: string, tags: TagCount[]}[]
         if (!tagGroups?.length && !post.tags) {
             if ("originalID" in post) {
                 let fullPost = await functions.http.get("/api/post/unverified", {postID: post.postID}, session, setSessionFlag)
@@ -281,7 +267,7 @@ export default class TagFunctions {
         for (const tagGroup of tagGroups) {
             if (!tagGroup) continue
             if (tagGroup.name.toLowerCase() === "tags") continue
-            let stringTags = tagGroup.tags.map((tag: string | MiniTag) => typeof tag === "string" ? tag : tag.tag)
+            let stringTags = tagGroup.tags.map((tag: string | TagCount) => typeof tag === "string" ? tag : tag.tag)
             resultStr += `${tagGroup.name}{${stringTags.join(" ")}}\n`
             removeTags.push(...stringTags)
         }
@@ -290,7 +276,7 @@ export default class TagFunctions {
         return resultStr
     }
 
-    public static appendOrphanTags = (tagGroups: TagGroupCategory[], tags?: MiniTag[]) => {
+    public static appendOrphanTags = (tagGroups: TagGroupCategory[], tags?: TagCount[]) => {
         if (!tags) return tagGroups
         let tagGroupTagsSet = new Set(tagGroups.flatMap((t) => t.tags.map((t) => t.tag)))
         let orphanTags = tags.filter((t) => !tagGroupTagsSet.has(t.tag))

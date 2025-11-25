@@ -29,7 +29,7 @@ import wandIcon from "../../assets/icons/wand.png"
 import lineartIcon from "../../assets/icons/lineart-big.png"
 import segmentateIcon from "../../assets/icons/segmentate.png"
 import QRCode from "qrcode"
-import {GIFFrame, MiniTag, PostFull, PostHistory, UnverifiedPost, UploadImage} from "../../types/Types"
+import {GIFFrame, TagCount, PostFull, PostHistory, UnverifiedPost, UploadImage} from "../../types/Types"
 import "./styles/postimage.less"
 
 interface Props {
@@ -53,7 +53,7 @@ interface Props {
     previous?: () => void
     next?: () => void
     noteID?: string | null
-    artists?: MiniTag[]
+    artists?: TagCount[]
     reader?: boolean
 }
 

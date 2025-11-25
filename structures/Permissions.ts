@@ -1,4 +1,4 @@
-import {ServerSession, MiniTag} from "../types/Types"
+import {ServerSession, MiniTag, TagCount} from "../types/Types"
 
 export default class Permissions {
     public static isAdmin = (session: ServerSession) => {
@@ -43,9 +43,9 @@ export default class Permissions {
         return false
     }
 
-    public static canPrivate = (session: ServerSession, artists?: MiniTag[] | string[]) => {
+    public static canPrivate = (session: ServerSession, artists?: TagCount[] | MiniTag[] | string[]) => {
         if (Permissions.isMod(session)) return true
-        const artistTags = artists?.map((a: MiniTag | string) => a.hasOwnProperty("tag") ? (a as MiniTag).tag : a) || []
+        const artistTags = artists?.map((a: TagCount | MiniTag | string) => a.hasOwnProperty("tag") ? (a as TagCount).tag : a) || []
         if (artistTags.includes(session.username || "")) return true
         return false
     }

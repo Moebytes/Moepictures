@@ -20,11 +20,11 @@ export interface MiniTag {
 }
 
 export interface TagCategories {
-    artists: MiniTag[]
-    characters: MiniTag[]
-    series: MiniTag[]
-    meta: MiniTag[]
-    tags: MiniTag[]
+    artists: TagCount[]
+    characters: TagCount[]
+    series: TagCount[]
+    meta: TagCount[]
+    tags: TagCount[]
 }
 
 export interface TagCount {
@@ -33,12 +33,6 @@ export interface TagCount {
     type: TagType
     image: string | null
     imageHash: string | null
-    description: string
-    website: string | null
-    social: string | null
-    twitter: string | null
-    fandom: string | null
-    wikipedia: string | null
     hidden: boolean | null
     r18: boolean | null
 }
@@ -120,7 +114,7 @@ export interface MiniTagGroup {
 
 export interface TagGroupCategory {
     name: string
-    tags: MiniTag[]
+    tags: TagCount[]
 }
 
 export interface AliasHistory {

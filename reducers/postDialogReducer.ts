@@ -1,18 +1,18 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {HistoryID, PostSearch, PostHistory, UnverifiedPost, MiniTag, 
+import {HistoryID, PostSearch, PostHistory, UnverifiedPost, TagCount, 
 TagGroupCategory, PostFull, Image, UploadImage} from "../types/Types"
 
 interface TagEditID {
     post: PostSearch | PostHistory | UnverifiedPost, 
     order: number,
     unverified?: boolean, 
-    artists: MiniTag[], 
-    characters: MiniTag[], 
-    series: MiniTag[], 
-    meta: MiniTag[],
-    tags: MiniTag[],
+    artists: TagCount[], 
+    characters: TagCount[], 
+    series: TagCount[], 
+    meta: TagCount[],
+    tags: TagCount[],
     tagGroups?: TagGroupCategory[]
 }
 
@@ -23,7 +23,7 @@ interface PostEditID {
 
 interface PrivateID {
     post: PostSearch | PostHistory | UnverifiedPost
-    artists: MiniTag[]
+    artists: TagCount[]
 }
 
 interface UndeleteID {

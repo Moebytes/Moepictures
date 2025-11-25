@@ -58,16 +58,16 @@ import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../functions/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagGroupCategory, PrunedUser} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount, TagGroupCategory, PrunedUser, Tag} from "../../types/Types"
 import "./styles/mobileinfo.less"
 
 interface Props {
     post?: PostSearch | PostHistory | UnverifiedPost
-    artists?: MiniTag[] 
-    characters?: MiniTag[]  
-    series?: MiniTag[]
-    meta?: MiniTag[]
-    tags?: MiniTag[]
+    artists?: TagCount[] 
+    characters?: TagCount[]  
+    series?: TagCount[]
+    meta?: TagCount[]
+    tags?: TagCount[]
     tagGroups?: TagGroupCategory[]
     unverified?: boolean
     order?: number
@@ -95,6 +95,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [updaterData, setUpdaterData] = useState(null as PrunedUser | null)
     const [approverData, setApproverData] = useState(null as PrunedUser | null)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
+    const [tagMetadata, setTagMetadata] = useState({} as {[key: string]: Tag})
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -119,10 +120,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             setApproverData(approver ?? null)
         }
     }
+    
+    const updateTagMetadata = async () => {
+        let artists = props.artists?.map((t) => t.tag) || []
+        let characters = props.characters?.map((t) => t.tag) || []
+        let series = props.series?.map((t) => t.tag) || []
+        let tags = [...artists, ...characters, ...series]
+        if (!tags.length) return
+        const tagObjects = await functions.http.get("/api/tag/list", {tags}, session, setSessionFlag)
+        let tagMetadata = {} as {[key: string]: Tag}
+        for (const tagObj of tagObjects) {
+            tagMetadata[tagObj.tag] = tagObj
+        }
+        setTagMetadata(tagMetadata)
+    }
 
     useEffect(() => {
         updateTags()
         updateUserImg()
+        updateTagMetadata()
     }, [session])
 
     useEffect(() => {
@@ -145,19 +161,21 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const artistSocials = () => {
                 if (!props.artists) return
-                let jsx = [] as React.ReactElement[] 
-                if (props.artists[i].website) {
-                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.artists?.[i].website!, "_blank")}/>)
+                let jsx = [] as React.ReactElement[]
+                const metaTag = tagMetadata[props.artists[i].tag] as Tag | undefined
+                if (!metaTag) return jsx
+                if (metaTag.website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(metaTag.website!, "_blank")}/>)
                 }
-                if (props.artists[i].social?.includes("pixiv.net")) {
-                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
-                } else if (props.artists[i].social?.includes("soundcloud.com")) {
-                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
-                } else if (props.artists[i].social?.includes("sketchfab.com")) {
-                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.artists?.[i].social!, "_blank")}/>)
+                if (metaTag.social?.includes("pixiv.net")) {
+                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(metaTag.social!, "_blank")}/>)
+                } else if (metaTag.social?.includes("soundcloud.com")) {
+                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(metaTag.social!, "_blank")}/>)
+                } else if (metaTag.social?.includes("sketchfab.com")) {
+                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(metaTag.social!, "_blank")}/>)
                 }
-                if (props.artists[i].twitter) {
-                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.artists?.[i].twitter!, "_blank")}/>)
+                if (metaTag.twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(metaTag.twitter!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -191,8 +209,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const characterSocials = () => {
                 if (!props.characters) return
                 let jsx = [] as React.ReactElement[] 
-                if (props.characters[i].fandom) {
-                    jsx.push(<img className="mobileinfo-social" src={fandom} onClick={() => window.open(props.characters?.[i].fandom!, "_blank")}/>)
+                const metaTag = tagMetadata[props.characters[i].tag] as Tag | undefined
+                if (!metaTag) return jsx
+                if (metaTag.fandom) {
+                    jsx.push(<img className="sidebar-social" src={fandom} onClick={() => window.open(metaTag.fandom!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -225,15 +245,17 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const seriesSocials = () => {
                 if (!props.series) return
-                let jsx = [] as React.ReactElement[] 
-                if (props.series[i].website) {
-                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.series?.[i].website!, "_blank")}/>)
+                let jsx = [] as React.ReactElement[]
+                const metaTag = tagMetadata[props.series[i].tag] as Tag | undefined
+                if (!metaTag) return jsx
+                if (metaTag.website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(metaTag.website!, "_blank")}/>)
                 }
-                if (props.series[i].twitter) {
-                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.series?.[i].twitter!, "_blank")}/>)
+                if (metaTag.twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(metaTag.twitter!, "_blank")}/>)
                 }
-                if (props.series[i].wikipedia) {
-                    jsx.push(<img className="mobileinfo-social" src={wikipedia} onClick={() => window.open(props.series?.[i].wikipedia!, "_blank")}/>)
+                if (metaTag.wikipedia) {
+                    jsx.push(<img className="sidebar-social" src={wikipedia} onClick={() => window.open(metaTag.wikipedia!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -275,8 +297,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const organizeTags = (tags: MiniTag[]) => {
-        if (!tags?.length) return [] as MiniTag[]
+    const organizeTags = (tags: TagCount[]) => {
+        if (!tags?.length) return [] as TagCount[]
         const meta = tags.filter((t) => t.type === "meta")
         const appearance = tags.filter((t) => t.type === "appearance")
         const outfit = tags.filter((t) => t.type === "outfit")
