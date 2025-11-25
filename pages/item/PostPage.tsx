@@ -241,6 +241,7 @@ const PostPage: React.FunctionComponent = () => {
                 setImage(images[0])
                 setOrder(1)
             }
+            setPost(historyPost)
             const allTags = [...historyPost.artists, ...historyPost.characters, ...historyPost.series, ...historyPost.tags]
             const tags = await functions.cache.sortedTagCounts(allTags, session, setSessionFlag)
             const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
@@ -248,7 +249,6 @@ const PostPage: React.FunctionComponent = () => {
             setTagGroupCategories(groupCategories)
             setTagCategories(categories)
             setTags(tags)
-            setPost(historyPost)
         }
         updateHistory()
     }, [postID, historyID, order, session])
@@ -272,16 +272,10 @@ const PostPage: React.FunctionComponent = () => {
                 return
             }
             if (post) {
-                const tags = await functions.tag.parseTags([post], session, setSessionFlag)
-                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
-                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
-                setTagGroupCategories(groupCategories)
-                setTagCategories(categories)
-                setTags(tags)
                 setPost(post)
                 if (!post.tags) {
                     try {
-                        post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
+                        post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
                         if (post) setPost(post)
                     } catch (err: any) {
                         if (err.message === "404") functions.dom.replaceLocation("/404")
@@ -289,6 +283,12 @@ const PostPage: React.FunctionComponent = () => {
                         return
                     }
                 }
+                const tags = await functions.tag.parseTags([post], session, setSessionFlag)
+                const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
+                const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
+                setTagGroupCategories(groupCategories)
+                setTagCategories(categories)
+                setTags(tags)
                 setSessionFlag(true)
             } else {
                 //functions.dom.replaceLocation("/404")
@@ -347,13 +347,13 @@ const PostPage: React.FunctionComponent = () => {
                     setImage(images[0])
                     setOrder(1)
                 }
+                setPost(post)
                 const tags = await functions.tag.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
                 const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setTags(tags)
-                setPost(post)
                 setSessionFlag(true)
             } else {
                 //functions.dom.replaceLocation("/404")
