@@ -13,7 +13,6 @@ import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import {Provider} from "react-redux"
-import {lookup} from "dns/promises"
 import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./functions/Functions"
@@ -98,6 +97,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   }
   let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
   ip = ip?.toString().replace("::ffff:", "") || ""
+  if (ip !== req.session.ip) req.session.ip = ip
   if (blacklist.has(ip)) {
     return res.status(403).json({message: "Your IP address has been blocked."})
   }
