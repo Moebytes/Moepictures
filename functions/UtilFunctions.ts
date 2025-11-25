@@ -291,4 +291,9 @@ export default class UtilFunctions {
         const matches = text.match(/\b((?:https?:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi)
         return matches ? matches : [] as string[]
     }
+
+    public static appendAndLimit = <T>(item: T, list: T[] | undefined, limit = 10) => {
+        const combined = [item, ...(list || [])].filter(Boolean)
+        return this.removeDuplicates(combined).slice(0, limit)
+    }
 }

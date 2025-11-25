@@ -233,7 +233,7 @@ const UserRoutes = (app: Express) => {
                 req.session.publicTagFavorites = user.publicTagFavorites
                 req.session.role = user.role
                 req.session.banned = user.banned
-                const ips = functions.util.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+                const ips = functions.util.appendAndLimit(ip, user.ips, 10)
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips
                 const {secret, token} = serverFunctions.generateCSRF()
@@ -795,7 +795,7 @@ const UserRoutes = (app: Express) => {
             const expireDate = new Date(tokenData.expires)
             const user = await sql.user.user(tokenData.username)
             if (user && new Date() <= expireDate) {
-                const ips = functions.util.removeDuplicates([tokenData.ip, ...(user.ips || [])].filter(Boolean))
+                const ips = functions.util.appendAndLimit(tokenData.ip, user.ips, 10)
                 await sql.user.updateUser(user.username, "ips", ips)
                 req.session.ips = ips
                 await sql.token.deleteIPToken(tokenData.username)

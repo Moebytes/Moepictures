@@ -57,7 +57,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
             req.session.imagePost = user.imagePost
             req.session.role = user.role
             req.session.banned = user.banned
-            const ips = functions.util.removeDuplicates([ip, ...(user.ips || [])].filter(Boolean))
+            const ips = functions.util.appendAndLimit(ip, user.ips, 10)
             await sql.user.updateUser(user.username, "ips", ips)
             req.session.ips = ips
             const {secret, token} = ServerFunctions.generateCSRF()
