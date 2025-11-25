@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {useInteractionSelector, useSearchSelector} from "../../store"
+import {useInteractionSelector, useLayoutSelector, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
 
 let inertia = false
@@ -13,12 +13,13 @@ let time = new Date()
 let id = 0
 
 const DragScroll = () => {
+    const {mobile} = useLayoutSelector()
     const {enableDrag} = useInteractionSelector()
     const {noteDrawingEnabled} = useSearchSelector()
 
     useEffect(() => {
         const element = document.documentElement
-        if (!element) return
+        if (mobile || !element) return
 
         const onScroll = () => {
             cancelAnimationFrame(id)
@@ -120,7 +121,7 @@ const DragScroll = () => {
             inertia = false
             disable()
         }
-    }, [enableDrag, noteDrawingEnabled])
+    }, [mobile, enableDrag, noteDrawingEnabled])
 
   return null
 }
