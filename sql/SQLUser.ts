@@ -149,6 +149,15 @@ export default class SQLUser {
         await SQLQuery.run(query)
     }
 
+    /** Prune all sessions of this ip. */
+    public static pruneIPSessions = async (ip: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE session->>'ip' = $1`,
+            values: [ip]
+        }
+        await SQLQuery.run(query)
+    }
+
     /** Destroy anon sessions. */
     public static pruneAnonSessions = async () => {
         const query: QueryConfig = {

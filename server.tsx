@@ -145,6 +145,7 @@ app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Respon
   if (!permissions.isAdmin(req.session)) return res.status(403).end()
   if (!ip) return res.status(400).send("Bad ip")
   await sql.report.insertBlacklist(ip, reason)
+  await sql.user.pruneIPSessions(ip)
   blacklist = null as any
   res.status(200).send("Success")
 })
