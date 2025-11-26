@@ -84,6 +84,8 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis")))
 app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
 
+app.use(apiKeyLogin)
+
 let blacklist = null as unknown as Set<string>
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
@@ -98,13 +100,21 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
   ip = ip?.toString().replace("::ffff:", "") || ""
   if (ip !== req.session.ip) req.session.ip = ip
+
+  if (!req.session.username) {
+    const sessionCount = await sql.user.countIPSessions(req.session.ip)
+    if (sessionCount > 100) {
+      await sql.report.insertBlacklist(ip, "automatic")
+      await sql.user.pruneIPSessions(ip)
+      blacklist.add(ip)
+    }
+  }
+
   if (blacklist.has(ip)) {
     return res.status(403).json({message: "Your IP address has been blocked."})
   }
   next()
 })
-
-app.use(apiKeyLogin)
 
 $2FARoutes(app)
 CommentRoutes(app)

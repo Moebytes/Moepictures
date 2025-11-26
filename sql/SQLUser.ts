@@ -149,11 +149,10 @@ export default class SQLUser {
         await SQLQuery.run(query)
     }
 
-    /** Prune all sessions of this ip. */
-    public static pruneIPSessions = async (ip: string) => {
+    public static destroyOtherAPISessions = async (username: string, currentSession: string) => {
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM sessions WHERE session->>'ip' = $1`,
-            values: [ip]
+            text: /*sql*/`DELETE FROM sessions WHERE session->>'username' = $1 AND "sessionID" != $2 AND session->>'apiKey' = 'true'`,
+            values: [username, currentSession]
         }
         await SQLQuery.run(query)
     }
@@ -170,6 +169,24 @@ export default class SQLUser {
     public static pruneExpiredSessions = async () => {
         const query: QueryConfig = {
             text: /*sql*/`DELETE FROM sessions WHERE expires < NOW()`
+        }
+        await SQLQuery.run(query)
+    }
+
+    public static countIPSessions = async (ip: string) => {
+        const query: QueryArrayConfig = {
+            text: /*sql*/`SELECT COUNT(*) AS count FROM sessions WHERE session->>'ip' = $1`,
+            values: [ip],
+            rowMode: "array"
+        }
+        const result = await SQLQuery.run(query)
+        return Number(result.flat(Infinity)[0])
+    }
+
+    public static pruneIPSessions = async (ip: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE session->>'ip' = $1`,
+            values: [ip]
         }
         await SQLQuery.run(query)
     }

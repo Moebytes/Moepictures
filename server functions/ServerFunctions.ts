@@ -75,6 +75,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
             req.session.premiumExpiration = user.premiumExpiration
             req.session.banExpiration = user.banExpiration
             req.session.apiKey = true
+            await sql.user.destroyOtherAPISessions(req.session.username, req.sessionID)
         } else {
             return res.status(403).json({message: "A valid API key is required."})
         }
