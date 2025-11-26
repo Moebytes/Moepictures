@@ -99,12 +99,11 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   }
   let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
   ip = ip?.toString().replace("::ffff:", "") || ""
-  if (ip !== req.session.ip) req.session.ip = ip
 
   if (["127.0.0.1", "::1", "0.0.0.0"].includes(ip)) return next()
 
   if (!req.session.username) {
-    const sessionCount = await sql.user.countIPSessions(req.session.ip)
+    const sessionCount = await sql.user.countIPSessions(ip)
     if (sessionCount > 100) {
       await sql.report.insertBlacklist(ip, "automatic")
       await sql.user.pruneIPSessions(ip)
@@ -115,6 +114,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (blacklist.has(ip)) {
     return res.status(403).json({message: "Your IP address has been blocked."})
   }
+  if (ip !== req.session.ip) req.session.ip = ip
   next()
 })
 
