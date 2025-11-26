@@ -10,6 +10,7 @@ import {createCanvas, loadImage} from "@napi-rs/canvas"
 import wanakana from "wanakana"
 import pinyin from "pinyin"
 import util from "util"
+import dns from "dns/promises"
 import child_process from "child_process"
 import * as hangul from "hangul-romanization"
 import functions from "../functions/Functions"
@@ -263,6 +264,40 @@ export default class ServerUtil {
             const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/sketchextractor/anime2sketch.pth`, {responseType: "arraybuffer"}).then((r) => r.data)
             fs.writeFileSync(modelPath, Buffer.from(data))
             console.log("Done!")
+        }
+    }
+
+    public static isAllowedBot = async (ip: string) => {
+        try {
+            const hostnames = await dns.reverse(ip).catch(() => [])
+            if (!hostnames.length) return false
+
+            const allowedDomains = [
+                ".googlebot.com", ".google.com",
+                ".search.msn.com",
+                ".duckduckgo.com",
+                ".crawl.yahoo.net",
+                ".yandex.ru", ".yandex.net",
+                ".baidu.com",
+                ".twitter.com", ".twttr.com",
+                ".x.com",
+                ".reddit.com",
+                ".discord.com", ".discordapp.com",
+                ".facebook.com",
+                ".apple.com",
+                ".pinterest.com"
+            ]
+
+            const validHosts = hostnames.filter((h) => allowedDomains.some(d => h.endsWith(d)))
+            if (validHosts.length === 0) return false
+
+            for (const host of validHosts) {
+                const forward = await dns.lookup(host, {all: true}).catch(() => [])
+                if (forward.some(a => a.address === ip)) return true
+            }
+            return false
+        } catch {
+            return false
         }
     }
 }

@@ -105,9 +105,14 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!req.session.username) {
     const sessionCount = await sql.user.countIPSessions(ip)
     if (sessionCount > 100) {
-      await sql.report.insertBlacklist(ip, "automatic")
-      await sql.user.pruneIPSessions(ip)
-      blacklist.add(ip)
+      const allowedBot = await serverFunctions.util.isAllowedBot(ip)
+      if (!allowedBot) {
+        await sql.report.insertBlacklist(ip, "automatic")
+        await sql.user.pruneIPSessions(ip)
+        blacklist.add(ip)
+      } else {
+        await sql.user.destroyOtherIPSessions(ip, req.sessionID)
+      }
     }
   }
 

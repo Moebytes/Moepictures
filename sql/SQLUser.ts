@@ -140,7 +140,7 @@ export default class SQLUser {
         return result as Promise<LoginHistory[]>
     }
 
-    /** Destroy other sessions. */
+    /** Destroy other user sessions. */
     public static destroyOtherSessions = async (username: string, currentSession: string) => {
         const query: QueryConfig = {
             text: /*sql*/`DELETE FROM sessions WHERE session->>'username' = $1 AND "sessionID" != $2`,
@@ -149,10 +149,20 @@ export default class SQLUser {
         await SQLQuery.run(query)
     }
 
+    /** Destroy other api sessions. */
     public static destroyOtherAPISessions = async (username: string, currentSession: string) => {
         const query: QueryConfig = {
             text: /*sql*/`DELETE FROM sessions WHERE session->>'username' = $1 AND "sessionID" != $2 AND session->>'apiKey' = 'true'`,
             values: [username, currentSession]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Destroy other ip sessions. */
+    public static destroyOtherIPSessions = async (ip: string, currentSession: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE session->>'ip' = $1 AND "sessionID" != $2`,
+            values: [ip, currentSession]
         }
         await SQLQuery.run(query)
     }
