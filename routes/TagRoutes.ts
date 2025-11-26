@@ -5,7 +5,7 @@ import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import path from "path"
-import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams,
+import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams, TagCount,
 TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType, TagUpdateColumns, TagType} from "../types/Types"
 import ServerFunctions from "../server functions/ServerFunctions"
 
@@ -83,7 +83,18 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
-            let result = await sql.tag.tagCounts(tags.filter(Boolean) ?? [])
+
+            let result = [] as TagCount[]
+            if (tags.length) {
+                result = await sql.tag.tagCounts(tags.filter(Boolean) ?? [])
+            } else {
+                result = await sql.getCache("tag-counts") as TagCount[]
+                if (!result) {
+                    result = await sql.tag.tagCounts([])
+                    await sql.setCache("tag-counts", result, 60)
+                }
+            }
+
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag) => !tag.hidden)
             }

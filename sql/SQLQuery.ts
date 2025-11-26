@@ -84,19 +84,16 @@ export default class SQLQuery {
       let redisResult: string | null = null
       if (cacheEndpoint) {
         try {
-          cacheKey = `${cacheEndpoint}_${hashQuery(query)}`
-          redisResult = await redis.get(cacheKey)
-          if (redisResult) return JSON.parse(redisResult)
+          // cacheKey = `${cacheEndpoint}_${hashQuery(query)}`
+          // redisResult = await redis.get(cacheKey)
+          // if (redisResult) return JSON.parse(redisResult)
         } catch (error) {
           // ignore
         }
       }
       const pgClient = await pgPool.connect()
-      const startTime = Date.now()
       try {
           const result = await pgClient.query(query)
-          const endTime = Date.now()
-          const executionTime = endTime - startTime
           if (cacheKey) {
             await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch(() => null)
           }
@@ -116,8 +113,8 @@ export default class SQLQuery {
   }
 
   /** Set cache */
-  public static setCache = async (cacheKey: string, value: any) => {
-    await redis.set(cacheKey, JSON.stringify(value), {EX: 3600}).catch(() => null)
+  public static setCache = async (cacheKey: string, value: any, EX = 3600) => {
+    await redis.set(cacheKey, JSON.stringify(value), {EX}).catch(() => null)
   }
 
   /** Get cache */

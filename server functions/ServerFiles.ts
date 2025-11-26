@@ -17,7 +17,7 @@ let publicRemote = process.env.MOEPICTURES_PUBLIC_BUCKET!
 let publicRemoteR18 = process.env.MOEPICTURES_PUBLIC_BUCKET_R18!
 let publicRemoteUnverified = process.env.MOEPICTURES_PUBLIC_BUCKET_UNVERIFIED!
 
-const r2 = new S3({
+const s3 = new S3({
     region: "auto",
     endpoint: process.env.S3_ENDPOINT,
     credentials: {
@@ -52,9 +52,14 @@ export default class ServerFiles {
             for (let i = 0; i < 10; i++) {
                 let testKey = `${prefix}/${i}/${fileName}`
                 try {
-                    const body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(testKey)}`, 
-                    {hash: pixelHash}), {responseType: "arraybuffer"}).then(r => r.data)
-                    return Buffer.from(body)
+                    let body = undefined as Buffer | Uint8Array | undefined
+                    if (publicBucket) {
+                        body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(testKey)}`, 
+                        {hash: pixelHash}), {responseType: "arraybuffer"}).then(r => r.data)
+                    } else {
+                        body = await s3.getObject({Key: decodeURIComponent(testKey), Bucket: bucket}).then((r) => r.Body?.transformToByteArray())
+                    }
+                    return Buffer.from(body ?? "")
                 } catch {}
             }
             return defaultBuffer
@@ -84,13 +89,14 @@ export default class ServerFiles {
                 originalKey = originalKey.replace("upscaled/", "original/")
                 upscaledKey = upscaledKey.replace("original/", "upscaled/").replace("history-upscaled", "history")
             }
-            let body = null as Buffer | null
-            if (upscaled) {
-                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+            let body = undefined as Buffer | Uint8Array | undefined
+            let key = upscaled ? upscaledKey : originalKey
+
+            if (publicBucket) {
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(key)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             } else {
-                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
-                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+                body = await s3.getObject({Key: decodeURIComponent(key), Bucket: bucket}).then((r) => r.Body?.transformToByteArray())
             }
             if (!body) return this.getFirstHistoryFile(file, upscaled, r18, pixelHash)
             return Buffer.from(body)
@@ -107,7 +113,7 @@ export default class ServerFiles {
         } else {
             let bucket = r18 ? remoteR18 : remote
             const mimeType = mime.lookup(file) || "application/octet-stream"
-            await r2.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
+            await s3.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
             return `${bucket}/${file}`
         }
     }
@@ -121,7 +127,7 @@ export default class ServerFiles {
         } else {
             try {
                 let bucket = r18 ? remoteR18 : remote
-                await r2.deleteObject({Key: file, Bucket: bucket})
+                await s3.deleteObject({Key: file, Bucket: bucket})
             } catch {}
         }
     }
@@ -135,9 +141,9 @@ export default class ServerFiles {
         } else {
             try {
                 let bucket = r18 ? remoteR18 : remote
-                const objects = await r2.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/"})
+                const objects = await s3.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/"})
                 if (objects.Contents?.length === 0) {
-                    await r2.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
+                    await s3.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
                 }
             } catch {}
         }
@@ -171,18 +177,18 @@ export default class ServerFiles {
             let continuationToken: string | undefined = undefined
 
             while (isTruncated) {
-                const objects = await r2.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/", ContinuationToken: continuationToken})
+                const objects = await s3.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/", ContinuationToken: continuationToken})
                 if (objects.Contents?.length) {
                     const deleteParams = {Bucket: bucket, Delete: {Objects: [] as {Key: string | undefined}[]}}
                     objects.Contents.forEach(({Key}) => {
                         deleteParams.Delete.Objects.push({Key})
                     })
-                    await r2.deleteObjects(deleteParams)
+                    await s3.deleteObjects(deleteParams)
                 }
                 isTruncated = objects.IsTruncated
                 continuationToken = objects.NextContinuationToken
             }  
-            await r2.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
+            await s3.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
         }
     }
 
@@ -199,8 +205,8 @@ export default class ServerFiles {
             const newBucket = newR18 ? remoteR18 : remote
 
             const mimeType = mime.lookup(newFile) || "application/octet-stream"
-            await r2.copyObject({Bucket: newBucket, CopySource: encodeURI(`/${oldBucket}/${oldFile}`), Key: newFile, ContentType: mimeType})
-            await r2.deleteObject({Bucket: oldBucket, Key: oldFile})
+            await s3.copyObject({Bucket: newBucket, CopySource: encodeURI(`/${oldBucket}/${oldFile}`), Key: newFile, ContentType: mimeType})
+            await s3.deleteObject({Bucket: oldBucket, Key: oldFile})
         }
     }
 
@@ -221,7 +227,7 @@ export default class ServerFiles {
             let continuationToken: string | undefined = undefined
 
             while (isTruncated) {
-                const listObjectsResponse = await r2.listObjectsV2({Bucket: bucket, 
+                const listObjectsResponse = await s3.listObjectsV2({Bucket: bucket, 
                 Prefix: `${oldFolder}/`, Delimiter: "/", ContinuationToken: continuationToken})
 
                 if (listObjectsResponse.Contents) {
@@ -229,8 +235,8 @@ export default class ServerFiles {
                         if (Key) {
                             const newKey = Key.replace(`${oldFolder}/`, `${newFolder}/`)
                             const mimeType = mime.lookup(newKey) || "application/octet-stream"
-                            await r2.copyObject({Bucket: bucket, CopySource: encodeURI(`/${bucket}/${Key}`), Key: newKey, ContentType: mimeType})
-                            await r2.deleteObject({Bucket: bucket, Key: Key})
+                            await s3.copyObject({Bucket: bucket, CopySource: encodeURI(`/${bucket}/${Key}`), Key: newKey, ContentType: mimeType})
+                            await s3.deleteObject({Bucket: bucket, Key: Key})
                         }
                     }
                 }
@@ -271,7 +277,7 @@ export default class ServerFiles {
                 let continuationToken: string | undefined = undefined
 
                 while (isTruncated) {
-                    const objects = await r2.listObjectsV2({Bucket: bucket,
+                    const objects = await s3.listObjectsV2({Bucket: bucket,
                     Prefix: prefix, Delimiter: "/", ContinuationToken: continuationToken})
     
                     if (objects.Contents) {
@@ -302,13 +308,14 @@ export default class ServerFiles {
             let originalKey = `${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${decodeURIComponent(upscaledFile)}`
-            let body = null as Buffer | null
-            if (upscaled) {
-                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(upscaledKey)}`, {hash: pixelHash}), 
+
+            let body = undefined as Buffer | Uint8Array | undefined
+            let key = upscaled ? upscaledKey : originalKey
+            if (publicBucket) {
+                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(key)}`, {hash: pixelHash}), 
                 {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
             } else {
-                body = await axios.get(functions.util.appendURLParams(`${publicBucket}/${encodeURIComponent(originalKey)}`, {hash: pixelHash}), 
-                {responseType: "arraybuffer"}).then((r) => r.data).catch(() => null)
+                body = await s3.getObject({Key: decodeURIComponent(key), Bucket: bucket}).then((r) => r.Body?.transformToByteArray())
             }
             if (!body) return Buffer.from("")
             return Buffer.from(body)
@@ -324,7 +331,7 @@ export default class ServerFiles {
         } else {
             let bucket = remoteUnverified
             const mimeType = mime.lookup(file) || "application/octet-stream"
-            await r2.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
+            await s3.putObject({Bucket: bucket, Key: file, Body: content, ContentType: mimeType})
             return `${bucket}/${file}`
         }
     }
@@ -340,14 +347,14 @@ export default class ServerFiles {
         } else {
             try {
                 let bucket = remoteUnverified
-                await r2.deleteObject({Key: file, Bucket: bucket})
+                await s3.deleteObject({Key: file, Bucket: bucket})
             } catch {}
         }
     }
 
     public static uploadBackup = async (file: string, content: Buffer) => {
         let bucket = process.env.MOEPICTURES_BACKUP_BUCKET!
-        await r2.putObject({Bucket: bucket, Key: file, Body: content,
+        await s3.putObject({Bucket: bucket, Key: file, Body: content,
         Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)})
     }
 }

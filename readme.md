@@ -42,6 +42,7 @@ Make sure that you install the correct major version of our dependencies. Using 
 - Node.js v23: https://nodejs.org/en/
 - Python v3.11: https://www.python.org/
 - PostgreSQL v16: https://www.postgresql.org/
+- Redis v7: https://redis.io/
 
 Clone the project:
 ```

@@ -114,17 +114,17 @@ export default class ServerTags {
         console.log("Done")
     }
 
-    public static tagMap = async (cache?: boolean) => {
+    public static tagMap = async (cache: boolean = true) => {
         if (cache) {
-            let cached = await sql.getCache("tag-map")
-            if (cached) return cached as {[key: string]: Tag}
+            let cached = await sql.getCache("tag-map") as {[key: string]: Tag}
+            if (cached) return cached 
         }
         let result = await sql.tag.tags([])
         const tagMap = {} as {[key: string]: Tag}
         for (const tag of result) {
             tagMap[tag.tag] = tag
         }
-        sql.setCache("tag-map", tagMap)
+        sql.setCache("tag-map", tagMap, 60)
         return tagMap
     }
 

@@ -81,8 +81,8 @@ app.use(session({
 }))
 
 app.use(express.static(path.join(__dirname, "./public")))
-app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis")))
 app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
+app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxAge: 2678400}))
 
 app.use(apiKeyLogin)
 
@@ -265,7 +265,7 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
-        let post = await sql.getCache(`cached-post/${postID}`)
+        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
         if (!post) {
           post = await sql.post.post(postID)
           await sql.setCache(`cached-post/${postID}`, post)
@@ -446,7 +446,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
     const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
     let r18 = false
     if (postID) {
-      let post = await sql.getCache(`cached-post/${postID}`)
+      let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
       if (!post) {
         post = await sql.post.post(postID)
         await sql.setCache(`cached-post/${postID}`, post)
