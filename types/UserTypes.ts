@@ -70,6 +70,7 @@ export interface ServerSession extends Partial<Omit<User, "password">> {
     publicKey?: string
     apiKey?: boolean
     ip?: string
+    url?: string
 }
 
 export interface LoginHistory {

@@ -104,9 +104,10 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
 
   if (!req.session.username) {
     const sessionCount = await sql.user.countIPSessions(ip)
-    if (sessionCount > 100) {
+    if (sessionCount > 300) {
       const allowedBot = await serverFunctions.util.isAllowedBot(ip)
       if (!allowedBot) {
+        // Created over 300 sessions in a 24 hour period, spam bot?
         await sql.report.insertBlacklist(ip, "automatic")
         await sql.user.pruneIPSessions(ip)
         blacklist.add(ip)
@@ -120,6 +121,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
     return res.status(403).json({message: "Your IP address has been blocked."})
   }
   if (ip !== req.session.ip) req.session.ip = ip
+  req.session.url = req.originalUrl || req.url || ""
   next()
 })
 
