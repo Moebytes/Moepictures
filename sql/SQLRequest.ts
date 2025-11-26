@@ -253,22 +253,22 @@ export default class SQLRequest {
     }
 
     /** Insert group request. */
-    public static insertGroupRequest = async (username: string, slug: string, name: string, postID: string, reason: string | null) => {
+    public static insertGroupRequest = async (username: string, slug: string, name: string, postIDs: string[], reason: string | null) => {
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO "group requests" ("username", "slug", "name", "postID", "reason") 
+            text: /*sql*/`INSERT INTO "group requests" ("username", "slug", "name", "postIDs", "reason") 
             VALUES ($1, $2, $3, $4, $5) RETURNING "requestID"`,
             rowMode: "array",
-            values: [username, slug, name, postID, reason]
+            values: [username, slug, name, postIDs, reason]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
     }
 
     /** Delete group request. */
-    public static deleteGroupRequest = async (username: string, slug: string, postID: string) => {
+    public static deleteGroupRequest = async (username: string, requestID: string) => {
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "group requests" WHERE "group requests"."username" = $1 AND "group requests"."slug" = $2 AND "group requests"."postID" = $3`,
-            values: [username, slug, postID]
+            text: /*sql*/`DELETE FROM "group requests" WHERE "group requests"."username" = $1 AND "group requests"."requestID" = $2`,
+            values: [username, requestID]
         }
         await SQLQuery.run(query)
     }
@@ -285,10 +285,10 @@ export default class SQLRequest {
             )
             SELECT "group requests".*, 
             COUNT(*) OVER() AS "requestCount",
-            to_json((array_agg(post_json.*))[1]) AS post,
+            json_agg(DISTINCT post_json.*) AS posts,
             CASE WHEN groups."groupID" IS NOT NULL THEN true ELSE false END AS "exists"
             FROM "group requests"
-            JOIN post_json ON post_json."postID" = "group requests"."postID"
+            JOIN post_json ON post_json."postID" = ANY("group requests"."postIDs")
             LEFT JOIN groups ON groups.slug = "group requests".slug
             GROUP BY "group requests"."requestID", groups."groupID"
             ORDER BY "group requests"."requestID" DESC
@@ -312,10 +312,10 @@ export default class SQLRequest {
             )
             SELECT "group requests".*, 
             COUNT(*) OVER() AS "requestCount",
-            to_json((array_agg(post_json.*))[1]) AS post,
+            json_agg(DISTINCT post_json.*) AS posts,
             CASE WHEN groups."groupID" IS NOT NULL THEN true ELSE false END AS "exists"
             FROM "group requests"
-            JOIN post_json ON post_json."postID" = "group requests"."postID"
+            JOIN post_json ON post_json."postID" = ANY("group requests"."postIDs")
             LEFT JOIN groups ON groups.slug = "group requests".slug
             WHERE "group requests"."username" = $1
             GROUP BY "group requests"."requestID", groups."groupID"

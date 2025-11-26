@@ -48,7 +48,6 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
             setRemapGroupObj(null)
             setGroupFlag(true)
         } else {
-            /*
             const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
                 setError(true)
@@ -59,8 +58,8 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
                 return
             }
             const postIDs = items.trim().split(/\s+/g)
-            await functions.http.put("/api/group/remap/request", {slug: remapGroupObj.slug, postIDs, reason}, session, setSessionFlag)
-            setSubmitted(true)*/
+            await functions.http.post("/api/group/request", {name: remapGroupObj.name, postIDs, reason}, session, setSessionFlag)
+            setSubmitted(true)
         }
         setRemapGroupObj(null)
     }

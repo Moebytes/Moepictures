@@ -61,10 +61,10 @@ export interface TagEditRequest extends Omit<Tag, "aliases" | "implications"> {
 export interface GroupRequest {
     requestID: string
     username: string
-    postID: string
+    postIDs: string[]
     name: string
     slug: string
-    post: Post
+    posts: Post[]
     exists: boolean
     reason: string | null
     requestCount: string

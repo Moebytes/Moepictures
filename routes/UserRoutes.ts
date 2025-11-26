@@ -1231,7 +1231,7 @@ const UserRoutes = (app: Express) => {
                 // Delete unverified groups
                 const groupRequests = await sql.request.userGroupRequests(username)
                 for (const groupRequest of groupRequests) {
-                    await sql.request.deleteGroupRequest(username, groupRequest.slug, groupRequest.postID)
+                    await sql.request.deleteGroupRequest(username, groupRequest.requestID)
                 }
                 // Delete unverified group edits
                 const groupEditRequests = await sql.request.userGroupEditRequests(username)

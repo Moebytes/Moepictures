@@ -28,7 +28,7 @@ const modLimiter = rateLimit({
     handler
 })
 
-export const addToGroup = async (postIDs: string[], name: string, username: string, date: string) => {
+export const addToGroup = async (postIDs: string[], name: string, username: string, date: string, remap = false) => {
     const slug = functions.post.generateSlug(name.trim())
 
     const posts = await sql.search.posts(postIDs.filter(Boolean))
@@ -41,7 +41,7 @@ export const addToGroup = async (postIDs: string[], name: string, username: stri
             groupID = await sql.group.insertGroup(username, name.trim(), slug, posts[0].rating)
         } catch {
             // it's an orphan group with no posts, so group.group() failed
-            const groups = await sql.group.groups([name.trim()])
+            const groups = await sql.group.postlessGroups([name.trim()])
             group = groups.find((g) => g.name === name.trim()) as any
             if (group) {
                 groupID = group.groupID
@@ -60,19 +60,20 @@ export const addToGroup = async (postIDs: string[], name: string, username: stri
 
     let existingPosts = group?.posts ?? []
     let maxOrder = Math.max(0, ...existingPosts.map((post) => post.order))
-    let newRating = functions.reduceHighestRating([...existingPosts, ...posts])
+    let toAdd = remap ? posts.filter((p) => !existingPosts.some((e) => p.postID === e.postID)) : posts
+    let newRating = functions.reduceHighestRating([...existingPosts, ...toAdd])
     await sql.group.updateGroup(groupID, "rating", newRating)
 
     let toInsert = [] as {postID: string, order: number}[]
-    for (let i = 0; i < posts.length; i++) {
-        toInsert.push({postID: posts[i].postID, order: maxOrder + i + 1})
+    for (let i = 0; i < toAdd.length; i++) {
+        toInsert.push({postID: toAdd[i].postID, order: maxOrder + i + 1})
     }
     await sql.group.bulkInsertGroupMappings(groupID, toInsert)
     await sql.group.updateGroup(groupID, "updater", username)
     await sql.group.updateGroup(groupID, "updatedDate", date)
     
     const oldPostIDs = existingPosts.map((p) => p.postID)
-    const newPostIDs = [...existingPosts, ...posts].map((p) => p.postID)
+    const newPostIDs = [...existingPosts, ...toAdd].map((p) => p.postID)
     const addedPosts = newPostIDs.filter(id => !oldPostIDs.includes(id))
     const removedPosts = oldPostIDs.filter(id => !newPostIDs.includes(id))
     let existingOrders = existingPosts.map((p) => ({postID: p.postID, order: p.order}))
@@ -100,7 +101,7 @@ export const addToGroup = async (postIDs: string[], name: string, username: stri
 const GroupRoutes = (app: Express) => {
     app.post("/api/group", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            let {postIDs, name, username, date} = req.body as GroupParams
+            let {postIDs, name, username, date, remap} = req.body as GroupParams
             if (!name) return void res.status(400).send("Invalid name")
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
@@ -108,7 +109,7 @@ const GroupRoutes = (app: Express) => {
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
             if (!date) date = new Date().toISOString()
-            await addToGroup(postIDs, name, targetUser, date)
+            await addToGroup(postIDs, name, targetUser, date, remap)
 
             res.status(200).send("Success")
         } catch (e) {
@@ -238,11 +239,11 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/groups/list", groupLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let groups = req.query.groups as string[]
-            if (typeof groups === "string") groups = [groups]
-            if (!groups) groups = []
-            let result = await sql.group.groups(groups.filter(Boolean))
-            let newGroups = [] as Group[]
+            let slugs = req.query.slugs as string[]
+            if (typeof slugs === "string") slugs = [slugs]
+            if (!slugs) slugs = []
+            let result = await sql.group.groups(slugs.filter(Boolean))
+            let newGroups = [] as GroupPosts[]
             for (let i = 0; i < result.length; i++) {
                 const group = result[i]
                 if (!req.session.showR18) {
@@ -433,15 +434,16 @@ const GroupRoutes = (app: Express) => {
 
     app.post("/api/group/request", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, name, reason} = req.body as GroupRequestParams
-            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            const {postIDs, name, reason} = req.body as GroupRequestParams
             if (!name) return void res.status(400).send("Invalid name")
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (req.session.banned) return void res.status(403).send("You are banned")
-            const post = await sql.post.post(postID)
-            if (!post) return void res.status(400).send("Invalid post")
+            
+            const posts = await sql.search.posts(postIDs)
+            if (!posts.length) return void res.status(400).send("Invalid postIDs")
+
             const slug = functions.post.generateSlug(name)
-            await sql.request.insertGroupRequest(req.session.username, slug, name, postID, reason)
+            await sql.request.insertGroupRequest(req.session.username, slug, name, postIDs, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -465,11 +467,11 @@ const GroupRoutes = (app: Express) => {
 
     app.post("/api/group/request/fulfill", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, slug, postID, accepted} = req.body as GroupRequestFulfillParams
+            const {username, slug, requestID, accepted} = req.body as GroupRequestFulfillParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!username) return void res.status(400).send("Bad username")
             if (!permissions.isMod(req.session)) return void res.status(403).end()
-            await sql.request.deleteGroupRequest(username, slug, postID)
+            await sql.request.deleteGroupRequest(username, requestID)
             if (accepted) {
                 let message = `Group request on ${functions.config.getDomain()}/group/${slug} has been approved. Thanks for the contribution!`
                 await serverFunctions.systemMessage(username, "Notice: Group request has been approved", message)

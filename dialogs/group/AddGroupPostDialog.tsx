@@ -51,7 +51,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             setAddGroupPostObj(null)
-            await functions.http.post("/api/group", {postIDs: postIDs.split(/ +/g), name: addGroupPostObj.slug}, session, setSessionFlag)
+            await functions.http.post("/api/group", {postIDs: postIDs.split(/\s+/g), name: addGroupPostObj.slug}, session, setSessionFlag)
             setGroupFlag(true)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
@@ -70,7 +70,10 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
                 await functions.timeout(2000)
                 return setError(false)
             }
-            await functions.http.post("/api/group/request", {postID: postIDs.split(/ +/g)[0], name: addGroupPostObj.slug, reason}, session, setSessionFlag)
+            let existingPosts = addGroupPostObj.posts.map((p) => p.postID)
+            let newPosts = postIDs.split(/\s+/g)
+            let newPostIDs = [...existingPosts, ...newPosts]
+            await functions.http.post("/api/group/request", {postIDs: newPostIDs, name: addGroupPostObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

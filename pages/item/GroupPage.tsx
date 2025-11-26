@@ -225,7 +225,7 @@ const GroupPage: React.FunctionComponent = () => {
             jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showGroupAddDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showGroupEditDialog()} style={{filter: getFilter()}}/>)
-            if (permissions.isContributor(session)) jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showGroupRemapDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showGroupRemapDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showGroupDeleteDialog()} style={{filter: getFilter()}}/>)
         }
         return jsx

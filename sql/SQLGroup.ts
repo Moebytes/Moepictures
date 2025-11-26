@@ -29,6 +29,31 @@ export default class SQLGroup {
         return result[0] as Promise<GroupPosts | undefined>
     }
 
+    /** Get groups. */
+    public static groups = async (slugs: string[]) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                    SELECT posts.*, "group map"."order", json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    JOIN "group map" ON "group map"."postID" = posts."postID"
+                    GROUP BY posts."postID", "group map"."order"
+                )
+                SELECT groups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
+                COUNT(DISTINCT post_json."postID") AS "postCount"
+                FROM "group map"
+                JOIN groups ON groups."groupID" = "group map"."groupID"
+                JOIN post_json ON post_json."postID" = "group map"."postID"
+                WHERE groups."slug" = ANY($1)
+                GROUP BY groups."groupID"
+            `),
+            values: [slugs]
+        }
+        const result = await SQLQuery.run(query)
+        return result as Promise<GroupPosts[]>
+    }
+
     /** Get post groups. */
     public static postGroups = async (postID: string) => {
         const query: QueryConfig = {
@@ -56,9 +81,9 @@ export default class SQLGroup {
         return result as Promise<GroupPosts[]>
     }
 
-    /** Get groups. */
-    public static groups = async (groups: string[]) => {
-        let whereQuery = groups?.[0] ? `WHERE groups."name" = ANY ($1)` : ""
+    /** Get groups with no post. */
+    public static postlessGroups = async (names: string[]) => {
+        let whereQuery = names?.[0] ? `WHERE groups."name" = ANY ($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                     SELECT groups.*
@@ -67,8 +92,8 @@ export default class SQLGroup {
                     GROUP BY groups."groupID"
             `)
         }
-        if (groups?.[0]) query.values = [groups]
-        const result = await SQLQuery.run(query, `group/${groups.join("-")}`)
+        if (names?.[0]) query.values = [names]
+        const result = await SQLQuery.run(query, `group/${names.join("-")}`)
         return result as Promise<Group[]>
     }
 
@@ -196,7 +221,7 @@ export default class SQLGroup {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "group map" ("groupID", "postID", "order") ${valueQuery}`,
+            text: /*sql*/`INSERT INTO "group map" ("groupID", "postID", "order") ${valueQuery} ON CONFLICT ("groupID", "postID") DO NOTHING`,
             values: [...rawValues]
         }
         await SQLQuery.run(query)

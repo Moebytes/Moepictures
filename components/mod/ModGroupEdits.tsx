@@ -42,7 +42,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         const requests = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
-        const groups = await functions.http.get("/api/groups/list", {groups: requests.map((r) => r.name)}, session, setSessionFlag, true)
+        const groups = await functions.http.get("/api/groups/list", {slugs: requests.map((r) => r.group)}, session, setSessionFlag, true)
         for (const group of groups) {
             oldGroups.set(group.name, group)
         }
@@ -131,7 +131,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             } else {
                 setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
             }
-            const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag, true)
+            const groups = await functions.http.get("/api/groups/list", {slugs: result.map((r) => r.group)}, session, setSessionFlag, true)
             for (const group of groups) {
                 oldGroups.set(group.name, group)
             }
@@ -143,7 +143,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                 } else {
                     setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
                 }
-                const groups = await functions.http.get("/api/groups/list", {groups: result.map((r) => r.name)}, session, setSessionFlag, true)
+                const groups = await functions.http.get("/api/groups/list", {slugs: result.map((r) => r.group)}, session, setSessionFlag, true)
                 for (const group of groups) {
                     oldGroups.set(group.name, group)
                 }

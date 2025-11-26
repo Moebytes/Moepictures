@@ -500,7 +500,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/> */}
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter(), marginRight: "7px"}}/>
                     <img className="mobile-nav-color" src={getPageMultiplierIcon()} onClick={togglePageMultiplier} style={{filter: getFilter()}}/>
                 </div>
                 <MiniAudioPlayer/>

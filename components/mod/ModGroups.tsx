@@ -6,7 +6,7 @@ import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
 import tagDiff from "../../assets/icons/tagdiff.png"
 import functions from "../../functions/Functions"
-import {GroupRequest} from "../../types/Types"
+import {GroupPosts, GroupRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
 const ModGroups: React.FunctionComponent = (props) => {
@@ -23,6 +23,7 @@ const ModGroups: React.FunctionComponent = (props) => {
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
     const [requests, setRequests] = useState([] as GroupRequest[])
+    const [groups, setGroups] = useState([] as GroupPosts[])
     const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([] as GroupRequest[])
@@ -38,8 +39,10 @@ const ModGroups: React.FunctionComponent = (props) => {
 
     const updateGroups = async () => {
         const requests = await functions.http.get("/api/group/request/list", null, session, setSessionFlag, true)
+        const groups = await functions.http.get("/api/groups/list", {slugs: requests.map((r) => r.slug)}, session, setSessionFlag, true)
         setEnded(false)
         setRequests(requests)
+        setGroups(groups)
     }
 
     useEffect(() => {
@@ -64,17 +67,39 @@ const ModGroups: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const addGroup = async (username: string, name: string, slug: string, postID: string, ) => {
-        await functions.http.post("/api/group", {username, postIDs: [postID], name}, session, setSessionFlag)
-        await functions.http.post("/api/group/request/fulfill", {username, slug, postID, accepted: true}, session, setSessionFlag)
+    const addGroup = async (username: string, name: string, slug: string, requestID: string, postIDs: string[]) => {
+        await functions.http.post("/api/group", {username, postIDs, name, remap: true}, session, setSessionFlag)
+        await functions.http.post("/api/group/request/fulfill", {username, slug, requestID, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
     }
 
-    const rejectRequest = async (username: string, slug: string, postID: string) => {
-        await functions.http.post("/api/group/request/fulfill", {username, slug, postID, accepted: false}, session, setSessionFlag)
+    const rejectRequest = async (username: string, slug: string, requestID: string) => {
+        await functions.http.post("/api/group/request/fulfill", {username, slug, requestID, accepted: false}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
+    }
+
+    const openPost = (postID: string, event: React.MouseEvent) => {
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
+    }
+
+    const postDiff = (addedPosts: string[], removedPosts: string[]) => {
+        const addedPostsJSX = addedPosts.map((postID: string) => <span className="tag-add-clickable" onClick={(event) => openPost(postID, event)}>+{postID}</span>)
+        const removedPostsJSX = removedPosts.map((postID: string) => <span className="tag-remove-clickable" onClick={(event) => openPost(postID, event)}>-{postID}</span>)
+        if (![...addedPostsJSX, ...removedPostsJSX].length) return null
+        return [...addedPostsJSX, ...removedPostsJSX]
+    }
+
+    const calcDifference = (request: GroupRequest) => {
+        let oldGroup = groups.find((g) => g.slug === request.slug)
+        let oldPosts = oldGroup?.posts.map((p) => p.postID) ?? []
+        let newPosts = request.posts.map((p) => p.postID)
+
+        const addedPosts = newPosts.filter((id) => !oldPosts.includes(id))
+        const removedPosts = oldPosts.filter((id) => !newPosts.includes(id))
+
+        return {addedPosts, removedPosts}
     }
 
     const getPageAmount = () => {
@@ -140,7 +165,6 @@ const ModGroups: React.FunctionComponent = (props) => {
         }
     }
 
-
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.dom.scrolledToBottom()) {
@@ -168,7 +192,7 @@ const ModGroups: React.FunctionComponent = (props) => {
         for (let i = 0; i < visibleRequests.length; i++) {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
-            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.posts[0].images[0], "tiny", session, mobile)
             if (!ref.current) continue
             let src = await functions.crypto.decryptThumb(img, session)
             const imgElement = document.createElement("img")
@@ -335,14 +359,15 @@ const ModGroups: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const imgClick = (event: React.MouseEvent) => {
-                functions.post.openPost(request.post, event, navigate, session, setSessionFlag)
+                functions.post.openPost(request.posts[0], event, navigate, session, setSessionFlag)
             }
             const groupClick = (event: React.MouseEvent, middle?: boolean) => {
                 if (!request.exists) return
                 if (middle) return window.open(`/group/${request.slug}`, "_blank")
                 navigate(`/group/${request.slug}`)
             }
-            const img = functions.link.getThumbnailLink(request.post.images[0], "tiny", session, mobile)
+            const img = functions.link.getThumbnailLink(request.posts[0].images[0], "tiny", session, mobile)
+            const {addedPosts, removedPosts} = calcDifference(request)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
@@ -354,13 +379,14 @@ const ModGroups: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
                         <span className="mod-post-text">{i18n.labels.reason}: {request.reason}</span>
                         <span className="mod-post-link" onClick={groupClick} onAuxClick={(event) => groupClick(event, true)}>{i18n.labels.groupName}: {request.name}</span>
+                        <span className="mod-post-text"><span className="mod-post-text">{i18n.sort.posts}: </span>{postDiff(addedPosts, removedPosts)}</span>
                     </div>
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.slug, request.postID)}>
+                        <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.slug, request.requestID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => addGroup(request.username, request.name, request.slug, request.postID)}>
+                        <div className="mod-post-options-container" onClick={() => addGroup(request.username, request.name, request.slug, request.requestID, request.postIDs)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
