@@ -50,6 +50,7 @@ export default class SQLFavorite {
                 SELECT post_json.*,
                 COUNT(*) OVER() AS "postCount"
                 FROM post_json
+                ORDER BY "favoriteDate" DESC
             `),
             values: [username]
         }
@@ -182,7 +183,7 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 ${postJSON}
-                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
+                SELECT favgroups.*, json_agg(post_json.* ORDER BY "favgroup map"."order" ASC) AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
                 FROM "favgroup map"
                 JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"

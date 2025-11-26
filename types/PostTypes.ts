@@ -119,6 +119,7 @@ export interface PostSearch extends Post {
     hasChildren: boolean
     isGrouped: boolean
     favorited: boolean
+    favoriteDate: string
     favgrouped: boolean
     postCount: string
 }

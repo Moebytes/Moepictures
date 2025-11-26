@@ -16,6 +16,7 @@ import groupDelete from "../../assets/icons/tag-delete.png"
 import groupCancel from "../../assets/icons/group-cancel.png"
 import groupCancelActive from "../../assets/icons/group-cancel-active.png"
 import groupAccept from "../../assets/icons/group-accept.png"
+import groupRemap from "../../assets/icons/group-remap.png"
 import lockIcon from "../../assets/icons/private-lock.png"
 import Reorder from "react-reorder"
 import TinyImage from "../../components/image/TinyImage"
@@ -34,7 +35,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj} = useGroupDialogActions()
+    const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj, setRemapFavGroupObj} = useGroupDialogActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
@@ -77,6 +78,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (!session.cookie) return
             if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
+        console.log(favgroup)
         setFavgroup(favgroup)
     }
 
@@ -202,6 +204,10 @@ const FavgroupPage: React.FunctionComponent = () => {
         setEditFavGroupObj(favgroup)
     }
 
+    const showFavgroupRemapDialog = async () => {
+        setRemapFavGroupObj(favgroup)
+    }
+
     const favgroupOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (session.username === username) {
@@ -212,6 +218,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showFavgroupAddDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showFavgroupEditDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showFavgroupRemapDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showFavgroupDeleteDialog()} style={{filter: getFilter()}}/>)
         }
         return jsx

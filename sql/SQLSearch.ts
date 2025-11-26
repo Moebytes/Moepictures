@@ -181,7 +181,7 @@ export default class SQLSearch {
                 SELECT posts.*, json_agg(DISTINCT image_json.*) AS images, 
                 ${includeTags ? `"tag map tags"."tags",` : ""}
                 ${includeTags ? `array_length("tag map tags"."tags", 1) AS "tagCount",` : ""}
-                ${favgroupOrder ? `"favgroup map"."order",` : ""} 
+                ${favgroupOrder ? `MIN("favgroup map"."order") AS order,` : ""} 
                 MAX(DISTINCT COALESCE(image_json."size", 0) + COALESCE(image_json."upscaledSize", 0)) AS "fileSize",
                 MAX(DISTINCT image_json."width")::float / MAX(DISTINCT image_json."height")::float AS "aspectRatio",
                 COUNT(DISTINCT image_json."imageID") AS "variationCount",
@@ -200,6 +200,7 @@ export default class SQLSearch {
                     WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
                     THEN true ELSE false
                 END AS favorited,
+                MAX(favorites."favoriteDate") FILTER (WHERE favorites."username" = $${userValue}) AS "favoriteDate",
                 CASE
                     WHEN COUNT("favgroup map"."favgroupID") FILTER (WHERE "favgroup map"."favgroupID" IN 
                     (SELECT "favgroupID" FROM "favgroups" WHERE "favgroups"."username" = $${userValue})) > 0 
@@ -217,7 +218,6 @@ export default class SQLSearch {
                 GROUP BY posts."postID"
                 ${includeTags ? `, "tag map tags"."tags"` : ""}
                 ${favoriteQuery ? `, favorites."favoriteID"` : ""}
-                ${favgroupOrder ? `, "favgroup map"."order"` : ""}
                 ${!outerSort ? sortQuery : ""}
                 ${intermLimit ? `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}` : ""}
             )`)

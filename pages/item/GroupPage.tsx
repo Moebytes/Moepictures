@@ -18,10 +18,12 @@ import groupDelete from "../../assets/icons/tag-delete.png"
 import groupCancel from "../../assets/icons/group-cancel.png"
 import groupCancelActive from "../../assets/icons/group-cancel-active.png"
 import groupAccept from "../../assets/icons/group-accept.png"
+import groupRemap from "../../assets/icons/group-remap.png"
 import Reorder from "react-reorder"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
+import permissions from "../../structures/Permissions"
 import "./styles/grouppage.less"
 import {GroupPosts, GroupHistory, GroupItem, PostOrdered} from "../../types/Types"
 
@@ -37,11 +39,11 @@ const GroupPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {setAddGroupPostObj, setDeleteGroupPostObj, setEditGroupObj, setDeleteGroupObj, setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
+    const {setAddGroupPostObj, setDeleteGroupPostObj, setEditGroupObj, setDeleteGroupObj, 
+    setRevertGroupHistoryID, setRevertGroupHistoryFlag, setRemapGroupObj} = useGroupDialogActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {setNavigationPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
@@ -50,7 +52,6 @@ const GroupPage: React.FunctionComponent = () => {
     const [items, setItems] = useState([] as GroupItem[])
     const navigate = useNavigate()
     const location = useLocation()
-    const imageFiltersRef = useRef<HTMLDivElement>(null)
     const {group: slug} = useParams() as {group: string}
 
     const getFilter = () => {
@@ -206,6 +207,10 @@ const GroupPage: React.FunctionComponent = () => {
         setDeleteGroupObj(group)
     }
 
+    const showGroupRemapDialog = async () => {
+        setRemapGroupObj(group)
+    }
+
     const groupOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!group) return jsx
@@ -220,6 +225,7 @@ const GroupPage: React.FunctionComponent = () => {
             jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showGroupAddDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showGroupEditDialog()} style={{filter: getFilter()}}/>)
+            if (permissions.isContributor(session)) jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showGroupRemapDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showGroupDeleteDialog()} style={{filter: getFilter()}}/>)
         }
         return jsx

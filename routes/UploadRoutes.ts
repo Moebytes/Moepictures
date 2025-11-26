@@ -84,7 +84,7 @@ const CreateRoutes = (app: Express) => {
         await serverFunctions.upload.updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, 
           uploader: req.session.username, updater: req.session.username, approver: req.session.username})
 
-        let {addedTags, removedTags} = await serverFunctions.upload.insertTags(postID, {artists, characters, series, newTags, 
+        await serverFunctions.upload.insertTags(postID, {artists, characters, series, newTags, 
           tags, noImageUpdate, username: req.session.username})
         await sql.cuteness.updateCuteness(postID, req.session.username, 500)
 
@@ -92,7 +92,7 @@ const CreateRoutes = (app: Express) => {
 
         if (groupName) {
           const post = await sql.post.post(postID)
-          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+          await addToGroup([post?.postID!], groupName, req.session.username, new Date().toISOString())
         }
 
         if (unverifiedID) {
@@ -188,7 +188,7 @@ const CreateRoutes = (app: Express) => {
 
         if (groupName) {
           const post = await sql.post.post(postID) as PostFull
-          await addToGroup(post, groupName, req.session.username, new Date().toISOString())
+          await addToGroup([post.postID], groupName, req.session.username, new Date().toISOString())
         }
 
         if (imageSources !== undefined) {
@@ -275,7 +275,7 @@ const CreateRoutes = (app: Express) => {
 
         if (groupName) {
           const post = await sql.post.post(postID)
-          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+          await addToGroup([post?.postID!], groupName, req.session.username, new Date().toISOString())
         }
 
         res.status(200).send("Success")
@@ -373,7 +373,7 @@ const CreateRoutes = (app: Express) => {
 
         if (groupName) {
           const post = await sql.post.post(postID)
-          await addToGroup(post!, groupName, req.session.username, new Date().toISOString())
+          await addToGroup([post?.postID!], groupName, req.session.username, new Date().toISOString())
         }
 
         if (post && originalPostID) {

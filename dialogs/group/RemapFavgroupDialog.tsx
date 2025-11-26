@@ -1,82 +1,77 @@
-import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
+import React, {useEffect, useState, useRef} from "react"
+import {useNavigate} from "react-router-dom"
+import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import permissions from "../../structures/Permissions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import radioButton from "../../assets/icons/radiobutton.png"
+import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
+import "../dialog.less"
 
-const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+const RemapFavgroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
+    const {remapFavGroupObj} = useGroupDialogSelector()
+    const {setRemapFavGroupObj} = useGroupDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {addFavgroupPostObj} = useGroupDialogSelector()
-    const {setAddFavgroupPostObj} = useGroupDialogActions()
     const {setGroupFlag} = useFlagActions()
-    const [postIDs, setPostIDs] = useState("")
+    const [items, setItems] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     useEffect(() => {
-        document.title = i18n.dialogs.addFavgroupPost.title
+        document.title = i18n.dialogs.remapFavgroup.title
     }, [i18n])
 
     useEffect(() => {
-        if (addFavgroupPostObj) {
-            // document.body.style.overflowY = "hidden"
+        if (remapFavGroupObj) {
             document.body.style.pointerEvents = "none"
+            setItems(remapFavGroupObj.posts.map((p) => p.postID).join(" "))
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [addFavgroupPostObj])
+    }, [remapFavGroupObj])
 
-    const addPost = async () => {
-        if (!addFavgroupPostObj) return
-        if (!postIDs) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = i18n.dialogs.addGroupPost.noPostIDs
-            await functions.timeout(2000)
-            return setError(false)
-        }
-        setAddFavgroupPostObj(null)
-        await functions.http.post("/api/favgroup/update", {postIDs: postIDs.split(/\s+/g), name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
+    const remapFavgroup = async () => {
+        if (!remapFavGroupObj) return
+        const postIDs = items.trim().split(/\s+/g)
+        await functions.http.put("/api/favgroup/remap", {name: remapFavGroupObj.name, postIDs}, session, setSessionFlag)
+        setRemapFavGroupObj(null)
         setGroupFlag(true)
     }
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            addPost()
+            remapFavgroup()
         } else {
-            setAddFavgroupPostObj(null)
+            setRemapFavGroupObj(null)
         }
     }
 
-    if (addFavgroupPostObj) {
+
+    if (remapFavGroupObj) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">{i18n.dialogs.addFavgroupPost.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.remapFavgroup.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.labels.postIDs}: </span>
-                            <input className="dialog-input-taller" type="text" spellCheck={false} value={postIDs} onChange={(event) => setPostIDs(event.target.value)} style={{width: "50%"}}/>
+                            <textarea className="dialog-textarea" style={{resize: "vertical"}} spellCheck={false} value={items} onChange={(event) => setItems(event.target.value)}></textarea>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.add}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.remap}</button>
                         </div>
                     </div>
                 </div>
@@ -87,4 +82,4 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default AddFavgroupPostDialog
+export default RemapFavgroupDialog

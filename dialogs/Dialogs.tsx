@@ -14,6 +14,8 @@ import EditFavgroupDialog from "./group/EditFavgroupDialog"
 import EditGroupDialog from "./group/EditGroupDialog"
 import FavGroupDialog from "./group/FavGroupDialog"
 import GroupDialog from "./group/GroupDialog"
+import RemapFavgroupDialog from "./group/RemapFavgroupDialog"
+import RemapGroupDialog from "./group/RemapGroupDialog"
 import RevertGroupHistoryDialog from "./group/RevertGroupHistoryDialog"
 import DeleteMessageDialog from "./message/DeleteMessageDialog"
 import DeleteMessageReplyDialog from "./message/DeleteMessageReplyDialog"
@@ -108,6 +110,8 @@ const Dialogs: React.FunctionComponent = (props) => {
         <EditGroupDialog/>
         <FavGroupDialog/>
         <GroupDialog/>
+        <RemapFavgroupDialog/>
+        <RemapGroupDialog/>
         <RevertGroupHistoryDialog/>
         <DeleteMessageDialog/>
         <DeleteMessageReplyDialog/>

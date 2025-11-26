@@ -243,7 +243,8 @@
         "autogenerate": "自動生成",
         "light": "ライト",
         "dark": "暗い",
-        "set": "セット"
+        "set": "セット",
+        "remap": "再配置"
     },
     "history": {
         "post": "投稿履歴",
@@ -933,6 +934,10 @@
             "header": "この投稿をグループから削除しますか？",
             "reasonHeader": "なぜこの投稿をグループから削除したいのですか？"
         },
+        "remapGroup": {
+            "title": "リマップ・グループ",
+            "request": "グループ再マッピング要求"
+        },
         "deleteGroupHistory": {
             "title": "グループ履歴の削除",
             "header": "本当にこの履歴状態を削除したいのですか？",
@@ -1016,6 +1021,9 @@
         },
         "editFavgroup": {
             "title": "お気に入りグループの編集"
+        },
+        "remapFavgroup": {
+            "title": "お気に入りグループを再割り当て"
         },
         "addFavgroupPost": {
             "title": "お気に入りグループ投稿の追加"

@@ -53,6 +53,7 @@ export interface GroupParams {
     name: string
     username?: string
     date?: string
+    silent?: boolean
 }
 
 export interface GroupEditParams {
@@ -68,6 +69,12 @@ export interface GroupEditParams {
 export interface GroupReorderParams {
     slug: string
     posts: {postID: string, order: number}[]
+    silent?: boolean
+}
+
+export interface GroupRemapParams {
+    slug: string
+    postIDs: string[]
     silent?: boolean
 }
 
@@ -121,6 +128,12 @@ export interface GroupEditRequestParams {
     reason: string | null
 }
 
+export interface GroupRemapRequestParams {
+    slug: string
+    postIDs: string[]
+    reason: string | null
+}
+
 export interface GroupEditRequestFulfillParams {
     username: string
     slug: string
@@ -160,6 +173,8 @@ export type GroupPostEndpoint<T extends string> =
 export type GroupPutEndpoint<T extends string> = 
     T extends "/api/group/edit" ? {params: GroupEditParams, response: string} :
     T extends "/api/group/reorder" ? {params: GroupReorderParams, response: string} :
+    T extends "/api/group/remap" ? {params: GroupRemapParams, response: string} :
+    T extends "/api/group/remap/request" ? {params: GroupRemapRequestParams, response: string} :
     T extends "/api/group/update" ? {params: {slug: string, column: GroupUpdateColumns, value: any}, response: string} :
     never
 

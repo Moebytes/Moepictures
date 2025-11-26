@@ -4,7 +4,7 @@ import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
-import {Favgroup, FavgroupUpdateParams, FavgroupEditParams, FavgroupReorderParams} from "../types/Types"
+import {Favgroup, FavgroupUpdateParams, FavgroupEditParams, FavgroupReorderParams, FavgroupSearch, PostSearchOrdered} from "../types/Types"
 
 const favoriteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -70,25 +70,29 @@ const FavoriteRoutes = (app: Express) => {
         try {
             const {postIDs, name, isPrivate} = req.body as FavgroupUpdateParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            for (const postID of postIDs) {
-                if (Number.isNaN(Number(postID))) continue
-                const post = await sql.post.post(postID)
-                if (!post) continue
-                const slug = functions.post.generateSlug(name)
-                const favgroupID = await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, post.rating)
-                try {
-                    const favgroup = await sql.favorite.favgroup(req.session.username, slug)
-                    if (!favgroup) {
-                        await sql.favorite.insertFavgroupPost(favgroupID, postID, 1)
-                    } else {
-                        if (!favgroup.posts?.length) favgroup.posts = [{order: 0}] as any
-                        const maxOrder = Math.max(...favgroup.posts.map((post: any) => post.order))
-                        let newRating = functions.reduceHighestRating(favgroup.posts)
-                        await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
-                        await sql.favorite.insertFavgroupPost(favgroup.favgroupID, postID, maxOrder + 1)
-                    }
-                } catch {}
+
+            const slug = functions.post.generateSlug(name)
+
+            const posts = await sql.search.posts(postIDs)
+            if (!posts.length) return void res.status(200).send("Success")
+
+            let favgroup = await sql.favorite.favgroup(req.session.username, slug)
+            let favgroupID = favgroup?.favgroupID || ""
+            if (!favgroupID) {
+                favgroupID = await sql.favorite.insertFavgroup(req.session.username, slug, name, isPrivate, posts[0].rating)
             }
+
+            let existingPosts = favgroup?.posts ?? []
+            let maxOrder = Math.max(0, ...existingPosts.map((post) => post.order))
+            let newRating = functions.reduceHighestRating([...existingPosts, ...posts])
+            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
+
+            let toInsert = [] as {postID: string, order: number}[]
+            for (let i = 0; i < posts.length; i++) {
+                toInsert.push({postID: posts[i].postID, order: maxOrder + i + 1})
+            }
+            await sql.favorite.bulkInsertFavgroupMappings(favgroupID, toInsert)
+
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -231,7 +235,7 @@ const FavoriteRoutes = (app: Express) => {
             for (let i = 0; i < posts.length; i++) {
                 if (Number(posts[i].order) !== i + 1) return void res.status(400).send("Bad post orders")
             }
-            let toChange = [] as any
+            let toChange = [] as {postID: string, order: number}[]
             for (let i = 0; i < posts.length; i++) {
                 let newPost = posts[i]
                 let oldPost = favgroup.posts.find((p) => p.postID === String(newPost.postID))
@@ -239,6 +243,33 @@ const FavoriteRoutes = (app: Express) => {
             }
             await sql.favorite.bulkDeleteFavgroupMappings(favgroup.favgroupID, toChange)
             await sql.favorite.bulkInsertFavgroupMappings(favgroup.favgroupID, toChange)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.put("/api/favgroup/remap", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            const {name, postIDs} = req.body as Omit<FavgroupUpdateParams, "isPrivate">
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+
+            const slug = functions.post.generateSlug(name)
+            const favgroup = await sql.favorite.favgroup(req.session.username, slug)
+            if (!favgroup) return void res.status(400).send("Bad name")
+
+            const posts = await sql.search.posts(postIDs)
+            let newRating = functions.reduceHighestRating(posts)
+            await sql.favorite.updateFavGroup(req.session.username, slug, "rating", newRating)
+
+            let newPosts = [] as {postID: string, order: number}[]
+            for (let i = 0; i < posts.length; i++) {
+                newPosts.push({postID: posts[i].postID, order: i + 1})
+            }
+            await sql.favorite.bulkDeleteFavgroupMappings(favgroup.favgroupID, favgroup.posts)
+            await sql.favorite.bulkInsertFavgroupMappings(favgroup.favgroupID, newPosts)
+
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

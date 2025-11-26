@@ -66,6 +66,7 @@ export type FavoritePostEndpoint<T extends string> =
 export type FavoritePutEndpoint<T extends string> = 
     T extends "/api/favgroup/edit" ? {params: FavgroupEditParams, response: string} :
     T extends "/api/favgroup/reorder" ? {params: FavgroupReorderParams, response: string} :
+    T extends "/api/favgroup/remap" ? {params: Omit<FavgroupUpdateParams, "isPrivate">, response: string} :
     never
 
 export type FavoriteDeleteEndpoint<T extends string> = 

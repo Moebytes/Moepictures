@@ -242,7 +242,8 @@
         "autogenerate": "Auto-Generate",
         "light": "Light",
         "dark": "Dark",
-        "set": "Set"
+        "set": "Set",
+        "remap": "Remap"
     },
     "history": {
         "post": "Post History",
@@ -932,6 +933,10 @@
             "header": "Do you want to delete this post from the group?",
             "reasonHeader": "Why do you want to delete this post from the group?"
         },
+        "remapGroup": {
+            "title": "Remap Group",
+            "request": "Remap Group Request"
+        },
         "deleteGroupHistory": {
             "title": "Delete Group History",
             "header": "Are you sure that you want to delete this history state?",
@@ -1015,6 +1020,9 @@
         },
         "editFavgroup": {
             "title": "Edit Favorite Group"
+        },
+        "remapFavgroup": {
+            "title": "Remap Favorite Group"
         },
         "addFavgroupPost": {
             "title": "Add Favorite Group Posts"

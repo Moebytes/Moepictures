@@ -76,6 +76,7 @@ export default class Functions {
     }
 
     public static reduceHighestRating = (posts: Post[]) => {
+        if (!posts?.length) return Functions.r13()
         return posts.map(p => p.rating).reduce((highest, current) => Functions.highestRating(highest, current))
     }
 }

@@ -215,15 +215,15 @@ export default class CompareFunctions {
         return json
     }
 
-    public static parseGroupChanges = (oldGroup: GroupPosts, newGroup: GroupPosts) => {
+    public static parseGroupChanges = (oldGroup: GroupPosts | undefined, newGroup: GroupPosts) => {
         let json = {} as GroupChanges
-        if (oldGroup.name !== newGroup.name) {
+        if (oldGroup?.name !== newGroup.name) {
             json.name = newGroup.name
         }
-        if (oldGroup.description !== newGroup.description) {
+        if (oldGroup?.description !== newGroup.description) {
             json.description = newGroup.description
         }
-        if (JSON.stringify(oldGroup.posts) !== JSON.stringify(newGroup.posts)) {
+        if (JSON.stringify(oldGroup?.posts) !== JSON.stringify(newGroup.posts)) {
             json.posts = newGroup.posts.map((post: PostOrdered) => ({postID: post.postID, order: post.order}))
         }
         return json
