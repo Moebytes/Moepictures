@@ -101,6 +101,8 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   ip = ip?.toString().replace("::ffff:", "") || ""
   if (ip !== req.session.ip) req.session.ip = ip
 
+  if (["127.0.0.1", "::1", "0.0.0.0"].includes(ip)) return next()
+
   if (!req.session.username) {
     const sessionCount = await sql.user.countIPSessions(req.session.ip)
     if (sessionCount > 100) {
