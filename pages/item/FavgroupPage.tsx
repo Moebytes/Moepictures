@@ -18,12 +18,16 @@ import groupCancelActive from "../../assets/icons/group-cancel-active.png"
 import groupAccept from "../../assets/icons/group-accept.png"
 import groupRemap from "../../assets/icons/group-remap.png"
 import lockIcon from "../../assets/icons/private-lock.png"
+import scrollIcon from "../../assets/icons/scroll.png"
+import pageIcon from "../../assets/icons/page.png"
 import Reorder from "react-reorder"
 import TinyImage from "../../components/image/TinyImage"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/grouppage.less"
 import {GroupItem, Favgroup} from "../../types/Types"
 
-let limit = 25
+let pageAmount = 50
 
 const FavgroupPage: React.FunctionComponent = () => {
     const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
@@ -36,13 +40,12 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj, setRemapFavGroupObj} = useGroupDialogActions()
-    const {ratingType} = useSearchSelector()
-    const {setSearch, setSearchFlag} = useSearchActions()
+    const {ratingType, scroll} = useSearchSelector()
+    const {setSearch, setSearchFlag, setScroll} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const {setNavigationPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null as Favgroup | null)
-    const [items, setItems] = useState([] as GroupItem[])
     const navigate = useNavigate()
     const location = useLocation()
     const {username, favgroup: favgroupName} = useParams() as {username: string, favgroup: string}
@@ -68,8 +71,28 @@ const FavgroupPage: React.FunctionComponent = () => {
     }, [session])
 
     useEffect(() => {
-        limit = mobile ? 5 : 25
+        setRelative(mobile ? true : false)
     }, [mobile])
+
+    const loadInitial = async () => {
+        if (!favgroup) return []
+        const items = [] as GroupItem[]
+
+        for (const post of favgroup.posts) {
+            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
+            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
+
+            const img = await functions.crypto.decryptThumb(imageLink, session)
+            const live = await functions.crypto.decryptThumb(liveLink, session)
+            items.push({id: post.order, image: img, live, post})
+        }
+
+        return items
+    }
+
+    const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
+        initItemLoader, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
 
     const favgroupInfo = async () => {
         let favgroup = await functions.http.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
@@ -78,7 +101,6 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (!session.cookie) return
             if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
-        console.log(favgroup)
         setFavgroup(favgroup)
     }
 
@@ -95,21 +117,6 @@ const FavgroupPage: React.FunctionComponent = () => {
         }
     }, [favgroupName, session, groupFlag])
 
-    const updateItems = async () => {
-        if (!favgroup) return
-        let items = [] as GroupItem[]
-        for (let i = 0; i < favgroup.posts.length; i++) {
-            const post = favgroup.posts[i]
-            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
-            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
-            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
-            let img = await functions.crypto.decryptThumb(imageLink, session)
-            let live = await functions.crypto.decryptThumb(liveLink, session)
-            items.push({id: post.order, image: img, live, post})
-        }
-        setItems(items)
-    }
-
     useEffect(() => {
         if (favgroup) {
             document.title = favgroup.name
@@ -117,22 +124,24 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (favgroup.private) {
                 if (session.username !== username) return functions.dom.replaceLocation("/403")
             }
-            updateItems()
+            initItemLoader()
         }
     }, [favgroup, ratingType, session])
 
-    useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
-    }, [mobile])
-
     const reorder = (event: React.MouseEvent, from: number, to: number) => {
+        const baseOffset = scroll ? 0 : (page - 1) * pageAmount
+
         setItems((prev) => {
             const newState = [...prev]
-            newState.splice(to, 0, newState.splice(from, 1)[0])
+            const item = newState.splice(baseOffset + from, 1)[0]
+            newState.splice(baseOffset + to, 0, item)
+            return newState
+        })
+
+        setVisible((prev) => {
+            const newState = [...prev]
+            const item = newState.splice(baseOffset + from, 1)[0]
+            newState.splice(baseOffset + to, 0, item)
             return newState
         })
     }
@@ -140,8 +149,8 @@ const FavgroupPage: React.FunctionComponent = () => {
     const favgroupImagesJSX = () => {
         if (!favgroup) return
         let jsx = [] as React.ReactElement[]
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i]
+        for (let i = 0; i < visibleItems.length; i++) {
+            const item = visibleItems[i]
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
                     await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
@@ -155,11 +164,14 @@ const FavgroupPage: React.FunctionComponent = () => {
                 }, 200)
             }
             jsx.push(
-                <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
+                <li key={item.post.postID} style={{marginRight: "20px", marginTop: "10px"}}>
                     <TinyImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
                     onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return (
             <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
@@ -181,7 +193,7 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        updateItems()
+        initItemLoader()
     }
 
     const changeReorderState = () => {
@@ -251,6 +263,10 @@ const FavgroupPage: React.FunctionComponent = () => {
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{favgroup.postCount}</span></span>
+                        <div className="group-page-container" onClick={() => toggleScroll()}>
+                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="group-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
+                        </div>
                     </div>
                     {favgroupImagesJSX()}
                 </div> : null}

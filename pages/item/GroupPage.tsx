@@ -1,8 +1,8 @@
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
-useGroupDialogSelector, useFilterSelector} from "../../store"
+useGroupDialogSelector} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -22,12 +22,15 @@ import groupRemap from "../../assets/icons/group-remap.png"
 import Reorder from "react-reorder"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
+import scrollIcon from "../../assets/icons/scroll.png"
+import pageIcon from "../../assets/icons/page.png"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
-import permissions from "../../structures/Permissions"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/grouppage.less"
-import {GroupPosts, GroupHistory, GroupItem, PostOrdered} from "../../types/Types"
+import {GroupPosts, GroupItem, PostOrdered} from "../../types/Types"
 
-let limit = 25
+let pageAmount = 50
 
 const GroupPage: React.FunctionComponent = () => {
     const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
@@ -41,15 +44,14 @@ const GroupPage: React.FunctionComponent = () => {
     const {mobile} = useLayoutSelector()
     const {setAddGroupPostObj, setDeleteGroupPostObj, setEditGroupObj, setDeleteGroupObj, 
     setRevertGroupHistoryID, setRevertGroupHistoryFlag, setRemapGroupObj} = useGroupDialogActions()
-    const {ratingType} = useSearchSelector()
-    const {setSearch, setSearchFlag} = useSearchActions()
+    const {ratingType, scroll} = useSearchSelector()
+    const {setSearch, setSearchFlag, setScroll} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setNavigationPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const [historyID, setHistoryID] = useState(null as string | null)
     const [group, setGroup] = useState(null as GroupPosts | null)
-    const [items, setItems] = useState([] as GroupItem[])
     const navigate = useNavigate()
     const location = useLocation()
     const {group: slug} = useParams() as {group: string}
@@ -70,8 +72,31 @@ const GroupPage: React.FunctionComponent = () => {
     }, [location])
 
     useEffect(() => {
-        limit = mobile ? 5 : 25
+        setRelative(mobile ? true : false)
     }, [mobile])
+
+    const loadInitial = async () => {
+        if (!group) return []
+        let items = [] as GroupItem[]
+
+        for (let i = 0; i < group.posts.length; i++) {
+            const post = group.posts[i]
+            if (!session.username) if (post.rating !== functions.r13()) continue
+            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
+
+            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
+            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
+
+            let img = await functions.crypto.decryptThumb(imageLink, session)
+            let live = await functions.crypto.decryptThumb(liveLink, session)
+            items.push({id: post.order, image: img, live, post})
+        }
+
+        return items
+    }
+
+    const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
+        initItemLoader, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
 
     const groupInfo = async () => {
         let group = null as GroupPosts | null
@@ -102,42 +127,28 @@ const GroupPage: React.FunctionComponent = () => {
         }
     }, [slug, historyID, session, groupFlag])
 
-    const updateItems = async () => {
-        if (!group) return
-        let items = [] as GroupItem[]
-        for (let i = 0; i < group.posts.length; i++) {
-            const post = group.posts[i]
-            if (!session.username) if (post.rating !== functions.r13()) continue
-            if (functions.post.isR18(post.rating)) if (!session.showR18) continue
-            const imageLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile)
-            const liveLink = functions.link.getThumbnailLink(post.images[0], "medium", session, mobile, true)
-            let img = await functions.crypto.decryptThumb(imageLink, session)
-            let live = await functions.crypto.decryptThumb(liveLink, session)
-            items.push({id: post.order, image: img, live, post})
-        }
-        setItems(items)
-    }
-
     useEffect(() => {
         if (group) {
             document.title = group.name
             setHeaderText(group.name)
-            updateItems()
+            initItemLoader()
         }
     }, [group, ratingType, session])
-
-    useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
-    }, [mobile])
-
+    
     const reorder = (event: React.MouseEvent, from: number, to: number) => {
+        const baseOffset = scroll ? 0 : (page - 1) * pageAmount
+
         setItems((prev) => {
             const newState = [...prev]
-            newState.splice(to, 0, newState.splice(from, 1)[0])
+            const item = newState.splice(baseOffset + from, 1)[0]
+            newState.splice(baseOffset + to, 0, item)
+            return newState
+        })
+
+        setVisible((prev) => {
+            const newState = [...prev]
+            const item = newState.splice(baseOffset + from, 1)[0]
+            newState.splice(baseOffset + to, 0, item)
             return newState
         })
     }
@@ -145,8 +156,8 @@ const GroupPage: React.FunctionComponent = () => {
     const groupImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!group) return jsx
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i]
+        for (let i = 0; i < visibleItems.length; i++) {
+            const item = visibleItems[i]
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})
@@ -163,6 +174,9 @@ const GroupPage: React.FunctionComponent = () => {
                     <GroupThumbnail image={item.image} live={item.live} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return (
             <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
@@ -184,7 +198,7 @@ const GroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        updateItems()
+        initItemLoader()
     }
 
     const changeReorderState = () => {
@@ -307,6 +321,10 @@ const GroupPage: React.FunctionComponent = () => {
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>
+                        <div className="group-page-container" onClick={() => toggleScroll()}>
+                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="group-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
+                        </div>
                     </div>
                     {groupImagesJSX()}
                 </div> : null}

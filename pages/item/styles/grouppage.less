@@ -52,7 +52,8 @@
     width: 100%;
     flex-wrap: wrap;
     padding: 0px;
-    overflow-x: hidden;
+    height: auto;
+    overflow: visible;
 }
 
 .group-opt {
@@ -70,6 +71,24 @@
     height: 28px;
     width: auto;
     margin-right: 10px;
+}
+
+.group-mini-icon {
+    height: 20px;
+    width: auto;
+    margin-right: 10px;
+}
+
+.group-page-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    margin-top: 5px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
 .placeholder {
