@@ -52,15 +52,12 @@ export default class LinkFunctions {
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
         if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 800
+        if (sizeType === "large") size = 750
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
         if (forceLive) return this.getImageLink(image, false)
-        if (image.type === "image" || image.type === "comic") {
-            return this.getImageLink(image, false)
-        }
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
         }
@@ -78,7 +75,7 @@ export default class LinkFunctions {
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
         if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 800
+        if (sizeType === "large") size = 750
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
         return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
@@ -90,7 +87,7 @@ export default class LinkFunctions {
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
         if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 800
+        if (sizeType === "large") size = 750
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`

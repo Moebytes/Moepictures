@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -11,15 +10,16 @@ import sortRev from "../../assets/icons/sort-reverse.png"
 import ThreadRow from "../../components/search/ThreadRow"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector} from "../../store"
-import permissions from "../../structures/Permissions"
+useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
+useThreadDialogActions, useThreadDialogSelector} from "../../store"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {ThreadSearch, CommentSort} from "../../types/Types"
 
-let replace = true
+let pageAmount = 50
 
 const ForumPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -32,50 +32,16 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
     const {scroll} = useSearchSelector()
-    const {setScroll} = useSearchActions()
     const {forumPage} = usePageSelector()
     const {setForumPage} = usePageActions()
-    const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag, threadSearchFlag} = useFlagSelector()
-    const {setPageFlag, setThreadSearchFlag} = useFlagActions()
+    const {threadSearchFlag} = useFlagSelector()
+    const {setThreadSearchFlag} = useFlagActions()
     const {showNewThreadDialog} = useThreadDialogSelector()
     const {setShowNewThreadDialog} = useThreadDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [threads, setThreads] = useState([] as ThreadSearch[])
     const [searchQuery, setSearchQuery] = useState("")
-    const [index, setIndex] = useState(0)
-    const [visibleThreads, setVisibleThreads] = useState([] as ThreadSearch[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef<HTMLDivElement>(null)
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        const queryParam = new URLSearchParams(window.location.search).get("query")
-        const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = () => {
-            if (queryParam) updateThreads(queryParam)
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setForumPage(Number(pageParam))
-            }
-        }
-        const updateStateChange = () => {
-            replace = true
-            const pageParam = new URLSearchParams(window.location.search).get("page")
-            if (pageParam) setForumPage(Number(pageParam))
-        }
-        window.addEventListener("load", onDOMLoaded)
-        window.addEventListener("popstate", updateStateChange)
-        window.addEventListener("pushstate", updateStateChange)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-            window.removeEventListener("popstate", updateStateChange)
-            window.removeEventListener("pushstate", updateStateChange)
-        }
-    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -86,24 +52,6 @@ const ForumPage: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateThreads = async (query?: string) => {
-        const result = await functions.http.get("/api/search/threads", {sort: functions.validation.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
-        setEnded(false)
-        setIndex(0)
-        setVisibleThreads([])
-        setThreads(result)
-    }
-
-    useEffect(() => {
-        if (threadSearchFlag) {
-            setTimeout(() => {
-                setSearchQuery(threadSearchFlag)
-                updateThreads(threadSearchFlag)
-                setThreadSearchFlag(null)
-            }, 500)
-        }
-    }, [threadSearchFlag])
-
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
@@ -112,7 +60,6 @@ const ForumPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        updateThreads()
     }, [])
 
     useEffect(() => {
@@ -120,228 +67,51 @@ const ForumPage: React.FunctionComponent = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
+    const loadInitial = async (queryOverride?: string) => {
+        let query = queryOverride ? queryOverride : searchQuery
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        const result = await functions.http.get("/api/search/threads", {sort, query}, session, setSessionFlag)
+        return result
+    }
+
+    const updateOffset = async (newOffset: number) => {
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        let result = await functions.http.get("/api/search/threads", {sort, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "threadCount"})
+
     useEffect(() => {
-        updateThreads()
+        if (threadSearchFlag) {
+            setTimeout(() => {
+                setSearchQuery(threadSearchFlag)
+                initItemLoader(threadSearchFlag)
+                setThreadSearchFlag(null)
+            }, 500)
+        }
+    }, [threadSearchFlag])
+
+    useEffect(() => {
+        initItemLoader()
     }, [sortType, sortReverse, session])
 
-    const getPageAmount = () => {
-        return scroll ? 15 : 50
-    }
-
     useEffect(() => {
-        const updateThreads = () => {
-            let currentIndex = index
-            const newVisibleThreads = visibleThreads
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!threads[currentIndex]) break
-                newVisibleThreads.push(threads[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleThreads(functions.util.removeDuplicates(newVisibleThreads))
-        }
-        if (scroll) updateThreads()
-    }, [scroll, threads])
-
-    const updateOffset = async () => {
-        if (ended) return
-        let newOffset = offset + 100
-        let padded = false
-        if (!scroll) {
-            newOffset = (forumPage - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (threads[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = await functions.http.get("/api/search/threads", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
-        let hasMore = result?.length >= 100
-        const cleanThreads = threads.filter((t) => !t.fake)
-        if (!scroll) {
-            if (cleanThreads.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, threadCount: cleanThreads[0]?.threadCount}), ...result]
-                padded = true
-            }
-        }
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setThreads(result)
-            } else {
-                setThreads((prev) => functions.util.removeDuplicates([...prev, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setThreads(result)
-                } else {
-                    setThreads((prev) => functions.util.removeDuplicates([...prev, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!threads[currentIndex]) return updateOffset()
-                const newVisibleThreads = visibleThreads
-                for (let i = 0; i < 15; i++) {
-                    if (!threads[currentIndex]) return updateOffset()
-                    newVisibleThreads.push(threads[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleThreads(functions.util.removeDuplicates(newVisibleThreads))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, visibleThreads, index, session, sortType, sortReverse])
-
-    useEffect(() => {
-        //window.scrollTo(0, 0)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleThreads([])
-            setForumPage(1)
-            updateThreads()
-        }
-    }, [scroll, session])
-
-    useEffect(() => {
-        if (!scroll) updateOffset()
+        if (forumPage) setManagedPage(forumPage)
     }, [])
 
     useEffect(() => {
-        const updatePageOffset = () => {
-            const artistOffset = (forumPage - 1) * getPageAmount()
-            if (threads[artistOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const artistAmount = Number(threads[0]?.threadCount)
-            let maximum = artistOffset + getPageAmount()
-            if (maximum > artistAmount) maximum = artistAmount
-            const maxTag = threads[maximum - 1]
-            if (!maxTag) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [scroll, threads, forumPage, ended, session, sortType, sortReverse])
+        setForumPage(page)
+    }, [page])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
     }, [searchQuery])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (!scroll) searchParams.set("page", String(forumPage || ""))
-        if (replace) {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
-            replace = false
-        } else {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
-        }
-    }, [scroll, forumPage])
-
-    useEffect(() => {
-        if (threads?.length) {
-            const maxTagPage = maxPage()
-            if (maxTagPage === 1) return
-            if (queryPage > maxTagPage) {
-                setQueryPage(maxTagPage)
-                setForumPage(maxTagPage)
-            }
-        }
-    }, [threads, forumPage, queryPage])
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    const maxPage = () => {
-        if (!threads?.length) return 1
-        if (Number.isNaN(Number(threads[0]?.threadCount))) return 10000
-        return Math.ceil(Number(threads[0]?.threadCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setForumPage(1)
-        //window.scrollTo(0, 0)
-    }
-
-    const previousPage = () => {
-        let newPage = forumPage - 1 
-        if (newPage < 1) newPage = 1 
-        setForumPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const nextPage = () => {
-        let newPage = forumPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setForumPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const lastPage = () => {
-        setForumPage(maxPage())
-        //window.scrollTo(0, 0)
-    }
-
-    const goToPage = (newPage: number) => {
-        setForumPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (forumPage > maxPage() - 3) increment = -4
-        if (forumPage > maxPage() - 2) increment = -5
-        if (forumPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (forumPage > maxPage() - 2) increment = -3
-            if (forumPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = forumPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
-    }
 
     const newThreadDialog = () => {
         setShowNewThreadDialog(!showNewThreadDialog)
@@ -369,35 +139,15 @@ const ForumPage: React.FunctionComponent = (props) => {
     const generateThreadsJSX = () => {
         const jsx = [] as React.ReactElement[]
         jsx.push(<ThreadRow key={"0"} titlePage={true}/>)
-        let visible = [] as ThreadSearch[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleThreads)
-        } else {
-            const postOffset = (forumPage - 1) * getPageAmount()
-            visible = threads?.slice(postOffset, postOffset + getPageAmount())
-        }
+        let visible = visibleItems as ThreadSearch[]
         for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<ThreadRow key={visible[i].threadID} thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
+            jsx.push(<ThreadRow thread={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader}/>)
         }
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {forumPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {forumPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {forumPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {forumPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
-    }
-
-    const toggleScroll = () => {
-        const newValue = !scroll
-        setScroll(newValue)
     }
 
     const getNewThreadButton = () => {
@@ -423,8 +173,8 @@ const ForumPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.forum}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateThreads() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateThreads()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
                                 <img src={search}/>
                             </button>
                         </div>

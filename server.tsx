@@ -186,10 +186,13 @@ let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}
 let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
 const lastModified = new Date().toUTCString()
+const allowedReferer = ["moepictures.net", "moepictures.moe"]
 
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const referer = req.headers.referer || req.headers.referrer as string
+      if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       let url = req.url.replace(/\?.*$/, "")
@@ -232,7 +235,7 @@ for (let i = 0; i < folders.length; i++) {
         return res.status(200).send(body)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (!req.session.publicKey && !req.session.apiKey) return res.status(401).end()
+        if (!permissions.noEncryption(req.session) && !req.session.publicKey) return res.status(401).end()
         body = encryption.encrypt(body, req.session.publicKey!, req.session)
       }
       if (req.headers.range) {
@@ -256,6 +259,8 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const referer = req.headers.referer || req.headers.referrer as string
+      if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -302,7 +307,7 @@ for (let i = 0; i < folders.length; i++) {
         }
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (!req.session.publicKey && !req.session.apiKey) return res.status(401).end()
+        if (!permissions.noEncryption(req.session) && !req.session.publicKey) return res.status(401).end()
         body = encryption.encrypt(body, req.session.publicKey!, req.session)
       }
       if (req.headers.range) {
@@ -327,6 +332,8 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const referer = req.headers.referer || req.headers.referrer as string
+      if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
@@ -374,6 +381,8 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const referer = req.headers.referer || req.headers.referrer as string
+      if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Cache-Control", "public, max-age=2678400")

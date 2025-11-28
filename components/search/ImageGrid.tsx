@@ -352,7 +352,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setUpdatePostFlag(false)
         }
         if (updatePostFlag) updatePosts()
-    }, [updatePostFlag, pageMultiplier])
+    }, [updatePostFlag, sizeType, pageMultiplier])
+
+    useEffect(() => {
+        setUpdatePostFlag(true)
+    }, [pageMultiplier, sizeType])
 
     useEffect(() => {
         let resultCount = Number(posts[0]?.postCount)
@@ -672,7 +676,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]
             if (post.fake) continue
-            // if (!showChildren) if (post.parentID) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(post.rating)) continue
             const image = post.images?.[0]
             if (!image) continue

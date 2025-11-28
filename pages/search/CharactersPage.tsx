@@ -12,14 +12,14 @@ import CharacterRow from "../../components/search/CharacterRow"
 import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions, useCacheSelector, useCacheActions} from "../../store"
+useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 
 let limit = 10
-let replace = true
 let pageAmount = 5
 
 const CharactersPage: React.FunctionComponent = (props) => {
@@ -27,60 +27,24 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
-    const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
     const {scroll} = useSearchSelector()
-    const {setScroll} = useSearchActions()
     const {charactersPage} = usePageSelector()
     const {setCharactersPage} = usePageActions()
-    const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
     const {characters} = useCacheSelector()
     const {setCharacters} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
-    const [visibleCharacters, setVisibleCharacters] = useState([] as TagCategorySearch[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef<HTMLDivElement>(null)
-    const navigate = useNavigate()
 
     useEffect(() => {
         limit = mobile ? 5 : 25
     }, [mobile])
-
-    useEffect(() => {
-        const queryParam = new URLSearchParams(window.location.search).get("query")
-        const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = () => {
-            if (queryParam) updateCharacters(queryParam)
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setCharactersPage(Number(pageParam))
-            }
-        }
-        const updateStateChange = () => {
-            replace = true
-            const pageParam = new URLSearchParams(window.location.search).get("page")
-            if (pageParam) setCharactersPage(Number(pageParam))
-        }
-        window.addEventListener("load", onDOMLoaded)
-        window.addEventListener("popstate", updateStateChange)
-        window.addEventListener("pushstate", updateStateChange)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-            window.removeEventListener("popstate", updateStateChange)
-            window.removeEventListener("pushstate", updateStateChange)
-        }
-    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -91,15 +55,6 @@ const CharactersPage: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateCharacters = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.http.get("/api/search/characters", {sort: functions.validation.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
-        setEnded(false)
-        setIndex(0)
-        setVisibleCharacters([])
-        setCharacters(result)
-    }
-
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
@@ -108,7 +63,6 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        updateCharacters()
     }, [])
 
     useEffect(() => {
@@ -116,229 +70,44 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
+
+    const loadInitial = async (queryOverride?: string) => {
+        let query = queryOverride ? queryOverride : searchQuery
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        const result = await functions.http.get("/api/search/characters", {sort, query, limit}, session, setSessionFlag)
+        return result
+    }
+
+    const updateOffset = async (newOffset: number) => {
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        let result = await functions.http.get("/api/search/characters", {sort, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "tagCount"})
+
     useEffect(() => {
-        updateCharacters()
+        initItemLoader()
     }, [sortType, sortReverse, session])
 
-
-    const getPageAmount = () => {
-        return pageAmount
-    }
-
     useEffect(() => {
-        const updateCharacters = () => {
-            let currentIndex = index
-            const newVisibleCharacters = visibleCharacters
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!characters[currentIndex]) break
-                newVisibleCharacters.push(characters[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleCharacters(functions.util.removeDuplicates(newVisibleCharacters))
-        }
-        if (scroll) updateCharacters()
-    }, [scroll, characters, session])
-
-    const updateOffset = async () => {
-        if (ended) return
-        let newOffset = offset + limit
-        let padded = false
-        if (!scroll) {
-            newOffset = (charactersPage - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (characters[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = await functions.http.get("/api/search/characters", {sort: functions.validation.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
-        let hasMore = result?.length >= limit
-        const cleanCharacters = characters.filter((t) => !t.fake)
-        if (!scroll) {
-            if (cleanCharacters.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, tagCount: cleanCharacters[0]?.tagCount}), ...result]
-                padded = true
-            }
-        }
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setCharacters(result)
-            } else {
-                setCharacters(functions.util.removeDuplicates([...characters, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setCharacters(result)
-                } else {
-                    setCharacters(functions.util.removeDuplicates([...characters, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!characters[currentIndex]) return updateOffset()
-                const newVisibleCharacters = visibleCharacters
-                for (let i = 0; i < 15; i++) {
-                    if (!characters[currentIndex]) return updateOffset()
-                    newVisibleCharacters.push(characters[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleCharacters(functions.util.removeDuplicates(newVisibleCharacters))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, visibleCharacters, index, sortType, sortReverse])
-
-    useEffect(() => {
-        //window.scrollTo(0, 0)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleCharacters([])
-            setCharactersPage(1)
-            updateCharacters()
-        }
-    }, [scroll, session])
-
-    useEffect(() => {
-        if (!scroll) updateOffset()
+        if (charactersPage) setManagedPage(charactersPage)
+        if (characters.length) setManagedItems(characters)
     }, [])
 
     useEffect(() => {
-        const updatePageOffset = () => {
-            const artistOffset = (charactersPage - 1) * getPageAmount()
-            if (characters[artistOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const artistAmount = Number(characters[0]?.tagCount)
-            let maximum = artistOffset + getPageAmount()
-            if (maximum > artistAmount) maximum = artistAmount
-            const maxTag = characters[maximum - 1]
-            if (!maxTag) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [scroll, characters, charactersPage, ended, sortType, sortReverse])
+        setCharacters(items)
+        setCharactersPage(page)
+    }, [items, page])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
     }, [searchQuery])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (!scroll) searchParams.set("page", String(charactersPage || ""))
-        if (replace) {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
-            replace = false
-        } else {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
-        }
-    }, [scroll, charactersPage])
-
-    useEffect(() => {
-        if (characters?.length) {
-            const maxTagPage = maxPage()
-            if (maxTagPage === 1) return
-            if (queryPage > maxTagPage) {
-                setQueryPage(maxTagPage)
-                setCharactersPage(maxTagPage)
-            }
-        }
-    }, [characters, charactersPage, queryPage])
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    const maxPage = () => {
-        if (!characters?.length) return 1
-        if (Number.isNaN(Number(characters[0]?.tagCount))) return 10000
-        return Math.ceil(Number(characters[0]?.tagCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setCharactersPage(1)
-        //window.scrollTo(0, 0)
-    }
-
-    const previousPage = () => {
-        let newPage = charactersPage - 1 
-        if (newPage < 1) newPage = 1 
-        setCharactersPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const nextPage = () => {
-        let newPage = charactersPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setCharactersPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const lastPage = () => {
-        setCharactersPage(maxPage())
-        //window.scrollTo(0, 0)
-    }
-
-    const goToPage = (newPage: number) => {
-        setCharactersPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (charactersPage > maxPage() - 3) increment = -4
-        if (charactersPage > maxPage() - 2) increment = -5
-        if (charactersPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (charactersPage > maxPage() - 2) increment = -3
-            if (charactersPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = charactersPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
-    }
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -363,37 +132,17 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const generateCharactersJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = [] as TagCategorySearch[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleCharacters)
-        } else {
-            const postOffset = (charactersPage - 1) * getPageAmount()
-            visible = characters.slice(postOffset, postOffset + getPageAmount())
-        }
+        let visible = visibleItems as TagCategorySearch[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (visible[i].tag === "original") continue
             if (visible[i].tag === "unknown-character") continue
-            jsx.push(<CharacterRow key={visible[i].tag} character={visible[i]}/>)
+            jsx.push(<CharacterRow character={visible[i]}/>)
         }
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {charactersPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {charactersPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {charactersPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {charactersPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
-    }
-
-    const toggleScroll = () => {
-        const newValue = !scroll
-        setScroll(newValue)
     }
 
     return (
@@ -407,8 +156,8 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.characters}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateCharacters()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
                                 <img src={search}/>
                             </button>
                         </div>

@@ -300,4 +300,24 @@ export default class ServerUtil {
             return false
         }
     }
+
+    public static isAllowedReferer = async (referer: string) => {
+        const ourDomains = ["moepictures.net", "moepictures.moe"]
+        if (!referer) return true
+
+        try {
+            const host = new URL(referer).hostname.toLowerCase()
+            if (ourDomains.includes(host)) return true
+
+            if (/\.google\./.test(host)) return true
+            if (/\.bing\./.test(host)) return true
+            if (/\.yandex\./.test(host)) return true
+            if (/\.duckduckgo\./.test(host)) return true
+            if (/\.yahoo\./.test(host)) return true
+
+            return false
+        } catch {
+            return false
+        }
+    }
 }

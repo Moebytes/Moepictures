@@ -1,4 +1,4 @@
-import React, {useEffect} from "react"
+import {useEffect} from "react"
 import {useInteractionSelector, useLayoutSelector, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
 

@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -15,71 +14,37 @@ import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions, useTagDialogActions} from "../../store"
+useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector, useTagDialogActions} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
 
 let limit = 200
-let replace = true
+let pageAmount = 50
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
-    const {setRedirect} = useFlagActions()
-    const {session, hasNotification} = useSessionSelector()
-    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
     const {scroll, ratingType} = useSearchSelector()
-    const {setScroll} = useSearchActions()
     const {tagsPage} = usePageSelector()
     const {setTagsPage} = usePageActions()
-    const {setShowPageDialog} = useMiscDialogActions()
     const {setMassImplyDialog, setBlockedTagsDialog} = useTagDialogActions()
-    const {pageFlag, tagSearchFlag} = useFlagSelector()
-    const {setPageFlag, setTagSearchFlag} = useFlagActions()
+    const {tagSearchFlag} = useFlagSelector()
+    const {setTagSearchFlag} = useFlagActions()
     const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all" as TagType)
-    const [tags, setTags] = useState([] as TagSearch[])
-    const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
-    const [visibleTags, setVisibleTags] = useState([] as TagSearch[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        const queryParam = new URLSearchParams(window.location.search).get("query")
-        const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = () => {
-            if (queryParam) updateTags(queryParam)
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setTagsPage(Number(pageParam))
-            }
-        }
-        const updateStateChange = () => {
-            replace = true
-            const pageParam = new URLSearchParams(window.location.search).get("page")
-            if (pageParam) setTagsPage(Number(pageParam))
-        }
-        window.addEventListener("load", onDOMLoaded)
-        window.addEventListener("popstate", updateStateChange)
-        window.addEventListener("pushstate", updateStateChange)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-            window.removeEventListener("popstate", updateStateChange)
-            window.removeEventListener("pushstate", updateStateChange)
-        }
-    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -90,15 +55,6 @@ const TagsPage: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateTags = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.http.get("/api/search/tags", {sort: functions.validation.parseSort(sortType, sortReverse), type: typeType, query, limit}, session, setSessionFlag)
-        setEnded(false)
-        setIndex(0)
-        setVisibleTags([])
-        setTags(result)
-    }
-
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
@@ -107,243 +63,55 @@ const TagsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        updateTags()
     }, [])
-
-    useEffect(() => {
-        if (tagSearchFlag !== null) {
-            updateTags(tagSearchFlag)
-            setTagSearchFlag(null)
-        }
-    }, [tagSearchFlag])
 
     useEffect(() => {
         document.title = i18n.navbar.tags
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
+    const loadInitial = async (queryOverride?: string) => {
+        let query = queryOverride ? queryOverride : searchQuery
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        const result = await functions.http.get("/api/search/tags", {sort, type: typeType, query, limit}, session, setSessionFlag)
+        return result
+    }
+
+    const updateOffset = async (newOffset: number) => {
+        let sort = functions.validation.parseSort(sortType, sortReverse)
+        let result = await functions.http.get("/api/search/tags", {sort, type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "tagCount"})
+
     useEffect(() => {
-        updateTags()
+        if (tagSearchFlag !== null) {
+            initItemLoader(tagSearchFlag)
+            setTagSearchFlag(null)
+        }
+    }, [tagSearchFlag])
+
+    useEffect(() => {
+        initItemLoader()
     }, [sortType, sortReverse, typeType, session])
 
-    const getPageAmount = () => {
-        return scroll ? 15 : 50
-    }
-
     useEffect(() => {
-        const updateTags = () => {
-            let currentIndex = index
-            const newVisibleTags = visibleTags
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!tags[currentIndex]) break
-                newVisibleTags.push(tags[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleTags(functions.util.removeDuplicates(newVisibleTags))
-        }
-        if (scroll) updateTags()
-    }, [scroll, tags])
-
-    const updateOffset = async () => {
-        if (ended) return
-        let newOffset = offset + limit
-        let padded = false
-        if (!scroll) {
-            newOffset = (tagsPage - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (tags[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = await functions.http.get("/api/search/tags", {sort: functions.validation.parseSort(sortType, sortReverse), type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
-        let hasMore = result?.length >= limit
-        const cleanTags = tags.filter((t) => !t.fake)
-        if (!scroll) {
-            if (cleanTags.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, tagCount: cleanTags[0]?.tagCount}), ...result]
-                padded = true
-            }
-        }
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setTags(result)
-            } else {
-                setTags((prev) => functions.util.removeDuplicates([...prev, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setTags(result)
-                } else {
-                    setTags((prev) => functions.util.removeDuplicates([...prev, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!tags[currentIndex]) return updateOffset()
-                const newVisibleTags = visibleTags
-                for (let i = 0; i < 15; i++) {
-                    if (!tags[currentIndex]) return updateOffset()
-                    newVisibleTags.push(tags[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleTags(functions.util.removeDuplicates(newVisibleTags))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, visibleTags, index, session, sortType, sortReverse, typeType])
-
-    useEffect(() => {
-        //window.scrollTo(0, 0)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleTags([])
-            setTagsPage(1)
-            updateTags()
-        }
-    }, [scroll, session])
-
-    useEffect(() => {
-        if (!scroll) updateOffset()
+        if (tagsPage) setManagedPage(tagsPage)
     }, [])
 
     useEffect(() => {
-        const updatePageOffset = () => {
-            const tagOffset = (tagsPage - 1) * getPageAmount()
-            if (tags[tagOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const tagAmount = Number(tags[0]?.tagCount)
-            let maximum = tagOffset + getPageAmount()
-            if (maximum > tagAmount) maximum = tagAmount
-            const maxTag = tags[maximum - 1]
-            if (!maxTag) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [scroll, tags, tagsPage, ended, session, sortType, sortReverse, typeType])
+        setTagsPage(page)
+    }, [page])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
     }, [searchQuery])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (!scroll) searchParams.set("page", String(tagsPage || ""))
-        if (replace) {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
-            replace = false
-        } else {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
-        }
-    }, [scroll, tagsPage])
-
-    useEffect(() => {
-        if (tags?.length) {
-            const maxTagPage = maxPage()
-            if (maxTagPage === 1) return
-            if (queryPage > maxTagPage) {
-                setQueryPage(maxTagPage)
-                setTagsPage(maxTagPage)
-            }
-        }
-    }, [tags, tagsPage, queryPage])
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    const maxPage = () => {
-        if (!tags?.length) return 1
-        if (Number.isNaN(Number(tags[0]?.tagCount))) return 10000
-        return Math.ceil(Number(tags[0]?.tagCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setTagsPage(1)
-        //window.scrollTo(0, 0)
-    }
-
-    const previousPage = () => {
-        let newPage = tagsPage - 1 
-        if (newPage < 1) newPage = 1 
-        setTagsPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const nextPage = () => {
-        let newPage = tagsPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setTagsPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const lastPage = () => {
-        setTagsPage(maxPage())
-        //window.scrollTo(0, 0)
-    }
-
-    const goToPage = (newPage: number) => {
-        setTagsPage(newPage)
-        //window.scrollTo(0, 0)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (tagsPage > maxPage() - 3) increment = -4
-        if (tagsPage > maxPage() - 2) increment = -5
-        if (tagsPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (tagsPage > maxPage() - 2) increment = -3
-            if (tagsPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = tagsPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
-    }
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -394,37 +162,17 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = [] as TagSearch[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleTags)
-        } else {
-            const postOffset = (tagsPage - 1) * getPageAmount()
-            visible = tags.slice(postOffset, postOffset + getPageAmount())
-        }
+        let visible = visibleItems as TagSearch[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
             if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
-            jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
+            jsx.push(<TagRow tag={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader}/>)
         }
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {tagsPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {tagsPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {tagsPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {tagsPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
-    }
-
-    const toggleScroll = () => {
-        const newValue = !scroll
-        setScroll(newValue)
     }
 
     const massImplyDialog = () => {
@@ -469,8 +217,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
-                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateTags()}>
+                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
                                 <img src={search}/>
                             </button>
                         </div>

@@ -78,11 +78,11 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div key="page-numbers" className="page-container">
-            {page <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-            {page <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
+            {page <= 1 ? null : <button key="first" className="page-button" onClick={firstPage}>{"<<"}</button>}
+            {page <= 1 ? null : <button key="prev" className="page-button" onClick={previousPage}>{"<"}</button>}
             {generatePageButtonsJSX()}
-            {page >= maxPage ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-            {page >= maxPage ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
+            {page >= maxPage ? null : <button key="next" className="page-button" onClick={nextPage}>{">"}</button>}
+            {page >= maxPage ? null : <button key="last" className="page-button" onClick={lastPage}>{">>"}</button>}
             {maxPage > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
         </div>
     )
