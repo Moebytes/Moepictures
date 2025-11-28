@@ -158,6 +158,7 @@ const GroupPage: React.FunctionComponent = () => {
         if (!group) return jsx
         for (let i = 0; i < visibleItems.length; i++) {
             const item = visibleItems[i]
+            if (!item) continue
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})

@@ -35,7 +35,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     const getTotalCount = (item: T) => Number(item[countKey ?? "tagCount"] ?? 0)
 
-    const totalCount = items.length ? (getTotalCount?.(items[0]) ?? items.length) : 0
+    const totalCount = items.length ? (getTotalCount?.(items[0]) || items.length) : 0
     const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
 
     useEffect(() => {
@@ -101,7 +101,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         updatingRef.current = true
 
         const newOffset = forceOffset ?? offset + pageAmount
-        let result = await updateOffset?.(newOffset) ?? []
+        let result = await updateOffset?.(newOffset) ?? null
         if (!result) result = items.slice(newOffset, newOffset + pageAmount)
 
         let padded = false

@@ -87,7 +87,6 @@ const FavgroupPage: React.FunctionComponent = () => {
             const live = await functions.crypto.decryptThumb(liveLink, session)
             items.push({id: post.order, image: img, live, post})
         }
-
         return items
     }
 
@@ -151,6 +150,7 @@ const FavgroupPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < visibleItems.length; i++) {
             const item = visibleItems[i]
+            if (!item) continue
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
                     await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
