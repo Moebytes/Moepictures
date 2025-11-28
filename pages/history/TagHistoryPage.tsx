@@ -7,10 +7,13 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import TagHistoryRow from "../../components/history/TagHistoryRow"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
-import permissions from "../../structures/Permissions"
+useSearchSelector, useActiveActions, useFlagActions, useLayoutSelector, useThemeSelector} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import {TagHistory} from "../../types/Types"
 import "./styles/historypage.less"
+
+let pageAmount = 15
 
 interface Props {
     all?: boolean
@@ -22,15 +25,10 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
     const {setRedirect} = useFlagActions()
+    const {scroll} = useSearchSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([] as TagHistory[])
-    const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([] as TagHistory[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
     const navigate = useNavigate()
     const {tag, username} = useParams() as {tag: string, username?: string}
 
@@ -42,39 +40,6 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
-
-    const updateHistory = async () => {
-        let result = [] as TagHistory[]
-        if (props.all) {
-            result = await functions.http.get("/api/tag/history", null, session, setSessionFlag)
-        } else {
-            result = await functions.http.get("/api/tag/history", {tag, username}, session, setSessionFlag)
-            if (!result.length) {
-                const tagObject = await functions.http.get("/api/tag", {tag}, session, setSessionFlag)
-                if (!tagObject) return
-                const historyObject = tagObject as unknown as TagHistory
-                if (!tagObject.createDate && !tagObject.creator) {
-                    const oldestPost = await functions.http.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
-                    tagObject.createDate = oldestPost[0].uploadDate
-                    tagObject.creator = oldestPost[0].uploader
-                }
-                historyObject.date = tagObject.createDate 
-                historyObject.user = tagObject.creator
-                historyObject.key = tag
-                historyObject.aliases = tagObject.aliases.map((alias) => alias?.alias || "")
-                historyObject.implications = tagObject.implications.map((implication) => implication?.implication || "")
-                result = [historyObject]
-            }
-        }
-        setEnded(false)
-        setIndex(0)
-        setVisibleRevisions([])
-        setRevisions(result)
-    }
-
-    useEffect(() => {
-        updateHistory()
-    }, [tag, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -91,71 +56,53 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
-    useEffect(() => {
-        if (!session.cookie) return
-        let currentIndex = index
-        const newVisibleRevisions = [] as TagHistory[]
-        for (let i = 0; i < 10; i++) {
-            if (!revisions[currentIndex]) break
-            if (revisions[currentIndex].r18) if (!functions.post.isR18(ratingType)) {
-                currentIndex++
-                continue
-            }
-            newVisibleRevisions.push(revisions[currentIndex])
-            currentIndex++
-        }
-        setIndex(currentIndex)
-        setVisibleRevisions(functions.util.removeDuplicates(newVisibleRevisions))
-    }, [revisions, session])
-
-    const updateOffset = async () => {
-        if (ended) return
-        const newOffset = offset + 100
-        const result = await functions.http.get("/api/tag/history", {tag, username, offset: newOffset}, session, setSessionFlag)
-        if (result?.length) {
-            setOffset(newOffset)
-            setRevisions((prev) => functions.util.removeDuplicates([...prev, ...result]))
+    const loadInitial = async () => {
+        let result = [] as TagHistory[]
+        if (props.all) {
+            result = await functions.http.get("/api/tag/history", null, session, setSessionFlag)
         } else {
-            setEnded(true)
+            result = await functions.http.get("/api/tag/history", {tag, username}, session, setSessionFlag)
+            if (!result.length) {
+                const tagObject = await functions.http.get("/api/tag", {tag}, session, setSessionFlag)
+                if (!tagObject) return []
+                const historyObject = tagObject as unknown as TagHistory
+                if (!tagObject.createDate && !tagObject.creator) {
+                    const oldestPost = await functions.http.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
+                    tagObject.createDate = oldestPost[0].uploadDate
+                    tagObject.creator = oldestPost[0].uploader
+                }
+                historyObject.date = tagObject.createDate 
+                historyObject.user = tagObject.creator
+                historyObject.key = tag
+                historyObject.aliases = tagObject.aliases.map((alias) => alias?.alias || "")
+                historyObject.implications = tagObject.implications.map((implication) => implication?.implication || "")
+                result = [historyObject]
+            }
         }
+        return result
     }
 
+    const updateOffset = async (newOffset: number) => {
+        const result = await functions.http.get("/api/tag/history", {tag, username, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+
     useEffect(() => {
-        if (!session.cookie) return
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions
-                for (let i = 0; i < 10; i++) {
-                    if (!revisions[currentIndex]) return updateOffset()
-                    if (revisions[currentIndex].r18) if (!functions.post.isR18(ratingType)) {
-                        currentIndex++
-                        continue
-                    }
-                    newRevisions.push(revisions[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleRevisions(functions.util.removeDuplicates(newRevisions))
-            }
-        }
-        window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [visibleRevisions])
+        initItemLoader()
+    }, [tag, session])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.util.removeDuplicates(visibleRevisions)
+        let visible = visibleItems as TagHistory[]
+        if (!session.showR18) {
+            visible = visible.filter((item) => !item.r18)
+        }
         let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
@@ -167,7 +114,10 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.tag !== current.tag) previous = null
             jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={updateHistory} onEdit={updateHistory}/>)
+                onDelete={initItemLoader} onEdit={initItemLoader}/>)
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)
         }
         return jsx
     }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -7,9 +7,9 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import Reply from "../../components/search/Reply"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
-useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
+useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchSelector, usePageSelector,
+useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import adminCrown from "../../assets/icons/admin-crown.png"
 import modCrown from "../../assets/icons/mod-crown.png"
@@ -44,9 +44,12 @@ import link from "../../assets/icons/link-purple.png"
 import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
-import adminLabel from "../../assets/icons/admin-label.png"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import {ThreadReply, ThreadUser} from "../../types/Types"
 import "./styles/threadpage.less"
+
+let pageAmount = 15
 
 const ThreadPage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -54,27 +57,19 @@ const ThreadPage: React.FunctionComponent = () => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {session} = useSessionSelector()
-    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {quoteText} = useActiveSelector()
     const {setActiveDropdown, setQuoteText} = useActiveActions()
     const {scroll} = useSearchSelector()
-    const {setScroll} = useSearchActions()
     const {threadPage} = usePageSelector()
     const {setThreadPage} = usePageActions()
-    const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag, setThreadSearchFlag} = useFlagActions()
-    const {deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
-    const {setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, setEditThreadR18, setReportThreadID} = useThreadDialogActions()
+    const {deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, 
+        editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
+    const {setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, 
+        setEditThreadTitle, setEditThreadContent, setEditThreadR18, setReportThreadID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
     const [thread, setThread] = useState(null as ThreadUser | null)
-    const [replies, setReplies] = useState([] as ThreadReply[])
-    const [index, setIndex] = useState(0)
-    const [visibleReplies, setVisibleReplies] = useState([] as ThreadReply[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
     const [replyID, setReplyID] = useState(-1)
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
     const [text, setText] = useState("")
@@ -94,32 +89,25 @@ const ThreadPage: React.FunctionComponent = () => {
     }
 
     useEffect(() => {
-        const pageParam = new URLSearchParams(window.location.search).get("page")
         const replyParam = new URLSearchParams(window.location.search).get("reply")
         const onDOMLoaded = () => {
-            if (pageParam && Number(pageParam) > 0) {
-                setQueryPage(Number(pageParam))
-                setThreadPage(Number(pageParam))
-            }
             if (replyParam) {
                 setReplyID(Number(replyParam))
                 setReplyJumpFlag(true)
             }
         }
         window.addEventListener("load", onDOMLoaded)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-        }
+        return () => window.removeEventListener("load", onDOMLoaded)
     }, [])
 
     useEffect(() => {
-        if (replies && replyID > -1 && replyJumpFlag) {
+        if (replyID > -1 && replyJumpFlag) {
             setTimeout(() => {
                 onReplyJump(replyID)
                 setReplyJumpFlag(false)
             }, 200)
         }
-    }, [replies, replyID, replyJumpFlag])
+    }, [replyID, replyJumpFlag])
 
     useEffect(() => {
         const updateRead = async () => {
@@ -142,18 +130,26 @@ const ThreadPage: React.FunctionComponent = () => {
         setDefaultIcon(thread.image ? false : true)
     }
 
-    const updateReplies = async () => {
+    const loadInitial = async () => {
         const result = await functions.http.get("/api/thread/replies", {threadID}, session, setSessionFlag)
-        setEnded(false)
-        setIndex(0)
-        setVisibleReplies([])
-        setReplies(result)
+        return result
     }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
+        usePaginatedScroll({loadInitial, pageAmount, countKey: "replyCount"})
 
     useEffect(() => {
         updateThread()
-        updateReplies()
+        initItemLoader()
     }, [threadID, session])
+
+    useEffect(() => {
+        if (threadPage) setManagedPage(threadPage)
+    }, [])
+
+    useEffect(() => {
+        setThreadPage(page)
+    }, [page])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -166,97 +162,28 @@ const ThreadPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
-    const getPageAmount = () => {
-        return scroll ? 15 : 50
-    }
-
     useEffect(() => {
-        const updateReplies = () => {
-            let currentIndex = index
-            const newVisibleReplies = visibleReplies
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!replies[currentIndex]) break
-                newVisibleReplies.push(replies[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleReplies(functions.util.removeDuplicates(newVisibleReplies))
-        }
-        if (scroll) updateReplies()
-    }, [scroll, replies])
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!replies[currentIndex]) return
-                const newVisibleReplies = visibleReplies
-                for (let i = 0; i < 15; i++) {
-                    if (!replies[currentIndex]) return
-                    newVisibleReplies.push(replies[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleReplies(functions.util.removeDuplicates(newVisibleReplies))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, visibleReplies, index])
-
-    useEffect(() => {
-        window.scrollTo(0, 0)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleReplies([])
-            setThreadPage(1)
-            updateReplies()
-        }
-    }, [scroll, session])
-
-    useEffect(() => {
-        if (!scroll) {
-            if (threadPage) navigate(`${location.pathname}?page=${threadPage}${replyID > -1 ? `&reply=${replyID}` : ""}`, {replace: true})
-        } else {
-            if (replyID > -1) navigate(`${location.pathname}?reply=${replyID}`, {replace: true}) 
-        }
-    }, [scroll, threadPage, replyID])
-
-    useEffect(() => {
-        if (replies?.length) {
-            const maxTagPage = maxPage()
-            if (maxTagPage === 1) return
-            if (queryPage > maxTagPage) {
-                setQueryPage(maxTagPage)
-                setThreadPage(maxTagPage)
-            }
-        }
-    }, [replies, threadPage, queryPage])
+        const searchParams = new URLSearchParams(window.location.search)
+        if (replyID > -1) searchParams.set("reply", String(replyID))
+    }, [replyID])
 
     const onReplyJump = (replyID: number) => {
         if (replyID === 0) {
-            goToPage(1)
+            setPage(1)
         } else {
             let index = -1
-            for (let i = 0; i < replies.length; i++) {
-                if (replies[i].replyID === String(replyID)) {
+            for (let i = 0; i < visibleItems.length; i++) {
+                if (visibleItems[i].replyID === String(replyID)) {
                     index = i 
                     break
                 }
             }
             if (index > -1) {
-                const pageNumber = Math.ceil(index / getPageAmount())
-                goToPage(pageNumber, true)
+                const pageNumber = Math.ceil(index / pageAmount)
+                setPage(pageNumber)
                 const element = document.querySelector(`[reply-id="${replyID}"]`)
                 if (!element) return
                 const position = element.getBoundingClientRect()
@@ -267,100 +194,14 @@ const ThreadPage: React.FunctionComponent = () => {
         }
     }
 
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    const maxPage = () => {
-        if (!replies?.length) return 1
-        if (Number.isNaN(Number(replies[0]?.replyCount))) return 10000
-        return Math.ceil(Number(replies[0]?.replyCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setThreadPage(1)
-        window.scrollTo(0, 0)
-    }
-
-    const previousPage = () => {
-        let newPage = threadPage - 1 
-        if (newPage < 1) newPage = 1 
-        setThreadPage(newPage)
-        window.scrollTo(0, 0)
-    }
-
-    const nextPage = () => {
-        let newPage = threadPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setThreadPage(newPage)
-        window.scrollTo(0, 0)
-    }
-
-    const lastPage = () => {
-        setThreadPage(maxPage())
-        window.scrollTo(0, 0)
-    }
-
-    const goToPage = (newPage: number, noScroll?: boolean) => {
-        setThreadPage(newPage)
-        if (!noScroll) window.scrollTo(0, 0)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (threadPage > maxPage() - 3) increment = -4
-        if (threadPage > maxPage() - 2) increment = -5
-        if (threadPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (threadPage > maxPage() - 2) increment = -3
-            if (threadPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = threadPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        if (!scroll) {
-            return (
-                <div key="page-numbers" className="page-container">
-                    {threadPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {threadPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {jsx}
-                    {threadPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {threadPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
-        }
-    }
-
     const generateRepliesJSX = () => {
         if (!thread) return
         const jsx = [] as React.ReactElement[]
-        let visible = [] as ThreadReply[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleReplies)
-        } else {
-            const postOffset = (threadPage - 1) * getPageAmount()
-            visible = replies.slice(postOffset, postOffset + getPageAmount())
-        }
+        let visible = visibleItems as ThreadReply[]
         for (let i = 0; i < visible.length; i++) {
             const reply = visible[i]
             if (reply.fake) continue
-            jsx.push(<Reply key={visible[i].replyID} reply={reply} thread={thread} onDelete={updateReplies} onEdit={updateReplies} onReplyJump={onReplyJump}/>)
+            jsx.push(<Reply reply={reply} thread={thread} onDelete={initItemLoader} onEdit={initItemLoader} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -568,7 +409,7 @@ const ThreadPage: React.FunctionComponent = () => {
             return setError(false)
         }
         await functions.http.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
-        updateReplies()
+        initItemLoader()
         setText("")
     }
 
@@ -713,7 +554,7 @@ const ThreadPage: React.FunctionComponent = () => {
                     </div>
                     {getReplyBoxJSX()}
                     {emojiGrid()}
-                    {generatePageButtonsJSX()}
+                    {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
                 </div> : null}
                 <Footer/>
             </div>

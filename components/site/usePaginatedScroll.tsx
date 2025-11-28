@@ -5,7 +5,7 @@ import functions from "../../functions/Functions"
 
 interface Params<T> {
     loadInitial: (query?: string) => Promise<T[]>
-    updateOffset?: (offset: number) => Promise<T[]>
+    updateOffset?: (offset: number) => Promise<T[] | null>
     pageAmount: number
     countKey?: string
 }

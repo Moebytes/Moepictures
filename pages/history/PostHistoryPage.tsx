@@ -7,10 +7,13 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import PostHistoryRow from "../../components/history/PostHistoryRow"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
-import permissions from "../../structures/Permissions"
-import {PostHistory, TagHistory} from "../../types/Types"
+useSearchSelector, useActiveActions, useFlagActions, useLayoutSelector, useThemeSelector} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
+import {PostHistory} from "../../types/Types"
 import "./styles/historypage.less"
+
+let pageAmount = 15
 
 interface Props {
     all?: boolean
@@ -21,16 +24,11 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
+    const {scroll} = useSearchSelector()
     const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([] as PostHistory[])
-    const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([] as PostHistory[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
     const navigate = useNavigate()
     const {id: postID, slug, username} = useParams() as {id: string, slug: string, username?: string}
 
@@ -42,44 +40,6 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
-
-    const processRedirects = async () => {
-        if (!postID || !session.cookie) return
-        const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
-        if (postObject) functions.post.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
-    }
-
-    useEffect(() => {
-        updateHistory()
-        processRedirects()
-    }, [postID, session])
-
-    const updateHistory = async () => {
-        let result = [] as PostHistory[]
-        if (props.all) {
-            result = await functions.http.get("/api/post/history", null, session, setSessionFlag)
-        } else {
-            result = await functions.http.get("/api/post/history", {postID, username}, session, setSessionFlag)
-            if (!result.length) {
-                const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
-                if (!postObject) return
-                const historyObject = postObject as unknown as PostHistory
-                historyObject.date = postObject.uploadDate
-                historyObject.user = postObject.uploader
-                historyObject.images = postObject.images.map((i) => functions.link.getThumbnailLink(i, "medium", session, mobile))
-                let categories = await functions.tag.tagCategories(postObject.tags, session, setSessionFlag)
-                historyObject.artists = categories.artists.map((a) => a.tag)
-                historyObject.characters = categories.characters.map((c) => c.tag)
-                historyObject.series = categories.series.map((s) => s.tag)
-                historyObject.tags = [...categories.tags.map((t) => t.tag), ...categories.meta.map((m) => m.tag)]
-                result = [historyObject]
-            }
-        }
-        setEnded(false)
-        setIndex(0)
-        setVisibleRevisions([])
-        setRevisions(result)
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -96,71 +56,58 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
-    useEffect(() => {
-        if (!session.cookie) return
-        let currentIndex = index
-        const newVisibleRevisions = [] as PostHistory[]
-        for (let i = 0; i < 10; i++) {
-            if (!revisions[currentIndex]) break
-            if (functions.post.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
-                currentIndex++
-                continue
-            }
-            newVisibleRevisions.push(revisions[currentIndex])
-            currentIndex++
-        }
-        setIndex(currentIndex)
-        setVisibleRevisions(functions.util.removeDuplicates(newVisibleRevisions))
-    }, [revisions, session])
-
-    const updateOffset = async () => {
-        if (ended) return
-        const newOffset = offset + 100
-        const result = await functions.http.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
-        if (result?.length) {
-            setOffset(newOffset)
-            setRevisions((prev) => functions.util.removeDuplicates([...prev, ...result]))
-        } else {
-            setEnded(true)
-        }
+    const processRedirects = async () => {
+        if (!postID || !session.cookie) return
+        const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.post.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
     }
 
-    useEffect(() => {
-        if (!session.cookie) return
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions
-                for (let i = 0; i < 10; i++) {
-                    if (!revisions[currentIndex]) return updateOffset()
-                    if (functions.post.isR18(revisions[currentIndex].rating)) if (!permissions.isMod(session)) {
-                        currentIndex++
-                        continue
-                    }
-                    newRevisions.push(revisions[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleRevisions(functions.util.removeDuplicates(newRevisions))
+    const loadInitial = async () => {
+        let result = [] as PostHistory[]
+        if (props.all) {
+            result = await functions.http.get("/api/post/history", null, session, setSessionFlag)
+        } else {
+            result = await functions.http.get("/api/post/history", {postID, username}, session, setSessionFlag)
+            if (!result.length) {
+                const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
+                if (!postObject) return []
+                const historyObject = postObject as unknown as PostHistory
+                historyObject.date = postObject.uploadDate
+                historyObject.user = postObject.uploader
+                historyObject.images = postObject.images.map((i) => functions.link.getThumbnailLink(i, "medium", session, mobile))
+                let categories = await functions.tag.tagCategories(postObject.tags, session, setSessionFlag)
+                historyObject.artists = categories.artists.map((a) => a.tag)
+                historyObject.characters = categories.characters.map((c) => c.tag)
+                historyObject.series = categories.series.map((s) => s.tag)
+                historyObject.tags = [...categories.tags.map((t) => t.tag), ...categories.meta.map((m) => m.tag)]
+                result = [historyObject]
             }
         }
-        window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [visibleRevisions])
+        return result
+    }
+
+    const updateOffset = async (newOffset: number) => {
+        const result = await functions.http.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+
+    useEffect(() => {
+        initItemLoader()
+        processRedirects()
+    }, [postID, session])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.util.removeDuplicates(visibleRevisions)
+        let visible = visibleItems as PostHistory[]
+        if (!session.showR18) {
+            visible = visible.filter((item) => !functions.post.isR18(item.rating))
+        }
         let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
@@ -172,7 +119,10 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.postID !== current.postID) previous = null
             jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={updateHistory} onEdit={updateHistory} imageHeight={300}/>)
+                onDelete={initItemLoader} onEdit={initItemLoader} imageHeight={300}/>)
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)
         }
         return jsx
     }

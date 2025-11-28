@@ -1,12 +1,16 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
-useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../../store"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
+useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
 import approve from "../../assets/icons/approve.png"
 import reject from "../../assets/icons/reject.png"
 import functions from "../../functions/Functions"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import {AliasRequest} from "../../types/Types"
 import "./styles/modposts.less"
+
+let pageAmount = 15
 
 const ModTagAliases: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -14,274 +18,57 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {scroll} = useSearchSelector()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
     const {modPage} = usePageSelector()
     const {setModPage} = usePageActions()
-    const {setShowPageDialog} = useMiscDialogActions()
     const {modState} = useActiveSelector()
-    const [hover, setHover] = useState(false)
-    const [requests, setRequests] = useState([] as AliasRequest[])
-    const [index, setIndex] = useState(0)
-    const [visibleRequests, setVisibleRequests] = useState([] as AliasRequest[])
-    const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
     const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateTags = async () => {
+    const loadInitial = async () => {
         const requests = await functions.http.get("/api/tag/aliasto/request/list", null, session, setSessionFlag, true)
-        setEnded(false)
-        setRequests(requests)
+        return requests
     }
 
-    useEffect(() => {
-        updateTags()
-    }, [session])
-
-    const updateVisibleRequests = () => {
-        const newVisibleRequests = [] as AliasRequest[]
-        for (let i = 0; i < index; i++) {
-            if (!requests[i]) break
-            newVisibleRequests.push(requests[i])
-        }
-        setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
+    const updateOffset = async (newOffset: number) => {
+        let result = await functions.http.get("/api/tag/aliasto/request/list", {offset: newOffset}, session, setSessionFlag, true)
+        return result
     }
 
+    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+
     useEffect(() => {
-        if (updateVisibleRequestFlag) {
-            updateVisibleRequests()
-            setUpdateVisibleRequestFlag(false)
-        }
-    }, [requests, index, updateVisibleRequestFlag])
+        initItemLoader()
+    }, [modState, session])
+
+    useEffect(() => {
+        if (modPage) setManagedPage(modPage)
+    }, [])
+
+    useEffect(() => {
+        setModPage(page)
+    }, [page])
 
     const aliasTag = async (username: string, tag: string, aliasTo: string, reason: string | null) => {
         await functions.http.post("/api/tag/aliasto", {tag, aliasTo, username, reason}, session, setSessionFlag)
         await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: true}, session, setSessionFlag)
-        await updateTags()
-        setUpdateVisibleRequestFlag(true)
+        await initItemLoader()
     }
 
     const rejectRequest = async (username: string, tag: string, aliasTo: string) => {
         await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: false}, session, setSessionFlag)
-        await updateTags()
-        setUpdateVisibleRequestFlag(true)
-    }
-
-    const getPageAmount = () => {
-        return 15
-    }
-
-    useEffect(() => {
-        const updateRequests = () => {
-            let currentIndex = index
-            const newVisibleRequests = visibleRequests
-            for (let i = 0; i < 10; i++) {
-                if (!requests[currentIndex]) break
-                newVisibleRequests.push(requests[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleRequests(functions.util.removeDuplicates(newVisibleRequests))
-        }
-        if (scroll) updateRequests()
-    }, [requests, scroll])
-
-    const updateOffset = async () => {
-        if (ended) return
-        let newOffset = offset + 100
-        let padded = false
-        if (!scroll) {
-            newOffset = (modPage - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (modPage[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = await functions.http.get("/api/tag/aliasto/request/list", {offset: newOffset}, session, setSessionFlag, true)
-        let hasMore = result?.length >= 100
-        const cleanHistory = requests.filter((t) => !t.fake)
-        if (!scroll) {
-            if (cleanHistory.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, requestCount: cleanHistory[0]?.requestCount}), ...result]
-                padded = true
-            }
-        }
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setRequests(result)
-            } else {
-                setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setRequests(result)
-                } else {
-                    setRequests((prev) => functions.util.removeDuplicates([...prev, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests
-                for (let i = 0; i < 10; i++) {
-                    if (!requests[currentIndex]) return updateOffset()
-                    newPosts.push(requests[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleRequests(functions.util.removeDuplicates(newPosts))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, index, visibleRequests, modState, session])
-
-    useEffect(() => {
-        window.scrollTo(0, 0)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleRequests([])
-            setModPage(1)
-            updateTags()
-        }
-    }, [scroll, modPage, modState, session])
-
-    useEffect(() => {
-        if (!scroll) updateOffset()
-    }, [modState])
-
-    useEffect(() => {
-        const updatePageOffset = () => {
-            const modOffset = (modPage - 1) * getPageAmount()
-            if (requests[modOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const modAmount = Number(requests[0]?.requestCount)
-            let maximum = modOffset + getPageAmount()
-            if (maximum > modAmount) maximum = modAmount
-            const maxTag = requests[maximum - 1]
-            if (!maxTag) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [scroll, requests, modPage, ended])
-
-    useEffect(() => {
-        if (requests?.length) {
-            const maxTagPage = maxPage()
-            if (maxTagPage === 1) return
-            if (queryPage > maxTagPage) {
-                setQueryPage(maxTagPage)
-                setModPage(maxTagPage)
-            }
-        }
-    }, [requests, modPage, queryPage])
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    const maxPage = () => {
-        if (!requests?.length) return 1
-        if (Number.isNaN(Number(requests[0]?.requestCount))) return 10000
-        return Math.ceil(Number(requests[0]?.requestCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setModPage(1)
-        window.scrollTo(0, 0)
-    }
-
-    const previousPage = () => {
-        let newPage = modPage - 1 
-        if (newPage < 1) newPage = 1 
-        setModPage(newPage)
-        window.scrollTo(0, 0)
-    }
-
-    const nextPage = () => {
-        let newPage = modPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setModPage(newPage)
-        window.scrollTo(0, 0)
-    }
-
-    const lastPage = () => {
-        setModPage(maxPage())
-        window.scrollTo(0, 0)
-    }
-
-    const goToPage = (newPage: number) => {
-        setModPage(newPage)
-        window.scrollTo(0, 0)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (modPage > maxPage() - 3) increment = -4
-        if (modPage > maxPage() - 2) increment = -5
-        if (modPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (modPage > maxPage() - 2) increment = -3
-            if (modPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = modPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
+        await initItemLoader()
     }
 
     const generateTagsJSX = () => {
         let jsx = [] as React.ReactElement[]
-        let visible = [] as AliasRequest[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleRequests)
-        } else {
-            const offset = (modPage - 1) * getPageAmount()
-            visible = requests.slice(offset, offset + getPageAmount())
-        }
+        let visible = visibleItems as AliasRequest[]
         if (!visible.length) {
             return (
-                <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
-                onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
+                <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} key={0}>
                     <div className="mod-post-text-column">
                         <span className="mod-post-text">{i18n.labels.noData}</span>
                     </div>
@@ -301,7 +88,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             }
             const img = functions.link.getTagLink(request.type, request.image, request.imageHash)
             jsx.push(
-                <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                <div className="mod-post">
                     {img ?
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={img}/>
@@ -326,16 +113,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             )
         }
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {modPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {modPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {modPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {modPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
     }

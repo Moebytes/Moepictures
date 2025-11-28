@@ -224,10 +224,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [session, autoSearch, search])
 
     useEffect(() => {
-        //window.scrollTo(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            //functions.jumpToTop()
         }, 100)
         if (scroll) {
             setEnded(false)
@@ -567,7 +565,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            //functions.jumpToTop()
         }, 100)
     }
 
@@ -578,7 +575,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            //functions.jumpToTop()
         }, 100)
     }
 
@@ -589,7 +585,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            //functions.jumpToTop()
         }, 100)
     }
 
@@ -598,7 +593,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
-            //functions.jumpToTop()
         }, 100)
     }
 

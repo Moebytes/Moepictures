@@ -5,33 +5,31 @@ import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import functions from "../../functions/Functions"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useSearchSelector,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import {LoginHistory} from "../../types/Types"
 import "./styles/sitepage.less"
 
+let pageAmount = 50
+
 const LoginHistoryPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
+    const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {scroll} = useSearchSelector()
     const {mobile, tablet} = useLayoutSelector()
     const {setActionBanner} = useActiveActions()
-    const [loginHistory, setLoginHistory] = useState([] as LoginHistory[])
-    const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const updateLoginHistory = async () => {
-        const result = await functions.http.get("/api/user/login/history", null, session, setSessionFlag)
-        setLoginHistory(result)
     }
 
     useEffect(() => {
@@ -49,12 +47,15 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
+
+    const loadInitial = async () => {
+        const result = await functions.http.get("/api/user/login/history", null, session, setSessionFlag)
+        return result
+    }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader} = usePaginatedScroll({loadInitial, pageAmount})
 
     useEffect(() => {
         if (!session.cookie) return
@@ -63,7 +64,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
             navigate("/login")
             setSidebarText("Login required.")
         }
-        updateLoginHistory()
+        initItemLoader()
     }, [session])
 
     const logoutOtherSessions = async () => {
@@ -84,8 +85,8 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
 
     const loginHistoryJSX = () => {
         let jsx = [] as React.ReactElement[]
-        for (let i = 0; i < loginHistory.length; i++) {
-            const log = loginHistory[i]
+        for (let i = 0; i < visibleItems.length; i++) {
+            const log = visibleItems[i]
             jsx.push(
                 <div className="sitepage-table-row">
                     <div className="sitepage-table-column">
@@ -108,6 +109,9 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
                     </div>
                 </div>
             )
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return (
             <div className="sitepage-table">

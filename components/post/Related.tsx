@@ -16,15 +16,15 @@ import GridVideo from "../image/GridVideo"
 import GridSong from "../image/GridSong"
 import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
-import Carousel from "../site/Carousel"
-import AdBanner from "./AdBanner"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/related.less"
 import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
 
-let replace = false
 let relatedTimer = null as any
 let delay = 2000
 let limit = 100
+let pageAmount = 15
 
 interface Props {
     tag: string
@@ -40,19 +40,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {related} = useCacheSelector()
     const {setNavigationPosts, setRelated} = useCacheActions()
     const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
-    const {setSearch, setSearchFlag, setScroll, setSquare, setSizeType} = useSearchActions()
+    const {setSearch, setSearchFlag, setSquare, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {relatedPage} = usePageSelector()
     const {setRelatedPage} = usePageActions()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
-    const {setShowPageDialog} = useMiscDialogActions()
-    const [visibleRelated, setVisibleRelated] = useState([] as PostSearch[])
-    const [queryPage, setQueryPage] = useState(1)
-    const [offset, setOffset] = useState(0)
-    const [index, setIndex] = useState(0)
-    const [ended, setEnded] = useState(false)
     const [init, setInit] = useState(true)
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
@@ -92,236 +84,55 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const updateRelated = async () => {
-        if (!props.count && (session.username && !session.showRelated)) return
-        if (!props.tag) return
+    const loadInitial = async () => {
+        if (!props.count && (session.username && !session.showRelated)) return []
+        if (!props.tag) return []
         let result = await searchPosts()
         result = result.filter((p) => p.postID !== props.post?.postID)
-        setRelatedPage(1)
-        setEnded(false)
-        setIndex(0)
-        setVisibleRelated([])
-        setRelated(result)
         delay = 0
+        return result
     }
+    
+    const updateOffset = async (newOffset: number) => {
+        if (!props.count && (session.username && !session.showRelated)) return null
+        if (props.post?.type === "model" || props.post?.type === "live2d") return []
+
+        let result = await functions.http.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
+        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
+        sort: props.count ? "date" : "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
+
+        return result
+    }
+
+    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems, 
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "postCount"})
 
     useEffect(() => {
         clearTimeout(relatedTimer)
         relatedTimer = setTimeout(() => {
-            if (init && related.length) {
+            if (init && items.length) {
                 return setInit(false)
             }
-            updateRelated()
+            initItemLoader()
         }, delay)
     }, [props.post, session])
 
     useEffect(() => {
         clearTimeout(relatedTimer)
         relatedTimer = setTimeout(() => {
-            updateRelated()
+            initItemLoader()
         }, delay)
     }, [props.tag, session])
 
-    const getPageAmount = () => {
-        return mobile ? 10 : scroll ? 15 : 20
-    }
-
     useEffect(() => {
-        const updateRelated = () => {
-            let currentIndex = index
-            const newVisibleRelated = visibleRelated
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!related[currentIndex]) break
-                newVisibleRelated.push(related[currentIndex])
-                currentIndex++
-            }
-            setIndex(currentIndex)
-            setVisibleRelated(functions.util.removeDuplicates(newVisibleRelated))
-        }
-        if (scroll) updateRelated()
-    }, [scroll, related, session])
-
-    const updateOffset = async () => {
-        if (!props.count && (session.username && !session.showRelated)) return
-        if (ended) return
-        if (props.post?.type === "model" || props.post?.type === "live2d") return
-        let newOffset = offset + limit
-        let padded = false
-        if (!scroll) {
-            newOffset = (relatedPage - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (related[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = await functions.http.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
-        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
-
-        let hasMore = result?.length >= limit
-        const cleanRelated = related.filter((t) => !t.fake)
-        if (!scroll) {
-            if (cleanRelated.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, postCount: cleanRelated[0]?.postCount}), ...result]
-                padded = true
-            }
-        }
-
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setRelated(functions.util.removeDuplicates([...related, ...result]))
-            } else {
-                setRelated(functions.util.removeDuplicates([...related, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setRelated(functions.util.removeDuplicates([...related, ...result]))
-                } else {
-                    setRelated(functions.util.removeDuplicates([...related, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!related[currentIndex]) return updateOffset()
-                const newVisibleRelated = visibleRelated
-                for (let i = 0; i < 15; i++) {
-                    if (!related[currentIndex]) break
-                    newVisibleRelated.push(related[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleRelated(functions.util.removeDuplicates(newVisibleRelated))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [scroll, visibleRelated, index])
-
-    useEffect(() => {
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisibleRelated([])
-            setRelatedPage(1)
-            updateRelated()
-        }
-    }, [scroll, session])
-
-    useEffect(() => {
-        if (!scroll) updateOffset()
+        if (relatedPage) setManagedPage(relatedPage)
+        if (related) setManagedItems(related)
     }, [])
 
     useEffect(() => {
-        const updatePageOffset = () => {
-            const relatedOffset = (relatedPage - 1) * getPageAmount()
-            if (related[relatedOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const relatedAmount = Number(related[0]?.postCount)
-            let maximum = relatedOffset + getPageAmount()
-            if (maximum > relatedAmount) maximum = relatedAmount
-            const maxRelated = related[maximum - 1]
-            if (!maxRelated) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [scroll, relatedPage, ended])
-
-    useEffect(() => {
-        if (related?.length) {
-            const maxRelatedPage = maxPage()
-            if (maxRelatedPage === 1) return
-            if (queryPage > maxRelatedPage) {
-                setQueryPage(maxRelatedPage)
-                setRelatedPage(maxRelatedPage)
-            }
-        }
-    }, [related, relatedPage, queryPage])
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
-
-    useEffect(() => {
-        localStorage.setItem("relatedPage", String(relatedPage || ""))
-    }, [relatedPage])
-
-    const maxPage = () => {
-        if (!related?.length) return 1
-        if (Number.isNaN(Number(related[0]?.postCount))) return 10000
-        return Math.ceil(Number(related[0]?.postCount) / getPageAmount())
-    }
-
-    const firstPage = () => {
-        setRelatedPage(1)
-    }
-
-    const previousPage = () => {
-        let newPage = relatedPage - 1 
-        if (newPage < 1) newPage = 1 
-        setRelatedPage(newPage)
-    }
-
-    const nextPage = () => {
-        let newPage = relatedPage + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setRelatedPage(newPage)
-    }
-
-    const lastPage = () => {
-        setRelatedPage(maxPage())
-    }
-
-    const goToPage = (newPage: number) => {
-        setRelatedPage(newPage)
-    }
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (relatedPage > maxPage() - 3) increment = -4
-        if (relatedPage > maxPage() - 2) increment = -5
-        if (relatedPage > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (relatedPage > maxPage() - 2) increment = -3
-            if (relatedPage > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = relatedPage + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} 
-                onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
-    }
+        setRelatedPage(page)
+        setRelated(items)
+    }, [items, page])
 
     const getSizeMargin = () => {
         const rect = sizeRef.current?.getBoundingClientRect()
@@ -392,17 +203,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
             setAllImagesLoaded(true)
         }
         poll()
-    }, [scroll, visibleRelated, relatedPage])
+    }, [scroll, items, relatedPage])
 
     const generateImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
-        let visible = [] as PostSearch[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visibleRelated)
-        } else {
-            const postOffset = (relatedPage - 1) * getPageAmount()
-            visible = related.slice(postOffset, postOffset + getPageAmount())
-        }
+        let visible = visibleItems as PostSearch[]
         visiblePromisesRef.current.splice(0, visiblePromisesRef.current.length)
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]
@@ -438,25 +243,10 @@ const Related: React.FunctionComponent<Props> = (props) => {
                     comicPages={post.type === "comic" ? images : null} onLoad={promise.resolve}/>)
             }
         }
-        // jsx.push(<div key="ad" style={{width: "100%"}}><AdBanner/></div>)
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {relatedPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {relatedPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {relatedPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {relatedPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
-    }
-
-    const toggleScroll = () => {
-        const newValue = !scroll
-        setScroll(newValue)
     }
 
     const searchTag = (event: React.MouseEvent) => {
@@ -471,19 +261,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const getImages = () => {
-        return related.map((post) => functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile))
+        return visibleItems.map((post) => functions.link.getThumbnailLink(post.images[0], "tiny", session, mobile))
     }
 
     const click = (img: string, index: number) => {
-        const post = related[index]
+        const post = visibleItems[index]
         navigate(`/post/${post.postID}/${post.slug}`)
-        setNavigationPosts(related)
+        setNavigationPosts(visibleItems)
     }
 
     let marginLeft = mobile ? 20 : 200
     let paddingLeft = props.count ? 0 : mobile ? 20 : 40
 
-    if (!related.length) return null
+    if (!items.length) return null
 
     return (
         <div className="related" style={{paddingLeft: `${paddingLeft}px`, marginBottom: "10px"}}>

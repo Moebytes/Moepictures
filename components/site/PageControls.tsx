@@ -1,10 +1,12 @@
 import {useEffect} from "react"
 import {useLayoutSelector, useFlagSelector, useMiscDialogActions, useFlagActions} from "../../store"
+import functions from "../../functions/Functions"
 
 interface Props {
     page: number
     maxPage: number
     setPage: (page: number) => void
+    scrollToTop?: boolean
 }
 
 const PageControls: React.FunctionComponent<Props> = (props) => {
@@ -16,28 +18,33 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
 
     const firstPage = () => {
         setPage(1)
+        if (props.scrollToTop) functions.dom.jumpToTop()
     }
 
     const previousPage = () => {
         let newPage = page - 1 
         if (newPage < 1) newPage = 1 
         setPage(newPage)
+        if (props.scrollToTop) functions.dom.jumpToTop()
     }
 
     const nextPage = () => {
         let newPage = page + 1 
         if (newPage > maxPage) newPage = maxPage
         setPage(newPage)
+        if (props.scrollToTop) functions.dom.jumpToTop()
     }
 
     const lastPage = () => {
         setPage(maxPage)
+        if (props.scrollToTop) functions.dom.jumpToTop()
     }
     
     const goToPage = (newPage: number) => {
         if (newPage < 1) newPage = 1 
         if (newPage > maxPage) newPage = maxPage
         setPage(newPage)
+        if (props.scrollToTop) functions.dom.jumpToTop()
     }
 
     useEffect(() => {

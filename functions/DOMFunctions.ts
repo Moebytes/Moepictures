@@ -108,9 +108,7 @@ export default class DOMFunctions {
     }
 
     public static jumpToTop = () => {
-        setTimeout(() => {
-            window.scrollTo(0, 0)
-        }, 300)
+        window.scroll(0, 0)
     }
 
     public static replaceLocation = (location: string) => {

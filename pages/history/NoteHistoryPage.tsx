@@ -7,10 +7,13 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import NoteHistoryRow from "../../components/history/NoteHistoryRow"
 import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
-useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useThemeSelector} from "../../store"
-import permissions from "../../structures/Permissions"
-import {NoteHistory, Note} from "../../types/Types"
+useSearchSelector, useActiveActions, useFlagActions, useLayoutSelector, useThemeSelector} from "../../store"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
+import {NoteHistory} from "../../types/Types"
 import "./styles/historypage.less"
+
+let pageAmount = 15
 
 interface Props {
     all?: boolean
@@ -22,15 +25,10 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
     const {setRedirect} = useFlagActions()
+    const {scroll} = useSearchSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {ratingType} = useSearchSelector()
-    const [revisions, setRevisions] = useState([] as NoteHistory[])
-    const [index, setIndex] = useState(0)
-    const [visibleRevisions, setVisibleRevisions] = useState([] as NoteHistory[])
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
     const navigate = useNavigate()
     const {id: postID, slug, order, username} = useParams() as {id: string, slug: string, order: string, username?: string}
 
@@ -42,34 +40,6 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
-
-    const processRedirects = async () => {
-        if (!postID || !session.cookie) return
-        const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
-        if (postObject) functions.post.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
-    }
-
-    useEffect(() => {
-        updateHistory()
-        processRedirects()
-    }, [postID, session])
-
-    const updateHistory = async () => {
-        let result = [] as NoteHistory[]
-        if (props.all) {
-            result = await functions.http.get("/api/note/history", null, session, setSessionFlag)
-        } else {
-            result = await functions.http.get("/api/note/history", {postID, order: Number(order), username}, session, setSessionFlag)
-        }
-        if (!result.length) {
-            const post = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
-            if (post) result = [{post, postID, order: Number(order), updater: post.uploader, updatedDate: post.uploadDate, notes: [{transcript: "No data"}]} as unknown as NoteHistory]
-        }
-        setEnded(false)
-        setIndex(0)
-        setVisibleRevisions([])
-        setRevisions(result)
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -86,61 +56,48 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
-    useEffect(() => {
-        let currentIndex = index
-        const newVisibleRevisions = [] as NoteHistory[]
-        for (let i = 0; i < 10; i++) {
-            if (!revisions[currentIndex]) break
-            newVisibleRevisions.push(revisions[currentIndex])
-            currentIndex++
-        }
-        setIndex(currentIndex)
-        setVisibleRevisions(functions.util.removeDuplicates(newVisibleRevisions))
-    }, [revisions])
-
-    const updateOffset = async () => {
-        if (ended) return
-        const newOffset = offset + 100
-        const result = await functions.http.get("/api/note/history", {postID, order: Number(order), username, offset: newOffset}, session, setSessionFlag)
-        if (result?.length) {
-            setOffset(newOffset)
-            setRevisions((prev) => functions.util.removeDuplicates([...prev, ...result]))
-        } else {
-            setEnded(true)
-        }
+    const processRedirects = async () => {
+        if (!postID || !session.cookie) return
+        const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
+        if (postObject) functions.post.processRedirects(postObject, postID, slug, navigate, session, setSessionFlag)
     }
 
+    const loadInitial = async () => {
+        let result = [] as NoteHistory[]
+        if (props.all) {
+            result = await functions.http.get("/api/note/history", null, session, setSessionFlag)
+        } else {
+            result = await functions.http.get("/api/note/history", {postID, order: Number(order), username}, session, setSessionFlag)
+        }
+        if (!result.length) {
+            const post = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
+            if (post) result = [{post, postID, order: Number(order), updater: post.uploader, updatedDate: post.uploadDate, notes: [{transcript: "No data"}]} as unknown as NoteHistory]
+        }
+        return result
+    }
+
+    const updateOffset = async (newOffset: number) => {
+        const result = await functions.http.get("/api/note/history", {postID, order: Number(order), username, offset: newOffset}, session, setSessionFlag)
+        return result
+    }
+
+    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+
     useEffect(() => {
-        const scrollHandler = async () => {
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!revisions[currentIndex]) return updateOffset()
-                const newRevisions = visibleRevisions
-                for (let i = 0; i < 10; i++) {
-                    if (!revisions[currentIndex]) return updateOffset()
-                    newRevisions.push(revisions[currentIndex])
-                    currentIndex++
-                }
-                setIndex(currentIndex)
-                setVisibleRevisions(functions.util.removeDuplicates(newRevisions))
-            }
-        }
-        window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [visibleRevisions])
+        initItemLoader()
+        processRedirects()
+    }, [postID, session])
 
     const generateRevisionsJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = functions.util.removeDuplicates(visibleRevisions)
+        let visible = visibleItems as NoteHistory[]
+        if (!session.showR18) {
+            visible = visible.filter((item) => !functions.post.isR18(item.post.rating))
+        }
         let current = visible[0]
         let currentIndex = 0
         for (let i = 0; i < visible.length; i++) {
@@ -153,7 +110,10 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
             jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
-                onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
+                onDelete={initItemLoader} onEdit={initItemLoader} current={i === currentIndex}/>)
+        }
+        if (!scroll) {
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)
         }
         return jsx
     }

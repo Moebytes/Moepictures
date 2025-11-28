@@ -20,6 +20,7 @@ const PageDialog: React.FunctionComponent = (props) => {
         if (showPageDialog) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
+            setPageField("")
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
@@ -33,7 +34,6 @@ const PageDialog: React.FunctionComponent = (props) => {
             setPageFlag(Number(pageField))
             setTimeout(() => {
                 setMobileScrolling(false)
-                // functions.jumpToTop()
             }, 100)
         }
         setShowPageDialog(false)
