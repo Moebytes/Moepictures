@@ -13,7 +13,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
-import {NoteHistory, Note} from "../../types/Types"
+import {NoteHistory, Note, PrunedUser} from "../../types/Types"
 import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 
@@ -35,19 +35,19 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const navigate = useNavigate()
-    const [userRole, setUserRole] = useState("")
+    const [user, setUser] = useState(null as PrunedUser | null)
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
     let prevHistory = props.previousHistory || Boolean(props.exact)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
 
-    const updateUserRole = async () => {
+    const updateUser = async () => {
         const user = await functions.http.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag, true)
-        if (user?.role) setUserRole(user.role)
+        if (user) setUser(user)
     }
 
     useEffect(() => {
-        updateUserRole()
+        updateUser()
     }, [props.noteHistory, session])
 
     const revertNoteHistory = async () => {
@@ -131,70 +131,18 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         functions.post.openPost(props.noteHistory.post, event, navigate, session, setSessionFlag, historyIndex)
     }
 
-    const userClick = (event: React.MouseEvent) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.noteHistory.updater}`, "_blank")
-        } else {
-            navigate(`/user/${props.noteHistory.updater}`)
-        }
-    }
-
-
     const dateTextJSX = () => {
+        if (!user) return
         const targetDate = props.noteHistory.updatedDate
-        const targetUser = props.noteHistory.updater
         const editText = i18n.time.updated
-        if (userRole === "admin") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (userRole === "mod") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (userRole === "premium-curator") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (userRole === "curator") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (userRole === "premium-contributor") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (userRole === "contributor") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (userRole === "premium") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser)}</span>
-                    <img className="historyrow-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(targetUser) || i18n.user.deleted}</span>
+        
+        return functions.jsx.usernameJSX(user, {
+            containerClass: "historyrow-username-container",
+            textClass: "historyrow-user-text",
+            imageClass: "historyrow-user-label",
+            editText,
+            date: targetDate
+        }, i18n, navigate)
     }
 
     const printNote = (note: Note) => {

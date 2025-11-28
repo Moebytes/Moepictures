@@ -79,21 +79,6 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const creatorPage = (event: React.MouseEvent) => {
-        if (!props.message) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.message.creator}`, "_blank")
-        } else {
-            navigate(`/user/${props.message.creator}`)
-        }
-    }
-
-    const creatorImgClick = (event: React.MouseEvent) => {
-        if (!creatorData?.imagePost) return
-        event.stopPropagation()
-        functions.post.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
-    }
-
     const getRecipientPFP = () => {
         if (recipientData?.image) {
             return functions.cache.noCacheURL(functions.link.getTagLink("pfp", recipientData.image, recipientData.imageHash))
@@ -102,178 +87,30 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const recipientPage = (event: React.MouseEvent) => {
-        if (!recipientData?.username) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${recipientData.username}`, "_blank")
-        } else {
-            navigate(`/user/${recipientData.username}`)
-        }
-    }
-
-    const recipientImgClick = (event: React.MouseEvent) => {
-        if (!recipientData?.imagePost) return
-        event.stopPropagation()
-        functions.post.openPost(recipientData.imagePost, event, navigate, session, setSessionFlag)
-    }
-
     const generateCreatorJSX = () => {
-        if (!props.message) return
-        if (creatorData?.role === "admin") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text admin-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "mod") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text mod-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "system") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text system-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium-curator") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (creatorData?.role === "curator") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium-contributor") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (creatorData?.role === "contributor") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text contributor-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium") {
-            return (
-                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.creator)}</span>
-                    <img className="message-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return (
-            <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.util.toProperCase(props.message?.creator) || i18n.user.deleted}</span>
-            </div>
-        )
+        if (!creatorData) return
+        return functions.jsx.usernameJSX(creatorData, {
+            containerClass: "message-username-container",
+            textClass: "message-user-text",
+            imageClass: "message-user-label",
+            profilePictureClass: "message-user-img",
+            profilePicture: getCreatorPFP(),
+            filter: creatorDefaultIcon ? getFilter() : ""
+        }, i18n, navigate)
     }
 
     const generateRecipientJSX = () => {
-        if (!props.message?.recipients[0]) return
-        if (recipientData?.role === "admin") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text admin-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={adminCrown}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "mod") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text mod-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={modCrown}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "system") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text system-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={systemCrown}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "premium-curator") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={premiumCuratorStar}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "curator") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={curatorStar}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "premium-contributor") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={premiumContributorPencil}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "contributor") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text contributor-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={contributorPencil}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        } else if (recipientData?.role === "premium") {
-            return (
-                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.util.toProperCase(props.message.recipients[0])}</span>
-                    <img className="message-user-label" src={premiumStar}/>
-                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-                </div>
-            )
-        }
-        return (
-            <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.util.toProperCase(props.message?.recipients[0] || i18n.user.deleted)}</span>
-                {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
-            </div>
-        )
+        if (!props.message || !recipientData) return
+        return functions.jsx.usernameJSX(recipientData, {
+            containerClass: "message-username-container",
+            textClass: "message-user-text",
+            imageClass: "message-user-label",
+            profilePictureClass: "message-user-img",
+            recipientClass: "message-recipients-text",
+            profilePicture: getRecipientPFP(),
+            recipientAmount: props.message.recipients.length,
+            filter: recipientDefaultIcon ? getFilter() : ""
+        }, i18n, navigate)
     }
 
     const checkMail = async () => {

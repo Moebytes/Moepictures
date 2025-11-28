@@ -85,21 +85,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const creatorPage = (event: React.MouseEvent) => {
-        if (!props.thread) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.thread.creator}`, "_blank")
-        } else {
-            navigate(`/user/${props.thread.creator}`)
-        }
-    }
-
-    const creatorImgClick = (event: React.MouseEvent) => {
-        if (!creatorData?.imagePost) return
-        event.stopPropagation()
-        functions.post.openPost(creatorData.imagePost, event, navigate, session, setSessionFlag)
-    }
-
     const getUpdaterPFP = () => {
         if (updaterData?.image) {
             return functions.link.getTagLink("pfp", updaterData.image, updaterData.imageHash)
@@ -108,169 +93,28 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const updaterPage = (event: React.MouseEvent) => {
-        if (!props.thread) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.thread.updater}`, "_blank")
-        } else {
-            navigate(`/user/${props.thread.updater}`)
-        }
-    }
-
-    const updaterImgClick = (event: React.MouseEvent) => {
-        if (!updaterData?.imagePost) return
-        event.stopPropagation()
-        functions.post.openPost(updaterData.imagePost, event, navigate, session, setSessionFlag)
-    }
-
     const generateCreatorJSX = () => {
         if (!props.thread) return
-        if (creatorData?.role === "admin") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text admin-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "mod") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text mod-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "system") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text system-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium-curator") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (creatorData?.role === "curator") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium-contributor") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (creatorData?.role === "contributor") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text contributor-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (creatorData?.role === "premium") {
-            return (
-                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.creator)}</span>
-                    <img className="thread-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return (
-            <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.util.toProperCase(props.thread?.creator) || i18n.user.deleted}</span>
-            </div>
-        )
+        return functions.jsx.usernameJSX(creatorData, {
+            containerClass: "thread-username-container",
+            textClass: "thread-user-text",
+            imageClass: "thread-user-label",
+            profilePictureClass: "thread-user-img",
+            profilePicture: getCreatorPFP(),
+            filter: creatorDefaultIcon ? getFilter() : ""
+        }, i18n, navigate)
     }
 
     const generateUpdaterJSX = () => {
         if (!props.thread) return
-        if (updaterData?.role === "admin") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                    <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text admin-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (updaterData?.role === "mod") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text mod-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (updaterData?.role === "system") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text system-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (updaterData?.role === "premium-curator") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (updaterData?.role === "curator") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text curator-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (updaterData?.role === "premium-contributor") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (updaterData?.role === "contributor") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text contributor-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (updaterData?.role === "premium") {
-            return (
-                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                    <span className="thread-user-text premium-color">{functions.util.toProperCase(props.thread.updater)}</span>
-                    <img className="thread-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return (
-            <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                <span className={`thread-user-text ${updaterData?.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.util.toProperCase(props.thread?.updater) || i18n.user.deleted}</span>
-            </div>
-        )
+        return functions.jsx.usernameJSX(updaterData, {
+            containerClass: "thread-username-container",
+            textClass: "thread-user-text",
+            imageClass: "thread-user-label",
+            profilePictureClass: "thread-user-img",
+            profilePicture: getUpdaterPFP(),
+            filter: updaterDefaultIcon ? getFilter() : ""
+        }, i18n, navigate)
     }
 
     const readStatus = () => {

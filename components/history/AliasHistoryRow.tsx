@@ -15,7 +15,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import "./styles/historyrow.less"
-import {AliasHistorySearch} from "../../types/Types"
+import {AliasHistorySearch, PrunedUser} from "../../types/Types"
 
 interface Props {
     history: AliasHistorySearch
@@ -30,16 +30,16 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
-    const [userRole, setUserRole] = useState("")
+    const [user, setUser] = useState(null as PrunedUser | null)
     const navigate = useNavigate()
 
-    const updateUserRole = async () => {
+    const updateUser = async () => {
         const user = await functions.http.get("/api/user", {username: props.history.user}, session, setSessionFlag, true)
-        if (user?.role) setUserRole(user.role)
+        if (user) setUser(user)
     }
 
     useEffect(() => {
-        updateUserRole()
+        updateUser()
     }, [props.history, session])
 
     const revertAliasHistory = async () => {
@@ -115,69 +115,19 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const userClick = (event: React.MouseEvent) => {
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.history.user}`, "_blank")
-        } else {
-            navigate(`/user/${props.history.user}`)
-        }
-    }
-
     const dateTextJSX = () => {
+        if (!user) return
         let targetDate = props.history.date
         let editText = i18n.time.aliased
         if (props.history.type?.includes("implication")) editText = i18n.time.implicated
-        if (userRole === "admin") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (userRole === "mod") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (userRole === "premium-curator") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (userRole === "curator") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (userRole === "premium-contributor") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (userRole === "contributor") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (userRole === "premium") {
-            return (
-                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user)}</span>
-                    <img className="historyrow-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.date.timeAgo(targetDate, i18n)} {i18n.time.by} {functions.util.toProperCase(props.history.user) || i18n.user.deleted}</span>
+
+        return functions.jsx.usernameJSX(user, {
+            containerClass: "historyrow-username-container",
+            textClass: "historyrow-user-text",
+            imageClass: "historyrow-user-label",
+            editText,
+            date: targetDate
+        }, i18n, navigate)
     }
 
     const getJSX = () => {

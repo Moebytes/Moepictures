@@ -232,64 +232,11 @@ const ThreadPage: React.FunctionComponent = () => {
 
     const getCreatorJSX = () => {
         if (!thread) return
-        if (thread.role === "admin") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                    <span className="thread-page-user-text admin-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={adminCrown}/>
-                </div>
-            )
-        } else if (thread.role === "mod") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text mod-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={modCrown}/>
-                </div>
-            )
-        } else if (thread.role === "system") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text system-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={systemCrown}/>
-                </div>
-            )
-        } else if (thread.role === "premium-curator") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text curator-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={premiumCuratorStar}/>
-                </div>
-            )
-        } else if (thread.role === "curator") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text curator-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={curatorStar}/>
-                </div>
-            )
-        } else if (thread.role === "premium-contributor") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text premium-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={premiumContributorPencil}/>
-                </div>
-            )
-        } else if (thread.role === "contributor") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text contributor-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={contributorPencil}/>
-                </div>
-            )
-        } else if (thread.role === "premium") {
-            return (
-                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="thread-page-user-text premium-color">{functions.util.toProperCase(thread.creator)}</span>
-                    <img className="thread-page-user-label" src={premiumStar}/>
-                </div>
-            )
-        }
-        return <span className={`thread-page-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.util.toProperCase(thread?.creator) || "deleted"}</span>
+        return functions.jsx.usernameJSX({username: thread.creator, ...thread}, {
+            containerClass: "thread-page-username-container",
+            textClass: "thread-page-user-text",
+            imageClass: "thread-page-user-label",
+        }, i18n, navigate)
     }
 
     const updateSticky = async () => {
@@ -430,7 +377,7 @@ const ThreadPage: React.FunctionComponent = () => {
         const rect = emojiRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
-        let offset = 180
+        let offset = 120
         if (mobile) offset += 0
         return `${raw + offset}px`
     }

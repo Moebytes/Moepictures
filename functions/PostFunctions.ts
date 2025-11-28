@@ -84,10 +84,12 @@ export default class PostFunctions {
     }
 
     public static openPost = async (postResolvable: Post | PostHistory | string | number | null, event: React.MouseEvent, navigate: NavigateFunction, 
-        session: Session, setSessionFlag: (value: boolean) => void, historyIndex = "") => {
+        session?: Session, setSessionFlag?: (value: boolean) => void, historyIndex = "") => {
         if (!postResolvable) return
         let post = postResolvable as Post | undefined
-        if (typeof postResolvable === "string" || typeof postResolvable === "number") post = await functions.http.get("/api/post", {postID: String(postResolvable)}, session, setSessionFlag)
+        if (typeof postResolvable === "string" || typeof postResolvable === "number") {
+            if (session && setSessionFlag) post = await functions.http.get("/api/post", {postID: String(postResolvable)}, session, setSessionFlag)
+        }
         if (!post) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${post.postID}/${post.slug}${historyIndex}`, "_blank")

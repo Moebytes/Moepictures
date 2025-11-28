@@ -388,85 +388,125 @@ export default class JSXFunctions {
         return jsx
     }
 
-    public static usernameJSX = (userData: {username: string, role: string, banned: boolean | null, deleted: boolean | null}, 
-        classNames: {containerClass: string, textClass: string, imageClass: string}, i18n: typeof enLocale, navigate: NavigateFunction) => {
+    public static usernameJSX = (userData: {username: string, role: string, banned: boolean | null, deleted: boolean | null, 
+        imagePost?: string | null}, classNames: {containerClass: string, textClass: string, imageClass: string, 
+        profilePictureClass?: string, recipientClass?: string, editText?: string, date?: string, profilePicture?: string, 
+        filter?: string, recipientAmount?: number}, 
+        i18n: typeof enLocale, navigate: NavigateFunction) => {
+        let {containerClass, textClass, imageClass, profilePictureClass, recipientClass, editText, date, 
+            profilePicture, filter, recipientAmount} = classNames
+        let timeString = editText && date ? `${editText} ${functions.date.timeAgo(date, i18n)} ${i18n.time.by} `  : ""
+
+        const openProfile = (event: React.MouseEvent) => {
+            if (event.ctrlKey || event.metaKey || event.button === 1) {
+                window.open(`/user/${userData.username}`, "_blank")
+            } else {
+                navigate(`/user/${userData.username}`)
+            }
+        }
+
+        const openProfilePost = (event: React.MouseEvent) => {
+            if (!userData.imagePost) return
+            event.stopPropagation()
+            functions.post.openPost(userData.imagePost, event, navigate)
+        }
+
         if (userData.role === "admin") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} admin-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} admin-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={adminCrown}/>
+                    <img className={imageClass} src={adminCrown}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "mod") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} mod-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} mod-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={modCrown}/>
+                    <img className={imageClass} src={modCrown}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "system") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} system-color`}>
-                        {functions.util.toProperCase(userData.username)}</span>
-                    <img className={classNames.imageClass} src={systemCrown}/>
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} system-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}</span>
+                    <img className={imageClass} src={systemCrown}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "premium-curator") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} curator-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} curator-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={premiumCuratorStar}/>
+                    <img className={imageClass} src={premiumCuratorStar}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "curator") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} curator-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} curator-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={curatorStar}/>
+                    <img className={imageClass} src={curatorStar}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "premium-contributor") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} premium-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} premium-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={premiumContributorPencil}/>
+                    <img className={imageClass} src={premiumContributorPencil}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "contributor") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} contributor-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} contributor-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={contributorPencil}/>
+                    <img className={imageClass} src={contributorPencil}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         } else if (userData.role === "premium") {
             return (
-                <div className={classNames.containerClass} onClick={() => navigate(`/user/${userData.username}`)}>
-                    <span className={`${classNames.textClass} premium-color`}>
-                        {functions.util.toProperCase(userData.username)}
+                <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    <span className={`${textClass} premium-color`}>
+                        {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={classNames.imageClass} src={premiumStar}/>
+                    <img className={imageClass} src={premiumStar}/>
+                    {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
         }
         return (
-            <span className={`${classNames.textClass} ${userData.banned ? "banned" : ""} ${userData.deleted ? "deleted" : ""}`} 
-                onClick={() => navigate(`/user/${userData.username}`)}>
-                {userData.deleted ? i18n.user.deleted : functions.util.toProperCase(userData.username)}
-            </span>
+            <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
+                {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                <span className={`${textClass} ${userData.banned ? "banned" : ""} ${userData.deleted ? "deleted" : ""}`}>
+                    {timeString}{userData.deleted ? i18n.user.deleted : functions.util.toProperCase(userData.username)}
+                </span>
+                {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
+            </div>
         )
     }
 }
