@@ -184,7 +184,7 @@ export default class JSXFunctions {
     
                 if (openingBraceIndex !== -1 && closingBraceIndex !== -1) {
                     const colorText = text.slice(openingBraceIndex + 1, closingBraceIndex)
-                    items.push({text: null, jsx: <span key={items.length} style={{ color: `#${hexColor}` }}>{colorText}</span>})
+                    items.push({text: null, jsx: <span key={items.length} style={{color: `#${hexColor}`}}>{colorText}</span>})
                     index = closingBraceIndex + 1
                     continue
                 }
