@@ -152,7 +152,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const updateTags = async () => {
         let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
-        if (!tags.length && props.post) tags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
+        if (!tags.length && !props.post) tags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
         setTags(tags)
     }
 
