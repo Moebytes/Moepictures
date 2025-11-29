@@ -118,6 +118,18 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         setSeekTo(seconds)
     }
 
+    const parseAnimatedPNG = async () => {
+        const start = new Date()
+        const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
+        const animated = functions.file.isAnimatedPng(arrayBuffer)
+        if (!animated) return 
+        const frames = await functions.video.extractAnimatedPngFrames(arrayBuffer)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+    }
+
     const parseUgoira = async () => {
         const start = new Date()
         const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
@@ -135,6 +147,10 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
 
         if (imageLoaded && functions.file.isWebP(props.anim)) {
             parseAnimatedWebP()
+        }
+
+        if (imageLoaded && functions.file.isPNG(props.anim)) {
+            parseAnimatedPNG()
         }
 
         if (imageLoaded && functions.file.isZip(props.anim)) {

@@ -124,6 +124,8 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                 gifData = await functions.video.extractGIFFrames(arrayBuffer)
             } else if (functions.file.isWebP(images[0])) {
                 gifData = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
+            } else if (functions.file.isPNG(images[0])) {
+                gifData = await functions.video.extractAnimatedPngFrames(arrayBuffer)
             }
             let frameArray = [] as ArrayBuffer[] 
             let delayArray = [] as number[]
@@ -186,6 +188,10 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                 const buffer = await fetch(image).then((r) => r.arrayBuffer())
                 const animatedWebp = functions.file.isAnimatedWebp(buffer)
                 if (animatedWebp) return setIsAnimated(true)
+            } else if (functions.file.isPNG(images[0])) {
+                const buffer = await fetch(image).then((r) => r.arrayBuffer())
+                const animatedPNG = functions.file.isAnimatedPng(buffer)
+                if (animatedPNG) return setIsAnimated(true)
             }
             setIsAnimated(false)
         }

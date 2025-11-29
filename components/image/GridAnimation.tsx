@@ -36,6 +36,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
             if (!gifData) {
                 if (functions.file.isGIF(props.anim)) return parseGIF()
                 if (functions.file.isWebP(props.anim)) return parseAnimatedWebP()
+                if (functions.file.isPNG(props.anim)) return parseAnimatedPNG()
             }
         }
     }))
@@ -112,6 +113,18 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         const animated = functions.file.isAnimatedWebp(arrayBuffer)
         if (!animated) return 
         const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+    }
+
+    const parseAnimatedPNG = async () => {
+        const start = new Date()
+        const arrayBuffer = await getCurrentBuffer(true)
+        const animated = functions.file.isAnimatedPng(arrayBuffer)
+        if (!animated) return 
+        const frames = await functions.video.extractAnimatedPngFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000

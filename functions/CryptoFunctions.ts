@@ -41,6 +41,7 @@ export default class CryptoFunctions {
         const cached = functions.cache.cachedThumbs.get(cacheKey)
         if (cached) return cached
         let isAnimatedWebP = false
+        let isAnimatedPNG = false
         let arrayBuffer = null as ArrayBuffer | null
         let decryptedImg = await decryption.decryptedLink(img, privateKey, serverPublicKey, session)
         if (forceImage && functions.file.isVideo(img)) {
@@ -77,7 +78,11 @@ export default class CryptoFunctions {
             arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
             isAnimatedWebP = functions.file.isAnimatedWebp(arrayBuffer)
         }
-        if (functions.file.isImage(img) && !isAnimatedWebP) {
+        if (functions.file.isPNG(img)) {
+            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            isAnimatedPNG = functions.file.isAnimatedPng(arrayBuffer)
+        }
+        if (functions.file.isImage(img) && !isAnimatedWebP && !isAnimatedPNG) {
             const base64 = await functions.link.linkToBase64(decryptedImg)
             functions.cache.cachedImages.set(cacheKey, base64)
             return base64
@@ -102,13 +107,18 @@ export default class CryptoFunctions {
             return img
         }
         let isAnimatedWebP = false
+        let isAnimatedPNG = false
         let arrayBuffer = null as ArrayBuffer | null
         let decrypted = await decryption.decryptedLink(img, privateKey, serverPublicKey, session)
         if (functions.file.isWebP(img)) {
             arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
             isAnimatedWebP = functions.file.isAnimatedWebp(arrayBuffer)
         }
-        if (functions.file.isImage(img) && !isAnimatedWebP) {
+        if (functions.file.isPNG(img)) {
+            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            isAnimatedPNG = functions.file.isAnimatedPng(arrayBuffer)
+        }
+        if (functions.file.isImage(img) && !isAnimatedWebP && !isAnimatedPNG) {
             const base64 = await functions.link.linkToBase64(decrypted)
             functions.cache.cachedImages.set(cacheKey, base64)
             return base64

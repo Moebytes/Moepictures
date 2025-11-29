@@ -33,19 +33,23 @@ export default class CompareFunctions {
             let upscaledCurrentBuffer = await functions.http.getBuffer(functions.util.appendURLParams(currentUpscaledLink, {upscaled: true}), {"x-force-upscale": "true"})
 
             if (imgBuffer.byteLength && functions.file.isImage(imgLink)) {
-                const isAnimated = functions.file.isAnimatedWebp(imgBuffer)
+                let isAnimated = functions.file.isAnimatedWebp(imgBuffer)
+                if (!isAnimated) isAnimated = functions.file.isAnimatedPng(imgBuffer)
                 if (!isAnimated) imgBuffer = decryption.decrypt(imgBuffer, privateKey, serverPublicKey, session)
             }
             if (currentBuffer.byteLength && functions.file.isImage(currentLink)) {
-                const isAnimated = functions.file.isAnimatedWebp(currentBuffer)
+                let isAnimated = functions.file.isAnimatedWebp(currentBuffer)
+                if (!isAnimated) isAnimated = functions.file.isAnimatedPng(currentBuffer)
                 if (!isAnimated) currentBuffer = decryption.decrypt(currentBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledImgBuffer.byteLength && functions.file.isImage(upscaledImgLink)) {
-                const isAnimated = functions.file.isAnimatedWebp(upscaledImgBuffer)
+                let isAnimated = functions.file.isAnimatedWebp(upscaledImgBuffer)
+                if (!isAnimated) isAnimated = functions.file.isAnimatedPng(upscaledImgBuffer)
                 if (!isAnimated) upscaledImgBuffer = decryption.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session)
             }
             if (upscaledCurrentBuffer.byteLength && functions.file.isImage(currentUpscaledLink)) {
-                const isAnimated = functions.file.isAnimatedWebp(upscaledCurrentBuffer)
+                let isAnimated = functions.file.isAnimatedWebp(upscaledCurrentBuffer)
+                if (!isAnimated) isAnimated = functions.file.isAnimatedPng(upscaledCurrentBuffer)
                 if (!isAnimated) upscaledCurrentBuffer = decryption.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session)
             }
 

@@ -34,8 +34,6 @@ interface Props {
     reader?: boolean
 }
 
-let isAnimatedWebP = false
-
 const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y}) => {
     const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()

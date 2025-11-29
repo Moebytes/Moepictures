@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {useActiveSelector, useActiveActions, useThemeSelector} from "../../store"
+import {useLayoutSelector, useActiveSelector, useActiveActions, useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import "./styles/actionbanner.less"
 
@@ -7,6 +7,7 @@ let timeout = null as any
 
 const ActionBanner: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
+    const {mobile} = useLayoutSelector()
     const {actionBanner} = useActiveSelector()
     const {setActionBanner} = useActiveActions()
     const [stickyText, setStickyText] = useState("")
@@ -78,7 +79,7 @@ const ActionBanner: React.FunctionComponent = (props) => {
         if (actionBanner === "account-restored") {
             return "27%"
         } else {
-            return "45%"
+            return mobile ? "32%" : "45%"
         }
     }
 

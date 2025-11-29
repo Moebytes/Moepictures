@@ -68,8 +68,8 @@ export default class SQLTag {
         const query: QueryConfig = {
             text: functions.multiTrim(
                 /*sql*/`INSERT INTO "tags" ("tag", "type", "description", "image", "imageHash", "createDate", "creator", 
-                "updatedDate", "updater") ${valueQuery} ON CONFLICT ("tag") DO UPDATE SET
-                ${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`
+                "updatedDate", "updater") ${valueQuery} ON CONFLICT ("tag") 
+                ${noImageUpdate ? "DO NOTHING" : "DO UPDATE SET \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`
             ),
             values: [...rawValues]
         }

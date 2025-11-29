@@ -100,6 +100,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [progressText, setProgressText] = useState("")
     const [currentLive2D, setCurrentLive2D] = useState(false)
     const [currentAnimatedWebp, setCurrentAnimatedWebp] = useState(false)
+    const [currentAnimatedPng, setCurrentAnimatedPng] = useState(false)
     const [currentPixivUgoira, setCurrentPixivUgoira] = useState(false)
     const progressBarRef = useRef<HTMLDivElement>(null!)
     const artistInputRef = useRef<HTMLInputElement>(null!)
@@ -170,6 +171,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const testFormats = async () => {
             const buffer = await fetch(currentImg).then((r) => r.arrayBuffer())
             setCurrentAnimatedWebp(functions.file.isAnimatedWebp(buffer))
+            setCurrentAnimatedPng(functions.file.isAnimatedPng(buffer))
             setCurrentPixivUgoira(await functions.file.isUgoiraZip(buffer))
             setCurrentLive2D(await functions.file.isLive2DZip(buffer))
         }
@@ -565,7 +567,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             return <PostSong audio={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else if (functions.file.isVideo(currentImg)) {
             return <PostVideo video={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
-        } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp || currentPixivUgoira) {
+        } else if (functions.file.isGIF(currentImg) || currentAnimatedWebp || currentAnimatedPng || currentPixivUgoira) {
             return <PostAnimation anim={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>
         } else {
             return <PostImage img={currentImg} noKeydown={true} noNotes={true} uploadImage={uploadImage}/>

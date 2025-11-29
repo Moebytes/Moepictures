@@ -160,6 +160,7 @@ export default class ServerUpload {
         let upscaledImageFilenames = [] as string[]
         let imageOrders = [] as number[]
         let r18 = functions.post.isR18(rating)
+        let inferredType = type
 
         for (let i = 0; i < images.length; i++) {
             let order = i + 1
@@ -257,6 +258,9 @@ export default class ServerUpload {
             } else if (functions.file.isWebP(`.${ext}`)) {
                 const animated = functions.file.isAnimatedWebp(new Uint8Array(bufferFallback).buffer)
                 kind = animated ? "animation" : "image"
+            } else if (functions.file.isPNG(`.${ext}`)) {
+                const animated = functions.file.isAnimatedPng(new Uint8Array(bufferFallback).buffer)
+                kind = animated ? "animation" : "image"
             } else if (functions.file.isImage(`.${ext}`)) {
                 kind = "image"
             } else if (functions.file.isGIF(`.${ext}`)) {
@@ -273,6 +277,7 @@ export default class ServerUpload {
                 if (live2d) kind = "live2d"
                 if (ugoira) kind = "animation"
             }
+            if (images.length === 1) inferredType = kind as PostType
             if (imgChanged) {
                 if (buffer?.byteLength) {
                     let imagePath = functions.link.getImagePath(kind, postID, Number(order), filename)
@@ -343,7 +348,7 @@ export default class ServerUpload {
         if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
         if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
 
-        return {hasOriginal, hasUpscaled, imageFilenames, upscaledImageFilenames, imageOrders}
+        return {hasOriginal, hasUpscaled, imageFilenames, upscaledImageFilenames, imageOrders, inferredType}
     }
 
     public static updatePost = async (postID: string, data: {artists: UploadTag[] | MiniTag[], type: PostType, rating: PostRating, 

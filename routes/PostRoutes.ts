@@ -1203,7 +1203,9 @@ const PostRoutes = (app: Express) => {
                     const tempDest = path.join(tempDir, basename)
                     fs.writeFileSync(tempDest, new Uint8Array(buffer))
                     let isAnimatedWebp = false
+                    let isAnimatedPng = false
                     if (functions.file.isWebP(basename)) isAnimatedWebp = functions.file.isAnimatedWebp(new Uint8Array(buffer).buffer)
+                    if (functions.file.isPNG(basename)) isAnimatedPng = functions.file.isAnimatedPng(new Uint8Array(buffer).buffer)
 
                     if (post.type === "image" || post.type === "comic") {
                         await waifu2x.upscaleImage(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})
@@ -1214,7 +1216,7 @@ const PostRoutes = (app: Express) => {
                     }
                     let newBuffer = fs.readFileSync(tempDest)
                     if (compressJPG) {
-                        if (functions.file.isGIF(basename) || isAnimatedWebp) {
+                        if (functions.file.isGIF(basename) || isAnimatedWebp || isAnimatedPng) {
                             newBuffer = await sharp(newBuffer, {animated: true, limitInputPixels: false}).webp().toBuffer()
                         } else {
                             newBuffer = await sharp(newBuffer, {limitInputPixels: false}).jpeg({optimiseScans: true, trellisQuantisation: true, quality: 95}).toBuffer()

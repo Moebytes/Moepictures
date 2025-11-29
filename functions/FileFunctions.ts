@@ -5,10 +5,10 @@ import {isLive2DZip as verifyLive2DZip} from "live2d-renderer"
 import JSZip from "jszip"
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
+const animationExtensions = [".gif", ".webp", ".apng", ".png", ".zip"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".fbx", ".vrm", ".obj"]
-const zipExtensions = [".zip"]
 
 export default class FileFunctions {
     public static isImage = (file?: string) => {
@@ -23,6 +23,20 @@ export default class FileFunctions {
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
         return functions.util.arrayIncludes(ext, imageExtensions)
+    }
+
+    public static isAnimation = (file?: string) => {
+        if (!file) return false
+        file = file.replace(/\?.*$/, "")
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return functions.util.arrayIncludes(ext, animationExtensions)
+        }
+        if (file.startsWith("data:image")) {
+            return true
+        }
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return functions.util.arrayIncludes(ext, animationExtensions)
     }
 
     public static isAudio = (file?: string) => {
@@ -52,10 +66,10 @@ export default class FileFunctions {
         file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
-            return functions.util.arrayIncludes(ext, zipExtensions)
+            return ext === ".zip"
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
-        return functions.util.arrayIncludes(ext, zipExtensions)
+        return ext === ".zip"
     }
 
     public static isGIF = (file?: string) => {
@@ -84,6 +98,20 @@ export default class FileFunctions {
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
         return ext === ".webp"
+    }
+
+    public static isPNG = (file?: string) => {
+        if (!file) return false
+        file = file.replace(/\?.*$/, "")
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".png" || ext === ".apng"
+        }
+        if (file?.startsWith("data:image/png")) {
+            return true
+        }
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".png" || ext === ".apng"
     }
 
     public static isGLTF = (file?: string) => {
@@ -136,7 +164,16 @@ export default class FileFunctions {
         for (let i = 0; i < byteArray.length; i++) {
             str += String.fromCharCode(byteArray[i])
         }
-        return str.indexOf("ANIM") !== -1
+        return str.indexOf("ANMF") !== -1
+    }
+
+    public static isAnimatedPng = (buffer: ArrayBuffer) => {
+        let str = ""
+        const byteArray = new Uint8Array(Buffer.from(buffer))
+        for (let i = 0; i < byteArray.length; i++) {
+            str += String.fromCharCode(byteArray[i])
+        }
+        return str.indexOf("acTL") !== -1
     }
 
     public static isVideo = (file?: string) => {
@@ -201,7 +238,6 @@ export default class FileFunctions {
         
         return hasImage && hasAnimation
     }
-
 
     public static isUgoira = async (file?: string) => {
         if (!file) return false

@@ -12,10 +12,10 @@ export default class ValidationFunctions {
     public static maxFileSize = (format: FileFormat = {}) => {
         const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm} = format
         const maxSize = jpg ? 10 :
-                        png ? 10 :
                         avif ? 10 :
                         mp3 ? 10 :
                         wav ? 10 :
+                        png ? 25 :
                         gif ? 25 :
                         webp ? 25 :
                         glb ? 30 :

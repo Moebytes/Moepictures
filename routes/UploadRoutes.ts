@@ -79,9 +79,9 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
 
-        const {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(postID, {images, upscaledImages, type, rating, source, 
+        const {hasOriginal, hasUpscaled, inferredType} = await serverFunctions.upload.insertImages(postID, {images, upscaledImages, type, rating, source, 
           characters, imgChanged: true, sourceLinks})
-        await serverFunctions.upload.updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, 
+        await serverFunctions.upload.updatePost(postID, {artists, type: inferredType, rating, style, source, parentID, hasOriginal, hasUpscaled, 
           uploader: req.session.username, updater: req.session.username, approver: req.session.username})
 
         await serverFunctions.upload.insertTags(postID, {artists, characters, series, newTags, 
@@ -169,9 +169,9 @@ const CreateRoutes = (app: Express) => {
           if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, parentID)
         }
 
-        let {hasOriginal, hasUpscaled, imageFilenames, upscaledImageFilenames, imageOrders} = 
+        let {hasOriginal, hasUpscaled, imageFilenames, upscaledImageFilenames, imageOrders, inferredType} = 
         await serverFunctions.upload.insertImages(postID, {images, upscaledImages, type, rating, source, characters, imgChanged})
-        let {newSlug} = await serverFunctions.upload.updatePost(postID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled,
+        let {newSlug} = await serverFunctions.upload.updatePost(postID, {artists, type: inferredType, rating, style, source, parentID, hasOriginal, hasUpscaled,
         updater: req.session.username, updatedDate})
 
         if (post.slug && post.slug !== newSlug) {
@@ -262,10 +262,10 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertUnverifiedPost()
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
 
-        let {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(postID, {unverified: true, images, upscaledImages, 
+        let {hasOriginal, hasUpscaled, inferredType} = await serverFunctions.upload.insertImages(postID, {unverified: true, images, upscaledImages, 
           type, rating, source, characters, imgChanged: true, sourceLinks})
 
-        await serverFunctions.upload.updatePost(postID, {unverified: true, artists, newTags, type, rating, style,
+        await serverFunctions.upload.updatePost(postID, {unverified: true, artists, newTags, type: inferredType, rating, style,
         source, hasOriginal, hasUpscaled, duplicates, parentID, uploader: req.session.username,
         updater: req.session.username})
 
@@ -359,11 +359,11 @@ const CreateRoutes = (app: Express) => {
         if (unverifiedID) await sql.post.deleteUnverifiedChild(postID)
         if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, parentID)
 
-        let {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(postID, {unverified: true, images, upscaledImages, characters, 
+        let {hasOriginal, hasUpscaled, inferredType} = await serverFunctions.upload.insertImages(postID, {unverified: true, images, upscaledImages, characters, 
           imgChanged, rating, source, type})
 
         await serverFunctions.upload.updatePost(postID, {unverified: true, originalID: originalPostID, reason, hasUpscaled, hasOriginal, 
-        artists, rating, source, type, style, updater: req.session.username, newTags, parentID})
+        artists, rating, source, type: inferredType, style, updater: req.session.username, newTags, parentID})
 
         let {addedTags, removedTags} = await serverFunctions.upload.insertTags(postID, {unverified: true, post: unverifiedPost, tags,
         artists, characters, series, newTags, username: req.session.username})
@@ -467,11 +467,11 @@ const CreateRoutes = (app: Express) => {
         let type = unverified.type
         let rating = unverified.rating
         let style = unverified.style
-        let {hasOriginal, hasUpscaled, imageOrders, imageFilenames, upscaledImageFilenames} = 
+        let {hasOriginal, hasUpscaled, imageOrders, imageFilenames, upscaledImageFilenames, inferredType} = 
         await serverFunctions.upload.insertImages(newPostID, {unverifiedImages: true, images: unverified.images, 
         upscaledImages: unverified.images, type, rating, source: sourceData, characters, imgChanged})
 
-        let {newSlug} = await serverFunctions.upload.updatePost(newPostID, {artists, type, rating, style, hasOriginal, hasUpscaled,
+        let {newSlug} = await serverFunctions.upload.updatePost(newPostID, {artists, type: inferredType, rating, style, hasOriginal, hasUpscaled,
         source: sourceData, uploader: unverified.uploader, updater: unverified.updater, uploadDate: unverified.uploadDate,
         parentID: unverified.parentID, updatedDate: unverified.updatedDate, approver: req.session.username})
 
@@ -636,9 +636,9 @@ const CreateRoutes = (app: Express) => {
             const newPostID = await sql.post.insertPost()
             await sql.post.insertChild(newPostID, parentID)
 
-            const {hasOriginal, hasUpscaled} = await serverFunctions.upload.insertImages(newPostID, {images, upscaledImages, type, rating, source, 
+            const {hasOriginal, hasUpscaled, inferredType} = await serverFunctions.upload.insertImages(newPostID, {images, upscaledImages, type, rating, source, 
               characters, imgChanged: true})
-            await serverFunctions.upload.updatePost(newPostID, {artists, type, rating, style, source, parentID, hasOriginal, hasUpscaled, 
+            await serverFunctions.upload.updatePost(newPostID, {artists, type: inferredType, rating, style, source, parentID, hasOriginal, hasUpscaled, 
               uploader: req.session.username,
             updater: req.session.username, approver: req.session.username})
             await serverFunctions.upload.insertTags(newPostID, {artists, characters, series, newTags: [], tags, 

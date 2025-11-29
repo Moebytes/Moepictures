@@ -5,6 +5,7 @@ import {JsWebm} from "jswebm"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
 import GifEncoder from "gif-encoder"
+import parseAPNG from "apng-js"
 import pixels from "image-pixels"
 import {GIFFrame} from "../types/Types"
 
@@ -135,6 +136,74 @@ export default class VideoFunctions {
                 resolve()
             })
             return webpData
+        }
+    }
+
+    public static extractAnimatedPngFramesNative = async (data: ArrayBuffer) => {
+        let index = 0
+        // @ts-ignore
+        let imageDecoder = new ImageDecoder({data, type: "image/png", preferAnimation: true})
+        let result = [] as GIFFrame[]
+        while (true) {
+            try {
+                const decoded = await imageDecoder.decode({frameIndex: index++})
+                const canvas = document.createElement("canvas")
+                canvas.width = decoded.image.codedWidth
+                canvas.height = decoded.image.codedHeight
+                const canvasContext = canvas.getContext("2d")!
+                const image = await createImageBitmap(decoded.image)
+                canvasContext.drawImage(image, 0, 0)
+                const duration = decoded.image.duration || 0
+                result.push({frame: canvas, delay: duration / 1000.0})
+            } catch {
+                break
+            }
+        }
+
+        return result
+    }
+
+    public static extractAnimatedPngFrames = async (pngBuffer: ArrayBuffer, nativeOnly?: boolean) => {
+        if ("ImageDecoder" in window) {
+            return this.extractAnimatedPngFramesNative(pngBuffer)
+        } else {
+            if (nativeOnly) return []
+            const apng = parseAPNG(pngBuffer)
+            if (apng instanceof Error) return []
+            let frames = [] as GIFFrame[]
+            await apng.createImages()
+            const canvas = document.createElement("canvas")
+            canvas.width = apng.width
+            canvas.height = apng.height
+            const ctx = canvas.getContext("2d")!
+
+            let previousData: ImageData | null = null
+
+            for (const frame of apng.frames) {
+                if (frame.disposeOp === 2) {
+                    previousData = ctx.getImageData(0, 0, apng.width, apng.height)
+                }
+                if (frame.blendOp === 0) {
+                    ctx.clearRect(frame.left, frame.top, frame.width, frame.height)
+                }
+
+                ctx.drawImage(frame.imageElement!, frame.left, frame.top)
+
+                const rendered = document.createElement("canvas")
+                rendered.width = apng.width
+                rendered.height = apng.height
+                const renderCtx = rendered.getContext("2d")!
+                renderCtx.drawImage(canvas, 0, 0)
+
+                frames.push({delay: frame.delay, frame: rendered})
+
+                if (frame.disposeOp === 1) {
+                    ctx.clearRect(frame.left, frame.top, frame.width, frame.height)
+                } else if (frame.disposeOp === 2 && previousData) {
+                    ctx.putImageData(previousData, 0, 0)
+                }
+            }
+            return frames
         }
     }
 
@@ -285,6 +354,12 @@ export default class VideoFunctions {
             const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
             if (functions.file.isAnimatedWebp(arrayBuffer)) {
                 const frames = await this.extractAnimatedWebpFrames(arrayBuffer)
+                return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
+            }
+        } else if (functions.file.isPNG(link)) {
+            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            if (functions.file.isAnimatedPng(arrayBuffer)) {
+                const frames = await this.extractAnimatedPngFrames(arrayBuffer)
                 return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
             }
         }
