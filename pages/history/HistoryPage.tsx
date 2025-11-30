@@ -66,7 +66,6 @@ const HistoryPage: React.FunctionComponent = () => {
     const {setPermaDeleteAllDialog} = usePostDialogActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [historyTab, setHistoryTab] = useState("")
-    const [commitSearch, setCommitSearch] = useState("")
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -145,7 +144,6 @@ const HistoryPage: React.FunctionComponent = () => {
             result = await functions.http.get("/api/post/deleted", {query}, session, setSessionFlag).catch(() => [])
         }
         result = result.map((r) => ({itemType: historyTab, ...r}))
-        setCommitSearch(query ?? "")
         return result
     }
 
@@ -237,7 +235,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={initItems} onEdit={initItems} exact={commitSearch ? true : false}/>)
+                    onDelete={initItems} onEdit={initItems}/>)
             }
 
             if (historyTab === "tag") {
