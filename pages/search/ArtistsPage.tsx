@@ -38,7 +38,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {setArtists} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -72,24 +71,23 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/artists", {sort, query, limit}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/artists", {sort, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/artists", {sort, query, limit, offset}, session, setSessionFlag)
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "tagCount"})
+    const {items, visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, setManagedItems,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "tagCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -101,11 +99,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setArtists(items)
         setArtistsPage(page)
     }, [items, page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -153,8 +146,8 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.artists}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

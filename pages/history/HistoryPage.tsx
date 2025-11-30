@@ -41,6 +41,7 @@ import PageControls from "../../components/site/PageControls"
 import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch, DeletedPost} from "../../types/Types"
 import "./styles/historypage.less"
 
+let limit = 100
 let pageAmount = 15
 
 const HistoryPage: React.FunctionComponent = () => {
@@ -65,7 +66,6 @@ const HistoryPage: React.FunctionComponent = () => {
     const {setPermaDeleteAllDialog} = usePostDialogActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [historyTab, setHistoryTab] = useState("")
-    const [searchQuery, setSearchQuery] = useState("")
     const [commitSearch, setCommitSearch] = useState("")
     const navigate = useNavigate()
 
@@ -121,63 +121,63 @@ const HistoryPage: React.FunctionComponent = () => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async () => {
+    const loadInitial = async (query?: string) => {
         let result = [] as History[]
         if (historyTab === "post") {
-            result = await functions.http.get("/api/post/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/post/history", {query}, session, setSessionFlag)
         }
         if (historyTab === "tag") {
-            result = await functions.http.get("/api/tag/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/tag/history", {query}, session, setSessionFlag)
         }
         if (historyTab === "note") {
-            result = await functions.http.get("/api/note/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/note/history", {query}, session, setSessionFlag)
         }
         if (historyTab === "group") {
-            result = await functions.http.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/group/history", {query}, session, setSessionFlag)
         }
         if (historyTab === "alias") {
-            result = await functions.http.get("/api/alias/history", {query: searchQuery}, session, setSessionFlag)
+            result = await functions.http.get("/api/alias/history", {query}, session, setSessionFlag)
         }
         if (historyTab === "search") {
-            result = await functions.http.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/user/history", {query}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "delete") {
-            result = await functions.http.get("/api/post/deleted", {query: searchQuery}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/deleted", {query}, session, setSessionFlag).catch(() => [])
         }
         result = result.map((r) => ({itemType: historyTab, ...r}))
-        setCommitSearch(searchQuery)
+        setCommitSearch(query ?? "")
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let result = [] as History[]
         if (historyTab === "post") {
-            result = await functions.http.get("/api/post/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "tag") {
-            result = await functions.http.get("/api/tag/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/tag/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "note") {
-            result = await functions.http.get("/api/note/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/note/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "group") {
-            result = await functions.http.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/group/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "alias") {
-            result = await functions.http.get("/api/alias/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/alias/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "search") {
-            result = await functions.http.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/user/history", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "delete") {
-            result = await functions.http.get("/api/post/deleted", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/deleted", {query, offset}, session, setSessionFlag).catch(() => [])
         }
         result = result.map((r) => ({itemType: historyTab, ...r}))
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, toggleScroll} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, toggleScroll} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "historyCount"})
 
     const resetState = () => {
         setPage(1)
@@ -185,7 +185,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         resetState()
-        initItemLoader()
+        initItems()
     }, [session, historyTab])
 
     useEffect(() => {
@@ -198,7 +198,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (historyFlag) {
-            initItemLoader()
+            initItems()
             setHistoryFlag(false)
         }
     }, [historyFlag, session])
@@ -206,6 +206,8 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (historyTab) searchParams.set("type", historyTab)
+        let pathString = `${location.pathname}?${searchParams.toString()}`
+        navigate(pathString, {replace: true})
     }, [scroll, historyTab])
 
     useEffect(() => {
@@ -234,7 +236,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.postID !== current.postID) previous = null
                 jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={initItemLoader} onEdit={initItemLoader} exact={commitSearch ? true : false}/>)
+                    onDelete={initItems} onEdit={initItems} exact={commitSearch ? true : false}/>)
             }
 
             if (historyTab === "tag") {
@@ -248,7 +250,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.tag !== current.tag) previous = null
                 jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={initItemLoader} onEdit={initItemLoader}/>)
+                    onDelete={initItems} onEdit={initItems}/>)
             }
 
             if (historyTab === "group") {
@@ -262,7 +264,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.groupID !== current.groupID) previous = null
                 jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={initItemLoader} onEdit={initItemLoader}/>)
+                    onDelete={initItems} onEdit={initItems}/>)
             }
 
             if (historyTab === "note") {
@@ -277,19 +279,19 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.postID !== current.postID &&
                     previous?.order !== current.order) previous = null
                 jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={item} 
-                    onDelete={initItemLoader} onEdit={initItemLoader} current={i === currentIndex}/>)
+                    onDelete={initItems} onEdit={initItems} current={i === currentIndex}/>)
             }
 
             if (historyTab === "alias") {
-                jsx.push(<AliasHistoryRow key={i} history={visible[i] as AliasHistorySearch} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+                jsx.push(<AliasHistoryRow key={i} history={visible[i] as AliasHistorySearch} onDelete={initItems} onEdit={initItems}/>)
             }
 
             if (historyTab === "search") {
-                jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={initItemLoader}/>)
+                jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={initItems}/>)
             }
 
             if (historyTab === "delete") {
-                jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={initItemLoader}/>)
+                jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={initItems}/>)
             }
         }
         if (!scroll) {
@@ -306,8 +308,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -325,8 +327,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -344,8 +346,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -363,8 +365,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -382,8 +384,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -401,8 +403,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>
@@ -424,8 +426,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                             <img src={search}/>
                         </button>
                     </div>

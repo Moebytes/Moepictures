@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {PostDeleteRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModPostDeletions: React.FunctionComponent = (props) => {
@@ -35,16 +36,16 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/post/delete/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/post/delete/request/list", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -70,13 +71,13 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const deletePost = async (username: string, postID: string) => {
         await functions.http.delete("/api/post/delete", {postID}, session, setSessionFlag)
         await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, postID: string) => {
         await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisibleRequestFlag(true)
     }
 

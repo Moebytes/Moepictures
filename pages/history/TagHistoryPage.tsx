@@ -13,6 +13,7 @@ import PageControls from "../../components/site/PageControls"
 import {TagHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
+let limit = 100
 let pageAmount = 15
 
 interface Props {
@@ -90,11 +91,11 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+    const {visibleItems, page, setPage, maxPage, initItems} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "historyCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [tag, session])
 
     const generateRevisionsJSX = () => {
@@ -114,7 +115,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.tag !== current.tag) previous = null
             jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={initItemLoader} onEdit={initItemLoader}/>)
+                onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

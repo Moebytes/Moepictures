@@ -13,6 +13,7 @@ import PageControls from "../../components/site/PageControls"
 import {PostHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
+let limit = 100
 let pageAmount = 15
 
 interface Props {
@@ -89,16 +90,16 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
-        const result = await functions.http.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
+    const updateOffset = async (offset: number) => {
+        const result = await functions.http.get("/api/post/history", {postID, username, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+    const {visibleItems, page, setPage, maxPage, initItems} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "historyCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
         processRedirects()
     }, [postID, session])
 
@@ -119,7 +120,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.postID !== current.postID) previous = null
             jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={initItemLoader} onEdit={initItemLoader} imageHeight={300}/>)
+                onDelete={initItems} onEdit={initItems} imageHeight={300}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

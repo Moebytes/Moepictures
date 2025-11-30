@@ -3,6 +3,16 @@ import path from "path"
 import {UploadImage} from "../types/Types"
 
 export default class UtilFunctions {
+    public static defer = async <T extends any[]>(func: (...params: T) => any, timeout: number, ...args: T) => {
+        return new Promise<void>((resolve, reject) => {
+            setTimeout(() => {
+                Promise.resolve(func(...args))
+                    .then(resolve)
+                    .catch(reject)
+            }, timeout)
+        })
+    }
+
     public static parseURLParams = (url: string, params?: object | null) => {
         if (!params) return url
         const parsed = url.startsWith("http") ? new URL(url) : new URL(url, window.location.origin)

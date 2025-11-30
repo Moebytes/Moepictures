@@ -95,7 +95,8 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "message-user-label",
             profilePictureClass: "message-user-img",
             profilePicture: getCreatorPFP(),
-            filter: creatorDefaultIcon ? getFilter() : ""
+            filter: creatorDefaultIcon ? getFilter() : "",
+            session, setSessionFlag
         }, i18n, navigate)
     }
 

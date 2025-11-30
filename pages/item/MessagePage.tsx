@@ -11,14 +11,6 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
 useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import systemCrown from "../../assets/icons/system-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
@@ -131,12 +123,12 @@ const MessagePage: React.FunctionComponent = () => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
         usePaginatedScroll({loadInitial, pageAmount, countKey: "replyCount"})
 
     useEffect(() => {
         updateMessage()
-        initItemLoader()
+        initItems()
     }, [messageID, session])
 
     useEffect(() => {
@@ -219,7 +211,7 @@ const MessagePage: React.FunctionComponent = () => {
         let visible = visibleItems as MessageUserReply[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<MessageReply reply={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader} onReplyJump={onReplyJump}/>)
+            jsx.push(<MessageReply reply={visible[i]} onDelete={initItems} onEdit={initItems} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -351,7 +343,7 @@ const MessagePage: React.FunctionComponent = () => {
             return setError(false)
         }
         await functions.http.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
-        initItemLoader()
+        initItems()
         setText("")
     }
 

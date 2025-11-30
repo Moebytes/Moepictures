@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
+import React, {useEffect, useState} from "react"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -7,17 +7,16 @@ import ImageGrid from "../../components/search/ImageGrid"
 import Footer from "../../components/site/Footer"
 import TagBanner from "../../components/site/TagBanner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
-useActiveActions, useLayoutSelector, useSearchActions} from "../../store"
+useActiveActions, useLayoutSelector} from "../../store"
 
 let scrollTimer = null as any
 let lastPos = 0
 
 const PostsPage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
-    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setHideNavbar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {setMobileScrolling} = useInteractionActions()
-    const {setSquare} = useSearchActions()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
 

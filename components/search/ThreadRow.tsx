@@ -101,7 +101,8 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "thread-user-label",
             profilePictureClass: "thread-user-img",
             profilePicture: getCreatorPFP(),
-            filter: creatorDefaultIcon ? getFilter() : ""
+            filter: creatorDefaultIcon ? getFilter() : "",
+            session, setSessionFlag
         }, i18n, navigate)
     }
 

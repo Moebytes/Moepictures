@@ -15,6 +15,7 @@ import premiumContributorPencil from "../assets/icons/premium-contributor-pencil
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import enLocale from "../assets/locales/en.json"
+import {Session} from "../types/Types"
 
 export default class JSXFunctions {
     public static verifyEmailJSX = (username: string, link: string) => {
@@ -391,10 +392,10 @@ export default class JSXFunctions {
     public static usernameJSX = (userData: {username: string, role: string, banned: boolean | null, deleted: boolean | null, 
         imagePost?: string | null}, classNames: {containerClass: string, textClass: string, imageClass: string, 
         profilePictureClass?: string, recipientClass?: string, editText?: string, date?: string, profilePicture?: string, 
-        filter?: string, recipientAmount?: number}, 
+        filter?: string, recipientAmount?: number, session?: Session, setSessionFlag?: (value: boolean) => void}, 
         i18n: typeof enLocale, navigate: NavigateFunction) => {
         let {containerClass, textClass, imageClass, profilePictureClass, recipientClass, editText, date, 
-            profilePicture, filter, recipientAmount} = classNames
+            profilePicture, filter, recipientAmount, session, setSessionFlag} = classNames
         let timeString = editText && date ? `${editText} ${functions.date.timeAgo(date, i18n)} ${i18n.time.by} `  : ""
 
         const openProfile = (event: React.MouseEvent) => {
@@ -408,7 +409,7 @@ export default class JSXFunctions {
         const openProfilePost = (event: React.MouseEvent) => {
             if (!userData.imagePost) return
             event.stopPropagation()
-            functions.post.openPost(userData.imagePost, event, navigate)
+            functions.post.openPost(userData.imagePost, event, navigate, session, setSessionFlag)
         }
 
         if (userData.role === "admin") {

@@ -6,6 +6,7 @@ import "./styles/searchsuggestions.less"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {TagType, TagCount} from "../../types/Types"
+import NewsBanner from "../site/NewsBanner"
 
 interface Props {
     active: boolean

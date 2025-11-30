@@ -38,7 +38,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const {setGroupSearchFlag} = useFlagActions()
     const [sortType, setSortType] = useState("date" as GroupSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const {ratingType} = useSearchSelector()
     const sortRef = useRef<HTMLDivElement>(null)
 
@@ -69,36 +68,35 @@ const GroupsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/groups", {sort, query, rating, limit}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/groups", {sort, query: searchQuery, rating, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/groups", {sort, query, rating, limit, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, toggleScroll} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "groupCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, toggleScroll} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "groupCount"})
 
     useEffect(() => {
         if (groupSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(groupSearchFlag)
-                initItemLoader(groupSearchFlag)
+                initItems(groupSearchFlag)
                 setGroupSearchFlag(null)
             }, 200)
         }
     }, [groupSearchFlag])
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, ratingType, session])
 
     useEffect(() => {
@@ -108,11 +106,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setGroupsPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -162,8 +155,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.sort.groups}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

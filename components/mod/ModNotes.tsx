@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {UnverifiedNoteSearch, Note} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModNotes: React.FunctionComponent = (props) => {
@@ -33,16 +34,16 @@ const ModNotes: React.FunctionComponent = (props) => {
         return notes
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/note/list/unverified", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/note/list/unverified", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "noteCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "noteCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -55,12 +56,12 @@ const ModNotes: React.FunctionComponent = (props) => {
 
     const approveNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.http.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const rejectNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.http.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const noteDataJSX = (unverifiedNote: UnverifiedNoteSearch) => {

@@ -69,8 +69,8 @@ export default class HTTPFunctions {
 
     public static get = async <T extends string>(endpoint: T, params: GetEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void, noLock?: boolean) => {
-        if (!this.privateKey) await functions.http.updateClientKeys(session)
-        if (!this.serverPublicKey) await functions.http.updateServerPublicKey(session)
+        const privateKey = await this.updateClientKeys(session)
+        const serverPublicKey = await this.updateServerPublicKey(session)
         const headers = {"x-csrf-token": session.csrfToken}
 
         let cacheKey = `${endpoint}_${JSON.stringify(params)}`
@@ -104,7 +104,7 @@ export default class HTTPFunctions {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})
                 return json as GetEndpoint<T>["response"]
             }
-            let decrypted = decryption.decryptAPI(arrayBuffer, this.privateKey, this.serverPublicKey, session)?.toString()
+            let decrypted = decryption.decryptAPI(arrayBuffer, privateKey, serverPublicKey, session)?.toString()
             try {
                 decrypted = JSON.parse(decrypted!)
             } catch {}

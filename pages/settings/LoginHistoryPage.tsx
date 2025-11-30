@@ -55,7 +55,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader} = usePaginatedScroll({loadInitial, pageAmount})
+    const {visibleItems, page, setPage, maxPage, initItems} = usePaginatedScroll({loadInitial, pageAmount})
 
     useEffect(() => {
         if (!session.cookie) return
@@ -64,7 +64,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
             navigate("/login")
             setSidebarText("Login required.")
         }
-        initItemLoader()
+        initItems()
     }, [session])
 
     const logoutOtherSessions = async () => {

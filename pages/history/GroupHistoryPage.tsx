@@ -13,6 +13,7 @@ import PageControls from "../../components/site/PageControls"
 import {GroupHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
+let limit = 100
 let pageAmount = 15
 
 interface Props {
@@ -77,16 +78,16 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
-        const result = await functions.http.get("/api/group/history", {slug, username, offset: newOffset}, session, setSessionFlag)
+    const updateOffset = async (offset: number) => {
+        const result = await functions.http.get("/api/group/history", {slug, username, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+    const {visibleItems, page, setPage, maxPage, initItems} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "historyCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [slug, session])
 
     const generateRevisionsJSX = () => {
@@ -106,7 +107,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.groupID !== current.groupID) previous = null
             jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={initItemLoader} onEdit={initItemLoader}/>)
+                onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

@@ -11,6 +11,7 @@ import PageControls from "../../components/site/PageControls"
 import {TagEditRequest, Tag} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModTagEdits: React.FunctionComponent = (props) => {
@@ -42,8 +43,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/tag/edit/request/list", {offset}, session, setSessionFlag, true)
         const tags = await functions.http.get("/api/tag/list", {tags: result.map((r) => r.tag)}, session, setSessionFlag, true)
         for (const tag of tags) {
             oldTags.set(tag.tag, tag)
@@ -52,11 +53,11 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -81,12 +82,12 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         }
         await functions.http.put("/api/tag/edit", {...request, tag: request.tag, key: request.key, image: bytes!, featuredPost: request.featuredPost?.postID, r18: request.r18!}, session, setSessionFlag)
         await functions.http.post("/api/tag/edit/request/fulfill", {username: request.username, tag: request.tag, image: request.image, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
         await functions.http.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const diffJSX = (oldTag: Tag, newTag: TagEditRequest, showOldTag: boolean) => {

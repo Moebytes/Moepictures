@@ -13,6 +13,7 @@ import PageControls from "../../components/site/PageControls"
 import {NoteHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
+let limit = 100
 let pageAmount = 15
 
 interface Props {
@@ -79,16 +80,16 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
-        const result = await functions.http.get("/api/note/history", {postID, order: Number(order), username, offset: newOffset}, session, setSessionFlag)
+    const updateOffset = async (offset: number) => {
+        const result = await functions.http.get("/api/note/history", {postID, order: Number(order), username, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "historyCount"})
+    const {visibleItems, page, setPage, maxPage, initItems} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "historyCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
         processRedirects()
     }, [postID, session])
 
@@ -110,7 +111,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
             jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
-                onDelete={initItemLoader} onEdit={initItemLoader} current={i === currentIndex}/>)
+                onDelete={initItems} onEdit={initItems} current={i === currentIndex}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

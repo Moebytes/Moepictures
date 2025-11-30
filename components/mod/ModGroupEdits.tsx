@@ -11,6 +11,7 @@ import PageControls from "../../components/site/PageControls"
 import {Group, GroupEditRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModGroupEdits: React.FunctionComponent = (props) => {
@@ -42,8 +43,8 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/group/edit/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/group/edit/request/list", {offset}, session, setSessionFlag, true)
         const groups = await functions.http.get("/api/groups/list", {slugs: result.map((r) => r.group)}, session, setSessionFlag, true)
         for (const group of groups) {
             oldGroups.set(group.name, group)
@@ -52,11 +53,11 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -70,12 +71,12 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     const editGroup = async (username: string, slug: string, name: string, description: string, reason: string | null) => {
         await functions.http.put("/api/group/edit", {username, slug, name, description, reason}, session, setSessionFlag)
         await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const rejectRequest = async (username: string, slug: string) => {
         await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const diffJSX = (oldGroup: Group, newGroup: GroupEditRequest, showOldGroup: boolean) => {

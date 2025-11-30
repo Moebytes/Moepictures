@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {TagDeleteRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModTagDeletions: React.FunctionComponent = (props) => {
@@ -33,16 +34,16 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/tag/delete/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/tag/delete/request/list", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -56,12 +57,12 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const deleteTag = async (username: string, tag: string) => {
         await functions.http.delete("/api/tag/delete", {tag}, session, setSessionFlag)
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const generateTagsJSX = () => {

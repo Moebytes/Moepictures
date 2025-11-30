@@ -21,6 +21,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {MessageSearch, CommentSort} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 50
 
 const MailPage: React.FunctionComponent = (props) => {
@@ -42,7 +43,6 @@ const MailPage: React.FunctionComponent = (props) => {
     const {setSoftDeleteMessageID, setSoftDeleteMessageFlag} = useMessageDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const [hideSystem, setHideSystem] = useState(false)
     const sortRef = useRef<HTMLDivElement>(null)
 
@@ -56,7 +56,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }, [hideSystem])
 
     useEffect(() => {
-        if (hasNotification) initItemLoader()
+        if (hasNotification) initItems()
     }, [hasNotification])
 
     const getFilter = () => {
@@ -71,7 +71,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const softDeleteMessage = async () => {
         if (!softDeleteMessageID) return
         await functions.http.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
-        initItemLoader()
+        initItems()
     }
 
     useEffect(() => {
@@ -81,16 +81,6 @@ const MailPage: React.FunctionComponent = (props) => {
             setSoftDeleteMessageID(null)
         }
     }, [softDeleteMessageFlag, softDeleteMessageID, session])
-
-    useEffect(() => {
-        if (messageSearchFlag) {
-            setTimeout(() => {
-                setSearchQuery(messageSearchFlag)
-                initItemLoader(messageSearchFlag)
-                setMessageSearchFlag(null)
-            }, 500)
-        }
-    }, [messageSearchFlag, hideSystem])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -117,24 +107,33 @@ const MailPage: React.FunctionComponent = (props) => {
         }
     }, [session])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/messages", {sort, query, hideSystem}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/messages", {sort, query: searchQuery, hideSystem, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/messages", {sort, query, hideSystem, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, toggleScroll} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "messageCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, toggleScroll} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "messageCount"})
 
     useEffect(() => {
-        initItemLoader()
+        if (messageSearchFlag) {
+            setTimeout(() => {
+                setSearchQuery(messageSearchFlag)
+                initItems(messageSearchFlag)
+                setMessageSearchFlag(null)
+            }, 500)
+        }
+    }, [messageSearchFlag, hideSystem])
+
+    useEffect(() => {
+        initItems()
     }, [sortType, sortReverse, hideSystem])
 
     useEffect(() => {
@@ -144,11 +143,6 @@ const MailPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setMailPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -175,7 +169,7 @@ const MailPage: React.FunctionComponent = (props) => {
         let visible = visibleItems as MessageSearch[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<MessageRow message={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+            jsx.push(<MessageRow message={visible[i]} onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -185,13 +179,13 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const readAll = async () => {
         await functions.http.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
-        initItemLoader()
+        initItems()
         setHasNotification(false)
     }
 
     const unreadAll = async () => {
         await functions.http.post("/api/message/bulkread", {readStatus: false}, session, setSessionFlag)
-        initItemLoader()
+        initItems()
         setHasNotification(true)
     }
 
@@ -220,8 +214,8 @@ const MailPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.mail}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

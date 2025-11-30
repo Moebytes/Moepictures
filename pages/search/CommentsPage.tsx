@@ -18,6 +18,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {CommentSearch, CommentSort} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 15
 
 const CommentsPage: React.FunctionComponent = (props) => {
@@ -35,7 +36,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {setCommentsPage} = usePageActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const {commentID, commentJumpFlag, commentSearchFlag} = useFlagSelector()
     const {setCommentID, setCommentJumpFlag, setCommentSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
@@ -77,34 +77,33 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/comments", {sort, query}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/comments", {sort, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/comments", {sort, query, offset}, session, setSessionFlag)
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "commentCount"})
+    const {items, visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "commentCount"})
 
     useEffect(() => {
         if (commentSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(commentSearchFlag)
-                initItemLoader(commentSearchFlag)
+                initItems(commentSearchFlag)
                 setCommentSearchFlag(null)
             }, 200)
         }
     }, [commentSearchFlag])
     
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -114,11 +113,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setCommentsPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const onCommentJump = async (commentID: number) => {
         let index = -1
@@ -171,7 +165,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (comment.fake) continue
             if (!session.username) if (comment.post.rating !== functions.r13()) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(comment.post.rating)) continue
-            jsx.push(<CommentRow comment={comment} onDelete={initItemLoader} onEdit={initItemLoader} onCommentJump={onCommentJump}/>)
+            jsx.push(<CommentRow comment={comment} onDelete={initItems} onEdit={initItems} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -190,8 +184,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.comments}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

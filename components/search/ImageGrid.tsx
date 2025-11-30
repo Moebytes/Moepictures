@@ -1,6 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {useNavigate, useLocation} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
+import React, {useEffect, useRef, useState} from "react"
+import {useNavigate} from "react-router-dom"
+import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
@@ -13,6 +13,8 @@ import GridLive2D from "../image/GridLive2D"
 import noresults from "../../assets/images/noresults.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
+import usePaginatedScroll from "../../components/site/usePaginatedScroll"
+import PageControls from "../../components/site/PageControls"
 import "./styles/imagegrid.less"
 import {PostSearch} from "../../types/Types"
 
@@ -24,8 +26,6 @@ interface Ref {
 
 let interval = null as any
 let reloadedPost = false
-let replace = true
-let manualHistoryChange = false
 let init = true
 let limit = 100
 
@@ -35,49 +35,45 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
     pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {posts, visiblePosts} = useCacheSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {posts} = useCacheSelector()
     const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
-    const [index, setIndex] = useState(0)
-    const {scrollY} = useInteractionSelector()
-    const {setScrollY, setEnableDrag, setMobileScrolling} = useInteractionActions()
     const {setSidebarText} = useActiveActions()
-    const {randomFlag, imageSearchFlag, pageFlag, reloadPostFlag, saveSearchFlag} = useFlagSelector()
-    const {setRandomFlag, setImageSearchFlag, setPostAmount, setHeaderFlag, setPageFlag, setSaveSearchFlag} = useFlagActions()
-    const {setPremiumRequired, setShowPageDialog} = useMiscDialogActions()
+    const {page: postPage} = usePageSelector()
+    const {setPage: setPostPage} = usePageActions()
+    const {randomFlag, imageSearchFlag, reloadPostFlag, saveSearchFlag} = useFlagSelector()
+    const {setRandomFlag, setImageSearchFlag, setPostAmount, setHeaderFlag, setSaveSearchFlag} = useFlagActions()
+    const {setPremiumRequired} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {page} = usePageSelector()
-    const {setPage} = usePageActions()
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
-    const [offset, setOffset] = useState(0)
-    const [ended, setEnded] = useState(false)
-    const [updatePostFlag, setUpdatePostFlag] = useState(false)
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
-    const [queryPage, setQueryPage] = useState(1)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
     const [allImagesLoaded, setAllImagesLoaded] = useState(true)
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
-    const location = useLocation()
 
     const getPageAmount = () => {
-        let loadAmount = 36
-        if (sizeType === "tiny") loadAmount = 36
-        if (sizeType === "small") loadAmount = 21
-        if (sizeType === "medium") loadAmount = 15
-        if (sizeType === "large") loadAmount = 12
-        if (sizeType === "massive") loadAmount = 6
+        let loadAmount = 72
+        if (sizeType === "tiny") loadAmount = 72
+        if (sizeType === "small") loadAmount = 42
+        if (sizeType === "medium") loadAmount = 30
+        if (sizeType === "large") loadAmount = 24
+        if (sizeType === "massive") loadAmount = 2
         return loadAmount * pageMultiplier
     }
 
     const getLoadAmount = () => {
-        const loadAmount = mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType)
+        const loadAmount = mobile ? functions.render.getImagesPerRowMobile(sizeType) 
+            : functions.render.getImagesPerRow(sizeType)
         return loadAmount * 5
     }
+
+    let pageAmount = scroll ? getLoadAmount() : getPageAmount()
 
     const saveSearchSkip = () => {
         if (saveSearchFlag) {
@@ -90,124 +86,89 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
     }
 
-    const searchPosts = async (query?: string) => {
+    const loadInitial = async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
         saveSearchSkip()
         if (!query) query = search
         if (query?.includes(" ") && !saveSearchFlag) {
             query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
         }
-        let tags = query?.trim().split(/ +/g).filter(Boolean) || []
+        let tags = query?.trim().split(/\s+/g).filter(Boolean) || []
         if (tags.length > 3) {
             if (!session.username) {
                 setSearch("")
                 setSidebarText("Login required.")
-                return navigate("/login")
+                navigate("/login")
+                return []
             }
-            if (!permissions.isPremium(session)) return setPremiumRequired("tags")
+            if (!permissions.isPremium(session)) {
+                setPremiumRequired("tags")
+                return []
+            }
         }
         if (query?.startsWith("history:")) {
             if (!session.username) {
                 setSearch("")
                 setSidebarText("Login required.")
-                return navigate("/login")
+                navigate("/login")
+                return []
             }
-            if (!permissions.isPremium(session)) return setPremiumRequired(true)
+            if (!permissions.isPremium(session)) {
+                setPremiumRequired(true)
+                return []
+            }
         }
         setNoResults(false)
-        setSearch(query ?? "")
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
-        setEnded(false)
-        setIndex(0)
-        setVisiblePosts([])
         setIsRandomSearch(false)
-        setPosts(result)
-        setUpdatePostFlag(true)
         if (!loaded) setLoaded(true)
         if (!result.length) setNoResults(true)
-        if (!search) {
-            document.title = i18n.title
-        }
+        if (!search) document.title = i18n.title
+        return result
     }
+
+    const updateOffset = async (offset: number, query?: string) => {
+        if (noResults) return []
+        let result = [] as PostSearch[]
+        if (isRandomSearch) {
+            result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
+            sort: "random", showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
+        } else {
+            if (!query) query = search
+            if (query.includes(" ") && !saveSearchFlag) {
+                query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
+            }
+            result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
+            sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
+        }
+        return result
+    }
+
+    const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount, startIndex,
+        setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 
+        pageAmount, limit, countKey: "postCount"})
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: "random", showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
-        setEnded(false)
-        setIndex(0)
-        setVisiblePosts([])
-        setPosts(result)
         setIsRandomSearch(true)
-        setUpdatePostFlag(true)
+        restructureItems(result)
         document.title = "Random"
     }
 
     useEffect(() => {
-        if (!scroll) updateOffset()
-        const queryParam = new URLSearchParams(window.location.search).get("query")
-        const pageParam = new URLSearchParams(window.location.search).get("page")
-        const onDOMLoaded = async () => {
-            setTimeout(() => {
-                if (!scrollY) {
-                    const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
-                    const img = document.querySelector(".image")
-                    if (!img && !elements?.[0]) {
-                        searchPosts()
-                    } else {
-                        let counter = 0
-                        for (let i = 0; i < elements.length; i++) {
-                            if (elements[i]?.innerText?.toLowerCase() === "all") counter++
-                            if (elements[i]?.innerText?.toLowerCase() === "random") counter++
-                        }
-                        if (!img && counter >= 4) randomPosts()
-                    }
-                } else {
-                    setScrollY(0)
-                }
-            }, 2000)
-            if (queryParam) searchPosts(queryParam)
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setPage(Number(pageParam))
-            }
-        }
-        const updateStateChange = (event: Event) => {
-            replace = true
-            const queryParam = new URLSearchParams(window.location.search).get("query")
-            const pageParam = new URLSearchParams(window.location.search).get("page")
-            if (queryParam) {
-                setSearch(queryParam)
-                setSearchFlag(true)
-            }
-            if (pageParam) setPageFlag(Number(pageParam))
-            if (event.type === "popstate") {
-                if (manualHistoryChange) {
-                    manualHistoryChange = false
-                    return
-                }
-                manualHistoryChange = true
-                window.history.go(-1)
-            } else if (event.type === "pushstate") {
-                if (manualHistoryChange) {
-                    manualHistoryChange = false
-                    return
-                }
-                manualHistoryChange = true
-                window.history.go(2)
-            }
-        }
-        window.addEventListener("load", onDOMLoaded)
-        window.addEventListener("popstate", updateStateChange)
-        window.addEventListener("pushstate", updateStateChange)
-        return () => {
-            window.removeEventListener("load", onDOMLoaded)
-            window.removeEventListener("popstate", updateStateChange)
-            window.removeEventListener("pushstate", updateStateChange)
-        }
+        if (postPage) setManagedPage(postPage)
+        if (posts.length) setManagedItems(posts as PostSearch[])
+        if (search) setManagedQuery(search)
     }, [])
+
+    useEffect(() => {
+        setPosts(items)
+        setPostPage(page)
+    }, [items, page])
 
     useEffect(() => {
         window.clearInterval(interval)
@@ -224,49 +185,16 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [session, autoSearch, search])
 
     useEffect(() => {
-        setTimeout(() => {
-            setMobileScrolling(false)
-        }, 100)
-        if (scroll) {
-            setEnded(false)
-            setIndex(0)
-            setVisiblePosts([])
-            setPage(1)
-            setSearchFlag(true)
+        if (searchFlag) {
+            setSearchQuery(search)
+            initItems()
         }
-    }, [scroll])
-
-    useEffect(() => {
-        const updatePageOffset = () => {
-            const postOffset = (page - 1) * getPageAmount()
-            if (posts[postOffset]?.fake) {
-                setEnded(false)
-                return updateOffset()
-            }
-            const postAmount = Number(posts[0]?.postCount)
-            let maximum = postOffset + getPageAmount()
-            if (maximum > postAmount) maximum = postAmount
-            const maxPost = posts[maximum - 1]
-            if (!maxPost) {
-                setEnded(false)
-                updateOffset()
-            }
-        }
-        if (!scroll) updatePageOffset()
-    }, [session, scroll, page, pageMultiplier, ended, noResults, sizeType, 
-        imageType, ratingType, styleType, sortType, sortReverse, showChildren,
-        favSearch])
-
-    useEffect(() => {
-        if (searchFlag) searchPosts()
-    }, [searchFlag])
+    }, [search, searchFlag])
 
     useEffect(() => {
         if (reloadedPost) {
             setTimeout(() => {
                 reloadedPost = false
-                const savedPage = localStorage.getItem("page")
-                if (savedPage) setPage(Number(savedPage))
             }, 500)
             return
         }
@@ -280,232 +208,49 @@ const ImageGrid: React.FunctionComponent = (props) => {
                     if (init) {
                         return init = false
                     } else {
-                        updateSearch()
+                        initItems()
                     }
                 }
         }
-        const updateSearch = async () => {
-            setPage(1)
-            searchPosts()
-        }
-        if (loaded) {
-            updateSearch()
-        } else {
-            checkLoaded()
-        }
-    }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, scroll, loaded])
-
-    useEffect(() => {
-        if (reloadedPost) return
-        if (loaded) {
-            if (page === 1) {
-                searchPosts()
-            } else {
-                updateOffset()
-            }
-        }
-    }, [pageMultiplier, showChildren, favSearch, loaded])
+        loaded ? initItems() : checkLoaded()
+    }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
+        pageMultiplier, showChildren, favSearch, loaded])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
     }, [reloadPostFlag])
 
     useEffect(() => {
-        if (randomFlag) {
-            setPage(1)
-            randomPosts(search)
-        }
+        if (randomFlag) randomPosts(search)
     }, [session, randomFlag, search])
 
     useEffect(() => {
         if (imageSearchFlag) {
             reloadedPost = true
-            setEnded(false)
-            setIndex(0)
-            setVisiblePosts([])
-            setPage(1)
-            setPosts(imageSearchFlag)
-            setUpdatePostFlag(true)
+            restructureItems(imageSearchFlag as PostSearch[])
             document.title = "Image Search"
             setImageSearchFlag(null)
         }
     }, [imageSearchFlag])
 
     useEffect(() => {
-        setPostAmount(index)
-    }, [index])
+        setSidebarText(`${totalCount === 1 ? `1 ${i18n.sidebar.result}` : `${totalCount} ${i18n.sidebar.results}`}`)
+        setNavigationPosts(items)
+    }, [items, totalCount, i18n])
 
     useEffect(() => {
-        const updatePosts = async () => {
-            let currentIndex = 0
-            const newVisiblePosts = [] as PostSearch[]
-            for (let i = 0; i < getPageAmount(); i++) {
-                if (!posts[currentIndex]) break
-                const post = posts[currentIndex] as PostSearch
-                currentIndex++
-                newVisiblePosts.push(post)
-            }
-            setIndex(currentIndex)
-            setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
-            setUpdatePostFlag(false)
-        }
-        if (updatePostFlag) updatePosts()
-    }, [updatePostFlag, sizeType, pageMultiplier])
+        setPostAmount(visibleItems.length)
+        let visibleSlice = scroll ? items.slice(startIndex, visibleItems.length) 
+            : items.slice(startIndex, startIndex + pageAmount)
+        setVisiblePosts(visibleSlice)
+    }, [items])
 
     useEffect(() => {
-        setUpdatePostFlag(true)
-    }, [pageMultiplier, sizeType])
-
-    useEffect(() => {
-        let resultCount = Number(posts[0]?.postCount)
-        if (Number.isNaN(resultCount)) resultCount = posts.length
-        setSidebarText(`${resultCount === 1 ? `1 ${i18n.sidebar.result}` : `${resultCount || 0} ${i18n.sidebar.results}`}`)
-        setNavigationPosts(posts)
-    }, [posts, i18n])
-
-    const updateOffset = async () => {
-        if (noResults) return
-        if (ended) return
-        let newOffset = offset + limit
-        let padded = false
-        if (!scroll) {
-            newOffset = (page - 1) * getPageAmount()
-            if (newOffset === 0) {
-                if (posts[newOffset]?.fake) {
-                    padded = true
-                } else {
-                    return
-                }
-            }
-        }
-        let result = null as unknown as PostSearch[]
-        if (isRandomSearch) {
-            result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
-            sort: "random", showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
-        } else {
-            let query = search
-            if (query.includes(" ") && !saveSearchFlag) {
-                query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
-            }
-            result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
-            sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset: newOffset}, session, setSessionFlag)
-        }
-        let hasMore = result?.length >= limit
-        const cleanPosts = posts.filter((p) => !p.fake)
-        if (!scroll) {
-            if (cleanPosts.length <= newOffset) {
-                result = [...new Array(newOffset).fill({fake: true, postCount: cleanPosts[0]?.postCount}), ...result]
-                padded = true
-            }
-        }
-        if (hasMore) {
-            setOffset(newOffset)
-            if (padded) {
-                setPosts(result)
-            } else {
-                setPosts(functions.util.removeDuplicates([...posts, ...result]))
-            }
-        } else {
-            if (result?.length) {
-                if (padded) {
-                    setPosts(result)
-                } else {
-                    setPosts(functions.util.removeDuplicates([...posts, ...result]))
-                }
-            }
-            setEnded(true)
-        }
-    }
-
-    useEffect(() => {
-        const updatePosts = async () => {
-            if (!loaded) return
-            if (visiblePosts.length < getPageAmount()) {
-                let currentIndex = index
-                const newVisiblePosts = structuredClone(visiblePosts)
-                const max = getPageAmount() - visiblePosts.length 
-                for (let i = 0; i < max; i++) {
-                    if (!posts[currentIndex]) return updateOffset()
-                    const post = posts[currentIndex] as PostSearch
-                    currentIndex++
-                    newVisiblePosts.push(post)
-                }
-                setIndex(currentIndex)
-                setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
-            }
-        }
-        if (scroll) updatePosts()
-    }, [session, sizeType, scroll, pageMultiplier, sizeType, imageType, 
-        ratingType, styleType, sortType, sortReverse, showChildren, favSearch])
-
-    useEffect(() => {
-        const scrollHandler = async () => {
-            if (!loaded) return
-            if (functions.dom.scrolledToBottom()) {
-                let currentIndex = index
-                if (!posts[currentIndex]) return updateOffset()
-                const newVisiblePosts = structuredClone(visiblePosts)
-                for (let i = 0; i < getLoadAmount(); i++) {
-                    if (!posts[currentIndex]) return updateOffset()
-                    const post = posts[currentIndex] as PostSearch
-                    currentIndex++
-                    newVisiblePosts.push(post)
-                }
-                setIndex(currentIndex)
-                setVisiblePosts(functions.util.removeDuplicates(newVisiblePosts))
-            }
-        }
-        if (scroll) window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, 
-        ratingType, styleType, sortType, sortReverse, pageMultiplier, showChildren, favSearch])
-
-    useEffect(() => {
-        if (loaded) {
-            const searchParams = new URLSearchParams(window.location.search)
-            navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
-        }
-    }, [loaded])
-
-    useEffect(() => {
-        if (manualHistoryChange) return
-        const searchParams = new URLSearchParams(window.location.search)
-        if (search) searchParams.set("query", search)
-    }, [search])
-
-    useEffect(() => {
-        if (manualHistoryChange) return
-        const searchParams = new URLSearchParams(window.location.search)
-        if (!scroll) searchParams.set("page", String(page))
-        if (!searchParams.toString()) return
-        if (replace) {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`, {replace: true})
-            replace = false
-        } else {
-            if (!scroll) navigate(`${location.pathname}?${searchParams.toString()}`)
-        }
-    }, [scroll, page])
-
-    const maxPage = () => {
-        if (!posts?.length) return 1
-        if (Number.isNaN(Number(posts[0]?.postCount))) return 10000
-        return Math.ceil(Number(posts[0]?.postCount) / getPageAmount())
-    }
-
-    useEffect(() => {
-        if (posts?.length) {
-            const newPostsRef = posts.map(() => React.createRef<Ref>())
+        if (items?.length) {
+            const newPostsRef = items.map(() => React.createRef<Ref>())
             setPostsRef(newPostsRef)
-            const maxPostPage = maxPage()
-            if (maxPostPage === 1) return
-            if (queryPage > maxPostPage) {
-                setQueryPage(maxPostPage)
-                setPage(maxPostPage)
-            }
         }
-    }, [posts, page, queryPage, pageMultiplier])
+    }, [items])
 
     useEffect(() => {
         let cleanup = null as (() => void) | Promise<void> | void | null
@@ -524,7 +269,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return () => {
             if (cleanup instanceof Function) cleanup()
         }
-    }, [visiblePosts, postsRef, session])
+    }, [visibleItems, postsRef, session])
 
     useEffect(() => {
         let cleanup = null as (() => void) | Promise<void> | void | null
@@ -550,7 +295,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const populateCache = () => {
-            for (const post of posts) {
+            for (const post of items) {
                 const image = post.images?.[0]
                 if (!image) continue
                 const thumbnail = functions.link.getThumbnailLink(image, sizeType, session, mobile)
@@ -558,56 +303,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
         }
         populateCache()
-    }, [posts, sizeType, pageMultiplier, session, mobile])
-
-    const firstPage = () => {
-        setPage(1)
-        window.scroll(0, 0)
-        setTimeout(() => {
-            setMobileScrolling(false)
-        }, 100)
-    }
-
-    const previousPage = () => {
-        let newPage = page - 1 
-        if (newPage < 1) newPage = 1 
-        setPage(newPage)
-        window.scroll(0, 0)
-        setTimeout(() => {
-            setMobileScrolling(false)
-        }, 100)
-    }
-
-    const nextPage = () => {
-        let newPage = page + 1 
-        if (newPage > maxPage()) newPage = maxPage()
-        setPage(newPage)
-        window.scroll(0, 0)
-        setTimeout(() => {
-            setMobileScrolling(false)
-        }, 100)
-    }
-
-    const lastPage = () => {
-        setPage(maxPage())
-        window.scroll(0, 0)
-        setTimeout(() => {
-            setMobileScrolling(false)
-        }, 100)
-    }
-
-    const goToPage = (newPage: number) => {
-        if (newPage < 1) newPage = 1
-        if (newPage > maxPage()) newPage = maxPage()
-        setPage(newPage)
-    }
-
-    useEffect(() => {
-        if (pageFlag) {
-            goToPage(pageFlag)
-            setPageFlag(null)
-        }
-    }, [pageFlag])
+    }, [items, sizeType, pageMultiplier, session, mobile])
 
     useEffect(() => {
         if (scroll) return
@@ -627,44 +323,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setAllImagesLoaded(true)
         }
         poll()
-    }, [scroll, visiblePosts, page])
-
-    const generatePageButtonsJSX = () => {
-        const jsx = [] as React.ReactElement[]
-        let buttonAmount = 7
-        if (mobile) buttonAmount = 3
-        if (maxPage() < buttonAmount) buttonAmount = maxPage()
-        let counter = 0
-        let increment = -3
-        if (page > maxPage() - 3) increment = -4
-        if (page > maxPage() - 2) increment = -5
-        if (page > maxPage() - 1) increment = -6
-        if (mobile) {
-            increment = -2
-            if (page > maxPage() - 2) increment = -3
-            if (page > maxPage() - 1) increment = -4
-        }
-        while (counter < buttonAmount) {
-            const pageNumber = page + increment
-            if (pageNumber > maxPage()) break
-            if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
-                counter++
-            }
-            increment++
-        }
-        return jsx
-    }
+    }, [scroll, items, page])
 
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]
-        let visible = [] as PostSearch[]
-        if (scroll) {
-            visible = functions.util.removeDuplicates(visiblePosts)
-        } else {
-            const postOffset = (page - 1) * getPageAmount()
-            visible = posts.slice(postOffset, postOffset + getPageAmount()) as PostSearch[]
-        }
+        let visible = visibleItems as PostSearch[]
 
         visiblePromisesRef.current.splice(0, visiblePromisesRef.current.length)
         for (let i = 0; i < visible.length; i++) {
@@ -684,23 +347,23 @@ const ImageGrid: React.FunctionComponent = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridModel id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridLive2D id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
+                jsx.push(<GridSong id={post.postID} img={img} cached={cached} audio={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
-                jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
+                jsx.push(<GridVideo id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
-                jsx.push(<GridAnimation key={post.postID} id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
+                jsx.push(<GridAnimation id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                jsx.push(<GridImage id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }
@@ -712,16 +375,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             )
         }
         if (!scroll) {
-            jsx.push(
-                <div key="page-numbers" className="page-container">
-                    {page <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
-                    {page <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
-                    {generatePageButtonsJSX()}
-                    {page >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
-                    {page >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
-                </div>
-            )
+            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
     }

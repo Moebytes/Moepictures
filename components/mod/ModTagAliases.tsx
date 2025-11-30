@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {AliasRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModTagAliases: React.FunctionComponent = (props) => {
@@ -32,16 +33,16 @@ const ModTagAliases: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/tag/aliasto/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/tag/aliasto/request/list", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -55,12 +56,12 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     const aliasTag = async (username: string, tag: string, aliasTo: string, reason: string | null) => {
         await functions.http.post("/api/tag/aliasto", {tag, aliasTo, username, reason}, session, setSessionFlag)
         await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const rejectRequest = async (username: string, tag: string, aliasTo: string) => {
         await functions.http.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
     }
 
     const generateTagsJSX = () => {

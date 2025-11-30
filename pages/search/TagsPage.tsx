@@ -42,7 +42,6 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all" as TagType)
-    const [searchQuery, setSearchQuery] = useState("")
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
 
@@ -73,31 +72,30 @@ const TagsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/tags", {sort, type: typeType, query, limit}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/tags", {sort, type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/tags", {sort, type: typeType, query, limit, offset}, session, setSessionFlag)
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "tagCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "tagCount"})
 
     useEffect(() => {
         if (tagSearchFlag !== null) {
-            initItemLoader(tagSearchFlag)
+            initItems(tagSearchFlag)
             setTagSearchFlag(null)
         }
     }, [tagSearchFlag])
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, typeType, session])
 
     useEffect(() => {
@@ -107,11 +105,6 @@ const TagsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setTagsPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -167,7 +160,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
             if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
-            jsx.push(<TagRow tag={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+            jsx.push(<TagRow tag={visible[i]} onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -217,8 +210,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
-                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

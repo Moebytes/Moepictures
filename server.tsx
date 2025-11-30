@@ -298,6 +298,7 @@ for (let i = 0; i < folders.length; i++) {
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         if (metadata.pages === 1) {
+          console.log(metadata.format)
           let width = Math.min(1000, Number(req.params.size))
           const ratio = metadata.height! / width
           body = await sharp(body, {animated: false, limitInputPixels: false})
@@ -407,12 +408,14 @@ for (let i = 0; i < folders.length; i++) {
       }
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
-        let width = Math.min(1000, Number(req.params.size))
-        const ratio = metadata.height! / width
-        body = await sharp(body, {animated: false, limitInputPixels: false})
-        .resize(Math.round(metadata.width! / ratio), width, {fit: "fill", kernel: "cubic"})
-        .toBuffer()
-        contentLength = body.byteLength
+        if (metadata.pages === 1) {
+          let width = Math.min(1000, Number(req.params.size))
+          const ratio = metadata.height! / width
+          body = await sharp(body, {animated: false, limitInputPixels: false})
+          .resize(Math.round(metadata.width! / ratio), width, {fit: "fill", kernel: "cubic"})
+          .toBuffer()
+          contentLength = body.byteLength
+        }
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")

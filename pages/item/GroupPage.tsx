@@ -96,7 +96,7 @@ const GroupPage: React.FunctionComponent = () => {
     }
 
     const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
-        initItemLoader, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
+        initItems, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
 
     const groupInfo = async () => {
         let group = null as GroupPosts | null
@@ -131,7 +131,7 @@ const GroupPage: React.FunctionComponent = () => {
         if (group) {
             document.title = group.name
             setHeaderText(group.name)
-            initItemLoader()
+            initItems()
         }
     }, [group, ratingType, session])
     
@@ -199,7 +199,7 @@ const GroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        initItemLoader()
+        initItems()
     }
 
     const changeReorderState = () => {

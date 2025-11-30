@@ -14,6 +14,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {CommentSort, ForumPostSearch} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 50
 
 const ForumPostsPage: React.FunctionComponent = () => {
@@ -30,7 +31,6 @@ const ForumPostsPage: React.FunctionComponent = () => {
     const {setForumPostsPage} = usePageActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const {forumPostSearchFlag} = useFlagSelector()
     const {setForumPostSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
@@ -58,34 +58,33 @@ const ForumPostsPage: React.FunctionComponent = () => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/user/forumposts", {username, query, sort}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/user/forumposts", {username, sort, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/user/forumposts", {username, sort, query, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, toggleScroll} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "postCount"})
+    const {visibleItems, page, setPage, maxPage, setSearchQuery, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount"})
 
     useEffect(() => {
         if (forumPostSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(forumPostSearchFlag)
-                initItemLoader(forumPostSearchFlag)
+                initItems(forumPostSearchFlag)
                 setForumPostSearchFlag(null)
             }, 200)
         }
     }, [forumPostSearchFlag])
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -96,11 +95,6 @@ const ForumPostsPage: React.FunctionComponent = () => {
         setForumPostsPage(page)
     }, [page])
 
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
-
     const generateForumPostsJSX = () => {
         const jsx = [] as React.ReactElement[]
         let visible = visibleItems as ForumPostSearch[]
@@ -108,7 +102,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
             const forumPost = visible[i]
             if (forumPost.fake) continue
             if (!functions.post.isR18(ratingType)) if (forumPost.r18) continue
-            jsx.push(<ForumPostRow forumPost={forumPost} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+            jsx.push(<ForumPostRow forumPost={forumPost} onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)

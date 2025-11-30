@@ -11,6 +11,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/modposts.less"
 import {Report, ThreadReply, ThreadUser, UserComment} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 15
 
 interface Props {
@@ -162,16 +163,16 @@ const ModReports: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/search/reports", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "reportCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "reportCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -198,7 +199,7 @@ const ModReports: React.FunctionComponent = (props) => {
             const request = visible[i]
             if (!request) break
             if (request.fake) continue
-            jsx.push(<ReportRow key={request.id} request={request} updateReports={initItemLoader}/>)
+            jsx.push(<ReportRow key={request.id} request={request} updateReports={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)

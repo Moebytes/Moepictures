@@ -7,12 +7,8 @@ PostSearch, PostHistory, MiniTagGroup} from "../types/Types"
 
 export default class CompareFunctions {
     public static imagesChanged = async (revertPost: PostSearch | PostHistory, currentPost: PostSearch | PostHistory, session: Session) => {
-        let privateKey = functions.http.privateKey
-        let serverPublicKey = functions.http.serverPublicKey
-        if (!privateKey) await functions.http.updateClientKeys(session)
-        if (!serverPublicKey) await functions.http.updateServerPublicKey(session)
-        privateKey = functions.http.privateKey
-        serverPublicKey = functions.http.serverPublicKey
+        let privateKey = await functions.http.updateClientKeys(session)
+        let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (revertPost.images.length !== currentPost.images.length) return true
         for (let i = 0; i < revertPost.images.length; i++) {

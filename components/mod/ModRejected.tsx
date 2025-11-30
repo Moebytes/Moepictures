@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {UnverifiedPost} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModRejected: React.FunctionComponent = (props) => {
@@ -38,16 +39,16 @@ const ModRejected: React.FunctionComponent = (props) => {
         return posts
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/post/deleted/unverified", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/post/deleted/unverified", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "postCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -72,13 +73,13 @@ const ModRejected: React.FunctionComponent = (props) => {
 
     const restorePost = async (postID: string) => {
         await functions.http.put("/api/post/undelete/unverified", {postID}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisiblePostFlag(true)
     }
 
     const rejectPost = async (postID: string) => {
         await functions.http.post("/api/post/reject", {postID}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisiblePostFlag(true)
     }
 

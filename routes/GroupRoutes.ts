@@ -183,6 +183,7 @@ const GroupRoutes = (app: Express) => {
             if (!name) return void res.status(400).send("Invalid name")
             const slug = functions.post.generateSlug(name)
             const group = await sql.group.group(slug) as GroupPosts
+            if (!group) return void res.status(400).send("Invalid group")
             group.posts = group.posts.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 group.posts = group.posts.filter((p) => !p.hidden)

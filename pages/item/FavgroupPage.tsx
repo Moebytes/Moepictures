@@ -91,7 +91,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     }
 
     const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
-        initItemLoader, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
+        initItems, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
 
     const favgroupInfo = async () => {
         let favgroup = await functions.http.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
@@ -123,7 +123,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (favgroup.private) {
                 if (session.username !== username) return functions.dom.replaceLocation("/403")
             }
-            initItemLoader()
+            initItems()
         }
     }, [favgroup, ratingType, session])
 
@@ -193,7 +193,7 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        initItemLoader()
+        initItems()
     }
 
     const changeReorderState = () => {

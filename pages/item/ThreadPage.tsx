@@ -135,12 +135,12 @@ const ThreadPage: React.FunctionComponent = () => {
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
         usePaginatedScroll({loadInitial, pageAmount, countKey: "replyCount"})
 
     useEffect(() => {
         updateThread()
-        initItemLoader()
+        initItems()
     }, [threadID, session])
 
     useEffect(() => {
@@ -201,7 +201,7 @@ const ThreadPage: React.FunctionComponent = () => {
         for (let i = 0; i < visible.length; i++) {
             const reply = visible[i]
             if (reply.fake) continue
-            jsx.push(<Reply reply={reply} thread={thread} onDelete={initItemLoader} onEdit={initItemLoader} onReplyJump={onReplyJump}/>)
+            jsx.push(<Reply reply={reply} thread={thread} onDelete={initItems} onEdit={initItems} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -356,7 +356,7 @@ const ThreadPage: React.FunctionComponent = () => {
             return setError(false)
         }
         await functions.http.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
-        initItemLoader()
+        initItems()
         setText("")
     }
 

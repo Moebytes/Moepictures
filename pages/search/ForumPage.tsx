@@ -19,6 +19,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {ThreadSearch, CommentSort} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 50
 
 const ForumPage: React.FunctionComponent = (props) => {
@@ -40,7 +41,6 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {setShowNewThreadDialog} = useThreadDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const sortRef = useRef<HTMLDivElement>(null)
 
     const getFilter = () => {
@@ -70,34 +70,33 @@ const ForumPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/threads", {sort, query}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/threads", {sort, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/threads", {sort, query, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "threadCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "threadCount"})
 
     useEffect(() => {
         if (threadSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(threadSearchFlag)
-                initItemLoader(threadSearchFlag)
+                initItems(threadSearchFlag)
                 setThreadSearchFlag(null)
             }, 500)
         }
     }, [threadSearchFlag])
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -107,11 +106,6 @@ const ForumPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setForumPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const newThreadDialog = () => {
         setShowNewThreadDialog(!showNewThreadDialog)
@@ -142,7 +136,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         let visible = visibleItems as ThreadSearch[]
         for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<ThreadRow thread={visible[i]} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+            jsx.push(<ThreadRow thread={visible[i]} onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -173,8 +167,8 @@ const ForumPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.forum}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

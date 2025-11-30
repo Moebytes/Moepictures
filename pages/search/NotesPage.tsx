@@ -19,6 +19,7 @@ import PageControls from "../../components/site/PageControls"
 import "./styles/itemspage.less"
 import {NoteSearch, CommentSort} from "../../types/Types"
 
+let limit = 100
 let pageAmount = 15
 
 const NotesPage: React.FunctionComponent = (props) => {
@@ -37,7 +38,6 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {setNotesPage} = usePageActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
     const {noteSearchFlag} = useFlagSelector()
     const {setNoteSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
@@ -52,16 +52,6 @@ const NotesPage: React.FunctionComponent = (props) => {
         if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
-
-    useEffect(() => {
-        if (noteSearchFlag) {
-            setTimeout(() => {
-                setSearchQuery(noteSearchFlag)
-                initItemLoader(noteSearchFlag)
-                setNoteSearchFlag(null)
-            }, 200)
-        }
-    }, [noteSearchFlag])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -81,24 +71,33 @@ const NotesPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (queryOverride?: string) => {
-        let query = queryOverride ? queryOverride : searchQuery
+    const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/notes", {sort, query}, session, setSessionFlag)
         return result
     }
 
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/notes", {sort, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.http.get("/api/search/notes", {sort, query, offset}, session, setSessionFlag)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "noteCount"})
+    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "noteCount"})
 
     useEffect(() => {
-        initItemLoader()
+        if (noteSearchFlag) {
+            setTimeout(() => {
+                setSearchQuery(noteSearchFlag)
+                initItems(noteSearchFlag)
+                setNoteSearchFlag(null)
+            }, 200)
+        }
+    }, [noteSearchFlag])
+
+    useEffect(() => {
+        initItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -108,11 +107,6 @@ const NotesPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setNotesPage(page)
     }, [page])
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search)
-        if (searchQuery) searchParams.set("query", searchQuery)
-    }, [searchQuery])
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
@@ -141,7 +135,7 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (noteGroup.fake) continue
             if (!session.username) if (noteGroup.post.rating !== functions.r13()) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(noteGroup.post.rating)) continue
-            jsx.push(<NoteRow note={noteGroup} onDelete={initItemLoader} onEdit={initItemLoader}/>)
+            jsx.push(<NoteRow note={noteGroup} onDelete={initItems} onEdit={initItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -178,8 +172,8 @@ const NotesPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.notes}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItemLoader() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItemLoader()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>

@@ -10,6 +10,7 @@ import PageControls from "../../components/site/PageControls"
 import {GroupPosts, GroupRequest} from "../../types/Types"
 import "./styles/modposts.less"
 
+let limit = 100
 let pageAmount = 15
 
 const ModGroups: React.FunctionComponent = (props) => {
@@ -38,16 +39,16 @@ const ModGroups: React.FunctionComponent = (props) => {
         return requests
     }
 
-    const updateOffset = async (newOffset: number) => {
-        let result = await functions.http.get("/api/group/request/list", {offset: newOffset}, session, setSessionFlag, true)
+    const updateOffset = async (offset: number) => {
+        let result = await functions.http.get("/api/group/request/list", {offset}, session, setSessionFlag, true)
         return result
     }
 
-    const {visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "requestCount"})
+    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
+        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
 
     useEffect(() => {
-        initItemLoader()
+        initItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -73,13 +74,13 @@ const ModGroups: React.FunctionComponent = (props) => {
     const addGroup = async (username: string, name: string, slug: string, requestID: string, postIDs: string[]) => {
         await functions.http.post("/api/group", {username, postIDs, name, remap: true}, session, setSessionFlag)
         await functions.http.post("/api/group/request/fulfill", {username, slug, requestID, accepted: true}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, slug: string, requestID: string) => {
         await functions.http.post("/api/group/request/fulfill", {username, slug, requestID, accepted: false}, session, setSessionFlag)
-        await initItemLoader()
+        await initItems()
         setUpdateVisibleRequestFlag(true)
     }
 

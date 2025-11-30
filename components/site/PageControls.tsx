@@ -1,5 +1,6 @@
 import {useEffect} from "react"
-import {useLayoutSelector, useFlagSelector, useMiscDialogActions, useFlagActions} from "../../store"
+import {useLayoutSelector, useFlagSelector, useMiscDialogActions, useFlagActions,
+useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
 
 interface Props {
@@ -14,11 +15,13 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
     const {setPageFlag} = useFlagActions()
+    const {setMobileScrolling} = useInteractionActions()
     const {page, maxPage, setPage} = props
 
     const firstPage = () => {
         setPage(1)
         if (props.scrollToTop) functions.dom.jumpToTop()
+        functions.util.defer(setMobileScrolling, 100, false)
     }
 
     const previousPage = () => {
@@ -26,6 +29,7 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
         if (newPage < 1) newPage = 1 
         setPage(newPage)
         if (props.scrollToTop) functions.dom.jumpToTop()
+        functions.util.defer(setMobileScrolling, 100, false)
     }
 
     const nextPage = () => {
@@ -33,11 +37,13 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
         if (newPage > maxPage) newPage = maxPage
         setPage(newPage)
         if (props.scrollToTop) functions.dom.jumpToTop()
+        functions.util.defer(setMobileScrolling, 100, false)
     }
 
     const lastPage = () => {
         setPage(maxPage)
         if (props.scrollToTop) functions.dom.jumpToTop()
+        functions.util.defer(setMobileScrolling, 100, false)
     }
     
     const goToPage = (newPage: number) => {

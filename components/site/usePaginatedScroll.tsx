@@ -1,37 +1,49 @@
 import {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
-import {useSearchSelector, useSearchActions} from "../../store"
+import {useNavigate, useLocation} from "react-router-dom"
+import {useSearchSelector, useSearchActions, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
 
 interface Params<T> {
     loadInitial: (query?: string) => Promise<T[]>
-    updateOffset?: (offset: number) => Promise<T[] | null>
+    updateOffset?: (offset: number, query?: string) => Promise<T[] | null>
     pageAmount: number
+    limit?: number
     countKey?: string
 }
 
 const usePaginatedScroll = <T,>(params: Params<T>) => {
     const {scroll} = useSearchSelector()
     const {setScroll} = useSearchActions()
-    const {loadInitial, updateOffset, pageAmount, countKey} = params
+    const {setMobileScrolling} = useInteractionActions()
+    let {loadInitial, updateOffset, pageAmount, limit, countKey} = params
     const [items, setItems] = useState([] as T[])
     const [visible, setVisible] = useState([] as T[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [managedItems, setManagedItems] = useState<T[] | null>(null)
     const [managedPage, setManagedPage] = useState<number | null>(null)
-    const queryRef = useRef("")
+    const [managedQuery, setManagedQuery] = useState<string | null>(null)
     const loadedRef = useRef(false)
     const updatingRef = useRef(false)
     const replaceRef = useRef(true)
     const navigate = useNavigate()
+    const location = useLocation()
+
+    if (!limit) limit = pageAmount
 
     const getQueryPage = () => {
         if (typeof window === "undefined") return 1
-        const pageParam = new URLSearchParams(window.location.search).get("page")
+        const pageParam = new URLSearchParams(location.search).get("page")
         return pageParam ? Number(pageParam) : 1
     }
     const [page, setPage] = useState(getQueryPage())
+
+    const getSearchQuery = () => {
+        if (typeof window === "undefined") return ""
+        const queryParam = new URLSearchParams(location.search).get("query")
+        return queryParam ?? ""
+    }
+    const [searchQuery, setSearchQuery] = useState(getSearchQuery())
 
     const getTotalCount = (item: T) => Number(item[countKey ?? "tagCount"] ?? 0)
 
@@ -40,27 +52,33 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     useEffect(() => {
         if (typeof window === "undefined") return
-        const onDOMLoaded = () => {
-            const queryParam = new URLSearchParams(window.location.search).get("query")
-            if (queryParam) queryRef.current = queryParam
-        }
         const updateStateChange = () => {
             replaceRef.current = true
+            setPage(getQueryPage())
+            setSearchQuery(getSearchQuery())
+            initItems()
         }
-        window.addEventListener("load", onDOMLoaded)
         window.addEventListener("popstate", updateStateChange)
         window.addEventListener("pushstate", updateStateChange)
         return () => {
-            window.removeEventListener("load", onDOMLoaded)
             window.removeEventListener("popstate", updateStateChange)
             window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
     useEffect(() => {
-        if (scroll || !loadedRef.current) return
-        const searchParams = new URLSearchParams(window.location.search)
-        searchParams.set("page", String(page || ""))
+        if (!loadedRef.current) return
+        const searchParams = new URLSearchParams(location.search)
+        if (page !== 1) {
+            searchParams.set("page", String(page))
+        } else {
+            searchParams.delete("page")
+        }
+        if (searchQuery?.trim()) {
+            searchParams.set("query", String(searchQuery))
+        } else {
+            searchParams.delete("query")
+        }
         let pathString = `${location.pathname}?${searchParams.toString()}`
         if (replaceRef.current) {
             navigate(pathString, {replace: true})
@@ -68,46 +86,56 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         } else {
             navigate(pathString)
         }
-    }, [scroll, page])
+    }, [page, searchQuery])
 
-    const initItemLoader = async (searchQuery?: string) => {
+    const initItems = async (queryOverride?: string) => {
         setEnded(false)
         setOffset(0)
-        const data = await loadInitial(searchQuery ?? queryRef.current)
+        setSearchQuery(queryOverride ?? searchQuery)
+        const data = await loadInitial(queryOverride ?? searchQuery)
         loadedRef.current = true
-        queryRef.current = ""
         setItems(data)
-        setPage(getQueryPage())
+        setPage(page)
         if (scroll) setVisible(data.slice(0, pageAmount))
     }
 
+    const restructureItems = async (items: T[]) => {
+        setEnded(false)
+        setOffset(0)
+        loadedRef.current = true
+        setItems(items)
+        setPage(1)
+        if (scroll) setVisible(items.slice(0, pageAmount))
+    }
+
     useEffect(() => {
-        initItemLoader()
+        functions.util.defer(setMobileScrolling, 100, false)
+        if (scroll && loadedRef.current) initItems()
     }, [scroll])
 
     useEffect(() => {
         if (loadedRef.current) return
 
-        if (managedItems?.length) {
-            setItems(managedItems)
-            if (managedPage) setPage(managedPage)
+        if (managedPage !== null) setPage(managedPage)
+        if (managedQuery !== null) setSearchQuery(managedQuery)
+
+        if (managedItems !== null) {
+            setItems(managedItems) 
             if (scroll) setVisible(managedItems.slice(0, pageAmount))
             loadedRef.current = true
         }
-    }, [managedItems, managedPage])
+    }, [managedItems, managedPage, managedQuery])
 
-    const updateItemLoader = async (forceOffset?: number) => {
+    const updateItems = async (forceOffset?: number, queryOverride?: string) => {
         if (ended || updatingRef.current) return
         updatingRef.current = true
 
         const newOffset = forceOffset ?? offset + pageAmount
-        let result = await updateOffset?.(newOffset) ?? null
+        let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
         if (!result) result = items.slice(newOffset, newOffset + pageAmount)
 
         let padded = false
         if (!scroll) {
-            // In pages mode, we pad fake entries to the start to reach the
-            // current offset if all the earlier posts aren't loaded
             if (newOffset === 0 && (items[newOffset] as any)?.fake) {
                 padded = true
             }
@@ -134,7 +162,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             setVisible((prev) => [...prev, ...result])
         }
 
-        if (result.length < pageAmount) setEnded(true)
+        if (result.length < limit) setEnded(true)
         updatingRef.current = false
     }
 
@@ -145,7 +173,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         const pageSlice = items.slice(start, end)
 
         if (pageSlice.length < pageAmount || pageSlice.some((i: any) => i?.fake)) {
-            updateItemLoader(start)
+            updateItems(start)
         }
     }, [page, scroll])
 
@@ -153,7 +181,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (!scroll) return
 
         const scrollListener = () => {
-            if (functions.dom.scrolledToBottom()) updateItemLoader()
+            if (functions.dom.scrolledToBottom()) updateItems()
         }
         window.addEventListener("scroll", scrollListener)
         return () => window.removeEventListener("scroll", scrollListener)
@@ -165,27 +193,40 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     }, [items])
 
     useEffect(() => {
+        if (!loadedRef.current) return
         setManagedPage(page)
     }, [page])
 
+    useEffect(() => {
+        if (!loadedRef.current) return
+        setManagedQuery(searchQuery)
+    }, [searchQuery])
+
     const toggleScroll = () => setScroll(!scroll)
 
-    const visibleItems = scroll ? visible : items.slice((page - 1) * pageAmount, pageAmount * page)
+    const startIndex = scroll ? 0 : (page - 1) * pageAmount
+    const visibleItems = scroll ? visible : items.slice(startIndex, startIndex + pageAmount)
 
     return {
         visibleItems,
         items,
         setItems,
         setVisible,
-        initItemLoader,
-        updateItemLoader,
+        initItems,
+        updateItems,
+        restructureItems,
         page,
         setPage,
         maxPage,
         ended,
+        searchQuery,
+        setSearchQuery,
         toggleScroll,
         setManagedItems,
-        setManagedPage
+        setManagedPage,
+        setManagedQuery,
+        totalCount,
+        startIndex
     }
 }
 

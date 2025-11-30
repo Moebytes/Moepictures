@@ -93,19 +93,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return result
     }
     
-    const updateOffset = async (newOffset: number) => {
+    const updateOffset = async (offset: number) => {
         if (!props.count && (session.username && !session.showRelated)) return null
         if (props.post?.type === "model" || props.post?.type === "live2d") return []
 
         let result = await functions.http.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
         rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", showChildren, limit, offset: newOffset}, session, setSessionFlag)
+        sort: props.count ? "date" : "random", showChildren, limit, offset}, session, setSessionFlag)
 
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, initItemLoader, setManagedPage, setManagedItems, 
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, countKey: "postCount"})
+    const {items, visibleItems, page, setPage, maxPage, initItems, setManagedPage, setManagedItems, 
+        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount"})
 
     useEffect(() => {
         clearTimeout(relatedTimer)
@@ -113,14 +113,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (init && items.length) {
                 return setInit(false)
             }
-            initItemLoader()
+            initItems()
         }, delay)
     }, [props.post, session])
 
     useEffect(() => {
         clearTimeout(relatedTimer)
         relatedTimer = setTimeout(() => {
-            initItemLoader()
+            initItems()
         }, delay)
     }, [props.tag, session])
 
