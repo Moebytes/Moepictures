@@ -313,8 +313,10 @@ export default class CompareFunctions {
             return changes || tagChanges || tagGroupChanges
         }
         if ("addedEntries" in history) {
+            let noData = history.notes.length === 1 && history.notes[0]?.transcript?.trim().toLowerCase() === "no data"
+            const hasNotes = history.notes.length > 1 || !noData
             let noteChanges = Boolean(history.addedEntries?.length) || Boolean(history.removedEntries?.length)
-            return noteChanges
+            return hasNotes || noteChanges
         }
         if ("addedPosts" in history) {
             let changes = history.changes && Boolean(Object.keys(history.changes).length)

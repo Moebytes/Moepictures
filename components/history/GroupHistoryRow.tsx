@@ -42,7 +42,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [postIndex, setPostIndex] = useState(0)
     const [user, setUser] = useState(null as PrunedUser | null)
     const slug = props.groupHistory.slug
-    let prevHistory = props.previousHistory || Boolean(props.exact)
+    let hasChanges = functions.compare.hasHistoryChanges(props.groupHistory)
 
     const updatePost = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
@@ -194,10 +194,10 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let changes = props.groupHistory.changes || {}
         let postChanges = props.groupHistory.addedPosts?.length || props.groupHistory.removedPosts?.length
-        if (!prevHistory || changes.name) {
+        if (!hasChanges || changes.name) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.name}: </span>{props.groupHistory.name}</span>)
         }
-        if (!prevHistory || changes.description) {
+        if (!hasChanges || changes.description) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.description}: </span>{props.groupHistory.description || i18n.labels.none}</span>)
         }
         if (postChanges) {

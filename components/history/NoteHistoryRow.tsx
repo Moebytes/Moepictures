@@ -38,7 +38,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [user, setUser] = useState(null as PrunedUser | null)
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
-    let prevHistory = props.previousHistory || Boolean(props.exact)
+    let hasChanges = functions.compare.hasHistoryChanges(props.noteHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
 
     const updateUser = async () => {
@@ -152,10 +152,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const diffText = () => {
         if (!props.noteHistory.notes[0]) return []
-        if (!prevHistory) {
-            if (props.noteHistory.notes[0].transcript === "No data") return []
-            return props.noteHistory.notes.map((item) => printNote(item))
-        }
+        if (!hasChanges) return props.noteHistory.notes.map((item) => printNote(item))
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return []
 

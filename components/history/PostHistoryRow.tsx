@@ -42,7 +42,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState({} as TagCategories)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
-    let prevHistory = props.previousHistory || Boolean(props.exact)
+    let hasChanges = functions.compare.hasHistoryChanges(props.postHistory)
 
     const updateUser = async () => {
         const user = await functions.http.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag, true)
@@ -214,7 +214,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const artistsDiff = () => {
-        if (!prevHistory) return props.postHistory.artists.join(" ")
+        if (!hasChanges) return props.postHistory.artists.join(" ")
         if (!tagCategories.artists) return null
         const tagCategory = tagCategories.artists.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) =>  tagCategory.includes(tag))
@@ -223,7 +223,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const charactersDiff = () => {
-        if (!prevHistory) return props.postHistory.characters.join(" ")
+        if (!hasChanges) return props.postHistory.characters.join(" ")
         if (!tagCategories.characters) return null
         const tagCategory = tagCategories.characters.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
@@ -232,7 +232,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const seriesDiff = () => {
-        if (!prevHistory) return props.postHistory.series.join(" ")
+        if (!hasChanges) return props.postHistory.series.join(" ")
         if (!tagCategories.series) return null
         const tagCategory = tagCategories.series.map((t) => t.tag)
         const addedTags = props.postHistory.addedTags.filter((tag: string) => tagCategory.includes(tag))
@@ -243,7 +243,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const tagsDiff = () => {
         const removeArr = [...props.postHistory.artists, ...props.postHistory.characters, ...props.postHistory.series]
         const filteredTags = props.postHistory.tags.filter((tag: string) => !removeArr.includes(tag))
-        if (!prevHistory) return filteredTags.join(" ")
+        if (!hasChanges) return filteredTags.join(" ")
         let totalTags = [...(tagCategories.tags || []), ...(tagCategories.meta || [])]
         if (!totalTags.length) return null
         const tagCategory = totalTags.map((t) => t.tag)
@@ -254,7 +254,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const tagGroupsDiff = () => {
         if (!props.postHistory.tagGroups?.length) return null
-        if (!prevHistory) return props.postHistory.tagGroups.map((g) => g?.name)?.join(" ")
+        if (!hasChanges) return props.postHistory.tagGroups.map((g) => g?.name)?.join(" ")
         const groupNames = props.postHistory.tagGroups.map((g) => g?.name).filter(Boolean)
         const addedTagGroups = props.postHistory.addedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
         const removedTagGroups = props.postHistory.removedTagGroups.filter((tagGroup: string) => groupNames.includes(tagGroup))
@@ -314,92 +314,92 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (changes.parentID !== undefined && !changes.parentID) {
             jsx.push(<span className="historyrow-text-strong">[{i18n.labels.parentRemoved}]</span>)
         }
-        if ((!prevHistory && props.postHistory.images.length > 1) || changes.images) {
+        if ((!hasChanges && props.postHistory.images.length > 1) || changes.images) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.images}: </span>{props.postHistory.images.length}</span>)
         }
-        if ((!prevHistory && props.postHistory.parentID) || changes.parentID) {
+        if ((!hasChanges && props.postHistory.parentID) || changes.parentID) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.parentID}: </span><span className="historyrow-label-link" onClick={(event) => openPost(props.postHistory.parentID, event)}>{props.postHistory.parentID}</span></span>)
         }
-        if (!prevHistory || changes.type) {
+        if (!hasChanges || changes.type) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.type}: </span>{functions.util.toProperCase(props.postHistory.type)}</span>)
         }
-        if (!prevHistory || changes.rating) {
+        if (!hasChanges || changes.rating) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.rating}: </span>{functions.util.toProperCase(props.postHistory.rating)}</span>)
         }
-        if (!prevHistory || changes.style) {
+        if (!hasChanges || changes.style) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sidebar.style}: </span>{functions.util.toProperCase(props.postHistory.style)}</span>)
         }
-        if (!prevHistory || tagChanges) {
+        if (!hasChanges || tagChanges) {
             if (artistsDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.artists}: </span>{artistsDiff()}</span>)
             }
         }
-        if (!prevHistory || tagChanges) {
+        if (!hasChanges || tagChanges) {
             if (charactersDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.characters}: </span>{charactersDiff()}</span>)
             }
         }
-        if (!prevHistory || tagChanges) {
+        if (!hasChanges || tagChanges) {
             if (seriesDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.series}: </span>{seriesDiff()}</span>)
             }
         }
-        if (!prevHistory || tagChanges) {
+        if (!hasChanges || tagChanges) {
             if (tagsDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.navbar.tags}: </span>{tagsDiff()}</span>)
             }
         }
-        if (!prevHistory || tagGroupChanges) {
+        if (!hasChanges || tagGroupChanges) {
             if (tagGroupsDiff()) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.tagGroups}: </span>{tagGroupsDiff()}</span>)
             }
         }
-        if (!prevHistory || changes.title) {
+        if (!hasChanges || changes.title) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.title}: </span>{props.postHistory.title || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.englishTitle) {
+        if (!hasChanges || changes.englishTitle) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishTitle}: </span>{props.postHistory.englishTitle || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.artist) {
+        if (!hasChanges || changes.artist) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.tag.artist}: </span>{props.postHistory.artist || i18n.labels.unknown}</span>)
         }
-        if (!prevHistory || changes.posted) {
+        if (!hasChanges || changes.posted) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.posted}: </span>{props.postHistory.posted ? functions.date.formatDate(new Date(props.postHistory.posted)) : i18n.labels.unknown}</span>)
         }
-        if (!prevHistory || changes.source) {
+        if (!hasChanges || changes.source) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.source}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.source, "_blank")}>{functions.util.getSiteName(props.postHistory.source, i18n)}</span></span>)
         }
-        if (!prevHistory || changes.userProfile) {
+        if (!hasChanges || changes.userProfile) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.userProfile}: </span><span className="historyrow-label-link" onClick={() => window.open(props.postHistory.userProfile!, "_blank")}>{props.postHistory.userProfile}</span></span>)
         }
-        if (!prevHistory || changes.imageSources) {
+        if (!hasChanges || changes.imageSources) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageSources}: </span>{printImageSources()}</span>)
         }
-        if (!prevHistory || changes.imageLinks) {
+        if (!hasChanges || changes.imageLinks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageLinks}: </span>{printImageLinks()}</span>)
         }
-        if (!prevHistory || changes.mirrors) {
+        if (!hasChanges || changes.mirrors) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.mirrors}: </span>{printMirrors()}</span>)
         }
-        if ((!prevHistory && props.postHistory.bookmarks) || changes.bookmarks) {
+        if ((!hasChanges && props.postHistory.bookmarks) || changes.bookmarks) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.bookmarks}: </span>{props.postHistory.bookmarks || "?"}</span>)
         }
-        if ((!prevHistory && props.postHistory.sourceImageCount) || changes.sourceImageCount) {
+        if ((!hasChanges && props.postHistory.sourceImageCount) || changes.sourceImageCount) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.imageCount}: </span>{props.postHistory.sourceImageCount || "?"}</span>)
         }
-        if ((!prevHistory && props.postHistory.pixivTags) || changes.pixivTags) {
+        if ((!hasChanges && props.postHistory.pixivTags) || changes.pixivTags) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.pixivTags}: </span>{props.postHistory.pixivTags?.join(", ") || i18n.labels.none}</span>)
         }
-        if ((!prevHistory && props.postHistory.drawingTools) || changes.drawingTools) {
+        if ((!hasChanges && props.postHistory.drawingTools) || changes.drawingTools) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.drawingTools}: </span>{props.postHistory.drawingTools?.join(", ") || i18n.labels.none}</span>)
         }
-        if ((!prevHistory && props.postHistory.buyLink) || changes.buyLink) {
+        if ((!hasChanges && props.postHistory.buyLink) || changes.buyLink) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.buyLink}: </span>{props.postHistory.buyLink || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.commentary) {
+        if (!hasChanges || changes.commentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.commentary}: </span>{props.postHistory.commentary || i18n.labels.none}</span>)
         }
-        if (!prevHistory || changes.englishCommentary) {
+        if (!hasChanges || changes.englishCommentary) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.englishCommentary}: </span>{props.postHistory.englishCommentary || i18n.labels.none}</span>)
         }
         if (!jsx.length && !props.postHistory.imageChanged) {
