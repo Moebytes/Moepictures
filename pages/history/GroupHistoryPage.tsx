@@ -105,6 +105,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                 currentIndex = i
             }
             if (previous?.groupID !== current.groupID) previous = null
+            if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={initItems} onEdit={initItems}/>)

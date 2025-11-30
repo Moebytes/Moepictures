@@ -3,7 +3,7 @@ import crypto from "crypto"
 import functions from "./Functions"
 import decryption from "../structures/Decryption"
 import {Post, PostChanges, PostOrdered, GroupPosts, GroupChanges, TagChanges, Tag, Note, Session, 
-PostSearch, PostHistory, MiniTagGroup} from "../types/Types"
+PostSearch, PostHistory, MiniTagGroup, NoteHistory, GroupHistory, TagHistory} from "../types/Types"
 
 export default class CompareFunctions {
     public static imagesChanged = async (revertPost: PostSearch | PostHistory, currentPost: PostSearch | PostHistory, session: Session) => {
@@ -303,5 +303,24 @@ export default class CompareFunctions {
         }
       
         return {addedTagGroups, removedTagGroups}
+    }
+
+    public static hasHistoryChanges = (history: PostHistory | NoteHistory | GroupHistory | TagHistory) => {
+        if ("addedTags" in history) {
+            let changes = history.changes && Boolean(Object.keys(history.changes).length)
+            let tagChanges = Boolean(history.addedTags?.length) || Boolean(history.removedTags?.length)
+            let tagGroupChanges = Boolean(history.addedTagGroups?.length) || Boolean(history.removedTagGroups?.length)
+            return changes || tagChanges || tagGroupChanges
+        }
+        if ("addedEntries" in history) {
+            let noteChanges = Boolean(history.addedEntries?.length) || Boolean(history.removedEntries?.length)
+            return noteChanges
+        }
+        if ("addedPosts" in history) {
+            let changes = history.changes && Boolean(Object.keys(history.changes).length)
+            let postChanges = Boolean(history.addedPosts?.length) || Boolean(history.addedPosts?.length)
+            return changes || postChanges
+        }
+        return history.changes && Boolean(Object.keys(history.changes).length)
     }
 }

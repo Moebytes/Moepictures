@@ -234,6 +234,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.postID !== current.postID) previous = null
+                if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={initItems} onEdit={initItems} exact={commitSearch ? true : false}/>)
@@ -248,6 +249,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.tag !== current.tag) previous = null
+                if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={initItems} onEdit={initItems}/>)
@@ -262,6 +264,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.groupID !== current.groupID) previous = null
+                if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={initItems} onEdit={initItems}/>)
@@ -278,6 +281,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 }
                 if (previous?.postID !== current.postID &&
                     previous?.order !== current.order) previous = null
+                if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={item} 
                     onDelete={initItems} onEdit={initItems} current={i === currentIndex}/>)
             }

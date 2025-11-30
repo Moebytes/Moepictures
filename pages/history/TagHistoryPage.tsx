@@ -113,6 +113,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 currentIndex = i
             }
             if (previous?.tag !== current.tag) previous = null
+            if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={initItems} onEdit={initItems}/>)

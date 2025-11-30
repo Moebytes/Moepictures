@@ -110,6 +110,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
             }
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
+            if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
                 onDelete={initItems} onEdit={initItems} current={i === currentIndex}/>)
         }
