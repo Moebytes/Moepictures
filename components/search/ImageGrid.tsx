@@ -63,7 +63,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (sizeType === "small") loadAmount = 42
         if (sizeType === "medium") loadAmount = 30
         if (sizeType === "large") loadAmount = 24
-        if (sizeType === "massive") loadAmount = 2
+        if (sizeType === "massive") loadAmount = 12
         return loadAmount * pageMultiplier
     }
 
