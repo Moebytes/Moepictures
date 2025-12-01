@@ -169,6 +169,31 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [items, page])
 
     useEffect(() => {
+        const onDOMLoaded = async () => {
+            setTimeout(() => {
+                if (!scrollY) {
+                    const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
+                    const img = document.querySelector(".image")
+                    if (!img && !elements?.[0]) {
+                        initItems()
+                    } else {
+                        let counter = 0
+                        for (let i = 0; i < elements.length; i++) {
+                            if (elements[i]?.innerText?.toLowerCase() === "all") counter++
+                            if (elements[i]?.innerText?.toLowerCase() === "random") counter++
+                        }
+                        if (!img && counter >= 4) randomPosts()
+                    }
+                }
+            }, 2000)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
+    }, [])
+
+    useEffect(() => {
         window.clearInterval(interval)
         const searchLoop = async () => {
             if (!autoSearch) return
