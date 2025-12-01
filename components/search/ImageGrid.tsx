@@ -58,12 +58,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const getPageAmount = () => {
-        let loadAmount = 72
-        if (sizeType === "tiny") loadAmount = 72
-        if (sizeType === "small") loadAmount = 42
-        if (sizeType === "medium") loadAmount = 30
-        if (sizeType === "large") loadAmount = 24
-        if (sizeType === "massive") loadAmount = 12
+        let loadAmount = 36
+        if (sizeType === "tiny") loadAmount = 36
+        if (sizeType === "small") loadAmount = 21
+        if (sizeType === "medium") loadAmount = 15
+        if (sizeType === "large") loadAmount = 12
+        if (sizeType === "massive") loadAmount = 6
         return loadAmount * pageMultiplier
     }
 
