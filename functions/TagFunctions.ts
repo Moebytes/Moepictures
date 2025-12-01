@@ -27,7 +27,8 @@ export default class TagFunctions {
         for (let i = 0; i < uniqueTagArray.length; i++) {
             const found = result.find((r: any) => r.tag === uniqueTagArray[i])
             if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", 
-                image: "", imageHash: "", hidden: false, r18: false})
+                image: "", imageHash: "", hidden: false, r18: false, social: "", twitter: "",
+                website: "", fandom: "", wikipedia: ""})
         }
         let characterTags = result.filter((t: any) => t.type === "character")
         let seriesTags = result.filter((t: any) => t.type === "series")
@@ -39,7 +40,8 @@ export default class TagFunctions {
         for (let i = 0; i < posts.length; i++) {
             for (let j = 0; j < posts[i].tags.length; j++) {
                 result.push({tag: posts[i].tags[j], count: "1", type: "tag", 
-                image: "", imageHash: "", hidden: false, r18: false})
+                image: "", imageHash: "", hidden: false, r18: false, social: "", twitter: "",
+                website: "", fandom: "", wikipedia: ""})
             }
         }
         return result
@@ -66,6 +68,11 @@ export default class TagFunctions {
                 obj.type = foundTag.type
                 obj.image = foundTag.image
                 obj.imageHash = foundTag.imageHash
+                obj.social = foundTag.social
+                obj.twitter = foundTag.twitter
+                obj.website = foundTag.website
+                obj.fandom = foundTag.fandom
+                obj.wikipedia = foundTag.wikipedia
                 if (foundTag.type === "artist") {
                     artists.push(obj)
                 } else if (foundTag.type === "character") {
@@ -90,6 +97,11 @@ export default class TagFunctions {
                 obj.image = unverifiedTag.image
                 obj.imageHash = unverifiedTag.imageHash
                 obj.type = unverifiedTag.type
+                obj.social = unverifiedTag.social
+                obj.twitter = unverifiedTag.twitter
+                obj.website = unverifiedTag.website
+                obj.fandom = unverifiedTag.fandom
+                obj.wikipedia = unverifiedTag.wikipedia
                 if (unverifiedTag.type === "artist") {
                     artists.push(obj)
                 } else if (unverifiedTag.type === "character") {

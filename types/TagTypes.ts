@@ -35,6 +35,11 @@ export interface TagCount {
     imageHash: string | null
     hidden: boolean | null
     r18: boolean | null
+    social: string | null
+    twitter: string | null
+    website: string | null
+    fandom: string | null
+    wikipedia: string | null
 }
 
 export interface Alias {

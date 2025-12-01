@@ -78,7 +78,7 @@ import joinIcon from "../../assets/icons/join.png"
 import snapshotIcon from "../../assets/icons/snapshot.png"
 import functions from "../../functions/Functions"
 import path from "path"
-import {PostSearch, PostHistory, UnverifiedPost, MiniTag, TagCount, TagGroupCategory, PrunedUser, Tag} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, TagCount, TagGroupCategory, PrunedUser} from "../../types/Types"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -132,7 +132,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [approverData, setApproverData] = useState(null as PrunedUser | null)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
-    const [tagMetadata, setTagMetadata] = useState({} as {[key: string]: Tag})
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -182,24 +181,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [tagFavoriteFlag, session])
 
-    const updateTagMetadata = async () => {
-        let artists = props.artists?.map((t) => t.tag) || []
-        let characters = props.characters?.map((t) => t.tag) || []
-        let series = props.series?.map((t) => t.tag) || []
-        let tags = [...artists, ...characters, ...series]
-        if (!tags.length) return
-        const tagObjects = await functions.http.get("/api/tag/list", {tags}, session, setSessionFlag)
-        let tagMetadata = {} as {[key: string]: Tag}
-        for (const tagObj of tagObjects) {
-            tagMetadata[tagObj.tag] = tagObj
-        }
-        setTagMetadata(tagMetadata)
-    }
-
     useEffect(() => {
         updateTags()
         updateUserImg()
-        updateTagMetadata()
         if (!props.post) updateFavoriteTags()
         const savedUploaderImage = localStorage.getItem("uploaderImage")
         if (savedUploaderImage) setUploaderImage(savedUploaderImage)
@@ -412,20 +396,20 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const artistSocials = () => {
                 if (!props.artists) return
                 let jsx = [] as React.ReactElement[]
-                const metaTag = tagMetadata[props.artists[i].tag] as Tag | undefined
-                if (!metaTag) return jsx
-                if (metaTag.website) {
-                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(metaTag.website!, "_blank")}/>)
+                const tag = props.artists[i]
+                if (!tag) return jsx
+                if (tag.website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(tag.website!, "_blank")}/>)
                 }
-                if (metaTag.social?.includes("pixiv.net")) {
-                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(metaTag.social!, "_blank")}/>)
-                } else if (metaTag.social?.includes("soundcloud.com")) {
-                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(metaTag.social!, "_blank")}/>)
-                } else if (metaTag.social?.includes("sketchfab.com")) {
-                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(metaTag.social!, "_blank")}/>)
+                if (tag.social?.includes("pixiv.net")) {
+                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(tag.social!, "_blank")}/>)
+                } else if (tag.social?.includes("soundcloud.com")) {
+                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(tag.social!, "_blank")}/>)
+                } else if (tag.social?.includes("sketchfab.com")) {
+                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(tag.social!, "_blank")}/>)
                 }
-                if (metaTag.twitter) {
-                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(metaTag.twitter!, "_blank")}/>)
+                if (tag.twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -461,11 +445,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             }
             const characterSocials = () => {
                 if (!props.characters) return
-                let jsx = [] as React.ReactElement[] 
-                const metaTag = tagMetadata[props.characters[i].tag] as Tag | undefined
-                if (!metaTag) return jsx
-                if (metaTag.fandom) {
-                    jsx.push(<img className="sidebar-social" src={fandom} onClick={() => window.open(metaTag.fandom!, "_blank")}/>)
+                let jsx = [] as React.ReactElement[]
+                const tag = props.characters[i]
+                if (!tag) return jsx
+                if (tag.fandom) {
+                    jsx.push(<img className="sidebar-social" src={fandom} onClick={() => window.open(tag.fandom!, "_blank")}/>)
                 }
                 return jsx 
             }
@@ -502,16 +486,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const seriesSocials = () => {
                 if (!props.series) return
                 let jsx = [] as React.ReactElement[]
-                const metaTag = tagMetadata[props.series[i].tag] as Tag | undefined
-                if (!metaTag) return jsx
-                if (metaTag.website) {
-                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(metaTag.website!, "_blank")}/>)
+                const tag = props.series[i]
+                if (!tag) return jsx
+                if (tag.website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(tag.website!, "_blank")}/>)
                 }
-                if (metaTag.twitter) {
-                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(metaTag.twitter!, "_blank")}/>)
+                if (tag.twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(tag.twitter!, "_blank")}/>)
                 }
-                if (metaTag.wikipedia) {
-                    jsx.push(<img className="sidebar-social" src={wikipedia} onClick={() => window.open(metaTag.wikipedia!, "_blank")}/>)
+                if (tag.wikipedia) {
+                    jsx.push(<img className="sidebar-social" src={wikipedia} onClick={() => window.open(tag.wikipedia!, "_blank")}/>)
                 }
                 return jsx 
             }

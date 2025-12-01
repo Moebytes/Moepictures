@@ -1,4 +1,4 @@
-import {useEffect, useState, useRef} from "react"
+import {useEffect, useState, useRef, useMemo} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSearchSelector, useSearchActions, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
@@ -205,7 +205,9 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     const toggleScroll = () => setScroll(!scroll)
 
     const startIndex = scroll ? 0 : (page - 1) * pageAmount
-    const visibleItems = scroll ? visible : items.slice(startIndex, startIndex + pageAmount)
+    const visibleItems = useMemo(() => {
+        return scroll ? visible : items.slice(startIndex, startIndex + pageAmount)
+    }, [scroll, visible, items, startIndex, pageAmount])
 
     return {
         visibleItems,

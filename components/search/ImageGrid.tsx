@@ -267,10 +267,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setPostAmount(visibleItems.length)
-        let visibleSlice = scroll ? items.slice(startIndex, visibleItems.length) 
-            : items.slice(startIndex, startIndex + pageAmount)
-        setVisiblePosts(visibleSlice)
-    }, [items])
+        setVisiblePosts(visibleItems)
+    }, [visibleItems])
 
     useEffect(() => {
         if (items?.length) {
@@ -350,7 +348,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setAllImagesLoaded(true)
         }
         poll()
-    }, [scroll, items, page])
+    }, [scroll, visibleItems, page])
 
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]

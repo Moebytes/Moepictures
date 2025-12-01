@@ -138,7 +138,6 @@ const SearchRoutes = (app: Express) => {
             result = result.filter((p) => !p.deleted)
             if (!permissions.isMod(req.session)) {
                 result = result.filter((p) => !p.hidden)
-                result = functions.post.stripTags(result)
             }
             if (!req.session.showR18) {
                 result = result.filter((p) => !functions.post.isR18(p.rating))
@@ -150,6 +149,7 @@ const SearchRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
+            if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -181,7 +181,7 @@ const SearchRoutes = (app: Express) => {
             if (!images.length && !useMD5) images = await sql.run(similarQuery) as Image[]
         
             let result = await sql.search.posts(Array.from(images.map((i) => i.postID)))
-            result = functions.post.stripTags(result)
+            if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -209,7 +209,7 @@ const SearchRoutes = (app: Express) => {
             
             for (let i = 0; i < result.length; i++) {
                 const artist = result[i]
-                artist.posts = functions.post.stripTags(artist.posts)
+                if (req.session.captchaNeeded) artist.posts = functions.post.stripTags(artist.posts)
                 artist.posts = artist.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     artist.posts = artist.posts.filter((p: any) => !p?.hidden)
@@ -253,7 +253,7 @@ const SearchRoutes = (app: Express) => {
 
             for (let i = 0; i < result.length; i++) {
                 const character = result[i]
-                character.posts = functions.post.stripTags(character.posts)
+                if (req.session.captchaNeeded) character.posts = functions.post.stripTags(character.posts)
                 character.posts = character.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     character.posts = character.posts.filter((p: any) => !p?.hidden)
@@ -297,7 +297,7 @@ const SearchRoutes = (app: Express) => {
 
             for (let i = 0; i < result.length; i++) {
                 const series = result[i]
-                series.posts = functions.post.stripTags(series.posts)
+                if (req.session.captchaNeeded) series.posts = functions.post.stripTags(series.posts)
                 series.posts = series.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
                     series.posts = series.posts.filter((p: any) => !p?.hidden)

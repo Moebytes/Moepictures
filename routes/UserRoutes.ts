@@ -1081,7 +1081,7 @@ const UserRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) favorites.splice(i, 1)
                 }
             }
-            favorites = functions.post.stripTags(favorites)
+            if (req.session.captchaNeeded) favorites = functions.post.stripTags(favorites)
             serverFunctions.sendEncrypted(favorites, req, res)
         } catch (e) {
             console.log(e)
@@ -1115,7 +1115,7 @@ const UserRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) uploads.splice(i, 1)
                 }
             }
-            uploads = functions.post.stripTags(uploads)
+            if (req.session.captchaNeeded) uploads = functions.post.stripTags(uploads)
             serverFunctions.sendEncrypted(uploads, req, res)
         } catch (e) {
             console.log(e)

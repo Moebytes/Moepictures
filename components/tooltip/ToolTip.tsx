@@ -40,7 +40,7 @@ import daki from "../../assets/icons/daki.png"
 import sketch from "../../assets/icons/sketch.png"
 import lineart from "../../assets/icons/lineart.png"
 import promo from "../../assets/icons/promo.png"
-import {MiniTag} from "../../types/Types"
+import {TagCount} from "../../types/Types"
 
 const ToolTip: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -52,9 +52,9 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {tooltipX, tooltipY, tooltipEnabled, tooltipPost} = useInteractionSelector()
     const {setEnableDrag, setToolTipEnabled} = useInteractionActions()
     const {setActionBanner} = useActiveActions()
-    const [tags, setTags] = useState([] as MiniTag[])
+    const [tags, setTags] = useState([] as TagCount[])
     const [metaTags, setMetaTags] = useState([] as string[])
-    const [artist, setArtist] = useState(null as MiniTag | null)
+    const [artist, setArtist] = useState(null as TagCount | null)
     const scrollRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
     const location = useLocation()
@@ -62,7 +62,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const updateTags = async () => {
         if (session?.username && !session?.showTooltips) return
         if (!tooltipPost) return
-        const result = await functions.http.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
+        const result = await functions.tag.parseTags([tooltipPost], session, setSessionFlag)
         const artists = result.filter((t) => t.type === "artist")
         const characters = result.filter((t) => t.type === "character")
         const series = result.filter((t) => t.type === "series")
