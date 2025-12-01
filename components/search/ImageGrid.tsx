@@ -2,7 +2,8 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
-useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
+useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions, 
+useInteractionSelector} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import GridImage from "../image/GridImage"
 import GridAnimation from "../image/GridAnimation"
@@ -35,7 +36,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
     pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {setEnableDrag} = useInteractionActions()
+    const {scrollY} = useInteractionSelector()
+    const {setEnableDrag, setScrollY} = useInteractionActions()
     const {posts} = useCacheSelector()
     const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
     const {setSidebarText, setActionBanner} = useActiveActions()
@@ -184,6 +186,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
                         }
                         if (!img && counter >= 4) randomPosts()
                     }
+                } else {
+                    setScrollY(0)
                 }
             }, 2000)
         }
