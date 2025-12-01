@@ -58,7 +58,6 @@ const PostPage: React.FunctionComponent = () => {
     const [images, setImages] = useState([] as string[])
     const [childPosts, setChildPosts] = useState([] as ChildPost[])
     const [artistPosts, setArtistPosts] = useState([] as PostSearch[])
-    const [relatedPosts, setRelatedPosts] = useState([] as PostSearch[])
     const [parentPost, setParentPost] = useState(null as ChildPost | null)
     const [loaded, setLoaded] = useState(false)
     const [image, setImage] = useState("")

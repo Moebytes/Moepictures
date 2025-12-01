@@ -21,7 +21,8 @@ const CookieBanner: React.FunctionComponent = (props) => {
         if (!session.cookie) return
         clearTimeout(cookieTimer)
         cookieTimer = setTimeout(() => {
-            if (session.cookieConsent === undefined || session.cookieConsent === null) {
+            let cookieConsent = session.username ? session.cookieConsent : localStorage.getItem("cookieConsent")
+            if (cookieConsent === undefined || cookieConsent === null) {
                 setShowCookieBanner(true)
             }
         }, 3000)
@@ -31,6 +32,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
         await functions.http.post("/api/user/cookieconsent", 
             {consent: button === "accept"}, session, setSessionFlag).catch(() => null)
         setShowCookieBanner(false)
+        localStorage.setItem("cookieConsent", String(button === "accept"))
     }
 
     return (

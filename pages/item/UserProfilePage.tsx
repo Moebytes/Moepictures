@@ -525,6 +525,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const clearCookieConsent = async () => {
         await functions.http.post("/api/user/cookieconsent", {consent: null}, session, setSessionFlag)
         functions.cache.clearResponseCacheKey("/api/user/session")
+        localStorage.removeItem("cookieConsent")
         setSessionFlag(true)
     }
 
