@@ -38,7 +38,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {posts} = useCacheSelector()
     const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
-    const {setSidebarText} = useActiveActions()
+    const {setSidebarText, setActionBanner} = useActiveActions()
     const {page: postPage} = usePageSelector()
     const {setPage: setPostPage} = usePageActions()
     const {randomFlag, imageSearchFlag, reloadPostFlag, saveSearchFlag} = useFlagSelector()
@@ -97,8 +97,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (tags.length > 3) {
             if (!session.username) {
                 setSearch("")
-                setSidebarText("Login required.")
-                navigate("/login")
+                setActionBanner("login-required")
                 return []
             }
             if (!permissions.isPremium(session)) {
@@ -109,8 +108,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         if (query?.startsWith("history:")) {
             if (!session.username) {
                 setSearch("")
-                setSidebarText("Login required.")
-                navigate("/login")
+                setActionBanner("login-required")
                 return []
             }
             if (!permissions.isPremium(session)) {

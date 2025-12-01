@@ -62,7 +62,7 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/login-history")
             navigate("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         initItems()
     }, [session])

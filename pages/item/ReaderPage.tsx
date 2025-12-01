@@ -70,7 +70,7 @@ const ReaderPage: React.FunctionComponent = () => {
     const {setSessionFlag} = useSessionActions()
     const {setRedirect} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
-    const {setSidebarText} = useActiveActions()
+    const {setActionBanner} = useActiveActions()
     const {readerPage} = usePageSelector()
     const {setReaderPage} = usePageActions()
     const {readerHorizontal, readerThumbnails, readerInvert, readerZoom, showTranscript} = useSearchSelector()
@@ -256,9 +256,8 @@ const ReaderPage: React.FunctionComponent = () => {
 
     const toggleUpscale = async () => {
         if (!session.username) {
-            setRedirect(`/post/${postID}/${slug}`)
-            navigate("/login")
-            return setSidebarText(i18n.sidebar.loginRequired)
+            setActionBanner("login-required")
+            return
         }
         if (permissions.isPremium(session)) {
             functions.cache.clearResponseCacheKey("/api/user/session")

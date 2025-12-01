@@ -120,7 +120,7 @@ const PostPage: React.FunctionComponent = () => {
         }
         if (!session.username && post.rating !== functions.r13()) {
             navigate("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         if (post.deleted && !permissions.isMod(session)) {
             return functions.dom.replaceLocation("/403")

@@ -125,7 +125,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         setPaused, setPreservePitch} = usePlaybackActions()
         const {noteMode, imageExpand, format} = useSearchSelector()
         const {setNoteMode, setNoteDrawingEnabled, setImageExpand} = useSearchActions()
-        const {setSidebarText} = useActiveActions()
+        const {setActionBanner} = useActiveActions()
         const {downloadFlag, downloadIDs} = useFlagSelector()
         const {setDownloadFlag, setDownloadIDs, setRedirect} = useFlagActions()
         const {setPremiumRequired, setQRCodeImage} = useMiscDialogActions()
@@ -468,9 +468,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleUpscale = async () => {
             if (!props.post) return
             if (!session.username) {
-                setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-                navigate("/login")
-                return setSidebarText(i18n.sidebar.loginRequired)
+                setActionBanner("login-required")
+                return
             }
             if (permissions.isPremium(session)) {
                 functions.cache.clearResponseCacheKey("/api/user/session")
@@ -484,9 +483,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleSegmentate = async () => {
             if (!props.post) return
             if (!session.username) {
-                setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-                navigate("/login")
-                return setSidebarText(i18n.sidebar.loginRequired)
+                setActionBanner("login-required")
+                return
             }
             if (permissions.isPremium(session)) {
                 childRef.current?.toggleSegmentate?.()
@@ -498,9 +496,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleLineart = async () => {
             if (!props.post) return
             if (!session.username) {
-                setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-                navigate("/login")
-                return setSidebarText(i18n.sidebar.loginRequired)
+                setActionBanner("login-required")
+                return
             }
             if (permissions.isPremium(session)) {
                 childRef.current?.toggleLineart?.()
@@ -597,9 +594,8 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             } else {
                 if (!props.post || "historyID" in props.post) return
                 if (!session.username) {
-                    setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-                    navigate("/login")
-                    return setSidebarText(i18n.sidebar.loginRequired)
+                    setActionBanner("login-required")
+                    return
                 }
                 let order = (props.order || 1) - 1
                 setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})

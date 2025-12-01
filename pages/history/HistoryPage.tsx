@@ -95,7 +95,7 @@ const HistoryPage: React.FunctionComponent = () => {
         if (!session.username) {
             setRedirect("/history")
             navigate("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         const typeParam = new URLSearchParams(window.location.search).get("type")
         if (!typeParam) setHistoryTab(permissions.isPremium(session) ? "search" : "post")

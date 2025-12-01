@@ -444,9 +444,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const saveTextDialog = () => {
         if (!props.post) return
         if (!session.username) {
-            setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
-            navigate("/login")
-            return setSidebarText("Login required.")
+            setActionBanner("login-required")
+            return
         }
         setSaveNoteOrder(props.order || 1)
         setSaveNoteData(items)

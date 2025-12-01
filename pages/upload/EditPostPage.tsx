@@ -308,7 +308,7 @@ const EditPostPage: React.FunctionComponent = () => {
         if (!session.username) {
             setRedirect(`/edit-post/${postID}/${slug}`)
             navigate("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
     }, [session])
 

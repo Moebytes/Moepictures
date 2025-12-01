@@ -191,7 +191,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (!session.username) {
             setRedirect("/upload")
             navigate("/login")
-            setSidebarText("Login required.")
+            setSidebarText(i18n.sidebar.loginRequired)
         }
         updatePending()
     }, [session])

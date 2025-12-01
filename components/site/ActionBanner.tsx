@@ -13,6 +13,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
     const [stickyText, setStickyText] = useState("")
 
     useEffect(() => {
+        if (actionBanner === "login-required") {
+            setStickyText(i18n.sidebar.loginRequired)
+            document.documentElement.style.setProperty("--actionBannerColor", "#d91442CC")
+        }
         if (actionBanner === "copy-tags") {
             setStickyText(i18n.banner.copiedTags)
             document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
