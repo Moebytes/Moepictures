@@ -496,11 +496,19 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }, [noteOCRFlag])
 
     const ocrDialog = () => {
+        if (!session.username) {
+            setActionBanner("login-required")
+            return
+        }
         setNoteOCRDialog(!noteOCRDialog)
     }
 
     const showHistory = () => {
         if (!props.post) return
+        if (!session.username) {
+            setActionBanner("login-required")
+            return
+        }
         navigate(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
     }
 
@@ -567,7 +575,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
-                    {session.username ? <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
+                    <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/>
                     <img draggable={false} className="note-editor-button" src={noteSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="note-editor-button" src={noteClear} style={{filter: getFilter()}} onClick={() => clearNotes()}/>
                     <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter: getFilter()}} onClick={() => copyNotes()}/>
