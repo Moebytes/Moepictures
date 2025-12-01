@@ -209,7 +209,7 @@ const PostPage: React.FunctionComponent = () => {
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
                 let artistPosts = await functions.http.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", 
-                    rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                    rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag, true)
                 artistPosts = artistPosts.filter((p) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
