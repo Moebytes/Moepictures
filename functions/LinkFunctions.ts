@@ -58,6 +58,10 @@ export default class LinkFunctions {
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
         if (forceLive) return this.getImageLink(image, false)
+        if (image.type === "image" || image.type === "comic") {
+            // Generating the image thumbnails seems too heavy for now
+            return this.getImageLink(image, false)
+        }
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
         }
