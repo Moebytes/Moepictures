@@ -449,10 +449,19 @@ export default class ServerTags {
     }
 
     public static convertToDanbooru = async (tags: string) => {
-        let tagArr = tags.split(/ +/g)
+        let tagArr = tags.split(/\s+/g)
         let tagReplaceMap = await sql.tag.tagReplaceMap()
         tagReplaceMap = functions.util.flipObject(tagReplaceMap)
         tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag.replaceAll("-", "_"))
+        return tagArr.join(" ")
+    }
+
+    public static convertFromDanbooru = async (tags: string) => {
+        let tagArr = tags.split(/\s+/g)
+        let tagReplaceMap = await sql.tag.tagReplaceMap()
+        tagArr = tagArr.map((tag: string) => tagReplaceMap[tag] ? tagReplaceMap[tag] : tag)
+        tagArr = tagArr.map((tag: string) => functions.tag.cleanTag(tag))
+        tagArr = tagArr.filter((tag: string) => tag.length >= 3)
         return tagArr.join(" ")
     }
 

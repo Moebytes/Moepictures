@@ -16,7 +16,7 @@ export default class DateFunctions {
     }
 
     public static formatDate(date: Date, yearFirst?: boolean) {
-        if (!date) return ""
+        if (!date || Number.isNaN(date.getTime())) return ""
         let year = date.getFullYear()
         let month = (1 + date.getMonth()).toString()
         let day = date.getDate().toString()

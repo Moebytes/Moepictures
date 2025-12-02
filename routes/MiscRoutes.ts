@@ -493,6 +493,17 @@ const MiscRoutes = (app: Express) => {
             res.status(400).end()
         }
     })
+
+    app.post("/api/misc/moepicstags", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {tags} = req.body as {tags: string}
+            let moepicsTags = await serverFunctions.tags.convertFromDanbooru(tags)
+            res.status(200).json({tags: moepicsTags})
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
 }
 
 export default MiscRoutes
