@@ -238,7 +238,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="dialog-text">{i18n.tag.artist}: </span>
                 <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)} style={{width: "30%"}}/>
-                <span className="dialog-text">{i18n.labels.imageCount}: </span>
+                <span className="dialog-text nowrap">{i18n.labels.imageCount}: </span>
                 <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={sourceImageCount} onChange={(event) => setSourceImageCount(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -282,7 +282,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={drawingTools} onChange={(event) => setDrawingTools(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <span className="dialog-text">{i18n.labels.buyLink}: </span>
+                <span className="dialog-text nowrap">{i18n.labels.buyLink}: </span>
                 <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={buyLink} onChange={(event) => setBuyLink(event.target.value)}/>
             </div>
             <div className="dialog-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
