@@ -123,7 +123,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={initItems} onEdit={initItems} imageHeight={300}/>)
+                onDelete={initItems} onEdit={initItems} imageHeight={username ? undefined : 300}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

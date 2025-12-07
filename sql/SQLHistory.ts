@@ -599,7 +599,7 @@ export default class SQLHistory {
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
-                ) AS "user"
+                ) AS "user",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "group history"
                 LEFT JOIN users ON users."username" = "group history"."user"
