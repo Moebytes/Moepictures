@@ -69,9 +69,11 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (!result.length) {
                 const groupObject = await functions.http.get("/api/group", {name: slug}, session, setSessionFlag)
                 if (!groupObject) return []
+                const creator = await functions.http.get("/api/user", {username: groupObject.creator}, session, setSessionFlag)
+                if (!creator) return []
                 const historyObject = groupObject as unknown as GroupHistory
                 historyObject.date = groupObject.createDate
-                historyObject.user = groupObject.creator
+                historyObject.user = {...creator}
                 result = [historyObject]
             }
         }

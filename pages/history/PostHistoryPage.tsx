@@ -75,9 +75,11 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (!result.length) {
                 const postObject = await functions.http.get("/api/post", {postID}, session, setSessionFlag)
                 if (!postObject) return []
+                const uploader = await functions.http.get("/api/user", {username: postObject.uploader}, session, setSessionFlag)
+                if (!uploader) return []
                 const historyObject = postObject as unknown as PostHistory
                 historyObject.date = postObject.uploadDate
-                historyObject.user = postObject.uploader
+                historyObject.user = {...uploader}
                 historyObject.images = postObject.images.map((i) => functions.link.getThumbnailLink(i, "medium", session, mobile))
                 let categories = await functions.tag.tagCategories(postObject.tags, session, setSessionFlag)
                 historyObject.artists = categories.artists.map((a) => a.tag)

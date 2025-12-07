@@ -1,5 +1,5 @@
 import {Post, DeletedPost, Image, PostType, PostStyle, PostMirrors, PostSearch, AliasHistoryType,
-PostRating, Alias, Implication, TagType, Note, AliasHistorySearch, MiniTagGroup} from "./Types"
+PostRating, Alias, Implication, TagType, Note, AliasHistorySearch, MiniTagGroup, UserRole, TinyUser} from "./Types"
 
 export type History = 
     | PostHistory 
@@ -48,7 +48,7 @@ export interface  PostChanges {
 export interface PostHistory {
     historyID: string
     postID: string
-    user: string
+    user: TinyUser
     date: string
     images: string[]
     upscaledImages: string[]
@@ -124,7 +124,7 @@ export interface TagHistory {
     tag: string
     key: string
     type: TagType
-    user: string
+    user: TinyUser
     date: string
     description: string
     image: string | null
@@ -152,8 +152,8 @@ export interface TagHistory {
 export interface NoteHistory {
     historyID: string
     postID: string
-    updater: string
     updatedDate: string
+    updater: TinyUser
     order: number
     notes: Note[]
     reason: string | null
@@ -174,7 +174,7 @@ export interface GroupChanges {
 export interface GroupHistory {
     historyID: string
     groupID: string
-    user: string
+    user: TinyUser
     date: string
     slug: string
     name: string

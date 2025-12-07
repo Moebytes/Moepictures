@@ -77,12 +77,21 @@ export default class SQLHistory {
                         GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "tag history"."historyID"
+                GROUP BY "tag history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -104,12 +113,21 @@ export default class SQLHistory {
                         GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
-                GROUP BY "tag history"."historyID"
+                GROUP BY "tag history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
             `),
             values: [tag, historyID]
         }
@@ -128,12 +146,21 @@ export default class SQLHistory {
                         GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
                 to_json((array_agg(post_json.*))[1]) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
+                LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."user" = $1
-                GROUP BY "tag history"."historyID"
+                GROUP BY "tag history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
             `),
             values: [username]
@@ -222,14 +249,24 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, postQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                SELECT "post history".*, 
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
+                posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
+                LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
+                users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -244,13 +281,23 @@ export default class SQLHistory {
     public static postHistoryID = async (postID: string | number, historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                SELECT "post history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
+                posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
                 FROM "post history"
+                LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
+                users."role", users."banned", users."deleted", users."imagePost"
             `),
             values: [postID, historyID]
         }
@@ -262,14 +309,24 @@ export default class SQLHistory {
     public static userPostHistory = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*, posts.locked, posts.hidden, posts.private, 
+                SELECT "post history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
+                posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
+                LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
+                users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
             `),
             values: [username]
@@ -339,12 +396,21 @@ export default class SQLHistory {
                     GROUP BY posts."postID"
                 )
                 SELECT "note history".*, 
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "updater",
                 COUNT(*) OVER() AS "historyCount",
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM "note history"
+                LEFT JOIN "users" ON users."username" = "note history"."updater"
                 JOIN post_json ON post_json."postID" = "note history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "note history"."historyID"
+                GROUP BY "note history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
         `),
@@ -366,12 +432,21 @@ export default class SQLHistory {
                         GROUP BY posts."postID"
                     )
                     SELECT "note history".*, 
+                    jsonb_build_object(
+                        'username', users."username",
+                        'role', users."role",
+                        'banned', users."banned",
+                        'deleted', users."deleted",
+                        'imagePost', users."imagePost"
+                    ) AS "updater",
                     COUNT(*) OVER() AS "historyCount",
                     to_json((array_agg(post_json.*))[1]) AS post
                     FROM "note history"
+                    LEFT JOIN "users" ON users."username" = "note history"."updater"
                     JOIN post_json ON post_json."postID" = "note history"."postID"
                     WHERE "note history"."postID" = $1 AND "note history"."historyID" = $2
-                    GROUP BY "note history"."historyID"
+                    GROUP BY "note history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
             `),
             values: [postID, historyID]
         }
@@ -390,12 +465,21 @@ export default class SQLHistory {
                     GROUP BY posts."postID"
                 )
                 SELECT "note history".*, 
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "updater",
                 COUNT(*) OVER() AS "historyCount",
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM "note history"
+                LEFT JOIN "users" ON users."username" = "note history"."updater"
                 JOIN post_json ON post_json."postID" = "note history"."postID"
                 WHERE "note history"."updater" = $1
-                GROUP BY "note history"."historyID"
+                GROUP BY "note history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
         `),
         values: [username]
@@ -457,10 +541,19 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "group history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
                 COUNT(*) OVER() AS "historyCount"
                 FROM "group history"
+                LEFT JOIN users ON users."username" = "group history"."user"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "group history"."historyID"
+                GROUP BY "group history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -475,9 +568,19 @@ export default class SQLHistory {
     public static groupHistoryID = async (groupID: string, historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "group history".*
+                SELECT "group history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user"
                 FROM "group history"
+                LEFT JOIN users ON users."username" = "group history"."user"
                 WHERE "group history"."groupID" = $1 AND "group history"."historyID" = $2
+                GROUP BY "group history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
             `),
             values: [groupID, historyID]
         }
@@ -490,10 +593,19 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "group history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user"
                 COUNT(*) OVER() AS "historyCount"
                 FROM "group history"
+                LEFT JOIN users ON users."username" = "group history"."user"
                 WHERE "group history"."user" = $1
-                GROUP BY "group history"."historyID"
+                GROUP BY "group history"."historyID", users."username", users."role", 
+                users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
             `),
             values: [username]

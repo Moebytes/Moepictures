@@ -7,15 +7,8 @@ import permissions from "../../structures/Permissions"
 import aliasHistoryUndo from "../../assets/icons/revert.png"
 import aliasHistoryRedo from "../../assets/icons/unrevert.png"
 import aliasHistoryDelete from "../../assets/icons/delete.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
-import "./styles/historyrow.less"
 import {AliasHistorySearch, PrunedUser} from "../../types/Types"
+import "./styles/historyrow.less"
 
 interface Props {
     history: AliasHistorySearch
@@ -30,17 +23,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
-    const [user, setUser] = useState(null as PrunedUser | null)
     const navigate = useNavigate()
-
-    const updateUser = async () => {
-        const user = await functions.http.get("/api/user", {username: props.history.user}, session, setSessionFlag, true)
-        if (user) setUser(user)
-    }
-
-    useEffect(() => {
-        updateUser()
-    }, [props.history, session])
 
     const revertAliasHistory = async () => {
         if (props.history.type === "alias") {
@@ -116,12 +99,11 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        if (!user) return
         let targetDate = props.history.date
         let editText = i18n.time.aliased
         if (props.history.type?.includes("implication")) editText = i18n.time.implicated
 
-        return functions.jsx.usernameJSX(user, {
+        return functions.jsx.usernameJSX(props.history.user, {
             containerClass: "historyrow-username-container",
             textClass: "historyrow-user-text",
             imageClass: "historyrow-user-label",

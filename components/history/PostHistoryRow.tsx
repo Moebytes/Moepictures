@@ -38,16 +38,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deletePostHistoryID, revertPostHistoryID, deletePostHistoryFlag, revertPostHistoryFlag} = usePostDialogSelector()
     const {setDeletePostHistoryID, setRevertPostHistoryID, setDeletePostHistoryFlag, setRevertPostHistoryFlag} = usePostDialogActions()
     const navigate = useNavigate()
-    const [user, setUser] = useState(null as PrunedUser | null)
     const [tagCategories, setTagCategories] = useState({} as TagCategories)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
     let hasChanges = functions.compare.hasHistoryChanges(props.postHistory)
-
-    const updateUser = async () => {
-        const user = await functions.http.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag, true)
-        if (user) setUser(user)
-    }
 
     const updateTagCategories = async () => {
         if (!props.postHistory.addedTags || !props.postHistory.removedTags) return
@@ -57,7 +51,6 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        updateUser()
         updateTagCategories()
     }, [props.postHistory, session])
 
@@ -191,13 +184,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        if (!user) return
         let firstHistory = props.historyIndex === Number(props.postHistory.historyCount)
         if (props.exact) firstHistory = false
         const targetDate = firstHistory ? props.postHistory.uploadDate : props.postHistory.date
         const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
         
-        return functions.jsx.usernameJSX(user, {
+        return functions.jsx.usernameJSX(props.postHistory.user, {
             containerClass: "historyrow-username-container",
             textClass: "historyrow-user-text",
             imageClass: "historyrow-user-label",
@@ -412,7 +404,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
             <div className="historyrow-container" ref={imageFiltersRef}>
-                <TinyImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={props.imageHeight}/>
+                <TinyImage className="historyrow-img" post={props.postHistory} onClick={imgClick} height={props.imageHeight ?? 200}/>
             </div>
             <div className="historyrow-container-row">
                 <div className="historyrow-container">

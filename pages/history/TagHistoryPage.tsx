@@ -69,6 +69,8 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (!result.length) {
                 const tagObject = await functions.http.get("/api/tag", {tag}, session, setSessionFlag)
                 if (!tagObject) return []
+                const creator = await functions.http.get("/api/user", {username: tagObject.creator}, session, setSessionFlag)
+                if (!creator) return []
                 const historyObject = tagObject as unknown as TagHistory
                 if (!tagObject.createDate && !tagObject.creator) {
                     const oldestPost = await functions.http.get("/api/search/posts", {query: tag, type: "all", rating: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
@@ -76,7 +78,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                     tagObject.creator = oldestPost[0].uploader
                 }
                 historyObject.date = tagObject.createDate 
-                historyObject.user = tagObject.creator
+                historyObject.user = {...creator}
                 historyObject.key = tag
                 historyObject.aliases = tagObject.aliases.map((alias) => alias?.alias || "")
                 historyObject.implications = tagObject.implications.map((implication) => implication?.implication || "")

@@ -807,7 +807,6 @@ const PostRoutes = (app: Express) => {
             if (!postHistory.length) {
                 const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
                 vanilla.date = vanilla.uploadDate 
-                vanilla.user = vanilla.uploader
                 const categories = await serverFunctions.tags.tagCategories(vanilla.tags)
                 vanilla.artists = categories.artists.map((a: any) => a.tag)
                 vanilla.characters = categories.characters.map((c: any) => c.tag)
@@ -822,7 +821,7 @@ const PostRoutes = (app: Express) => {
                         vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+                    post: vanilla, username: vanilla.uploader, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
                     addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
                     addedTagGroups: [], removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
@@ -1402,7 +1401,6 @@ const PostRoutes = (app: Express) => {
 
                 const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
                 vanilla.date = vanilla.uploadDate
-                vanilla.user = vanilla.uploader
                 const categories = await serverFunctions.tags.tagCategories(vanilla.tags)
                 vanilla.artists = categories.artists.map((a: any) => a.tag)
                 vanilla.characters = categories.characters.map((c: any) => c.tag)
@@ -1415,7 +1413,7 @@ const PostRoutes = (app: Express) => {
                     vanillaUpscaledImages.push(functions.link.getUpscaledImagePath(vanilla.images[i].type, post.postID, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+                    post: vanilla, username: vanilla.uploader, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
                     addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups),
                     addedTagGroups: [], removedTagGroups: [], imageSources: sourceMap ? JSON.stringify(sourceMap) : null, 

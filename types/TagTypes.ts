@@ -1,5 +1,5 @@
 import {TagType, Post, AliasHistoryType, TagDeleteRequest, AliasRequest, TagEditRequest,
-TagHistory} from "./Types"
+TagHistory, UserRole, TinyUser} from "./Types"
 
 export type TagUpdateColumns = "tag" | "type" | "image" | "imageHash" | "description" |
 "updater" | "updatedDate" | "website" | "social" | "twitter" | "fandom" | "wikipedia" | 
@@ -124,7 +124,7 @@ export interface TagGroupCategory {
 
 export interface AliasHistory {
     historyID: string
-    user: string
+    user: TinyUser
     date: string
     source: string
     target: string

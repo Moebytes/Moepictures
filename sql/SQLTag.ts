@@ -545,8 +545,16 @@ export default class SQLTag {
     public static aliasHistoryID = async (historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "alias history".*
+                SELECT "alias history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user"
                 FROM "alias history"
+                LEFT JOIN users ON users."username" = "alias history"."user"
                 WHERE "alias history"."historyID" = $1
             `),
             values: [historyID]
@@ -559,8 +567,16 @@ export default class SQLTag {
     public static implicationHistoryID = async (historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "implication history".*
+                SELECT "implication history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user"
                 FROM "implication history"
+                LEFT JOIN users ON users."username" = "implication history"."user"
                 WHERE "implication history"."historyID" = $1
             `),
             values: [historyID]
@@ -586,7 +602,15 @@ export default class SQLTag {
         const whereQueries = [searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "history".*, COUNT(*) OVER() AS "historyCount"
+                SELECT "history".*,
+                jsonb_build_object(
+                    'username', users."username",
+                    'role', users."role",
+                    'banned', users."banned",
+                    'deleted', users."deleted",
+                    'imagePost', users."imagePost"
+                ) AS "user",
+                COUNT(*) OVER() AS "historyCount"
                 FROM (
                     SELECT "historyID", "user", "date", "source", "target",
                     "type", "affectedPosts", "sourceData", "reason"
@@ -596,6 +620,7 @@ export default class SQLTag {
                     "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
                     FROM "implication history"
                 ) AS "history"
+                LEFT JOIN users ON users."username" = "history"."user"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 ORDER BY "history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}

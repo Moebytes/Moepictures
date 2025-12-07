@@ -63,7 +63,6 @@ export default class ServerUpload {
         if (!tagHistory.length) {
             let vanilla = tag as unknown as TagHistory
             vanilla.date = tag.createDate 
-            vanilla.user = tag.creator
             vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
             vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
             if (vanilla.image && oldBuffer) {
@@ -73,7 +72,7 @@ export default class ServerUpload {
             } else {
                 vanilla.image = null
             }
-            await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: targetTag, type: vanilla.type, 
+            await sql.history.insertTagHistory({username: tag.creator, tag: targetTag, key: targetTag, type: vanilla.type, 
             image: vanilla.image, imageHash: vanilla.imageHash, description: vanilla.description, 
             aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), 
             pixivTags: functions.util.filterNulls(vanilla.pixivTags), website: vanilla.website, social: vanilla.social, 
@@ -718,7 +717,6 @@ export default class ServerUpload {
         if (!postHistory.length) {
             const vanilla = structuredClone(post) as unknown as PostHistory & Omit<PostFull, "upscaledImages">
             vanilla.date = vanilla.uploadDate
-            vanilla.user = vanilla.uploader
             const categories = await serverFunctions.tags.tagCategories(vanilla.tags)
             vanilla.artists = categories.artists.map((a) => a.tag)
             vanilla.characters = categories.characters.map((c) => c.tag)
@@ -749,7 +747,7 @@ export default class ServerUpload {
                 }
             }
             await sql.history.insertPostHistory({
-                post: vanilla, username: vanilla.user, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
+                post: vanilla, username: vanilla.uploader, images: vanillaImages, upscaledImages: vanillaUpscaledImages, 
                 artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags,
                 addedTags: [], removedTags: [], tagGroups: JSON.stringify(vanilla.tagGroups), addedTagGroups: [],
                 removedTagGroups: [], imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 

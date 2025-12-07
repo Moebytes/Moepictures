@@ -35,20 +35,10 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteNoteHistoryID, revertNoteHistoryID, deleteNoteHistoryFlag, revertNoteHistoryFlag} = useNoteDialogSelector()
     const {setDeleteNoteHistoryID, setRevertNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryFlag} = useNoteDialogActions()
     const navigate = useNavigate()
-    const [user, setUser] = useState(null as PrunedUser | null)
     const postID = props.noteHistory.postID
     const order = props.noteHistory.order
     let hasChanges = functions.compare.hasHistoryChanges(props.noteHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
-
-    const updateUser = async () => {
-        const user = await functions.http.get("/api/user", {username: props.noteHistory.updater}, session, setSessionFlag, true)
-        if (user) setUser(user)
-    }
-
-    useEffect(() => {
-        updateUser()
-    }, [props.noteHistory, session])
 
     const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
@@ -132,11 +122,10 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        if (!user) return
         const targetDate = props.noteHistory.updatedDate
         const editText = i18n.time.updated
         
-        return functions.jsx.usernameJSX(user, {
+        return functions.jsx.usernameJSX(props.noteHistory.updater, {
             containerClass: "historyrow-username-container",
             textClass: "historyrow-user-text",
             imageClass: "historyrow-user-label",

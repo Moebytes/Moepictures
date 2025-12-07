@@ -85,10 +85,10 @@ export const addToGroup = async (postIDs: string[], name: string, username: stri
 
     if (!groupHistory.length) {
         let vanilla = (group ?? {}) as unknown as GroupHistory
-        vanilla.user = group?.creator ?? username
+        let vanillaUsername = group?.creator ?? username
         vanilla.date = group?.createDate ?? date
         let vanillaPosts = vanilla.posts?.map((post) => ({postID: post.postID, order: post.order})) ?? []
-        await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+        await sql.history.insertGroupHistory({username: vanillaUsername, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
         rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
         await sql.history.insertGroupHistory({username, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
         description: updated.description, posts: JSON.stringify(newPosts), orderChanged: true, addedPosts, removedPosts, changes})
@@ -145,9 +145,9 @@ const GroupRoutes = (app: Express) => {
             if (!date) date = new Date().toISOString()
             if (!groupHistory.length) {
                 let vanilla = group as unknown as GroupHistory
-                vanilla.user = group.creator
+                let vanillaUsername = group.creator ?? targetUser
                 vanilla.date = group.createDate
-                await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+                await sql.history.insertGroupHistory({username: vanillaUsername, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
                 rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
                 await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
                 description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes, reason})
@@ -289,10 +289,10 @@ const GroupRoutes = (app: Express) => {
                 if (!date) date = new Date().toISOString()
                 if (!groupHistory.length) {
                     let vanilla = group as unknown as GroupHistory
-                    vanilla.user = group.creator
+                let vanillaUsername = group.creator ?? targetUser
                     vanilla.date = group.createDate
                     let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                    await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+                    await sql.history.insertGroupHistory({username: vanillaUsername, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
                     rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
                     await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
                     description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [postID], changes})
@@ -359,10 +359,10 @@ const GroupRoutes = (app: Express) => {
             const date = new Date().toISOString()
             if (!groupHistory.length) {
                 let vanilla = group as unknown as GroupHistory
-                vanilla.user = group.creator
+                let vanillaUsername = group.creator ?? req.session.username
                 vanilla.date = group.createDate
                 let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+                await sql.history.insertGroupHistory({username: vanillaUsername, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
                 rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
                 await sql.history.insertGroupHistory({username: req.session.username, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
                 description: updated.description, posts: JSON.stringify(posts), orderChanged: true, addedPosts, removedPosts, changes})
@@ -415,10 +415,10 @@ const GroupRoutes = (app: Express) => {
 
             if (!groupHistory.length) {
                 let vanilla = group as unknown as GroupHistory
-                vanilla.user = group.creator
+                let vanillaUsername = group.creator ?? req.session.username
                 vanilla.date = group.createDate
                 let vanillaPosts = vanilla.posts.map((post) => ({postID: post.postID, order: post.order}))
-                await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
+                await sql.history.insertGroupHistory({username: vanillaUsername, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
                 rating: vanilla.rating, description: vanilla.description, posts: JSON.stringify(vanillaPosts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
                 await sql.history.insertGroupHistory({username: req.session.username, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, rating: updated.rating, 
                 description: updated.description, posts: JSON.stringify(newPosts), orderChanged: true, addedPosts, removedPosts, changes})

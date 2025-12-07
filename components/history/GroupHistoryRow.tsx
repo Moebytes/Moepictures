@@ -40,7 +40,6 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [groupPost, setGroupPost] = useState(null as PostFull | null)
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)
-    const [user, setUser] = useState(null as PrunedUser | null)
     const slug = props.groupHistory.slug
     let hasChanges = functions.compare.hasHistoryChanges(props.groupHistory)
 
@@ -52,13 +51,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         setGroupPost(post)
     }
 
-    const updateUser = async () => {
-        const user = await functions.http.get("/api/user", {username: props.groupHistory.user}, session, setSessionFlag, true)
-        if (user) setUser(user)
-    }
-
     useEffect(() => {
-        updateUser()
         updatePost()
     }, [props.groupHistory, session])
 
@@ -149,13 +142,12 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        if (!user) return
         let firstHistory = props.historyIndex === Number(props.groupHistory.historyCount)
         if (props.exact) firstHistory = false
         let targetDate = props.groupHistory.date
         const editText = firstHistory ? i18n.time.created : i18n.time.edited
         
-        return functions.jsx.usernameJSX(user, {
+        return functions.jsx.usernameJSX(props.groupHistory.user, {
             containerClass: "historyrow-username-container",
             textClass: "historyrow-user-text",
             imageClass: "historyrow-user-label",

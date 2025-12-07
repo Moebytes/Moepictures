@@ -383,7 +383,6 @@ const TagRoutes = (app: Express) => {
             if (!tagHistory.length) {
                 let vanilla = tagObj as unknown as TagHistory
                 vanilla.date = tagObj.createDate 
-                vanilla.user = tagObj.creator
                 vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
                 vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
                 if (vanilla.image && vanillaImageBuffer) {
@@ -395,7 +394,7 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key: vanilla.tag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
+                await sql.history.insertTagHistory({username: tagObj.creator, tag: targetTag, key: vanilla.tag, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
                     description: vanilla.description, aliases: functions.util.filterNulls(vanilla.aliases), implications: functions.util.filterNulls(vanilla.implications), pixivTags: functions.util.filterNulls(vanilla.pixivTags), 
                     website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, wikipedia: vanilla.wikipedia, danbooruTag: vanilla.danbooruTag, r18: vanilla.r18, featuredPost: vanilla.featuredPost?.postID, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {

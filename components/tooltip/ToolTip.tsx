@@ -3,7 +3,6 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
-import "./styles/tooltip.less"
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
 import deviantart from "../../assets/icons/deviantart.png"
@@ -41,6 +40,7 @@ import sketch from "../../assets/icons/sketch.png"
 import lineart from "../../assets/icons/lineart.png"
 import promo from "../../assets/icons/promo.png"
 import {TagCount} from "../../types/Types"
+import "./styles/tooltip.less"
 
 const ToolTip: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

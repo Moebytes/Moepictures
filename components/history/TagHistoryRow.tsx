@@ -45,7 +45,6 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {setDeleteTagHistoryID, setRevertTagHistoryID, setDeleteTagHistoryFlag, setRevertTagHistoryFlag} = useTagDialogActions()
     const navigate = useNavigate()
     const [img, setImg] = useState("")
-    const [user, setUser] = useState(null as PrunedUser | null)
     const tag = props.tagHistory.tag
     let hasChanges = functions.compare.hasHistoryChanges(props.tagHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
@@ -56,14 +55,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         setImg(img)
     }
 
-    const updateUser = async () => {
-        const user = await functions.http.get("/api/user", {username: props.tagHistory.user}, session, setSessionFlag, true)
-        if (user) setUser(user)
-    }
-
     useEffect(() => {
         updateImage()
-        updateUser()
     }, [props.tagHistory, session])
 
     const revertTagHistory = async () => {
@@ -211,13 +204,12 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        if (!user) return
         let firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
         if (props.exact) firstHistory = false
         let targetDate = props.tagHistory.date
         const editText = firstHistory ? i18n.time.uploaded : i18n.time.edited
         
-        return functions.jsx.usernameJSX(user, {
+        return functions.jsx.usernameJSX(props.tagHistory.user, {
             containerClass: "historyrow-username-container",
             textClass: "historyrow-user-text",
             imageClass: "historyrow-user-label",

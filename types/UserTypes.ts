@@ -1,6 +1,14 @@
 import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory,
 ForumPostSearch} from "./Types"
 
+export interface TinyUser {
+    username: string
+    role: UserRole
+    banned: boolean | null
+    deleted: boolean | null
+    imagePost: string | null
+}
+
 export interface PrunedUser {
     userID: string
     username: string
