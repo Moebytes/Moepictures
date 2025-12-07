@@ -44,38 +44,9 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
             if (!user) return next()
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            req.session.$2fa = user.$2fa
-            req.session.email = user.email
-            req.session.emailVerified = user.emailVerified
-            req.session.username = user.username
-            req.session.joinDate = user.joinDate
-            req.session.image = user.image 
-            req.session.bio = user.bio
-            req.session.publicFavorites = user.publicFavorites
-            req.session.image = user.image
-            req.session.imageHash = user.imageHash
-            req.session.imagePost = user.imagePost
-            req.session.role = user.role
-            req.session.banned = user.banned
-            const ips = functions.util.appendAndLimit(ip, user.ips, 10)
-            await sql.user.updateUser(user.username, "ips", ips)
-            req.session.ips = ips
-            const {secret, token} = ServerFunctions.generateCSRF()
-            req.session.csrfSecret = secret
-            req.session.csrfToken = token
-            req.session.showRelated = user.showRelated
-            req.session.showTooltips = user.showTooltips
-            req.session.showTagBanner = user.showTagBanner
-            req.session.downloadPixivID = user.downloadPixivID
-            req.session.autosearchInterval = user.autosearchInterval
-            req.session.upscaledImages = user.upscaledImages
-            req.session.savedSearches = user.savedSearches
-            req.session.showR18 = user.showR18
-            req.session.postCount = user.postCount
-            req.session.premiumExpiration = user.premiumExpiration
-            req.session.banExpiration = user.banExpiration
+            await ServerUsers.login(req, user, ip)
             req.session.apiKey = true
-            await sql.user.destroyOtherAPISessions(req.session.username, req.sessionID)
+            await sql.user.destroyOtherAPISessions(req.session.username!, req.sessionID)
         } else {
             return res.status(403).json({message: "A valid API key is required."})
         }

@@ -4,9 +4,8 @@
   "description": "Moepictures is an anime image board for cute/moe art.",
   "main": "dist/server/server.js",
   "scripts": {
-    "start": "npm run build && node dist/server/server.js",
-    "build": "npm run clean && npm run rsbuild",
-    "rsbuild": "rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
+    "start": "npm run build && node --max-old-space-size=8192 dist/server/server.js",
+    "build": "npm run clean && rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
     "wasm": "emcmake cmake -DCMAKE_BUILD_TYPE=Release -B structures/build -S structures && cmake --build structures/build",
     "napi": "cmake-js compile",
     "pm2": "pm2 start ecosystem.config.js --env production",

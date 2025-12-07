@@ -221,42 +221,7 @@ const UserRoutes = (app: Express) => {
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email
                 if (user.$2fa) return void res.status(200).send("2fa")
-                req.session.emailVerified = user.emailVerified
-                req.session.cookieConsent = user.cookieConsent
-                req.session.username = user.username
-                req.session.joinDate = user.joinDate
-                req.session.image = user.image
-                req.session.imageHash = user.imageHash
-                req.session.imagePost = user.imagePost
-                req.session.bio = user.bio
-                req.session.publicFavorites = user.publicFavorites
-                req.session.publicTagFavorites = user.publicTagFavorites
-                req.session.role = user.role
-                req.session.banned = user.banned
-                const ips = functions.util.appendAndLimit(ip, user.ips, 10)
-                await sql.user.updateUser(user.username, "ips", ips)
-                req.session.ips = ips
-                const {secret, token} = serverFunctions.generateCSRF()
-                req.session.csrfSecret = secret
-                req.session.csrfToken = token
-                req.session.showRelated = user.showRelated
-                req.session.showTooltips = user.showTooltips
-                req.session.showTagTooltips = user.showTagTooltips
-                req.session.showTagBanner = user.showTagBanner
-                req.session.downloadPixivID = user.downloadPixivID
-                req.session.autosearchInterval = user.autosearchInterval
-                req.session.upscaledImages = user.upscaledImages
-                req.session.forceNoteBubbles = user.forceNoteBubbles
-                req.session.liveAnimationPreview = user.liveAnimationPreview
-                req.session.liveModelPreview = user.liveModelPreview
-                req.session.savedSearches = user.savedSearches
-                req.session.blacklist = user.blacklist
-                req.session.postCount = user.postCount
-                req.session.deletedPosts = user.deletedPosts
-                req.session.showR18 = user.showR18
-                req.session.premiumExpiration = user.premiumExpiration
-                req.session.banExpiration = user.banExpiration
-                req.session.lastNameChange = user.lastNameChange
+                await serverFunctions.users.login(req, user, ip)
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")
@@ -626,7 +591,8 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
-            let savedSearches = user.savedSearches || {}
+            let savedSearches = Object.create(null)
+            Object.assign(savedSearches, user.savedSearches)
             savedSearches[name] = tags
             req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
@@ -643,7 +609,8 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
-            let savedSearches = user.savedSearches || {}
+            let savedSearches = Object.create(null)
+            Object.assign(savedSearches, user.savedSearches)
             delete savedSearches[name]
             savedSearches[key] = tags
             req.session.savedSearches = savedSearches 
@@ -666,7 +633,8 @@ const UserRoutes = (app: Express) => {
                 return void res.status(200).send("Success")
             }
             if (!name) return void res.status(400).send("Bad name")
-            let savedSearches = user.savedSearches || {}
+            let savedSearches = Object.create(null)
+            Object.assign(savedSearches, user.savedSearches)
             delete savedSearches[name]
             req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))

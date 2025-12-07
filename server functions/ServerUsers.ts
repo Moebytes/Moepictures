@@ -1,9 +1,53 @@
 import sql from "../sql/SQLQuery"
+import {Request} from "express"
 import functions from "../functions/Functions"
 import serverFunctions from "./ServerFunctions"
 import {User} from "../types/Types"
 
 export default class ServerUsers {
+    public static login = async (req: Request, user: User, ip: string) => {
+        req.session.$2fa = user.$2fa
+        req.session.email = user.email
+        req.session.emailVerified = user.emailVerified
+        req.session.cookieConsent = user.cookieConsent
+        req.session.username = user.username
+        req.session.joinDate = user.joinDate
+        req.session.image = user.image
+        req.session.imageHash = user.imageHash
+        req.session.imagePost = user.imagePost
+        req.session.bio = user.bio
+        req.session.publicFavorites = user.publicFavorites
+        req.session.publicTagFavorites = user.publicTagFavorites
+        req.session.role = user.role
+        req.session.banned = user.banned
+        req.session.showRelated = user.showRelated
+        req.session.showTooltips = user.showTooltips
+        req.session.showTagTooltips = user.showTagTooltips
+        req.session.showTagBanner = user.showTagBanner
+        req.session.downloadPixivID = user.downloadPixivID
+        req.session.autosearchInterval = user.autosearchInterval
+        req.session.upscaledImages = user.upscaledImages
+        req.session.forceNoteBubbles = user.forceNoteBubbles
+        req.session.liveAnimationPreview = user.liveAnimationPreview
+        req.session.liveModelPreview = user.liveModelPreview
+        req.session.savedSearches = user.savedSearches
+        req.session.blacklist = user.blacklist
+        req.session.postCount = user.postCount
+        req.session.deletedPosts = user.deletedPosts
+        req.session.showR18 = user.showR18
+        req.session.premiumExpiration = user.premiumExpiration
+        req.session.banExpiration = user.banExpiration
+        req.session.lastNameChange = user.lastNameChange
+
+        const ips = functions.util.appendAndLimit(ip, user.ips, 10)
+        await sql.user.updateUser(user.username, "ips", ips)
+        req.session.ips = ips
+        
+        const {secret, token} = serverFunctions.generateCSRF()
+        req.session.csrfSecret = secret
+        req.session.csrfToken = token
+    }
+
     public static deleteUser = async (user: User) => {
         try {
             await sql.token.delete2faToken(user.email!)
