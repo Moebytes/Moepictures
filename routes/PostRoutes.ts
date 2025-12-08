@@ -1376,7 +1376,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thumbnail/regenerate", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thumbnail/regenerate", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
             let {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
