@@ -497,7 +497,10 @@ const PostPage: React.FunctionComponent = () => {
             const {images, upscaledImages} = await functions.post.parseImages(post, session)
             const newTags = await functions.post.parseNewTags(post, session, setSessionFlag)
 
-            await functions.http.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, rating: post.rating, source: source as SourceData,
+            let {imageChunks, upscaledChunks} = functions.byte.chunkImages(images, upscaledImages)
+            await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
+
+            await functions.http.put("/api/post/edit", {postID: post.postID, imageChunks, upscaledChunks, type: post.type, rating: post.rating, source: source as SourceData,
             style: post.style, artists: functions.tag.tagObject(historyPost.artists), characters: functions.tag.tagObject(historyPost.characters), noImageUpdate: true,
             preserveChildren: Boolean(post.parentID), series: functions.tag.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, imageSources,
             imageLinks, reason: historyPost.reason}, session, setSessionFlag)

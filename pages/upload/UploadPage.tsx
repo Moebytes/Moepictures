@@ -946,9 +946,16 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
+        setSubmitError(true)
+        if (!submitErrorRef.current) await functions.timeout(20)
+        submitErrorRef.current!.innerText = i18n.buttons.submitting
+
+        let {imageChunks, upscaledChunks} = functions.byte.chunkImages(originalFiles, upscaledFiles)
+        await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
+
         const data = {
-            images: originalFiles,
-            upscaledImages: upscaledFiles,
+            imageChunks,
+            upscaledChunks,
             type,
             rating,
             style,
@@ -988,9 +995,6 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 data.reason = reason
             }
         }
-        setSubmitError(true)
-        if (!submitErrorRef.current) await functions.timeout(20)
-        submitErrorRef.current!.innerText = i18n.buttons.submitting
         try {
             if (props.edit) {
                 if (props.unverified) {

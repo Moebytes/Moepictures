@@ -410,9 +410,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
 
+            let {imageChunks, upscaledChunks} = functions.byte.chunkImages(currentArr, upscaledCurrentArr)
+            await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
+
             const data = {
-                images: currentArr,
-                upscaledImages: upscaledCurrentArr,
+                imageChunks,
+                upscaledChunks,
                 type: tagData.type,
                 rating: tagData.rating,
                 style: tagData.style,
@@ -517,7 +520,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 console.log(e)
                 setSubmitError(true)
                 if (!submitErrorRef.current) await functions.timeout(20)
-                submitErrorRef.current!.innerText = `Failed to submit ${data.images[0].name}`
+                submitErrorRef.current!.innerText = `Failed to submit ${data.imageChunks[0].name}`
                 setTimeout(() => {
                     return setSubmitError(false)
                 }, 2000)

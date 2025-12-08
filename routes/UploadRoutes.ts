@@ -5,7 +5,7 @@ import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import {UploadParams, EditParams, UnverifiedUploadParams, UnverifiedEditParams, 
-PostFull, UnverifiedPost, ApproveParams, SourceData, ChildPost} from "../types/Types"
+PostFull, UnverifiedPost, ApproveParams, SourceData, ChildPost, ImageChunk} from "../types/Types"
 import {addToGroup} from "./GroupRoutes"
 
 const uploadLimiter = rateLimit({
@@ -34,10 +34,76 @@ const modLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+let imageChunks = new Map<string, {chunks: ImageChunk[], expires: number}>()
+const chunkLifetime = 10 * 60 * 1000
+
+if (process.env.REDIS === "off") {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [fileID, item] of imageChunks) {
+      if (item.expires < now) imageChunks.delete(fileID)
+    }
+  }, 60000)
+}
+
+const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
+  const populateChunkItem = async (chunkItem: ImageChunk[]) => {
+    for (const chunk of chunkItem) {
+      if (process.env.REDIS === "on") {
+        let cacheChunks = await sql.getCache(chunk.fileID) as ImageChunk[] | undefined
+        let referenceChunk = cacheChunks?.find((c) => c.index === chunk.index)
+        if (referenceChunk) chunk.bytes = referenceChunk.bytes
+      } else {
+        let item = imageChunks.get(chunk.fileID)
+        let referenceChunk = item?.chunks.find(c => c.index === chunk.index)
+        if (referenceChunk) chunk.bytes = referenceChunk.bytes
+      }
+    }
+  }
+  await populateChunkItem(originalChunks)
+  await populateChunkItem(upscaledChunks)
+}
+
 const CreateRoutes = (app: Express) => {
+  app.post("/api/post/image-chunk", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {chunk} = req.body as {chunk: ImageChunk}
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+        if (req.session.banned) return void res.status(403).send("You are banned")
+        if (!chunk?.bytes?.length) return void res.status(400).send("No chunk bytes")
+
+        if (process.env.REDIS === "on") {
+          let chunks = await sql.getCache(chunk.fileID) as ImageChunk[]
+          if (chunks) {
+            const exists = chunks.find((c) => c.index === chunk.index)
+            if (!exists) await sql.setCache(chunk.fileID, [...chunks, chunk], 600)
+          } else {
+              await sql.setCache(chunk.fileID, [chunk], 600)
+          }
+        } else {
+          let item = imageChunks.get(chunk.fileID)
+          if (item) {
+            const exists = item.chunks.find((c) => c.index === chunk.index)
+            if (!exists) item.chunks.push(chunk)
+            item.expires = Date.now() + chunkLifetime
+          } else {
+            imageChunks.set(chunk.fileID, {
+              chunks: [chunk],
+              expires: Date.now() + chunkLifetime
+            })
+          }
+        }
+        
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
     app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series,
+        let {imageChunks, upscaledChunks, type, rating, style, parentID, groupName, source, artists, characters, series,
         tags, tagGroups, newTags, unverifiedID, noImageUpdate, sourceLinks} = req.body as UploadParams
 
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
@@ -46,6 +112,9 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validation.validType(type)) return void res.status(400).send("Invalid type")
         if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
         if (!functions.validation.validStyle(style)) return void res.status(400).send("Invalid style")
+
+        await populateChunkBytes(imageChunks, upscaledChunks)
+        let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -108,7 +177,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, images, upscaledImages, type, rating, style, parentID, groupName, source, 
+        let {postID, imageChunks, upscaledChunks, type, rating, style, parentID, groupName, source, 
           artists, characters, series, tags, tagGroups, imageSources, imageLinks, newTags, unverifiedID, 
           reason, noImageUpdate, preserveChildren, updatedDate, silent} = req.body as EditParams
 
@@ -117,6 +186,9 @@ const CreateRoutes = (app: Express) => {
         if (!permissions.isContributor(req.session)) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
+
+        await populateChunkBytes(imageChunks, upscaledChunks)
+        let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -223,13 +295,16 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {images, upscaledImages, type, rating, style, parentID, groupName, source, artists, characters, series, 
+        let {imageChunks, upscaledChunks, type, rating, style, parentID, groupName, source, artists, characters, series, 
         tags, tagGroups, newTags, duplicates, sourceLinks} = req.body as UnverifiedUploadParams
 
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         const pending = await sql.search.unverifiedUserPosts(req.session.username)
         if (functions.post.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return void res.status(403).send("Upload limit reached")
+
+        await populateChunkBytes(imageChunks, upscaledChunks)
+        let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -287,7 +362,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {postID, unverifiedID, images, upscaledImages, type, rating, style, parentID, groupName, 
+        let {postID, unverifiedID, imageChunks, upscaledChunks, type, rating, style, parentID, groupName, 
           source, artists, characters, series, tags, tagGroups, newTags, reason} = req.body as UnverifiedEditParams
 
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
@@ -295,6 +370,9 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
 
+        await populateChunkBytes(imageChunks, upscaledChunks)
+        let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
+        
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
         series = functions.tag.cleanTags(series, "series")

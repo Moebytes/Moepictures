@@ -1,4 +1,6 @@
 import fileType from "magic-bytes.js"
+import {UploadImage, ImageChunk, Session} from "../types/Types"
+import functions from "./Functions"
 
 export default class ByteFunctions {
     public static streamToBuffer = async (stream: NodeJS.ReadableStream) => {
@@ -55,5 +57,92 @@ export default class ByteFunctions {
     public static fileExtension = (uint8Array: Uint8Array | number[]) => {
         const result = this.bufferFileType(uint8Array)?.[0]
         return result?.extension || ""
+    }
+
+    public static chunkImages = (images: UploadImage[], upscaledImages: UploadImage[]) => {
+        let imageChunks = [] as ImageChunk[]
+        let upscaledChunks = [] as ImageChunk[]
+
+        const chunkSize = 90 * 1024 * 1024
+
+        for (let i = 0; i < images.length; i++) {
+            let randKey = Math.random().toString(36).slice(2) + Date.now().toString(36)
+            let img = images[i]
+            let bytes = img.bytes
+
+            for (let start = 0, i = 0; start < bytes.length; start += chunkSize, i++) {
+                let chunk = {...img} as ImageChunk
+                chunk.fileID = randKey
+                chunk.index = i + 1
+                chunk.bytes = bytes.slice(start, start + chunkSize)
+                imageChunks.push(chunk)
+            }
+        }
+
+        for (let i = 0; i < upscaledImages.length; i++) {
+            let randKey = Math.random().toString(36).slice(2) + Date.now().toString(36)
+            let img = upscaledImages[i]
+            let bytes = img.bytes
+
+            for (let start = 0, i = 0; start < bytes.length; start += chunkSize, i++) {
+                let chunk = {...img} as ImageChunk
+                chunk.fileID = randKey
+                chunk.index = i + 1
+                chunk.bytes = bytes.slice(start, start + chunkSize)
+                upscaledChunks.push(chunk)
+            }
+        }
+
+        return {imageChunks, upscaledChunks}
+    }
+
+    public static uploadChunks = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[], 
+        session: Session, setSessionFlag?: (value: boolean) => void) => {
+        for (const chunk of originalChunks) {
+            await functions.http.post("/api/post/image-chunk", {chunk}, session, setSessionFlag)
+            delete chunk.bytes
+        }
+        for (const chunk of upscaledChunks) {
+            await functions.http.post("/api/post/image-chunk", {chunk}, session, setSessionFlag)
+            delete chunk.bytes
+        }
+    }
+
+    public static mergeChunks = (imageChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
+        const recoverImages = (imgChunks: ImageChunk[]) => {
+            const fileMap = new Map<string, ImageChunk[]>()
+
+            for (const chunk of imgChunks) {
+                if (!fileMap.has(chunk.fileID)) fileMap.set(chunk.fileID, [])
+                let item = fileMap.get(chunk.fileID)
+                if (item) item.push(chunk)
+            }
+
+            let images = [] as UploadImage[]
+
+            for (const [_, chunks] of fileMap) {
+                chunks.sort((a, b) => a.index - b.index)
+
+                let bytes = [] as number[]
+
+                for (const section of chunks) {
+                    if (section.bytes) bytes = bytes.concat(section.bytes)
+                }
+
+                const img = {...chunks[0]}
+                // @ts-ignore
+                delete img.fileID
+                // @ts-ignore
+                delete img.index
+                images.push({...img, bytes})
+            }
+
+            return images
+        }
+
+        let images = recoverImages(imageChunks)
+        let upscaledImages = recoverImages(upscaledChunks)
+
+        return {images, upscaledImages}
     }
 }

@@ -77,7 +77,11 @@ const BanDialog: React.FunctionComponent = (props) => {
                     sourceImageCount: currentHistory.sourceImageCount,
                     mirrors: currentHistory.mirrors ? Object.values(currentHistory.mirrors).join("\n") : null
                 }
-                await functions.http.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, 
+                
+                let {imageChunks, upscaledChunks} = functions.byte.chunkImages(images, upscaledImages)
+                await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
+
+                await functions.http.put("/api/post/edit", {silent: true, postID: currentHistory.postID, imageChunks, upscaledChunks, type: currentHistory.type, 
                 rating: currentHistory.rating, source, style: currentHistory.style, artists: functions.tag.tagObject(currentHistory.artists), 
                 characters: functions.tag.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
                 series: functions.tag.tagObject(currentHistory.series), tags: currentHistory.tags, tagGroups: currentHistory.tagGroups, newTags, 

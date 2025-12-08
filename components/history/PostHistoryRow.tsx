@@ -85,7 +85,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             const {images, upscaledImages} = await functions.post.parseImages(props.postHistory, session)
             const newTags = await functions.post.parseNewTags(props.postHistory, session, setSessionFlag)
 
-            await functions.http.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, 
+            let {imageChunks, upscaledChunks} = functions.byte.chunkImages(images, upscaledImages)
+            await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
+
+            await functions.http.put("/api/post/edit", {postID: props.postHistory.postID, imageChunks, upscaledChunks, 
             type: props.postHistory.type, rating: props.postHistory.rating, source: source!, style: props.postHistory.style, 
             artists: functions.tag.tagObject(props.postHistory.artists), characters: functions.tag.tagObject(props.postHistory.characters), 
             preserveChildren: Boolean(props.postHistory.parentID), series: functions.tag.tagObject(props.postHistory.series), 

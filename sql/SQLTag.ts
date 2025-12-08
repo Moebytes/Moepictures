@@ -146,7 +146,7 @@ export default class SQLTag {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
+            text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery} ON CONFLICT ("postID", "tag") DO NOTHING`,
             values: [postID, ...tags]
         }
         await SQLQuery.run(query)
@@ -174,7 +174,7 @@ export default class SQLTag {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "unverified tag map" ("postID", "tag") ${valueQuery}`,
+            text: /*sql*/`INSERT INTO "unverified tag map" ("postID", "tag") ${valueQuery} ON CONFLICT ("postID", "tag") DO NOTHING`,
             values: [postID, ...tags]
         }
         await SQLQuery.run(query)

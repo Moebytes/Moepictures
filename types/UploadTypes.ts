@@ -30,6 +30,26 @@ export interface UploadTag {
     bytes?: number[]
 }
 
+export interface ImageChunk {
+    fileID: string
+    index: number
+    bytes?: number[]
+    name: string
+    link: string
+    originalLink: string
+    ext: string
+    size: number
+    width: number
+    height: number
+    thumbnail: string
+    thumbnailExt: string
+    altSource: string
+    directLink: string
+    duration?: number
+    groupName?: string
+    parentID?: string
+}
+
 export interface UploadImage {
     name: string
     link: string
@@ -49,8 +69,8 @@ export interface UploadImage {
 }
 
 export interface UploadParams {
-    images: UploadImage[]
-    upscaledImages: UploadImage[]
+    imageChunks: ImageChunk[]
+    upscaledChunks: ImageChunk[]
     type: PostType
     rating: PostRating
     style: PostStyle
@@ -103,6 +123,7 @@ export type UploadPostEndpoint<T extends string> =
     T extends "/api/post/split" ? {params: {postID: string, order: number | null, mergeSubsequent?: boolean}, response: string} :
     T extends "/api/post/join" ? {params: {postID: string, nested: boolean}, response: string} :
     T extends "/api/post/flip" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/image-chunk" ? {params: {chunk: ImageChunk}, response: string} :
     never
 
 export type UploadPutEndpoint<T extends string> = 
