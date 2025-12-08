@@ -63,7 +63,7 @@ export default class ByteFunctions {
         let imageChunks = [] as ImageChunk[]
         let upscaledChunks = [] as ImageChunk[]
 
-        const chunkSize = 45 * 1024 * 1024
+        const chunkSize = 20 * 1024 * 1024
 
         for (let i = 0; i < images.length; i++) {
             let randKey = Math.random().toString(36).slice(2) + Date.now().toString(36)
